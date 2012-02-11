@@ -1,0 +1,213 @@
+﻿html{
+    background-color: #4E5160;
+}
+
+	body{
+	    font-family: arial;
+	    margin: 0 auto;
+	    padding: 35px 50px 15px 50px;
+	    max-width: 1056px;
+	    background-color: #FFFFFF;
+	    color: #4E5260;
+	    font-size: 0.9em;
+	}
+		header{
+		}
+			header h1{
+				font-size:8em;
+				letter-spacing:-5px;
+				margin:0;
+				line-height:1em;
+			}
+		
+		h2{
+			margin-top:50px;
+			font-size:3em;
+		}
+		h3{
+			font-size:2em;
+		}
+
+
+		button{
+			padding:5px;
+			font-size:1.2em;
+		}
+
+
+
+
+
+
+@media all and (max-width: 1000px) {
+	body{
+		padding:10px;
+	}
+}
+
+
+
+blockquote{
+	background-color: #F5F7F5;
+	border: 1px solid #CCC;
+	padding: 15px;
+	margin: 0 0 35px 0;	
+}
+
+q{
+	color:green;
+}
+i{
+	color:blue;
+}
+
+
+@media all and (max-width: 650px), screen and (max-device-width: 480px) {
+	*{
+		max-width:100%;
+	}
+	body {
+		margin:0;
+		padding:0;
+		padding-left:2%;
+	}
+	h1,h2,h3,h4{
+		margin-left:0;
+		font-weight:bold;
+	}
+	pre{
+		overflow-x:auto;
+		font-size: 90%;
+	}
+
+	/** Hide root tables, but display our button to show them, and when our button has toggle we show table 
+	body > table{
+		display:none;
+	}
+	button.displaytable{
+		display:block;
+	}
+	button.displaytable.show + table{
+		display:block;
+	}
+	/**/
+}
+
+
+
+a.restexplorer{
+	text-decoration:underline;
+	color:blue;
+	font-family:monospace;
+}
+
+.hide{
+	display:none;
+}
+
+
+/**
+ * Pre
+ */
+
+pre{
+	color:green;
+	background-color:#f4f4f4;
+	border:1px solid #e4e4e4;
+	border-left-width:10px;
+	white-space:pre-wrap;
+	padding: 15px;
+	margin: 0 0 35px 0;	
+}
+pre:empty:before{
+	content: "Loading...";
+}
+
+pre[contenteditable]:focus{
+	color:black;
+	background-color:white;
+}
+pre + button{
+	margin-top:-60px;
+	position:absolute;
+	background:rgb(78,81,96);
+	border:none;
+	color:white;
+}
+pre + button:active{
+	background:rgb(98,101,116);
+}
+pre.tryit, pre.tryitoffline{
+	margin-bottom:50px;
+}
+
+/**
+ * REST EXPOLORER
+ */
+input[name=path]{
+	display:block;
+	width:100%;
+	padding:5px;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	font-size:20px;
+	margin:0;
+	border:1px solid #e4e4e4;
+	border-top-width:10px;
+}
+article{
+	display:-moz-box; /* Firefox */
+	display:-webkit-box; /* Safari and Chrome */
+	display:box;
+	border:1px solid #e4e4e4;
+}
+	article > nav ul, 
+	article > nav ul li{
+		margin:0;
+		padding:10px;
+		list-style:none;
+	}
+	article > pre{
+		-moz-box-flex:1.0; /* Firefox */
+		-webkit-box-flex:1.0; /* Safari and Chrome */
+		box-flex:1.0;
+		margin:0;
+	}
+
+
+
+/**
+ * Table, compatibility
+ */
+table{
+	border-collapse: collapse;
+	border-spacing: 0;
+	width:100%;
+}
+	td,th{
+		border:1px solid #D2D2D2;
+		padding:4px 10px 4px 6px;
+		vertical-align: top;
+	}
+		table td pre{
+			margin:0;
+			padding:0;
+			background-color:transparent;
+			border:none;
+		}
+	td.yes,span.yes{
+		background-color:#00882D;
+	}
+	td.no,span.no{
+		background-color:#CB000F;
+	}
+	td.partial,span.partial{
+		background-color:#20A84D;
+	}
+	td.no, td.yes,td.partial,
+	span.no, span.yes,span.partial{
+		color:white;
+		text-align:center;
+	}
+
