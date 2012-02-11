@@ -130,7 +130,7 @@ var hello = (function(){
 		 * Get/Set the default service
 		 */
 		service : function(service){
-			if(service){
+			if(typeof (service) !== 'undefined' ){
 				return _store( 'sync_service', service );
 			}
 			return _store( 'sync_service' );
@@ -228,12 +228,21 @@ var hello = (function(){
 				_store(s,'');
 				(callback ? callback() : null);
 			}
+			else if(!s){
+				for(var x in services){
+					hello.logout(x);
+				}
+				// remove the default
+				hello.service(false);
+				// trigger callback
+				(callback ? callback() : null);
+			}
 			else{
-				log( s ? s + ' had no session' : 'please specify a service' );
+				log( s + ' had no session' );
 			}
 		},
 
-		
+
 		/**
 		 * API
 		 * @param path		string
@@ -263,12 +272,21 @@ var hello = (function(){
 				service = this.service();
 			}
 			
+			
 			p.callback = p.callback || function(){};
-	
+			
+			
 			log("API:",p);
 			
 			var o = services[service];
 			
+			// Have we got a service
+			if(!o){
+				log("No user");
+				p.callback(false);
+				return;
+			}
+
 			// Callback wrapper?
 			var callback = (o.wrap && (p.path in o.wrap)) ? function(r){ log(p.path,r); p.callback(o.wrap[p.path](r)); } : p.callback;
 	
