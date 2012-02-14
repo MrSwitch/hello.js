@@ -213,7 +213,7 @@ var hello = (function(){
 					// Save the callback until session changes.
 					if(callback){
 						// pass in a self unsubscribing function
-						this.subscribe('auth.login.'+s, function self(){ hello.unsubscribe('auth.login.'+s,self); callback();} );
+						this.subscribe('auth.login.'+s, function self(){ hello.unsubscribe('auth.login.'+s,self); callback.call(this, arguments);} );
 					}
 				
 					// Trigger callback
