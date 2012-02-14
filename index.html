@@ -133,11 +133,21 @@
 </script>
 	
 
-	<style type="text/css">
-	.auto-style2 {
-		color: #008000;
+<style>
+	#profile p{
+		display:inline-block;
+		border:1px solid #ddd;
+		padding:20px;
+		vertical-align:top;
+		margin:20px;
+		background-color:#f4f4f4;
 	}
-	</style>
+	#profile p img{
+		width:50px;
+		vertical-align:middle;
+		margin-right:20px;
+	}
+</style>
 	
 
 </head>
@@ -168,19 +178,34 @@
 
 <script src="hello.js"></script>
 
-	<p>Define your new client ID's and pass the list (key:value) into the <code>hello.init</code> function. Removing other items as appropriate.</p>
+	<p>Lets define a simple function, which will load a user profile into the page after they signin and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.</p>
 
 <script>
-	// setup the credentials
+hello.subscribe('auth.login', function(r){
+	
+	// call user information, for the given network
+	hello.api( r.network + '/me', function(r){
+		if(!r.id){
+			return;
+		}
+		$( "<p></p>" )
+			.append('<img src="'+ r.picture +'" />')
+			.append('<b>'+r.name+'</b>')
+			.appendTo("#profile");
 
+	});
+});
+</script>
+	
+	<div id="profile"></div>
+
+	<p>Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the <code>hello.init</code> function. e.g....</p>
+
+<script>
 	hello.init({ 
-
 		facebook : FACEBOOK_CLIENT_ID,
-
-		windows : WINDOWS_CLIENT_ID,
-
-		google : GOOGLE_CLIENT_ID
-
+		windows  : WINDOWS_CLIENT_ID,
+		google   : GOOGLE_CLIENT_ID
 	});
 </script>
 	
@@ -190,28 +215,6 @@
 <div class="demo"><button onclick="hello.login('google', function(){alert('You have signed into google')});">google</button>
 <button onclick="hello.login('facebook', function(){alert('You have signed into facebook')});">facebook</button>
 <button onclick="hello.login('windows', function(){alert('You have signed into windows live')});">windows</button></div>
-
-
-<h2>Get User Profile</h2>
-<p>Now we can get a users profile information</p>
-<script>
-demo.me = function(target){
-	hello.api('/me', function(r){
-		dump(r,target);
-	});
-}
-</script>
-<button onclick="demo.me(this)">Get user information</button>
-
-<h2>Events</h2>
-<p>Listening for global changes to authentication</p>
-<script id="demo-sub">
-	// Connect listen
-	hello.subscribe("auth.login", function(e){
-		// This is called for every endpoint the user is signed in	
-		dump(["User authenticated ", e], $("#demo-sub"));
-	});
-</script>
 
 
 

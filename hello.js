@@ -95,12 +95,21 @@ var hello = (function(){
 
 			uri : {
 				// REF: 
-				auth : 'http://knarly.net/oauth?client_id={id}'
+				auth : function(){
+					var url = 'http://knarly.net/oauth?client_id={id}'
 					+'&response_type=token'
-					+'&redirect_uri='+ encodeURIComponent(window.location.href)
+					+'&redirect_uri=' + encodeURIComponent(window.location.href)
 					+'&scope=email'
 					+'&display=popup'
-					+'&state=knarly',
+					+'&state=knarly';
+
+					// if the user is signed into another service. Lets attach the credentials to that and hopefully get the user signed in.
+					if( hello.service() ){
+						console.log('&access_token='+this.service().access_token );
+					}
+					
+					return url;
+				},
 
 				base : 'http://knarly.net/api/',
 			},
@@ -147,7 +156,7 @@ var hello = (function(){
 
 			// Monitor for a change in state and fire
 			var _diff = {};
-			
+
 			// create monitoring function
 			(function self(){
 
@@ -166,7 +175,7 @@ var hello = (function(){
 						else{
 							evt = 'auth.login.' + x;
 						}
-						hello.trigger(evt);
+						hello.trigger(evt, { network:x, authResponse: session } );
 					}
 					
 					_diff[x] = session;
@@ -174,7 +183,6 @@ var hello = (function(){
 
 				setTimeout(self, 1000);
 			})();
-			
 		},
 
 		/**
@@ -184,11 +192,19 @@ var hello = (function(){
 		 * @param callback or boolean, if callback then we trigger this immediatly, otherwise call the service inline
 		 */	
 		login :  function(s, callback){
+
+			var uri;
+
 			if( typeof(s) === 'string' ){
 
-				var url = services[s].uri.auth.replace(/\{([a-z]+)\}/ig, function(m,v){
-					return ( v in services[s] ? services[s][v] : '' );
-				});
+				if( typeof(services[s].uri.auth) === 'function'){
+					url = services[s].uri.auth(callback);
+				}
+				else{
+					url = services[s].uri.auth.replace(/\{([a-z]+)\}/ig, function(m,v){
+						return ( v in services[s] ? services[s][v] : '' );
+					});
+				}
 
 				if(callback===true){
 					window.location = url;
@@ -377,14 +393,14 @@ var hello = (function(){
 		 * Trigger
 		 * Triggers any subscribed events
 		 */
-		trigger : function(evt){
+		trigger : function(evt, data){
 			// loop through the events
 			log("Trigger", evt, JSON.stringify(listeners));
 
 			for(var x in listeners){
 				if( evt.indexOf(x) > -1 ){
 					for(var i=0;i<listeners[x].length;i++){
-						listeners[x][i].call(this);
+						listeners[x][i].call(this, data);
 					}
 				} 
 			}
