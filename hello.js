@@ -1,5 +1,13 @@
 /**
  * hello.js
+ *
+ * So many web services are putting their content online accessible on the web using OAuth2 as a provider.
+ * The downside is they all have seperate REST calls, and client-side libraries to access their data.
+ * So its either one service or the other, or add a ton of libraries and logic to your scripts.
+ * 
+ * You could use a proprietary service like Gigya or Jan Rain to circumnavigate the problem. But i think you'll like hello.js
+ * It works with FaceBook, Windows and Google+ and is totally FREE to use and hack!
+ *
  * @author Andrew Dodson
  * @company Knarly
  */
@@ -92,11 +100,12 @@ var hello = (function(){
 		
 		knarly : {
 			name : 'Knarly',
-
+			autologin : true,
+			id : window.location.host,
 			uri : {
 				// REF: 
 				auth : function(){
-					var url = 'http://knarly.net/oauth?client_id={id}'
+					var url = '/knarly.net/oauth?client_id={id}'
 					+'&response_type=token'
 					+'&redirect_uri=' + encodeURIComponent(window.location.href)
 					+'&scope=email'
@@ -104,18 +113,39 @@ var hello = (function(){
 					+'&state=knarly';
 
 					// if the user is signed into another service. Lets attach the credentials to that and hopefully get the user signed in.
-					if( hello.service() ){
-						console.log('&access_token='+this.service().access_token );
+					var service = hello.service(),
+						session = hello.getAuthResponse( service );
+
+					if( session && "access_token" in session ){
+						qs = {
+							access_token : session.access_token,
+							provider : service
+						}
+						url += '&' + _param(qs);
 					}
-					
+
 					return url;
 				},
 
-				base : 'http://knarly.net/api/',
+				base : '/knarly.net/api/',
 			},
 			wrap : {
+				// knarly has no special paths
+			},
+
+			// Specify unique handling mechanism for knarly
+			/*
+			requestHandler : function(uri,qs,data,callback){
 				
+				// lets use another services access_token
+				if(!qs.access_token){
+					
+				}
+				
+				// make the call
+				_json(uri  + ( url.indexOf('?') > -1 ? "&" : "?" ) + _param(qs), data, callback );
 			}
+			/**/
 		}
 		/*
 		,
@@ -161,14 +191,16 @@ var hello = (function(){
 			(function self(){
 
 				for(var x in services){
+				
+					// Get session
 					var session = hello.getAuthResponse(x);
+					var token = ( session ? session.access_token : null);
 					var evt = '';
-					if(_diff[x] === session 
-						|| JSON.stringify(_diff[x]) === JSON.stringify(session) ){
+					if( _diff[x] === token ){
 						continue;
 					}
 					else{
-						if(!session){
+						if(!token){
 							evt = 'auth.logout.' + x;
 						}
 						// else if(!_diff[x]){
@@ -178,7 +210,7 @@ var hello = (function(){
 						hello.trigger(evt, { network:x, authResponse: session } );
 					}
 					
-					_diff[x] = session;
+					_diff[x] = token;
 				}
 
 				setTimeout(self, 1000);
@@ -190,8 +222,9 @@ var hello = (function(){
 		 * Using the endpoint defined by services[x].auth we prompt the login
 		 * @param string name of the service to connect to
 		 * @param callback or boolean, if callback then we trigger this immediatly, otherwise call the service inline
-		 */	
-		login :  function(s, callback){
+		 * @param boolean refresh flag, make an iframe request to refresh the token
+		 */
+		login :  function(s, callback, refresh){
 
 			var uri;
 
@@ -216,12 +249,21 @@ var hello = (function(){
 						this.subscribe('auth.login.'+s, function self(){ hello.unsubscribe('auth.login.'+s,self); callback.apply(this, arguments);} );
 					}
 				
-					// Trigger callback
-					window.open( 
-						url,
-						'name', 
-						"height=400,width=450,left="+((window.innerWidth-450)/2)+",top="+((window.innerHeight-400)/2)
-					);
+					// Calling Quietly?
+					if( refresh ){
+						// signin in the background, iframe
+						_append('iframe', { src : url, style : {height:0,width:0,position:'absolute',top:0,left:0}  }, document.body);
+					}
+
+					// Triggering popup?
+					else {
+						// Trigger callback
+						window.open( 
+							url,
+							'name', 
+							"height=400,width=450,left="+((window.innerWidth-450)/2)+",top="+((window.innerHeight-400)/2)
+						);
+					}
 				}
 			}
 			else{
@@ -244,7 +286,7 @@ var hello = (function(){
 				_store(s,'');
 				(callback ? callback() : null);
 			}
-			else if(!s){
+ 			else if(!s){
 				for(var x in services){
 					hello.logout(x);
 				}
@@ -324,16 +366,37 @@ var hello = (function(){
 					p.data = {data: JSON.stringify(p.data), method: p.method.toLowerCase()};
 				}
 
-				_jsonp( url + ( url.indexOf('?') > -1 ? "&" : "?" ) + _param(qs)
-						, p.data
-						, callback );
+				// has the session expired?
+				if( ( session && "expires" in session && session.expires < ((new Date).getTime()/1e3) ) 
+					|| (!session && o.autologin) ){
+
+					log("Callback");
+	
+					hello.login(service, function(bool){
+						// Add
+						_jsonp( url + ( url.indexOf('?') > -1 ? "&" : "?" ) + _param(qs)
+								, p.data
+								, callback );
+					}, true);
+				}
+
+				// If we have to augment the headings, lets try that.
+				else if( 'requestHandler' in o ){
+					o.requestHandler( uri, qs, p.data, callback );
+				}
+				// Make the call
+				else {
+					_jsonp( url + ( url.indexOf('?') > -1 ? "&" : "?" ) + _param(qs)
+							, p.data
+							, callback );
+				}
 			}
 			else{
 				log('The path "'+ p.path +'" is not recognised');
 			}
 		},
-	
-	
+
+
 		/**
 		 * getAuthResponse
 		 * Returns all the sessions that are subscribed too
@@ -425,6 +488,11 @@ var hello = (function(){
 		&& ("state" in p)
 		&& p.state in services){
 
+		if(parseInt(p.expires_in) === 0){
+			// Facebook, tut tut tut,
+			p.expires_in = (3600 * 24 * 7 * 52);
+		}
+
 		// Lets use the "state" to assign it to one of our networks
 		_store( p.state, {
 			access_token : p.access_token, 
@@ -437,12 +505,12 @@ var hello = (function(){
 
 		// this is a popup so
 		window.close();
-
+		
 		
 		log('Trying to close window');
 
 		// Dont execute any more
-		// return;
+		return;
 	}
 
 
@@ -623,7 +691,14 @@ var hello = (function(){
 			}
 			else{
 				for(var x in attr){
-					n[x] = attr[x];
+					if(typeof(attr[x])==='object'){
+						for(var y in attr[x]){
+							n[x][y] = attr[x][y];
+						}
+					}
+					else{
+						n[x] = attr[x];
+					}
 				}
 			}
 		}
