@@ -12,7 +12,10 @@
  * @company Knarly
  */
 
+
 var hello = (function(){
+
+	"use strict";
 
 	// JSONP
 	var _jsonp_counter = 0;
@@ -21,22 +24,21 @@ var hello = (function(){
 	var listeners = {};
 
 
-	/**
-	 * Services
-	 */
+	//
+	// Services
+	//
 	var services = {
+
 		google : {
 			name : "Google Plus",
 			uri : {
 				// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
-				auth : "https://accounts.google.com/o/oauth2/auth?client_id={id}"
-					+"&redirect_uri="+encodeURIComponent(window.location.href)
-					+"&response_type=token"
-					+"&scope=https://www.googleapis.com/auth/plus.me"
-					+"&state=google",
-
+				auth : "https://accounts.google.com/o/oauth2/auth",
 				me	: "people/me?pp=1",
-				base : "https://www.googleapis.com/plus/v1/",
+				base : "https://www.googleapis.com/plus/v1/"
+			},
+			scope : {
+				basic : "https://www.googleapis.com/auth/plus.me"
 			},
 			wrap : {
 				me : function(o){
@@ -50,20 +52,18 @@ var hello = (function(){
 				}
 			}
 		},
-		
+	
 		windows : {
 			name : 'Windows live',
 
 			uri : {
 				// REF: http://msdn.microsoft.com/en-us/library/hh243641.aspx
-				auth : 'https://oauth.live.com/authorize?client_id={id}'
-					+'&response_type=token'
-					+'&redirect_uri=' + encodeURIComponent(window.location.href)
-					+'&scope=wl.basic'
-					+'&state=windows',
+				auth : 'https://oauth.live.com/authorize',
 				base : 'https://apis.live.net/v5.0/'
 			},
-			
+			scope : {
+				basic : 'wl.basic'
+			},			
 			wrap : {
 				me : function(o){
 					if(o.id){
@@ -80,12 +80,11 @@ var hello = (function(){
 
 			uri : {
 				// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
-				auth : 'http://www.facebook.com/dialog/oauth/?client_id={id}'
-					+'&response_type=token'
-					+'&redirect_uri='+ encodeURIComponent(window.location.href)
-					+'&scope=email,offline_access'
-					+'&state=facebook',
-				base : 'https://graph.facebook.com/',
+				auth : 'http://www.facebook.com/dialog/oauth/',
+				base : 'https://graph.facebook.com/'
+			},
+			scope : {
+				basic : 'email,offline_access'
 			},
 			wrap : {
 				me : function(o){
@@ -103,69 +102,37 @@ var hello = (function(){
 			id : window.location.host,
 			uri : {
 				// REF: 
-				auth : function(){
-					var url = '/knarly.net/oauth?client_id={id}'
-					+'&response_type=token'
-					+'&redirect_uri=' + encodeURIComponent(window.location.href)
-					+'&scope=email'
-					+'&state=knarly';
+				auth : function(qs){
+					var url = '/knarly.net/oauth';
 
 					// if the user is signed into another service. Lets attach the credentials to that and hopefully get the user signed in.
 					var service = hello.service(),
 						session = hello.getAuthResponse( service );
 
 					if( session && "access_token" in session ){
-						qs = {
-							access_token : session.access_token,
-							provider : service
-						}
-						url += '&' + _param(qs);
+						qs.access_token = session.access_token;
+						qs.provider = service;
 					}
-
-					return url;
+					return url + '?' + _param(qs);
 				},
 
-				base : '/knarly.net/api/',
+				base : '/knarly.net/api/'
+			},
+			scope : {
+				basic : ''
 			},
 			wrap : {
 				// knarly has no special paths
-			},
-
-			// Specify unique handling mechanism for knarly
-			/*
-			requestHandler : function(uri,qs,data,callback){
-				
-				// lets use another services access_token
-				if(!qs.access_token){
-					
-				}
-				
-				// make the call
-				_json(uri  + ( url.indexOf('?') > -1 ? "&" : "?" ) + _param(qs), data, callback );
 			}
-			/**/
 		}
-		/*
-		,
-		twitter : {
-			name : 'Twitter',
-
-			uri : {
-				// Ref: does not support OAuth2 yet
-				auth : 'https://oauth.twitter.com/2/authorize?oauth_callback_url=" + redirect + "&oauth_mode=flow_web_client&oauth_client_identifier=" + appid + "&redirect_uri=" + redirect + "&response_type=token&client_id=" + appid;',
-				me : '',
-				base : ''
-			}		
-		}
-		*/
-	}
+	};
 
 
 	var hello = {
-		/**
-		 * Service
-		 * Get/Set the default service
-		 */
+		//
+		// Service
+		// Get/Set the default service
+		//
 		service : function(service){
 			if(typeof (service) !== 'undefined' ){
 				return _store( 'sync_service', service );
@@ -173,14 +140,16 @@ var hello = (function(){
 			return _store( 'sync_service' );
 		},
 
-		/**
-		 * Define the clientId's for the endpoint services
-		 * @param object o, contains a key value pair, service => clientId
-		 */
+
+		//
+		// init
+		// Define the clientId's for the endpoint services
+		// @param object o, contains a key value pair, service => clientId
+		//
 		init : function(o){
-			for( var x in o ){
+			for( var x in o ){if(o.hasOwnProperty(x)){
 				services[x].id = o[x];
-			}
+			}}
 
 			// Monitor for a change in state and fire
 			var _diff = {};
@@ -188,7 +157,7 @@ var hello = (function(){
 			// create monitoring function
 			(function self(){
 
-				for(var x in services){
+				for(var x in services){if(services.hasOwnProperty(x)){
 				
 					// Get session
 					var session = hello.getAuthResponse(x);
@@ -209,22 +178,22 @@ var hello = (function(){
 					}
 					
 					_diff[x] = token;
-				}
+				}}
 
 				setTimeout(self, 1000);
 			})();
 		},
 
-		/**
-		 * Login
-		 * Using the endpoint defined by services[x].auth we prompt the login
-		 * @param service 	string 					name to connect to
-		 * @param callback 	function 	(optional)	fired on signin
-		 * @param display 	string 		(optional)	display mode, is either none|popup(default)|page
-		 */
+		//
+		// Login
+		// Using the endpoint defined by services[x].auth we prompt the login
+		// @param service 	string 					name to connect to
+		// @param callback 	function 	(optional)	fired on signin
+		// @param display 	string 		(optional)	display mode, is either none|popup(default)|page
+		//
 		login :  function(service, callback, display){
 
-			var uri;
+			var url;
 
 			var p = _arguments({service:'s!', callback : 'f', display:'s'}, arguments);
 
@@ -234,24 +203,33 @@ var hello = (function(){
 			// 
 			if( typeof(p.service) === 'string' ){
 
+				// Build URL
+				// These are all the parameters that will go into making the call
+				var qs = {
+					client_id 		: services[p.service].id,
+					redirect_uri 	: window.location.href,
+					response_type 	: "token",
+					scope			: services[p.service].scope.basic,
+					state 			: p.service,
+					display 		: p.display				
+				};
+
 				if( typeof(services[p.service].uri.auth) === 'function'){
-					url = services[p.service].uri.auth(p.callback);
+					url = services[p.service].uri.auth(qs);
 				}
 				else{
-					url = services[p.service].uri.auth.replace(/\{([a-z]+)\}/ig, function(m,v){
-						return ( v in services[p.service] ? services[p.service][v] : '' );
-					});
+					url = services[p.service].uri.auth + '?' + _param(qs);
 				}
 
-				// Add display parameter
-				url += '&display='+p.display;
-
+				// Callback
 				// Save the callback until session changes.
 				if(p.callback){
 					// pass in a self unsubscribing function
 					this.subscribe('auth.login.'+p.service, function self(){ hello.unsubscribe('auth.login.'+p.service,self); p.callback.apply(this, arguments);} );
 				}
 			
+
+				// Trigger how we want this displayed
 				// Calling Quietly?
 				if( p.display === 'none' ){
 					// signin in the background, iframe
@@ -279,21 +257,21 @@ var hello = (function(){
 		},
 	
 	
-		/**
-		 * Logout
-		 * Remove any data associated with a given service
-		 * @param string name of the service
-		 * @param function callback
-		 */
+		//
+		// Logout
+		// Remove any data associated with a given service
+		// @param string name of the service
+		// @param function callback
+		//
 		logout : function(s, callback){
 			if(s && _store(s)){
 				_store(s,'');
 				(callback ? callback() : null);
 			}
  			else if(!s){
-				for(var x in services){
+				for(var x in services){if(services.hasOwnProperty(x)){
 					hello.logout(x);
-				}
+				}}
 				// remove the default
 				hello.service(false);
 				// trigger callback
@@ -305,13 +283,13 @@ var hello = (function(){
 		},
 
 
-		/**
-		 * API
-		 * @param path		string
-		 * @param method	string (optional)
-		 * @param data 		object (optional)
-		 * @param callback	function (optional)
-		 */
+		//
+		// API
+		// @param path		string
+		// @param method	string (optional)
+		// @param data 		object (optional)
+		// @param callback	function (optional)
+		//
 		api : function(){
 		
 			// get arguments
@@ -402,11 +380,11 @@ var hello = (function(){
 		},
 
 
-		/**
-		 * getAuthResponse
-		 * Returns all the sessions that are subscribed too
-		 * @param string optional, name of the service to get information about.
-		 */
+		//
+		// getAuthResponse
+		// Returns all the sessions that are subscribed too
+		// @param string optional, name of the service to get information about.
+		//
 		getAuthResponse : function(service){
 			return _store(service||this.service());
 		},
@@ -414,11 +392,11 @@ var hello = (function(){
 
 
 
-		/**
-		 * Subscribe to events
-		 * @param evt 		string
-		 * @param callback 	function
-		 */
+		//
+		// Subscribe to events
+		// @param evt 		string
+		// @param callback 	function
+		//
 		subscribe : function(evt, callback){
 
 			var p = _arguments({evt:'s!', callback:"f!"}, arguments);
@@ -433,11 +411,11 @@ var hello = (function(){
 		},
 
 
-		/**
-		 * Unsubscribe to events
-		 * @param evt 		string
-		 * @param callback 	function
-		 */
+		//
+		// Unsubscribe to events
+		// @param evt 		string
+		// @param callback 	function
+		//
 		unsubscribe : function(evt, callback){
 	
 
@@ -453,39 +431,39 @@ var hello = (function(){
 			for(var i=0;i<listeners[p.evt].length;i++){
 				if(listeners[p.evt][i] === callback){
 					listeners[p.evt] = listeners[p.evt].splice(i,1);
-				};
+				}
 			}
 		},
 		
-		/**
-		 * Trigger
-		 * Triggers any subscribed events
-		 */
+		//
+		// Trigger
+		// Triggers any subscribed events
+		//
 		trigger : function(evt, data){
 			// loop through the events
 			log("Trigger", evt, JSON.stringify(listeners));
 
-			for(var x in listeners){
+			for(var x in listeners){if(listeners.hasOwnProperty(x)){
 				if( evt.indexOf(x) > -1 ){
 					for(var i=0;i<listeners[x].length;i++){
 						listeners[x][i].call(this, data);
 					}
 				} 
-			}
+			}}
 		},
 		
-		/**
-		 * Utilities
-		 */
+		//
+		// Utilities
+		//
 		_param : _param,
 		_store : _store
 	};
 	
 
-	/**
-	 * Save session, from redirected authentication
-	 * #access_token has come in?
-	 */	
+	//
+	// Save session, from redirected authentication
+	// #access_token has come in?
+	//	
 	var p = _param(window.location.hash);
 
 	if( p 
@@ -493,7 +471,7 @@ var hello = (function(){
 		&& ("state" in p)
 		&& p.state in services){
 
-		if(parseInt(p.expires_in) === 0){
+		if(parseInt(p.expires_in,10) === 0){
 			// Facebook, tut tut tut,
 			p.expires_in = (3600 * 24 * 7 * 52);
 		}
@@ -501,8 +479,8 @@ var hello = (function(){
 		// Lets use the "state" to assign it to one of our networks
 		_store( p.state, {
 			access_token : p.access_token, 
-			expires_in : parseInt(p.expires_in), 
-			expires : ((new Date).getTime()/1e3) + parseInt(p.expires_in)
+			expires_in : parseInt(p.expires_in,10), 
+			expires : ((new Date).getTime()/1e3) + parseInt(p.expires_in,10)
 		});
 
 		// Service
@@ -527,12 +505,12 @@ var hello = (function(){
 	//////////////////////////////////////////////
 	//////////////////////////////////////////////
 
-	/**
-	 * Log
-	 * [@param,..]
-	 */
+	//
+	// Log
+	// [@param,..]
+	//
 	function log() {
-		if (typeof(console) === 'undefined'||typeof(console.log) === 'undefined') return;
+		if (typeof(console) === 'undefined'||typeof(console.log) === 'undefined'){ return; }
 		if (typeof console.log === 'function') {
 			console.log.apply(console, arguments); // FF, CHROME, Webkit
 		}
@@ -541,11 +519,11 @@ var hello = (function(){
 		}
 	}
 	
-	/**
-	 * Param
-	 * Explode/Encode the parameters of an URL string/object
-	 * @param string s, String to decode
-	 */
+	//
+	// Param
+	// Explode/Encode the parameters of an URL string/object
+	// @param string s, String to decode
+	//
 	function _param(s){
 		var b, 
 			a = {},
@@ -556,7 +534,7 @@ var hello = (function(){
 			m = s.replace(/.*[#\?]/,'').match(/([^=\/\&]+)=([^\/\&]+)/g);
 	
 			if(m){
-				for(i=0;i<m.length;i++){
+				for(var i=0;i<m.length;i++){
 					b = m[i].split('=');
 					a[b[0]] = decodeURIComponent( b[1] );
 				}
@@ -564,22 +542,23 @@ var hello = (function(){
 			return a;
 		}
 		else {
-			var o = s,
-				a = [];
+			var o = s;
+		
+			a = [];
 
-			for( var x in o ){
+			for( var x in o ){if(o.hasOwnProperty(x)){
 				if( o.hasOwnProperty(x) ){
 					a.push( [x, o[x] === '?' ? '?' : encodeURIComponent(o[x]) ].join('=') );
 				}
-			}
+			}}
 
 			return a.join('&');
 		}
 	}
 	
-	/**
-	 * Store
-	 */
+	//
+	// Store
+	//
 	function _store(name,value,days) {
 
 		// log
@@ -644,18 +623,18 @@ var hello = (function(){
 		*/
 	}
 
-	/**
-	 * Args utility
-	 * @param o object
-	 * @param a arguments
-	 */
+	//
+	// Args utility
+	// @param o object
+	// @param a arguments
+	//
 	function _arguments(o,args){
 
 		var p = {},
 			i = 0,
 			t = null;
 
-		for(var x in o){
+		for(var x in o){if(o.hasOwnProperty(x)){
 
 			t = typeof( args[i] );
 
@@ -675,17 +654,17 @@ var hello = (function(){
 				log("Whoops! " + x + " not defined");
 				return false;
 			}
-		}
+		}}
 		return p;
 	}
 
 
-	/**
-	 * Create and Append new Dom elements
-	 * @param node string
-	 * @param attr object literal
-	 * @param dom/string 
-	 */
+	//
+	// Create and Append new Dom elements
+	// @param node string
+	// @param attr object literal
+	// @param dom/string 
+	//
 	function _append(node,attr,target){
 
 		var n = typeof(node)==='string' ? document.createElement(node) : node;
@@ -695,7 +674,7 @@ var hello = (function(){
 				target = attr;
 			}
 			else{
-				for(var x in attr){
+				for(var x in attr){if(attr.hasOwnProperty(x)){
 					if(typeof(attr[x])==='object'){
 						for(var y in attr[x]){
 							n[x][y] = attr[x][y];
@@ -704,7 +683,7 @@ var hello = (function(){
 					else{
 						n[x] = attr[x];
 					}
-				}
+				}}
 			}
 		}
 		if(typeof(target)==='object'){
@@ -718,11 +697,11 @@ var hello = (function(){
 	}
 
 
-	/**
-	 * JSONP
-	 * Injects a script tag into the dom to be executed and appends a callback function to the window object
-	 * TODO: IE triggering a click event to initiate the code, can't repo this apparent bug.
-	 */
+	//
+	// JSONP
+	// Injects a script tag into the dom to be executed and appends a callback function to the window object
+	// TODO: IE triggering a click event to initiate the code, can't repo this apparent bug.
+	//
 
 	function _jsonp(path,data,callback){
 
@@ -772,7 +751,7 @@ var hello = (function(){
 		// By setting the request to synchronous we can trigger the error handler when all else fails.
 		// This action will be ignored if we've already called the callback handler "cb" with a successful onload event
 		if( window.navigator.userAgent.toLowerCase().indexOf('opera') > -1 ){
-			operafix = create('script',{
+			operafix = _append('script',{
 				text:"document.getElementById('"+cb_name+"').onerror();"
 			});
 			script.async = false;
@@ -795,13 +774,13 @@ var hello = (function(){
 	}
 
 
-	/**
-	 * Post
-	 * Send information to a remote location using the post mechanism
-	 * @param string uri path
-	 * @param object data, key value data to send
-	 * @param function callback, function to execute in response
-	 */
+	//
+	// Post
+	// Send information to a remote location using the post mechanism
+	// @param string uri path
+	// @param object data, key value data to send
+	// @param function callback, function to execute in response
+	//
 	function _post(uri, data, callback){
 	
 		// Build an iFrame and inject it into the DOM
