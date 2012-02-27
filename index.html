@@ -252,7 +252,7 @@ hello.init({
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
 		argument</th><th>default</th></tr>
-	<tr><td>network</td><td><q>string</q></td><td><span class="auto-style2">windows</span>, <span class="auto-style2">facebook</span></td><td>One of our services.</td><td>
+	<tr><td>network</td><td><q>string</q></td><td><q>windows</q>, <q>facebook</q></td><td>One of our services.</td><td>
 		<em>optional</em></td><td>
 		<em>null</em></td></tr>
 	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert(&quot;Logged 
@@ -260,6 +260,9 @@ hello.init({
 		A callback when the users session has been initiated</td><td>
 		<em>optional</em></td><td>
 		<em>null</em></td></tr>
+	<tr><td>display</td><td><q>string</q></td><td><q>popup</q>, <q>page</q> or <q>none</q></td><td>Defines how the signin flow works, "none" is used to refresh the access_token in the background</td><td>
+		<em>optional</em></td><td>
+		<q>popup</q></td></tr>
 </table>
 <h4>Examples:</h4>
 <pre class="tryitoffline">

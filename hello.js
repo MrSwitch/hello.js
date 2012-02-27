@@ -84,7 +84,6 @@ var hello = (function(){
 					+'&response_type=token'
 					+'&redirect_uri='+ encodeURIComponent(window.location.href)
 					+'&scope=email,offline_access'
-					+'&display=popup'
 					+'&state=facebook',
 				base : 'https://graph.facebook.com/',
 			},
@@ -109,7 +108,6 @@ var hello = (function(){
 					+'&response_type=token'
 					+'&redirect_uri=' + encodeURIComponent(window.location.href)
 					+'&scope=email'
-					+'&display=popup'
 					+'&state=knarly';
 
 					// if the user is signed into another service. Lets attach the credentials to that and hopefully get the user signed in.
@@ -220,55 +218,60 @@ var hello = (function(){
 		/**
 		 * Login
 		 * Using the endpoint defined by services[x].auth we prompt the login
-		 * @param string name of the service to connect to
-		 * @param callback or boolean, if callback then we trigger this immediatly, otherwise call the service inline
-		 * @param boolean refresh flag, make an iframe request to refresh the token
+		 * @param service 	string 					name to connect to
+		 * @param callback 	function 	(optional)	fired on signin
+		 * @param display 	string 		(optional)	display mode, is either none|popup(default)|page
 		 */
-		login :  function(s, callback, refresh){
+		login :  function(service, callback, display){
 
 			var uri;
 
-			if( typeof(s) === 'string' ){
+			var p = _arguments({service:'s!', callback : 'f', display:'s'}, arguments);
 
-				if( typeof(services[s].uri.auth) === 'function'){
-					url = services[s].uri.auth(callback);
+			// display method
+			p.display = p.display || 'popup';
+
+			// 
+			if( typeof(p.service) === 'string' ){
+
+				if( typeof(services[p.service].uri.auth) === 'function'){
+					url = services[p.service].uri.auth(p.callback);
 				}
 				else{
-					url = services[s].uri.auth.replace(/\{([a-z]+)\}/ig, function(m,v){
-						return ( v in services[s] ? services[s][v] : '' );
+					url = services[p.service].uri.auth.replace(/\{([a-z]+)\}/ig, function(m,v){
+						return ( v in services[p.service] ? services[p.service][v] : '' );
 					});
 				}
 
-				if(callback===true){
-					window.location = url;
-				}
-				else{
-					// Save the callback until session changes.
-					if(callback){
-						// pass in a self unsubscribing function
-						this.subscribe('auth.login.'+s, function self(){ hello.unsubscribe('auth.login.'+s,self); callback.apply(this, arguments);} );
-					}
-				
-					// Calling Quietly?
-					if( refresh ){
-						// signin in the background, iframe
-						_append('iframe', { src : url, style : {height:0,width:0,position:'absolute',top:0,left:0}  }, document.body);
-					}
+				// Add display parameter
+				url += '&display='+p.display;
 
-					// Triggering popup?
-					else {
-						// Trigger callback
-						window.open( 
-							url,
-							'name', 
-							"height=400,width=450,left="+((window.innerWidth-450)/2)+",top="+((window.innerHeight-400)/2)
-						);
-					}
+				// Save the callback until session changes.
+				if(p.callback){
+					// pass in a self unsubscribing function
+					this.subscribe('auth.login.'+p.service, function self(){ hello.unsubscribe('auth.login.'+p.service,self); p.callback.apply(this, arguments);} );
+				}
+			
+				// Calling Quietly?
+				if( p.display === 'none' ){
+					// signin in the background, iframe
+					_append('iframe', { src : url, style : {height:0,width:0,position:'absolute',top:0,left:0}  }, document.body);
+				}
+
+				// Triggering popup?
+				else if( p.display === 'popup'){
+					// Trigger callback
+					window.open( 
+						url,
+						'name', 
+						"height=400,width=450,left="+((window.innerWidth-450)/2)+",top="+((window.innerHeight-400)/2)
+					);
+				}
+				else {
+					window.location = url;
 				}
 			}
 			else{
-				callback = s;
-				s = '';
 				
 				// trigger the default login.
 				log('Please specify a service.');
@@ -280,6 +283,7 @@ var hello = (function(){
 		 * Logout
 		 * Remove any data associated with a given service
 		 * @param string name of the service
+		 * @param function callback
 		 */
 		logout : function(s, callback){
 			if(s && _store(s)){
@@ -372,12 +376,13 @@ var hello = (function(){
 
 					log("Callback");
 	
+					// trigger refresh
 					hello.login(service, function(bool){
 						// Add
 						_jsonp( url + ( url.indexOf('?') > -1 ? "&" : "?" ) + _param(qs)
 								, p.data
 								, callback );
-					}, true);
+					}, 'none');
 				}
 
 				// If we have to augment the headings, lets try that.
@@ -411,8 +416,8 @@ var hello = (function(){
 
 		/**
 		 * Subscribe to events
-		 * @param evt string
-		 * @param callback function
+		 * @param evt 		string
+		 * @param callback 	function
 		 */
 		subscribe : function(evt, callback){
 
@@ -430,8 +435,8 @@ var hello = (function(){
 
 		/**
 		 * Unsubscribe to events
-		 * @param evt string
-		 * @param callback function
+		 * @param evt 		string
+		 * @param callback 	function
 		 */
 		unsubscribe : function(evt, callback){
 	
