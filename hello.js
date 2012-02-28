@@ -38,7 +38,17 @@ var hello = (function(){
 				base : "https://www.googleapis.com/plus/v1/"
 			},
 			scope : {
-				basic : "https://www.googleapis.com/auth/plus.me"
+				basic : "https://www.googleapis.com/auth/plus.me",
+				email			: '',
+				birthday		: '',
+				events			: '',
+				photos			: '',
+				videos			: '',
+				
+				publish			: '',
+				create_event	: '',
+
+				offline_access : ''
 			},
 			wrap : {
 				me : function(o){
@@ -63,10 +73,16 @@ var hello = (function(){
 			},
 			scope : {
 				basic			: 'wl.signin,wl.basic',
-				offline_access	: 'wl.offline_access',
-				emails			: 'wl.emails',
+				email			: 'wl.emails',
 				birthday		: 'wl.birthday',
-				events			: 'wl.events'
+				events			: 'wl.events,wl.calendars',
+				photos			: 'wl.photos',
+				videos			: 'wl.photos',
+				
+				publish			: 'wl.share',
+				create_event	: 'wl.calendars_update,wl.events_create',
+
+				offline_access	: 'wl.offline_access'
 			},
 			wrap : {
 				me : function(o){
@@ -88,9 +104,17 @@ var hello = (function(){
 				base : 'https://graph.facebook.com/'
 			},
 			scope : {
-				basic : '',
-				offline_access : 'offline_access',
-				email : 'email'
+				basic			: '',
+				email			: 'email',
+				birthday		: 'user_birthday',
+				events			: 'user_events',
+				photos			: 'user_photos,user_videos',
+				videos			: 'user_photos,user_videos',
+				
+				publish			: 'publish_stream',
+				create_event	: 'create_event',
+
+				offline_access : 'offline_access'
 			},
 			wrap : {
 				me : function(o){
@@ -195,16 +219,21 @@ var hello = (function(){
 		// Using the endpoint defined by services[x].auth we prompt the login
 		// @param service 	string 					name to connect to
 		// @param callback 	function 	(optional)	fired on signin
-		// @param display 	string 		(optional)	display mode, is either none|popup(default)|page
+		// @param options 	object 		(optional)	{display mode, is either none|popup(default)|page, scope: email,birthday,publish, .. }
 		//
-		login :  function(service, callback, display){
+		login :  function(service, callback, options){
 
 			var url;
 
-			var p = _arguments({service:'s!', callback : 'f', display:'s'}, arguments);
+			var p = _arguments({service:'s!', callback : 'f', options:'o'}, arguments);
+			
+			// Format
+			if(!p.options){
+				p.options = {};
+			}
 
 			// display method
-			p.display = p.display || 'popup';
+			var display = p.options.display || 'popup';
 
 			// 
 			if( typeof(p.service) === 'string' ){
@@ -217,9 +246,25 @@ var hello = (function(){
 					response_type 	: "token",
 					scope			: services[p.service].scope.basic,
 					state 			: p.service,
-					display 		: p.display				
+					display 		: display
 				};
 
+				//
+				// Scopes
+				var scope = p.options.scope;
+				if(scope){
+					if(typeof(scope)!=='string'){
+						scope = scope.join(',');
+					}
+					qs.scope = (qs.scope+ ',' + scope).replace(/[^,\s]+/ig, function(m){
+						return (m in services[p.service].scope) ? services[p.service].scope[m] : m;
+					});
+					// remove duplication and empty spaces
+					qs.scope = _unique(qs.scope.split(/,+/)).join(',');
+				}
+				
+				
+				// 
 				if( typeof(services[p.service].uri.auth) === 'function'){
 					url = services[p.service].uri.auth(qs);
 				}
@@ -237,13 +282,13 @@ var hello = (function(){
 
 				// Trigger how we want this displayed
 				// Calling Quietly?
-				if( p.display === 'none' ){
+				if( display === 'none' ){
 					// signin in the background, iframe
 					_append('iframe', { src : url, style : {height:0,width:0,position:'absolute',top:0,left:0}  }, document.body);
 				}
 
 				// Triggering popup?
-				else if( p.display === 'popup'){
+				else if( display === 'popup'){
 					// Trigger callback
 					window.open( 
 						url,
@@ -366,7 +411,7 @@ var hello = (function(){
 						_jsonp( url + ( url.indexOf('?') > -1 ? "&" : "?" ) + _param(qs)
 								, p.data
 								, callback );
-					}, 'none');
+					}, {display:'none'});
 				}
 
 				// If we have to augment the headings, lets try that.
@@ -628,6 +673,26 @@ var hello = (function(){
 		document.cookie = name+"="+value+expires+"; path=/";
 		*/
 	}
+
+	//
+	// unique
+	// remove duplicate and null values from an array
+	// @param a array
+	//
+	function _unique(a){
+		if(typeof(a)!=='object'){ return []; }
+		var r = [];
+		for(var i=0;i<a.length;i++){
+			if(!a[i]||a[i].length===0||r.indexOf(a[i])!==-1){
+				continue;
+			}
+			else{
+				r.push(a[i]);
+			}
+		}
+		return r;
+	}
+	
 
 	//
 	// Args utility

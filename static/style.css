@@ -193,6 +193,19 @@ table{
 	border-spacing: 0;
 	width:100%;
 }
+	tr.break th{
+		background-color:#f8f8f8;
+	}
+	tr.break th:first-child{
+		border-top:0;
+		border-bottom:0;
+		border-right:0;
+		vertical-align:middle;
+	}
+	tr.break th:last-child{
+		border-left:0;
+	}
+	
 	td,th{
 		border:1px solid #D2D2D2;
 		padding:4px 10px 4px 6px;

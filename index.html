@@ -61,7 +61,7 @@
 		});
 		
 		
-		$("form").each(function(i){
+		$("form.rest").each(function(i){
 			
 			var $frm = $(this).submit(function(e){
 					e.preventDefault();
@@ -147,6 +147,9 @@
 		vertical-align:middle;
 		margin-right:20px;
 	}
+.auto-style1 {
+	color: #008000;
+}
 </style>
 	
 
@@ -216,6 +219,83 @@ hello.subscribe('auth.login', function(r){
 <button onclick="hello.login('facebook', function(){alert('You have signed into facebook')});">facebook</button>
 <button onclick="hello.login('windows', function(){alert('You have signed into windows live')});">windows</button></div>
 
+<h2>Publishing Demo: Write it on the wall</h2>
+<p>Publishing content to a socal feed... easy!</p>
+<script>
+$('form.demoPostWall').live('submit',function(e){
+	// Lets not leave the browser
+	e.preventDefault();
+
+	// Call our api
+	hello.api('me/feed', 'post', {
+		message : this.message.value,
+		uri : this.uri.value
+	}, function(r){
+		dump(r);
+	});
+}
+</script>
+
+<p>Signin with the 'publish' scope <button onclick="hello.login('google', function(){alert('You have signed into google')}, {scope:'publish'});">google</button>
+<button onclick="hello.login('facebook', function(){alert('You have signed into facebook')}, {scope:'publish'});">facebook</button>
+<button onclick="hello.login('windows', function(){alert('You have signed into windows live')}, {scope:'publish'});">windows</button></p>
+
+<form class="demoPostWall" style="white-space:pre;">{
+	message : <input type="text" name="message"/>
+	url		: <input type="url" name="url"/>
+}
+	<button type="submit">Post</button>
+</form>
+
+
+<h2>Scope and Permissions</h2>
+<p>Scopes define which part of a providers service your app can access. As you 
+can gather your app could be very invasive, dont expect users to sign up if your 
+asking too much. Use the least <code>scopes</code> possible. You can always 
+request more from the user later.</p>
+<table>
+	<thead>
+		<tr><td></td><th><code>scope</code></th><th>Facebook</th><th>Windows Live</th><th>Google</th></tr>
+	</thead>
+	<tbody>
+		<tr class="break">
+			<th rowspan="6">View</th>
+			<th colspan="4"></th>
+		</tr>
+		<tr>
+			<th><em>default</em></th><td>&nbsp;</td><td>wl.signin, wl.basic</td><td>https://www.googleapis.com/auth/plus.me</td>
+		</tr>
+		<tr>
+			<th><q>email</q></th><td>email</td><td>wl.emails</td><td></td>
+		</tr>
+		<tr>
+			<th><q>birthday</q></th><td>user_birthday</td><td>wl.birthday</td><td></td>
+		</tr>
+		<tr>
+			<th><q>events</q></th><td>user_events</td><td>wl.events,wl.calenders</td><td></td>
+		</tr>
+		<tr>
+			<th><q>photos</q>, <q>videos</q></th><td>user_photos,user_videos</td><td>wl.photos</td><td></td>
+		</tr>
+		<tr class="break">
+			<th rowspan="3">Edit</th>
+			<th colspan="4"></th>
+		</tr>
+		<tr>
+			<th><q>publish</q></th><td>publish_streams</td><td>wl.share</td><td></td>
+		</tr>
+		<tr>
+			<th><q>create_event</q></th><td>create_event</td><td>wl.calendars_update,wl.events_create</td><td></td>
+		</tr>
+		<tr class="break">
+			<th rowspan="2">Misc</th>
+			<th colspan="4"></th>
+		</tr>
+		<tr>
+			<th><q>offline_access</q></th><td>offline_access</td><td>wl.offline_access</td><td></td>
+		</tr>
+	</tbody>
+</table>
 
 
 <h2>Core Methods</h2>
@@ -388,7 +468,7 @@ e.g.
 <pre>hello.api("me", function(json){console.log(json);})</pre>
 <p>Below is a REST playground, clicking the paths on the left will return the results on the right</p>
 
-<form>
+<form class="rest">
 	<input type="text" name="path" placeholder="path"/>
 	<article>
 		<nav>
