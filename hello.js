@@ -62,8 +62,12 @@ var hello = (function(){
 				base : 'https://apis.live.net/v5.0/'
 			},
 			scope : {
-				basic : 'wl.basic'
-			},			
+				basic			: 'wl.signin,wl.basic',
+				offline_access	: 'wl.offline_access',
+				emails			: 'wl.emails',
+				birthday		: 'wl.birthday',
+				events			: 'wl.events'
+			},
 			wrap : {
 				me : function(o){
 					if(o.id){
@@ -84,7 +88,9 @@ var hello = (function(){
 				base : 'https://graph.facebook.com/'
 			},
 			scope : {
-				basic : 'email,offline_access'
+				basic : '',
+				offline_access : 'offline_access',
+				email : 'email'
 			},
 			wrap : {
 				me : function(o){
