@@ -154,7 +154,6 @@
 
 </head>
 <body>
-
 	<header>
 		<h1>hello.js</h1>
 		<p>A Javascript API for <a href="http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf" target="_blank">OAuth2</a> authentication and REST inspection of third party 
@@ -224,24 +223,30 @@ hello.subscribe('auth.login', function(r){
 <h2>Publishing Demo: Write it on the wall</h2>
 <p>Publishing content to a socal feed... easy!</p>
 </header>
+
+
+<p>Signin with the 'publish' scope <button onclick="hello.login('google', function(){alert('You have signed into google')}, {scope:'publish'});">google</button>
+<button onclick="hello.login('facebook', function(){alert('You have signed into facebook')}, {scope:'publish'});">facebook</button>
+<button onclick="hello.login('windows', function(){alert('You have signed into windows live')}, {scope:'publish'});">windows</button></p>
+
 <script>
-$('form.demoPostWall').live('submit',function(e){
+$('body').on('submit','form.demoPostWall', function(e){
 	// Lets not leave the browser
 	e.preventDefault();
+
+	// form
+	var frm = this;
 
 	// Call our api
 	hello.api('me/feed', 'post', {
 		message : this.message.value,
 		link : this.link.value
 	}, function(r){
-		dump(r);
+		dump(r, frm);
 	});
-}
+	return false;
+});
 </script>
-
-<p>Signin with the 'publish' scope <button onclick="hello.login('google', function(){alert('You have signed into google')}, {scope:'publish'});">google</button>
-<button onclick="hello.login('facebook', function(){alert('You have signed into facebook')}, {scope:'publish'});">facebook</button>
-<button onclick="hello.login('windows', function(){alert('You have signed into windows live')}, {scope:'publish'});">windows</button></p>
 
 <form class="demoPostWall" style="white-space:pre;">{
 	message : <input type="text" name="message"/>
@@ -249,6 +254,7 @@ $('form.demoPostWall').live('submit',function(e){
 }
 	<button type="submit">Post</button>
 </form>
+
 
 <header>
 <h2>Scope and Permissions</h2>

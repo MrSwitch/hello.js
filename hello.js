@@ -34,22 +34,23 @@ var hello = (function(){
 			uri : {
 				// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
 				auth : "https://accounts.google.com/o/oauth2/auth",
-				me	: "people/me?pp=1",
-				base : "https://www.googleapis.com/plus/v1/"
+				me	: "plus/v1/people/me?pp=1",
+				base : "https://www.googleapis.com/"
 			},
 			scope : {
 				basic : "https://www.googleapis.com/auth/plus.me",
 				email			: '',
 				birthday		: '',
 				events			: '',
-				photos			: '',
-				videos			: '',
+				photos			: 'https://picasaweb.google.com/data/',
+				videos			: 'http://gdata.youtube.com',
 				
 				publish			: '',
 				create_event	: '',
 
 				offline_access : ''
 			},
+			scope_delim : ' ',
 			wrap : {
 				me : function(o){
 					if(o.id){
@@ -69,7 +70,7 @@ var hello = (function(){
 			uri : {
 				// REF: http://msdn.microsoft.com/en-us/library/hh243641.aspx
 				auth : 'https://oauth.live.com/authorize',
-				base : 'https://apis.live.net/v5.0/'
+				base : 'https://apis.live.net/v5.0/',
 			},
 			scope : {
 				basic			: 'wl.signin,wl.basic',
@@ -92,6 +93,18 @@ var hello = (function(){
 					}
 					return o;
 				}
+			},
+			preprocess : function(p){
+				if( p.method.toLowerCase() !== 'get'){
+					//p.data = {data: JSON.stringify(p.data), method: p.method.toLowerCase()};
+					p.path = {
+							'me/feed' : 'me/share'
+						}[p.path] || p.path;
+
+					p.method = 'get';
+					p.data.method = 'post';
+				}
+				return p;
 			}
 		},
 		
@@ -101,7 +114,8 @@ var hello = (function(){
 			uri : {
 				// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
 				auth : 'http://www.facebook.com/dialog/oauth/',
-				base : 'https://graph.facebook.com/'
+				base : 'https://graph.facebook.com/',
+				'me/share' : 'me/feed'
 			},
 			scope : {
 				basic			: '',
@@ -123,6 +137,13 @@ var hello = (function(){
 					}
 					return o;
 				}
+			},
+			preprocess : function(p){
+				if( p.method.toLowerCase() !== 'get'){
+					p.method = 'get';
+					p.data.method = 'post';
+				}
+				return p;
 			}
 		},
 		
@@ -238,13 +259,15 @@ var hello = (function(){
 			// 
 			if( typeof(p.service) === 'string' ){
 
+				var provider  = services[p.service];
+
 				// Build URL
 				// These are all the parameters that will go into making the call
 				var qs = {
-					client_id 		: services[p.service].id,
+					client_id 		: provider.id,
 					redirect_uri 	: window.location.href,
 					response_type 	: "token",
-					scope			: services[p.service].scope.basic,
+					scope			: provider.scope.basic,
 					state 			: p.service,
 					display 		: display
 				};
@@ -257,19 +280,19 @@ var hello = (function(){
 						scope = scope.join(',');
 					}
 					qs.scope = (qs.scope+ ',' + scope).replace(/[^,\s]+/ig, function(m){
-						return (m in services[p.service].scope) ? services[p.service].scope[m] : m;
+						return (m in provider.scope) ? provider.scope[m] : m;
 					});
 					// remove duplication and empty spaces
-					qs.scope = _unique(qs.scope.split(/,+/)).join(',');
+					qs.scope = _unique(qs.scope.split(/,+/)).join( provider.scope_delim || ',');
 				}
 				
 				
 				// 
-				if( typeof(services[p.service].uri.auth) === 'function'){
-					url = services[p.service].uri.auth(qs);
+				if( typeof(provider.uri.auth) === 'function'){
+					url = provider.uri.auth(qs);
 				}
 				else{
-					url = services[p.service].uri.auth + '?' + _param(qs);
+					url = provider.uri.auth + '?' + _param(qs);
 				}
 
 				// Callback
@@ -346,7 +369,7 @@ var hello = (function(){
 			// get arguments
 			var p = _arguments({path:'s!', method : 's', data:'o', callback:"f"}, arguments);
 			
-			p.method = p.method || 'get';
+			p.method = (p.method || 'get').toLowerCase();
 			p.data = p.data || {};
 			
 			
@@ -378,28 +401,59 @@ var hello = (function(){
 				return;
 			}
 
+			// 
 			// Callback wrapper?
+			// Change the incoming values so that they are have generic values according to the path that is defined
 			var callback = (o.wrap && (p.path in o.wrap)) ? function(r){ log(p.path,r); p.callback(o.wrap[p.path](r)); } : p.callback;
 	
+
+			// Preprocess the parameters
+			// Change the p parameters
+			if("preprocess" in o){
+				p = o.preprocess(p);
+			}
+
+
 			// push out to all networks
+			// as long as the path isn't flagged as unavaiable, e.g. path == false
 			if( !(p.path in o.uri) || o.uri[p.path] !== false ){
+
 				var url = o.uri.base+(p.path in o.uri ? o.uri[p.path] : p.path),
 					session = this.getAuthResponse(service),
 					token = (session?session.access_token:null);
 				
-				var qs = {
-					callback : '?'
-				};
+				var qs = {};
 				
 				if(token){
 					qs.access_token = token;
 				}
 
-				if( p.method.toLowerCase() !== 'get'){
-					p.data = {data: JSON.stringify(p.data), method: p.method.toLowerCase()};
+				// 
+				// build the call
+				var request = function(){
+
+					if( p.method === 'post' ){
+
+						qs.channelUrl = window.location.href;
+
+						_post( url + ( url.indexOf('?') > -1 ? "&" : "?" ) + _param(qs)
+								, p.data
+								, callback );
+					}
+					// Make the call
+					else{
+
+						qs.callback = '?'
+
+						_jsonp( url + ( url.indexOf('?') > -1 ? "&" : "?" ) + _param(qs)
+								, p.data
+								, callback );
+					}
 				}
 
 				// has the session expired?
+				// Compare the session time, if session doesn't exist but we can feign it. Then use autologin
+				// otherwise consider the session is current, or the resource doesn't need it
 				if( ( session && "expires" in session && session.expires < ((new Date).getTime()/1e3) ) 
 					|| (!session && o.autologin) ){
 
@@ -407,22 +461,13 @@ var hello = (function(){
 	
 					// trigger refresh
 					hello.login(service, function(bool){
-						// Add
-						_jsonp( url + ( url.indexOf('?') > -1 ? "&" : "?" ) + _param(qs)
-								, p.data
-								, callback );
+						// regardless of the response, lets make the request
+						request();
+
 					}, {display:'none'});
 				}
-
-				// If we have to augment the headings, lets try that.
-				else if( 'requestHandler' in o ){
-					o.requestHandler( uri, qs, p.data, callback );
-				}
-				// Make the call
-				else {
-					_jsonp( url + ( url.indexOf('?') > -1 ? "&" : "?" ) + _param(qs)
-							, p.data
-							, callback );
+				else{
+					request();
 				}
 			}
 			else{
@@ -853,12 +898,31 @@ var hello = (function(){
 	// @param function callback, function to execute in response
 	//
 	function _post(uri, data, callback){
+
+		// Remove ?
+		uri = uri.replace(/[a-z]+=\?/,'');
+
+		// How to hide elements, without dispay:none
+		var hide = {position:'absolute',left:-1000,bottom:0,height:'1px',width:'1px'};
 	
 		// Build an iFrame and inject it into the DOM
+		var ifm = _append('iframe',{id:'_'+Math.round(Math.random()*1e9), style:hide});
 		
 		// Build an HTML form, with a target attribute as the ID of the iFrame, and inject it into the DOM.
-		
+		var frm = _append('form',{ method: 'post', action: uri, target: ifm.id, style:hide});
+
 		// insert into the HTML form all the values
+		for( var x in data ){ if(data.hasOwnProperty(x) ){
+			// Add input
+			_append('input',{ name: x, value: data[x] }, frm);
+		}}
+
+		// Append iFrame & Form to the DOM
+		document.body.appendChild(ifm);
+		document.body.appendChild(frm);
+
+		// Submit form
+		frm.submit();
 	}
 
 })();
