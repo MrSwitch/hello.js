@@ -2,6 +2,7 @@
 <html>
 <head>
 	<title>hello.js - Javascript API for OAuth2 authentication and REST services</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 	<link rel="stylesheet" href="static/style.css" />
 <script>
 //<![CDATA[
@@ -134,6 +135,7 @@
 	
 
 <style>
+
 	#profile p{
 		display:inline-block;
 		border:1px solid #ddd;
@@ -147,9 +149,6 @@
 		vertical-align:middle;
 		margin-right:20px;
 	}
-.auto-style1 {
-	color: #008000;
-}
 </style>
 	
 
@@ -162,8 +161,10 @@
 		API&#39;s like Google+, Facebook Graph and Windows Live Connect. A developer may code against this very familiar looking API and let the end user choose which provider they want to authenticate with.</p>
 	</header>
 
-	<h2>Quick Start</h2>
-	<p>Registering a domain, creating a signin button + retrieve user info.</p>
+	<header>
+		<h2>Quick Start</h2>
+		<p>Registering a domain, creating a signin button + retrieve user info.</p>
+	</header>
 	<h3>1. Register</h3>
 	<p>Register your application with atleast one of the following networks. Ensure you register the correct domain as they can be quite picky</p>
 	<ul>
@@ -219,8 +220,10 @@ hello.subscribe('auth.login', function(r){
 <button onclick="hello.login('facebook', function(){alert('You have signed into facebook')});">facebook</button>
 <button onclick="hello.login('windows', function(){alert('You have signed into windows live')});">windows</button></div>
 
+<header>
 <h2>Publishing Demo: Write it on the wall</h2>
 <p>Publishing content to a socal feed... easy!</p>
+</header>
 <script>
 $('form.demoPostWall').live('submit',function(e){
 	// Lets not leave the browser
@@ -229,7 +232,7 @@ $('form.demoPostWall').live('submit',function(e){
 	// Call our api
 	hello.api('me/feed', 'post', {
 		message : this.message.value,
-		uri : this.uri.value
+		link : this.link.value
 	}, function(r){
 		dump(r);
 	});
@@ -242,17 +245,18 @@ $('form.demoPostWall').live('submit',function(e){
 
 <form class="demoPostWall" style="white-space:pre;">{
 	message : <input type="text" name="message"/>
-	url		: <input type="url" name="url"/>
+	link	: <input type="link" name="link"/>
 }
 	<button type="submit">Post</button>
 </form>
 
-
+<header>
 <h2>Scope and Permissions</h2>
 <p>Scopes define which part of a providers service your app can access. As you 
 can gather your app could be very invasive, dont expect users to sign up if your 
 asking too much. Use the least <code>scopes</code> possible. You can always 
 request more from the user later.</p>
+</header>
 <table>
 	<thead>
 		<tr><td></td><th><code>scope</code></th><th>Facebook</th><th>Windows Live</th><th>Google</th></tr>
@@ -297,8 +301,9 @@ request more from the user later.</p>
 	</tbody>
 </table>
 
-
-<h2>Core Methods</h2>
+<header>
+	<h2>Core Methods</h2>
+</header>
 <h3>hello.init()</h3>
 <p>Initiate the environment. And add the application credentials</p> 
 <h4>hello.init( {facebook: <em>id</em>, windows: <em>id</em>, google: <em>id, 
@@ -460,8 +465,9 @@ hello.unsubscribe("auth.login",sessionstart);
 </pre>
 
 
-
+<header>
 <h2 id="REST API">REST API</h2>
+</header>
 <h3>Paths</h3>
 <p>These are some of the paths you can use with hello.api( <strong>path</strong>, <em>callback</em> ).</p>
 e.g.

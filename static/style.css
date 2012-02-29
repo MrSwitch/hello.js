@@ -1,28 +1,31 @@
-﻿html{
-    background-color: #4E5160;
+﻿* {
+	box-sizing:border-box;
 }
 
+html{
+    background-color: #4E5160;
+}
 	body{
 	    font-family: arial;
 	    margin: 0 auto;
 	    padding: 35px 50px 15px 50px;
-	    max-width: 1056px;
+	    max-width: 1156px;
 	    background-color: #FFFFFF;
 	    color: #4E5260;
-	    font-size: 0.9em;
+	    font-size: 1em;
 	}
 		header{
 		}
-			header h1{
-				font-size:8em;
-				letter-spacing:-5px;
-				margin:0;
-				line-height:1em;
-			}
 			header p{
 				font-size:1.4em;
 			}
 		
+		h1{
+			font-size:8em;
+			letter-spacing:-5px;
+			margin:0;
+			line-height:1em;
+		}
 		h2{
 			margin-top:50px;
 			font-size:3em;
@@ -76,29 +79,18 @@ i{
 	}
 	body {
 		margin:0;
-		padding:0;
-		padding-left:2%;
+		padding:4px;
 	}
-	h1,h2,h3,h4{
-		margin-left:0;
-		font-weight:bold;
+	header{
+		font-size:70%;
 	}
+
+
 	pre{
 		overflow-x:auto;
 		font-size: 90%;
 	}
 
-	/** Hide root tables, but display our button to show them, and when our button has toggle we show table 
-	body > table{
-		display:none;
-	}
-	button.displaytable{
-		display:block;
-	}
-	button.displaytable.show + table{
-		display:block;
-	}
-	/**/
 }
 
 
@@ -192,6 +184,7 @@ table{
 	border-collapse: collapse;
 	border-spacing: 0;
 	width:100%;
+	background-color:inherit;
 }
 	tr.break th{
 		background-color:#f8f8f8;
@@ -205,7 +198,7 @@ table{
 	tr.break th:last-child{
 		border-left:0;
 	}
-	
+
 	td,th{
 		border:1px solid #D2D2D2;
 		padding:4px 10px 4px 6px;
