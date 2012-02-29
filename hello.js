@@ -6,7 +6,7 @@
  * So its either one service or the other, or add a ton of libraries and logic to your scripts.
  * 
  * You could use a proprietary service like Gigya or Jan Rain to circumnavigate the problem. But i think you'll like hello.js
- * It works with FaceBook, Windows and Google+ and is totally FREE to use and hack!
+ * It works with FaceBook, Windows and Google+ and is FREE to use and hack!
  *
  * @author Andrew Dodson
  * @company Knarly
@@ -70,7 +70,7 @@ var hello = (function(){
 			uri : {
 				// REF: http://msdn.microsoft.com/en-us/library/hh243641.aspx
 				auth : 'https://oauth.live.com/authorize',
-				base : 'https://apis.live.net/v5.0/',
+				base : 'https://apis.live.net/v5.0/'
 			},
 			scope : {
 				basic			: 'wl.signin,wl.basic',
@@ -178,7 +178,6 @@ var hello = (function(){
 		}
 	};
 
-
 	var hello = {
 		//
 		// Service
@@ -198,9 +197,17 @@ var hello = (function(){
 		// @param object o, contains a key value pair, service => clientId
 		//
 		init : function(o){
+
+			// Define provider credentials
+			// Reformat the ID field
 			for( var x in o ){if(o.hasOwnProperty(x)){
-				services[x].id = o[x];
+				if( typeof(o[x]) !== 'object' ){
+					o[x] = {id : o[x]};
+				}
 			}}
+
+			// merge objects
+			services = _merge(services, o);
 
 			// Monitor for a change in state and fire
 			var _diff = {};
@@ -238,15 +245,14 @@ var hello = (function(){
 		//
 		// Login
 		// Using the endpoint defined by services[x].auth we prompt the login
-		// @param service 	string 					name to connect to
-		// @param callback 	function 	(optional)	fired on signin
-		// @param options 	object 		(optional)	{display mode, is either none|popup(default)|page, scope: email,birthday,publish, .. }
+		// @param service	stringify				name to connect to
+		// @param Callback	function	(optional)	fired on signin
+		// @param options	object		(optional)	{display mode, is either none|popup(default)|page, scope: email,birthday,publish, .. }
 		//
 		login :  function(service, callback, options){
 
-			var url;
-
-			var p = _arguments({service:'s!', callback : 'f', options:'o'}, arguments);
+			var url,
+				p = _arguments({service:'s!', callback : 'f', options:'o'}, arguments);
 			
 			// Format
 			if(!p.options){
@@ -262,17 +268,17 @@ var hello = (function(){
 				var provider  = services[p.service];
 
 				// Build URL
-				// These are all the parameters that will go into making the call
+				// querystring parameters
 				var qs = {
-					client_id 		: provider.id,
-					redirect_uri 	: window.location.href,
-					response_type 	: "token",
+					client_id		: provider.id,
+					redirect_uri	: window.location.href,
+					response_type	: "token",
 					scope			: provider.scope.basic,
-					state 			: p.service,
-					display 		: display
+					state			: p.service,
+					display			: display
 				};
 
-				//
+				// Additional
 				// Scopes
 				var scope = p.options.scope;
 				if(scope){
@@ -287,7 +293,7 @@ var hello = (function(){
 				}
 				
 				
-				// 
+				// Does the provider have their own algorithm?
 				if( typeof(provider.uri.auth) === 'function'){
 					url = provider.uri.auth(qs);
 				}
@@ -340,16 +346,20 @@ var hello = (function(){
 		logout : function(s, callback){
 			if(s && _store(s)){
 				_store(s,'');
-				(callback ? callback() : null);
+				if(callback){
+					callback();
+				}
 			}
- 			else if(!s){
+			else if(!s){
 				for(var x in services){if(services.hasOwnProperty(x)){
 					hello.logout(x);
 				}}
 				// remove the default
 				hello.service(false);
 				// trigger callback
-				(callback ? callback() : null);
+				if(callback){
+					callback();
+				}
 			}
 			else{
 				log( s + ' had no session' );
@@ -361,19 +371,19 @@ var hello = (function(){
 		// API
 		// @param path		string
 		// @param method	string (optional)
-		// @param data 		object (optional)
+		// @param data		object (optional)
 		// @param callback	function (optional)
 		//
 		api : function(){
 		
 			// get arguments
-			var p = _arguments({path:'s!', method : 's', data:'o', callback:"f"}, arguments);
+			var p = _arguments({path:'s!', method : /get|post|put|delete/, data:'o', callback:"f"}, arguments);
 			
 			p.method = (p.method || 'get').toLowerCase();
 			p.data = p.data || {};
 			
 			
-			p.path = p.path.replace(/^\//,'');
+			p.path = p.path.replace(/^\/+/,'');
 			var a = (p.path.split("/",2)||[])[0].toLowerCase();
 	
 			var service;
@@ -432,29 +442,29 @@ var hello = (function(){
 				// build the call
 				var request = function(){
 
+					// Update the resource_uri
+					url += ( url.indexOf('?') > -1 ? "&" : "?" );
+
+					// Is this a post?
 					if( p.method === 'post' ){
 
 						qs.channelUrl = window.location.href;
 
-						_post( url + ( url.indexOf('?') > -1 ? "&" : "?" ) + _param(qs)
-								, p.data
-								, callback );
+						_post( url + _param(qs), p.data, callback );
 					}
 					// Make the call
 					else{
 
-						qs.callback = '?'
+						qs.callback = '?';
 
-						_jsonp( url + ( url.indexOf('?') > -1 ? "&" : "?" ) + _param(qs)
-								, p.data
-								, callback );
+						_jsonp( url + _param(qs), p.data, callback );
 					}
-				}
+				};
 
 				// has the session expired?
 				// Compare the session time, if session doesn't exist but we can feign it. Then use autologin
 				// otherwise consider the session is current, or the resource doesn't need it
-				if( ( session && "expires" in session && session.expires < ((new Date).getTime()/1e3) ) 
+				if( ( session && "expires" in session && session.expires < ((new Date()).getTime()/1e3) ) 
 					|| (!session && o.autologin) ){
 
 					log("Callback");
@@ -490,8 +500,8 @@ var hello = (function(){
 
 		//
 		// Subscribe to events
-		// @param evt 		string
-		// @param callback 	function
+		// @param evt		string
+		// @param callback	function
 		//
 		subscribe : function(evt, callback){
 
@@ -509,8 +519,8 @@ var hello = (function(){
 
 		//
 		// Unsubscribe to events
-		// @param evt 		string
-		// @param callback 	function
+		// @param evt		string
+		// @param callback	function
 		//
 		unsubscribe : function(evt, callback){
 	
@@ -576,7 +586,7 @@ var hello = (function(){
 		_store( p.state, {
 			access_token : p.access_token, 
 			expires_in : parseInt(p.expires_in,10), 
-			expires : ((new Date).getTime()/1e3) + parseInt(p.expires_in,10)
+			expires : ((new Date()).getTime()/1e3) + parseInt(p.expires_in,10)
 		});
 
 		// Service
@@ -737,10 +747,35 @@ var hello = (function(){
 		}
 		return r;
 	}
-	
+
+	//
+	// merge
+	// recursive merge two objects into one, second parameter overides the first
+	// @param a array
+	//
+	function _merge(a,b){
+		var x;
+		if( typeof(a) === 'object' && typeof(b) === 'object' ){
+			for(x in a){if(a.hasOwnProperty(x)){
+				if(x in b){
+					a[x] = _merge( a[x], b[x]);
+				}
+			}}
+			for(x in b){if(b.hasOwnProperty(x)){
+				if(!(x in a)){
+					a[x] = b[x];
+				}
+			}}
+		}
+		else{
+			a = b;
+		}
+		return a;
+	}
 
 	//
 	// Args utility
+	// Makes it easier to assign parameters, where some are optional
 	// @param o object
 	// @param a arguments
 	//
@@ -792,9 +827,9 @@ var hello = (function(){
 			else{
 				for(var x in attr){if(attr.hasOwnProperty(x)){
 					if(typeof(attr[x])==='object'){
-						for(var y in attr[x]){
+						for(var y in attr[x]){if(attr[x].hasOwnProperty(y)){
 							n[x][y] = attr[x][y];
-						}
+						}}
 					}
 					else{
 						n[x] = attr[x];
@@ -899,17 +934,14 @@ var hello = (function(){
 	//
 	function _post(uri, data, callback){
 
-		// Remove ?
-		uri = uri.replace(/[a-z]+=\?/,'');
-
 		// How to hide elements, without dispay:none
-		var hide = {position:'absolute',left:-1000,bottom:0,height:'1px',width:'1px'};
+		var shy = {position:'absolute',left:-1000,bottom:0,height:'1px',width:'1px'};
 	
 		// Build an iFrame and inject it into the DOM
-		var ifm = _append('iframe',{id:'_'+Math.round(Math.random()*1e9), style:hide});
+		var ifm = _append('iframe',{id:'_'+Math.round(Math.random()*1e9), style:shy});
 		
 		// Build an HTML form, with a target attribute as the ID of the iFrame, and inject it into the DOM.
-		var frm = _append('form',{ method: 'post', action: uri, target: ifm.id, style:hide});
+		var frm = _append('form',{ method: 'post', action: uri, target: ifm.id, style:shy});
 
 		// insert into the HTML form all the values
 		for( var x in data ){ if(data.hasOwnProperty(x) ){
