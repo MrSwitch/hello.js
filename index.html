@@ -132,6 +132,15 @@
 	}
 
 </script>
+
+<script>
+	function scopes(frm){
+		return $.map($(frm).serializeArray(),function(n,i){
+			return n.value;
+		}).join(',');
+	}
+</script>
+
 	
 
 <style>
@@ -256,56 +265,6 @@ $('body').on('submit','form.demoPostWall', function(e){
 </form>
 
 
-<header>
-<h2>Scope and Permissions</h2>
-<p>Scopes define which part of a providers service your app can access. As you 
-can gather your app could be very invasive, dont expect users to sign up if your 
-asking too much. Use the least <code>scopes</code> possible. You can always 
-request more from the user later.</p>
-</header>
-<table>
-	<thead>
-		<tr><td></td><th><code>scope</code></th><th>Facebook</th><th>Windows Live</th><th>Google</th></tr>
-	</thead>
-	<tbody>
-		<tr class="break">
-			<th rowspan="6">View</th>
-			<th colspan="4"></th>
-		</tr>
-		<tr>
-			<th><em>default</em></th><td>&nbsp;</td><td>wl.signin, wl.basic</td><td>https://www.googleapis.com/auth/plus.me</td>
-		</tr>
-		<tr>
-			<th><q>email</q></th><td>email</td><td>wl.emails</td><td></td>
-		</tr>
-		<tr>
-			<th><q>birthday</q></th><td>user_birthday</td><td>wl.birthday</td><td></td>
-		</tr>
-		<tr>
-			<th><q>events</q></th><td>user_events</td><td>wl.events,wl.calenders</td><td></td>
-		</tr>
-		<tr>
-			<th><q>photos</q>, <q>videos</q></th><td>user_photos,user_videos</td><td>wl.photos</td><td></td>
-		</tr>
-		<tr class="break">
-			<th rowspan="3">Edit</th>
-			<th colspan="4"></th>
-		</tr>
-		<tr>
-			<th><q>publish</q></th><td>publish_streams</td><td>wl.share</td><td></td>
-		</tr>
-		<tr>
-			<th><q>create_event</q></th><td>create_event</td><td>wl.calendars_update,wl.events_create</td><td></td>
-		</tr>
-		<tr class="break">
-			<th rowspan="2">Misc</th>
-			<th colspan="4"></th>
-		</tr>
-		<tr>
-			<th><q>offline_access</q></th><td>offline_access</td><td>wl.offline_access</td><td></td>
-		</tr>
-	</tbody>
-</table>
 
 <header>
 	<h2>Core Methods</h2>
@@ -339,21 +298,33 @@ hello.init({
 
 <h3>hello.login()</h3>
 <p>If a network string is provided: A consent window to authenticate with that network will be initiated. Else if no network is provided a prompt to select one of the networks will open. A callback will be executed if the user authenticates and or cancels the authentication flow.</p>
-<h4>hello.login( [network] [, callback() ] )</h4>
+<h4>hello.login( [network] [, callback() ][,options] )</h4>
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
 		argument</th><th>default</th></tr>
 	<tr><td>network</td><td><q>string</q></td><td><q>windows</q>, <q>facebook</q></td><td>One of our services.</td><td>
-		<em>optional</em></td><td>
+		<em>required</em></td><td>
 		<em>null</em></td></tr>
 	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert(&quot;Logged 
 		in!&quot;);}</code></td><td>
 		A callback when the users session has been initiated</td><td>
 		<em>optional</em></td><td>
 		<em>null</em></td></tr>
-	<tr><td>display</td><td><q>string</q></td><td><q>popup</q>, <q>page</q> or <q>none</q></td><td>Defines how the signin flow works, "none" is used to refresh the access_token in the background</td><td>
-		<em>optional</em></td><td>
-		<q>popup</q></td></tr>
+	<tr><td>options</td><td colspan="5">
+		<i>object</i>
+		<table>
+			<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
+				argument</th><th>default</th></tr>
+			<tr><td>display</td><td><q>string</q></td><td><q>popup</q>, <q>page</q> or <q>none</q></td><td>
+				How the signin flow should work, "none" is used to refresh the access_token in the background</td><td>
+				<em>optional</em></td><td>
+				<q>popup</q></td></tr>
+			<tr><td>scope</td><td><q>string</q></td><td><q>email</q>, <q>publish</q> or <q>photos</q></td><td>
+				Comma separated list of scopes</td><td>
+				<em>optional</em></td><td>
+				<em>null</em></td></tr>
+		</table>
+	</td></tr>
 </table>
 <h4>Examples:</h4>
 <pre class="tryitoffline">
@@ -472,6 +443,75 @@ hello.unsubscribe("auth.login",sessionstart);
 
 
 <header>
+
+<header>
+<h2>Scope and Permissions</h2>
+<p>Scopes define what services your asking the user to 
+grant your app permission to. As you 
+can gather these can be quite intrusive so only ask permission for scopes which 
+are obvious to your app. You may always 
+request more from the user later.</p>
+</header>
+<table>
+	<thead>
+		<tr><td></td><th><code>scope</code></th><th>Facebook</th><th>Windows Live</th><th>Google</th></tr>
+	</thead>
+	<tbody>
+		<tr class="break">
+			<th rowspan="6">View</th>
+			<th colspan="4"></th>
+		</tr>
+		<tr>
+			<th><em>default</em></th><td>&nbsp;</td><td>wl.signin, wl.basic</td><td>https://www.googleapis.com/auth/plus.me</td>
+		</tr>
+		<tr>
+			<th><q>email</q></th><td>email</td><td>wl.emails</td><td></td>
+		</tr>
+		<tr>
+			<th><q>birthday</q></th><td>user_birthday</td><td>wl.birthday</td><td></td>
+		</tr>
+		<tr>
+			<th><q>events</q></th><td>user_events</td><td>wl.events,wl.calenders</td><td></td>
+		</tr>
+		<tr>
+			<th><q>photos</q>, <q>videos</q></th><td>user_photos,user_videos</td><td>wl.photos</td><td></td>
+		</tr>
+		<tr class="break">
+			<th rowspan="3">Edit</th>
+			<th colspan="4"></th>
+		</tr>
+		<tr>
+			<th><q>publish</q></th><td>publish_streams</td><td>wl.share</td><td></td>
+		</tr>
+		<tr>
+			<th><q>create_event</q></th><td>create_event</td><td>wl.calendars_update,wl.events_create</td><td></td>
+		</tr>
+		<tr class="break">
+			<th rowspan="2">Misc</th>
+			<th colspan="4"></th>
+		</tr>
+		<tr>
+			<th><q>offline_access</q></th><td>offline_access</td><td>wl.offline_access</td><td></td>
+		</tr>
+	</tbody>
+</table>
+
+
+<form class="setscopes" onsubmit="return false;" style="display:inline-block;">
+	<label>bithday</label><input type="checkbox" name="scopes" value="birthday"/>,
+	<label>email</label><input type="checkbox" name="scopes" value="email"/>,
+	<label>photos</label><input type="checkbox" name="scopes" value="photos"/>,
+	<label>videos</label><input type="checkbox" name="scopes" value="videos"/>,
+	<label>publish</label><input type="checkbox" name="scopes" value="publish"/>,
+	<label>events</label><input type="checkbox" name="scopes" value="events"/>,
+	<label>create_event</label><input type="checkbox" name="scopes" value="create_event"/>,
+	<label>offline_access</label><input type="checkbox" name="scopes" value="offline_access"/>
+</form>
+	<button onclick="hello.login('google', function(){alert('You have signed into google')},{scope:scopes('form.setscopes')} );">google</button>
+	<button onclick="hello.login('facebook', function(){alert('You have signed into facebook')},{scope:scopes('form.setscopes')});">facebook</button>
+	<button onclick="hello.login('windows', function(){alert('You have signed into windows live')},{scope:scopes('form.setscopes')});">windows</button>
+
+
 <h2 id="REST API">REST API</h2>
 </header>
 <h3>Paths</h3>
@@ -498,6 +538,9 @@ e.g.
 		<pre></pre>
 	</article>
 </form>
+
+
+
 
 	<h3>Error handling</h3>
 <p>For hello.api([path], [<em>callback</em>]) the first parameter of <em>callback</em> 
