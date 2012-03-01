@@ -12,7 +12,6 @@
  * @company Knarly
  */
 
-
 var hello = (function(){
 
 	"use strict";
