@@ -225,3 +225,50 @@ table{
 		text-align:center;
 	}
 
+
+
+/* TOC */
+	nav.toc{
+		position:fixed;
+		top:0;
+		color:rgba(0,0,0,0.5);
+		margin-left:-250px;
+		width:200px;
+		text-align:right;
+		font-weight:bold;
+		z-index:-1;
+		font-size:100%;
+
+	}
+	nav.toc ul{
+		margin:0;
+		padding:0;
+	}
+	nav.toc li{
+		font-size:100%;
+		list-style:none;
+		padding:4px;
+	}
+	nav.toc li li a{
+		font-size:90%;
+	}
+	nav.toc li li li a{
+		font-size:80%;
+		font-weight:normal;
+	}
+	nav.toc a{
+		color:inherit;
+		text-decoration: none;
+		display: block;
+		overflow: hidden;
+		text-overflow:ellipsis;
+	}
+	nav.toc a:hover{
+		color:rgba(0,0,0,0.6);
+	}
+@media all and (max-width: 1400px) {
+	nav.toc{
+		position:static;
+		margin-left:0;
+	}
+}

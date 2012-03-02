@@ -89,6 +89,35 @@
 				});
 			});
 		});
+
+
+		//
+		// Create TOC
+		var last_depth = 0
+			$nav = $('nav.toc');
+
+		$('h1,h2,h3').each(function(){
+			// Create an 
+			var depth = parseInt(this.tagName.match(/[0-9]/)[0], 10);
+
+			var $li = $('<li><a href="#'+ $(this).text().replace(/\W/ig,'') +'">'+ $(this).text() +'</a></li>');
+
+			if(last_depth < depth){
+				$('<ul></ul>').appendTo($nav).append($li);
+			}
+			else if (last_depth > depth){
+				$nav.parent().parent().after($li);
+			}
+			else{
+				$nav.after($li);
+			}
+			$nav = $li;
+
+			// Add anchor
+			$(this).prepend('<a name="' + $(this).text().replace(/\W/ig, '') + '"></a>' );
+
+			last_depth = depth;
+		});
 	});
 
 
@@ -140,7 +169,6 @@
 		}).join(',');
 	}
 </script>
-
 	
 
 <style>
@@ -167,8 +195,8 @@
 		<h1>hello.js</h1>
 		<p>A Javascript API for <a href="http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf" target="_blank">OAuth2</a> authentication and REST inspection of third party 
 		API&#39;s like Google+, Facebook Graph and Windows Live Connect. A developer may code against this very familiar looking API and let the end user choose which provider they want to authenticate with.</p>
+		<nav class="toc"></nav>
 	</header>
-
 	<header>
 		<h2>Quick Start</h2>
 		<p>Registering a domain, creating a signin button + retrieve user info.</p>
