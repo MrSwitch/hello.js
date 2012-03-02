@@ -96,11 +96,12 @@
 		var last_depth = 0
 			$nav = $('nav.toc');
 
-		$('h1,h2,h3').each(function(){
+		var $headings = $('h1,h2,h3').each(function(){
 			// Create an 
-			var depth = parseInt(this.tagName.match(/[0-9]/)[0], 10);
+			var depth = parseInt(this.tagName.match(/[0-9]/)[0], 10),
+				ref = $(this).text().replace(/\W/ig,'');
 
-			var $li = $('<li><a href="#'+ $(this).text().replace(/\W/ig,'') +'">'+ $(this).text() +'</a></li>');
+			var $li = $('<li><a href="#'+ ref +'">'+ $(this).text() +'</a></li>').attr('data-ref', ref);
 
 			if(last_depth < depth){
 				$('<ul></ul>').appendTo($nav).append($li);
@@ -114,9 +115,31 @@
 			$nav = $li;
 
 			// Add anchor
-			$(this).prepend('<a name="' + $(this).text().replace(/\W/ig, '') + '"></a>' );
+			$(this).prepend('<a name="' + ref + '"></a>' );
 
 			last_depth = depth;
+		});
+
+		$(window).scroll(function(){
+			// from the list of items
+			// find the one which is in view on the page
+			var T = window.scrollY || window.pageYOffset,
+				H = ("screen" in window ? window.screen.availHeight : 500);
+
+			var b = false;
+			$headings.each(function(){
+				if(b){
+					return;
+				}
+				var t = $(this).position().top + 100,
+					h = $(this).height() + 50;
+
+				if( T < t && T+H > t ){
+					$('nav.toc li').removeClass('active');
+					$('nav.toc li').filter('[data-ref="'+ $(this).text().replace(/\W/ig, '') +'"]').addClass('active');
+					b=true;
+				}
+			});
 		});
 	});
 

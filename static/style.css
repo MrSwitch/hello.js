@@ -232,7 +232,7 @@ table{
 		position:fixed;
 		top:0;
 		color:rgba(0,0,0,0.5);
-		margin-left:-250px;
+		margin-left:-260px;
 		width:200px;
 		text-align:right;
 		font-weight:bold;
@@ -247,8 +247,21 @@ table{
 	nav.toc li{
 		font-size:100%;
 		list-style:none;
-		padding:4px;
+		padding:4px 0;
+		position:relative;
 	}
+	nav.toc li.active:after{
+		content:" ";
+		position:absolute;
+		display:inline-block;
+		right:-10px;
+		top:0;
+		border:10px solid transparent;
+		border-left-width:0;
+		border-right-color:rgba(255,255,255,0.5);
+		border-right-width:5px;
+	}
+
 	nav.toc li li a{
 		font-size:90%;
 	}
