@@ -231,7 +231,7 @@ table{
 	nav.toc{
 		position:fixed;
 		top:0;
-		color:rgba(0,0,0,0.5);
+		color:white;
 		margin-left:-260px;
 		width:200px;
 		text-align:right;
@@ -258,7 +258,7 @@ table{
 		top:0;
 		border:10px solid transparent;
 		border-left-width:0;
-		border-right-color:rgba(255,255,255,0.5);
+		border-right-color:white;
 		border-right-width:5px;
 	}
 
@@ -268,6 +268,7 @@ table{
 	nav.toc li li li a{
 		font-size:80%;
 		font-weight:normal;
+		color:rgba(255,255,255,0.8);
 	}
 	nav.toc a{
 		color:inherit;
@@ -277,11 +278,17 @@ table{
 		text-overflow:ellipsis;
 	}
 	nav.toc a:hover{
-		color:rgba(0,0,0,0.6);
+		color:white;
+		color:rgba(255,255,255,0.9);
 	}
 @media all and (max-width: 1400px) {
 	nav.toc{
 		position:static;
 		margin-left:0;
+		color:inherit;
+		text-align:left;
+	}
+	nav.toc li li li a{
+		color:inherit;
 	}
 }

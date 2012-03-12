@@ -22,6 +22,9 @@ var hello = (function(){
 	// Events
 	var listeners = {};
 
+	// Shy elements, without dispay:none
+	var shy = {position:'absolute',left:"-1000px",bottom:0,height:'1px',width:'1px'};
+
 
 	//
 	// Services
@@ -153,7 +156,7 @@ var hello = (function(){
 			uri : {
 				// REF: 
 				auth : function(qs){
-					var url = '/knarly.net/oauth';
+					var url = 'http://oauth.knarly.com/';
 
 					// if the user is signed into another service. Lets attach the credentials to that and hopefully get the user signed in.
 					var service = hello.service(),
@@ -166,7 +169,7 @@ var hello = (function(){
 					return url + '?' + _param(qs);
 				},
 
-				base : '/knarly.net/api/'
+				base : 'http://api.knarly.com/'
 			},
 			scope : {
 				basic : ''
@@ -312,7 +315,7 @@ var hello = (function(){
 				// Calling Quietly?
 				if( display === 'none' ){
 					// signin in the background, iframe
-					_append('iframe', { src : url, style : {height:0,width:0,position:'absolute',top:0,left:0}  }, document.body);
+					_append('iframe', { src : url, style : shy  }, document.body);
 				}
 
 				// Triggering popup?
@@ -588,7 +591,7 @@ var hello = (function(){
 			expires : ((new Date()).getTime()/1e3) + parseInt(p.expires_in,10)
 		});
 
-		// Service
+		// Make this the default users service
 		hello.service( p.state );
 
 		// this is a popup so
@@ -598,6 +601,30 @@ var hello = (function(){
 		log('Trying to close window');
 
 		// Dont execute any more
+		return;
+	}
+
+	//error=?
+	//&error_description=?
+	//&state=?
+	else if( p 
+			&& ("error" in p)
+			&& ("state" in p)
+			&& p.state in services){
+
+		_store( 'error', {
+			error : p.error, 
+			error_message : p.error_message, 
+			state : p.state
+		});
+
+		// possible reasons are invalid_scope, user cancelled the authentication.
+		// we're just going to close the page for now, 
+		// @todo should this fire an event?
+		window.close();
+
+		log('Trying to close window');
+
 		return;
 	}
 
@@ -933,9 +960,6 @@ var hello = (function(){
 	//
 	function _post(uri, data, callback){
 
-		// How to hide elements, without dispay:none
-		var shy = {position:'absolute',left:-1000,bottom:0,height:'1px',width:'1px'};
-	
 		// Build an iFrame and inject it into the DOM
 		var ifm = _append('iframe',{id:'_'+Math.round(Math.random()*1e9), style:shy});
 		

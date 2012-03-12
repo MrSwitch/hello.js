@@ -41,15 +41,28 @@
 
 	// on ready
 	$(function(){
-		$('body script, .demo').each(function(){
+		$('body script:not(.ignore), .demo').each(function(){
 			var html;
+
+			// get outerHTML
 			if(this.tagName === 'SCRIPT'){
-				html=$(this).prop('outerHTML');
+				html = $(this).prop('outerHTML') || (function(n){
+						var div = document.createElement('div'), h;
+						div.appendChild( n.cloneNode(true) );
+						h = div.innerHTML;
+						div = null;
+						return h;
+					})(this);
 			}
-			else {
+			if (!html) {
 				html = $(this).html();
 			}
+
+			// remove any unwanted sections
+			html = html.replace(/<<<[\s\S]+>>>/, '').replace(/\/(\*)*\//, '');
+
 			$('<pre></pre>').insertBefore(this).text(html);
+
 		});
 		$('pre[class^=tryit]').each(function(){
 			var pre = this;
@@ -241,6 +254,7 @@
 
 <script src="hello.js"></script>
 
+
 	<p>Lets define a simple function, which will load a user profile into the page after they signin and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.</p>
 
 <script>
@@ -269,6 +283,21 @@ hello.subscribe('auth.login', function(r){
 		facebook : FACEBOOK_CLIENT_ID,
 		windows  : WINDOWS_CLIENT_ID,
 		google   : GOOGLE_CLIENT_ID
+		/**<<< HIDE FROM BEING DISPLAYED IN PAGE*/
+		,knarly   : (local ? {uri: { auth: function(qs){
+					var url = 'knarly.net/oauth';
+
+					// if the user is signed into another service. Lets attach the credentials to that and hopefully get the user signed in.
+					var service = hello.service(),
+						session = hello.getAuthResponse( service );
+
+					if( session && "access_token" in session ){
+						qs.access_token = session.access_token;
+						qs.provider = service;
+					}
+					return url + '?' + hello._param(qs);
+				}, base : '/knarly.net/api/' }} : {})
+		//>>>*/
 	});
 </script>
 	
