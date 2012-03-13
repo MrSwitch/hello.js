@@ -27,6 +27,16 @@ var hello = (function(){
 
 
 	//
+	// Options
+	// #fragment not allowed
+	//
+	var options = {
+		redirect_uri  : window.location.href.split('#')[0],
+		response_type : 'token',
+		display       : 'popup'
+	};
+
+	//
 	// Services
 	//
 	var services = {
@@ -197,8 +207,9 @@ var hello = (function(){
 		// init
 		// Define the clientId's for the endpoint services
 		// @param object o, contains a key value pair, service => clientId
+		// @param object opts, contains a key value pair of options used for defining the authentication defaults
 		//
-		init : function(o){
+		init : function(o,opts){
 
 			// Define provider credentials
 			// Reformat the ID field
@@ -210,6 +221,11 @@ var hello = (function(){
 
 			// merge objects
 			services = _merge(services, o);
+
+			// options
+			if(typeof(opts) !== 'undefined'){
+				options = _merge(options, opts);
+			}
 
 			// Monitor for a change in state and fire
 			var _diff = {};
@@ -251,20 +267,16 @@ var hello = (function(){
 		// @param Callback	function	(optional)	fired on signin
 		// @param options	object		(optional)	{display mode, is either none|popup(default)|page, scope: email,birthday,publish, .. }
 		//
-		login :  function(service, callback, options){
+		login :  function(service, callback, opts){
 
 			var url,
 				p = _arguments({service:'s!', callback : 'f', options:'o'}, arguments);
 			
-			// Format
-			if(!p.options){
-				p.options = {};
-			}
 
-			// display method
-			var display = p.options.display || 'popup';
+			// merge/override options with app defaults
+			p.options = _merge(options, p.options || {} );
 
-			// 
+			// Is our service valid?
 			if( typeof(p.service) === 'string' ){
 
 				var provider  = services[p.service];
@@ -273,11 +285,11 @@ var hello = (function(){
 				// querystring parameters
 				var qs = {
 					client_id		: provider.id,
-					redirect_uri	: window.location.href,
-					response_type	: "token",
+					redirect_uri	: p.options.redirect_uri,
+					response_type	: p.options.response_type,
 					scope			: provider.scope.basic,
-					state			: p.service,
-					display			: display
+					state			: p.service + (p.options.display==='page' ? '.page' : ''),
+					display			: p.options.display
 				};
 
 				// Additional
@@ -313,13 +325,13 @@ var hello = (function(){
 
 				// Trigger how we want this displayed
 				// Calling Quietly?
-				if( display === 'none' ){
+				if( p.options.display === 'none' ){
 					// signin in the background, iframe
 					_append('iframe', { src : url, style : shy  }, document.body);
 				}
 
 				// Triggering popup?
-				else if( display === 'popup'){
+				else if( p.options.display === 'popup'){
 					// Trigger callback
 					window.open( 
 						url,
@@ -574,58 +586,71 @@ var hello = (function(){
 	//	
 	var p = _param(window.location.hash);
 
-	if( p 
-		&& ("access_token" in p)
-		&& ("state" in p)
-		&& p.state in services){
+	// if p.state
+	if( p && "state" in p ){
 
-		if(parseInt(p.expires_in,10) === 0){
-			// Facebook, tut tut tut,
-			p.expires_in = (3600 * 24 * 7 * 52);
+		// remove any addition information
+		// e.g. p.state = 'facebook.page';
+		var a = p.state.split('.');
+		p.state = a[0];
+		if(a.length>0){
+			p.display = a[1];
 		}
 
-		// Lets use the "state" to assign it to one of our networks
-		_store( p.state, {
-			access_token : p.access_token, 
-			expires_in : parseInt(p.expires_in,10), 
-			expires : ((new Date()).getTime()/1e3) + parseInt(p.expires_in,10)
-		});
-
-		// Make this the default users service
-		hello.service( p.state );
-
-		// this is a popup so
-		window.close();
-		
-		
-		log('Trying to close window');
-
-		// Dont execute any more
-		return;
-	}
-
-	//error=?
-	//&error_description=?
-	//&state=?
-	else if( p 
-			&& ("error" in p)
-			&& ("state" in p)
+		// access_token?
+		if( ("access_token" in p)
 			&& p.state in services){
 
-		_store( 'error', {
-			error : p.error, 
-			error_message : p.error_message, 
-			state : p.state
-		});
+			if(parseInt(p.expires_in,10) === 0){
+				// Facebook, tut tut tut,
+				p.expires_in = (3600 * 24 * 7 * 52);
+			}
 
-		// possible reasons are invalid_scope, user cancelled the authentication.
-		// we're just going to close the page for now, 
-		// @todo should this fire an event?
-		window.close();
+			// Lets use the "state" to assign it to one of our networks
+			_store( p.state, {
+				access_token : p.access_token, 
+				expires_in : parseInt(p.expires_in,10), 
+				expires : ((new Date()).getTime()/1e3) + parseInt(p.expires_in,10)
+			});
 
-		log('Trying to close window');
+			// Make this the default users service
+			hello.service( p.state );
 
-		return;
+			// this is a popup so
+			if(!("display" in p) || p.display !== 'page'){
+				window.close();
+				log('Trying to close window');
+
+				// Dont execute any more
+				return;
+			}
+		}
+
+		//error=?
+		//&error_description=?
+		//&state=?
+		else if( ("error" in p)
+				&& p.state in services){
+
+			_store( 'error', {
+				error : p.error, 
+				error_message : p.error_message, 
+				state : p.state
+			});
+
+			// possible reasons are invalid_scope, user cancelled the authentication.
+			// we're just going to close the page for now, 
+			// @todo should this fire an event?
+			// this is a popup so
+
+			if(!("display" in p) || p.display !== 'page'){
+				window.close();
+				log('Trying to close window');
+
+				// Dont execute any more
+				return;
+			}
+		}
 	}
 
 
@@ -780,23 +805,24 @@ var hello = (function(){
 	// @param a array
 	//
 	function _merge(a,b){
-		var x;
+		var x,r = {};
 		if( typeof(a) === 'object' && typeof(b) === 'object' ){
 			for(x in a){if(a.hasOwnProperty(x)){
+				r[x] = a[x];
 				if(x in b){
-					a[x] = _merge( a[x], b[x]);
+					r[x] = _merge( a[x], b[x]);
 				}
 			}}
 			for(x in b){if(b.hasOwnProperty(x)){
 				if(!(x in a)){
-					a[x] = b[x];
+					r[x] = b[x];
 				}
 			}}
 		}
 		else{
-			a = b;
+			r = b;
 		}
-		return a;
+		return r;
 	}
 
 	//

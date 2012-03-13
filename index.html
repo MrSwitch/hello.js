@@ -59,7 +59,7 @@
 			}
 
 			// remove any unwanted sections
-			html = html.replace(/<<<[\s\S]+>>>/, '').replace(/\/(\*)*\//, '');
+			html = html.replace(/<<<[\s\S]+>>>/, '').replace(/\/\*+\//, '');
 
 			$('<pre></pre>').insertBefore(this).text(html);
 
@@ -367,6 +367,9 @@ $('body').on('submit','form.demoPostWall', function(e){
 		<em>required</em></td><td>n/a</td></tr>
 </table>
 		</td></tr>
+	<tr><td>options</td><td>
+	set's default <i>options</i>, as in hello.login()</i>
+		</td></tr>
 	</table>
 <h4>Example:</h4>
 <pre>
@@ -403,6 +406,14 @@ hello.init({
 				Comma separated list of scopes</td><td>
 				<em>optional</em></td><td>
 				<em>null</em></td></tr>
+			<tr><td>redirect_uri</td><td><q>string</q></td><td><q>http://domain.com/hello.html</q></td><td>
+				A full URI of a page which includes this script file hello.js</td><td>
+				<em>optional</em></td><td>
+				<em>window.location.href</em></td></tr>
+			<tr><td>response_type</td><td><q>string</q></td><td><q>token</q>, <q>code</q></td><td>
+				Mechanism for authentication</td><td>
+				<em>optional</em></td><td>
+				<q>token</q></td></tr>
 		</table>
 	</td></tr>
 </table>
