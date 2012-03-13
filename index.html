@@ -6,34 +6,31 @@
 	<link rel="stylesheet" href="static/style.css" />
 <script>
 //<![CDATA[
-	var local = ( /local/.test(window.location.host) ? 0 : 1);
+	var local = ( /local/.test(window.location.host) ? 1 : 0);
 	function loadScript(a){
 		for(var i=0;i<a.length;i++){
 			document.write('<script src="'+a[i]+'"><\/script>');
 		}
 	}
-	loadScript([['/_packages/jquery.js','http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'][local]]);
+	loadScript([['http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js','/_packages/jquery.js'][local]]);
 //]]>
 </script>
 
 <script>
 	// Var
 	var FACEBOOK_CLIENT_ID = [
-		'285836944766385',
-		'304672569582045'
+		'304672569582045',
+		'285836944766385'
 	][local];
 
 	// Var
 	var WINDOWS_CLIENT_ID = [
-		'000000004405FD31',
-		'0000000044088105'
+		'0000000044088105',
+		'000000004405FD31'
 	][local];
 
 	// 
-	var GOOGLE_CLIENT_ID = [
-		'656984324806-buu8gehpe46bspg4o49mc57i1bdkquce.apps.googleusercontent.com',
-		'656984324806-sr0q9vq78tlna4hvhlmcgp2bs2ut8uj8.apps.googleusercontent.com'
-	][local];
+	var GOOGLE_CLIENT_ID = '656984324806-sr0q9vq78tlna4hvhlmcgp2bs2ut8uj8.apps.googleusercontent.com';
 
 	// Load the demo object 
 	// this page has lots of demo's
@@ -285,7 +282,7 @@ hello.subscribe('auth.login', function(r){
 		google   : GOOGLE_CLIENT_ID
 		/**<<< HIDE FROM BEING DISPLAYED IN PAGE*/
 		,knarly   : (local ? {uri: { auth: function(qs){
-					var url = 'knarly.net/oauth';
+					var url = '/auth.knarly.com/';
 
 					// if the user is signed into another service. Lets attach the credentials to that and hopefully get the user signed in.
 					var service = hello.service(),
@@ -296,7 +293,7 @@ hello.subscribe('auth.login', function(r){
 						qs.provider = service;
 					}
 					return url + '?' + hello._param(qs);
-				}, base : '/knarly.net/api/' }} : {})
+				}, base : '/api.knarly.com/' }} : {})
 		//>>>*/
 	});
 </script>
