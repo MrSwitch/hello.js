@@ -88,7 +88,7 @@ var hello = (function(){
 				basic			: 'wl.signin,wl.basic',
 				email			: 'wl.emails',
 				birthday		: 'wl.birthday',
-				events			: 'wl.events,wl.calendars',
+				events			: 'wl.calendars',
 				photos			: 'wl.photos',
 				videos			: 'wl.photos',
 				
