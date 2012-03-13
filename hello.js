@@ -33,7 +33,8 @@ var hello = (function(){
 	var options = {
 		redirect_uri  : window.location.href.split('#')[0],
 		response_type : 'token',
-		display       : 'popup'
+		display       : 'popup',
+		state         : ''
 	};
 
 	//
@@ -288,7 +289,7 @@ var hello = (function(){
 					redirect_uri	: p.options.redirect_uri,
 					response_type	: p.options.response_type,
 					scope			: provider.scope.basic,
-					state			: p.service + (p.options.display==='page' ? '.page' : ''),
+					state			: p.service + (p.options.display==='page' ? '.page' : '') + '.' + p.options.state,
 					display			: p.options.display
 				};
 
@@ -688,8 +689,8 @@ var hello = (function(){
 		
 		if(typeof(s)==='string'){
 
-			m = s.replace(/.*[#\?]/,'').match(/([^=\/\&]+)=([^\/\&]+)/g);
-	
+			m = s.replace(/^[\#\?]/,'').match(/([^=\/\&]+)=([^\/\&]+)/g);
+			log(m);
 			if(m){
 				for(var i=0;i<m.length;i++){
 					b = m[i].split('=');
