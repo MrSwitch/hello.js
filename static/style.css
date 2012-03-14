@@ -288,7 +288,12 @@ table{
 		color:inherit;
 		text-align:left;
 	}
-	nav.toc li li li a{
+	nav.toc li a,
+	nav.toc li a:hover,
+	nav.toc li li a,
+	nav.toc li li a:hover,
+	nav.toc li li li a,
+	nav.toc li li li a:hover{
 		color:inherit;
 	}
 }

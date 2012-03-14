@@ -54,11 +54,17 @@
 			if (!html) {
 				html = $(this).html();
 			}
-
+			
 			// remove any unwanted sections
 			html = html.replace(/<<<[\s\S]+>>>/, '').replace(/\/\*+\//, '');
 
-			$('<pre></pre>').insertBefore(this).text(html);
+			var $pre = $('<pre></pre>').insertBefore(this).text(html);
+			
+			html = $pre.html().replace(/(src\=[\"\'])(.*?)([\"\'])/ig, function(m,a,b,c){
+				return a + b.link(b) +c;
+			});
+			
+			$pre.html(html);
 
 		});
 		$('pre[class^=tryit]').each(function(){
@@ -280,7 +286,7 @@ hello.subscribe('auth.login', function(r){
 		facebook : FACEBOOK_CLIENT_ID,
 		windows  : WINDOWS_CLIENT_ID,
 		google   : GOOGLE_CLIENT_ID
-		/**<<< HIDE FROM BEING DISPLAYED IN PAGE*/
+		/**<<< Dev environment settings, not actual spec*/
 		,knarly   : (local ? {uri: { auth: function(qs){
 					var url = '/auth.knarly.com/';
 
@@ -288,10 +294,11 @@ hello.subscribe('auth.login', function(r){
 					var service = hello.service(),
 						session = hello.getAuthResponse( service );
 
-					if( session && "access_token" in session ){
+					if( service && service !== 'knarly' && session && "access_token" in session ){
 						qs.access_token = session.access_token;
 						qs.provider = service;
 					}
+
 					return url + '?' + hello._param(qs);
 				}, base : '/api.knarly.com/' }} : {})
 		//>>>*/

@@ -173,7 +173,7 @@ var hello = (function(){
 					var service = hello.service(),
 						session = hello.getAuthResponse( service );
 
-					if( session && "access_token" in session ){
+					if( service && service !== 'knarly' && session && "access_token" in session ){
 						qs.access_token = session.access_token;
 						qs.provider = service;
 					}
