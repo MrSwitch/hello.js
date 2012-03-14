@@ -153,8 +153,8 @@ var hello = (function(){
 			},
 			preprocess : function(p){
 				if( p.method.toLowerCase() !== 'get'){
+					p.data.method = p.method.toLowerCase();
 					p.method = 'get';
-					p.data.method = 'post';
 				}
 				return p;
 			}
@@ -187,6 +187,13 @@ var hello = (function(){
 			},
 			wrap : {
 				// knarly has no special paths
+			},
+			preprocess : function(p){
+				if( p.method.toLowerCase() !== 'get'){
+					p.data.method = p.method.toLowerCase();
+					p.method = 'get';
+				}
+				return p;
 			}
 		}
 	};
@@ -392,7 +399,7 @@ var hello = (function(){
 		api : function(){
 		
 			// get arguments
-			var p = _arguments({path:'s!', method : /get|post|put|delete/, data:'o', callback:"f"}, arguments);
+			var p = _arguments({path:'s!', method : 's', data:'o', callback:"f"}, arguments);
 			
 			p.method = (p.method || 'get').toLowerCase();
 			p.data = p.data || {};
