@@ -190,7 +190,17 @@ var hello = (function(){
 			},
 			preprocess : function(p){
 				if( p.method.toLowerCase() !== 'get'){
+
+					// is this a collection of items in a post?
+					if( p.method === 'post' && _isArray( p.data ) ){
+						// wrap data up
+						p.data = { json : JSON.stringify(p.data) };
+					}
+					
+					// Add method as a parameter
 					p.data.method = p.method.toLowerCase();
+					
+					// change the method to GET aka JSONP
 					p.method = 'get';
 				}
 				return p;
@@ -236,18 +246,54 @@ var hello = (function(){
 			}
 
 			// Monitor for a change in state and fire
-			var _diff = {};
+			var old_tokens = {}, pending = {};
 
 			// create monitoring function
 			(function self(){
 
+				// 
 				for(var x in services){if(services.hasOwnProperty(x)){
 				
 					// Get session
 					var session = hello.getAuthResponse(x);
 					var token = ( session ? session.access_token : null);
 					var evt = '';
-					if( _diff[x] === token ){
+
+					//
+					// Listen for callbacks fired from Signin
+					//
+					if(session && "callback" in session && session.callback in listeners){
+
+						// to do remove from session object...
+						var cb = session.callback;
+						delete session.callback;
+
+						// Update store
+						_store(x,session);
+
+						// fire
+						hello.trigger(cb, { network:x, authResponse: session } );
+					}
+					
+					//
+					// Refresh login
+					// 
+					if( ( session 
+							&& "expires" in session 
+							&& ( !( x in pending ) || pending[x] < ((new Date()).getTime()/1e3) ) 
+							&& session.expires < ((new Date()).getTime()/1e3) ) ){
+
+						// try to resignin
+						log( x + " has expired trying to resignin" );
+						hello.login(x,{display:'none'});
+
+						// update pending, every 10 minutes
+						pending[x] = ((new Date()).getTime()/1e3) + 600;
+					}
+
+
+					// Has token changed?
+					if( old_tokens[x] === token ){
 						continue;
 					}
 					else{
@@ -261,8 +307,10 @@ var hello = (function(){
 						hello.trigger(evt, { network:x, authResponse: session } );
 					}
 					
-					_diff[x] = token;
+					old_tokens[x] = token;
 				}}
+
+				// Check error events
 
 				setTimeout(self, 1000);
 			})();
@@ -284,24 +332,43 @@ var hello = (function(){
 			// merge/override options with app defaults
 			p.options = _merge(options, p.options || {} );
 
+
 			// Is our service valid?
 			if( typeof(p.service) === 'string' ){
 
-				var provider  = services[p.service];
+				var provider  = services[p.service],
+					callback_id = '';
 
-				// Build URL
+				//
+				// Callback
+				// Save the callback until state comes back.
+				//
+				if(p.callback){
+					// choose a random callback ID string
+					callback_id = "" + Math.round(Math.random()*1e9);
+					
+					// pass in a self unsubscribing function
+					this.subscribe(callback_id, function self(){ hello.unsubscribe(callback_id,self); p.callback.apply(this, arguments);} );
+				}
+
+
+				//
+				// QUERY STRING
 				// querystring parameters
+				//
 				var qs = {
 					client_id		: provider.id,
 					redirect_uri	: p.options.redirect_uri,
 					response_type	: p.options.response_type,
 					scope			: provider.scope.basic,
-					state			: p.service + (p.options.display==='page' ? '.page' : '') + '.' + p.options.state,
+					state			: p.service + '.' + p.options.display + '.' + callback_id + '.' + p.options.state,
 					display			: p.options.display
 				};
 
-				// Additional
-				// Scopes
+				// 
+				// SCOPES
+				// Authentication permisions
+				//
 				var scope = p.options.scope;
 				if(scope){
 					if(typeof(scope)!=='string'){
@@ -314,32 +381,44 @@ var hello = (function(){
 					qs.scope = _unique(qs.scope.split(/,+/)).join( provider.scope_delim || ',');
 				}
 				
-				
+				// 
+				// REDIRECT_URI
+				// Is the redirect_uri root?
+				//
+				if( qs.redirect_uri.indexOf('/') === 0 ){
+					qs.redirect_uri = window.location.protocol + '//' + window.location.host + qs.redirect_uri;
+				}
+				// Is the redirect_uri relative?
+				else if( !qs.redirect_uri.match(/^https?\:\/\//) ){
+					qs.redirect_uri = (window.location.href.replace(/#.*/,'').replace(/\/[^\/]+$/,'/') + qs.redirect_uri).replace(/\/\.\//g,'/').replace(/\/[^\/]+\/\.\.\//g, '/');
+				}
+
+				// 
+				// URL
 				// Does the provider have their own algorithm?
+				//
 				if( typeof(provider.uri.auth) === 'function'){
 					url = provider.uri.auth(qs);
 				}
 				else{
 					url = provider.uri.auth + '?' + _param(qs);
 				}
-
-				// Callback
-				// Save the callback until session changes.
-				if(p.callback){
-					// pass in a self unsubscribing function
-					this.subscribe('auth.login.'+p.service, function self(){ hello.unsubscribe('auth.login.'+p.service,self); p.callback.apply(this, arguments);} );
-				}
+				
 			
 
+				// 
+				// Execute
 				// Trigger how we want this displayed
 				// Calling Quietly?
+				//
 				if( p.options.display === 'none' ){
 					// signin in the background, iframe
-					_append('iframe', { src : url, style : shy  }, document.body);
+					_append('iframe', { src : url, style : shy  }, 'body');
 				}
 
 				// Triggering popup?
 				else if( p.options.display === 'popup'){
+
 					// Trigger callback
 					window.open( 
 						url,
@@ -354,6 +433,7 @@ var hello = (function(){
 			else{
 				
 				// trigger the default login.
+				// ahh we dont have one.
 				log('Please specify a service.');
 			}
 		},
@@ -397,13 +477,12 @@ var hello = (function(){
 		// @param callback	function (optional)
 		//
 		api : function(){
-		
+
 			// get arguments
 			var p = _arguments({path:'s!', method : 's', data:'o', callback:"f"}, arguments);
 			
 			p.method = (p.method || 'get').toLowerCase();
 			p.data = p.data || {};
-			
 			
 			p.path = p.path.replace(/^\/+/,'');
 			var a = (p.path.split("/",2)||[])[0].toLowerCase();
@@ -604,6 +683,7 @@ var hello = (function(){
 		if(a.length>0){
 			p.display = a[1];
 		}
+		
 
 		// access_token?
 		if( ("access_token" in p)
@@ -618,7 +698,8 @@ var hello = (function(){
 			_store( p.state, {
 				access_token : p.access_token, 
 				expires_in : parseInt(p.expires_in,10), 
-				expires : ((new Date()).getTime()/1e3) + parseInt(p.expires_in,10)
+				expires : ((new Date()).getTime()/1e3) + parseInt(p.expires_in,10),
+				callback : a[2]
 			});
 
 			// Make this the default users service
@@ -642,7 +723,8 @@ var hello = (function(){
 
 			_store( 'error', {
 				error : p.error, 
-				error_message : p.error_message, 
+				error_message : p.error_message,
+				callback : a[2],
 				state : p.state
 			});
 
@@ -683,6 +765,14 @@ var hello = (function(){
 			console.log(Array.prototype.slice.call(arguments)); // IE
 		}
 	}
+	
+
+	// 
+	// isArray
+	function _isArray(o){
+		return Object.prototype.toString.call(o) === '[object Array]';
+	}
+
 	
 	//
 	// Param
@@ -897,7 +987,18 @@ var hello = (function(){
 				}}
 			}
 		}
-		if(typeof(target)==='object'){
+		
+		if(target==='body'){
+			(function self(){
+				if(document.body){
+					document.body.appendChild(n);
+				}
+				else{
+					setTimeout( self, 16 );
+				}
+			})();
+		}
+		else if(typeof(target)==='object'){
 			target.appendChild(n);
 		}
 		else if(typeof(target)==='string'){
