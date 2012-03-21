@@ -119,6 +119,7 @@ pre{
 	white-space:pre-wrap;
 	padding: 15px;
 	margin: 0 0 35px 0;	
+	max-width:100%;
 }
 pre:empty:before{
 	content: "Loading...";
