@@ -14,11 +14,16 @@
 	}
 	loadScript([['http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js','/_packages/jquery.js'][local]]);
 	loadScript([['http://cdnjs.cloudflare.com/ajax/libs/knockout/2.0.0/knockout-min.js','/_packages/knockout.js'][local]]);
+	loadScript([['http://cloud.github.com/downloads/SteveSanderson/knockout/jquery.tmpl.js','/_packages/jquery.tmpl.js'][local]]);
 	
 //]]>
 </script>
+<style>
+	.error{
+		color:red;
+	}
+</style>
 
-<script src="/_packages/jquery.tmpl.js"></script>
 <script src="../hello.js"></script>
 
 <script>
@@ -240,21 +245,28 @@
 	</section>
 
 	<table>
-	    <tbody data-bind="foreach: tests">
-	        <tr>
-	            <td data-bind="text: name"></td>
-	            <td data-bind="text: method"></td>            
-	            <td data-bind="text: result"></td>
-	        </tr>
-	        <tr data-bind="if: result">
+		<thead>
+			<tr>
+				<th>Name</th>
+				<th>Method</th>
+				<th>Path</th>
+			</tr>
+		</thead>
+		<tbody data-bind="foreach: tests">
+			<tr>
+				<td data-bind="text: name"></td>
+				<td data-bind="text: method"></td>
+				<td data-bind="text: path"></td>
+			</tr>
+			<tr data-bind="if: result">
 				<td colspan="3">
 					<span data-bind="visible: data">request:</span>
 					<pre data-bind="beautify: data, visible: data"></pre>
 					<span>response:</span>
-					<pre data-bind="beautify: response"></pre>
+					<pre data-bind="beautify: response, css: { error: response.error }"></pre>
 				</td>
-	        </tr>
-	    </tbody>
- 	</table>
+			</tr>
+		</tbody>
+	</table>
 </body>
 </html>

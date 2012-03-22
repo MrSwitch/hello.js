@@ -938,7 +938,7 @@ var hello = (function(){
 			t = null;
 
 		// Passing in hash object of arguments?
-		if(args.length===1&&typeof(args)==='object'){
+		if((args.length===1)&&(typeof(args)==='object')){
 			// return same hash.
 			return args;
 		}
