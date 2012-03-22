@@ -1,15 +1,18 @@
 /**
- * hello.js
+ * @hello.js
  *
  * So many web services are putting their content online accessible on the web using OAuth2 as a provider.
  * The downside is they all have seperate REST calls, and client-side libraries to access their data.
  * So its either one service or the other, or add a ton of libraries and logic to your scripts.
- * 
+ *
  * You could use a proprietary service like Gigya or Jan Rain to circumnavigate the problem. But i think you'll like hello.js
  * It works with FaceBook, Windows and Google+ and is FREE to use and hack!
  *
  * @author Andrew Dodson
  * @company Knarly
+ *
+ * @copyright 2012, Andrew Dodson
+ * Dual licensed under the MIT or GPL Version 2 licenses.
  */
 
 var hello = (function(){
@@ -70,7 +73,7 @@ var hello = (function(){
 						o.last_name = o.name.familyName;
 						o.first_name = o.name.givenName;
 						o.picture = o.image.url;
-						o.name = o.displayName; 
+						o.name = o.displayName;
 					}
 					return o;
 				}
@@ -101,8 +104,8 @@ var hello = (function(){
 			wrap : {
 				me : function(o){
 					if(o.id){
-						o.email = (o.emails?o.emails.preferred:null); 
-						o.picture = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+hello.getAuthResponse('windows').access_token; 
+						o.email = (o.emails?o.emails.preferred:null);
+						o.picture = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
 					}
 					return o;
 				}
@@ -146,7 +149,7 @@ var hello = (function(){
 			wrap : {
 				me : function(o){
 					if(o.id){
-						o.picture = 'http://graph.facebook.com/'+o.id+'/picture'; 
+						o.picture = 'http://graph.facebook.com/'+o.id+'/picture';
 					}
 					return o;
 				}
@@ -165,7 +168,7 @@ var hello = (function(){
 			autologin : true,
 			id : window.location.host,
 			uri : {
-				// REF: 
+				// REF:
 				auth : function(qs){
 					var url = 'http://oauth.knarly.com/';
 
@@ -251,7 +254,7 @@ var hello = (function(){
 			// create monitoring function
 			(function self(){
 
-				// 
+				//
 				for(var x in services){if(services.hasOwnProperty(x)){
 				
 					// Get session
@@ -277,11 +280,8 @@ var hello = (function(){
 					
 					//
 					// Refresh login
-					// 
-					if( ( session 
-							&& "expires" in session 
-							&& ( !( x in pending ) || pending[x] < ((new Date()).getTime()/1e3) ) 
-							&& session.expires < ((new Date()).getTime()/1e3) ) ){
+					//
+					if( ( session && ("expires" in session) && ( !( x in pending ) || pending[x] < ((new Date()).getTime()/1e3) ) && session.expires < ((new Date()).getTime()/1e3) ) ){
 
 						// try to resignin
 						log( x + " has expired trying to resignin" );
@@ -326,7 +326,7 @@ var hello = (function(){
 		login :  function(service, callback, opts){
 
 			var url,
-				p = _arguments({service:'s!', callback : 'f', options:'o'}, arguments);
+				p = _arguments({service:'s!', callback:'f', options:'o'}, arguments);
 			
 
 			// merge/override options with app defaults
@@ -365,7 +365,7 @@ var hello = (function(){
 					display			: p.options.display
 				};
 
-				// 
+				//
 				// SCOPES
 				// Authentication permisions
 				//
@@ -380,8 +380,8 @@ var hello = (function(){
 					// remove duplication and empty spaces
 					qs.scope = _unique(qs.scope.split(/,+/)).join( provider.scope_delim || ',');
 				}
-				
-				// 
+
+				//
 				// REDIRECT_URI
 				// Is the redirect_uri root?
 				//
@@ -393,10 +393,12 @@ var hello = (function(){
 					qs.redirect_uri = (window.location.href.replace(/#.*/,'').replace(/\/[^\/]+$/,'/') + qs.redirect_uri).replace(/\/\.\//g,'/').replace(/\/[^\/]+\/\.\.\//g, '/');
 				}
 
-				// 
+				//
 				// URL
 				// Does the provider have their own algorithm?
 				//
+				
+				// Does the provider have their own parameters?
 				if( typeof(provider.uri.auth) === 'function'){
 					url = provider.uri.auth(qs);
 				}
@@ -935,6 +937,13 @@ var hello = (function(){
 			i = 0,
 			t = null;
 
+		// Passing in hash object of arguments?
+		if(args.length===1&&typeof(args)==='object'){
+			// return same hash.
+			return args;
+		}
+
+		// else loop through and account for the missing ones.
 		for(var x in o){if(o.hasOwnProperty(x)){
 
 			t = typeof( args[i] );
