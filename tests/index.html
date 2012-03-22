@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>hello.js - Tests</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+	<link rel="stylesheet" href="../static/style.css" />
+<script>
+//<![CDATA[
+	var local = ( /local/.test(window.location.host) ? 1 : 0);
+	function loadScript(a){
+		for(var i=0;i<a.length;i++){
+			document.write('<script src="'+a[i]+'"><\/script>');
+		}
+	}
+	loadScript([['http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js','/_packages/jquery.js'][local]]);
+	loadScript([['http://cdnjs.cloudflare.com/ajax/libs/knockout/2.0.0/knockout-min.js','/_packages/knockout.js'][local]]);
+	
+//]]>
+</script>
+
+<script src="/_packages/jquery.tmpl.js"></script>
+<script src="../hello.js"></script>
+
+<script>
+	// Var
+	var FACEBOOK_CLIENT_ID = [
+		'304672569582045',
+		'285836944766385'
+	][local];
+
+	// Var
+	var WINDOWS_CLIENT_ID = [
+		'0000000044088105',
+		'000000004405FD31'
+	][local];
+
+	// 
+	var GOOGLE_CLIENT_ID = '656984324806-sr0q9vq78tlna4hvhlmcgp2bs2ut8uj8.apps.googleusercontent.com';
+
+	hello.init({ 
+		facebook : FACEBOOK_CLIENT_ID,
+		windows  : WINDOWS_CLIENT_ID,
+		google   : GOOGLE_CLIENT_ID
+		/**<<< Dev environment settings, not actual spec*/
+		,knarly   : (local ? {uri: { auth: function(qs){
+					var url = '/auth.knarly.com/';
+
+					// if the user is signed into another service. Lets attach the credentials to that and hopefully get the user signed in.
+					var service = hello.service(),
+						session = hello.getAuthResponse( service );
+
+					if( service && service !== 'knarly' && session && "access_token" in session ){
+						qs.access_token = session.access_token;
+						qs.provider = service;
+					}
+
+					return url + '?' + hello._param(qs);
+				}, base : '/api.knarly.com/' }} : {})
+		//>>>*/
+	}, 
+	{redirect_uri: '/hello.js/'});
+	
+	
+	//
+	// Tests
+	// An array containing objects
+	// Each object contains a name, path, method, data, test (callback)
+	// This executes them equentially
+	//
+	var tests = [
+		{
+			name : 'Get user data',
+			path : 'knarly/me',
+			method : 'get',
+		},
+		{
+			name : 'Change user data',
+			path : 'knarly/me',
+			method : 'put',
+			data : {
+				description : 'put it to the test'
+			},
+			validate : function(r){
+				return ( r && "description" in r && r.description === 'put it to te test');
+			}
+		},
+		{
+			name : 'Create a new path /me/contacts',
+			path : 'knarly/me/contacts',
+			method : 'post',
+			data : [{
+				name : 'Boris',
+				city : 'Berlin',
+				lat	 : 52.500556,
+				lng : 13.398889
+			},{
+				name : 'Zeeman',
+				city : 'New Zealand',
+				lat	 : -41.283333, 
+				lng  : 174.45
+			},{
+				name : 'Lee',
+				city : 'London',
+				lat	 : 51.507222,
+				lng : -0.1275
+			}]
+		},
+		{
+			name : 'Search string /me/contacts',
+			path : 'knarly/me/contacts',
+			data : {
+				'name' : 'Zeeman'
+			}
+		},
+		{
+			name : 'Search and return the first string /me/contacts',
+			path : 'knarly/me/contacts',
+			data : {
+				'latitude' : -33.859972,
+				'longitude' : 151.211111,
+				'sort' : 'distance ASC'
+			}
+		},
+		{
+			name : 'Delete all contacts',
+			path : 'knarly/me/contacts',
+			method : 'delete'
+		}
+	];
+
+	function Test(test){
+		this.result = ko.observable();
+		this.response = ko.observable();
+		this.method = test.method || 'get';
+		this.data = test.data || {};
+		this.validate = test.validate || function(r){return ("error" in r);};
+		this.name = test.name;
+		this.path = test.path;
+		return this;
+	}
+
+	
+	// Loop through the tests and 
+	function testModel(tests){
+		var self = this;
+
+		// Add to tests object
+		self.tests = ko.observableArray();
+
+		// Format the tests
+		$.each(tests, function(){
+			self.tests.push(new Test(this));
+		});
+		
+
+		//
+		// Execute Tests
+		// 
+		self.executeTests = function(){
+
+			var auth = hello.getAuthResponse('knarly');
+
+			var action = function(r){
+				
+				// trigger test
+				(function loop(i){
+					var test = self.tests()[i];
+					if(!test){
+						return;
+					}
+					test.result('working');
+
+					// update model
+					hello.api(test.path, test.method, test.data, function(r){
+
+						// update the test
+						var b = test.validate(r);
+
+						// update model
+						test.response(r);
+
+						// update model
+						test.result(b?'success':'failed');
+
+						// then trigger the next one
+						loop(++i);
+					});
+				})(0);
+			};
+			
+			if(auth&&"access_token" in auth && "expires" in auth && auth.expires < ((new Date()).getTime()/1e3)){
+				// check user is signed in
+				hello.login('knarly',action);
+			}
+			else{
+				action({authResponse:auth});
+			}
+
+		}
+	}
+
+	/**
+	 * Beautify content
+	 */
+	ko.bindingHandlers.beautify = {
+	    update: function(element, valueAccessor, allBindingsAccessor) {
+			var value = ko.utils.unwrapObservable( valueAccessor() );
+            $(element).wrap('<ul/>').html(beautify(value)); // Make the element visible
+	    }
+	};
+	function beautify(value){
+		var r = '';
+		if(typeof(value) === 'object'){
+			for(var x in value){
+				r += '<li>'+ x + ': ' + beautify(value[x])+'</li>';
+			}
+			r = '<ul>'+r+'</ul>';
+		}else{
+			r = value;
+		}
+		return r;
+	}
+	
+	$(function(){
+		// Bind model
+		ko.applyBindings(new testModel(tests));
+	});
+
+</script>
+
+</head>
+<body>
+	<header>
+		<h1>hello.js - tests</h1>
+		<p>Test the api</p>
+	</header>
+
+	<section>
+		<div class="demo"><button data-bind="click: executeTests">knarly</button></div>
+	</section>
+
+	<table>
+	    <tbody data-bind="foreach: tests">
+	        <tr>
+	            <td data-bind="text: name"></td>
+	            <td data-bind="text: method"></td>            
+	            <td data-bind="text: result"></td>
+	        </tr>
+	        <tr data-bind="if: result">
+				<td colspan="3">
+					<span data-bind="visible: data">request:</span>
+					<pre data-bind="beautify: data, visible: data"></pre>
+					<span>response:</span>
+					<pre data-bind="beautify: response"></pre>
+				</td>
+	        </tr>
+	    </tbody>
+ 	</table>
+</body>
+</html>
