@@ -3,7 +3,7 @@
 <head>
 	<title>hello.js - Tests</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-	<link rel="stylesheet" href="../static/style.css" />
+	<link rel="stylesheet" href="../../_packages/document.css" />
 <script>
 //<![CDATA[
 	var local = ( /local/.test(window.location.host) ? 1 : 0);
@@ -24,6 +24,7 @@
 	}
 </style>
 
+<script src="../../_packages/document.js"></script>
 <script src="../hello.js"></script>
 
 <script>
@@ -86,11 +87,20 @@
 				description : 'put it to the test'
 			},
 			validate : function(r){
-				return ( r && "description" in r && r.description === 'put it to te test');
+				return ( r && "description" in r && r.description === 'put it to the test');
 			}
 		},
 		{
 			name : 'Create a new path /me/contacts',
+			path : 'knarly/me/contacts',
+			method : 'put',
+			data : {
+				'name' : 'Contacts',
+				'description' : 'Users contacts'
+			}
+		},
+		{
+			name : 'Post new contacts to /me/contacts',
 			path : 'knarly/me/contacts',
 			method : 'post',
 			data : [{
@@ -114,22 +124,32 @@
 			name : 'Search string /me/contacts',
 			path : 'knarly/me/contacts',
 			data : {
-				'name' : 'Zeeman'
+				'name' : 'Zeeman',
+				'limit' : 3
 			}
 		},
 		{
-			name : 'Search and return the first string /me/contacts',
+			name : 'Search by longitude and latitude /me/contacts',
 			path : 'knarly/me/contacts',
 			data : {
 				'latitude' : -33.859972,
 				'longitude' : 151.211111,
-				'sort' : 'distance ASC'
+				'sort' : 'distance ASC',
+				'limit' : 3
 			}
 		},
 		{
-			name : 'Delete all contacts',
+			name : 'Delete access to contacts',
 			path : 'knarly/me/contacts',
 			method : 'delete'
+		},
+		{
+			name : 'Verified the page is deleted',
+			path : 'knarly/me/contacts',
+			method : 'get',
+			validate : function(r){
+				return ('error' in r);
+			}
 		}
 	];
 
@@ -137,8 +157,8 @@
 		this.result = ko.observable();
 		this.response = ko.observable();
 		this.method = test.method || 'get';
-		this.data = test.data || {};
-		this.validate = test.validate || function(r){return ("error" in r);};
+		this.data = test.data || null;
+		this.validate = test.validate || function(r){return !("error" in r);};
 		this.name = test.name;
 		this.path = test.path;
 		return this;
@@ -183,6 +203,8 @@
 
 						// update model
 						test.response(r);
+						
+						console.log(r);
 
 						// update model
 						test.result(b?'success':'failed');
@@ -210,16 +232,29 @@
 	ko.bindingHandlers.beautify = {
 	    update: function(element, valueAccessor, allBindingsAccessor) {
 			var value = ko.utils.unwrapObservable( valueAccessor() );
-            $(element).wrap('<ul/>').html(beautify(value)); // Make the element visible
+            $(element).html(beautify(value)); // Make the element visible
 	    }
 	};
+	
+	function isArray(o){
+		return Object.prototype.toString.call(o) === '[object Array]';
+	}
+	
 	function beautify(value){
 		var r = '';
 		if(typeof(value) === 'object'){
-			for(var x in value){
+			for(var x in value) if(value.hasOwnProperty(x)){{
 				r += '<li>'+ x + ': ' + beautify(value[x])+'</li>';
+			}}
+
+			if(r===''){
+				return '';
 			}
-			r = '<ul>'+r+'</ul>';
+			else if(isArray(value)){
+				r = '<ol>'+r+'</ol>';
+			}else{
+				r = '<ul>'+r+'</ul>';
+			}
 		}else{
 			r = value;
 		}
@@ -232,38 +267,67 @@
 	});
 
 </script>
-
+<style>
+pre li{
+	list-style:none;
+}
+pre ul:before, pre ol:before,pre ul:after, pre ol:after{
+	margin-left:-20px;
+}
+pre ol:before{
+	content: '[';
+}
+pre ul:before{
+	content: '{';
+}
+pre ol:after{
+	content: ']';
+}
+pre ul:after{
+	content: '}';
+}
+thead tr th{
+	background-color:#ccc;
+	box-shadow:1px 1px 1px white inset;
+	width:50%;
+}
+tr:nth-child(odd) td{
+	background-color:#eee;
+	box-shadow:1px 1px 1px white inset;
+	width:50%;
+}
+</style>
 </head>
 <body>
 	<header>
 		<h1>hello.js - tests</h1>
-		<p>Test the api</p>
+		<p>Test the knarly api with a series of GET, POST, PUT and DELETE commands</p>
 	</header>
 
 	<section>
-		<div class="demo"><button data-bind="click: executeTests">knarly</button></div>
+		<button data-bind="click: executeTests">knarly</button>
 	</section>
 
 	<table>
 		<thead>
-			<tr>
-				<th>Name</th>
-				<th>Method</th>
-				<th>Path</th>
-			</tr>
+	        <tr>
+	            <th>Description</th>
+	            <th>Result</th>
+	        </tr>
 		</thead>
-		<tbody data-bind="foreach: tests">
-			<tr>
-				<td data-bind="text: name"></td>
-				<td data-bind="text: method"></td>
-				<td data-bind="text: path"></td>
-			</tr>
-			<tr data-bind="if: result">
-				<td colspan="3">
-					<span data-bind="visible: data">request:</span>
+	    <tbody data-bind="foreach: tests">
+	        <tr>
+	            <td data-bind="text: name"></td>
+	            <td data-bind="text: result"></td>
+	        </tr>
+	        <tr>
+				<td>
+					<q data-bind="text: path"></q>,
+					<q data-bind="text: method"></q>
 					<pre data-bind="beautify: data, visible: data"></pre>
-					<span>response:</span>
-					<pre data-bind="beautify: response, css: { error: response.error }"></pre>
+				</td>
+				<td>
+					<pre data-bind="visible: result, beautify: response, style: { color: result() == 'failed' ? 'red' : 'none' }"></pre>
 				</td>
 			</tr>
 		</tbody>
