@@ -938,9 +938,9 @@ var hello = (function(){
 			t = null;
 
 		// Passing in hash object of arguments?
-		if((args.length===1)&&(typeof(args)==='object')){
+		if((args.length===1)&&(typeof(args[0])==='object')){
 			// return same hash.
-			return args;
+			return args[0];
 		}
 
 		// else loop through and account for the missing ones.
