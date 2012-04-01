@@ -530,16 +530,19 @@ described below.</p>
 	<h3>Browser Support</h3>
 <h4>PC</h4>
 <table>
-	<tr>
+	<thead>
+	<tr class="browsers">
 		<td>Browser</td>
-		<th>IE9</th>
-		<th>IE8</th>
-		<th>IE7</th>
-		<th>FF3.6</th>
-		<th>Chrome 8+</th>
-		<th>Safari 5 (win)</th>
-		<th>Opera 10</th>
+		<th class="ie9">IE9</th>
+		<th class="ie8">IE8</th>
+		<th class="ie7">IE7</th>
+		<th class="ff">FF</th>
+		<th class="cr">Cr</th>
+		<th class="sa">Saf</th>
+		<th class="op">Op</th>
 	</tr>
+	</thead>
+	<tbody>
 	<tr>
 		<th>hello.js</th>
 		<td class="yes" colspan=2>yes</td>
@@ -549,7 +552,8 @@ described below.</p>
 		<td class="yes">yes</td>
 		<td class="yes">yes</td>
 	</tr>
-	</table>
+	</tbody>
+</table>
 <ol>
 	<li><span class="partial">IE7</span>: Makes beeping sounds whenever the POST, PUT or DELETE methods are 
 	used - because of the XD, IFrame+Form+hack.</li>

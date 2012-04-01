@@ -23,7 +23,24 @@
 	<script src="../../_packages/document.js"></script>
 	<script src="../hello.js"></script>
 	<script src="auth.js"></script>
-	<script src="knarly_tests.js"></script>
+	<script>
+	
+	var tests = [
+		{
+			name : 'Get profile information',
+			path : 'me',
+			method : 'get'
+		},
+
+		{
+			name : 'Get information about posts',
+			path : 'me/feed',
+			method : 'get'
+		}
+
+	]
+	
+	</script>
 	<script src="api_tests.js"></script>
 
 </head>
@@ -74,7 +91,9 @@
 						</tfoot>
 					</table>
 				</div>
-				<button data-bind="click: execute.bind($data,'knarly')">Try it out</button>
+				<button data-bind="click: execute.bind($data,'facebook')">Facebook</button>
+				<button data-bind="click: execute.bind($data,'windows')">Windows</button>
+				<button data-bind="click: execute.bind($data,'google')">Google+</button>
 				<div data-bind="visible: result">
 					<h4>Results</h4>
 					<pre data-bind="visible: result, beautify: response, css: { error : result() == 'failed' }"></pre>
