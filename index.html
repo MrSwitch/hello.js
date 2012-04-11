@@ -189,9 +189,9 @@ hello.subscribe('auth.login', function(r){
 </header>
 
 
-<p>Signin with the 'publish' scope <button onclick="hello.login('google', function(){alert('You have signed into google')}, {scope:'publish'});">google</button>
-<button onclick="hello.login('facebook', function(){alert('You have signed into facebook')}, {scope:'publish'});">facebook</button>
-<button onclick="hello.login('windows', function(){alert('You have signed into windows live')}, {scope:'publish'});">windows</button></p>
+<p>Signin with the 'publish' scope <button onclick="hello.login('google', {scope:'publish'}, function(){alert('You have signed into google')});">google</button>
+<button onclick="hello.login('facebook', {scope:'publish'}, function(){alert('You have signed into facebook')});">facebook</button>
+<button onclick="hello.login('windows', {scope:'publish'}, function(){alert('You have signed into windows live')});">windows</button></p>
 
 <script class="demo">
 $('body').on('submit','form.demoPostWall', function(e){
@@ -256,17 +256,12 @@ hello.init({
 
 <h3>hello.login()</h3>
 <p>If a network string is provided: A consent window to authenticate with that network will be initiated. Else if no network is provided a prompt to select one of the networks will open. A callback will be executed if the user authenticates and or cancels the authentication flow.</p>
-<h4>hello.login( [network] [, callback() ][,options] )</h4>
+<h4>hello.login( [network] [,options] [, callback() ] )</h4>
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
 		argument</th><th>default</th></tr>
 	<tr><td>network</td><td><q>string</q></td><td><q>windows</q>, <q>facebook</q></td><td>One of our services.</td><td>
 		<em>required</em></td><td>
-		<em>null</em></td></tr>
-	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert(&quot;Logged 
-		in!&quot;);}</code></td><td>
-		A callback when the users session has been initiated</td><td>
-		<em>optional</em></td><td>
 		<em>null</em></td></tr>
 	<tr><td>options</td><td colspan="5">
 		<i>object</i>
@@ -290,6 +285,11 @@ hello.init({
 				<em>optional</em></td><td>
 				<q>token</q></td></tr>
 		</table>
+	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert(&quot;Logged 
+		in!&quot;);}</code></td><td>
+		A callback when the users session has been initiated</td><td>
+		<em>optional</em></td><td>
+		<em>null</em></td></tr>
 	</td></tr>
 </table>
 <h4>Examples:</h4>
@@ -471,9 +471,9 @@ request more from the user later.</p>
 	<label>create_event</label><input type="checkbox" name="scopes" value="create_event"/>,
 	<label>offline_access</label><input type="checkbox" name="scopes" value="offline_access"/>
 </form>
-	<button onclick="hello.login('google', function(){alert('You have signed into google')},{scope:scopes('form.setscopes')} );">google</button>
-	<button onclick="hello.login('facebook', function(){alert('You have signed into facebook')},{scope:scopes('form.setscopes')});">facebook</button>
-	<button onclick="hello.login('windows', function(){alert('You have signed into windows live')},{scope:scopes('form.setscopes')});">windows</button>
+	<button onclick="hello.login('google',{scope:scopes('form.setscopes')}, function(){alert('You have signed into google')} );">google</button>
+	<button onclick="hello.login('facebook',{scope:scopes('form.setscopes')}, function(){alert('You have signed into facebook')});">facebook</button>
+	<button onclick="hello.login('windows',{scope:scopes('form.setscopes')}, function(){alert('You have signed into windows live')});">windows</button>
 
 
 <h2 id="REST API">REST API</h2>

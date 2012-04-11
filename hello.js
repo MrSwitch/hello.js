@@ -320,13 +320,13 @@ var hello = (function(){
 		// Login
 		// Using the endpoint defined by services[x].auth we prompt the login
 		// @param service	stringify				name to connect to
-		// @param Callback	function	(optional)	fired on signin
 		// @param options	object		(optional)	{display mode, is either none|popup(default)|page, scope: email,birthday,publish, .. }
+		// @param callback	function	(optional)	fired on signin
 		//
-		login :  function(service, callback, opts){
+		login :  function(service, opts, callback){
 
 			var url,
-				p = _arguments({service:'s!', callback:'f', options:'o'}, arguments);
+				p = _arguments({service:'s!', options:'o', callback:'f'}, arguments);
 			
 
 			// merge/override options with app defaults
