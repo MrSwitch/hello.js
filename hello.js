@@ -34,7 +34,7 @@ var hello = (function(){
 	// #fragment not allowed
 	//
 	var options = {
-		redirect_uri  : window.location.href.split('#')[0],
+		redirect_uri  : window.location.href.split(/[?#]/)[0],
 		response_type : 'token',
 		display       : 'popup',
 		state         : ''
@@ -169,20 +169,7 @@ var hello = (function(){
 			id : window.location.host,
 			uri : {
 				// REF:
-				auth : function(qs){
-					var url = 'http://oauth.knarly.com/';
-
-					// if the user is signed into another service. Lets attach the credentials to that and hopefully get the user signed in.
-					var service = hello.service(),
-						session = hello.getAuthResponse( service );
-
-					if( service && service !== 'knarly' && session && "access_token" in session ){
-						qs.access_token = session.access_token;
-						qs.provider = service;
-					}
-					return url + '?' + _param(qs);
-				},
-
+				auth : 'http://oauth.knarly.com/',
 				base : 'http://api.knarly.com/'
 			},
 			scope : {
@@ -354,16 +341,13 @@ var hello = (function(){
 
 				//
 				// QUERY STRING
-				// querystring parameters
+				// querystring parameters, we may pass our own arguments to form the querystring
 				//
-				var qs = {
+				var qs = _merge( p.options, {
 					client_id		: provider.id,
-					redirect_uri	: p.options.redirect_uri,
-					response_type	: p.options.response_type,
 					scope			: provider.scope.basic,
-					state			: p.service + '.' + p.options.display + '.' + callback_id + '.' + p.options.state,
-					display			: p.options.display
-				};
+					state			: p.service + '.' + p.options.display + '.' + callback_id + '.' + p.options.state
+				});
 
 				//
 				// SCOPES
@@ -395,31 +379,21 @@ var hello = (function(){
 
 				//
 				// URL
-				// Does the provider have their own algorithm?
 				//
-				
-				// Does the provider have their own parameters?
-				if( typeof(provider.uri.auth) === 'function'){
-					url = provider.uri.auth(qs);
-				}
-				else{
-					url = provider.uri.auth + '?' + _param(qs);
-				}
-				
-			
+				url = provider.uri.auth + '?' + _param(qs);
 
 				// 
 				// Execute
 				// Trigger how we want this displayed
 				// Calling Quietly?
 				//
-				if( p.options.display === 'none' ){
+				if( qs.display === 'none' ){
 					// signin in the background, iframe
 					_append('iframe', { src : url, style : shy  }, 'body');
 				}
 
 				// Triggering popup?
-				else if( p.options.display === 'popup'){
+				else if( qs.display === 'popup'){
 
 					// Trigger callback
 					window.open( 
@@ -573,11 +547,11 @@ var hello = (function(){
 					log("Callback");
 	
 					// trigger refresh
-					hello.login(service, function(bool){
+					hello.login(service, {display:'none'}, function(bool){
 						// regardless of the response, lets make the request
 						request();
 
-					}, {display:'none'});
+					});
 				}
 				else{
 					request();
