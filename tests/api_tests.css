@@ -25,6 +25,9 @@ ul{
 	li.delete{
 		border-color:#e8c6c7;
 	}
+	li.login{
+		border-color:#FFC9FF;
+	}
 		li header{
 			background-color:#E7F6EC;
 			padding:0;
@@ -58,6 +61,9 @@ ul{
 			}
 			li.delete header span.method{
 				background-color:red;
+			}
+			li.login header span.method{
+				background-color:purple;
 			}
 		
 			/** Path */

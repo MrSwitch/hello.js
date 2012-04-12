@@ -28,13 +28,15 @@ var hello = (function(){
 	// Shy elements, without dispay:none
 	var shy = {position:'absolute',left:"-1000px",bottom:0,height:'1px',width:'1px'};
 
+	// default timeout, 20 seconds for API calls
+	var _timeout = 20000;
 
 	//
 	// Options
 	// #fragment not allowed
 	//
-	var options = {
-		redirect_uri  : window.location.href.split(/[?#]/)[0],
+	var _options = {
+		redirect_uri  : window.location.href.split('#')[0],
 		response_type : 'token',
 		display       : 'popup',
 		state         : ''
@@ -43,7 +45,7 @@ var hello = (function(){
 	//
 	// Services
 	//
-	var services = {
+	var _services = {
 
 		google : {
 			name : "Google Plus",
@@ -165,7 +167,7 @@ var hello = (function(){
 		
 		knarly : {
 			name : 'Knarly',
-			autologin : true,
+//			autologin : true,
 			id : window.location.host,
 			uri : {
 				// REF:
@@ -216,23 +218,32 @@ var hello = (function(){
 		// Define the clientId's for the endpoint services
 		// @param object o, contains a key value pair, service => clientId
 		// @param object opts, contains a key value pair of options used for defining the authentication defaults
+		// @param number timeout, timeout in seconds
 		//
-		init : function(o,opts){
+		init : function(services,opts,timeout){
+		
+			// Arguments
+			var p = _arguments({services:'o!',opts:'o',timeout:'i'},arguments);
 
 			// Define provider credentials
 			// Reformat the ID field
-			for( var x in o ){if(o.hasOwnProperty(x)){
-				if( typeof(o[x]) !== 'object' ){
-					o[x] = {id : o[x]};
+			for( var x in p.services ){if(p.services.hasOwnProperty(x)){
+				if( typeof(p.services[x]) !== 'object' ){
+					p.services[x] = {id : p.services[x]};
 				}
 			}}
 
 			// merge objects
-			services = _merge(services, o);
+			_services = _merge(_services, p.services);
 
 			// options
-			if(typeof(opts) !== 'undefined'){
-				options = _merge(options, opts);
+			if(p.opts){
+				_options = _merge(_options, p.opts);
+			}
+
+			// Timeout
+			if(p.timeout){
+				_timeout = p.timeout;
 			}
 
 			// Monitor for a change in state and fire
@@ -242,7 +253,7 @@ var hello = (function(){
 			(function self(){
 
 				//
-				for(var x in services){if(services.hasOwnProperty(x)){
+				for(var x in _services){if(_services.hasOwnProperty(x)){
 				
 					// Get session
 					var session = hello.getAuthResponse(x);
@@ -305,7 +316,7 @@ var hello = (function(){
 
 		//
 		// Login
-		// Using the endpoint defined by services[x].auth we prompt the login
+		// Using the endpoint defined by _services[x].auth we prompt the login
 		// @param service	stringify				name to connect to
 		// @param options	object		(optional)	{display mode, is either none|popup(default)|page, scope: email,birthday,publish, .. }
 		// @param callback	function	(optional)	fired on signin
@@ -317,13 +328,13 @@ var hello = (function(){
 			
 
 			// merge/override options with app defaults
-			p.options = _merge(options, p.options || {} );
+			p.options = _merge(_options, p.options || {} );
 
 
 			// Is our service valid?
 			if( typeof(p.service) === 'string' ){
 
-				var provider  = services[p.service],
+				var provider  = _services[p.service],
 					callback_id = '';
 
 				//
@@ -389,7 +400,7 @@ var hello = (function(){
 				//
 				if( qs.display === 'none' ){
 					// signin in the background, iframe
-					_append('iframe', { src : url, style : shy  }, 'body');
+					_append('iframe', { src : url, style : shy }, 'body');
 				}
 
 				// Triggering popup?
@@ -429,7 +440,7 @@ var hello = (function(){
 				}
 			}
 			else if(!s){
-				for(var x in services){if(services.hasOwnProperty(x)){
+				for(var x in _services){if(_services.hasOwnProperty(x)){
 					hello.logout(x);
 				}}
 				// remove the default
@@ -451,35 +462,44 @@ var hello = (function(){
 		// @param method	string (optional)
 		// @param data		object (optional)
 		// @param callback	function (optional)
+		// @param timeout	integer (optional)
 		//
 		api : function(){
 
 			// get arguments
-			var p = _arguments({path:'s!', method : 's', data:'o', callback:"f"}, arguments);
+			var p = _arguments({path:'s!', method : 's', data:'o', callback:"f", timeout:'i' }, arguments);
 			
+			// method
 			p.method = (p.method || 'get').toLowerCase();
+			
+			// data
 			p.data = p.data || {};
 			
+			// Path
 			p.path = p.path.replace(/^\/+/,'');
 			var a = (p.path.split("/",2)||[])[0].toLowerCase();
 	
 			var service;
 	
-			if(a in services){
+			if(a in _services){
 				service = a;
-				p.path = p.path.replace(/^.*?\//,'');
+				var reg = new RegExp('^'+a+'\/?');
+				p.path = p.path.replace(reg,'');
 			}
 			else {
 				service = this.service();
 			}
 			
-			
+			// callback
 			p.callback = p.callback || function(){};
+			
+			// timeout global setting
+			_timeout = p.timeout || _timeout;
 			
 			
 			log("API:",p);
 			
-			var o = services[service];
+			var o = _services[service];
 			
 			// Have we got a service
 			if(!o){
@@ -547,7 +567,14 @@ var hello = (function(){
 					log("Callback");
 	
 					// trigger refresh
-					hello.login(service, {display:'none'}, function(bool){
+					hello.login(service, {display:'none'}, function(r){
+					
+						// success?
+						if( typeof(r)==='object' && "error" in r){
+							callback(r);
+							return;
+						}
+
 						// regardless of the response, lets make the request
 						request();
 
@@ -639,7 +666,8 @@ var hello = (function(){
 		// Utilities
 		//
 		_param : _param,
-		_store : _store
+		_store : _store,
+		_append : _append
 	};
 	
 
@@ -663,7 +691,7 @@ var hello = (function(){
 
 		// access_token?
 		if( ("access_token" in p)
-			&& p.state in services){
+			&& p.state in _services){
 
 			if(parseInt(p.expires_in,10) === 0){
 				// Facebook, tut tut tut,
@@ -695,7 +723,7 @@ var hello = (function(){
 		//&error_description=?
 		//&state=?
 		else if( ("error" in p)
-				&& p.state in services){
+				&& p.state in _services){
 
 			_store( 'error', {
 				error : p.error, 
@@ -909,16 +937,23 @@ var hello = (function(){
 
 		var p = {},
 			i = 0,
-			t = null;
+			t = null,
+			x = null;
+		
+		// define x
+		for(var x in o){if(o.hasOwnProperty(x)){
+			break;
+		}}
 
 		// Passing in hash object of arguments?
-		if((args.length===1)&&(typeof(args[0])==='object')){
+		// Where the first argument can't be an object
+		if((args.length===1)&&(typeof(args[0])==='object')&&o[x]!='o!'){
 			// return same hash.
 			return args[0];
 		}
 
 		// else loop through and account for the missing ones.
-		for(var x in o){if(o.hasOwnProperty(x)){
+		for(x in o){if(o.hasOwnProperty(x)){
 
 			t = typeof( args[i] );
 
@@ -1009,7 +1044,7 @@ var hello = (function(){
 			head = document.getElementsByTagName('head')[0],
 			operafix,
 			script,
-			result = false,
+			result = {error:{message:'timeout'}},
 			cb = function(){
 				if( !( bool++ ) ){
 					window.setTimeout(function(){
@@ -1053,7 +1088,7 @@ var hello = (function(){
 		}
 
 		// Add timeout
-		window.setTimeout(cb, 60000);
+		window.setTimeout(cb, _timeout);
 
 		// Todo: 
 		// Add fix for msie,

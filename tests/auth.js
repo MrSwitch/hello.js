@@ -1,3 +1,6 @@
+	var local = ( /local/.test(window.location.host) ? 1 : 0);
+
+	
 	// Var
 	var FACEBOOK_CLIENT_ID = [
 		'304672569582045',

@@ -2,18 +2,22 @@
 
 	// Tests
 	function Test(test){
+		this.section = test.section || false;
+		this.aside = test.aside || false;
+
 		this.result = ko.observable();
 		this.response = ko.observable();
+		this.noauth = test.auth === false;
+		this.side = test.aside || null;
 		this.note = test.note || '';
-		this.execute = function(service,callback){
-			var auth = hello.getAuthResponse(service);
+		this.execute = test.execute || function(service,callback){
+			var authResponse = hello.getAuthResponse(service);
 			var test = this;
 			var action = function(r){
 				
 				test.result('working');
 				var data = JSON.parse(ko.toJSON(test.data.itemsAsObject()));
-				// update model
-				hello.api(test.path, test.method, data, function(r){
+				var cb = function(r){
 
 					// update the test
 					var b = test.validate(r);
@@ -27,21 +31,29 @@
 					if(callback&&typeof(callback)==='function'){
 						callback();
 					}
-				});
+				}
+				
+				if(test.method === 'login'){
+					hello.login('knarly',cb,data);
+					return;
+				}
+				
+				// update model
+				hello.api(test.path, test.method, data, cb);
 			};
 			
-			if( !auth || !("access_token" in auth) || !("expires" in auth) || auth.expires < ((new Date()).getTime()/1e3) ){
+			if( !this.noauth && ( !authResponse || !("access_token" in authResponse ) || !("expires" in authResponse) || authResponse.expires < ((new Date()).getTime()/1e3) ) ){
 				// check user is signed in
 				hello.login(service,action);
 			}
 			else{
-				action({authResponse:auth});
+				action({authResponse:authResponse});
 			}
 		};
 		this.method = test.method || 'get';
 		this.data = new Dictionary( test.data || {} );
 		this.validate = test.validate || function(r){return r && !("error" in r);};
-		this.name = test.name;
+		this.name = test.name || false;
 		this.path = test.path;
 		return this;
 	}

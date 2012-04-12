@@ -39,7 +39,9 @@
 	</p>
 
 	<ul data-bind="foreach: tests">
-		<li data-bind="attr:{ class : method }">
+		<h2 data-bind="text: section, visible:section "></h2>
+		<p data-bind="text:aside, visible:aside"></p>
+		<li data-bind="visible: name, attr:{ class : method }">
 			<header onclick="$(this).toggleClass('show')">
 				<span class="method" data-bind="text:method"></span>
 				<span class="path" data-bind="text:path"></span>
