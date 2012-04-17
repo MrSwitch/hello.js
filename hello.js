@@ -1,12 +1,15 @@
+
 /**
  * @hello.js
  *
  * So many web services are putting their content online accessible on the web using OAuth2 as a provider.
- * The downside is they all have seperate REST calls, and client-side libraries to access their data.
- * So its either one service or the other, or add a ton of libraries and logic to your scripts.
+ * The downside is they all have seperate REST calls, + client-side libraries to access their data.
+ * Meaning that if you want to implement more than one of the API's, your going to have to write code for each of them seperatly, 
+ * not to mention the extra page bulk of including their propriatary script files.
  *
- * You could use a proprietary service like Gigya or Jan Rain to circumnavigate the problem. But i think you'll like hello.js
- * It works with FaceBook, Windows and Google+ and is FREE to use and hack!
+ * You could also use a proprietary service like Gigya or Jan Rain to circumnavigate the problem. But i think you'll like hello.js
+ * It works with FaceBook, Windows Live Connect and Google+ it is easy to understand with a simple generic API.
+ , Its easy to extend and add new services. But best of all its free!
  *
  * @author Andrew Dodson
  * @company Knarly
@@ -195,6 +198,9 @@ var hello = (function(){
 					// change the method to GET aka JSONP
 					p.method = 'get';
 				}
+				if( !hello.getAuthResponse('knarly') ){
+					p.data.client_id = this.id;
+				}
 				return p;
 			}
 		}
@@ -251,6 +257,23 @@ var hello = (function(){
 
 			// create monitoring function
 			(function self(){
+
+				//
+				// Check for error Callbacks
+				//
+				var error = _store('error');
+				if(error && "callback" in error && error.callback in listeners){
+
+					// to do remove from session object...
+					var cb = error.callback;
+					delete error.callback;
+
+					// Update store
+					_store('error',error);
+
+					// fire
+					hello.trigger(cb, error );
+				}
 
 				//
 				for(var x in _services){if(_services.hasOwnProperty(x)){
@@ -423,6 +446,7 @@ var hello = (function(){
 				// ahh we dont have one.
 				log('Please specify a service.');
 			}
+			return {url:url,method:qs.display};
 		},
 	
 	
@@ -461,13 +485,13 @@ var hello = (function(){
 		// @param path		string
 		// @param method	string (optional)
 		// @param data		object (optional)
-		// @param callback	function (optional)
 		// @param timeout	integer (optional)
+		// @param callback	function (optional)
 		//
 		api : function(){
 
 			// get arguments
-			var p = _arguments({path:'s!', method : 's', data:'o', callback:"f", timeout:'i' }, arguments);
+			var p = _arguments({path:'s!', method : 's', data:'o', timeout:'i', callback:"f" }, arguments);
 			
 			// method
 			p.method = (p.method || 'get').toLowerCase();
@@ -547,14 +571,25 @@ var hello = (function(){
 
 						qs.channelUrl = window.location.href;
 
-						_post( url + _param(qs), p.data, callback );
+						var req = _post( url + _param(qs), p.data, callback );
+
+						return {
+							url : req,
+							method : 'POST',
+							data : p.data
+						};
 					}
 					// Make the call
 					else{
 
 						qs.callback = '?';
 
-						_jsonp( url + _param(qs), p.data, callback );
+						var req = _jsonp( url + _param(qs), p.data, callback );
+
+						return {
+							url : req,
+							method : 'JSONP'
+						};
 					}
 				};
 
@@ -579,9 +614,13 @@ var hello = (function(){
 						request();
 
 					});
+
+					return {
+						status : 'Signing in'
+					};
 				}
 				else{
-					request();
+					return request();
 				}
 			}
 			else{
@@ -609,6 +648,8 @@ var hello = (function(){
 		//
 		subscribe : function(evt, callback){
 
+			log("Subscribed", evt, callback);
+
 			var p = _arguments({evt:'s!', callback:"f!"}, arguments);
 
 			if(!p){
@@ -617,7 +658,6 @@ var hello = (function(){
 	
 			listeners[p.evt] = [p.callback].concat(listeners[p.evt]||[]);
 
-			log("Sub", evt);
 		},
 
 
@@ -628,7 +668,6 @@ var hello = (function(){
 		//
 		unsubscribe : function(evt, callback){
 	
-
 			log('Unsubscribe', evt, callback);
 
 			var p = _arguments({evt:'s!', callback:"f!"}, arguments);
@@ -1044,7 +1083,7 @@ var hello = (function(){
 			head = document.getElementsByTagName('head')[0],
 			operafix,
 			script,
-			result = {error:{message:'timeout'}},
+			result = {error:{message:'server_error'}},
 			cb = function(){
 				if( !( bool++ ) ){
 					window.setTimeout(function(){
@@ -1088,7 +1127,10 @@ var hello = (function(){
 		}
 
 		// Add timeout
-		window.setTimeout(cb, _timeout);
+		window.setTimeout(function(){
+			result = {error:{message:'timeout'}};
+			cb();
+		}, _timeout);
 
 		// Todo: 
 		// Add fix for msie,
@@ -1101,6 +1143,9 @@ var hello = (function(){
 		if(operafix){
 			head.appendChild(operafix);
 		}
+
+		// return the request url
+		return script.src;
 	}
 
 
@@ -1131,6 +1176,8 @@ var hello = (function(){
 
 		// Submit form
 		frm.submit();
+
+		return uri;
 	}
 
 })();
