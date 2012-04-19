@@ -2,7 +2,7 @@
 //
 // Test Model
 // Defines which parts of our tests are mutable, and how to execute the test.
-// 
+//
 function Test(test){
 	this.section = test.section || false;
 	this.aside = test.aside || false;
@@ -25,6 +25,9 @@ function Test(test){
 				// update the test
 				var b = test.validate(r);
 
+				// passed?
+				test.passed(b);
+
 				// update model
 				test.response(r);
 				
@@ -32,9 +35,9 @@ function Test(test){
 				test.result(b?'success':'failed');
 				
 				if(callback&&typeof(callback)==='function'){
-					callback();
+					callback.call(test);
 				}
-			}
+			};
 			
 			if(test.method === 'login'){
 				test.request( hello.login('knarly',data,cb) );
@@ -51,6 +54,7 @@ function Test(test){
 	this.method = test.method || 'get';
 	this.data = new Dictionary( test.data || {} );
 	this.validate = test.validate || function(r){return r && !("error" in r);};
+	this.passed = ko.observable();
 	this.name = test.name || false;
 	return this;
 }
@@ -62,8 +66,30 @@ function Test(test){
 // Map the items in the JSON array 'tests' to the Test model and bind to Knockout
 //
 $(function(){
+
 	// Bind model
-	ko.applyBindings(ko.mapping.fromJS({tests:tests}, {tests : {create: function(options){return new Test(options.data);}}}));
+	var model = {
+		tests:tests,
+		executeTests: function(service){
+			var self = this;
+			// trigger test
+			(function loop(i){
+				var test = self.tests()[i];
+				if(!test){
+					return;
+				}
+				test.execute(service,function(){
+					if(this.passed()){
+						loop(++i);
+					}
+				});
+			})(0);
+		}
+	};
+
+	// Bind model
+	// Map the data to TEST options.
+	ko.applyBindings(ko.mapping.fromJS(model, {tests : {create: function(options){return new Test(options.data);}}}));
 });
 
 
@@ -95,22 +121,21 @@ ko.bindingHandlers.contenteditable = {
                 var allBindings = allBindingsAccessor();
                 if (allBindings['_ko_property_writers'] && allBindings['_ko_property_writers'].htmlValue) allBindings['_ko_property_writers'].htmlValue(elementValue);
             }
-        }
-                                     )
+        });
     },
     update: function(element, valueAccessor) {
         var value = ko.utils.unwrapObservable(valueAccessor()) || "";
         if (element.innerHTML !== value) {
-            element.innerHTML = value;    
+            element.innerHTML = value;
         }
     }
 };
 
 
 
-// 
+//
 // Bind beautifier handler
-// 
+//
 ko.bindingHandlers.beautify = {
     update: function(element, valueAccessor, allBindingsAccessor) {
 		var value = ko.utils.unwrapObservable( valueAccessor() );
@@ -133,13 +158,13 @@ function DictionaryItem(key, value) {
 }
 
 
-// 
+//
 // Custom Dictionary observable in Knockout
 // represent the dictionary object
 //
 function Dictionary(data) {
     this.items = ko.observableArray([]);
-    for (field in data) {
+    for (var field in data) {
         if (data.hasOwnProperty(field)) {
             this.items.push(new DictionaryItem(field, data[field]));
         }
