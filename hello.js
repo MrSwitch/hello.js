@@ -31,6 +31,9 @@ var hello = (function(){
 	// default timeout, 20 seconds for API calls
 	var _timeout = 20000;
 
+	// hello.init() already called?
+	var _initstarted = false;
+
 	//
 	// Options
 	// #fragment not allowed
@@ -246,10 +249,22 @@ var hello = (function(){
 				_timeout = p.timeout;
 			}
 
+			// Have we already run init?
+			if(_initstarted){
+				return false;
+			}
+			else{
+				_initstarted = true;
+			}
+
+
 			// Monitor for a change in state and fire
 			var old_tokens = {}, pending = {};
 
-			// create monitoring function
+
+			//
+			// Monitoring session state
+			// Check for session changes
 			(function self(){
 
 				//
@@ -309,7 +324,6 @@ var hello = (function(){
 				}}
 
 				// Check error events
-
 				setTimeout(self, 1000);
 			})();
 		},
@@ -784,7 +798,7 @@ var hello = (function(){
 	// @param string s, String to decode
 	//
 	function _param(s){
-		var b, 
+		var b,
 			a = {},
 			m;
 		
