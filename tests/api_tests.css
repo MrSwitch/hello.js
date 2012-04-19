@@ -153,9 +153,9 @@ ul{
 					vertical-align:top;
 				}
 	
-			li article a{
-				font-size:0.8em;
-			}
+				li article table a{
+					font-size:0.8em;
+				}
 			li article button{
 				font-size:0.8em;
 			}

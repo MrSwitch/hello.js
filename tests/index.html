@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>hello.js - Tests</title>
+	<title>hello.js + knarly</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 	<link rel="stylesheet" href="../../_packages/document.css" />
 <script>
@@ -20,23 +20,28 @@
 </script>
 	<link href="api_tests.css" rel="stylesheet"/>
 
+	<script src="../../_packages/knockout-mapping.js"></script>
 	<script src="../../_packages/document.js"></script>
 	<script src="../hello.js"></script>
 	<script src="auth.js"></script>
 	<script src="knarly_tests.js"></script>
 	<script src="api_tests.js"></script>
+	
+	<script>
+		function stopPropagation(e){
+			e = e || window.event;
+			e.stopPropagation();
+			return false;
+		}
+	</script>
 
 </head>
 <body>
 
 	<header>
-		<h1>hello.js - tests</h1>
+		<h1>hello.js <span style="color:orange;-webkit-transform:rotate(5deg);display:inline-block;font-family: monospace;margin: -40px;">+</span> knarly</h1>
 		<p>Test the knarly api with a series of GET, POST, PUT and DELETE commands</p>
 	</header>
-
-	<p>
-		<button data-bind="click: executeTests">Run all tests</button>
-	</p>
 
 	<ul data-bind="foreach: tests">
 		<h2 data-bind="text: section, visible:section "></h2>
@@ -44,7 +49,7 @@
 		<li data-bind="visible: name, attr:{ class : method }">
 			<header onclick="$(this).toggleClass('show')">
 				<span class="method" data-bind="text:method"></span>
-				<span class="path" data-bind="text:path"></span>
+				<span class="path" data-bind="contenteditable:path" contenteditable="true" onclick="$(this).parent().hasClass('show') && window.event.stopPropagation();return false;"></span>
 				<span class="name" data-bind="text:name"></span>
 			</header>
 			<article>
@@ -77,6 +82,10 @@
 					</table>
 				</div>
 				<button data-bind="click: execute.bind($data,'knarly')">Try it out</button>
+				<div data-bind="visible: request">
+					<h4>Request</h4>
+					<pre data-bind="visible: request, beautify: request"></pre>
+				</div>
 				<div data-bind="visible: result">
 					<h4>Results</h4>
 					<pre data-bind="visible: result, beautify: response, css: { error : result() == 'failed' }"></pre>
