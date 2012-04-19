@@ -730,6 +730,11 @@ var hello = (function(){
 	//	
 	var p = _param(window.location.hash);
 
+	if(!p){
+		// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
+		p = _param(window.location.search);
+	}
+
 	// if p.state
 	if( p && "state" in p ){
 
@@ -780,7 +785,7 @@ var hello = (function(){
 
 			_store( 'error', {
 				error : p.error, 
-				error_message : p.error_message,
+				error_message : p.error_message || p.error_description,
 				callback : a[2],
 				state : p.state
 			});
