@@ -14,8 +14,8 @@
 	][local];
 
 	var KNARLY = [
-		{uri: { auth: '/auth.knarly.com/', base : '/api.knarly.com/' }},
-		{}
+		{},
+		{uri: { auth: '/auth.knarly.com/', base : '/api.knarly.com/' }}
 	][local];
 
 	//
