@@ -41,17 +41,20 @@ function Test(test){
 			
 			if(test.method === 'login'){
 				test.request( hello.login('knarly',data,cb) );
-				return;
 			}
-			
-			// Call hello.api
-			// Save the request information
-			test.request( hello.api(test.path(), test.method, data, cb) );
+			else if(test.method === 'logout'){
+				test.request( hello.logout('knarly',cb) );
+			}
+			else{
+				// Call hello.api
+				// Save the request information
+				test.request( hello.api(test.path(), test.method, data, cb) );
+			}
 		};
 
 		action({authResponse:authResponse});
 	};
-	this.method = test.method || 'get';
+	this.method = test.method;
 	this.data = new Dictionary( test.data || {} );
 	this.validate = test.validate || function(r){return r && !("error" in r);};
 	this.passed = ko.observable();
@@ -60,33 +63,40 @@ function Test(test){
 }
 
 
+//
+// Bind model
+//
+var model = {
+	connections : [],
+	tests : tests,
+	executeTests: function(service){
+		var self = this;
+		// trigger test
+		(function loop(i){
+			var test = self.tests()[i];
+			if(!test){
+				return;
+			}else if(!test.method){
+				loop(++i);
+			}
+			else{
+				test.execute('knarly',function(){
+					if(this.passed()){
+						loop(++i);
+					}
+				});
+			}
+
+		})(0);
+	}
+};
+
 
 //
 // When everything is loaded, we map `tests` to applyBindings
 // Map the items in the JSON array 'tests' to the Test model and bind to Knockout
 //
 $(function(){
-
-	// Bind model
-	var model = {
-		tests:tests,
-		executeTests: function(service){
-			var self = this;
-			// trigger test
-			(function loop(i){
-				var test = self.tests()[i];
-				if(!test){
-					return;
-				}
-				test.execute(service,function(){
-					if(this.passed()){
-						loop(++i);
-					}
-				});
-			})(0);
-		}
-	};
-
 	// Bind model
 	// Map the data to TEST options.
 	ko.applyBindings(ko.mapping.fromJS(model, {tests : {create: function(options){return new Test(options.data);}}}));
@@ -154,7 +164,7 @@ ko.bindingHandlers.beautify = {
 //
 function DictionaryItem(key, value) {
     this.key = ko.observable(key);
-    this.value = ko.observable(value);
+    this.value = (typeof(value)==='function')? value : ko.observable(value);
 }
 
 

@@ -23,9 +23,48 @@
 	<script src="../../_packages/knockout-mapping.js"></script>
 	<script src="../../_packages/document.js"></script>
 	<script src="../hello.js"></script>
-	<script src="auth.js"></script>
+
 	<script src="knarly_unit_tests.js"></script>
 	<script src="api_tests.js"></script>
+
+	<script>
+		hello.subscribe('auth.login',function(r){
+			var network = r.network;
+			hello.api(network+'/me',function(r){
+				$('button.'+network).html('<img src="'+ r.picture +'"/>'+r.name);
+			});
+
+			var i = model.connections.length;
+			model.connections.push({ access_token : ko.observable(r.authResponse.access_token), name : ko.observable(r.network) });
+
+			model.tests.forEach(function(a){
+				if("data" in a){
+					if( 'provider_token' in a.data){
+						a.data.provider_token = ko.computed(function(){
+							return model.connections[i].access_token();
+						},model);
+					}
+					if('provider_name' in a.data){
+						a.data.provider_name = ko.computed(function(){
+							return model.connections[i].name();
+						},model);
+					}
+				}
+			});
+		});
+	</script>
+	<script src="auth.js"></script>
+
+	<style>
+	button.google,button.facebook,button.windows{
+		border-radius:10px;
+	}
+	button.google img,button.facebook img,button.windows img{
+		width:36px;
+		vertical-align:middle;
+		margin-right:10px;
+	}
+	</style>
 
 </head>
 <body>
@@ -35,19 +74,29 @@
 		<p>Test the knarly api with variations of GET,POST,PUT,DELETE commands</p>
 	</header>
 
+	<aside>
+		<h2>Signin with Oauth's</h2>
+		<p>Google+, Windows and FaceBook in order to run tests</p>
+
+		<button class="google" onclick="hello.login('google');">google</button>
+<button class="facebook" onclick="hello.login('facebook');">facebook</button>
+<button class="windows" onclick="hello.login('windows');">windows</button>
+
+	</aside>
+
+	<h2>Runtests</h2>
 	<p>
 		<button data-bind="click: executeTests">Run all tests</button>
 	</p>
-
 	<ul data-bind="foreach: tests">
 		<h2 data-bind="text: section, visible:section "></h2>
 		<p data-bind="text:aside, visible:aside"></p>
-		<li data-bind="visible: name, attr:{ class : method }">
+		<li data-bind="visible: name, attr:{ class : method }, css: { error : passed() === false, passed : passed() === true }">
 			<header onclick="$(this).toggleClass('show')">
 				<span class="method" data-bind="text:method"></span>
 				<span class="path" data-bind="text:path"></span>
 				<span class="name" data-bind="text:name"></span>
-			</header>
+			</header>	
 			<article>
 				<div data-bind="visible: note">
 					<h4>Notes</h4>
@@ -78,9 +127,13 @@
 					</table>
 				</div>
 				<button data-bind="click: execute.bind($data,'knarly')">Try it out</button>
+				<div data-bind="visible: request">
+					<h4>Request</h4>
+					<pre data-bind="visible: request, beautify: request"></pre>
+				</div>
 				<div data-bind="visible: result">
 					<h4>Results</h4>
-					<pre data-bind="visible: result, beautify: response, css: { error : result() == 'failed' }"></pre>
+					<pre data-bind="visible: result, beautify: response"></pre>
 				</div>
 			</article>
 		</li>

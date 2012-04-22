@@ -15,12 +15,12 @@ var tests = [
 		note : 'The first account created is assigned Administrator status. By "putting" a name, email and password to knarly/me. The response data shall be a authentication code or otherwise an error.',
 		method : 'post',
 		data : {
-			type 	 : 'user',
-			name	 : '',
-			email	 : '',
+			type : 'user',
+			name : '',
+			email : '',
 			username : '',
 			password : '',
-			file 	 : ''
+			file : ''
 		},
 		auth : false // do not check for authentication
 	},
@@ -67,9 +67,9 @@ var tests = [
 		note : 'Check for the existance of a `username` or `email` address',
 		method : 'get',
 		data : {
-			type	 : 'user',
-			email	 : 'replace@th.is',
-			limit	 : 1
+			type : 'user',
+			email : 'replace@th.is',
+			limit : 1
 		},
 		auth : false // do not check for authentication
 	},
@@ -79,11 +79,11 @@ var tests = [
 		note : 'Create a user by "post"ing a name, email and password to the root, "knarly". The response will be the newly created object. We can get the access token so the user can create other types of articles etc by calling hello.login("knarly",{username:string, password: string})',
 		method : 'put',
 		data : {
-			name	 : '',
-			email	 : '',
+			name : '',
+			email : '',
 			username : '',
 			password : '',
-			file 	 : ''
+			file : ''
 		},
 		auth : false // do not check for authentication
 	},
@@ -116,7 +116,7 @@ var tests = [
 			type : 'token',
 			token : '',
 			provider : ''
-		},
+		}
 	},
 	{
 		name : 'Search for linked networks',
@@ -126,7 +126,7 @@ var tests = [
 		data : {
 			type : 'token',
 			limit: 100
-		},
+		}
 	},
 	{
 		name : 'Remove a network from an existing account',
@@ -142,7 +142,7 @@ var tests = [
 		data : {
 			name : 'Recover Account Access',
 			type : 'message',
-			email : 'example@ema.il',
+			email : 'example@ema.il'
 		}
 	},
 	{
@@ -185,8 +185,8 @@ var tests = [
 		data : {
 			name : 'Boris',
 			city : 'Berlin',
-			lat	 : 52.500556,
-			lng : 13.398889
+			latitude : 52.500556,
+			longitude : 13.398889
 		}
 	},
 	{
@@ -232,7 +232,7 @@ var tests = [
 		data : {
 			name : 'Boris',
 			city : 'Berlin',
-			lat	 : 52.500556,
+			lat	: 52.500556,
 			lng : 13.398889
 		}
 	},
