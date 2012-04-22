@@ -1102,7 +1102,7 @@ var hello = (function(){
 			head = document.getElementsByTagName('head')[0],
 			operafix,
 			script,
-			result = {error:{message:'server_error'}},
+			result = {error:{message:'server_error',code:'server_error'}},
 			cb = function(){
 				if( !( bool++ ) ){
 					window.setTimeout(function(){
@@ -1147,7 +1147,7 @@ var hello = (function(){
 
 		// Add timeout
 		window.setTimeout(function(){
-			result = {error:{message:'timeout'}};
+			result = {error:{message:'timeout',code:'timeout'}};
 			cb();
 		}, _timeout);
 
