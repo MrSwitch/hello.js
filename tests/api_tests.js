@@ -9,6 +9,7 @@ function Test(test){
 
 	this.result = ko.observable();
 	this.response = ko.observable();
+	this.expected = test.expected || null;
 	this.request = ko.observable();
 	this.path = ko.observable(test.path);
 	this.noauth = test.auth === false;
@@ -56,19 +57,51 @@ function Test(test){
 	};
 	this.method = test.method;
 	this.data = new Dictionary( test.data || {} );
-	this.validate = test.validate || function(r){return r && !("error" in r);};
+	this.validate = test.validate || function(r){
+		if(this.expected){
+			return testExpected(this.expected,r);
+		}
+		return r && !("error" in r);
+	};
 	this.passed = ko.observable();
 	this.name = test.name || false;
 	return this;
 }
 
+function testExpected(test,r){
+	for(var x in test){
+		if(!r || !(x in r)){
+			b = false;
+		}
+		else if( tests[x] === null ){
+			// no test
+			b = true;
+		}
+		else if( test[x] instanceof RegExp ){
+			b = test[x].test(r[x]);
+		}
+		else if( test[x] instanceof Array ){
+			b = r[x] instanceof Array;
+		}
+		else if( typeof( test[x] ) === 'object' ){
+			b = testExpected(test[x],r[x]);
+		}
+		else{
+			b = r[x] === test[x];
+		}
+		if(!b){
+			return false;
+		}
+	}
+	return true;
+}
 
 //
 // Bind model
 //
 var model = {
 	connections : [],
-	tests : tests,
+	tests : [],
 	executeTests: function(service){
 		var self = this;
 		// trigger test
@@ -91,15 +124,19 @@ var model = {
 	}
 };
 
+$.each(tests, function(i,a){
+	model.tests.push(new Test(a));
+});
 
 //
 // When everything is loaded, we map `tests` to applyBindings
 // Map the items in the JSON array 'tests' to the Test model and bind to Knockout
 //
 $(function(){
+
 	// Bind model
 	// Map the data to TEST options.
-	ko.applyBindings(ko.mapping.fromJS(model, {tests : {create: function(options){return new Test(options.data);}}}));
+	ko.applyBindings(model);
 });
 
 
@@ -149,9 +186,16 @@ ko.bindingHandlers.contenteditable = {
 ko.bindingHandlers.beautify = {
     update: function(element, valueAccessor, allBindingsAccessor) {
 		var value = ko.utils.unwrapObservable( valueAccessor() );
-
-		value = (JSON.stringify(value,null,2)||'').replace(/https?:\/\/[^\'\"\s]+/ig, function(r){
+		function fixRegExp(k,v){
+			if(v instanceof RegExp){
+				v = v.toString();
+			}
+			return v;
+		}
+		value = (JSON.stringify(value,fixRegExp,2)||'').replace(/https?:\/\/[^\'\"\s]+/ig, function(r){
 			return r.link(r).replace('<a ', '<a target="_blank" ');
+		}).replace(/\"(\/.*?\/)\"/, function(m,a){
+			return a;
 		});
 
         $(element).html(value); // Make the element visible

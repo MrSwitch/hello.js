@@ -37,14 +37,14 @@ var unittests = [
 			{method:'post'},
 			{method:'delete'}
 		],
-		validate : function(r){
-			return ("error" in r ) && r.error.code === 'invalid_domain';
+		expected : {
+			error : {code:'invalid_domain'}
 		}
 	},
-	{
-		section: 'Admin: Creating the first user',
-		aside : ''
-	},
+{
+	section: 'Admin: Creating the first user',
+	aside : ''
+},
 	{
 		name : 'Can\'t \'put\' or post anything to the /me path other than a user',
 		method : 'put',
@@ -54,8 +54,8 @@ var unittests = [
 			{method:'put', data:{type:'dataset',email:'andrew@gmail.com'}},
 			{method:'post'}
 		],
-		validate : function(r){
-			return "error" in r && r.error.code === 'invalid_domain';
+		expected : {
+			error : {code:'invalid_domain'}
 		}
 	},
 	{
@@ -68,8 +68,8 @@ var unittests = [
 		variants : [
 			{email : ''}
 		],
-		validate : function(r){
-			return "error" in r && r.error.code === 'required_email';
+		expected : {
+			error : {code:'required_email'}
 		}
 	},
 	{
@@ -87,8 +87,8 @@ var unittests = [
 			{data:{email:["asdfasdf@gmail.com"]}},
 			{data:{email:{email:"asdfasdf@gmail.com"}}}
 		],
-		validate : function(r){
-			return ("error" in r ) && r.error.code === 'invalid_email';
+		expected : {
+			error : {code:'invalid_email'}
 		}
 	},
 	{
@@ -102,8 +102,8 @@ var unittests = [
 		variants : [
 			{data:{password:''}}
 		],
-		validate : function(r){
-			return "error" in r && r.error.code === 'required_password';
+		expected : {
+			error : {code:'required_password'}
 		}
 	},
 	{
@@ -119,8 +119,8 @@ var unittests = [
 			{data:{password:function(){}}},
 			{data:{password:['asdasd']}}
 		],
-		validate : function(r){
-			return "error" in r && r.error.code === 'invalid_password';
+		expected : {
+			error : {code:'invalid_password'}
 		}
 	},
 	{
@@ -137,8 +137,8 @@ var unittests = [
 			{status : 0},
 			{status : -1}
 		],
-		validate : function(r){
-			return "error" in r && r.error.code === 'invalid_status';
+		expected : {
+			error : {code:'invalid_status'}
 		}
 	},
 	{
@@ -148,8 +148,8 @@ var unittests = [
 		data : griffins.peter,
 		variants : [
 		],
-		validate : function(r){
-			return "id" in r;
+		expected : {
+			id : /[0-9]+/
 		}
 	},
 	{
@@ -160,8 +160,8 @@ var unittests = [
 			password : griffins.peter.password,
 			display	: 'none'
 		},
-		validate : function(r){
-			return "authResponse" in r;
+		expected : {
+			authResponse : {}
 		}
 	},
 {
@@ -176,8 +176,8 @@ var unittests = [
 			name : 'Quotes',
 			state : 3 // let people add children
 		},
-		validate : function(r){
-			return "id" in r;
+		expected : {
+			id : /[0-9]+/
 		}
 	},
 	{
@@ -188,13 +188,13 @@ var unittests = [
 			name : 'First quotes',
 			description : 'Something someone just said'
 		},
-		validate : function(r){
-			return "id" in r;
+		expected : {
+			id : /[0-9]+/
 		}
 	},
 
 {
-	section: 'User1: Create user',
+	section: 'User1: Create user, then link account',
 	aside : ''
 },
 	{
@@ -215,8 +215,8 @@ var unittests = [
 			email : griffins.peter.email,
 			limit : 1
 		},
-		validate : function(r){
-			return "data" in r && r.data.length === 1;
+		expected : {
+			data : [null]
 		}
 	},
 	{
@@ -229,8 +229,8 @@ var unittests = [
 			username : griffins.peter.username,
 			limit : 1
 		},
-		validate : function(r){
-			return "data" in r && r.data.length === 1;
+		expected : {
+			data : [null]
 		}
 	},
 	{
@@ -243,8 +243,8 @@ var unittests = [
 			email : griffins.louis.email,
 			limit : 1
 		},
-		validate : function(r){
-			return "data" in r && r.data.length === 0;
+		expected : {
+			data : []
 		}
 	},
 	{
@@ -257,8 +257,8 @@ var unittests = [
 			username : griffins.louis.username,
 			limit : 1
 		},
-		validate : function(r){
-			return "data" in r && r.data.length === 0;
+		expected : {
+			data : []
 		}
 	},
 	{
@@ -266,8 +266,8 @@ var unittests = [
 		method : 'put',
 		path : 'knarly/me',
 		data : _merge( griffins.louis, {username:griffins.peter.username} ),
-		validate : function(r){
-			return "error" in r && r.error.code === 'unique_username';
+		expected : {
+			error : {code:'unique_username'}
 		}
 	},
 	{
@@ -275,8 +275,8 @@ var unittests = [
 		method : 'put',
 		path : 'knarly/me',
 		data : _merge( griffins.louis, {email:griffins.peter.email} ),
-		validate : function(r){
-			return "error" in r && r.error.code === 'unique_email';
+		expected : {
+			error : {code:'unique_email'}
 		}
 	},
 	{
@@ -284,8 +284,8 @@ var unittests = [
 		method : 'put',
 		path : 'knarly/me',
 		data : griffins.louis,
-		validate : function(r){
-			return "id" in r;
+		expected : {
+			id : /[0-9]+/
 		}
 	},
 	{
@@ -295,8 +295,8 @@ var unittests = [
 			username : griffins.louis.username,
 			password : griffins.louis.password
 		},
-		validate : function(r){
-			return "authResponse" in r;
+		expected : {
+			authResponse : {}
 		}
 	},
 	{
@@ -307,8 +307,58 @@ var unittests = [
 			name : 'Louis quotes',
 			description : 'aye'
 		},
-		validate : function(r){
-			return "id" in r;
+		expected : {
+			id : /[0-9]+/
+		}
+	},
+	{
+		name : 'Check can\'t ommit a network token to federate accounts',
+		method : 'post',
+		path : 'knarly/me',
+		data : {
+			type : 'token',
+			provider_name : '0NAME'
+		},
+		expected : {
+			error : {code:'required_token'}
+		}
+	},
+	{
+		name : 'Check can\'t add and erronous network token to federate accounts',
+		method : 'post',
+		path : 'knarly/me',
+		data : {
+			type : 'token',
+			provider_token : 'adsflbasdfjhasbdfljhabsdfasdfasdfkajshdfb',
+			provider_name : '0NAME'
+		},
+		expected : {
+			error : {code:'invalid_token'}
+		}
+	},
+	{
+		name : 'Check can\'t ommit a network name to federate accounts',
+		method : 'post',
+		path : 'knarly/me',
+		data : {
+			type : 'token',
+			provider_token : '0TOKEN'
+		},
+		expected : {
+			error : {code:'required_provider'}
+		}
+	},
+	{
+		name : 'Check can\'t add and erronous network name to federate accounts',
+		method : 'post',
+		path : 'knarly/me',
+		data : {
+			type : 'token',
+			provider_token : '0TOKEN',
+			provider_name : 'asdASDasd'
+		},
+		expected : {
+			error : {code:'invalid_provider'}
 		}
 	},
 	{
@@ -317,14 +367,164 @@ var unittests = [
 		path : 'knarly/me',
 		data : {
 			type : 'token',
-			provider_token : '',
-			provider_name : ''
+			provider_token : '0TOKEN',
+			provider_name : '0NAME'
+		},
+		expected : {
+			id : /[0-9]+/
+		}
+	},
+	{
+		name : 'Checking that we can obtain a list of joined accounts for the user',
+		method : 'get',
+		path : 'knarly/me',
+		data : {
+			type : 'token',
+			limit : 1
+		},
+		expected : {
+			data : {length:1}
+		}
+	},
+	{
+		name : 'Check that we can\'t have duplicate joined accounts',
+		method : 'post',
+		path : 'knarly/me',
+		data : {
+			type : 'token',
+			provider_token : '0TOKEN',
+			provider_name : '0NAME'
+		},
+		expected : {
+			error : {code:'unique_token'}
+		}
+	},
+{
+	section: 'User2: Create user using an Access Token',
+	aside : ''
+},
+	{
+		name : 'Signout current users',
+		method : 'logout',
+		validate : function(r){
+			var auth = hello.getAuthResponse('knarly');
+			return !auth || !("access_token" in auth);
+		}
+	},
+	{
+		name : 'Already linked?',
+		method : 'login',
+		data : {
+			provider_token : '1TOKEN',
+			provider_name : '1NAME'
+		},
+		expected : {
+			error: {code : /[a-z]+/}
+		}
+	},
+	{
+		name : 'Post a third party access token to create a new account',
+		method : 'post',
+		path : 'knarly/me',
+		data : {
+			type : 'token',
+			provider_token : '1TOKEN',
+			provider_name : '1NAME'
+		},
+		expected : {
+			type:'user',
+			id:/0-9+/
+		}
+	},
+	{
+		name : 'Check that we can\'t login with a bad access token',
+		method : 'login',
+		data : {
+			provider_token : 'wrong',
+			provider_name : '1NAME',
+			display: 'none'
+		},
+		expected : {
+			error: {code : /[a-z]+/}
+		}
+	},
+	{
+		name : 'Login with the access_token',
+		method : 'login',
+		data : {
+			provider_token : '1TOKEN',
+			provider_name : '1NAME',
+			display: 'none'
+		},
+		expected : {
+			authResponse: {access_token : /[a-z]+/}
+		}
+	},
+	{
+		name : 'Checking that a user has been created',
+		method : 'get',
+		path : 'knarly/me',
+		expected : {
+			type:'user',
+			id:/0-9+/
+		}
+	},
+	{
+		name : 'Checking that we can obtain a list of joined accounts for the user',
+		method : 'get',
+		path : 'knarly/me',
+		data : {
+			type : 'token',
+			limit : 1
 		},
 		validate : function(r){
-			return "id" in r;
+			// update items in the model
+			model.tests.forEach(function(a){
+				if( a && "path" in a && typeof(a.path) === 'function' && a.path() === '$edit_token_id'){
+					a.path('knarly/me/'+r.data[0].id);
+				}
+			});
+			// return
+			return r.data && r.data.length === 1;
+		},
+		expected : {
+			data : {
+				length : 1
+			}
+		}
+	},
+	{
+		name : 'Try to edit the token',
+		method : 'put',
+		path : '$edit_token_id',
+		data : {
+			type : 'user'
+		},
+		expected : {
+			type : 'user'
+		}
+	},
+	{
+		name : 'Post an update to the user',
+		method : 'put',
+		path : 'knarly/me',
+		data : griffins.brian,
+		expected : {
+			type : 'user'
+		}
+	},
+	{
+		name : 'Post a quote',
+		method : 'post',
+		path : 'knarly/quotes',
+		data : {
+			name : 'Brian quotes',
+			description : 'i will return any stick you can throw at me'
+		},
+		expected : {
+			id : /[0-9]+/
 		}
 	}
-
 ];
 
 

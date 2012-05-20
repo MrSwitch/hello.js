@@ -30,8 +30,14 @@
 	<script>
 		hello.subscribe('auth.login',function(r){
 			var network = r.network;
+
 			hello.api(network+'/me',function(r){
+				if(!r.name){
+					return;
+				}
+
 				$('button.'+network).html('<img src="'+ r.picture +'"/>'+r.name);
+
 			});
 
 			var i = model.connections.length;
@@ -39,18 +45,19 @@
 
 			model.tests.forEach(function(a){
 				if("data" in a){
-					if( 'provider_token' in a.data){
+					if( 'provider_token' in a.data && parseInt(a.data.provider_token,10) === i ){
 						a.data.provider_token = ko.computed(function(){
 							return model.connections[i].access_token();
 						},model);
 					}
-					if('provider_name' in a.data){
+					if('provider_name' in a.data && parseInt(a.data.provider_name,10) === i){
 						a.data.provider_name = ko.computed(function(){
 							return model.connections[i].name();
 						},model);
 					}
 				}
 			});
+
 		});
 	</script>
 	<script src="auth.js"></script>
@@ -127,6 +134,10 @@
 					</table>
 				</div>
 				<button data-bind="click: execute.bind($data,'knarly')">Try it out</button>
+				<div data-bind="visible: expected">
+					<h4>Expected</h4>
+					<pre data-bind="beautify: expected"></pre>
+				</div>
 				<div data-bind="visible: request">
 					<h4>Request</h4>
 					<pre data-bind="visible: request, beautify: request"></pre>
