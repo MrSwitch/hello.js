@@ -473,9 +473,6 @@ var hello = (function(){
 		logout : function(s, callback){
 			if(s && _store(s)){
 				_store(s,'');
-				if(callback){
-					callback();
-				}
 			}
 			else if(!s){
 				for(var x in _services){if(_services.hasOwnProperty(x)){
@@ -484,12 +481,12 @@ var hello = (function(){
 				// remove the default
 				hello.service(false);
 				// trigger callback
-				if(callback){
-					callback();
-				}
 			}
 			else{
 				log( s + ' had no session' );
+			}
+			if(callback){
+				callback(false);
 			}
 		},
 
