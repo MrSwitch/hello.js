@@ -4,7 +4,7 @@
 // The purpose of these tests is to be awesome... unfourtunatly these tests are hard to write
 // Anyone copying them for their own API should be really pround of themselves for getting out of doing the hard work.
 //
-// @author Andrew Dodson #mr_switch
+// @author Andrew Dodson - @mr_switch
 // @company Knarly
 
 var griffins = {
@@ -13,10 +13,20 @@ var griffins = {
 	louis : {username:'Louis',email:'sonofdod@gmail.com',password:'pichachu',type:'user'}
 };
 
+var clientId = parseInt(Math.random()*10000,10);
+
 var unittests = [
 	{
 		section: 'No Domain or authentication',
 		aside : ''
+	},
+	{
+		name : 'Clear any preexisting authentication',
+		method : 'logout',
+		validate : function(r){
+			var auth = hello.getAuthResponse('knarly');
+			return !auth || !("access_token" in auth);
+		}
 	},
 	{
 		// Test that a domain does not exist
@@ -216,7 +226,7 @@ var unittests = [
 			limit : 1
 		},
 		expected : {
-			data : [null]
+			data : [{}]
 		}
 	},
 	{
@@ -230,7 +240,7 @@ var unittests = [
 			limit : 1
 		},
 		expected : {
-			data : [null]
+			data : [{}] // expected one result which is an object
 		}
 	},
 	{
@@ -244,7 +254,7 @@ var unittests = [
 			limit : 1
 		},
 		expected : {
-			data : []
+			data : [] // expected Zero results
 		}
 	},
 	{
@@ -258,7 +268,7 @@ var unittests = [
 			limit : 1
 		},
 		expected : {
-			data : []
+			data : [] // expected Zero results
 		}
 	},
 	{

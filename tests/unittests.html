@@ -59,6 +59,22 @@
 			});
 
 		});
+
+		// 
+		$(function(){
+
+			// Change the user
+			$('input[name=clientId]').change(function(){
+				// Init
+				hello.init({
+					knarly : this.value+'@'+window.location.hostname
+				});
+				//
+				console.log(this.value+'.'+window.location.hostname);
+			}).val(parseInt(Math.random()*100000,10)).trigger('change');
+
+
+		});
 	</script>
 	<script src="auth.js"></script>
 
@@ -82,8 +98,14 @@
 	</header>
 
 	<aside>
-		<h2>Signin with Oauth's</h2>
-		<p>Google+, Windows and FaceBook in order to run tests</p>
+		<h2>Choose an arbitary clientId</h2>
+		<p>This runs account creation scripts</p>
+		<p><input type="text" name="clientId"/></p>
+	</aside>
+
+	<aside>
+		<h2>Signin with OAuth's</h2>
+		<p>Signin with three seperate Oauth providers, Google+, Windows and FaceBook in order to run tests</p>
 
 		<button class="google" onclick="hello.login('google');">google</button>
 <button class="facebook" onclick="hello.login('facebook');">facebook</button>

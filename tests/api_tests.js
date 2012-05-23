@@ -1,4 +1,3 @@
-
 //
 // Test Model
 // Defines which parts of our tests are mutable, and how to execute the test.
@@ -106,7 +105,7 @@ var model = {
 		var self = this;
 		// trigger test
 		(function loop(i){
-			var test = self.tests()[i];
+			var test = self.tests[i];
 			if(!test){
 				return;
 			}else if(!test.method){

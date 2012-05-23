@@ -173,7 +173,7 @@ ul{
 	 * Error
 	 */
 	li.error header, li.error header + article pre{
-		background-color:red;
+		background-color:darkorange;
 		color:white !important;
 	}
 	li.error:before{
