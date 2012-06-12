@@ -7,11 +7,33 @@
 // @author Andrew Dodson - @mr_switch
 // @company Knarly
 
+var regObjects = {};
+
+regObjects.auth = {
+	network : /[a-z]+/,
+	authResponse : {
+		access_token : /.{20,}/,
+		expires_in : /^\d+$/,
+		expires : /^\d+(\.\d+)?$/		
+	}
+};
+
+regObjects.item = {
+	id : /^\d+$/
+};
+
+regObjects.user = {
+	type : 'user',
+	id : /^\d+$/
+};
+
+
 var griffins = {
 	peter : {username:'Peter',email:'sonofdod@gmail.com',password:'pichachu',type:'user'},
 	brian : {username:'Brian',email:'andrew.live@gmail.com',password:'pichachu',type:'user'},
-	louis : {username:'Louis',email:'sonofdod@gmail.com',password:'pichachu',type:'user'}
+	louis : {username:'Louis',email:'adrosetint@hotmail.com',password:'pichachu',type:'user'}
 };
+
 
 var clientId = parseInt(Math.random()*10000,10);
 
@@ -88,13 +110,14 @@ var unittests = [
 		path : 'knarly/me',
 		data : {
 			type : 'user',
-			email : 'asdasd'
+			email : 'asdasd',
+			password:'password'
 		},
 		variants : [
 			{data:{email:1234}},
 			{data:{email:"!@#$%^&"}},
 			{data:{email:"asdfasdf@sdf$.com"}},
-			{data:{email:["asdfasdf@gmail.com"]}},
+			{data:{email:'[asdfasdf@gmail.com"]'}},
 			{data:{email:{email:"asdfasdf@gmail.com"}}}
 		],
 		expected : {
@@ -122,12 +145,12 @@ var unittests = [
 		path : 'knarly/me',
 		data : {
 			type : 'user',
-			email : 'email@mail.com'
+			email : 'email@mail.com',
+			password : '1%$&('
 		},
 		variants : [
 			{data:{password:'12345'}},
-			{data:{password:function(){}}},
-			{data:{password:['asdasd']}}
+			{data:{password:'sssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss'}}
 		],
 		expected : {
 			error : {code:'invalid_password'}
@@ -158,9 +181,7 @@ var unittests = [
 		data : griffins.peter,
 		variants : [
 		],
-		expected : {
-			id : /[0-9]+/
-		}
+		expected : regObjects.item
 	},
 	{
 		name : 'Login user (admin)',
@@ -170,9 +191,7 @@ var unittests = [
 			password : griffins.peter.password,
 			display	: 'none'
 		},
-		expected : {
-			authResponse : {}
-		}
+		expected : regObjects.auth
 	},
 {
 	section: 'Admin: Creating categories and access levels',
@@ -213,7 +232,8 @@ var unittests = [
 		validate : function(r){
 			var auth = hello.getAuthResponse('knarly');
 			return !auth || !("access_token" in auth);
-		}
+		},
+		expected : false
 	},
 	{
 		name : 'Check we can\'t reuse and existing email',
@@ -226,7 +246,7 @@ var unittests = [
 			limit : 1
 		},
 		expected : {
-			data : [{}]
+			data : [regObjects.item]
 		}
 	},
 	{
@@ -240,13 +260,13 @@ var unittests = [
 			limit : 1
 		},
 		expected : {
-			data : [{}] // expected one result which is an object
+			data : [regObjects.item] // expected one result which is an object
 		}
 	},
 	{
-		name : 'Check new email email isn\'t used',
+		name : 'Check new email isn\'t in use',
 		path : 'knarly',
-		note : 'Check for the existance of an `email` address',
+		note : 'Check for the existance of a certain `email` address',
 		method : 'get',
 		data : {
 			type : 'user',
@@ -294,8 +314,39 @@ var unittests = [
 		method : 'put',
 		path : 'knarly/me',
 		data : griffins.louis,
+		expected : regObjects.item
+	},
+	{
+		name : 'Can\'t Signin Louis - no password',
+		method : 'login',
+		data : {
+			username : griffins.louis.username,
+			password : ''
+		},
 		expected : {
-			id : /[0-9]+/
+			error : 'required_password'
+		}
+	},
+	{
+		name : 'Can\'t Signin Louis - no username',
+		method : 'login',
+		data : {
+			username : '',
+			password : griffins.louis.password
+		},
+		expected : {
+			error : 'required_username'
+		}
+	},
+	{
+		name : 'Can\'t Signin Louis - no email',
+		method : 'login',
+		data : {
+			email : '',
+			password : griffins.louis.password
+		},
+		expected : {
+			error : 'required_email'
 		}
 	},
 	{
@@ -317,9 +368,7 @@ var unittests = [
 			name : 'Louis quotes',
 			description : 'aye'
 		},
-		expected : {
-			id : /[0-9]+/
-		}
+		expected : regObjects.item
 	},
 	{
 		name : 'Check can\'t ommit a network token to federate accounts',
@@ -380,9 +429,7 @@ var unittests = [
 			provider_token : '0TOKEN',
 			provider_name : '0NAME'
 		},
-		expected : {
-			id : /[0-9]+/
-		}
+		expected : regObjects.item
 	},
 	{
 		name : 'Checking that we can obtain a list of joined accounts for the user',
@@ -393,7 +440,7 @@ var unittests = [
 			limit : 1
 		},
 		expected : {
-			data : {length:1}
+			data : [regObjects.item]
 		}
 	},
 	{
@@ -419,17 +466,31 @@ var unittests = [
 		validate : function(r){
 			var auth = hello.getAuthResponse('knarly');
 			return !auth || !("access_token" in auth);
-		}
+		},
+		expected : false
 	},
 	{
-		name : 'Already linked?',
+		name : 'Already linked?, Check that no user exists',
 		method : 'login',
 		data : {
 			provider_token : '1TOKEN',
 			provider_name : '1NAME'
 		},
 		expected : {
-			error: {code : /[a-z]+/}
+			error: 'invalid_client'
+		}
+	},
+	{
+		name : 'Check can\'t post a provider_token/name which is already inuse by User 1',
+		method : 'post',
+		path : 'knarly/me',
+		data : {
+			type : 'token',
+			provider_token : '0TOKEN',
+			provider_name : '0NAME'
+		},
+		expected : {
+			error : {code:'unique_token'}
 		}
 	},
 	{
@@ -441,11 +502,32 @@ var unittests = [
 			provider_token : '1TOKEN',
 			provider_name : '1NAME'
 		},
+		expected : regObjects.item
+	},
+	{
+		name : 'Can\'t login with a no provider_token',
+		method : 'login',
+		data : {
+			provider_token : '',
+			provider_name : '1NAME',
+			display: 'none'
+		},
 		expected : {
-			type:'user',
-			id:/0-9+/
+			error: 'required_provider_token'
 		}
 	},
+	{
+		name : 'Can\'t login with a no provider_name',
+		method : 'login',
+		data : {
+			provider_token : '1TOKEN',
+			provider_name : '',
+			display: 'none'
+		},
+		expected : {
+			error: 'required_provider_name'
+		}
+	},	
 	{
 		name : 'Check that we can\'t login with a bad access token',
 		method : 'login',
@@ -455,7 +537,7 @@ var unittests = [
 			display: 'none'
 		},
 		expected : {
-			error: {code : /[a-z]+/}
+			error: 'invalid_client'
 		}
 	},
 	{
@@ -466,18 +548,13 @@ var unittests = [
 			provider_name : '1NAME',
 			display: 'none'
 		},
-		expected : {
-			authResponse: {access_token : /[a-z]+/}
-		}
+		expected : regObjects.auth
 	},
 	{
 		name : 'Checking that a user has been created',
 		method : 'get',
 		path : 'knarly/me',
-		expected : {
-			type:'user',
-			id:/0-9+/
-		}
+		expected : regObjects.user
 	},
 	{
 		name : 'Checking that we can obtain a list of joined accounts for the user',
@@ -498,9 +575,7 @@ var unittests = [
 			return r.data && r.data.length === 1;
 		},
 		expected : {
-			data : {
-				length : 1
-			}
+			data : [regObjects.item]
 		}
 	},
 	{
@@ -510,18 +585,14 @@ var unittests = [
 		data : {
 			type : 'user'
 		},
-		expected : {
-			type : 'user'
-		}
+		expected : regObjects.user
 	},
 	{
 		name : 'Post an update to the user',
 		method : 'put',
 		path : 'knarly/me',
 		data : griffins.brian,
-		expected : {
-			type : 'user'
-		}
+		expected : regObjects.user
 	},
 	{
 		name : 'Post a quote',
@@ -531,9 +602,7 @@ var unittests = [
 			name : 'Brian quotes',
 			description : 'i will return any stick you can throw at me'
 		},
-		expected : {
-			id : /[0-9]+/
-		}
+		expected : regObjects.item
 	}
 ];
 

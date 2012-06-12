@@ -41,19 +41,20 @@
 			});
 
 			var i = model.connections.length;
-			model.connections.push({ access_token : ko.observable(r.authResponse.access_token), name : ko.observable(r.network) });
+			model.connections.push({ token : ko.observable(r.authResponse.access_token), name : ko.observable(r.network) });
 
 			model.tests.forEach(function(a){
 				if("data" in a){
-					if( 'provider_token' in a.data && parseInt(a.data.provider_token,10) === i ){
-						a.data.provider_token = ko.computed(function(){
-							return model.connections[i].access_token();
-						},model);
-					}
-					if('provider_name' in a.data && parseInt(a.data.provider_name,10) === i){
-						a.data.provider_name = ko.computed(function(){
-							return model.connections[i].name();
-						},model);
+					var a = a.data.items();
+					for(var j=0; j<a.length; j++){
+						var o=a[j];
+						console.log('provider_token' === o.key());
+						if( 'provider_token' === o.key() && parseInt(o.value(),10) === i ){
+							o.value(model.connections[i].token());
+						}
+						if( 'provider_name' === o.key() && parseInt(o.value(),10) === i ){
+							o.value(model.connections[i].name());
+						}
 					}
 				}
 			});
