@@ -59,7 +59,9 @@ var hello = (function(){
 				// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
 				auth : "https://accounts.google.com/o/oauth2/auth",
 				me	: "plus/v1/people/me?pp=1",
-				base : "https://www.googleapis.com/"
+				base : "https://www.googleapis.com/",
+				'me/friends' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000'
+
 			},
 			scope : {
 				basic : "https://www.googleapis.com/auth/plus.me",
@@ -68,6 +70,7 @@ var hello = (function(){
 				events			: '',
 				photos			: 'https://picasaweb.google.com/data/',
 				videos			: 'http://gdata.youtube.com',
+				friends			: 'https://www.google.com/m8/feeds',
 				
 				publish			: '',
 				create_event	: '',
@@ -84,7 +87,25 @@ var hello = (function(){
 						o.name = o.displayName;
 					}
 					return o;
-				}
+				},
+				'me/friends'	: function(o){
+					var r = [];
+					for(var i=0;i<o.feed.entry.length;i++){
+						var a = o.feed.entry[i];
+						r.push({
+							id		: a.id.$t,
+							name	: a.title.$t, 
+							email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
+							updated	: a.updated.$t,
+							picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null
+						});
+					}
+					return {
+						name : o.feed.title.$t,
+						updated : o.feed.updated.$t,
+						data : r
+					}
+				} 
 			}
 		},
 	
@@ -103,6 +124,7 @@ var hello = (function(){
 				events			: 'wl.calendars',
 				photos			: 'wl.photos',
 				videos			: 'wl.photos',
+				friends			: '',
 				
 				publish			: 'wl.share',
 				create_event	: 'wl.calendars_update,wl.events_create',
@@ -114,6 +136,14 @@ var hello = (function(){
 					if(o.id){
 						o.email = (o.emails?o.emails.preferred:null);
 						o.picture = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
+					}
+					return o;
+				},
+				'me/friends' : function(o){
+					if("data" in o){
+						for(var i=0;i<o.data.length;i++){
+							o.data[i].picture = 'https://apis.live.net/v5.0/'+o.data[i].id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
+						}
 					}
 					return o;
 				}
@@ -148,6 +178,7 @@ var hello = (function(){
 				events			: 'user_events',
 				photos			: 'user_photos,user_videos',
 				videos			: 'user_photos,user_videos',
+				friends			: '',
 				
 				publish			: 'publish_stream',
 				create_event	: 'create_event',
@@ -158,6 +189,14 @@ var hello = (function(){
 				me : function(o){
 					if(o.id){
 						o.picture = 'http://graph.facebook.com/'+o.id+'/picture';
+					}
+					return o;
+				},
+				'me/friends' : function(o){
+					if("data" in o){
+						for(var i=0;i<o.data.length;i++){
+							o.data[i].picture = 'http://graph.facebook.com/'+o.data[i].id+'/picture';
+						}
 					}
 					return o;
 				}
@@ -560,9 +599,14 @@ var hello = (function(){
 			// as long as the path isn't flagged as unavaiable, e.g. path == false
 			if( !(p.path in o.uri) || o.uri[p.path] !== false ){
 
-				var url = o.uri.base+(p.path in o.uri ? o.uri[p.path] : p.path),
+				var url = (p.path in o.uri ? o.uri[p.path] : p.path),
 					session = this.getAuthResponse(service),
 					token = (session?session.access_token:null);
+
+				// if url needs a base
+				if( !url.match(/^https?:\/\//) ){
+					url = o.uri.base + url;
+				}
 				
 				var qs = {};
 				
