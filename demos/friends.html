@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>hello.js - Javascript API for OAuth2 authentication and REST services</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+	<link rel="stylesheet" href="../../_packages/document.css" />
+	<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'></script>
+
+	<script src="../../_packages/document.js"></script>
+	<script src="client_ids.js"></script>
+	<style>ul:empty:after{content:'empty';font-weight:bold;color:#aaa;}</style>
+</head>
+<body>
+	<header>
+		<h1>hello.js - me/friends</h1>
+	</header>
+
+	<script class="demo" src="../hello.js"></script>
+
+<script class="demo">
+	hello.init({ 
+		facebook : FACEBOOK_CLIENT_ID,
+		windows  : WINDOWS_CLIENT_ID,
+		google   : GOOGLE_CLIENT_ID
+	},
+	{redirect_uri:'../'});
+</script>
+
+	<button>google</button>
+	<button>facebook</button>
+	<button>windows</button>
+
+<script class="demo">
+	$('button').click(function(){
+		var nw = $(this).text().toLowerCase();
+		hello.login( nw, {scope:'friends'}, function(){
+
+			// Get the friends
+			hello.api( nw+'/me/friends', function(r){
+				$.each(r.data, function(i,o){
+					$('<li><img src="'+ o.picture +'"/><span>'+o.name+'</span></li>').appendTo('ul').find('img').on('error', function(e){$(this).hide();});
+				});
+			});
+
+		});
+	})
+</script>
+
+	<h2>Friends list</h2>
+	<ul></ul>
+
+</body>
+</html>
