@@ -90,21 +90,24 @@ var hello = (function(){
 				},
 				'me/friends'	: function(o){
 					var r = [];
-					for(var i=0;i<o.feed.entry.length;i++){
-						var a = o.feed.entry[i];
-						r.push({
-							id		: a.id.$t,
-							name	: a.title.$t, 
-							email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
-							updated	: a.updated.$t,
-							picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null
-						});
+					if("feed" in o && "entry" in o.feed){
+						for(var i=0;i<o.feed.entry.length;i++){
+							var a = o.feed.entry[i];
+							r.push({
+								id		: a.id.$t,
+								name	: a.title.$t, 
+								email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
+								updated	: a.updated.$t,
+								picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null
+							});
+						}
+						return {
+							name : o.feed.title.$t,
+							updated : o.feed.updated.$t,
+							data : r
+						}
 					}
-					return {
-						name : o.feed.title.$t,
-						updated : o.feed.updated.$t,
-						data : r
-					}
+					return o;
 				} 
 			}
 		},
@@ -775,7 +778,6 @@ var hello = (function(){
 		// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
 		p = _param(window.location.search);
 	}
-
 	// if p.state
 	if( p && "state" in p ){
 
@@ -889,7 +891,7 @@ var hello = (function(){
 		
 		if(typeof(s)==='string'){
 
-			m = s.replace(/^[\#\?]/,'').match(/([^=\/\&]+)=([^\/\&]+)/g);
+			m = s.replace(/^[\#\?]/,'').match(/([^=\/\&]+)=([^\&]+)/g);
 			log(m);
 			if(m){
 				for(var i=0;i<m.length;i++){
