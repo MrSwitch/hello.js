@@ -58,13 +58,14 @@ var hello = (function(){
 			uri : {
 				// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
 				auth : "https://accounts.google.com/o/oauth2/auth",
-				me	: "plus/v1/people/me?pp=1",
+//				me	: "plus/v1/people/me?pp=1",
+				me : 'oauth2/v1/userinfo',
 				base : "https://www.googleapis.com/",
 				'me/friends' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000'
 
 			},
 			scope : {
-				basic : "https://www.googleapis.com/auth/plus.me",
+				basic : "https://www.googleapis.com/auth/plus.me,https://www.googleapis.com/auth/userinfo.profile,https://www.googleapis.com/auth/userinfo.email",
 				email			: '',
 				birthday		: '',
 				events			: '',
@@ -81,10 +82,10 @@ var hello = (function(){
 			wrap : {
 				me : function(o){
 					if(o.id){
-						o.last_name = o.name.familyName;
-						o.first_name = o.name.givenName;
-						o.picture = o.image.url;
-						o.name = o.displayName;
+						o.last_name = o.family_name || o.name.familyName;
+						o.first_name = o.given_name || o.name.givenName;
+						o.picture = o.picture || o.image.url;
+						o.name = o.name || o.displayName;
 					}
 					return o;
 				},
