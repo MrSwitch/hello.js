@@ -58,13 +58,14 @@ var hello = (function(){
 			uri : {
 				// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
 				auth : "https://accounts.google.com/o/oauth2/auth",
-				me	: "plus/v1/people/me?pp=1",
+//				me	: "plus/v1/people/me?pp=1",
+				me : 'oauth2/v1/userinfo',
 				base : "https://www.googleapis.com/",
 				'me/friends' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000'
 
 			},
 			scope : {
-				basic : "https://www.googleapis.com/auth/plus.me",
+				basic : "https://www.googleapis.com/auth/plus.me,https://www.googleapis.com/auth/userinfo.profile,https://www.googleapis.com/auth/userinfo.email",
 				email			: '',
 				birthday		: '',
 				events			: '',
@@ -81,30 +82,33 @@ var hello = (function(){
 			wrap : {
 				me : function(o){
 					if(o.id){
-						o.last_name = o.name.familyName;
-						o.first_name = o.name.givenName;
-						o.picture = o.image.url;
-						o.name = o.displayName;
+						o.last_name = o.family_name || o.name.familyName;
+						o.first_name = o.given_name || o.name.givenName;
+						o.picture = o.picture || o.image.url;
+						o.name = o.name || o.displayName;
 					}
 					return o;
 				},
 				'me/friends'	: function(o){
 					var r = [];
-					for(var i=0;i<o.feed.entry.length;i++){
-						var a = o.feed.entry[i];
-						r.push({
-							id		: a.id.$t,
-							name	: a.title.$t, 
-							email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
-							updated	: a.updated.$t,
-							picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null
-						});
+					if("feed" in o && "entry" in o.feed){
+						for(var i=0;i<o.feed.entry.length;i++){
+							var a = o.feed.entry[i];
+							r.push({
+								id		: a.id.$t,
+								name	: a.title.$t, 
+								email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
+								updated	: a.updated.$t,
+								picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null
+							});
+						}
+						return {
+							name : o.feed.title.$t,
+							updated : o.feed.updated.$t,
+							data : r
+						}
 					}
-					return {
-						name : o.feed.title.$t,
-						updated : o.feed.updated.$t,
-						data : r
-					}
+					return o;
 				} 
 			}
 		},
@@ -775,7 +779,6 @@ var hello = (function(){
 		// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
 		p = _param(window.location.search);
 	}
-
 	// if p.state
 	if( p && "state" in p ){
 
@@ -889,7 +892,7 @@ var hello = (function(){
 		
 		if(typeof(s)==='string'){
 
-			m = s.replace(/^[\#\?]/,'').match(/([^=\/\&]+)=([^\/\&]+)/g);
+			m = s.replace(/^[\#\?]/,'').match(/([^=\/\&]+)=([^\&]+)/g);
 			log(m);
 			if(m){
 				for(var i=0;i<m.length;i++){
