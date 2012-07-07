@@ -160,7 +160,7 @@ hello.subscribe('auth.login', function(r){
 		/**<<< Dev environment settings, not actual spec*/
 		,knarly   : (local ? {uri: { auth: '/auth.knarly.com/', base : '/api.knarly.com/' }} : {})
 		//>>>*/
-	});
+	},{redirect_uri:'redirect.html'});
 </script>
 	
 	<h3>3. And run</h3>
