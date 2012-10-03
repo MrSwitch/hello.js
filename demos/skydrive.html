@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.2.min.js"></script>
+<script src="client_ids.js"></script>
+
+<title>Simple SkyDrive Demo</title>
+<button>Login</button>
+<script>
+$('button').click(function(){
+	window.location = 'https://oauth.live.com/authorize'+ 
+		'?client_id='+WINDOWS_CLIENT_ID 
+		'&scope=wl.skydrive'+ 
+		'&response_type=token'+ 
+		'&redirect_uri='+encodeURIComponent(window.location.href);
+});
+</script>
+
+<script>
+var access_token = (window.location.hash||window.location.search).match(/access_token=([^&]+)/); 
+if(access_token){ 
+	// Get the first match result
+	access_token = decodeURIComponent(access_token[1]);
+
+	// Recursively start searching Skydrive directories for photos, triggers callback on each image
+	getAllPhotos('me/skydrive/files',function(obj){
+		// Place photos on the page
+		$('<img src="'+obj.picture+'"/>').appendTo('body');
+	});
+}
+
+// Recursively go through the directories
+// e.g. "https://apis.live.net/v5.0/me/skydrive/files?filter=photos" 
+function getAllPhotos(path,callback){
+	// Make JSONP request
+	// Use access_token to authenticate the request and a callback used for JSONP 
+	$.getJSON('https://apis.live.net/v5.0/'+path+'?filter=albums,folders,photos&access_token='+access_token+"&callback=?", function(r){
+		// Loop through the results
+		$(r.data).each(function(i,obj){
+			// Make a request to get the folder contents
+			if(obj.type === 'folder' || obj.type === 'album'){
+				getAllPhotos(obj.id+'/files', callback);
+			}
+			else if(obj.type==='photo'){
+				callback(obj);
+			}
+		});
+	});
+};
+</script>

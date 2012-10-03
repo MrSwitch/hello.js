@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<script src="//connect.facebook.net/en_US/all.js"></script>
+<script src="//js.live.net/v5.0/wl.js"></script>
+<script src="client_ids.js"></script>
+
+<button id="windows" onclick="WL.login();">Login Windows</button>
+<button id="facebook" onclick="FB.login();">Login Facebook</button>
+
+<script>
+// Windows Live
+WL.Event.subscribe('auth.login', function(){
+	// Get Profile
+	WL.api('me', function(r){
+		document.getElementById('windows').innerHTML = "Connected to Windows as " + r.name;
+	});
+});
+
+// Facebook
+FB.Event.subscribe('auth.login', function(){
+	// Get Profile
+	FB.api('me', function(r){
+		document.getElementById('facebook').innerHTML = "Connected to FaceBook as " + r.name;
+	});
+});
+
+// Initiate the windows live app
+WL.init({
+	client_id: WINDOWS_CLIENT_ID,
+	scope: "wl.signin"
+});
+
+// Initiate the facebook app
+FB.init({
+	appId: FACEBOOK_CLIENT_ID
+});
+</script>
