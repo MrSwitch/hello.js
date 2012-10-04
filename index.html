@@ -505,61 +505,46 @@ described below.</p>
 	</table>
 
 	<h3>Browser Support</h3>
-<h4>PC</h4>
 <table>
 	<thead>
-	<tr class="browsers">
+	<tr>
 		<td>Browser</td>
-		<th class="ie9">IE9</th>
-		<th class="ie8">IE8</th>
-		<th class="ie7">IE7</th>
-		<th class="ff">FF</th>
-		<th class="cr">Cr</th>
-		<th class="sa">Saf</th>
-		<th class="op">Op</th>
+		<th><div class="ie9"></div>IE10</th>
+		<th><div class="ie9"></div>IE9</th>
+		<th><div class="ie8"></div>IE8</th>
+		<th><div class="ie7"></div>IE7</th>
+		<th><div class="ff"></div></th>
+		<th><div class="cr"></div></th>
+		<th><div class="sa"></div></th>
+		<th><div class="op"></div></th>
+		<th><div class="op"></div>Mob</th>
+		<th><div class="op"></div>Mini5</th>
+		<th>iOS</th>
+		<th>WP 7</th>
 	</tr>
 	</thead>
 	<tbody>
 	<tr>
 		<th>hello.js</th>
-		<td class="yes" colspan=2>yes</td>
-		<td class="partial">partial<sup>1</sup></td>
-		<td class="yes">yes</td>
-		<td class="yes">yes</td>
-		<td class="yes">yes</td>
-		<td class="yes">yes</td>
+		<td class="yes" colspan=3></td>
+		<td class="yes"><sup>1,2</sup></td>
+		<td class="yes"></td>
+		<td class="yes"></td>
+		<td class="yes"></td>
+		<td class="yes"></td>
+		<td class="yes"></td>
+		<td class="yes"><sup>3</sup></td>
+		<td class="yes"></td>
+		<td class="yes"><sup>4</sup></td>
 	</tr>
 	</tbody>
 </table>
 <ol>
-	<li><span class="partial">IE7</span>: Makes beeping sounds whenever the POST, PUT or DELETE methods are 
+	<li><span>IE7</span>: Makes beeping sounds whenever the POST, PUT or DELETE methods are 
 	used - because of the XD, IFrame+Form+hack.</li>
-	<li><span class="partial">IE7</span>: Include JSON.js and localStorage shims</li>
-</ol>
-<h4>Mobile</h4>
-<table>
-	<tr>
-		<td>Browser</td>
-		<th>Android</th>
-		<th>WP 7</th>
-		<th>iOS</th>
-		<th>Opera Mobile 10.1</th>
-		<th>Opera Mini 5</th>
-		<th>Nokia S60</th>
-	</tr>
-	<tr>
-		<th>hello.js</th>
-		<td class="yes">yes</td>
-		<td class="yes">yes<sup>1</sup></td>
-		<td class="yes">yes</td>
-		<td class="yes">yes</td>
-		<td class="yes">yes<sup>2</sup></td>
-		<td></td>
-	</tr>
-	</table>
-<ol>
-	<li><span class="yes">WP7</span>: Supports inline consent only, i.e. reloads original page.</li>
-	<li><span class="yes">Opera Mini</span>: Supports inline consent only, i.e. reloads original page.</li>
+	<li><span>IE7</span>: Requires JSON.js and localStorage shims</li>
+	<li><span>Opera Mini</span>: Supports inline consent only, i.e. reloads original page.</li>
+	<li><span>WP7</span>: Supports inline consent only, i.e. reloads original page.</li>
 </ol>
 
 </body>
