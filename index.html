@@ -3,7 +3,7 @@
 <head>
 	<title>hello.js - Javascript API for OAuth2 authentication and REST services</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-	<link rel="stylesheet" href="../_packages/document.css" />
+	<link rel="stylesheet" href="/_packages/document.css" />
 	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
 	<script src="demos/client_ids.js"></script>
 <script>
@@ -17,7 +17,7 @@
 	loadScript([['http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js','/_packages/jquery.js'][local]]);
 //]]>
 </script>
-	<script src="../_packages/document.js"></script>
+	<script src="/_packages/document.js"></script>
 <script>
 
 	// Load the demo object 
@@ -112,12 +112,12 @@
 	<h3>2. Copy and paste</h3>
 	<p>Copy and paste the code below to your test page.</p>
 
-<script class="demo" src="hello.js"></script>
+<script class="pre" src="hello.js"></script>
 
 
 	<p>Lets define a simple function, which will load a user profile into the page after they signin and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.</p>
 
-<script class="demo">
+<script class="pre">
 hello.subscribe('auth.login', function(r){
 	
 	// call user information, for the given network
@@ -138,23 +138,28 @@ hello.subscribe('auth.login', function(r){
 
 	<p>Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the <code>hello.init</code> function. e.g....</p>
 
-<script class="demo">
-	hello.init({ 
-		facebook : FACEBOOK_CLIENT_ID,
-		windows  : WINDOWS_CLIENT_ID,
-		google   : GOOGLE_CLIENT_ID
-		/**<<< Dev environment settings, not actual spec*/
-		,knarly   : (local ? {uri: { auth: '/auth.knarly.com/', base : '/api.knarly.com/' }} : {})
-		//>>>*/
-	},{redirect_uri:'redirect.html'});
+<script class="pre">
+hello.init({ 
+	facebook : FACEBOOK_CLIENT_ID,
+	windows  : WINDOWS_CLIENT_ID,
+	google   : GOOGLE_CLIENT_ID
+},{redirect_uri:'redirect.html'});
 </script>
 	
 	<h3>3. And run</h3>
 	<p>Now create buttons for your services on the page and  You should see a button which says "Signin" clicking this will prompt you to choose the network you wish to connect to out of the options you passed to hello.init function.</p>
 
-<div class="demo"><button onclick="hello.login('google', function(){alert('You have signed into google')});">google</button>
-<button onclick="hello.login('facebook', function(){alert('You have signed into facebook')});">facebook</button>
-<button onclick="hello.login('windows', function(){alert('You have signed into windows live')});">windows</button></div>
+<button class="signin">google</button>
+<button class="signin">facebook</button>
+<button class="signin">windows</button></div>
+
+	<p>The onclick events for the buttons</p>
+<script class="pre">
+$('button.signin').on('click', function(){
+	var network = this.innerText||this.innerHTML;
+	hello.login(network, function(){alert('You have signed into '+network+' live')});
+});
+</script>
 
 <header>
 <h2>Publishing Demo: Write it on the wall</h2>
@@ -166,7 +171,7 @@ hello.subscribe('auth.login', function(r){
 <button onclick="hello.login('facebook', {scope:'publish'}, function(){alert('You have signed into facebook')});">facebook</button>
 <button onclick="hello.login('windows', {scope:'publish'}, function(){alert('You have signed into windows live')});">windows</button></p>
 
-<script class="demo">
+<script class="pre">
 $('body').on('submit','form.demoPostWall', function(e){
 	// Lets not leave the browser
 	e.preventDefault();
