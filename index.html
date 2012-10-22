@@ -89,8 +89,11 @@
 <body>
 	<header>
 		<h1><img src="favicon.ico" width=64 height=64 style="vertical-align:middle;margin-right:20px;">hello.js</h1>
-		<blockquote>A Javascript API for <a href="http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf" target="_blank">OAuth2</a> authentication and REST inspection of third party 
-		API&#39;s like Google+, Facebook Graph and Windows Live Connect. A developer may code against this very familiar looking API and let the end user choose which provider they want to authenticate with.</blockquote>
+		<blockquote><p>A Javascript API for <a href="http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf" target="_blank">OAuth2</a> authentication and REST inspection of third party 
+		API&#39;s like Google+, Facebook Graph and Windows Live Connect. A developer may code against this very familiar looking API whilst switching seemlessly between REST URL's and Login URL's pertaining to Windows, Facebook and or Google (more to come) no more spaghetti code. 
+
+<p>It's built to be agnostic, just like OAuth2. Its extensible so you may add your own provider, assuming they support OAuth2 and have a Graph interface accessible via CORS and or JSONP. 
+</blockquote>
 		<nav class="toc"></nav>
 	</header>
 	<header>
@@ -458,7 +461,37 @@ request more from the user later.</p>
 	<button onclick="hello.login('windows',{scope:scopes('form.setscopes')}, function(){alert('You have signed into windows live')});">windows</button>
 
 
+
 <h2 id="REST API">REST API</h2>
+
+<h3>Path Translation</h3>
+<p>hello.js translates paths if there are common paths across services.</p>
+<table contenteditable=true>
+	<thead>
+		<tr><th><code>hello.js</code></th><th>Facebook</th><th>Windows Live</th><th>Google</th></tr>
+	</thead>
+	<tbody>
+		<tr>
+			<th><em>OAuth2 endpoint</em></th><td>http://www.facebook.com/dialog/oauth/</td><td>https://oauth.live.com/authorize</td><td>https://accounts.google.com/o/oauth2/auth</td>
+		</tr>
+		<tr>
+			<th><em>REST API base</em></th><td>https://graph.facebook.com/</td><td>https://apis.live.net/v5.0/</td><td>https://www.googleapis.com/</td>
+		</tr>
+		<tr>
+			<th><q>me</q></th><td>me</td><td>me</td><td>plus/v1/people/me?pp=1</td>
+		</tr>
+		<tr>
+			<th><q>me/friends</q></th><td>me/friends</td><td>me/friends</td><td>https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000</td>
+		</tr>
+		<tr>
+			<th><q>me/share</q></th><td>me/feed</td><td>me/share</td><td>n/a</td>
+		</tr>
+		<tr>
+			<th><q>me/albums</q></th><td>me/albums</td><td>me/albums</td><td>n/a</td>
+		</tr>
+	</tbody>
+</table>
+
 
 <h3>Paths</h3>
 <p>These are some of the paths you can use with hello.api( <strong>path</strong>, <em>callback</em> ).</p>
