@@ -1,12 +1,19 @@
 <!DOCTYPE html>
-<script src="//connect.facebook.net/en_US/all.js"></script>
-<script src="//js.live.net/v5.0/wl.js"></script>
+<link rel="stylesheet" href="/_packages/document.css"></script>
 <script src="client_ids.js"></script>
 
+<h1>Profile Demo: With Windows Live and FaceBook SDK's</h1>
+
+<p>Include both the SDK's</p>
+<script src="//connect.facebook.net/en_US/all.js" class="pre"></script>
+<script src="//js.live.net/v5.0/wl.js" class="pre"></script>
+
+<p>Create the signin buttons</p>
 <button id="windows" onclick="WL.login();">Login Windows</button>
 <button id="facebook" onclick="FB.login();">Login Facebook</button>
 
-<script>
+<p>Add event listeners for the login completed event and make a request for the users profile. Once that's loaded push it to the page. </p>
+<script class="pre">
 // Windows Live
 WL.Event.subscribe('auth.login', function(){
 	// Get Profile
@@ -23,6 +30,10 @@ FB.Event.subscribe('auth.login', function(){
 	});
 });
 
+</script>
+
+<p>Plug the app keys (client_id') and voila</p>
+<script class="pre">
 // Initiate the windows live app
 WL.init({
 	client_id: WINDOWS_CLIENT_ID,
