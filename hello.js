@@ -65,6 +65,7 @@ var hello = (function(){
 
 			},
 			scope : {
+				//,https://www.googleapis.com/auth/userinfo.email
 				basic : "https://www.googleapis.com/auth/plus.me",
 				email			: '',
 				birthday		: '',
@@ -556,13 +557,13 @@ var hello = (function(){
 			
 			// Path
 			p.path = p.path.replace(/^\/+/,'');
-			var a = (p.path.split("/",2)||[])[0].toLowerCase();
+			var a = (p.path.split(/[\/\:]/,2)||[])[0].toLowerCase();
 	
 			var service;
 	
 			if(a in _services){
 				service = a;
-				var reg = new RegExp('^'+a+'\/?');
+				var reg = new RegExp('^'+a+'\:?\/?');
 				p.path = p.path.replace(reg,'');
 			}
 			else {
