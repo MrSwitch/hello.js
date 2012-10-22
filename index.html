@@ -59,42 +59,6 @@
 		.appendTo($log);
 	}
 
-	// Load the demo object 
-	// this page has lots of demo's
-	var demo = {};
-
-	// on ready
-	$(function(){
-			
-		$("form.rest").each(function(i){
-			
-			var $frm = $(this).submit(function(e){
-					e.preventDefault();
-					e.stopPropagation();
-					var path = $inpt.val();
-					hello.api( path, function (json, network){
-						dump(path, $pre );
-						dump(json, $pre );
-					});
-				}),
-				$pre = $('pre',this),
-				$inpt = $('input[name=path]', this);
-		
-		
-			// Add events to the first column
-			$("nav ul li", this).each(function(){
-		
-				var path = this.innerHTML;
-				this.innerHTML = '';
-		
-				$("<a href='javascript:void(0);'></a>").appendTo(this).text(path).click(function(){
-					$inpt.val(path);
-					$frm.trigger('submit');
-				});
-			});
-		});
-	});
-
 </script>
 
 <script>
@@ -124,6 +88,55 @@
 		vertical-align:middle;
 		margin-right:20px;
 	}
+
+
+/**
+ * REST EXPOLORER
+ */
+
+ul.tabs{
+	margin:0;
+	padding:0;
+}
+	ul.tabs li{
+		display: inline-block;
+		border:1px solid #eee;
+		background-color: #f4f4f4;
+		padding:5px 10px;
+	}
+
+input[name=path]{
+	display:block;
+	width:100%;
+	padding:5px;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	font-size:20px;
+	margin:0;
+	border:1px solid #e4e4e4;
+	border-top-width:10px;
+}
+article{
+	display:-moz-box; /* Firefox */
+	display:-webkit-box; /* Safari and Chrome */
+	display:box;
+}
+	article > nav ul, 
+	article > nav ul li{
+		margin:0;
+		padding:5px;
+		list-style:none;
+	}
+	article > pre{
+		-moz-box-flex:1.0; /* Firefox */
+		-webkit-box-flex:1.0; /* Safari and Chrome */
+		box-flex:1.0;
+		margin:0;
+	}
+
+
+
 </style>
 	
 
@@ -508,7 +521,7 @@ request more from the user later.</p>
 
 <h3>Path Translation</h3>
 <p>hello.js translates paths if there are common paths across services.</p>
-<table contenteditable=true>
+<table>
 	<thead>
 		<tr><th><code>hello.js</code></th><th>Facebook</th><th>Windows Live</th><th>Google</th></tr>
 	</thead>
@@ -542,10 +555,18 @@ e.g.
 <p>Below is a REST playground, clicking the paths on the left will return the results on the right</p>
 
 <h3>Play Ground</h3>
-<form class="rest">
-	<input type="text" name="path" placeholder="path"/>
+
+<ul class="tabs">
+	<li onclick='restTabs("windows:")'>Windows
+	<li onclick='restTabs("facebook:")'>FaceBook
+	<li onclick='restTabs("google:")'>Google
+</ul>
+<form class="rest" id="playground">
+	<input type="text" name="path" placeholder="Select a path and click `Run`" list="restpaths"/>
+	<button type="submit">Run</button><button type="button" onclick="document.getElementById('restoutput').innerHTML = '';">clear</button> <a href="#ScopeandPermissions">update your scopes and permissions</a>
 	<article>
 		<nav>
+			e.g...
 			<ul>
 				<li>/me</li>
 				<li>/me/friends</li>
@@ -557,10 +578,62 @@ e.g.
 				<li>/me/events</li>
 			</ul>
 		</nav>
-		<pre></pre>
+		<pre id="restoutput"></pre>
 	</article>
 </form>
 
+<script>
+function restTabs(path){
+	var input = document.getElementById('playground').elements.path;
+
+	network = ( path.match(/^([^:]+)\:/) || input.value.match(/^([^:]+)\:/) );
+	if(network){
+		network = network[1];
+	}
+
+	var pathname = (path.match(/[^:]+$/)||input.value.match(/[^:]+$/));
+	if(pathname){
+		pathname = pathname[0];
+	}
+
+	path = (network?network+":":'') + (pathname||'');
+
+	var action = function(){
+		input.value = path;
+	};
+
+	if(network){
+		var service = hello.getAuthResponse(network);
+		( !service || (service.expires && service.expires < ((new Date()).getTime()/1e3) ) )
+			? hello.login(network, action)
+			: action();
+	}
+	else{
+		action();
+	}
+}
+		
+// Add events to the first column
+$("#playground nav ul li").click(function(){
+	restTabs($(this).text());
+});
+
+
+$("form.rest").each(function(i){
+	var $frm = $(this).submit(function(e){
+			e.preventDefault();
+			e.stopPropagation();
+			var path = $inpt.val();
+			hello.api( path, function (json, network){
+				dump(path, $pre );
+				dump(json, $pre );
+			});
+		}),
+		$pre = $('pre',this),
+		$inpt = $('input[name=path]', this);
+});
+
+</script>
 
 
 
