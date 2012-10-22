@@ -117,24 +117,20 @@ input[name=path]{
 	border:1px solid #e4e4e4;
 	border-top-width:10px;
 }
-article{
-	display:-moz-box; /* Firefox */
-	display:-webkit-box; /* Safari and Chrome */
-	display:box;
-}
-	article > nav ul, 
-	article > nav ul li{
-		margin:0;
-		padding:5px;
-		list-style:none;
-	}
-	article > pre{
-		-moz-box-flex:1.0; /* Firefox */
-		-webkit-box-flex:1.0; /* Safari and Chrome */
-		box-flex:1.0;
-		margin:0;
-	}
 
+#playground > ul,
+#playground > ul > li{
+	display: inline-block;
+	margin:0;
+	padding:0;
+}
+#playground > ul > li:after{
+	content:", ";
+}
+
+#playground > ul > li:hover{
+	background-color: rgba(0,0,0,0.05);
+}
 
 
 </style>
@@ -563,23 +559,20 @@ e.g.
 </ul>
 <form class="rest" id="playground">
 	<input type="text" name="path" placeholder="Select a path and click `Run`" list="restpaths"/>
+	e.g...
+	<ul>
+		<li>/me</li>
+		<li>/me/friends</li>
+		<li>/me/feed</li>
+		<li>/me/home</li>
+		<li>/me/photos</li>
+		<li>/me/albums</li>
+		<li>/me/videos</li>
+		<li>/me/events</li>
+	</ul>
+	<br />
 	<button type="submit">Run</button><button type="button" onclick="document.getElementById('restoutput').innerHTML = '';">clear</button> <a href="#ScopeandPermissions">update your scopes and permissions</a>
-	<article>
-		<nav>
-			e.g...
-			<ul>
-				<li>/me</li>
-				<li>/me/friends</li>
-				<li>/me/feed</li>
-				<li>/me/home</li>
-				<li>/me/photos</li>
-				<li>/me/albums</li>
-				<li>/me/videos</li>
-				<li>/me/events</li>
-			</ul>
-		</nav>
-		<pre id="restoutput"></pre>
-	</article>
+	<pre id="restoutput" style="min-height:400px;"></pre>
 </form>
 
 <script>
@@ -614,7 +607,7 @@ function restTabs(path){
 }
 		
 // Add events to the first column
-$("#playground nav ul li").click(function(){
+$("#playground ul li").click(function(){
 	restTabs($(this).text());
 });
 
