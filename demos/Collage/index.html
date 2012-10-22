@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="style.css" />
+<script src="/hello.js/demos/client_ids.js"></script>
+<script src="/hello.js/hello.js"></script>
+<script src="fabric.js"></script>
+<script src="/_packages/track.js"></script>
+<header>
+	<h1><a onclick="nav.style.display='block';">Collage</a></h1>
+</header>
+
+<nav id="nav">
+	<button onclick="nav.style.display='none';" class="close">X</button>
+	<h1>Hi, welcome to Collage</h1>
+	<p>Play around with your photos from SkyDrive</p>
+	<button onclick="hello.login('windows')">Load images from Skydrive</button>
+	<!--
+	<button onclick="hello.login('facebook')">Load images from Facebook</button>
+	-->
+</nav>
+
+<section>
+	<canvas id="c" width="800" height="500"></canvas>
+</section>
+<script>
+
+// Start Fabric
+var canvas = new fabric.Canvas('c',{
+	selectionColor: 'blue',
+	selectionLineWidth: 2
+});
+
+// Register with Hello
+hello.subscribe('auth.login', function(r){
+
+	findPhotos( r.network, 'me/albums', function(file){
+
+		var h = canvas.height,
+			w = canvas.width;
+
+		fabric.Image.fromURL(file.picture, function(img) {
+
+			var img = img.set({
+				left: parseInt(Math.random()*h), 
+				top: parseInt(Math.random()*w), 
+				angle: parseInt((Math.random()*50)-25,10),
+				selectable : true
+			});
+
+			canvas.add(img);
+		});
+
+//		console.log(img);
+	});
+});
+
+hello.init(CLIENT_IDS,{scope:'photos',redirect_uri:"/hello.js/redirect.html"});
+
+function findPhotos(network, path, callback){
+
+	// Does it have siblings?
+	hello.api(network+'/'+path, function(r){
+
+		if(!r||r.error){
+			return;
+		}
+
+		if(r.data){
+			// Loop through and add photos to the canvas
+			for(var i=0;i<r.data.length;i++){
+				var item = r.data[i];
+
+				if(item.type === 'folder' || item.type === 'album'){
+					findPhotos(network, item.id+'/files', callback);
+				}
+				else if(item.type==='photo'){
+					callback(item);
+				}
+			}
+		}
+
+	})	
+}
+</script>
