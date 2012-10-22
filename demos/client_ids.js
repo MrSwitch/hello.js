@@ -19,3 +19,10 @@ var WINDOWS_CLIENT_ID = {
 
 // 
 var GOOGLE_CLIENT_ID = '656984324806-sr0q9vq78tlna4hvhlmcgp2bs2ut8uj8.apps.googleusercontent.com';
+
+// To make it a little easier
+var CLIENT_IDS = {
+	windows : WINDOWS_CLIENT_ID,
+	google : GOOGLE_CLIENT_ID,
+	facebook : FACEBOOK_CLIENT_ID
+};
