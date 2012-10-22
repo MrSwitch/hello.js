@@ -4,25 +4,24 @@
 
 <script src="/_packages/document.js"></script>
 <script src="client_ids.js"></script>
-<script src="http://mrswitch.github.com/hello.js/hello.js"></script>
+<script src="/hello.js/hello.js"></script>
 
 <h1>Demo hello.api('/me')</h1>
 <button id='google' onclick="hello.login('google');">google</button>
 <button id='facebook' onclick="hello.login('facebook');">facebook</button>
 <button id='windows' onclick="hello.login('windows');">windows</button>
 
-<script>
-	// Windows Live
-	hello.subscribe('auth.login', function(r){
-		// Get Profile
-		hello.api(r.network+'/me', function(p){
-			document.getElementById(r.network).innerHTML = "Connected to "+r.network+" as " + p.name;
-		});
+<script class="pre">
+hello.subscribe('auth.login', function(r){
+	// Get Profile
+	hello.api(r.network+'/me', function(p){
+		document.getElementById(r.network).innerHTML = "Connected to "+r.network+" as " + p.name;
 	});
+});
 
-	hello.init({ 
-		facebook : FACEBOOK_CLIENT_ID,
-		windows  : WINDOWS_CLIENT_ID,
-		google   : GOOGLE_CLIENT_ID
-	});
+hello.init({ 
+	facebook : FACEBOOK_CLIENT_ID,
+	windows  : WINDOWS_CLIENT_ID,
+	google   : GOOGLE_CLIENT_ID
+});
 </script>
