@@ -107,7 +107,10 @@
 	
 
 <style>
-
+	#profile:empty:before{
+		content:"Profiles are loaded here";
+		color:#999;
+	}
 	#profile p{
 		display:inline-block;
 		border:1px solid #ddd;
@@ -175,8 +178,6 @@ hello.subscribe('auth.login', function(r){
 	});
 });
 </script>
-	
-	<div id="profile"></div>
 
 	<p>Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the <code>hello.init</code> function. e.g....</p>
 
@@ -190,6 +191,8 @@ hello.init({
 	
 	<h3>3. And run</h3>
 	<p>Now create buttons for your services on the page and  You should see a button which says "Signin" clicking this will prompt you to choose the network you wish to connect to out of the options you passed to hello.init function.</p>
+
+	<div id="profile"></div>
 
 <button class="signin">google</button>
 <button class="signin">facebook</button>
