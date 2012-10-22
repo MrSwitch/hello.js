@@ -30,6 +30,9 @@ linear-gradient(-30deg, rgba(0,0,0,.1) 25%, transparent 25%, transparent 75%, rg
 }
 header{
 	height:30px;
+	display: inline-block;
+	position: absolute;
+	z-index: 1;
 }
 	header h1{
 		margin:0;
@@ -45,12 +48,16 @@ header{
 nav{
 	position:absolute;
 	top:60px;
+	left:30px;
 	background-color: beige;
 	display: inline-block;
 	padding: 20px;
 	border: 6px inset #6D695C;
 	box-shadow: 10px 10px 10px rgba(0, 0, 0, 0.4);
 	-webkit-transform: rotate(1deg);
+	-moz-transform: rotate(1deg);
+	-ms-transform: rotate(1deg);
+	transform: rotate(1deg);
 	z-index:10;
 }
 
@@ -60,8 +67,9 @@ nav{
 		right:0;
 	}
 
-nav:before{
+nav:before, nav:after{
 	content: " ";
+
 	border:30px solid transparent;
 	border-bottom-color:black;
 	position:absolute;
@@ -69,17 +77,13 @@ nav:before{
 	left:0;
 }
 nav:after{
-	content: " ";
-	border:30px solid transparent;
 	border-bottom-color:beige;
-	position:absolute;
 	top:-54px;
-	left:0;
 }
 
 section{
 	position:absolute;
-	top:30px;
+	top:0;
 	bottom:0;
 	left:0;
 	right:0;

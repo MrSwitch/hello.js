@@ -5,7 +5,7 @@
 <script src="fabric.js"></script>
 <script src="/_packages/track.js"></script>
 <header>
-	<h1><a onclick="nav.style.display='block';">Collage</a></h1>
+	<h1>&gt; <a onclick="nav.style.display='block';">Collage</a></h1>
 </header>
 
 <nav id="nav">
@@ -22,6 +22,9 @@
 	<canvas id="c" width="800" height="500"></canvas>
 </section>
 <script>
+
+c.width = window.innerWidth;
+c.height = window.innerHeight;
 
 // Start Fabric
 var canvas = new fabric.Canvas('c',{
@@ -40,11 +43,11 @@ hello.subscribe('auth.login', function(r){
 		fabric.Image.fromURL(file.picture, function(img) {
 
 			var img = img.set({
-				left: parseInt(Math.random()*h), 
-				top: parseInt(Math.random()*w), 
+				left: parseInt(Math.random()*w), 
+				top: parseInt(Math.random()*h), 
 				angle: parseInt((Math.random()*50)-25,10),
 				selectable : true
-			});
+			}).scale(2);
 
 			canvas.add(img);
 		});
