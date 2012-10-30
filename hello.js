@@ -58,15 +58,15 @@ var hello = (function(){
 			uri : {
 				// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
 				auth : "https://accounts.google.com/o/oauth2/auth",
-				me	: "plus/v1/people/me?pp=1",
-//				me : 'oauth2/v1/userinfo',
+//				me	: "plus/v1/people/me?pp=1",
+				me : 'oauth2/v1/userinfo?alt=json',
 				base : "https://www.googleapis.com/",
 				'me/friends' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000'
 
 			},
 			scope : {
-				//,https://www.googleapis.com/auth/userinfo.email
-				basic : "https://www.googleapis.com/auth/plus.me",
+				//,
+				basic : "https://www.googleapis.com/auth/plus.me,https://www.googleapis.com/auth/userinfo.email,https://www.googleapis.com/auth/userinfo.profile",
 				email			: '',
 				birthday		: '',
 				events			: '',
@@ -775,7 +775,7 @@ var hello = (function(){
 	// Save session, from redirected authentication
 	// #access_token has come in?
 	//	
-	var p = _param(window.location.hash);
+	var p = _param(window.location.hash||null);
 
 	if(!p){
 		// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
@@ -942,7 +942,7 @@ var hello = (function(){
 		else {
 			return hello;
 		}
-		
+
 		localStorage.setItem('hello', JSON.stringify(hello));
 
 		return hello;
