@@ -66,7 +66,7 @@ var hello = (function(){
 			},
 			scope : {
 				//,
-				basic : "https://www.googleapis.com/auth/plus.me,https://www.googleapis.com/auth/userinfo.email,https://www.googleapis.com/auth/userinfo.profile",
+				basic : "https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
 				email			: '',
 				birthday		: '',
 				events			: '',
