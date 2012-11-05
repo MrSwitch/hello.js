@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>hello.js - demo - activities</title>
+	<link rel="stylesheet" href="/_packages/document.css" />
+	<script src="/_packages/document.js"></script>
+
+	<script src="client_ids.js"></script>
+	<style>ul:empty:after{content:'empty';font-weight:bold;color:#aaa;}</style>
+
+	<script src="../hello.js"></script>
+</head>
+<body>
+	<h1>hello.js - me/share</h1>
+
+	<button onclick="getActivities('google')">Get activities from Google</button>
+	<button onclick="getActivities('facebook')">Get activities from Facebook</button>
+
+	<h2>Activities list</h2>
+	<ul id="list"></ul>
+
+
+<script class="pre">
+function getActivities(network){
+	hello.login( network, function(){
+		// Get the friends
+		hello.api( network +':/me/share', function(r){
+			for(var i=0;i<r.data.length;i++){
+				var o = r.data[i];
+				var li = document.createElement('li');
+				li.innerHTML = o.name || o.message || o.story || o.title;
+				document.getElementById('list').appendChild(li);
+			};
+		});
+	});
+}
+hello.init( CLIENT_IDS, {redirect_uri:'../'} );
+
+</script>
+
+</body>
+</html>

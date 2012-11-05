@@ -31,6 +31,7 @@ function getFriends(network){
 		// Get the friends
 		hello.api( network +':/me/friends', function(r){
 			for(var i=0;i<r.data.length;i++){
+				var o = r.data[i];
 				var li = document.createElement('li');
 				li.innerHTML = o.name + ", picture: url("+o.picture+")";
 				document.getElementById('list').appendChild(li);

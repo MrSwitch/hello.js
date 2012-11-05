@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/_packages/document.css"></script>
+<script src="/_packages/document.js"></script>
+
+<script src="client_ids.js"></script>
+<script src="../hello.js"></script>
+
+<style>
+	form{
+		padding:20px;
+	}
+	form label{
+		min-width:100px;
+		display: inline-block;
+		text-align: right;
+		font-weight:bold;
+	}
+	form input{
+		width:250px;
+	}
+
+</style>
+
+<h1>Demo hello.api('/me/share')</h1>
+
+<blockquote>
+	<form id="activity_form">
+		<label>message</label> <input type="text" name="message" value="Hello.js is a great social aggregator"/>
+		<br />
+		<label>link</label> <input type="url" name="link" value="http://adodson.com/hello.js"/>
+	</form>
+
+	<button onclick="post('facebook');">Post to Facebook</button>
+	<button onclick="post('windows');">Post to Windows Live</button>
+
+</blockquote>
+
+
+<script class="pre">
+function post(network){
+	hello.login(network,{scope:'publish'}, function(){
+		// Post the contents of the form
+		hello.api(network+':/me/share', 'post', document.getElementById('activity_form'), function(r){
+			if(!r||r.error){
+				alert("Whoops! "+r.error.message);
+			}
+			else{
+				alert("Your message has been published to "+ network);
+			}
+		});
+	})
+}
+
+hello.init(CLIENT_IDS, {redirect_uri:'../redirect.html'});
+</script>
