@@ -1,4 +1,8 @@
+*{
+	font-size:inherit;
+}
 body{
+	font-size:2em;
 	font-family: Tahoma;
 	margin:0;
 	background-color: #6d695c;
@@ -38,9 +42,9 @@ header{
 		margin:0;
 		padding: 3px;
 		display: inline-block;
-		font-size:1em;
 		text-decoration: capitalize;
 		color:white;
+		background-color:rgba(71, 167, 255, 0.6);
 	}
 	header button{
 		vertical-align: top;

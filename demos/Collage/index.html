@@ -11,11 +11,14 @@
 <nav id="nav">
 	<button onclick="nav.style.display='none';" class="close">X</button>
 	<h1>Hi, welcome to Collage</h1>
-	<p>Play around with your photos from SkyDrive</p>
-	<button onclick="hello.login('windows')">Load images from Skydrive</button>
-	<!--
-	<button onclick="hello.login('facebook')">Load images from Facebook</button>
-	-->
+	<p>Play around with your images from 
+
+		<button onclick="loadImages('windows')">Skydrive</button>,
+		<button onclick="loadImages('facebook')">FaceBook</button> or
+		<button onclick="loadImages('google')">Google</button>
+
+	</p>
+	<button onclick="limit+=10;update();" style="display:none;" id="count"></button>
 </nav>
 
 <section>
@@ -23,6 +26,7 @@
 </section>
 <script>
 
+var c = document.getElementById('c');
 c.width = window.innerWidth;
 c.height = window.innerHeight;
 
@@ -32,55 +36,72 @@ var canvas = new fabric.Canvas('c',{
 	selectionLineWidth: 2
 });
 
-// Register with Hello
-hello.subscribe('auth.login', function(r){
 
-	findPhotos( r.network, 'me/albums', function(file){
+var index = 0,
+	limit = 10, 
+	images = [];
 
-		var h = canvas.height,
-			w = canvas.width;
+var count = document.getElementById('count');
 
-		fabric.Image.fromURL(file.picture, function(img) {
+function update(){
+
+	var h = canvas.height,
+		w = canvas.width;
+
+
+	while(index<Math.min(images.length,limit)){
+
+		fabric.Image.fromURL(images[index++], function(img) {
 
 			var img = img.set({
 				left: parseInt(Math.random()*w), 
 				top: parseInt(Math.random()*h), 
 				angle: parseInt((Math.random()*50)-25,10),
 				selectable : true
-			}).scale(2);
+			});
 
 			canvas.add(img);
 		});
+	}
 
-//		console.log(img);
+	// Update
+	count.style.display = (limit>images.length?'none':'block');
+	count.innerHTML = "Load in " + index + " - " + (limit+10)  +" of "+images.length;
+}
+
+// Register with Hello
+function loadImages(network){
+
+	hello.login(network, function(){
+
+		// Does it have siblings?
+		hello.api(network+':me/albums', function(r){
+
+			if(!r||r.error){
+				alert(r.error.message);
+				return;
+			}
+
+			// Loop through and add photos to the canvas
+			for(var i=0;i<r.data.length;i++){
+
+				hello.api(network+':'+r.data[i].photos, function(r){
+
+					if(!r||r.error){
+						alert(r.error.message);
+						return;
+					}
+
+					for(var i=0;i<r.data.length;i++){
+						images.push(r.data[i].picture);
+					}
+					update();
+				});
+			}
+		});
 	});
-});
+};
 
 hello.init(CLIENT_IDS,{scope:'photos',redirect_uri:"/hello.js/redirect.html"});
 
-function findPhotos(network, path, callback){
-
-	// Does it have siblings?
-	hello.api(network+'/'+path, function(r){
-
-		if(!r||r.error){
-			return;
-		}
-
-		if(r.data){
-			// Loop through and add photos to the canvas
-			for(var i=0;i<r.data.length;i++){
-				var item = r.data[i];
-
-				if(item.type === 'folder' || item.type === 'album'){
-					findPhotos(network, item.id+'/files', callback);
-				}
-				else if(item.type==='photo'){
-					callback(item);
-				}
-			}
-		}
-
-	})	
-}
 </script>
