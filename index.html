@@ -133,23 +133,151 @@ input[name=path]{
 }
 
 
+.method:before{
+	vertical-align:top;
+	color:white;
+	text-transform:uppercase;
+	padding:3px 0px;
+	border-radius:3px;
+	font-size:0.7em;
+	min-width:60px;
+	text-align:center;
+	display: inline-block;
+	margin:5px;
+}
+
+.method.get:before{
+	content:"GET";
+	background-color: #0F6AB4;
+}
+.method.post:before{
+	content:"POST";
+	background-color: #10A54A;
+}
+.method.put:before{
+	content:"PUT";
+	background-color: #C5862B;
+}
+.method.delete:before{
+	content:"DELETE";
+	background-color: red;
+}
+
 </style>
 	
 
 </head>
 <body>
+	<nav class="toc"></nav>
 	<header>
 		<h1><img src="favicon.ico" width=64 height=64 style="vertical-align:middle;margin-right:20px;">hello.js</h1>
 		<blockquote><p>A Javascript API for <a href="http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf" target="_blank">OAuth2</a> authentication and REST inspection of third party 
 		API&#39;s like Google+, Facebook Graph and Windows Live Connect. A developer may code against this very familiar looking API whilst switching seemlessly between REST URL's and Login URL's pertaining to Windows, Facebook and or Google (more to come) no more spaghetti code. 
 
-<p>It's built to be agnostic, just like OAuth2. Its extensible so you may add your own provider, assuming they support OAuth2 and have a Graph interface accessible via CORS and or JSONP. 
+<p>It's built to be agnostic, just like OAuth2. Its extensible so you may add your own provider, assuming they support OAuth2 and have a Graph interface accessible via CORS and or JSONP...
+
+<p>	<b>Yeah Yeah, enough jargon, yawn! Lets cut to a demo:</b> Load my profile information from
+	<button onclick="hello.login('windows')">windows</button>,
+	<button onclick="hello.login('facebook')">facebook</button> or
+	<button onclick="hello.login('google')">google</button>
+</p>
+	<div id="profile"></div>
 </blockquote>
-		<nav class="toc"></nav>
 	</header>
+
+	<h2>Features</h2>
+
+	<p>If the demo above hasn't whetted your appetite, then here's what else you can do with Hello.js right now. </p>
+	<ul>
+		<li>Items marked with a <span class="yes"></span> are fully working and can be <a href="./tests/">tested here</a>. 
+		<li>Items marked with a <span class="no"></span> aren't provided by the provider at this time. 
+		<li>Blank items are work in progress, but there is good evidence that they can be done.
+		<li>Anything not listed i have no knowledge of and would appreciate input.
+	</ul>
+	<table>
+		<thead>
+			<tr>
+				<th></th>
+				<th>Windows</th>
+				<th>FaceBook</th>
+				<th>Google</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<th class="method get"><a href="demos/profile.html">Profile: name, picture (email)</a></th>
+				<td class="yes"></td>
+				<td class="yes"></td>
+				<td class="yes"></td>
+			</tr>
+			<tr>
+				<th class="method get"><a href="demos/friends.html">Friends/Contacts: name, id (email)</a></th>
+				<td class="yes"></td>
+				<td class="yes"></td>
+				<td class="yes"></td>
+			</tr>
+			<tr>
+				<th class="method get">Albums, name, id, web link</th>
+				<td class="yes"></td>
+				<td class="yes"></td>
+				<td class="yes"></td>
+			</tr>
+			<tr>
+				<th class="method get">Photos in album, names, links</th>
+				<td class="yes"></td>
+				<td class="yes"></td>
+				<td class="yes"></td>
+			</tr>
+			<tr>
+				<th class="method get">Photo file: url, dimensions</th>
+				<td class="yes"></td>
+				<td class="yes"></td>
+				<td class="yes"></td>
+			</tr>
+			<tr>
+				<th class="method post">Create a new album</th>
+				<td class="yes"></td>
+				<td class="yes"></td>
+				<td></td>
+			</tr>
+			<tr>
+				<th class="method post"><a href="demos/upload.html">Upload a photo</a></th>
+				<td class="yes"></td>
+				<td class="yes"></td>
+				<td></td>
+			</tr>
+			<tr>
+				<th class="method delete">Delete an album</th>
+				<td class="yes"></td>
+				<td class="no"></td>
+				<td></td>
+			</tr>
+			<tr>
+				<th class="method get">Status updates</th>
+				<td class="no"></td>
+				<td class="yes"></td>
+				<td class="yes"></td>
+			</tr>
+			<tr>
+				<th class="method post">Status updates</th>
+				<td class="yes"></td>
+				<td class="yes"></td>
+				<td class="no"></td>
+			</tr>
+		</tbody>
+	</table>
+
+
 	<header>
 		<h2>Quick Start</h2>
-		<p>Registering a domain, creating a signin button + retrieve user info.</p>
+		<p>Quick start shows you how to go from zero to loading in the name and picture of a user, like in the demo above.</p>
+		<ol>
+			<li>Register your app domain
+			<li>Include hello.js script 
+			<li>Create the signin buttons
+			<li>Setup listener for login and retrieve user info.
+			<li>Initiate the client_ids and all listeners
+		</ol>
 	</header>
 	<h3>1. Register</h3>
 	<p>Register your application with atleast one of the following networks. Ensure you register the correct domain as they can be quite picky</p>
@@ -163,24 +291,33 @@ input[name=path]{
 		<li><a target="_blank" href="https://manage.dev.live.com/">Windows Live</a></li>
 		<li><a target="_blank" href="https://code.google.com/apis/console/b/0/#:access">Google +</a></li>
 	</ul>
-	<h3>2. Copy and paste</h3>
-	<p>Copy and paste the code below to your test page.</p>
+	<h3>2. Include Hello.js script in your page</h3>
 
 <script class="pre" src="hello.js"></script>
 
+	<h3>3. Create the signin buttons</h3>
+	<p>Just add onclick events to call hello.login(network)</p>
+<pre>
+&lt;button onclick="hello.login('windows')"&gt;windows&lt;/button&gt;
+</pre>
 
+
+	<h3>4. Add listeners for the user login</h3>
 	<p>Lets define a simple function, which will load a user profile into the page after they signin and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.</p>
+
+
 
 <script class="pre">
 hello.subscribe('auth.login', function(r){
 	
 	// call user information, for the given network
 	hello.api( r.network + '/me', function(r){
-		if(!r.id){
+		if(!r.id || !!document.getElementById(r.id) ){
 			return;
 		}
 		$( "<p></p>" )
 			.append('<img src="'+ r.picture +'" />')
+			.attr('id', r.id)
 			.append('<b>'+r.name+'</b>')
 			.appendTo("#profile");
 
@@ -188,6 +325,7 @@ hello.subscribe('auth.login', function(r){
 });
 </script>
 
+	<h3>5. Configure hello.js with your client_id's and initiate all listeners</h3>
 	<p>Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the <code>hello.init</code> function. e.g....</p>
 
 <script class="pre">
@@ -197,61 +335,8 @@ hello.init({
 	google   : GOOGLE_CLIENT_ID
 },{redirect_uri:'redirect.html'});
 </script>
-	
-	<h3>3. And run</h3>
-	<p>Now create buttons for your services on the page and  You should see a button which says "Signin" clicking this will prompt you to choose the network you wish to connect to out of the options you passed to hello.init function.</p>
 
-	<div id="profile"></div>
-
-<button class="signin">google</button>
-<button class="signin">facebook</button>
-<button class="signin">windows</button></div>
-
-	<p>The onclick events for the buttons</p>
-<script class="pre">
-$('button.signin').on('click', function(){
-	var network = this.innerText||this.innerHTML;
-	hello.login(network, function(){alert('You have signed into '+network+' live')});
-});
-</script>
-
-<header>
-<h2>Publishing Demo: Write it on the wall</h2>
-<p>Publishing content to a socal feed... easy!</p>
-</header>
-
-
-<p>Signin with the 'publish' scope <button onclick="hello.login('google', {scope:'publish'}, function(){alert('You have signed into google')});">google</button>
-<button onclick="hello.login('facebook', {scope:'publish'}, function(){alert('You have signed into facebook')});">facebook</button>
-<button onclick="hello.login('windows', {scope:'publish'}, function(){alert('You have signed into windows live')});">windows</button></p>
-
-<script class="pre">
-$('body').on('submit','form.demoPostWall', function(e){
-	// Lets not leave the browser
-	e.preventDefault();
-
-	// form
-	var frm = this;
-
-	// Call our api
-	hello.api('me/feed', 'post', {
-		message : this.message.value,
-		link : this.link.value
-	}, function(r){
-		dump(r, frm);
-	});
-	return false;
-});
-</script>
-
-<form class="demoPostWall" style="white-space:pre;">{
-	message : <input type="text" name="message"/>
-	link	: <input type="link" name="link"/>
-}
-	<button type="submit">Post</button>
-</form>
-
-
+<p>That's it. The code above actually powers the demo at the start so, no excuses.</p>
 
 <header>
 	<h2>Core Methods</h2>
@@ -261,22 +346,30 @@ $('body').on('submit','form.demoPostWall', function(e){
 <h4>hello.init( {facebook: <em>id</em>, windows: <em>id</em>, google: <em>id, 
 ....</em> } )</h4>
 <table>
+	<thead>
 	<tr><th>name</th><th>type</th></tr>
-	<tr><td>credentials</td><td>
+	</thead>
+	<tbody>
+		<tr><td>credentials</td><td>
 	<i>object( key =&gt; value, ...&nbsp; )</i>
 <table>
+	<thead>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
 		argument</th><th>default</th></tr>
+	</thead>
+	<tbody>
 	<tr><td>key</td><td><i>string</i></td><td><q>windows</q>, <q>facebook</q> or <q>google</q></td><td>
 		App name&#39;s</td><td><em>required</em></td><td>n/a</td></tr>
 	<tr><td>value</td><td><i>string</i></td><td>
 		<q>0000000AB1234</q></td><td>ID of the service to connect to</td><td>
 		<em>required</em></td><td>n/a</td></tr>
+	</tbody>
 </table>
 		</td></tr>
 	<tr><td>options</td><td>
 	set's default <i>options</i>, as in hello.login()</i>
 		</td></tr>
+	</tbody>
 	</table>
 <h4>Example:</h4>
 <pre>
@@ -292,7 +385,7 @@ hello.init({
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
 		argument</th><th>default</th></tr>
-	<tr><td>network</td><td><q>string</q></td><td><q>windows</q>, <q>facebook</q></td><td>One of our services.</td><td>
+	<tr><td>network</td><td><i>string</i></td><td><q>windows</q>, <q>facebook</q></td><td>One of our services.</td><td>
 		<em>required</em></td><td>
 		<em>null</em></td></tr>
 	<tr><td>options</td><td colspan="5">
@@ -300,19 +393,19 @@ hello.init({
 		<table>
 			<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
 				argument</th><th>default</th></tr>
-			<tr><td>display</td><td><q>string</q></td><td><q>popup</q>, <q>page</q> or <q>none</q></td><td>
+			<tr><td>display</td><td><i>string</i></td><td><q>popup</q>, <q>page</q> or <q>none</q></td><td>
 				How the signin flow should work, "none" is used to refresh the access_token in the background</td><td>
 				<em>optional</em></td><td>
 				<q>popup</q></td></tr>
-			<tr><td>scope</td><td><q>string</q></td><td><q>email</q>, <q>publish</q> or <q>photos</q></td><td>
+			<tr><td>scope</td><td><i>string</i></td><td><q>email</q>, <q>publish</q> or <q>photos</q></td><td>
 				Comma separated list of scopes</td><td>
 				<em>optional</em></td><td>
 				<em>null</em></td></tr>
-			<tr><td>redirect_uri</td><td><q>string</q></td><td><q>http://domain.com/hello.html</q></td><td>
+			<tr><td>redirect_uri</td><td><i>string</i></td><td><q>http://domain.com/hello.html</q></td><td>
 				A full URI of a page which includes this script file hello.js</td><td>
 				<em>optional</em></td><td>
 				<em>window.location.href</em></td></tr>
-			<tr><td>response_type</td><td><q>string</q></td><td><q>token</q>, <q>code</q></td><td>
+			<tr><td>response_type</td><td><i>string</i></td><td><q>token</q>, <q>code</q></td><td>
 				Mechanism for authentication</td><td>
 				<em>optional</em></td><td>
 				<q>token</q></td></tr>
@@ -337,7 +430,7 @@ hello.login(&#39;facebook&#39;, function(){
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
 		argument</th><th>default</th></tr>
-	<tr><td>network</td><td><q>string</q></td><td><q>windows</q>, <q>facebook</q></td><td>One of our services.</td><td>
+	<tr><td>network</td><td><i>string</i></td><td><q>windows</q>, <q>facebook</q></td><td>One of our services.</td><td>
 		<em>optional</em></td><td>
 		<em>null</em></td></tr>
 	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert(&quot;Logged 
@@ -359,7 +452,7 @@ hello.logout(&#39;facebook&#39;, function(){
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
 		argument</th><th>default</th></tr>
-	<tr><td>network</td><td><q>string</q></td><td><q>windows</q>, <q>facebook</q></td><td>One of our services.</td><td>
+	<tr><td>network</td><td><i>string</i></td><td><q>windows</q>, <q>facebook</q></td><td>One of our services.</td><td>
 		<em>optional</em></td><td>
 		<em>current</em></td></tr>
 </table>
@@ -379,11 +472,9 @@ alert((hello.getAuthResponse(&#39;facebook&#39;)?&quot;Signed&quot;:&#39;Not sig
 		Can be prefixed with the name of the service</td><td>
 		<em>required</em></td><td>null</td></tr>
 	<tr><td>method</td><td><q>get</q>, <q>post</q>, <q>delete</q>, <q>put</q></td><td>See<em> type</em></td><td>HTTP request method to use. 
-		<q>cache</q> is the same as <q>get</q>, but where available retrieves results from client cache without 
-		an API request.</td><td><em>optional</em></td><td><q>cache</q></td></tr>
-	<tr><td>data</td><td><i>object</i></td><td><code>{&quot;$filter&quot;: &quot;Cid eq &#39;0000000AB3456&#39;&quot;}&nbsp; </code></td><td>
-		An object of data to attach to the query string in a <q>get</q> request, 
-		otherwise to be sent in the body of a <q>post</q>, <q>put</q> or <q>delete</q></td><td>
+		</td><td><em>optional</em></td><td><q>get</q></td></tr>
+	<tr><td>data</td><td><i>object</i></td><td><code>{name: <q>Hello</q>, descrition: <q>Fandelicious</q>}</td><td>
+		A JSON object of data, FormData, HTMLInputElement, HTMLFormElment to be sent along with a <q>get</q>, <q>post</q> or <q>put</q> request</td><td>
 		<em>optional</em></td><td>
 		<em>null</em></td></tr>
 	<tr><td>callback</td><td><i>function</i></td><td><code>function(json){console.log(json);}</code></td><td>
@@ -636,19 +727,27 @@ upon error will be either <i>boolean (false)</i> or be an error <i>object</i> as
 described below.</p>
 <h4>Error Object</h4>
 <table>
-	<tr><th>name</th><th>type</th></tr>
+	<thead>
+		<tr><th>name</th><th>type</th></tr>
+	</thead>
+	<tbody>
 	<tr><td>error</td><td><i>object</i>
 <table>
+	<thead>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
 		argument</th><th>default</th></tr>
+	</thead>
+	<tbody>
 	<tr><td>code</td><td><i>string</i></td><td>
 		<q>request_token_unauthorized</q></td><td>Code</td><td>
 		<em>required</em></td><td>n/a</td></tr>
 	<tr><td>message</td><td><i>string</i></td><td class="auto-style2">The 
 		provided access token....</td><td>
 		Error message</td><td><em>required</em></td><td>n/a</td></tr>
+	</tbody>
 </table>
 	</td></tr>
+	</tbody>
 	</table>
 
 	<h3>Browser Support</h3>
