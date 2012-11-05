@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>hello.js + knarly</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+	<link rel="stylesheet" href="/_packages/document.css" />
+
+
+<script src="/_packages/knockout.js"></script>
+<script src="/_packages/document.js"></script>
+
+<style>
+
+	td.method span{
+		vertical-align:top;
+		color:white;
+		text-transform:uppercase;
+		padding:7px 10px;
+		border-radius:3px;
+		font-size:0.7em;
+		min-width:60px;
+		text-align:center;
+	}
+
+	span.get{
+		background-color:#0F6AB4;
+	}
+	span.post{
+		background-color:#10A54A;
+	}
+	span.put{
+		background-color:#c5862b;
+	}
+	span.delete{
+		background-color:red;
+	}
+
+	tr.debug{
+		background-color:#E7F6EC;
+	}
+
+	button.run:before{
+		content:"\025BA";		
+	}
+
+	button.response{
+		color : white;
+		border:0;
+		border-radius:4px;
+	}
+	button.response.error{
+		background-color:red;
+	}
+	button.response.passed{
+		background-color:#10A54A;
+	}
+	button.response.exception{
+		background-color:orange;
+	}
+	button.response.error:after{
+		content: "\000D7";
+	}
+	button.response.passed:after{
+		content: "\02713";
+	}
+
+	pre *{
+		word-break:break-word;
+	}
+
+
+</style>
+
+<!-- AUTHENTICATION -->
+<script src="../hello.js"></script>
+<script src="../demos/client_ids.js"></script>
+</head>
+<body>
+
+	<header>
+		<h1>hello.js endpoint tests</h1>
+		<p>Steps to run the automated tests</p>
+	</header>
+	<ol>
+		<li>Select the scope of the services you want to test
+		<li>Click the signin buttons along the top of the table, and give consent to the application
+		<li>Click the <button class="run"></button> to run individual tests
+		<li>Click on the <button class="response passed"></button> or <button class="response error"></button> response button's to view the data
+	</ol>
+
+<table>
+	<thead>
+		<tr>
+			<th>method</th>
+			<th><label><input type="checkbox" data-bind="checked: scopes().length===checkedScopes().length, click:function(){ scopes().length===checkedScopes().length ? checkedScopes.removeAll() : checkAllScopes() }">scopes </label></th>
+			<!-- ko foreach:networks -->
+			<th><button data-bind="text: name, click:login"></button></th>
+			<!-- /ko -->
+		</tr>
+	</thead>
+	<tbody data-bind="foreach: tests">
+		<tr data-bind="css: {debug: debug()}">
+			<td class="method" data-bind="click:function(){debug()?debug(false):debug(true);}"><span data-bind="attr:{ class : method }, text:method"></span> <b data-bind="text: path"></b></td>
+			<td>
+				<!-- ko foreach:scope -->
+				<label><input type="checkbox" data-bind="checked:$root.checkedScopes, value:$data"/><span data-bind="text:$data"></span></label>
+				<!-- /ko -->
+			</td>
+			<!-- ko foreach:variants -->
+			<td>
+				<button data-bind="click:run" class="run" title="Run this test"></button>
+				<button class="response" data-bind="css: { error : passed() === false, passed : passed() === true, exception:status()==='exception' }, visible:response, click:function(){if($parent.debug()&&showResponse()){ showResponse(false);$parent.debug(false); return; } $parent.debug(true);ko.utils.arrayForEach($parent.variants(), function(c){c.showResponse(false);});showResponse(true);}, text: status()==='exception'?'exception':'response'"></button>
+			</td>
+			<!-- /ko -->
+		</tr>
+		<tr data-bind="visible:debug, css: {debug: debug()}">
+			<td colspan="2">
+				<div data-bind="visible: data.items().length">
+					<h4>Parameters</h4>
+					<table>
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Value</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody data-bind="foreach: data.items">
+						    <tr>
+						        <th><input type="text" data-bind="value:key" /></th>
+						        <td><input type="text" data-bind="value:value" /></td>
+						        <td><a href="javascript:void(0);" data-bind="click: function() { $parent.data.removeItem($data) }">Delete</a></td>
+						    </tr>
+						</tbody>
+						<tfoot>
+							<tr>
+								<td colspan="3"><a href="javascript:void(0);" data-bind="click: data.addItem">Add item</a></td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+				<div data-bind="visible: expected">
+					<h4>Expected</h4>
+					<pre data-bind="beautify: expected"></pre>
+				</div>
+			</td>
+			<td data-bind="attr: {colspan: variants().length}">
+				<!-- ko foreach:variants -->
+				<pre data-bind="visible: showResponse, css: { error : passed() === false, passed : passed() === true }, beautify: response"></pre>
+				<!-- /ko -->
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+
+<!-- TESTS -->
+<script>
+
+var reg = {
+	url : /^https?\:\/\//,
+	name : /^[\w\d\s\-]+$/,
+	id : /^[\w\d\@\-]+$/,
+	string : /^\S+$/
+}
+
+
+var tests = [
+	{
+		method : 'get',
+		path : 'me',
+		expected : {
+			name : reg.name,
+			id : reg.id,
+			first_name : reg.name,
+			last_name : reg.name,
+			picture : reg.url
+		},
+	},
+	{
+		method : 'get',
+		path : 'me/friends',
+		scope : ["friends"],
+		expected : {
+			data : [{
+				name : reg.name,
+				picture : reg.url
+			}]
+		}
+	},
+	{
+		method : 'get',
+		path : 'me/albums',
+		scope : ["photos"],
+		expected : {
+			data : [{
+				id : reg.string,
+				name : reg.name,
+				picture : reg.url,
+				photos : reg.string
+			}]
+		}
+	},
+	{
+		method : 'get',
+		path : '[ALBUM_PHOTOS_PATH]',
+		scope : ["photos"],
+		setup : function(test, callback){
+			hello.api(test.network+":me/albums", function(r){
+				if("data" in r && r.data.length > 0){
+					test.path = test.path.replace("[ALBUM_PHOTOS_PATH]", r.data[0].photos );
+					callback();
+					return;
+				}
+				callback("Failed to setup: the user has no albums");
+			})
+		},
+		expected : {
+			data : [{
+				id : reg.string,
+				name : reg.name,
+				picture : reg.url,
+			}]
+		}
+	},
+	{
+		method : 'get',
+		path : 'me/photos',
+		scope : ["photos"],
+		expected : {
+			data : [{
+				id : reg.string,
+				name : reg.name,
+				picture : reg.url
+			}]
+		}
+	},
+	{
+		method : 'get',
+		path : '[PHOTO_ID]',
+		scope : ["photos"],
+		setup : function(test, callback){
+			hello.api(test.network+":me/albums", function(r){
+				if("data" in r && r.data.length > 0){
+
+					// Pick one randomly
+					var i = Math.floor(Math.random()*r.data.length);
+
+					hello.api( test.network + ":" + r.data[i].photos, function(r){
+						if("data" in r && r.data.length > 0){
+							test.path = test.path.replace("[PHOTO_ID]", r.data[0].id );
+							callback();
+							return;
+						}
+						callback("Failed to setup: the user has no images in the album");
+					})
+				}
+				else{
+					callback("Failed to setup: The user has no albums yet");
+				}
+			})
+		},
+		expected : {
+			name : /^.+$/,
+			id : reg.string,
+			picture : reg.url
+		}
+	},
+	{
+		method : 'post',
+		path : 'me/albums',
+		scope : ["publish_files"],
+		data : {
+			name : "New test album",
+			description : "This is a test album created at "+ window.location.href
+		},
+		expected : {
+			id : reg.string
+		}
+	},
+	{
+		method : 'delete',
+		path : '[ALBUM_ID]',
+		scope : ["publish_files"],
+		setup : function(test, callback){
+			hello.api(test.network+":me/albums", function(r){
+				if("data" in r && r.data.length > 0){
+
+					// Find the one with the name "New test album"
+					for(var i=0;i<r.data.length;i++){
+						if(r.data[i].name === "New test album"){
+							test.path = r.data[i].id;
+							callback();
+							return;
+						}
+					}
+					callback("Failed to setup: Could not find the album 'New test album'");
+				}
+				else{
+					callback("Failed to setup: the user has no Albums");
+				}
+			})
+		},
+		expected : {
+			response : 'deleted'
+		}
+	},
+	{
+		method : 'get',
+		path : 'me/share',
+		expected : {
+			data : []
+		}
+	},
+	{
+		method : 'post',
+		path : 'me/share',
+		scope : ["publish"],
+		data : {
+			message : "Running the tests",
+			link : window.location.href
+		}
+	}
+];
+
+
+function Test(test,network,parent){
+	var self = this;
+	// Toggle debug
+	this.debug = ko.observable(false);
+
+	// Parameters
+	this.method = test.method;
+	this.path = test.path;
+	this.data = new Dictionary( test.data || {} );
+
+	this.scope = ko.observableArray(test.scope||[]);
+	this.setup = test.setup;
+	this.network = network;
+
+	this.variants = ko.observableArray([]);
+	if(!network){
+		for(var x in CLIENT_IDS){
+			this.variants.push(new Test(test,x,this));
+		}
+	}
+
+	this.expected = test.expected;
+	this.validate = test.validate || function(r){
+		if(this.expected){
+			return testExpected(this.expected,r);
+		}
+		return r && !("error" in r);
+	};
+
+	this.passed = ko.observable();
+	this.response = ko.observable();
+	this.request = ko.observable();
+	this.status = ko.observable();
+
+	this.showResponse = ko.observable(false);
+
+	this.run = function(service,callback){
+		var authResponse = hello.getAuthResponse(service);
+		var test = this;
+		var action = function(r){
+			test.status('working');
+			var data = JSON.parse(ko.toJSON(parent.data.itemsAsObject()));
+			var cb = function(r){
+
+				// update the test
+				var b = test.validate(r);
+
+				// passed?
+				test.passed(b);
+
+				// update model
+				test.response(r);
+
+				test.status(b?'success':'failure');
+				
+				if(callback&&typeof(callback)==='function'){
+					callback.call(test);
+				}
+			};
+			
+			if(test.method === 'login'){
+				test.request( hello.login(network,data,cb) );
+			}
+			else if(test.method === 'logout'){
+				test.request( hello.logout(network,cb) );
+			}
+			else{
+				// Call hello.api
+				// Save the request information
+				test.request( hello.api((network?network+":":"")+test.path, test.method, data, cb) );
+			}
+		};
+
+		if(test.setup){
+			test.setup(test, function(s){
+				// a string shows that an exception occured whilst setting the test up.
+				if(s){
+					test.status('exception');
+					test.response(s);
+					return;
+				}
+				action({authResponse:authResponse});
+			});
+		}
+		else{
+			action({authResponse:authResponse});
+		}
+	};
+}
+
+function Provider(network){
+	this.name = network;
+	this.login = function(){
+		hello.login(network, {scope: model.checkedScopes() });
+	};
+	this.online = ko.observable(false);
+}
+
+var model = new (function(){
+	this.networks = ko.observableArray([]);
+	this.tests = ko.observableArray([]);
+	this.checkedScopes = ko.observableArray([]);
+	this.checkAllScopes = function(){
+		ko.utils.arrayForEach(this.scopes(), function(scope){
+			model.checkedScopes.push(scope);
+		});
+	};
+	this.scopes = ko.observableArray([]);
+});
+
+ko.utils.arrayForEach( tests, function(test){
+	model.tests.push(new Test(test));
+
+	if(test.scope){
+		ko.utils.arrayForEach(test.scope, function(scope){
+			if(model.scopes().indexOf(scope)===-1){
+				model.scopes.push(scope);
+			}
+		});
+	}
+});
+
+ko.utils.arrayForEach( Object.keys(CLIENT_IDS), function(network){
+	model.networks.push(new Provider(network));
+});
+
+
+// Subscribe to the authentication
+hello.subscribe('auth.login', function(o){
+	ko.utils.arrayForEach( model.networks(), function(network){
+		if(o.network===network){
+			network.online(true);
+		}
+	});	
+});
+
+// Initiate the library
+hello.init(CLIENT_IDS,{redirect_uri: '../redirect.html'});
+
+
+//
+// Bind beautifier handler
+//
+ko.bindingHandlers.beautify = {
+    update: function(element, valueAccessor, allBindingsAccessor) {
+		var value = ko.utils.unwrapObservable( valueAccessor() );
+		function fixRegExp(k,v){
+			if(v instanceof RegExp){
+				v = v.toString();
+			}
+			return v;
+		}
+		value = (JSON.stringify(value,fixRegExp,2)||'').replace(/https?:\/\/[^\'\"\s]+/ig, function(r){
+			return r.link(r).replace('<a ', '<a target="_blank" ');
+		}).replace(/\"(\/.*?\/)\"/ig, function(m,a){
+			return a;
+		});
+
+        element.innerHTML = value; // Make the element visible
+    }
+};
+
+
+ko.applyBindings(model);
+
+
+//
+// Turn an object of Key => Value into mutable stores
+//
+function DictionaryItem(key, value) {
+    this.key = ko.observable(key);
+    this.value = (typeof(value)==='function')? value : ko.observable(value);
+}
+
+
+//
+// Custom Dictionary observable in Knockout
+// represent the dictionary object
+//
+function Dictionary(data) {
+    this.items = ko.observableArray([]);
+    for (var field in data) {
+        if (data.hasOwnProperty(field)) {
+            this.items.push(new DictionaryItem(field, data[field]));
+        }
+    }
+
+    this.addItem = function() {
+        this.items.push(new DictionaryItem());
+    }.bind(this);
+
+    this.removeItem = function(item) {
+        this.items.remove(item);
+    }.bind(this);
+        
+    this.itemsAsObject = ko.dependentObservable(function() {
+        var result = {};
+        ko.utils.arrayForEach(this.items(), function(item) {
+            result[item.key()] = item.value;
+        });
+
+        return result;
+    }, this);
+}
+
+
+function testExpected(test,r){
+	for(var x in test){
+		if(!r || !(x in r)){
+			b = false;
+		}
+		else if( tests[x] === null ){
+			// no test
+			b = true;
+		}
+		else if( test[x] instanceof RegExp ){
+			b = test[x].test(r[x]);
+		}
+		else if( test[x] instanceof Array ){
+			b = r[x] instanceof Array;
+		}
+		else if( typeof( test[x] ) === 'object' ){
+			b = testExpected(test[x],r[x]);
+		}
+		else{
+			b = r[x] === test[x];
+		}
+		if(!b){
+			return false;
+		}
+	}
+	return true;
+}
+</script>
+</body>
+</html>
