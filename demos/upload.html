@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/_packages/document.css"></script>
+<script src="/_packages/document.js"></script>
+<script src="client_ids.js"></script>
+
+<h1>Upload Photo Demo with Hello.js</h1>
+
+<p>Include hello.js</p>
+<script src="../hello.js" class="pre"></script>
+
+<p>Create the signin buttons</p>
+<button id="windows" onclick="hello.login('windows');">Login Windows</button>
+<button id="facebook" onclick="hello.login('facebook');">Login Facebook</button>
+<!--
+<button id="google" onclick="hello.login('google');">Login Google</button>
+-->
+<p>Upload form</p>
+<blockquote>
+	<form>
+		<input type="file" id="file"/>
+	</form>
+
+	<select id="albums"></select>
+	<button type="button" onclick="upload()">Upload</button>
+	<div id="result"></div>
+</blockquote>
+
+<p>Add event listeners for the login completed event and make a request for the users profile. Once that's loaded push it to the page. </p>
+<script class="pre">
+// Windows Live
+hello.subscribe('auth.login', function(auth){
+
+	// Get Profile
+	hello.api(auth.network+':me', function(r){
+		if(!r||r.error){
+			return;
+		}
+		document.getElementById(auth.network).innerHTML = "Connected to "+auth.network+" as " + r.name;
+	});
+
+	// Get albums
+	hello.api(auth.network+':me/albums', function(r){
+
+		if(!r||r.error){
+			console.error(r);
+			return;
+		}
+
+		var grp = document.createElement('optgroup');
+		grp.label = auth.network;
+		document.getElementById('albums').appendChild(grp);
+
+		for(var i=0;i<r.data.length;i++){
+			var o = document.createElement('option');
+			o.value = auth.network+":"+ ( r.data[i].upload_location || r.data[i].id );
+			o.innerHTML = r.data[i].name;
+			grp.appendChild(o);
+		}
+
+	});
+});
+</script>
+
+<script class="pre">
+function upload(){
+	hello.api(document.getElementById('albums').value, 'post', {
+		file:document.getElementById('file')
+	}, function(r){
+		if(r.error){
+			alert(r.error.message);
+			return;
+		}
+		else if(r.source){
+			// Windows we get a reference
+			var a = document.createElement('a');
+			a.href = r.source;
+			a.innerHTML = r.name;
+			a.target = "_blank";
+		}
+		else{
+			// Facebook we dont get a response.
+			var a = document.createElement('span');
+			a.innerHTML = "Uploaded "+document.getElementById('file').value;
+		}
+		document.getElementById('result').appendChild(a);
+	});
+}
+</script>
+
+
+<p>Plug the app keys (client_id') and voila</p>
+<script class="pre">
+
+// Initiate hellojs
+hello.init( CLIENT_IDS, {
+	scope: "publish_files",
+	redirect_uri : "../redirect.html"
+});
+</script>
