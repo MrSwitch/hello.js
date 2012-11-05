@@ -48,6 +48,81 @@ var hello = (function(){
 		state         : ''
 	};
 
+	// Google has a horrible JSON API
+	function gEntry(o){
+
+		var entry = function(a){
+			var p = {
+				id		: a.id.$t,
+				name	: a.title.$t, 
+				description	: a.summary.$t,
+				updated_time : a.updated.$t,
+				created_time : a.published.$t,
+				picture : a['media$group']['media$content'][0].url,
+				width : a['media$group']['media$content'][0].width,
+				height : a['media$group']['media$content'][0].height,
+//				original : a
+			};
+			// Get feed/children
+			if("link" in a){
+				for(var j=0;j<a.link.length;j++){
+					if(a.link[j].rel.match("feed")){
+						p.photos = a.link[j].href;
+						break;
+					}
+				}
+			}
+
+			// Get images of different scales
+			if('media$thumbnail' in a['media$group']){
+				var _a = a['media$group']['media$thumbnail'];
+				p.images = [];
+				for(var j=0;j<_a.length;j++){
+					p.images.push({
+						source : _a[j].url,
+						width : _a[j].width,
+						height : _a[j].height
+					});
+				}
+				p.images.push({
+					source : a['media$group']['media$content'][0].url,
+					width : a['media$group']['media$content'][0].width,
+					height : a['media$group']['media$content'][0].height,
+				});
+			}
+			return p;
+		};
+
+		var r = [];
+		if("feed" in o && "entry" in o.feed){
+			for(var i=0;i<o.feed.entry.length;i++){
+				r.push(entry(o.feed.entry[i]));
+			}
+			return {
+				//name : o.feed.title.$t,
+				//updated : o.feed.updated.$t,
+				data : r
+			}
+		}
+		return "entry" in o ? entry(o.entry) : o;
+	}
+
+	//
+	// Some of the providers require that only MultiPart is used with non-binary forms.
+	// This function checks whether the form contains binary data
+	function has_binary(data){
+		for(var x in data ) if(data.hasOwnProperty(x)){
+			if( (data[x] instanceof HTMLElement && data[x].type === 'file')
+				|| ("FileList" in window && data[x] instanceof FileList)
+				|| ("File" in window && data[x] instanceof File)
+				|| ("Blob" in window && data[x] instanceof Blob)
+			 ){
+				return true;
+			}
+		}
+		return false;
+	}
+
 	//
 	// Services
 	//
@@ -61,8 +136,11 @@ var hello = (function(){
 //				me	: "plus/v1/people/me?pp=1",
 				me : 'oauth2/v1/userinfo?alt=json',
 				base : "https://www.googleapis.com/",
-				'me/friends' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000'
-
+				'me/friends' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
+				'me/share' : 'plus/v1/people/me/activities/public',
+				'me/feed' : 'plus/v1/people/me/activities/public',
+				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json',
+				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=100'
 			},
 			scope : {
 				//,
@@ -75,6 +153,7 @@ var hello = (function(){
 				friends			: 'https://www.google.com/m8/feeds',
 				
 				publish			: '',
+				publish_files	: '',
 				create_event	: '',
 
 				offline_access : ''
@@ -100,19 +179,46 @@ var hello = (function(){
 								id		: a.id.$t,
 								name	: a.title.$t, 
 								email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
-								updated	: a.updated.$t,
+								updated_time : a.updated.$t,
 								picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null
 							});
 						}
 						return {
-							name : o.feed.title.$t,
-							updated : o.feed.updated.$t,
+							//name : o.feed.title.$t,
+							//updated : o.feed.updated.$t,
 							data : r
 						}
 					}
 					return o;
-				} 
-			}
+				},
+				'me/share' : function(o){
+					o.data = o.items;
+					try{
+						delete o.items;
+					}catch(e){
+						o.items = null;
+					}
+					return o;
+				},
+				'me/feed' : function(o){
+					o.data = o.items;
+					try{
+						delete o.items;
+					}catch(e){
+						o.items = null;
+					}
+					return o;
+				},
+				'me/albums' : gEntry,
+				'me/photos' : gEntry,
+				'default' : gEntry
+			},
+			xhr : function(p){
+				if(p.method==='post'){
+					return false;
+				}
+				return {};
+			},
 		},
 	
 		windows : {
@@ -121,7 +227,15 @@ var hello = (function(){
 			uri : {
 				// REF: http://msdn.microsoft.com/en-us/library/hh243641.aspx
 				auth : 'https://oauth.live.com/authorize',
-				base : 'https://apis.live.net/v5.0/'
+				base : 'https://apis.live.net/v5.0/',
+				"me/share" : function(p,callback){
+					// If this is a POST them return
+					callback( p.method==='get' ? "me/feed" : "me/share" );
+				},
+				"me/feed" : function(p,callback){
+					// If this is a POST them return
+					callback( p.method==='get' ? "me/feed" : "me/share" );
+				}
 			},
 			scope : {
 				basic			: 'wl.signin,wl.basic',
@@ -133,6 +247,7 @@ var hello = (function(){
 				friends			: '',
 				
 				publish			: 'wl.share',
+				publish_files	: 'wl.skydrive_update',
 				create_event	: 'wl.calendars_update,wl.events_create',
 
 				offline_access	: 'wl.offline_access'
@@ -152,17 +267,30 @@ var hello = (function(){
 						}
 					}
 					return o;
+				},
+				'me/albums' : function(o){
+					if("data" in o){
+						for(var i=0;i<o.data.length;i++){
+							o.data[i].photos = 'https://apis.live.net/v5.0/'+o.data[i].id+'/photos';
+						}
+					}
+					return o;
 				}
 			},
-			preprocess : function(p){
+			xhr : function(p){
+				if(p.method==='post'&& !has_binary(p.data) ){
+					p.data = JSON.stringify(p.data);
+					return {
+						contentType : 'application/json'
+					};
+				}
+				return {};
+			},
+			jsonp : function(p){
 				if( p.method.toLowerCase() !== 'get'){
 					//p.data = {data: JSON.stringify(p.data), method: p.method.toLowerCase()};
-					p.path = {
-							'me/feed' : 'me/share'
-						}[p.path] || p.path;
-
+					p.data.method = p.method.toLowerCase();
 					p.method = 'get';
-					p.data.method = 'post';
 				}
 				return p;
 			}
@@ -186,6 +314,7 @@ var hello = (function(){
 				videos			: 'user_photos,user_videos',
 				friends			: '',
 				
+				publish_files	: 'publish_stream',
 				publish			: 'publish_stream',
 				create_event	: 'create_event',
 
@@ -205,14 +334,45 @@ var hello = (function(){
 						}
 					}
 					return o;
+				},
+				'me/albums' : function(o){
+					if("data" in o){
+						for(var i=0;i<o.data.length;i++){
+							o.data[i].photos = 'https://graph.facebook.com/'+o.data[i].id+'/photos';
+							if(o.data[i].can_upload){
+								o.data[i].upload_location = 'https://graph.facebook.com/'+o.data[i].id+'/photos';
+							}
+						}
+					}
+					return o;
 				}
 			},
-			preprocess : function(p){
-				if( p.method.toLowerCase() !== 'get'){
+
+			// special requirements for handling XHR
+			xhr : function(p){
+				if(p.method==='get'){
+					return {};
+				}
+				else{
+					return false;
+				}
+			},
+
+			// Special requirements for handling JSONP fallback
+			jsonp : function(p){
+				if( p.method.toLowerCase() !== 'get' && !has_binary(p.data) ){
 					p.data.method = p.method.toLowerCase();
 					p.method = 'get';
 				}
 				return p;
+			},
+
+			// Special requirements for iframe form hack
+			post : function(p){
+				return {
+					// fire the callback onload
+					callbackonload : true
+				}
 			}
 		},
 		
@@ -294,6 +454,9 @@ var hello = (function(){
 			if(p.opts){
 				_options = _merge(_options, p.opts);
 			}
+			if("redirect_uri" in p.opts){
+				_options.redirect_uri = _realPath(p.opts.redirect_uri);
+			}
 
 			// Timeout
 			if(p.timeout){
@@ -326,7 +489,9 @@ var hello = (function(){
 
 					// to do remove from session object...
 					var cb = error.callback;
-					delete error.callback;
+					try{
+						delete error.callback;
+					}catch(e){}
 
 					// Update store
 					_store('error',error);
@@ -350,7 +515,9 @@ var hello = (function(){
 
 						// to do remove from session object...
 						var cb = session.callback;
-						delete session.callback;
+						try{
+							delete session.callback;
+						}catch(e){}
 
 						// Update store
 						_store(x,session);
@@ -462,13 +629,7 @@ var hello = (function(){
 				// REDIRECT_URI
 				// Is the redirect_uri root?
 				//
-				if( qs.redirect_uri.indexOf('/') === 0 ){
-					qs.redirect_uri = window.location.protocol + '//' + window.location.host + qs.redirect_uri;
-				}
-				// Is the redirect_uri relative?
-				else if( !qs.redirect_uri.match(/^https?\:\/\//) ){
-					qs.redirect_uri = (window.location.href.replace(/#.*/,'').replace(/\/[^\/]+$/,'/') + qs.redirect_uri).replace(/\/\.\//g,'/').replace(/\/[^\/]+\/\.\.\//g, '/');
-				}
+				qs.redirect_uri = _realPath(qs.redirect_uri);
 
 				//
 				// URL
@@ -544,6 +705,7 @@ var hello = (function(){
 		// @param timeout	integer (optional)
 		// @param callback	function (optional)
 		//
+
 		api : function(){
 
 			// get arguments
@@ -591,15 +753,12 @@ var hello = (function(){
 			// 
 			// Callback wrapper?
 			// Change the incoming values so that they are have generic values according to the path that is defined
-			var callback = (o.wrap && (p.path in o.wrap)) ? function(r){ log(p.path,r); p.callback(o.wrap[p.path](r)); } : p.callback;
-	
-
-			// Preprocess the parameters
-			// Change the p parameters
-			if("preprocess" in o){
-				p = o.preprocess(p);
-			}
-
+			var callback = o.wrap && ((p.path in o.wrap) || ("default" in o.wrap)) 
+				? function(r){ 
+					var wrap = (p.path in o.wrap ? p.path : "default");
+					log(p.path,r); 
+					p.callback(o.wrap[wrap](r));
+				} : p.callback;
 
 			// push out to all networks
 			// as long as the path isn't flagged as unavaiable, e.g. path == false
@@ -610,78 +769,176 @@ var hello = (function(){
 					token = (session?session.access_token:null);
 
 				// if url needs a base
-				if( !url.match(/^https?:\/\//) ){
-					url = o.uri.base + url;
-				}
-				
-				var qs = {};
-				
-				if(token){
-					qs.access_token = token;
-				}
+				// Wrap everything in 
+				var getPath = function(url){
 
-				// 
-				// build the call
-				var request = function(){
-
-					// Update the resource_uri
-					url += ( url.indexOf('?') > -1 ? "&" : "?" );
-
-					// Is this a post?
-					if( p.method === 'post' ){
-
-						qs.channelUrl = window.location.href;
-
-						var req = _post( url + _param(qs), p.data, callback );
-
-						return {
-							url : req,
-							method : 'POST',
-							data : p.data
-						};
+					if( !url.match(/^https?:\/\//) ){
+						url = o.uri.base + url;
 					}
-					// Make the call
-					else{
 
-						qs.callback = '?';
-
-						var req = _jsonp( url + _param(qs), p.data, callback );
-
-						return {
-							url : req,
-							method : 'JSONP'
-						};
-					}
-				};
-
-				// has the session expired?
-				// Compare the session time, if session doesn't exist but we can feign it. Then use autologin
-				// otherwise consider the session is current, or the resource doesn't need it
-				if( ( session && "expires" in session && session.expires < ((new Date()).getTime()/1e3) ) 
-					|| (!session && o.autologin) ){
-
-					log("Callback");
-	
-					// trigger refresh
-					hello.login(service, {display:'none'}, function(r){
+					var qs = {};
 					
-						// success?
-						if( typeof(r)==='object' && "error" in r){
-							callback(r);
+					if(token){
+						qs.access_token = token;
+					}
+
+					// 
+					// build the call
+					var request = function(){
+
+						// Update the resource_uri
+						url += ( url.indexOf('?') > -1 ? "&" : "?" );
+
+						// Format the data
+						if( p.data && !_dataToJSON(p) ){
+							// If we can't format the post then, we are going to run the iFrame hack
+							_post( url + _param(qs), p.data, ("post" in o ? o.post(p) : null), callback);
 							return;
 						}
 
-						// regardless of the response, lets make the request
-						request();
+						// Each provider and their protocol has unique features
+						// We place it in the config
+						var config ={};
 
-					});
 
-					return {
-						status : 'Signing in'
+						// the delete callback needs a better response
+						if(p.method === 'delete'){
+							var _callback = callback;
+							callback = function(r){
+								_callback((!r||_isEmpty(r))? {response:'deleted'} : r);
+							}
+						}
+
+
+						// Can we use XHR for Cross domain delivery?
+						if( 'withCredentials' in new XMLHttpRequest() && (!("xhr" in o) || (config = o.xhr(p))) ){
+							var r = new XMLHttpRequest();
+							// xhr.responseType = "json"; // is not supported in any of the vendors yet.
+							r.onload = function(e){
+								var json = r.responseText ? JSON.parse(r.responseText) : null;
+								callback( json || ( p.method!=='delete' ? {error:{message:"Could not get resource"}} : {} ));
+							};
+							r.onerror = function(e){
+								callback(r.responseText?JSON.parse(r.responseText):{error:{message:"There was an error accessing "+ url}});
+							};
+
+							// Add the token
+							qs.suppress_response_codes = true;
+							url += _param(qs);
+
+							// Should we add the query to the URL?
+							if(p.method === 'get'||p.method === 'delete'){
+								if(!_isEmpty(p.data)){
+									url += (url.indexOf('?')===-1?'?':'&')+_param(p.data);
+								}
+								p.data = null;
+							}
+							else if( p.data && typeof(p.data) !== 'string' && !(p.data instanceof FormData)){
+								// Loop through and add formData
+								var f = new FormData();
+								for( var x in p.data )if(p.data.hasOwnProperty(x)){
+									if( p.data[x] instanceof HTMLInputElement ){
+										if( "files" in p.data[x] && p.data[x].files.length > 0){
+											f.append(x, p.data[x].files[0]);
+										}
+									}
+									else{
+										f.append(x, p.data[x]);
+									}
+								}
+								p.data = f;
+							}								
+
+							// Open URL
+							r.open( p.method.toUpperCase(), url );
+
+							if(config.contentType)
+								r.setRequestHeader("Content-Type", config.contentType);
+
+							// Should we wrap the post data in the body of the request?
+							r.send( p.data );
+
+							// we're done
+							return {
+								url : url,
+								method : 'XHR',
+								data : p.data
+							};
+						}
+
+						// Otherwise we're on to the old school, IFRAME hacks and JSONP
+
+						// Preprocess the parameters
+						// Change the p parameters
+						if("jsonp" in o){
+							p = o.jsonp(p);
+						}
+
+						// Is this still a post?
+						if( p.method === 'post' ){
+
+							//qs.channelUrl = window.location.href;
+
+							var req = _post( url + _param(qs), p.data, ("post" in o ? o.post(p) : null), callback );
+
+							return {
+								url : req,
+								method : 'POST',
+								data : p.data
+							};
+						}
+						// Make the call
+						else{
+
+							qs.callback = '?';
+
+							var req = _jsonp( url + _param(qs), p.data, callback );
+
+							return {
+								url : req,
+								method : 'JSONP'
+							};
+						}
 					};
+
+					// has the session expired?
+					// Compare the session time, if session doesn't exist but we can feign it. Then use autologin
+					// otherwise consider the session is current, or the resource doesn't need it
+					if( ( session && "expires" in session && session.expires < ((new Date()).getTime()/1e3) ) 
+						|| (!session && o.autologin) ){
+
+						log("Callback");
+		
+						// trigger refresh
+						hello.login(service, {display:'none'}, function(r){
+						
+							// success?
+							if( typeof(r)==='object' && "error" in r){
+								callback(r);
+								return;
+							}
+
+							// regardless of the response, lets make the request
+							request();
+
+						});
+
+						return {
+							status : 'Signing in'
+						};
+					}
+					else{
+						return request();
+					}
+
+				}
+
+				// Make request
+				if(typeof(url)==='function'){
+					url(p, getPath);
 				}
 				else{
-					return request();
+					getPath(url);
 				}
 			}
 			else{
@@ -781,6 +1038,7 @@ var hello = (function(){
 		// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
 		p = _param(window.location.search);
 	}
+
 	// if p.state
 	if( p && "state" in p ){
 
@@ -829,6 +1087,7 @@ var hello = (function(){
 		else if( ("error" in p)
 				&& p.state in _services){
 
+
 			_store( 'error', {
 				error : p.error, 
 				error_message : p.error_message || p.error_description,
@@ -847,6 +1106,15 @@ var hello = (function(){
 
 				// Dont execute any more
 				return;
+			}
+		}
+
+		// IFRAME HACK
+		// Result is serialized JSON string.
+		if(p&&p.state&&"result" in p){
+			// trigger a function in the parent
+			if(p.state in window.parent){
+				window.parent[p.state](JSON.parse(p.result));
 			}
 		}
 	}
@@ -880,6 +1148,26 @@ var hello = (function(){
 	function _isArray(o){
 		return Object.prototype.toString.call(o) === '[object Array]';
 	}
+
+	// isEmpty
+	function _isEmpty(obj){
+		// scalar?
+		if(!obj){
+			return true;
+		}
+
+		// Array?
+		if(obj && obj.length>0) return false;
+		if(obj && obj.length===0) return true;
+
+		// object?
+		for (var key in obj) {
+			if (hasOwnProperty.call(obj, key))
+				return false;
+		}
+		return true;
+	}
+
 
 	
 	//
@@ -934,7 +1222,12 @@ var hello = (function(){
 			return hello[name];
 		}
 		else if(name && value === ''){
-			delete hello[name];
+			try{
+				delete hello[name];
+			}
+			catch(e){
+				hello[name]=null;
+			}
 		}
 		else if(name){
 			hello[name] = value;
@@ -1081,6 +1374,20 @@ var hello = (function(){
 		return p;
 	}
 
+	//
+	// realPath
+	//
+	function _realPath(path){
+		if( path.indexOf('/') === 0 ){
+			path = window.location.protocol + '//' + window.location.host + path;
+		}
+		// Is the redirect_uri relative?
+		else if( !path.match(/^https?\:\/\//) ){
+			path = (window.location.href.replace(/#.*/,'').replace(/\/[^\/]+$/,'/') + path).replace(/\/\.\//g,'/').replace(/\/[^\/]+\/\.\.\//g, '/');
+		}
+		return path;
+	}
+
 
 	//
 	// Create and Append new Dom elements
@@ -1161,7 +1468,9 @@ var hello = (function(){
 		// Add callback to the window object
 		window[cb_name] = function(json){
 			result = json;
-			delete window[cb_name];
+			try{
+				delete window[cb_name];
+			}catch(e){}
 		};
 
 		// Build script tag
@@ -1221,28 +1530,300 @@ var hello = (function(){
 	// @param object data, key value data to send
 	// @param function callback, function to execute in response
 	//
-	function _post(uri, data, callback){
+	function _post(url, data, options, callback){
+
+		// This hack needs a form
+		var form = null, 
+			reenableAfterSubmit = [],
+			newform;
+
+		// What is the name of the callback to contain
+		// We'll also use this to name the iFrame
+		var state = "ifrmhack_"+parseInt(Math.random()*1e6).toString(16);
+
+		// Save the callback to the window
+		window[state] = function(r){
+			try{
+				// remove the iframe from the page.
+				win.parentNode.removeChild(win);
+				// remove the form
+				if(newform){
+					newform.parentNode.removeChild(newform);
+				}
+			}
+			catch(e){console.error("could not remove iframe")}
+
+			// reenable the disabled form
+			for(var i=0;i<reenableAfterSubmit.length;i++){
+				if(reenableAfterSubmit[i]){
+					reenableAfterSubmit[i].setAttribute('disabled', false);
+				}
+			}
+
+			// fire the callback
+			callback(r);
+		}
+
+		// Build the iframe window
+		var win = document.createElement('iframe');
+		win.id = state;
+		win.name = state;
+		win.height = "1px";
+		win.width = "1px";
+		document.body.appendChild(win);
+
+		// Override callback mechanism. Triggger a response onload/onerror
+		if(options&&options.callbackonload){
+			win.onload = function(){
+				callback({
+					response : "posted",
+					message : "Successfully posted content"
+				});
+			};
+			win.onerror = function(){
+				callback({
+					error : {
+						message : "Failed to post content"
+					}
+				});
+			};
+		}
+
+		// Add some additional query parameters to the URL
+		url += "&suppress_response_codes=true&redirect_uri="+encodeURIComponent(_options.redirect_uri) +"&state="+state
+			+"&callbackUrl="+encodeURIComponent(_options.redirect_uri)
+			+"&redirect-uri="+encodeURIComponent(_options.redirect_uri)
+
+		// if we are just posting a single item
+		if(data instanceof HTMLInputElement){
+			// get the parent form
+			var form = data.form;
+			// Loop through and disable all of its siblings
+			for( var i = 0; i < form.elements.length; i++ ){
+				if(form.elements[i] !== data){
+					form.elements[i].setAttribute('disabled',true);
+				}
+			}
+			// Move the focus to the form
+			data = form;
+		}
+
+		// Posting a form
+		if(data instanceof HTMLFormElement){
+			// This is a form element
+			var form = data;
+
+			// Does this form need to be a multipart form?
+			for( var i = 0; i < form.elements.length; i++ ){
+				if(!form.elements[i].disabled && form.elements[i].type === 'file'){
+					form.setAttribute('enctype', 'multipart/form-data');
+					form.elements[i].setAttribute('name', 'file');
+				}
+			}
+		}
+		else{
+			// Its not a form element, 
+			// Therefore it must be a JSON object of Key=>Value or Key=>Element
+
+			// If anyone of those values are a input type=file we shall shall insert its siblings into the form for which it belongs.
+			for(var x in data) if(data.hasOwnProperty(x)){
+				// is this an input Element?
+				if( data[x] instanceof HTMLInputElement && data[x].type === 'file' ){
+					form = data[x].form;
+					form.setAttribute('enctype', 'multipart/form-data');
+				}
+			}
+
+			// Do If there is no defined form element, lets create one.
+			if(!form){
+				// Build form
+				form = document.createElement('form');
+				form.height = "1px";
+				form.width = "1px";
+				document.body.appendChild(form);
+				newform = form;
+			}
+
+			// Add elements to the form if they dont exist
+			for(var x in data) if(data.hasOwnProperty(x)){
+
+				// Is this an element?
+				var el = ( data[x] instanceof HTMLInputElement || data[x] instanceof HTMLTextAreaElement || data[x] instanceof HTMLSelectElement );
+
+				// is this not an input element, or one that exists outside the form.
+				if( !el || data[x].form !== form ){
+
+					// Does an element have the same name?
+					if(form.elements[x]){
+						// Remove it.
+						form.elements[x].parentNode.removeChild(form.elements[x]);
+					}
+
+					// Create an input element
+					var input = document.createElement('input');
+					input.setAttribute('name', x);
+
+					// Does it have a value attribute?
+					if(el){
+						input.value = data[x].value;
+					}
+					else if(el instanceof HTMLElement){
+						input.value = data[x].innerHTML || data[x].innerText;
+					}else{
+						input.value = data[x];
+					}
+
+					form.appendChild(input);
+				}
+				// it is an element, which exists within the form, but the name is wrong
+				else if( el && data[x].name !== x){
+					data[x].setAttribute('name', x);
+					data[x].name = x;
+				}
+			}
+
+			// Disable elements from within the form if they weren't specified
+			for(var i=0;i<form.children.length;i++){
+				// Does the same name and value exist in the parent
+				if( !( form.children[i].name in data ) && form.children[i].getAttribute('disabled') !== true ) {
+					// disable 
+					form.children[i].setAttribute('disabled',true);
+					// add re-enable to callback
+					reenableAfterSubmit.push(form.children[i]);
+				}
+			}
+		}
+
+
+		// Set the target of the form
+		form.setAttribute('method', 'post');
+		form.setAttribute('action', url);
+		form.setAttribute('target', state);
+
+		// Submit the form
+		setTimeout(function(){
+			form.submit();
+		},30);
 
 		// Build an iFrame and inject it into the DOM
-		var ifm = _append('iframe',{id:'_'+Math.round(Math.random()*1e9), style:shy});
+		//var ifm = _append('iframe',{id:'_'+Math.round(Math.random()*1e9), style:shy});
 		
 		// Build an HTML form, with a target attribute as the ID of the iFrame, and inject it into the DOM.
-		var frm = _append('form',{ method: 'post', action: uri, target: ifm.id, style:shy});
+		//var frm = _append('form',{ method: 'post', action: uri, target: ifm.id, style:shy});
 
-		// insert into the HTML form all the values
-		for( var x in data ){ if(data.hasOwnProperty(x) ){
-			// Add input
-			_append('input',{ name: x, value: data[x] }, frm);
-		}}
+		// _append('input',{ name: x, value: data[x] }, frm);
+	}
 
-		// Append iFrame & Form to the DOM
-		document.body.appendChild(ifm);
-		document.body.appendChild(frm);
 
-		// Submit form
-		frm.submit();
+	//
+	// dataToJSON
+	// This takes a FormElement and converts it to a JSON object
+	// 
+	function _dataToJSON(p){
 
-		return uri;
+		var data = p.data;
+
+		// Is data a form object
+		if( data instanceof HTMLFormElement ){
+			// Get the first FormElement Item if its an type=file
+			var kids = data.children;
+
+			var json = {};
+
+			// Create a data string
+			for(var i=0;i<kids.length;i++){
+
+				// Is this a file, does the browser not support 'files' and 'FormData'?
+				if( kids[i].type === 'file' ){
+					// the browser does not XHR2
+					if("FormData" in window){
+						// include the whole element
+						json[kids[i].name] = kids[i];
+						break;
+					}
+					else if( !("files" in kids[i]) ){
+						return false;
+					}
+				}
+				else{
+					json[ kids[i].name ] = kids[i].value || kids[i].innerHTML;
+				}
+			}
+
+			// Convert to a postable querystring
+			data = json;
+		}
+
+		// Is this a form input element?
+		if( data instanceof HTMLInputElement ){
+			// Get the Input Element
+			// Do we have a Blob data?
+			if("files" in data){
+
+				var o = {};
+				o[ data.name ] = data.files;
+				// Turn it into a FileList
+				data = o;
+			}
+			else{
+				// This is old school, we have to perform the FORM + IFRAME + HASHTAG hack
+				return iframeHack(url, data, callback);
+			}
+		}
+
+		// Is data a blob, File, FileList?
+		if( ("File" in window && data instanceof File) 
+			|| ("Blob" in window && data instanceof Blob) 
+			|| ("FileList" in window && data instanceof FileList) ){
+
+			// Convert to a JSON object
+			data = {'file' : data};
+		}
+
+		// Loop through data if its not FormData it must now be a JSON object
+		if( !( "FormData" in window && data instanceof FormData ) ){
+
+			// Loop through the object
+			for(var x in data) if(data.hasOwnProperty(x)){
+
+				// FileList Object?
+				if("FileList" in window && data[x] instanceof FileList){
+					// Get first record only
+					if(data[x].length===1){
+						data[x] = data[x][0];
+					}
+					else{
+						console.error("We were expecting the FileList to contain one file");
+					}
+				}
+				else if( data[x] instanceof HTMLInputElement && data[x].type === 'file' ){
+
+					if( ("files" in data[x] ) ){
+						// this supports HTML5
+						// do nothing
+					}
+					else{
+						// this does not support HTML5 forms FileList
+						return false;
+					}
+				}
+				else if( data[x] instanceof HTMLInputElement
+					&& data[x] instanceof HTMLSelectElement
+					&& data[x] instanceof HTMLTextAreaElement
+					){
+					data[x] = data[x].value;
+				}
+				else if( data[x] instanceof Element ){
+					data[x] = data[x].innerHTML || data[x].innerText;
+				}
+			}
+		}
+
+
+		// Data has been converted to JSON.
+		p.data = data;
+
+		return true;
 	}
 
 })();
