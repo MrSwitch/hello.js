@@ -71,22 +71,24 @@
 	
 
 <style>
-	#profile:empty:before{
-		content:"Profiles are loaded here";
-		color:#999;
-	}
-	#profile p{
+#profile{
+	min-height:75px;
+}
+	#profile button{
 		display:inline-block;
-		border:1px solid #ddd;
-		padding:20px;
-		vertical-align:top;
-		margin:20px;
-		background-color:#f4f4f4;
+		padding:10px;
+		vertical-align:middle;
+		margin:0 20px;
+		text-transform: capitalize;
 	}
-	#profile p img{
+	#profile button img{
 		width:50px;
 		vertical-align:middle;
 		margin-right:20px;
+		float:left;
+	}
+	#profile button span{
+		clear:left;
 	}
 
 
@@ -177,11 +179,12 @@ input[name=path]{
 <p>It's built to be agnostic, just like OAuth2. Its extensible so you may add your own provider, assuming they support OAuth2 and have a Graph interface accessible via CORS and or JSONP...
 
 <p>	<b>Yeah Yeah, enough jargon, yawn! Lets cut to a demo:</b> Load my profile information from
-	<button onclick="hello.login('windows')">windows</button>,
-	<button onclick="hello.login('facebook')">facebook</button> or
-	<button onclick="hello.login('google')">google</button>
+	<div id="profile">
+		<button id="profile_windows" onclick="hello.login('windows')">windows</button>,
+		<button id="profile_facebook" onclick="hello.login('facebook')">facebook</button> or
+		<button id="profile_google" onclick="hello.login('google')">google</button>
+	</div>
 </p>
-	<div id="profile"></div>
 </blockquote>
 	</header>
 
@@ -308,18 +311,15 @@ input[name=path]{
 
 
 <script class="pre">
-hello.subscribe('auth.login', function(r){
+hello.subscribe('auth.login', function(auth){
 	
 	// call user information, for the given network
-	hello.api( r.network + '/me', function(r){
+	hello.api( auth.network + '/me', function(r){
 		if(!r.id || !!document.getElementById(r.id) ){
 			return;
 		}
-		$( "<p></p>" )
-			.append('<img src="'+ r.picture +'" />')
-			.attr('id', r.id)
-			.append('<b>'+r.name+'</b>')
-			.appendTo("#profile");
+		var target = document.getElementById("profile_"+ auth.network );
+		target.innerHTML = '<img src="'+ r.picture +'" /><b>'+r.name+'</b><br /><span>'+auth.network+'</span>';
 
 	});
 });
