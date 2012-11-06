@@ -104,7 +104,18 @@ var hello = (function(){
 				data : r
 			}
 		}
-		return "entry" in o ? entry(o.entry) : o;
+
+		// Old style, picasa, etc...
+		if( "entry" in o ){
+			return entry(o.entry);
+		}else if( "items" in o ){
+			return {
+				data : o.items
+			};
+		}
+		else{
+			return o;
+		}
 	}
 
 	//
@@ -140,7 +151,8 @@ var hello = (function(){
 				'me/share' : 'plus/v1/people/me/activities/public',
 				'me/feed' : 'plus/v1/people/me/activities/public',
 				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json',
-				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=100'
+				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=100',
+				"me/files" : 'https://www.googleapis.com/drive/v2/files'
 			},
 			scope : {
 				//,
@@ -151,6 +163,7 @@ var hello = (function(){
 				photos			: 'https://picasaweb.google.com/data/',
 				videos			: 'http://gdata.youtube.com',
 				friends			: 'https://www.google.com/m8/feeds',
+				files 			: 'https://www.googleapis.com/auth/drive.readonly',
 				
 				publish			: '',
 				publish_files	: '',
@@ -235,7 +248,9 @@ var hello = (function(){
 				"me/feed" : function(p,callback){
 					// If this is a POST them return
 					callback( p.method==='get' ? "me/feed" : "me/share" );
-				}
+				},
+				"me/files" : 'me/skydrive/files'
+
 			},
 			scope : {
 				basic			: 'wl.signin,wl.basic',
@@ -245,6 +260,7 @@ var hello = (function(){
 				photos			: 'wl.photos',
 				videos			: 'wl.photos',
 				friends			: '',
+				files 			: 'wl.skydrive',
 				
 				publish			: 'wl.share',
 				publish_files	: 'wl.skydrive_update',
@@ -313,6 +329,7 @@ var hello = (function(){
 				photos			: 'user_photos,user_videos',
 				videos			: 'user_photos,user_videos',
 				friends			: '',
+				files 			: '',
 				
 				publish_files	: 'publish_stream',
 				publish			: 'publish_stream',
@@ -653,7 +670,7 @@ var hello = (function(){
 					window.open( 
 						url,
 						'name', 
-						"height=400,width=450,left="+((window.innerWidth-450)/2)+",top="+((window.innerHeight-400)/2)
+						"height=550,width=500,left="+((window.innerWidth-500)/2)+",top="+((window.innerHeight-550)/2)
 					);
 				}
 				else {
