@@ -367,7 +367,7 @@ var hello = (function(){
 
 			// special requirements for handling XHR
 			xhr : function(p){
-				if(p.method==='get'){
+				if(p.method==='get'||p.method==='post'){
 					return {};
 				}
 				else{
