@@ -75,13 +75,16 @@ function upload(){
 			var a = document.createElement('a');
 			a.href = r.source;
 			a.innerHTML = r.name;
-			a.target = "_blank";
 		}
 		else{
 			// Facebook we dont get a response.
-			var a = document.createElement('span');
+			var a = document.createElement('a');
 			a.innerHTML = "Uploaded "+document.getElementById('file').value;
+			if(r.picture){
+				a.href = r.picture;
+			}
 		}
+		a.target = "_blank";
 		document.getElementById('result').appendChild(a);
 	});
 }
