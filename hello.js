@@ -807,7 +807,7 @@ var hello = (function(){
 						url += ( url.indexOf('?') > -1 ? "&" : "?" );
 
 						// Format the data
-						if( p.data && !_dataToJSON(p) ){
+						if( !_isEmpty(p.data) && !_dataToJSON(p) ){
 							// If we can't format the post then, we are going to run the iFrame hack
 							_post( url + _param(qs), p.data, ("post" in o ? o.post(p) : null), callback);
 							return;
@@ -829,7 +829,9 @@ var hello = (function(){
 
 						// Can we use XHR for Cross domain delivery?
 						if( 'withCredentials' in new XMLHttpRequest() && (!("xhr" in o) || (config = o.xhr(p))) ){
+
 							var r = new XMLHttpRequest();
+
 							// xhr.responseType = "json"; // is not supported in any of the vendors yet.
 							r.onload = function(e){
 								var json = r.responseText ? JSON.parse(r.responseText) : null;
@@ -873,7 +875,14 @@ var hello = (function(){
 								r.setRequestHeader("Content-Type", config.contentType);
 
 							// Should we wrap the post data in the body of the request?
-							r.send( p.data );
+							// The fake atrribute is required if this is a shim
+							if( p.data && p.data instanceof FormData && "fake" in p.data && p.data.fake ){
+								r.setRequestHeader("Content-Type", "multipart/form-data; boundary="+ p.data.boundary);
+								r.sendAsBinary(p.data.toString());
+							}
+							else{
+								r.send( p.data );
+							}
 
 							// we're done
 							return {
@@ -1106,7 +1115,7 @@ var hello = (function(){
 
 
 			_store( 'error', {
-				error : p.error, 
+				error : p.error,
 				error_message : p.error_message || p.error_description,
 				callback : a[2],
 				state : p.state
@@ -1743,7 +1752,7 @@ var hello = (function(){
 		// Is data a form object
 		if( data instanceof HTMLFormElement ){
 			// Get the first FormElement Item if its an type=file
-			var kids = data.children;
+			var kids = data.elements;
 
 			var json = {};
 
