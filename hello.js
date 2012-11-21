@@ -1,4 +1,3 @@
-
 /**
  * @hello.js
  *
@@ -48,6 +47,27 @@ var hello = (function(){
 		state         : ''
 	};
 
+	// Format
+	// Ensure each record contains a name, id etc.
+	function formatItem(o){
+		if(o.error){
+			return;
+		}
+		if(!o.name){
+			o.name = o.title || o.message || o.message;
+		}
+		if(!o.picture){
+			o.picture = o.thumbnailLink;
+		}
+		if(!o.thumbnail){
+			o.thumbnail = o.thumbnailLink;
+		}
+		if(o.mimeType === "application/vnd.google-apps.folder"){
+			o.type = "folder";
+			o.files = "https://www.googleapis.com/drive/v2/files?q=%22"+o.id+"%22+in+parents";
+		}
+	}
+
 	// Google has a horrible JSON API
 	function gEntry(o){
 
@@ -59,6 +79,7 @@ var hello = (function(){
 				updated_time : a.updated.$t,
 				created_time : a.published.$t,
 				picture : a['media$group']['media$content'][0].url,
+				thumbnail : a['media$group']['media$content'][0].url,
 				width : a['media$group']['media$content'][0].width,
 				height : a['media$group']['media$content'][0].height,
 //				original : a
@@ -68,7 +89,18 @@ var hello = (function(){
 				for(var j=0;j<a.link.length;j++){
 					if(a.link[j].rel.match("feed")){
 						p.photos = a.link[j].href;
+						p.files = a.link[j].href;
 						break;
+					}
+				}
+			}
+
+			// Get images of different scales
+			if('category' in a&&a['category'].length){
+				var _a  = a['category'];
+				for(var j=0;j<_a.length;j++){
+					if(_a[j].scheme&&_a[j].scheme.match(/\#kind$/)){
+						p.type = _a[j].term.replace(/^.*?\#/,'');
 					}
 				}
 			}
@@ -76,6 +108,7 @@ var hello = (function(){
 			// Get images of different scales
 			if('media$thumbnail' in a['media$group']){
 				var _a = a['media$group']['media$thumbnail'];
+				p.thumbnail = a['media$group']['media$thumbnail'][0].url;
 				p.images = [];
 				for(var j=0;j<_a.length;j++){
 					p.images.push({
@@ -109,11 +142,15 @@ var hello = (function(){
 		if( "entry" in o ){
 			return entry(o.entry);
 		}else if( "items" in o ){
+			for(var i=0;i<o.items.length;i++){
+				formatItem( o.items[i] );
+			}
 			return {
 				data : o.items
 			};
 		}
 		else{
+			formatItem( o );
 			return o;
 		}
 	}
@@ -152,7 +189,7 @@ var hello = (function(){
 				'me/feed' : 'plus/v1/people/me/activities/public',
 				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json',
 				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=100',
-				"me/files" : 'https://www.googleapis.com/drive/v2/files'
+				"me/files" : 'https://www.googleapis.com/drive/v2/files?q=%22root%22+in+parents'
 			},
 			scope : {
 				//,
@@ -193,7 +230,8 @@ var hello = (function(){
 								name	: a.title.$t, 
 								email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
 								updated_time : a.updated.$t,
-								picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null
+								picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null,
+								thumbnail : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null
 							});
 						}
 						return {
@@ -273,6 +311,7 @@ var hello = (function(){
 					if(o.id){
 						o.email = (o.emails?o.emails.preferred:null);
 						o.picture = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
+						o.thumbnail = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
 					}
 					return o;
 				},
@@ -280,6 +319,7 @@ var hello = (function(){
 					if("data" in o){
 						for(var i=0;i<o.data.length;i++){
 							o.data[i].picture = 'https://apis.live.net/v5.0/'+o.data[i].id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
+							o.data[i].thumbnail = 'https://apis.live.net/v5.0/'+o.data[i].id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
 						}
 					}
 					return o;
@@ -288,6 +328,17 @@ var hello = (function(){
 					if("data" in o){
 						for(var i=0;i<o.data.length;i++){
 							o.data[i].photos = 'https://apis.live.net/v5.0/'+o.data[i].id+'/photos';
+							o.data[i].files = 'https://apis.live.net/v5.0/'+o.data[i].id+'/photos';
+						}
+					}
+					return o;
+				},
+				'default' : function(o){
+					if("data" in o){
+						for(var i=0;i<o.data.length;i++){
+							if(o.data[i].picture){
+								o.data[i].thumbnail = o.data[i].picture;	
+							}
 						}
 					}
 					return o;
@@ -319,7 +370,8 @@ var hello = (function(){
 				// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
 				auth : 'http://www.facebook.com/dialog/oauth/',
 				base : 'https://graph.facebook.com/',
-				'me/share' : 'me/feed'
+				'me/share' : 'me/feed',
+				'me/files' : 'me/albums'
 			},
 			scope : {
 				basic			: '',
@@ -329,9 +381,9 @@ var hello = (function(){
 				photos			: 'user_photos,user_videos',
 				videos			: 'user_photos,user_videos',
 				friends			: '',
-				files 			: '',
+				files 			: 'user_photos,user_videos',
 				
-				publish_files	: 'publish_stream',
+				publish_files	: 'user_photos,user_videos,publish_stream',
 				publish			: 'publish_stream',
 				create_event	: 'create_event',
 
@@ -341,6 +393,7 @@ var hello = (function(){
 				me : function(o){
 					if(o.id){
 						o.picture = 'http://graph.facebook.com/'+o.id+'/picture';
+						o.thumbnail = 'http://graph.facebook.com/'+o.id+'/picture';
 					}
 					return o;
 				},
@@ -348,6 +401,7 @@ var hello = (function(){
 					if("data" in o){
 						for(var i=0;i<o.data.length;i++){
 							o.data[i].picture = 'http://graph.facebook.com/'+o.data[i].id+'/picture';
+							o.data[i].thumbnail = 'http://graph.facebook.com/'+o.data[i].id+'/picture';
 						}
 					}
 					return o;
@@ -355,9 +409,28 @@ var hello = (function(){
 				'me/albums' : function(o){
 					if("data" in o){
 						for(var i=0;i<o.data.length;i++){
+							o.data[i].files = 'https://graph.facebook.com/'+o.data[i].id+'/photos';
 							o.data[i].photos = 'https://graph.facebook.com/'+o.data[i].id+'/photos';
+							if(o.data[i].cover_photo){
+								o.data[i].thumbnail = 'https://graph.facebook.com/'+o.data[i].cover_photo+'/picture?access_token='+hello.getAuthResponse('facebook').access_token;
+							}
+							o.data[i].type = "album";
 							if(o.data[i].can_upload){
 								o.data[i].upload_location = 'https://graph.facebook.com/'+o.data[i].id+'/photos';
+							}
+						}
+					}
+					return o;
+				},
+				'me/files' : function(o){return this["me/albums"](o);},
+				'default' : function(o){
+					if("data" in o){
+						for(var i=0;i<o.data.length;i++){
+							if(o.data[i].picture){
+								o.data[i].thumbnail = o.data[i].picture;	
+							}
+							if(o.data[i].cover_photo){
+								o.data[i].thumbnail = 'https://graph.facebook.com/'+o.data[i].cover_photo+'/picture?access_token='+hello.getAuthResponse('facebook').access_token;
 							}
 						}
 					}
@@ -391,43 +464,6 @@ var hello = (function(){
 					callbackonload : true
 				}
 			}
-		},
-		
-		knarly : {
-			name : 'Knarly',
-//			autologin : true,
-			id : window.location.host,
-			uri : {
-				// REF:
-				auth : 'http://oauth.knarly.com/',
-				base : 'http://api.knarly.com/'
-			},
-			scope : {
-				basic : ''
-			},
-			wrap : {
-				// knarly has no special paths
-			},
-			preprocess : function(p){
-				if( p.method.toLowerCase() !== 'get'){
-
-					// is this a collection of items in a post?
-					if( p.method === 'post' && _isArray( p.data ) ){
-						// wrap data up
-						p.data = { json : JSON.stringify(p.data) };
-					}
-					
-					// Add method as a parameter
-					p.data.method = p.method.toLowerCase();
-					
-					// change the method to GET aka JSONP
-					p.method = 'get';
-				}
-				if( !hello.getAuthResponse('knarly') ){
-					p.data.client_id = this.id;
-				}
-				return p;
-			}
 		}
 	};
 
@@ -443,7 +479,6 @@ var hello = (function(){
 			return _store( 'sync_service' );
 		},
 
-
 		//
 		// init
 		// Define the clientId's for the endpoint services
@@ -452,7 +487,11 @@ var hello = (function(){
 		// @param number timeout, timeout in seconds
 		//
 		init : function(services,opts,timeout){
-		
+
+			if(!services){
+				return _services;
+			}
+
 			// Arguments
 			var p = _arguments({services:'o!',opts:'o',timeout:'i'},arguments);
 
@@ -470,9 +509,10 @@ var hello = (function(){
 			// options
 			if(p.opts){
 				_options = _merge(_options, p.opts);
-			}
-			if("redirect_uri" in p.opts){
-				_options.redirect_uri = _realPath(p.opts.redirect_uri);
+
+				if("redirect_uri" in p.opts){
+					_options.redirect_uri = _realPath(p.opts.redirect_uri);
+				}
 			}
 
 			// Timeout
@@ -482,7 +522,7 @@ var hello = (function(){
 
 			// Have we already run init?
 			if(_initstarted){
-				return false;
+				return _services;
 			}
 			else{
 				_initstarted = true;
@@ -491,7 +531,6 @@ var hello = (function(){
 
 			// Monitor for a change in state and fire
 			var old_tokens = {}, pending = {};
-
 
 			//
 			// Monitoring session state
@@ -562,14 +601,10 @@ var hello = (function(){
 						continue;
 					}
 					else{
-						if(!token){
-							evt = 'auth.logout.' + x;
-						}
-						// else if(!_diff[x]){
-						else{
-							evt = 'auth.login.' + x;
-						}
-						hello.trigger(evt, { network:x, authResponse: session } );
+						hello.trigger( x+':auth.' + (!token?'logout':'login'), {
+							network:x, 
+							authResponse: session
+						} );
 					}
 					
 					old_tokens[x] = token;
@@ -578,19 +613,21 @@ var hello = (function(){
 				// Check error events
 				setTimeout(self, 1000);
 			})();
+
+			return _services;
 		},
 
 		//
 		// Login
 		// Using the endpoint defined by _services[x].auth we prompt the login
-		// @param service	stringify				name to connect to
+		// @param network	stringify				name to connect to
 		// @param options	object		(optional)	{display mode, is either none|popup(default)|page, scope: email,birthday,publish, .. }
 		// @param callback	function	(optional)	fired on signin
 		//
-		login :  function(service, opts, callback){
+		login :  function(network, opts, callback){
 
 			var url,
-				p = _arguments({service:'s!', options:'o', callback:'f'}, arguments);
+				p = _arguments({network:'s!', options:'o', callback:'f'}, arguments);
 			
 
 			// merge/override options with app defaults
@@ -598,21 +635,22 @@ var hello = (function(){
 
 
 			// Is our service valid?
-			if( typeof(p.service) === 'string' ){
+			if( typeof(p.network) === 'string' ){
 
-				var provider  = _services[p.service],
+				var provider  = _services[p.network],
 					callback_id = '';
 
 				//
 				// Callback
 				// Save the callback until state comes back.
 				//
+				var responded = false;
 				if(p.callback){
 					// choose a random callback ID string
 					callback_id = "" + Math.round(Math.random()*1e9);
 					
 					// pass in a self unsubscribing function
-					this.subscribe(callback_id, function self(){ hello.unsubscribe(callback_id,self); p.callback.apply(this, arguments);} );
+					this.subscribe(callback_id, function self(){ responded = true; hello.unsubscribe(callback_id,self); p.callback.apply(this, arguments);} );
 				}
 
 
@@ -623,7 +661,12 @@ var hello = (function(){
 				var qs = _merge( p.options, {
 					client_id		: provider.id,
 					scope			: provider.scope.basic,
-					state			: p.service + '.' + p.options.display + '.' + callback_id + '.' + p.options.state
+					state			: {
+						network : p.network, 
+						display : p.options.display, 
+						callback : callback_id, 
+						state : p.options.state
+					}
 				});
 
 				//
@@ -632,9 +675,14 @@ var hello = (function(){
 				//
 				var scope = p.options.scope;
 				if(scope){
+					// Format
 					if(typeof(scope)!=='string'){
 						scope = scope.join(',');
 					}
+					// Save in the State
+					qs.state.scope = scope.split(/,\s/);
+
+					// Replace each with the default scopes
 					qs.scope = (qs.scope+ ',' + scope).replace(/[^,\s]+/ig, function(m){
 						return (m in provider.scope) ? provider.scope[m] : m;
 					});
@@ -642,11 +690,33 @@ var hello = (function(){
 					qs.scope = _unique(qs.scope.split(/,+/)).join( provider.scope_delim || ',');
 				}
 
+				// 
+				// Is the user already signed in
+				//
+				var session = hello.getAuthResponse(p.network);
+				if( session && "expires" in session && session.expires > ((new Date()).getTime()/1e3) ){
+					// What is different about the scopes in the session vs the scopes in the new login?
+					var diff = _diff( session.scope || [], qs.state.scope || [] );
+					if(diff.length===0){
+						// Ok trigger the callback
+						this.trigger(callback_id+".login", {
+							network : p.network,
+							authResponse : session
+						});
+
+						// Notthing has changed
+						return;
+					}
+				}
+
 				//
 				// REDIRECT_URI
 				// Is the redirect_uri root?
 				//
 				qs.redirect_uri = _realPath(qs.redirect_uri);
+
+				// Convert state to a string
+				qs.state = JSON.stringify(qs.state);
 
 				//
 				// URL
@@ -667,11 +737,20 @@ var hello = (function(){
 				else if( qs.display === 'popup'){
 
 					// Trigger callback
-					window.open( 
+					var popup = window.open( 
 						url,
-						'name', 
+						'Authentication',
 						"height=550,width=500,left="+((window.innerWidth-500)/2)+",top="+((window.innerHeight-550)/2)
 					);
+					var self = this;
+					var timer = setInterval(function(){
+						if(popup.closed){
+							clearInterval(timer);
+							if(!responded){
+								self.trigger(callback_id+".failed", {error:{code:"user_cancelled", message:"Cancelled"}, network:p.network });
+							}
+						}
+					}, 100);
 				}
 				else {
 					window.location = url;
@@ -1014,15 +1093,14 @@ var hello = (function(){
 	
 			log('Unsubscribe', evt, callback);
 
-			var p = _arguments({evt:'s!', callback:"f!"}, arguments);
+			var p = _arguments({evt:'s!', callback:"f"}, arguments);
 
 			if(!p){
 				return false;
 			}
 			
-			
 			for(var i=0;i<listeners[p.evt].length;i++){
-				if(listeners[p.evt][i] === callback){
+				if(!p.callback || listeners[p.evt][i] === p.callback){
 					listeners[p.evt] = listeners[p.evt].splice(i,1);
 				}
 			}
@@ -1050,14 +1128,65 @@ var hello = (function(){
 		//
 		_param : _param,
 		_store : _store,
-		_append : _append
+		_append : _append,
+		_merge : _merge
 	};
-	
 
+
+
+
+	//
+	// AuthCallback
+	// Trigger a callback to authenticate
+	//
+	function authCallback(network, obj){
+
+		// Trigger the callback on the parent
+		_store(obj.network, obj );
+
+		// this is a popup so
+		if( !("display" in p) || p.display !== 'page'){
+
+			// trigger window.opener
+			var win = (window.opener||window.parent);
+
+			if(win&&"hello" in win){
+				// Call the generic listeners
+//				win.hello.trigger(network+":auth."+(obj.error?'failed':'login'), obj);
+				// Call the inline listeners
+
+				// Trigger on the parent
+				if(obj.error){
+					win.hello.trigger(obj.network+":"+obj.callback+".failed", obj );
+				}
+				else{
+					win.hello.trigger(obj.network+":"+obj.callback+".login", { 
+						network : obj.network, 
+						authResponse : obj 
+					});
+				}
+
+				// to do remove from session object...
+				try{
+					delete obj.callback;
+				}catch(e){}
+
+				// Update store
+				_store(obj.network,obj);
+
+			}
+
+			window.close();
+			log('Trying to close window');
+
+			// Dont execute any more
+			return;
+		}
+	}
 	//
 	// Save session, from redirected authentication
 	// #access_token has come in?
-	//	
+	//
 	var p = _param(window.location.hash||null);
 
 	if(!p){
@@ -1070,84 +1199,56 @@ var hello = (function(){
 
 		// remove any addition information
 		// e.g. p.state = 'facebook.page';
-		var a = p.state.split('.');
-		p.state = a[0];
-		if(a.length>0){
-			p.display = a[1];
+		try{
+			var a = JSON.parse(p.state);
+			p = _merge(p, a);
+		}catch(e){
+			console.error("HelloJS: Could not decode state parameter");
 		}
-		
 
 		// access_token?
 		if( ("access_token" in p)
-			&& p.state in _services){
+			&& p.network in _services){
 
 			if(parseInt(p.expires_in,10) === 0){
 				// Facebook, tut tut tut,
 				p.expires_in = (3600 * 24 * 7 * 52);
 			}
-
-			// Lets use the "state" to assign it to one of our networks
-			_store( p.state, {
-				access_token : p.access_token, 
-				expires_in : parseInt(p.expires_in,10), 
-				expires : ((new Date()).getTime()/1e3) + parseInt(p.expires_in,10),
-				callback : a[2]
-			});
+			p.expires_in = parseInt(p.expires_in,10);
+			p.expires = ((new Date()).getTime()/1e3) + parseInt(p.expires_in,10);
 
 			// Make this the default users service
-			hello.service( p.state );
+			hello.service( p.network );
 
-			// this is a popup so
-			if(!("display" in p) || p.display !== 'page'){
-				window.close();
-				log('Trying to close window');
-
-				// Dont execute any more
-				return;
-			}
+			// Lets use the "state" to assign it to one of our networks
+			authCallback( p.network, p );
 		}
 
 		//error=?
 		//&error_description=?
 		//&state=?
 		else if( ("error" in p)
-				&& p.state in _services){
+				&& p.network in _services){
+			p.error_message = p.error_message || p.error_description;
 
-
-			_store( 'error', {
-				error : p.error,
-				error_message : p.error_message || p.error_description,
-				callback : a[2],
-				state : p.state
-			});
-
-			// possible reasons are invalid_scope, user cancelled the authentication.
-			// we're just going to close the page for now, 
-			// @todo should this fire an event?
-			// this is a popup so
-
-			if(!("display" in p) || p.display !== 'page'){
-				window.close();
-				log('Trying to close window');
-
-				// Dont execute any more
-				return;
-			}
+			authCallback( 'error', p );
 		}
 
 		// IFRAME HACK
 		// Result is serialized JSON string.
-		if(p&&p.state&&"result" in p){
+		if(p&&p.callback&&"result" in p){
 			// trigger a function in the parent
-			if(p.state in window.parent){
-				window.parent[p.state](JSON.parse(p.result));
+			if(p.callback in window.parent){
+				window.parent[p.callback](JSON.parse(p.result));
 			}
 		}
 	}
 
 
 	return hello;
-	
+
+
+
 	//////////////////////////////////////////////
 	//////////////////////////////////////////////
 	/////////////////UTILITIES////////////////////
@@ -1195,6 +1296,17 @@ var hello = (function(){
 	}
 
 
+	// 
+	// diff
+	function _diff(a,b){
+		var r = [];
+		for(var i=0;i<b.length;i++){
+			if(a.indexOf(b[i])===-1){
+				r.push(b[i]);
+			}
+		}
+		return r;
+	}
 	
 	//
 	// Param
@@ -1409,7 +1521,10 @@ var hello = (function(){
 		}
 		// Is the redirect_uri relative?
 		else if( !path.match(/^https?\:\/\//) ){
-			path = (window.location.href.replace(/#.*/,'').replace(/\/[^\/]+$/,'/') + path).replace(/\/\.\//g,'/').replace(/\/[^\/]+\/\.\.\//g, '/');
+			path = (window.location.href.replace(/#.*/,'').replace(/\/[^\/]+$/,'/') + path).replace(/\/\.\//g,'/');
+		}
+		while( /\/[^\/]+\/\.\.\//g.test(path) ){
+			path = path.replace(/\/[^\/]+\/\.\.\//g, '/');
 		}
 		return path;
 	}
@@ -1436,8 +1551,11 @@ var hello = (function(){
 							n[x][y] = attr[x][y];
 						}}
 					}
-					else{
-						n[x] = attr[x];
+					else if(x==="html"){
+						n.innerHTML = attr[x];
+					}
+					else {
+						n.setAttribute( x, attr[x]);
 					}
 				}}
 			}
@@ -1565,10 +1683,10 @@ var hello = (function(){
 
 		// What is the name of the callback to contain
 		// We'll also use this to name the iFrame
-		var state = "ifrmhack_"+parseInt(Math.random()*1e6).toString(16);
+		var callbackID = "ifrmhack_"+parseInt(Math.random()*1e6).toString(16);
 
 		// Save the callback to the window
-		window[state] = function(r){
+		window[callbackID] = function(r){
 			try{
 				// remove the iframe from the page.
 				win.parentNode.removeChild(win);
@@ -1592,8 +1710,8 @@ var hello = (function(){
 
 		// Build the iframe window
 		var win = document.createElement('iframe');
-		win.id = state;
-		win.name = state;
+		win.id = callbackID;
+		win.name = callbackID;
 		win.height = "1px";
 		win.width = "1px";
 		document.body.appendChild(win);
@@ -1616,7 +1734,7 @@ var hello = (function(){
 		}
 
 		// Add some additional query parameters to the URL
-		url += "&suppress_response_codes=true&redirect_uri="+encodeURIComponent(_options.redirect_uri) +"&state="+state
+		url += "&suppress_response_codes=true&redirect_uri="+encodeURIComponent(_options.redirect_uri) +"&state="+JSON.stringify({callback:callbackID})
 			+"&callbackUrl="+encodeURIComponent(_options.redirect_uri)
 			+"&redirect-uri="+encodeURIComponent(_options.redirect_uri)
 
