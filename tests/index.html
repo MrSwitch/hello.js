@@ -78,14 +78,15 @@
 
 	<header>
 		<h1>hello.js endpoint tests</h1>
-		<p>Steps to run the automated tests</p>
 	</header>
+	<blockquote>
 	<ol>
 		<li>Select the scope of the services you want to test
 		<li>Click the signin buttons along the top of the table, and give consent to the application
-		<li>Click the <button class="run"></button> to run individual tests
+		<li>Click the <button class="run"></button> to run individual tests, alternatively <button class="run">All</button> to run all the tests in the column
 		<li>Click on the <button class="response passed"></button> or <button class="response error"></button> response button's to view the data
 	</ol>
+	</blockquote>
 
 <table>
 	<thead>
@@ -93,7 +94,7 @@
 			<th>method</th>
 			<th><label><input type="checkbox" data-bind="checked: scopes().length===checkedScopes().length, click:function(){ scopes().length===checkedScopes().length ? checkedScopes.removeAll() : checkAllScopes() }">scopes </label></th>
 			<!-- ko foreach:networks -->
-			<th><button data-bind="text: name, click:login"></button></th>
+			<th><button data-bind="text: name, click:login" title="Signin"></button><button data-bind="click:runAll" class="run" title="Run all tests in this column">All</button></th>
 			<!-- /ko -->
 		</tr>
 	</thead>
@@ -185,6 +186,22 @@ var tests = [
 				name : reg.name,
 				picture : reg.url
 			}]
+		}
+	},
+	{
+		method : 'get',
+		path : 'me/share',
+		expected : {
+			data : []
+		}
+	},
+	{
+		method : 'post',
+		path : 'me/share',
+		scope : ["publish"],
+		data : {
+			message : "Running the tests",
+			link : window.location.href
 		}
 	},
 	{
@@ -306,20 +323,17 @@ var tests = [
 	},
 	{
 		method : 'get',
-		path : 'me/share',
+		path : 'me/files',
+		scope : ["files"],
 		expected : {
-			data : []
+			data : [{
+				id : reg.string,
+				name : reg.name,
+				picture : reg.url,
+				photos : reg.string
+			}]
 		}
 	},
-	{
-		method : 'post',
-		path : 'me/share',
-		scope : ["publish"],
-		data : {
-			message : "Running the tests",
-			link : window.location.href
-		}
-	}
 ];
 
 
@@ -359,8 +373,8 @@ function Test(test,network,parent){
 
 	this.showResponse = ko.observable(false);
 
-	this.run = function(service,callback){
-		var authResponse = hello.getAuthResponse(service);
+	this.run = function(callback){
+		var authResponse = hello.getAuthResponse(network);
 		var test = this;
 		var action = function(r){
 			test.status('working');
@@ -415,6 +429,36 @@ function Test(test,network,parent){
 
 function Provider(network){
 	this.name = network;
+	this.runAll = function(){
+		hello.login(network, {scope: model.checkedScopes() }, function(r){
+			if(!r||r.error){
+				alert("Login error: "+r.error.message);
+			}
+			var tests = [];
+			// Loop through all the tests
+			ko.utils.arrayForEach(model.tests(), function(test){
+				// Get the variant that matches this name
+				ko.utils.arrayForEach(test.variants(), function(variant){
+					if(variant.network === network){
+						tests.push(variant);
+					}
+				});
+			});
+
+			// Now iterate through the tests
+			(function loop(i){
+				var test = tests[i];
+				if(!test){
+					return;
+				}
+				else{
+					test.run(function(){
+						loop(++i);
+					});
+				}
+			})(0);
+		});
+	};
 	this.login = function(){
 		hello.login(network, {scope: model.checkedScopes() });
 	};
