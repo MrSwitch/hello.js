@@ -27,13 +27,17 @@ hello.init( CLIENT_IDS, {redirect_uri:'../redirect.html'} );
 
 <script class="pre">
 function getFriends(network){
-	hello.login( network, {scope:'friends'}, function(){
+	hello.login( network, {scope:'friends'}, function(auth){
+		if(!auth||auth.error){
+			console.log("Signin aborted");
+			return;
+		}
 		// Get the friends
 		hello.api( network +':/me/friends', function(r){
 			for(var i=0;i<r.data.length;i++){
 				var o = r.data[i];
 				var li = document.createElement('li');
-				li.innerHTML = o.name + (o.picture?" <a href="+o.picture+" target='_blank'>picture</a>":'');
+				li.innerHTML = o.name + (o.thumbnail?" <a href="+o.thumbnail+" target='_blank'>picture</a>":'');
 				document.getElementById('list').appendChild(li);
 			};
 		});

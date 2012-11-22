@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>hello.js - Login Events</title>
+	<link rel="stylesheet" href="/_packages/document.css" />
+	<script src="/_packages/document.js"></script>
+
+	<script src="client_ids.js"></script>
+	<style>ul:empty:after{content:'empty';font-weight:bold;color:#aaa;}</style>
+</head>
+<body>
+	<h1>hello.js - Login Events</h1>
+	<button onclick="login('google')">Login Google</button>
+	<button onclick="login('facebook')">Login Facebook</button>
+	<button onclick="login('windows')">Login Windows</button>
+
+<script class="pre" src="../hello.js"></script>
+
+<textarea id="log" style="width:100%;height:100px;"></textarea>
+
+<script class="pre">
+var log = document.getElementById('log');
+hello.subscribe( "auth", function(e){
+	log.value = "AUTH:" + JSON.stringify( e ) + "\n" + log.value;
+});
+hello.subscribe( "auth.failed", function(e){
+	log.value = "AUTH.FAILED:" + JSON.stringify( e ) + "\n" + log.value;
+});
+hello.subscribe( "auth.login", function(e){
+	log.value = "AUTH.LOGIN:" + JSON.stringify( e ) + "\n" + log.value;
+});
+hello.init( CLIENT_IDS, {redirect_uri:'../redirect.html'} );
+</script>
+
+<script class="pre">
+// Signin button click handler
+function login(network){
+	hello.login( network, {scope:'friends'}, function(e){
+		log.value = "CALLBACK:" + JSON.stringify( e ) + "\n" + log.value;
+	});
+}
+
+</script>
+
+
+</body>
+</html>
