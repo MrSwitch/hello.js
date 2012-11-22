@@ -4,6 +4,8 @@
 	<title>hello.js testing</title>
 	<link rel="stylesheet" href="/_packages/document.css" />
 
+<!--- Oh IE7 -->
+<script src="http://ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js"></script>
 
 <script src="/_packages/knockout.js"></script>
 <script src="/_packages/document.js"></script>
@@ -100,7 +102,7 @@
 	</thead>
 	<tbody data-bind="foreach: tests">
 		<tr data-bind="css: {debug: debug()}">
-			<td class="method" data-bind="click:function(){debug()?debug(false):debug(true);}"><span data-bind="attr:{ class : method }, text:method"></span> <b data-bind="text: path"></b></td>
+			<td class="method" data-bind="click:function(){debug()?debug(false):debug(true);}"><span data-bind="attr:{ 'class' : method }, text:method"></span> <b data-bind="text: path"></b></td>
 			<td>
 				<!-- ko foreach:scope -->
 				<label><input type="checkbox" data-bind="checked:$root.checkedScopes, value:$data"/><span data-bind="text:$data"></span></label>
@@ -174,8 +176,8 @@ var tests = [
 			id : reg.id,
 			first_name : reg.name,
 			last_name : reg.name,
-			picture : reg.url
-		},
+			thumbnail : reg.url
+		}
 	},
 	{
 		method : 'get',
@@ -184,7 +186,7 @@ var tests = [
 		expected : {
 			data : [{
 				name : reg.name,
-				picture : reg.url
+				thumbnail : reg.url
 			}]
 		}
 	},
@@ -212,7 +214,7 @@ var tests = [
 			data : [{
 				id : reg.string,
 				name : reg.name,
-				picture : reg.url,
+				thumbnail : reg.url,
 				photos : reg.string
 			}]
 		}
@@ -235,7 +237,7 @@ var tests = [
 			data : [{
 				id : reg.string,
 				name : reg.name,
-				picture : reg.url,
+				picture : reg.url
 			}]
 		}
 	},
@@ -277,7 +279,7 @@ var tests = [
 			})
 		},
 		expected : {
-			name : /^.+$/,
+//			name : /^.+$/, // FaceBook doesn't always return a name
 			id : reg.string,
 			picture : reg.url
 		}
@@ -333,7 +335,7 @@ var tests = [
 				photos : reg.string
 			}]
 		}
-	},
+	}
 ];
 
 
@@ -433,6 +435,7 @@ function Provider(network){
 		hello.login(network, {scope: model.checkedScopes() }, function(r){
 			if(!r||r.error){
 				alert("Login error: "+r.error.message);
+				return;
 			}
 			var tests = [];
 			// Loop through all the tests
@@ -478,16 +481,31 @@ var model = new (function(){
 });
 
 ko.utils.arrayForEach( tests, function(test){
+
+	// Urgh, IE8 including empty prototype at end of array
+	if(!test){
+		return;
+	}
 	model.tests.push(new Test(test));
 
 	if(test.scope){
 		ko.utils.arrayForEach(test.scope, function(scope){
-			if(model.scopes().indexOf(scope)===-1){
+			if(_indexOf(model.scopes(), scope)===-1){
 				model.scopes.push(scope);
 			}
 		});
 	}
 });
+
+if(!Object.keys){
+	Object.keys = function(o){
+		var a = [];
+		for(var x in o)if(o.hasOwnProperty(x)){
+			a.push(x);
+		}
+		return a;
+	}
+}
 
 ko.utils.arrayForEach( Object.keys(CLIENT_IDS), function(network){
 	model.networks.push(new Provider(network));
@@ -600,6 +618,24 @@ function testExpected(test,r){
 	}
 	return true;
 }
+
+// 
+// indexOf
+// IE hack Array.indexOf doesn't exist prior to IE9
+function _indexOf(a,s){
+	// Do we need the hack?
+	if(a.indexOf){
+		return a.indexOf(s);
+	}
+
+	for(var j=0;j<a.length;j++){
+		if(a[j]===s){
+			return j;
+		}
+	}
+	return -1;
+}
+
 </script>
 </body>
 </html>
