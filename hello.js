@@ -1,9 +1,10 @@
 /**
  * @hello.js
  *
+ * HelloJS is named because it makes a lot of introductions. If you want to know It lets
  * So many web services are putting their content online accessible on the web using OAuth2 as a provider.
  * The downside is they all have seperate REST calls, + client-side libraries to access their data.
- * Meaning that if you want to implement more than one of the API's, your going to have to write code for each of them seperatly, 
+ * Meaning that if you want to implement more than one of the API's, your going to have to write code for each of them seperatly,
  * not to mention the extra page bulk of including their propriatary script files.
  *
  * You could also use a proprietary service like Gigya or Jan Rain to circumnavigate the problem. But i think you'll like hello.js
@@ -72,9 +73,10 @@ var hello = (function(){
 	function gEntry(o){
 
 		var entry = function(a){
+			var i=0, _a;
 			var p = {
 				id		: a.id.$t,
-				name	: a.title.$t, 
+				name	: a.title.$t,
 				description	: a.summary.$t,
 				updated_time : a.updated.$t,
 				created_time : a.published.$t,
@@ -86,11 +88,11 @@ var hello = (function(){
 			};
 			// Get feed/children
 			if("link" in a){
-				for(var j=0;j<a.link.length;j++){
-					if(a.link[j].rel.match(/\#feed$/)){
-						p.photos = a.link[j].href;
-						p.files = a.link[j].href;
-						p.upload_location = a.link[j].href;
+				for(i=0;i<a.link.length;i++){
+					if(a.link[i].rel.match(/\#feed$/)){
+						p.photos = a.link[i].href;
+						p.files = a.link[i].href;
+						p.upload_location = a.link[i].href;
 						break;
 					}
 				}
@@ -98,24 +100,24 @@ var hello = (function(){
 
 			// Get images of different scales
 			if('category' in a&&a['category'].length){
-				var _a  = a['category'];
-				for(var j=0;j<_a.length;j++){
-					if(_a[j].scheme&&_a[j].scheme.match(/\#kind$/)){
-						p.type = _a[j].term.replace(/^.*?\#/,'');
+				_a  = a['category'];
+				for(i=0;i<_a.length;i++){
+					if(_a[i].scheme&&_a[i].scheme.match(/\#kind$/)){
+						p.type = _a[i].term.replace(/^.*?\#/,'');
 					}
 				}
 			}
 
 			// Get images of different scales
 			if('media$thumbnail' in a['media$group']){
-				var _a = a['media$group']['media$thumbnail'];
+				_a = a['media$group']['media$thumbnail'];
 				p.thumbnail = a['media$group']['media$thumbnail'][0].url;
 				p.images = [];
-				for(var j=0;j<_a.length;j++){
+				for(i=0;i<_a.length;i++){
 					p.images.push({
-						source : _a[j].url,
-						width : _a[j].width,
-						height : _a[j].height
+						source : _a[i].url,
+						width : _a[i].width,
+						height : _a[i].height
 					});
 				}
 				p.images.push({
@@ -129,14 +131,14 @@ var hello = (function(){
 
 		var r = [];
 		if("feed" in o && "entry" in o.feed){
-			for(var i=0;i<o.feed.entry.length;i++){
+			for(i=0;i<o.feed.entry.length;i++){
 				r.push(entry(o.feed.entry[i]));
 			}
 			return {
 				//name : o.feed.title.$t,
 				//updated : o.feed.updated.$t,
 				data : r
-			}
+			};
 		}
 
 		// Old style, picasa, etc...
@@ -162,11 +164,11 @@ var hello = (function(){
 	// This function checks whether the form contains binary data
 	function has_binary(data){
 		for(var x in data ) if(data.hasOwnProperty(x)){
-			if( (_domInstance('input', data[x]) && data[x].type === 'file')
-				|| ("FileList" in window && data[x] instanceof FileList)
-				|| ("File" in window && data[x] instanceof File)
-				|| ("Blob" in window && data[x] instanceof Blob)
-			 ){
+			if( (_domInstance('input', data[x]) && data[x].type === 'file')	||
+				("FileList" in window && data[x] instanceof window.FileList) ||
+				("File" in window && data[x] instanceof window.File) ||
+				("Blob" in window && data[x] instanceof window.Blob)
+			){
 				return true;
 			}
 		}
@@ -202,7 +204,7 @@ var hello = (function(){
 				photos			: 'https://picasaweb.google.com/data/',
 				videos			: 'http://gdata.youtube.com',
 				friends			: 'https://www.google.com/m8/feeds',
-				files 			: 'https://www.googleapis.com/auth/drive.readonly',
+				files			: 'https://www.googleapis.com/auth/drive.readonly',
 				
 				publish			: '',
 				publish_files	: 'https://www.googleapis.com/auth/drive',
@@ -230,7 +232,7 @@ var hello = (function(){
 							var a = o.feed.entry[i];
 							r.push({
 								id		: a.id.$t,
-								name	: a.title.$t, 
+								name	: a.title.$t,
 								email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
 								updated_time : a.updated.$t,
 								picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null,
@@ -241,7 +243,7 @@ var hello = (function(){
 							//name : o.feed.title.$t,
 							//updated : o.feed.updated.$t,
 							data : r
-						}
+						};
 					}
 					return o;
 				},
@@ -304,7 +306,7 @@ var hello = (function(){
 				photos			: 'wl.photos',
 				videos			: 'wl.photos',
 				friends			: '',
-				files 			: 'wl.skydrive',
+				files			: 'wl.skydrive',
 				
 				publish			: 'wl.share',
 				publish_files	: 'wl.skydrive_update',
@@ -343,7 +345,7 @@ var hello = (function(){
 					if("data" in o){
 						for(var i=0;i<o.data.length;i++){
 							if(o.data[i].picture){
-								o.data[i].thumbnail = o.data[i].picture;	
+								o.data[i].thumbnail = o.data[i].picture;
 							}
 						}
 					}
@@ -387,7 +389,7 @@ var hello = (function(){
 				photos			: 'user_photos,user_videos',
 				videos			: 'user_photos,user_videos',
 				friends			: '',
-				files 			: 'user_photos,user_videos',
+				files			: 'user_photos,user_videos',
 				
 				publish_files	: 'user_photos,user_videos,publish_stream',
 				publish			: 'publish_stream',
@@ -433,7 +435,7 @@ var hello = (function(){
 					if("data" in o){
 						for(var i=0;i<o.data.length;i++){
 							if(o.data[i].picture){
-								o.data[i].thumbnail = o.data[i].picture;	
+								o.data[i].thumbnail = o.data[i].picture;
 							}
 							if(o.data[i].cover_photo){
 								o.data[i].thumbnail = 'https://graph.facebook.com/'+o.data[i].cover_photo+'/picture?access_token='+hello.getAuthResponse('facebook').access_token;
@@ -468,7 +470,7 @@ var hello = (function(){
 				return {
 					// fire the callback onload
 					callbackonload : true
-				}
+				};
 			}
 		}
 	};
@@ -546,11 +548,12 @@ var hello = (function(){
 				//
 				// Check for error Callbacks
 				//
-				var error = _store('error');
+				var error = _store('error'),
+					cb = null;
 				if(error && "callback" in error && error.callback in listeners){
 
 					// to do remove from session object...
-					var cb = error.callback;
+					cb = error.callback;
 					try{
 						delete error.callback;
 					}catch(e){}
@@ -576,7 +579,7 @@ var hello = (function(){
 					if(session && "callback" in session && session.callback in listeners){
 
 						// to do remove from session object...
-						var cb = session.callback;
+						cb = session.callback;
 						try{
 							delete session.callback;
 						}catch(e){}
@@ -608,7 +611,7 @@ var hello = (function(){
 					}
 					else{
 						hello.trigger( x+':auth.' + (!token?'logout':'login'), {
-							network:x, 
+							network:x,
 							authResponse: session
 						} );
 					}
@@ -641,133 +644,133 @@ var hello = (function(){
 
 
 			// Is our service valid?
-			if( typeof(p.network) === 'string' ){
-
-				var provider  = _services[p.network],
-					callback_id = '';
-
-				//
-				// Callback
-				// Save the callback until state comes back.
-				//
-				var responded = false;
-				if(p.callback){
-					// choose a random callback ID string
-					callback_id = "" + Math.round(Math.random()*1e9);
-					
-					// pass in a self unsubscribing function
-					this.subscribe(callback_id, function self(){ responded = true; hello.unsubscribe(callback_id,self); p.callback.apply(this, arguments);} );
-				}
-
-
-				//
-				// QUERY STRING
-				// querystring parameters, we may pass our own arguments to form the querystring
-				//
-				var qs = _merge( p.options, {
-					client_id		: provider.id,
-					scope			: provider.scope.basic,
-					state			: {
-						network : p.network, 
-						display : p.options.display, 
-						callback : callback_id, 
-						state : p.options.state
-					}
-				});
-
-				//
-				// SCOPES
-				// Authentication permisions
-				//
-				var scope = p.options.scope;
-				if(scope){
-					// Format
-					if(typeof(scope)!=='string'){
-						scope = scope.join(',');
-					}
-					// Save in the State
-					qs.state.scope = scope.split(/,\s/);
-
-					// Replace each with the default scopes
-					qs.scope = (qs.scope+ ',' + scope).replace(/[^,\s]+/ig, function(m){
-						return (m in provider.scope) ? provider.scope[m] : m;
-					});
-					// remove duplication and empty spaces
-					qs.scope = _unique(qs.scope.split(/,+/)).join( provider.scope_delim || ',');
-				}
-
-				// 
-				// Is the user already signed in
-				//
-				var session = hello.getAuthResponse(p.network);
-				if( session && "expires" in session && session.expires > ((new Date()).getTime()/1e3) ){
-					// What is different about the scopes in the session vs the scopes in the new login?
-					var diff = _diff( session.scope || [], qs.state.scope || [] );
-					if(diff.length===0){
-						// Ok trigger the callback
-						this.trigger(callback_id+".login", {
-							network : p.network,
-							authResponse : session
-						});
-
-						// Notthing has changed
-						return;
-					}
-				}
-
-				//
-				// REDIRECT_URI
-				// Is the redirect_uri root?
-				//
-				qs.redirect_uri = _realPath(qs.redirect_uri);
-
-				// Convert state to a string
-				qs.state = JSON.stringify(qs.state);
-
-				//
-				// URL
-				//
-				url = provider.uri.auth + '?' + _param(qs);
-
-				// 
-				// Execute
-				// Trigger how we want this displayed
-				// Calling Quietly?
-				//
-				if( qs.display === 'none' ){
-					// signin in the background, iframe
-					_append('iframe', { src : url, style : shy }, 'body');
-				}
-
-				// Triggering popup?
-				else if( qs.display === 'popup'){
-
-					// Trigger callback
-					var popup = window.open( 
-						url,
-						'Authentication',
-						"resizeable=true,height=550,width=500,left="+((window.innerWidth-500)/2)+",top="+((window.innerHeight-550)/2)
-					);
-					var self = this;
-					var timer = setInterval(function(){
-						if(popup.closed){
-							clearInterval(timer);
-							if(!responded){
-								self.trigger(callback_id+".failed", {error:{code:"user_cancelled", message:"Cancelled"}, network:p.network });
-							}
-						}
-					}, 100);
-				}
-				else {
-					window.location = url;
-				}
-			}
-			else{
-				
+			if( typeof(p.network) !== 'string' ){
 				// trigger the default login.
 				// ahh we dont have one.
 				log('Please specify a service.');
 			}
+
+			//
+			var provider  = _services[p.network],
+				callback_id = '';
+
+			//
+			// Callback
+			// Save the callback until state comes back.
+			//
+			var responded = false;
+			if(p.callback){
+				// choose a random callback ID string
+				callback_id = "" + Math.round(Math.random()*1e9);
+				
+				// pass in a self unsubscribing function
+				this.subscribe(callback_id, function self(){ responded = true; hello.unsubscribe(callback_id,self); p.callback.apply(this, arguments);} );
+			}
+
+
+			//
+			// QUERY STRING
+			// querystring parameters, we may pass our own arguments to form the querystring
+			//
+			var qs = _merge( p.options, {
+				client_id		: provider.id,
+				scope			: provider.scope.basic,
+				state			: {
+					network : p.network,
+					display : p.options.display,
+					callback : callback_id,
+					state : p.options.state
+				}
+			});
+
+			//
+			// SCOPES
+			// Authentication permisions
+			//
+			var scope = p.options.scope;
+			if(scope){
+				// Format
+				if(typeof(scope)!=='string'){
+					scope = scope.join(',');
+				}
+				// Save in the State
+				qs.state.scope = scope.split(/,\s/);
+
+				// Replace each with the default scopes
+				qs.scope = (qs.scope+ ',' + scope).replace(/[^,\s]+/ig, function(m){
+					return (m in provider.scope) ? provider.scope[m] : m;
+				});
+				// remove duplication and empty spaces
+				qs.scope = _unique(qs.scope.split(/,+/)).join( provider.scope_delim || ',');
+			}
+
+			//
+			// Is the user already signed in
+			//
+			var session = hello.getAuthResponse(p.network);
+			if( session && "expires" in session && session.expires > ((new Date()).getTime()/1e3) ){
+				// What is different about the scopes in the session vs the scopes in the new login?
+				var diff = _diff( session.scope || [], qs.state.scope || [] );
+				if(diff.length===0){
+					// Ok trigger the callback
+					this.trigger(callback_id+".login", {
+						network : p.network,
+						authResponse : session
+					});
+
+					// Notthing has changed
+					return;
+				}
+			}
+
+			//
+			// REDIRECT_URI
+			// Is the redirect_uri root?
+			//
+			qs.redirect_uri = _realPath(qs.redirect_uri);
+
+			// Convert state to a string
+			qs.state = JSON.stringify(qs.state);
+
+			//
+			// URL
+			//
+			url = provider.uri.auth + '?' + _param(qs);
+
+			//
+			// Execute
+			// Trigger how we want this displayed
+			// Calling Quietly?
+			//
+			if( qs.display === 'none' ){
+				// signin in the background, iframe
+				_append('iframe', { src : url, style : shy }, 'body');
+			}
+
+			// Triggering popup?
+			else if( qs.display === 'popup'){
+
+				// Trigger callback
+				var popup = window.open(
+					url,
+					'Authentication',
+					"resizeable=true,height=550,width=500,left="+((window.innerWidth-500)/2)+",top="+((window.innerHeight-550)/2)
+				);
+				var self = this;
+				var timer = setInterval(function(){
+					if(popup.closed){
+						clearInterval(timer);
+						if(!responded){
+							self.trigger(callback_id+".failed", {error:{code:"user_cancelled", message:"Cancelled"}, network:p.network });
+						}
+					}
+				}, 100);
+			}
+
+			else {
+				window.location = url;
+			}
+
 			return {url:url,method:qs.display};
 		},
 	
@@ -827,7 +830,7 @@ var hello = (function(){
 	
 			if(a in _services){
 				service = a;
-				var reg = new RegExp('^'+a+'\:?\/?');
+				var reg = new RegExp('^'+a+':?\/?');
 				p.path = p.path.replace(reg,'');
 			}
 			else {
@@ -852,15 +855,17 @@ var hello = (function(){
 				return;
 			}
 
-			// 
+			//
 			// Callback wrapper?
 			// Change the incoming values so that they are have generic values according to the path that is defined
-			var callback = o.wrap && ((p.path in o.wrap) || ("default" in o.wrap)) 
-				? function(r){ 
+			var callback = p.callback;
+			if( o.wrap && ( (p.path in o.wrap) || ("default" in o.wrap) )){
+				callback = function(r){
 					var wrap = (p.path in o.wrap ? p.path : "default");
-					log(p.path,r); 
+					log(p.path,r);
 					p.callback(o.wrap[wrap](r));
-				} : p.callback;
+				};
+			}
 
 			// push out to all networks
 			// as long as the path isn't flagged as unavaiable, e.g. path == false
@@ -871,7 +876,7 @@ var hello = (function(){
 					token = (session?session.access_token:null);
 
 				// if url needs a base
-				// Wrap everything in 
+				// Wrap everything in
 				var getPath = function(url){
 
 					if( !url.match(/^https?:\/\//) ){
@@ -884,7 +889,7 @@ var hello = (function(){
 						qs.access_token = token;
 					}
 
-					// 
+					//
 					// build the call
 					var request = function(){
 
@@ -908,7 +913,7 @@ var hello = (function(){
 							var _callback = callback;
 							callback = function(r){
 								_callback((!r||_isEmpty(r))? {response:'deleted'} : r);
-							}
+							};
 						}
 
 
@@ -960,7 +965,7 @@ var hello = (function(){
 									}
 								}
 								p.data = f;
-							}								
+							}
 
 							// Open URL
 							r.open( p.method.toUpperCase(), url );
@@ -997,11 +1002,8 @@ var hello = (function(){
 						if( p.method === 'post' ){
 
 							//qs.channelUrl = window.location.href;
-
-							var req = _post( url + _param(qs), p.data, ("post" in o ? o.post(p) : null), callback );
-
 							return {
-								url : req,
+								url : _post( url + _param(qs), p.data, ("post" in o ? o.post(p) : null), callback ),
 								method : 'POST',
 								data : p.data
 							};
@@ -1011,10 +1013,8 @@ var hello = (function(){
 
 							qs.callback = '?';
 
-							var req = _jsonp( url + _param(qs), p.data, callback );
-
 							return {
-								url : req,
+								url : _jsonp( url + _param(qs), p.data, callback ),
 								method : 'JSONP'
 							};
 						}
@@ -1023,8 +1023,8 @@ var hello = (function(){
 					// has the session expired?
 					// Compare the session time, if session doesn't exist but we can feign it. Then use autologin
 					// otherwise consider the session is current, or the resource doesn't need it
-					if( ( session && "expires" in session && session.expires < ((new Date()).getTime()/1e3) ) 
-						|| (!session && o.autologin) ){
+					if( ( session && "expires" in session && session.expires < ((new Date()).getTime()/1e3) ) ||
+						(!session && o.autologin) ){
 
 						log("Callback");
 		
@@ -1050,7 +1050,7 @@ var hello = (function(){
 						return request();
 					}
 
-				}
+				};
 
 				// Make request
 				if(typeof(url)==='function'){
@@ -1133,7 +1133,7 @@ var hello = (function(){
 					for(var i=0;i<listeners[x].length;i++){
 						listeners[x][i].call(this, data);
 					}
-				} 
+				}
 			}}
 		},
 		
@@ -1180,9 +1180,9 @@ var hello = (function(){
 					win.hello.trigger(obj.network+":"+cb+".failed", obj );
 				}
 				else{
-					win.hello.trigger(obj.network+":"+cb+".login", { 
-						network : obj.network, 
-						authResponse : obj 
+					win.hello.trigger(obj.network+":"+cb+".login", {
+						network : obj.network,
+						authResponse : obj
 					});
 
 					// Save on the parent window the new credentials
@@ -1221,12 +1221,11 @@ var hello = (function(){
 			var a = JSON.parse(p.state);
 			p = _merge(p, a);
 		}catch(e){
-			console.error("HelloJS: Could not decode state parameter");
+			log("Could not decode state parameter");
 		}
 
 		// access_token?
-		if( ("access_token" in p&&p.access_token)
-			&& p.network in _services){
+		if( ("access_token" in p&&p.access_token) && p.network in _services){
 
 			if(parseInt(p.expires_in,10) === 0){
 				// Facebook, tut tut tut,
@@ -1245,8 +1244,7 @@ var hello = (function(){
 		//error=?
 		//&error_description=?
 		//&state=?
-		else if( ("error" in p && p.error)
-				&& p.network in _services){
+		else if( ("error" in p && p.error) && p.network in _services){
 			p.error_message = p.error_message || p.error_description;
 
 			authCallback( 'error', p );
@@ -1289,7 +1287,7 @@ var hello = (function(){
 	}
 	
 
-	// 
+	//
 	// isArray
 	function _isArray(o){
 		return Object.prototype.toString.call(o) === '[object Array]';
@@ -1314,8 +1312,7 @@ var hello = (function(){
 		return true;
 	}
 
-
-	// 
+	//
 	// diff
 	function _diff(a,b){
 		var r = [];
@@ -1336,12 +1333,11 @@ var hello = (function(){
 		}else if(window.Element){
 			return data instanceof window.Element && (!type || data.tagName === type);
 		}else{
-			return (!(data instanceof Object||data instanceof Array||data instanceof String||data instanceof Number) 
-					&& data.tagName && data.tagName === type );
+			return (!(data instanceof Object||data instanceof Array||data instanceof String||data instanceof Number) && data.tagName && data.tagName === type );
 		}
 	}
 
-	// 
+	//
 	// indexOf
 	// IE hack Array.indexOf doesn't exist prior to IE9
 	function _indexOf(a,s){
@@ -1440,7 +1436,7 @@ var hello = (function(){
 				if (c.indexOf(nameEQ) == 0){
 					r = c.substring(nameEQ.length,c.length);
 					if( r.match(/^\{/) ){
-						try{ 
+						try{
 							r = JSON.parse(r);
 						}catch(e){}
 					}
@@ -1528,7 +1524,7 @@ var hello = (function(){
 			x = null;
 		
 		// define x
-		for(var x in o){if(o.hasOwnProperty(x)){
+		for(x in o){if(o.hasOwnProperty(x)){
 			break;
 		}}
 
@@ -1544,14 +1540,13 @@ var hello = (function(){
 
 			t = typeof( args[i] );
 
-			if( ( typeof( o[x] ) === 'function' && o[x].test(args[i]) ) || 
-				( typeof( o[x] ) === 'string' && (
+			if( ( typeof( o[x] ) === 'function' && o[x].test(args[i]) ) || ( typeof( o[x] ) === 'string' && (
 					( o[x].indexOf('s')>-1 && t === 'string' ) ||
 					( o[x].indexOf('o')>-1 && t === 'object' ) ||
 					( o[x].indexOf('i')>-1 && t === 'number' ) ||
 					( o[x].indexOf('a')>-1 && t === 'object' ) ||
 					( o[x].indexOf('f')>-1 && t === 'function' )
-				) )	
+				) )
 			){
 				p[x] = args[i++];
 			}
@@ -1586,7 +1581,7 @@ var hello = (function(){
 	// Create and Append new Dom elements
 	// @param node string
 	// @param attr object literal
-	// @param dom/string 
+	// @param dom/string
 	//
 	function _append(node,attr,target){
 
@@ -1690,7 +1685,7 @@ var hello = (function(){
 
 		// Opera fix error
 		// Problem: If an error occurs with script loading Opera fails to trigger the script.onerror handler we specified
-		// Fix: 
+		// Fix:
 		// By setting the request to synchronous we can trigger the error handler when all else fails.
 		// This action will be ignored if we've already called the callback handler "cb" with a successful onload event
 		if( window.navigator.userAgent.toLowerCase().indexOf('opera') > -1 ){
@@ -1706,7 +1701,7 @@ var hello = (function(){
 			cb();
 		}, _timeout);
 
-		// Todo: 
+		// Todo:
 		// Add fix for msie,
 		// However: unable recreate the bug of firing off the onreadystatechange before the script content has been executed and the value of "result" has been defined.
 		// Inject script tag into the head element
@@ -1732,10 +1727,12 @@ var hello = (function(){
 	function _post(url, data, options, callback){
 
 		// This hack needs a form
-		var form = null, 
+		var form = null,
 			reenableAfterSubmit = [],
-			newform, 
-			bool = 0, 
+			newform,
+			i = 0,
+			x = null,
+			bool = 0,
 			cb = function(r){
 				if( !( bool++ ) ){
 					try{
@@ -1746,7 +1743,7 @@ var hello = (function(){
 							newform.parentNode.removeChild(newform);
 						}
 					}
-					catch(e){console.error("could not remove iframe")}
+					catch(e){log("could not remove iframe");}
 
 					// reenable the disabled form
 					for(var i=0;i<reenableAfterSubmit.length;i++){
@@ -1768,12 +1765,13 @@ var hello = (function(){
 		window[callbackID] = cb;
 
 		// Build the iframe window
+		var win;
 		try{
 			// IE7 hack, only lets us define the name here, not later.
-			var win = document.createElement('<iframe name="'+callbackID+'">');
+			win = document.createElement('<iframe name="'+callbackID+'">');
 		}
 		catch(e){
-			var win = document.createElement('iframe');
+			win = document.createElement('iframe');
 		}
 
 		win.name = callbackID;
@@ -1803,16 +1801,16 @@ var hello = (function(){
 		document.body.appendChild(win);
 
 		// Add some additional query parameters to the URL
-		url += "&suppress_response_codes=true&redirect_uri="+encodeURIComponent(_options.redirect_uri) +"&state="+JSON.stringify({callback:callbackID})
-			+"&callbackUrl="+encodeURIComponent(_options.redirect_uri)
-			+"&redirect-uri="+encodeURIComponent(_options.redirect_uri)
+		url += "&suppress_response_codes=true&redirect_uri="+encodeURIComponent(_options.redirect_uri) +"&state="+JSON.stringify({callback:callbackID})+
+			"&callbackUrl="+encodeURIComponent(_options.redirect_uri)+
+			"&redirect-uri="+encodeURIComponent(_options.redirect_uri);
 
 		// if we are just posting a single item
 		if( _domInstance('form', data) ){
 			// get the parent form
-			var form = data.form;
+			form = data.form;
 			// Loop through and disable all of its siblings
-			for( var i = 0; i < form.elements.length; i++ ){
+			for( i = 0; i < form.elements.length; i++ ){
 				if(form.elements[i] !== data){
 					form.elements[i].setAttribute('disabled',true);
 				}
@@ -1824,10 +1822,10 @@ var hello = (function(){
 		// Posting a form
 		if( _domInstance('form', data) ){
 			// This is a form element
-			var form = data;
+			form = data;
 
 			// Does this form need to be a multipart form?
-			for( var i = 0; i < form.elements.length; i++ ){
+			for( i = 0; i < form.elements.length; i++ ){
 				if(!form.elements[i].disabled && form.elements[i].type === 'file'){
 					form.encoding = form.enctype = "multipart/form-data";
 					form.elements[i].setAttribute('name', 'file');
@@ -1835,11 +1833,10 @@ var hello = (function(){
 			}
 		}
 		else{
-			// Its not a form element, 
+			// Its not a form element,
 			// Therefore it must be a JSON object of Key=>Value or Key=>Element
-
 			// If anyone of those values are a input type=file we shall shall insert its siblings into the form for which it belongs.
-			for(var x in data) if(data.hasOwnProperty(x)){
+			for(x in data) if(data.hasOwnProperty(x)){
 				// is this an input Element?
 				if( _domInstance('input', data[x]) && data[x].type === 'file' ){
 					form = data[x].form;
@@ -1856,7 +1853,7 @@ var hello = (function(){
 			}
 
 			// Add elements to the form if they dont exist
-			for(var x in data) if(data.hasOwnProperty(x)){
+			for(x in data) if(data.hasOwnProperty(x)){
 
 				// Is this an element?
 				var el = ( _domInstance('input', data[x]) || _domInstance('textArea', data[x]) || _domInstance('select', data[x]) );
@@ -1894,10 +1891,10 @@ var hello = (function(){
 			}
 
 			// Disable elements from within the form if they weren't specified
-			for(var i=0;i<form.children.length;i++){
+			for(i=0;i<form.children.length;i++){
 				// Does the same name and value exist in the parent
 				if( !( form.children[i].name in data ) && form.children[i].getAttribute('disabled') !== true ) {
-					// disable 
+					// disable
 					form.children[i].setAttribute('disabled',true);
 					// add re-enable to callback
 					reenableAfterSubmit.push(form.children[i]);
@@ -1930,7 +1927,7 @@ var hello = (function(){
 	//
 	// dataToJSON
 	// This takes a FormElement and converts it to a JSON object
-	// 
+	//
 	function _dataToJSON(p){
 
 		var data = p.data;
@@ -1979,38 +1976,38 @@ var hello = (function(){
 			}
 			else{
 				// This is old school, we have to perform the FORM + IFRAME + HASHTAG hack
-				return iframeHack(url, data, callback);
+				return false;
 			}
 		}
 
 		// Is data a blob, File, FileList?
-		if( ("File" in window && data instanceof File) 
-			|| ("Blob" in window && data instanceof Blob) 
-			|| ("FileList" in window && data instanceof FileList) ){
+		if( ("File" in window && data instanceof window.File) ||
+			("Blob" in window && data instanceof window.Blob) ||
+			("FileList" in window && data instanceof window.FileList) ){
 
 			// Convert to a JSON object
 			data = {'file' : data};
 		}
 
 		// Loop through data if its not FormData it must now be a JSON object
-		if( !( "FormData" in window && data instanceof FormData ) ){
+		if( !( "FormData" in window && data instanceof window.FormData ) ){
 
 			// Loop through the object
 			for(var x in data) if(data.hasOwnProperty(x)){
 
 				// FileList Object?
-				if("FileList" in window && data[x] instanceof FileList){
+				if("FileList" in window && data[x] instanceof window.FileList){
 					// Get first record only
 					if(data[x].length===1){
 						data[x] = data[x][0];
 					}
 					else{
-						console.error("We were expecting the FileList to contain one file");
+						log("We were expecting the FileList to contain one file");
 					}
 				}
 				else if( _domInstance('input', data[x]) && data[x].type === 'file' ){
 
-					if( ("files" in data[x] ) ){
+					if( ( "files" in data[x] ) ){
 						// this supports HTML5
 						// do nothing
 					}
@@ -2019,9 +2016,9 @@ var hello = (function(){
 						return false;
 					}
 				}
-				else if( _domInstance('input', data[x])
-					|| _domInstance('select', data[x])
-					|| _domInstance('textArea', data[x])
+				else if( _domInstance('input', data[x]) ||
+					_domInstance('select', data[x]) ||
+					_domInstance('textArea', data[x])
 					){
 					data[x] = data[x].value;
 				}
@@ -2030,7 +2027,6 @@ var hello = (function(){
 				}
 			}
 		}
-
 
 		// Data has been converted to JSON.
 		p.data = data;
