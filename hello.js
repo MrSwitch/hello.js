@@ -81,15 +81,16 @@ var hello = (function(){
 				picture : a['media$group']['media$content'][0].url,
 				thumbnail : a['media$group']['media$content'][0].url,
 				width : a['media$group']['media$content'][0].width,
-				height : a['media$group']['media$content'][0].height,
+				height : a['media$group']['media$content'][0].height
 //				original : a
 			};
 			// Get feed/children
 			if("link" in a){
 				for(var j=0;j<a.link.length;j++){
-					if(a.link[j].rel.match("feed")){
+					if(a.link[j].rel.match(/\#feed$/)){
 						p.photos = a.link[j].href;
 						p.files = a.link[j].href;
+						p.upload_location = a.link[j].href;
 						break;
 					}
 				}
@@ -120,7 +121,7 @@ var hello = (function(){
 				p.images.push({
 					source : a['media$group']['media$content'][0].url,
 					width : a['media$group']['media$content'][0].width,
-					height : a['media$group']['media$content'][0].height,
+					height : a['media$group']['media$content'][0].height
 				});
 			}
 			return p;
@@ -155,12 +156,13 @@ var hello = (function(){
 		}
 	}
 
+
 	//
 	// Some of the providers require that only MultiPart is used with non-binary forms.
 	// This function checks whether the form contains binary data
 	function has_binary(data){
 		for(var x in data ) if(data.hasOwnProperty(x)){
-			if( (data[x] instanceof HTMLElement && data[x].type === 'file')
+			if( (_domInstance('input', data[x]) && data[x].type === 'file')
 				|| ("FileList" in window && data[x] instanceof FileList)
 				|| ("File" in window && data[x] instanceof File)
 				|| ("Blob" in window && data[x] instanceof Blob)
@@ -203,7 +205,7 @@ var hello = (function(){
 				files 			: 'https://www.googleapis.com/auth/drive.readonly',
 				
 				publish			: '',
-				publish_files	: '',
+				publish_files	: 'https://www.googleapis.com/auth/drive',
 				create_event	: '',
 
 				offline_access : ''
@@ -216,6 +218,7 @@ var hello = (function(){
 						o.first_name = o.given_name || o.name.givenName;
 //						o.name = o.first_name + ' ' + o.last_name;
 						o.picture = o.picture || o.image.url;
+						o.thumbnail = o.picture;
 						o.name = o.displayName || o.name;
 					}
 					return o;
@@ -266,10 +269,13 @@ var hello = (function(){
 			},
 			xhr : function(p){
 				if(p.method==='post'){
+					if(p.data.file){
+//						return {handler: gMultiPart};
+					}
 					return false;
 				}
 				return {};
-			},
+			}
 		},
 	
 		windows : {
@@ -740,7 +746,7 @@ var hello = (function(){
 					var popup = window.open( 
 						url,
 						'Authentication',
-						"height=550,width=500,left="+((window.innerWidth-500)/2)+",top="+((window.innerHeight-550)/2)
+						"resizeable=true,height=550,width=500,left="+((window.innerWidth-500)/2)+",top="+((window.innerHeight-550)/2)
 					);
 					var self = this;
 					var timer = setInterval(function(){
@@ -909,6 +915,7 @@ var hello = (function(){
 						// Can we use XHR for Cross domain delivery?
 						if( 'withCredentials' in new XMLHttpRequest() && (!("xhr" in o) || (config = o.xhr(p))) ){
 
+
 							var r = new XMLHttpRequest();
 
 							// xhr.responseType = "json"; // is not supported in any of the vendors yet.
@@ -919,6 +926,14 @@ var hello = (function(){
 							r.onerror = function(e){
 								callback(r.responseText?JSON.parse(r.responseText):{error:{message:"There was an error accessing "+ url}});
 							};
+
+							/**
+							// Google Data API needs to overwrite this entirely... Urgh!
+							if(config&&config.handler){
+								config.handler(url, qs, p.data, r);
+								return;
+							}
+							*/
 
 							// Add the token
 							qs.suppress_response_codes = true;
@@ -972,7 +987,6 @@ var hello = (function(){
 						}
 
 						// Otherwise we're on to the old school, IFRAME hacks and JSONP
-
 						// Preprocess the parameters
 						// Change the p parameters
 						if("jsonp" in o){
@@ -1140,7 +1154,6 @@ var hello = (function(){
 	// Trigger a callback to authenticate
 	//
 	function authCallback(network, obj){
-
 		// Trigger the callback on the parent
 		_store(obj.network, obj );
 
@@ -1150,30 +1163,35 @@ var hello = (function(){
 			// trigger window.opener
 			var win = (window.opener||window.parent);
 
-			if(win&&"hello" in win){
+			if(win&&"hello" in win&&win.hello){
 				// Call the generic listeners
 //				win.hello.trigger(network+":auth."+(obj.error?'failed':'login'), obj);
 				// Call the inline listeners
 
-				// Trigger on the parent
-				if(obj.error){
-					win.hello.trigger(obj.network+":"+obj.callback+".failed", obj );
-				}
-				else{
-					win.hello.trigger(obj.network+":"+obj.callback+".login", { 
-						network : obj.network, 
-						authResponse : obj 
-					});
-				}
-
 				// to do remove from session object...
+				var cb = obj.callback;
 				try{
 					delete obj.callback;
 				}catch(e){}
 
+
+				// Trigger on the parent
+				if(obj.error){
+					win.hello.trigger(obj.network+":"+cb+".failed", obj );
+				}
+				else{
+					win.hello.trigger(obj.network+":"+cb+".login", { 
+						network : obj.network, 
+						authResponse : obj 
+					});
+
+					// Save on the parent window the new credentials
+					// This fixes an IE10 bug i think... atleast it does for me.
+					win.hello._store(obj.network,obj);
+				}
+
 				// Update store
 				_store(obj.network,obj);
-
 			}
 
 			window.close();
@@ -1207,7 +1225,7 @@ var hello = (function(){
 		}
 
 		// access_token?
-		if( ("access_token" in p)
+		if( ("access_token" in p&&p.access_token)
 			&& p.network in _services){
 
 			if(parseInt(p.expires_in,10) === 0){
@@ -1227,16 +1245,17 @@ var hello = (function(){
 		//error=?
 		//&error_description=?
 		//&state=?
-		else if( ("error" in p)
+		else if( ("error" in p && p.error)
 				&& p.network in _services){
 			p.error_message = p.error_message || p.error_description;
 
 			authCallback( 'error', p );
 		}
 
+		// API Calls
 		// IFRAME HACK
 		// Result is serialized JSON string.
-		if(p&&p.callback&&"result" in p){
+		if(p&&p.callback&&"result" in p && p.result){
 			// trigger a function in the parent
 			if(p.callback in window.parent){
 				window.parent[p.callback](JSON.parse(p.result));
@@ -1289,7 +1308,7 @@ var hello = (function(){
 
 		// object?
 		for (var key in obj) {
-			if (hasOwnProperty.call(obj, key))
+			if (obj.hasOwnProperty(key))
 				return false;
 		}
 		return true;
@@ -1301,11 +1320,42 @@ var hello = (function(){
 	function _diff(a,b){
 		var r = [];
 		for(var i=0;i<b.length;i++){
-			if(a.indexOf(b[i])===-1){
+			if(_indexOf(a,b[i])===-1){
 				r.push(b[i]);
 			}
 		}
 		return r;
+	}
+
+	// _DOM
+	// return the type of DOM object
+	function _domInstance(type,data){
+		var test = "HTML" + (type||'').replace(/^[a-z]/,function(m){return m.toUpperCase();}) + "Element";
+		if(window[test]){
+			return data instanceof window[test];
+		}else if(window.Element){
+			return data instanceof window.Element && (!type || data.tagName === type);
+		}else{
+			return (!(data instanceof Object||data instanceof Array||data instanceof String||data instanceof Number) 
+					&& data.tagName && data.tagName === type );
+		}
+	}
+
+	// 
+	// indexOf
+	// IE hack Array.indexOf doesn't exist prior to IE9
+	function _indexOf(a,s){
+		// Do we need the hack?
+		if(a.indexOf){
+			return a.indexOf(s);
+		}
+
+		for(var j=0;j<a.length;j++){
+			if(a[j]===s){
+				return j;
+			}
+		}
+		return -1;
 	}
 	
 	//
@@ -1426,7 +1476,8 @@ var hello = (function(){
 		if(typeof(a)!=='object'){ return []; }
 		var r = [];
 		for(var i=0;i<a.length;i++){
-			if(!a[i]||a[i].length===0||r.indexOf(a[i])!==-1){
+
+			if(!a[i]||a[i].length===0||_indexOf(r, a[i])!==-1){
 				continue;
 			}
 			else{
@@ -1435,6 +1486,7 @@ var hello = (function(){
 		}
 		return r;
 	}
+
 
 	//
 	// merge
@@ -1494,17 +1546,17 @@ var hello = (function(){
 
 			if( ( typeof( o[x] ) === 'function' && o[x].test(args[i]) ) || 
 				( typeof( o[x] ) === 'string' && (
-					( o[x][0] === 's' && t === 'string' ) ||
-					( o[x][0] === 'o' && t === 'object' ) ||
-					( o[x][0] === 'i' && t === 'number' ) ||
-					( o[x][0] === 'a' && t === 'object' ) ||
-					( o[x][0] === 'f' && t === 'function' )
+					( o[x].indexOf('s')>-1 && t === 'string' ) ||
+					( o[x].indexOf('o')>-1 && t === 'object' ) ||
+					( o[x].indexOf('i')>-1 && t === 'number' ) ||
+					( o[x].indexOf('a')>-1 && t === 'object' ) ||
+					( o[x].indexOf('f')>-1 && t === 'function' )
 				) )	
 			){
 				p[x] = args[i++];
 			}
 			
-			else if( typeof( o[x] ) === 'string' && o[x][1] === '!' ){
+			else if( typeof( o[x] ) === 'string' && o[x].indexOf('!')>-1 ){
 				log("Whoops! " + x + " not defined");
 				return false;
 			}
@@ -1554,8 +1606,12 @@ var hello = (function(){
 					else if(x==="html"){
 						n.innerHTML = attr[x];
 					}
-					else {
+					// IE doesn't like us setting methods with setAttribute
+					else if(!/^on/.test(x)){
 						n.setAttribute( x, attr[x]);
+					}
+					else{
+						n[x] = attr[x];
 					}
 				}}
 			}
@@ -1653,7 +1709,6 @@ var hello = (function(){
 		// Todo: 
 		// Add fix for msie,
 		// However: unable recreate the bug of firing off the onreadystatechange before the script content has been executed and the value of "result" has been defined.
-
 		// Inject script tag into the head element
 		head.appendChild(script);
 		
@@ -1679,59 +1734,73 @@ var hello = (function(){
 		// This hack needs a form
 		var form = null, 
 			reenableAfterSubmit = [],
-			newform;
+			newform, 
+			bool = 0, 
+			cb = function(r){
+				if( !( bool++ ) ){
+					try{
+						// remove the iframe from the page.
+						//win.parentNode.removeChild(win);
+						// remove the form
+						if(newform){
+							newform.parentNode.removeChild(newform);
+						}
+					}
+					catch(e){console.error("could not remove iframe")}
+
+					// reenable the disabled form
+					for(var i=0;i<reenableAfterSubmit.length;i++){
+						if(reenableAfterSubmit[i]){
+							reenableAfterSubmit[i].setAttribute('disabled', false);
+						}
+					}
+
+					// fire the callback
+					callback(r);
+				}
+			};
 
 		// What is the name of the callback to contain
 		// We'll also use this to name the iFrame
-		var callbackID = "ifrmhack_"+parseInt(Math.random()*1e6).toString(16);
+		var callbackID = "ifrmhack_"+parseInt(Math.random()*1e6,10).toString(16);
 
 		// Save the callback to the window
-		window[callbackID] = function(r){
-			try{
-				// remove the iframe from the page.
-				win.parentNode.removeChild(win);
-				// remove the form
-				if(newform){
-					newform.parentNode.removeChild(newform);
-				}
-			}
-			catch(e){console.error("could not remove iframe")}
-
-			// reenable the disabled form
-			for(var i=0;i<reenableAfterSubmit.length;i++){
-				if(reenableAfterSubmit[i]){
-					reenableAfterSubmit[i].setAttribute('disabled', false);
-				}
-			}
-
-			// fire the callback
-			callback(r);
-		}
+		window[callbackID] = cb;
 
 		// Build the iframe window
-		var win = document.createElement('iframe');
-		win.id = callbackID;
+		try{
+			// IE7 hack, only lets us define the name here, not later.
+			var win = document.createElement('<iframe name="'+callbackID+'">');
+		}
+		catch(e){
+			var win = document.createElement('iframe');
+		}
+
 		win.name = callbackID;
-		win.height = "1px";
-		win.width = "1px";
-		document.body.appendChild(win);
+		win.id = callbackID;
+		win.style.display = 'none';
 
 		// Override callback mechanism. Triggger a response onload/onerror
 		if(options&&options.callbackonload){
+			// onload is being fired twice
 			win.onload = function(){
-				callback({
+				cb({
 					response : "posted",
-					message : "Successfully posted content"
-				});
-			};
-			win.onerror = function(){
-				callback({
-					error : {
-						message : "Failed to post content"
-					}
+					message : "Content was posted"
 				});
 			};
 		}
+
+		setTimeout(function(){
+			cb({
+				error : {
+					code:"timeout",
+					message : "The post operation timed out"
+				}
+			});
+		}, _timeout);
+
+		document.body.appendChild(win);
 
 		// Add some additional query parameters to the URL
 		url += "&suppress_response_codes=true&redirect_uri="+encodeURIComponent(_options.redirect_uri) +"&state="+JSON.stringify({callback:callbackID})
@@ -1739,7 +1808,7 @@ var hello = (function(){
 			+"&redirect-uri="+encodeURIComponent(_options.redirect_uri)
 
 		// if we are just posting a single item
-		if(data instanceof HTMLInputElement){
+		if( _domInstance('form', data) ){
 			// get the parent form
 			var form = data.form;
 			// Loop through and disable all of its siblings
@@ -1753,14 +1822,14 @@ var hello = (function(){
 		}
 
 		// Posting a form
-		if(data instanceof HTMLFormElement){
+		if( _domInstance('form', data) ){
 			// This is a form element
 			var form = data;
 
 			// Does this form need to be a multipart form?
 			for( var i = 0; i < form.elements.length; i++ ){
 				if(!form.elements[i].disabled && form.elements[i].type === 'file'){
-					form.setAttribute('enctype', 'multipart/form-data');
+					form.encoding = form.enctype = "multipart/form-data";
 					form.elements[i].setAttribute('name', 'file');
 				}
 			}
@@ -1772,9 +1841,9 @@ var hello = (function(){
 			// If anyone of those values are a input type=file we shall shall insert its siblings into the form for which it belongs.
 			for(var x in data) if(data.hasOwnProperty(x)){
 				// is this an input Element?
-				if( data[x] instanceof HTMLInputElement && data[x].type === 'file' ){
+				if( _domInstance('input', data[x]) && data[x].type === 'file' ){
 					form = data[x].form;
-					form.setAttribute('enctype', 'multipart/form-data');
+					form.encoding = form.enctype = "multipart/form-data";
 				}
 			}
 
@@ -1782,8 +1851,6 @@ var hello = (function(){
 			if(!form){
 				// Build form
 				form = document.createElement('form');
-				form.height = "1px";
-				form.width = "1px";
 				document.body.appendChild(form);
 				newform = form;
 			}
@@ -1792,7 +1859,7 @@ var hello = (function(){
 			for(var x in data) if(data.hasOwnProperty(x)){
 
 				// Is this an element?
-				var el = ( data[x] instanceof HTMLInputElement || data[x] instanceof HTMLTextAreaElement || data[x] instanceof HTMLSelectElement );
+				var el = ( _domInstance('input', data[x]) || _domInstance('textArea', data[x]) || _domInstance('select', data[x]) );
 
 				// is this not an input element, or one that exists outside the form.
 				if( !el || data[x].form !== form ){
@@ -1811,7 +1878,7 @@ var hello = (function(){
 					if(el){
 						input.value = data[x].value;
 					}
-					else if(el instanceof HTMLElement){
+					else if( _domInstance(null, data[x]) ){
 						input.value = data[x].innerHTML || data[x].innerText;
 					}else{
 						input.value = data[x];
@@ -1840,14 +1907,15 @@ var hello = (function(){
 
 
 		// Set the target of the form
-		form.setAttribute('method', 'post');
+		form.setAttribute('method', 'POST');
 		form.setAttribute('action', url);
-		form.setAttribute('target', state);
+		form.setAttribute('target', callbackID);
+		form.target = callbackID;
 
 		// Submit the form
 		setTimeout(function(){
 			form.submit();
-		},30);
+		},100);
 
 		// Build an iFrame and inject it into the DOM
 		//var ifm = _append('iframe',{id:'_'+Math.round(Math.random()*1e9), style:shy});
@@ -1868,7 +1936,7 @@ var hello = (function(){
 		var data = p.data;
 
 		// Is data a form object
-		if( data instanceof HTMLFormElement ){
+		if( _domInstance('form', data) ){
 			// Get the first FormElement Item if its an type=file
 			var kids = data.elements;
 
@@ -1899,7 +1967,7 @@ var hello = (function(){
 		}
 
 		// Is this a form input element?
-		if( data instanceof HTMLInputElement ){
+		if( _domInstance('input', data) ){
 			// Get the Input Element
 			// Do we have a Blob data?
 			if("files" in data){
@@ -1940,7 +2008,7 @@ var hello = (function(){
 						console.error("We were expecting the FileList to contain one file");
 					}
 				}
-				else if( data[x] instanceof HTMLInputElement && data[x].type === 'file' ){
+				else if( _domInstance('input', data[x]) && data[x].type === 'file' ){
 
 					if( ("files" in data[x] ) ){
 						// this supports HTML5
@@ -1951,13 +2019,13 @@ var hello = (function(){
 						return false;
 					}
 				}
-				else if( data[x] instanceof HTMLInputElement
-					&& data[x] instanceof HTMLSelectElement
-					&& data[x] instanceof HTMLTextAreaElement
+				else if( _domInstance('input', data[x])
+					|| _domInstance('select', data[x])
+					|| _domInstance('textArea', data[x])
 					){
 					data[x] = data[x].value;
 				}
-				else if( data[x] instanceof Element ){
+				else if( _domInstance(null, data[x]) ){
 					data[x] = data[x].innerHTML || data[x].innerText;
 				}
 			}
