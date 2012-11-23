@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/_packages/document.css"></script>
+<script src="/_packages/document.js"></script>
+<script src="client_ids.js"></script>
+<style>
+img{
+	position: fixed;
+	top:0;
+	left:50%;
+	width:200px;
+	border:1px solid #ccc;
+	padding:10px;
+}
+img:nth-child(2n){
+	-webkit-transform:rotate(10deg);
+	-moz-transform:rotate(10deg);
+	-ms-transform:rotate(10deg);
+	transform:rotate(10deg);
+}
+img:nth-child(3n){
+	-webkit-transform:rotate(-10deg);
+	-moz-transform:rotate(-10deg);
+	-ms-transform:rotate(-10deg);
+	transform:rotate(-10deg);
+}
+</style>
+
+<h1>Load album photos with Hello.js</h1>
+
+<blockquote>
+
+	<h2>Signin</h2>
+
+	<button id="windows" onclick="hello.login('windows');">Login Windows</button>
+	<button id="facebook" onclick="hello.login('facebook');">Login Facebook</button>
+	<button id="google" onclick="hello.login('google');">Login Google</button>
+
+	<h2>Select an album to load</h2>
+
+	<select id="albums"></select>
+
+	<button type="button" onclick="getPhotos()">Get Photos</button>
+	<div id="result"></div>
+</blockquote>
+
+<p>Include hello.js</p>
+<script src="../hello.js" class="pre"></script>
+
+<p>Listener: On login authenticated. Request users profile + Albums. </p>
+
+<script class="pre">
+// Windows Live
+hello.subscribe('auth.login', function(auth){
+
+	// Get Profile
+	hello.api(auth.network+':me', function(r){
+		if(!r||r.error){
+			return;
+		}
+		document.getElementById(auth.network).innerHTML = "Connected to "+auth.network+" as " + r.name;
+	});
+
+	// Get albums
+	hello.api(auth.network+':me/albums', function(r){
+
+		if(!r||r.error){
+			console.error("Could not open albums from "+auth.network+", try resigning in");
+			return;
+		}
+
+		var grp = document.createElement('optgroup');
+		grp.label = auth.network;
+		document.getElementById('albums').appendChild(grp);
+
+		for(var i=0;i<r.data.length;i++){
+			var o = document.createElement('option');
+			o.value = auth.network+":"+ ( r.data[i].photos || r.data[i].id );
+			o.innerHTML = r.data[i].name;
+			grp.appendChild(o);
+		}
+
+	});
+});
+</script>
+
+<p>On album selected: Load photos</p>
+
+<script class="pre">
+function getPhotos(){
+	if(!document.getElementById('albums').value){
+		alert("Please signin and wait for an album content to load");
+	}
+	hello.api(document.getElementById('albums').value, function(r){
+		if(r.error){
+			alert(r.error.message);
+			return;
+		}
+		// Create a new image in the DOM, give it some randomness and insert it into the dom.
+		for(var i=0;i<r.data.length;i++){
+			var obj = r.data[i];
+			var img = document.createElement('img');
+			img.src = obj.thumbnail;
+			img.style.top = (parseInt(Math.random()*85,10))+'%';
+			img.style.left = (50+parseInt(Math.random()*50,10))+'%';
+			document.body.appendChild(img);
+		}		
+	});
+}
+</script>
+
+
+<p>Plug the app keys (client_id') and voila</p>
+<script class="pre">
+
+// Initiate hellojs
+hello.init( CLIENT_IDS, {
+	scope: "files, photos",
+	redirect_uri : "../redirect.html"
+});
+</script>
