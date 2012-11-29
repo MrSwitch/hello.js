@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/_packages/document.css"></script>
+<script src="/_packages/document.js"></script>
+
+<script src="client_ids.js"></script>
+<script src="../hello.js"></script>
+<script src="../modules/soundcloud.js"></script>
+
+<title>HelloJS and SoundCloud</title>
+<h1>HelloJS and SoundCloud</h1>
+
+<button id='soundcloud' onclick="hello.login('soundcloud');">SoundCloud</button>
+<div id="result"></div>
+<script class="pre">
+hello.subscribe('auth.login', function(r){
+	// Get Profile
+	console.log("auth.login");
+	hello.api(r.network+':/me', function(p){
+		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
+	});
+	hello.api(r.network+':/tracks', function(r){
+		console.log(r);
+		for(var i=0;i<r.length;i++){
+			var li = document.createElement('li');
+			var a = document.createElement('a');
+			a.innerHTML = r[i].title;
+			a.href=r[i].permalink_url;
+			li.appendChild(a);
+			document.getElementById('result').appendChild(li);
+		}
+	});
+});
+
+hello.init({
+	soundcloud : '8a4a19f86cdab097fa71a15ab26a01d6'
+},	{redirect_uri:'../redirect.html'});
+</script>

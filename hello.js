@@ -1,21 +1,13 @@
 /**
  * @hello.js
  *
- * HelloJS is named because it makes a lot of introductions. If you want to know It lets
- * So many web services are putting their content online accessible on the web using OAuth2 as a provider.
- * The downside is they all have seperate REST calls, + client-side libraries to access their data.
- * Meaning that if you want to implement more than one of the API's, your going to have to write code for each of them seperatly,
- * not to mention the extra page bulk of including their propriatary script files.
- *
- * You could also use a proprietary service like Gigya or Jan Rain to circumnavigate the problem. But i think you'll like hello.js
- * It works with FaceBook, Windows Live Connect and Google+ it is easy to understand with a simple generic API.
- , Its easy to extend and add new services. But best of all its free!
+ * HelloJS is a client side Javascript SDK for making OAuth2 logins and subsequent REST calls.
  *
  * @author Andrew Dodson
  * @company Knarly
  *
  * @copyright 2012, Andrew Dodson
- * Dual licensed under the MIT or GPL Version 2 licenses.
+ * @license Free for non-commercial
  */
 
 var hello = (function(){
@@ -48,432 +40,83 @@ var hello = (function(){
 		state         : ''
 	};
 
-	// Format
-	// Ensure each record contains a name, id etc.
-	function formatItem(o){
-		if(o.error){
-			return;
-		}
-		if(!o.name){
-			o.name = o.title || o.message || o.message;
-		}
-		if(!o.picture){
-			o.picture = o.thumbnailLink;
-		}
-		if(!o.thumbnail){
-			o.thumbnail = o.thumbnailLink;
-		}
-		if(o.mimeType === "application/vnd.google-apps.folder"){
-			o.type = "folder";
-			o.files = "https://www.googleapis.com/drive/v2/files?q=%22"+o.id+"%22+in+parents";
-		}
-	}
-
-	// Google has a horrible JSON API
-	function gEntry(o){
-
-		var entry = function(a){
-			var i=0, _a;
-			var p = {
-				id		: a.id.$t,
-				name	: a.title.$t,
-				description	: a.summary.$t,
-				updated_time : a.updated.$t,
-				created_time : a.published.$t,
-				picture : a['media$group']['media$content'][0].url,
-				thumbnail : a['media$group']['media$content'][0].url,
-				width : a['media$group']['media$content'][0].width,
-				height : a['media$group']['media$content'][0].height
-//				original : a
-			};
-			// Get feed/children
-			if("link" in a){
-				for(i=0;i<a.link.length;i++){
-					if(a.link[i].rel.match(/\#feed$/)){
-						p.photos = a.link[i].href;
-						p.files = a.link[i].href;
-						p.upload_location = a.link[i].href;
-						break;
-					}
-				}
-			}
-
-			// Get images of different scales
-			if('category' in a&&a['category'].length){
-				_a  = a['category'];
-				for(i=0;i<_a.length;i++){
-					if(_a[i].scheme&&_a[i].scheme.match(/\#kind$/)){
-						p.type = _a[i].term.replace(/^.*?\#/,'');
-					}
-				}
-			}
-
-			// Get images of different scales
-			if('media$thumbnail' in a['media$group']){
-				_a = a['media$group']['media$thumbnail'];
-				p.thumbnail = a['media$group']['media$thumbnail'][0].url;
-				p.images = [];
-				for(i=0;i<_a.length;i++){
-					p.images.push({
-						source : _a[i].url,
-						width : _a[i].width,
-						height : _a[i].height
-					});
-				}
-				p.images.push({
-					source : a['media$group']['media$content'][0].url,
-					width : a['media$group']['media$content'][0].width,
-					height : a['media$group']['media$content'][0].height
-				});
-			}
-			return p;
-		};
-
-		var r = [];
-		if("feed" in o && "entry" in o.feed){
-			for(i=0;i<o.feed.entry.length;i++){
-				r.push(entry(o.feed.entry[i]));
-			}
-			return {
-				//name : o.feed.title.$t,
-				//updated : o.feed.updated.$t,
-				data : r
-			};
-		}
-
-		// Old style, picasa, etc...
-		if( "entry" in o ){
-			return entry(o.entry);
-		}else if( "items" in o ){
-			for(var i=0;i<o.items.length;i++){
-				formatItem( o.items[i] );
-			}
-			return {
-				data : o.items
-			};
-		}
-		else{
-			formatItem( o );
-			return o;
-		}
-	}
-
 
 	//
-	// Some of the providers require that only MultiPart is used with non-binary forms.
-	// This function checks whether the form contains binary data
-	function has_binary(data){
-		for(var x in data ) if(data.hasOwnProperty(x)){
-			if( (_domInstance('input', data[x]) && data[x].type === 'file')	||
-				("FileList" in window && data[x] instanceof window.FileList) ||
-				("File" in window && data[x] instanceof window.File) ||
-				("Blob" in window && data[x] instanceof window.Blob)
-			){
-				return true;
-			}
-		}
-		return false;
-	}
+	// Services Object
+	var _services = {};
+
+	// Monitor for a change in state and fire
+	var old_tokens = {}, pending = {};
 
 	//
-	// Services
-	//
-	var _services = {
+	// Monitoring session state
+	// Check for session changes
+	(function self(){
 
-		google : {
-			name : "Google Plus",
-			uri : {
-				// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
-				auth : "https://accounts.google.com/o/oauth2/auth",
-//				me	: "plus/v1/people/me?pp=1",
-				me : 'oauth2/v1/userinfo?alt=json',
-				base : "https://www.googleapis.com/",
-				'me/friends' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
-				'me/share' : 'plus/v1/people/me/activities/public',
-				'me/feed' : 'plus/v1/people/me/activities/public',
-				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json',
-				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=100',
-				"me/files" : 'https://www.googleapis.com/drive/v2/files?q=%22root%22+in+parents'
-			},
-			scope : {
-				//,
-				basic : "https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
-				email			: '',
-				birthday		: '',
-				events			: '',
-				photos			: 'https://picasaweb.google.com/data/',
-				videos			: 'http://gdata.youtube.com',
-				friends			: 'https://www.google.com/m8/feeds',
-				files			: 'https://www.googleapis.com/auth/drive.readonly',
-				
-				publish			: '',
-				publish_files	: 'https://www.googleapis.com/auth/drive',
-				create_event	: '',
+		// Loop through the services
+		for(var x in _services){if(_services.hasOwnProperty(x)){
 
-				offline_access : ''
-			},
-			scope_delim : ' ',
-			wrap : {
-				me : function(o){
-					if(o.id){
-						o.last_name = o.family_name || o.name.familyName;
-						o.first_name = o.given_name || o.name.givenName;
-//						o.name = o.first_name + ' ' + o.last_name;
-						o.picture = o.picture || o.image.url;
-						o.thumbnail = o.picture;
-						o.name = o.displayName || o.name;
-					}
-					return o;
-				},
-				'me/friends'	: function(o){
-					var r = [];
-					if("feed" in o && "entry" in o.feed){
-						for(var i=0;i<o.feed.entry.length;i++){
-							var a = o.feed.entry[i];
-							r.push({
-								id		: a.id.$t,
-								name	: a.title.$t,
-								email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
-								updated_time : a.updated.$t,
-								picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null,
-								thumbnail : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null
-							});
-						}
-						return {
-							//name : o.feed.title.$t,
-							//updated : o.feed.updated.$t,
-							data : r
-						};
-					}
-					return o;
-				},
-				'me/share' : function(o){
-					o.data = o.items;
-					try{
-						delete o.items;
-					}catch(e){
-						o.items = null;
-					}
-					return o;
-				},
-				'me/feed' : function(o){
-					o.data = o.items;
-					try{
-						delete o.items;
-					}catch(e){
-						o.items = null;
-					}
-					return o;
-				},
-				'me/albums' : gEntry,
-				'me/photos' : gEntry,
-				'default' : gEntry
-			},
-			xhr : function(p){
-				if(p.method==='post'){
-					if(p.data.file){
-//						return {handler: gMultiPart};
-					}
-					return false;
-				}
-				return {};
+			if(!_services[x].id){
+				// we haven't attached an ID so dont listen.
+				continue;
 			}
-		},
-	
-		windows : {
-			name : 'Windows live',
-
-			uri : {
-				// REF: http://msdn.microsoft.com/en-us/library/hh243641.aspx
-				auth : 'https://oauth.live.com/authorize',
-				base : 'https://apis.live.net/v5.0/',
-				"me/share" : function(p,callback){
-					// If this is a POST them return
-					callback( p.method==='get' ? "me/feed" : "me/share" );
-				},
-				"me/feed" : function(p,callback){
-					// If this is a POST them return
-					callback( p.method==='get' ? "me/feed" : "me/share" );
-				},
-				"me/files" : 'me/skydrive/files'
-
-			},
-			scope : {
-				basic			: 'wl.signin,wl.basic',
-				email			: 'wl.emails',
-				birthday		: 'wl.birthday',
-				events			: 'wl.calendars',
-				photos			: 'wl.photos',
-				videos			: 'wl.photos',
-				friends			: '',
-				files			: 'wl.skydrive',
-				
-				publish			: 'wl.share',
-				publish_files	: 'wl.skydrive_update',
-				create_event	: 'wl.calendars_update,wl.events_create',
-
-				offline_access	: 'wl.offline_access'
-			},
-			wrap : {
-				me : function(o){
-					if(o.id){
-						o.email = (o.emails?o.emails.preferred:null);
-						o.picture = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
-						o.thumbnail = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
-					}
-					return o;
-				},
-				'me/friends' : function(o){
-					if("data" in o){
-						for(var i=0;i<o.data.length;i++){
-							o.data[i].picture = 'https://apis.live.net/v5.0/'+o.data[i].id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
-							o.data[i].thumbnail = 'https://apis.live.net/v5.0/'+o.data[i].id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
-						}
-					}
-					return o;
-				},
-				'me/albums' : function(o){
-					if("data" in o){
-						for(var i=0;i<o.data.length;i++){
-							o.data[i].photos = 'https://apis.live.net/v5.0/'+o.data[i].id+'/photos';
-							o.data[i].files = 'https://apis.live.net/v5.0/'+o.data[i].id+'/photos';
-						}
-					}
-					return o;
-				},
-				'default' : function(o){
-					if("data" in o){
-						for(var i=0;i<o.data.length;i++){
-							if(o.data[i].picture){
-								o.data[i].thumbnail = o.data[i].picture;
-							}
-						}
-					}
-					return o;
-				}
-			},
-			xhr : function(p){
-				if(p.method==='post'&& !has_binary(p.data) ){
-					p.data = JSON.stringify(p.data);
-					return {
-						contentType : 'application/json'
-					};
-				}
-				return {};
-			},
-			jsonp : function(p){
-				if( p.method.toLowerCase() !== 'get'){
-					//p.data = {data: JSON.stringify(p.data), method: p.method.toLowerCase()};
-					p.data.method = p.method.toLowerCase();
-					p.method = 'get';
-				}
-				return p;
-			}
-		},
 		
-		facebook : {
-			name : 'Facebook',
+			// Get session
+			var session = hello.getAuthResponse(x);
+			var token = ( session ? session.access_token : null);
+			var evt = '';
 
-			uri : {
-				// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
-				auth : 'http://www.facebook.com/dialog/oauth/',
-				base : 'https://graph.facebook.com/',
-				'me/share' : 'me/feed',
-				'me/files' : 'me/albums'
-			},
-			scope : {
-				basic			: '',
-				email			: 'email',
-				birthday		: 'user_birthday',
-				events			: 'user_events',
-				photos			: 'user_photos,user_videos',
-				videos			: 'user_photos,user_videos',
-				friends			: '',
-				files			: 'user_photos,user_videos',
-				
-				publish_files	: 'user_photos,user_videos,publish_stream',
-				publish			: 'publish_stream',
-				create_event	: 'create_event',
+			//
+			// Listen for callbacks fired from Signin
+			//
+			if(session && "callback" in session && session.callback in listeners){
 
-				offline_access : 'offline_access'
-			},
-			wrap : {
-				me : function(o){
-					if(o.id){
-						o.picture = 'http://graph.facebook.com/'+o.id+'/picture';
-						o.thumbnail = 'http://graph.facebook.com/'+o.id+'/picture';
-					}
-					return o;
-				},
-				'me/friends' : function(o){
-					if("data" in o){
-						for(var i=0;i<o.data.length;i++){
-							o.data[i].picture = 'http://graph.facebook.com/'+o.data[i].id+'/picture';
-							o.data[i].thumbnail = 'http://graph.facebook.com/'+o.data[i].id+'/picture';
-						}
-					}
-					return o;
-				},
-				'me/albums' : function(o){
-					if("data" in o){
-						for(var i=0;i<o.data.length;i++){
-							o.data[i].files = 'https://graph.facebook.com/'+o.data[i].id+'/photos';
-							o.data[i].photos = 'https://graph.facebook.com/'+o.data[i].id+'/photos';
-							if(o.data[i].cover_photo){
-								o.data[i].thumbnail = 'https://graph.facebook.com/'+o.data[i].cover_photo+'/picture?access_token='+hello.getAuthResponse('facebook').access_token;
-							}
-							o.data[i].type = "album";
-							if(o.data[i].can_upload){
-								o.data[i].upload_location = 'https://graph.facebook.com/'+o.data[i].id+'/photos';
-							}
-						}
-					}
-					return o;
-				},
-				'me/files' : function(o){return this["me/albums"](o);},
-				'default' : function(o){
-					if("data" in o){
-						for(var i=0;i<o.data.length;i++){
-							if(o.data[i].picture){
-								o.data[i].thumbnail = o.data[i].picture;
-							}
-							if(o.data[i].cover_photo){
-								o.data[i].thumbnail = 'https://graph.facebook.com/'+o.data[i].cover_photo+'/picture?access_token='+hello.getAuthResponse('facebook').access_token;
-							}
-						}
-					}
-					return o;
-				}
-			},
+				// to do remove from session object...
+				var cb = session.callback;
+				try{
+					delete session.callback;
+				}catch(e){}
 
-			// special requirements for handling XHR
-			xhr : function(p){
-				if(p.method==='get'||p.method==='post'){
-					return {};
-				}
-				else{
-					return false;
-				}
-			},
+				// Update store
+				_store(x,session);
 
-			// Special requirements for handling JSONP fallback
-			jsonp : function(p){
-				if( p.method.toLowerCase() !== 'get' && !has_binary(p.data) ){
-					p.data.method = p.method.toLowerCase();
-					p.method = 'get';
-				}
-				return p;
-			},
-
-			// Special requirements for iframe form hack
-			post : function(p){
-				return {
-					// fire the callback onload
-					callbackonload : true
-				};
+				// fire
+				hello.trigger(cb, { network:x, authResponse: session } );
 			}
-		}
-	};
+			
+			//
+			// Refresh login
+			//
+			if( ( session && ("expires" in session) && ( !( x in pending ) || pending[x] < ((new Date()).getTime()/1e3) ) && session.expires < ((new Date()).getTime()/1e3) ) ){
+
+				// try to resignin
+				log( x + " has expired trying to resignin" );
+				hello.login(x,{display:'none'});
+
+				// update pending, every 10 minutes
+				pending[x] = ((new Date()).getTime()/1e3) + 600;
+			}
+
+
+			// Has token changed?
+			if( old_tokens[x] === token ){
+				continue;
+			}
+			else{
+				hello.trigger( x+':auth.' + (!token?'logout':'login'), {
+					network:x,
+					authResponse: session
+				} );
+			}
+			
+			old_tokens[x] = token;
+		}}
+
+		// Check error events
+		setTimeout(self, 1000);
+	})();
+
+
 
 	var hello = {
 		//
@@ -514,6 +157,11 @@ var hello = (function(){
 			// merge objects
 			_services = _merge(_services, p.services);
 
+			// Tidy
+			for( x in _services ){if(_services.hasOwnProperty(x)){
+				_services[x].scope = _services[x].scope || {};
+			}}
+
 			// options
 			if(p.opts){
 				_options = _merge(_options, p.opts);
@@ -527,101 +175,6 @@ var hello = (function(){
 			if(p.timeout){
 				_timeout = p.timeout;
 			}
-
-			// Have we already run init?
-			if(_initstarted){
-				return _services;
-			}
-			else{
-				_initstarted = true;
-			}
-
-
-			// Monitor for a change in state and fire
-			var old_tokens = {}, pending = {};
-
-			//
-			// Monitoring session state
-			// Check for session changes
-			(function self(){
-
-				//
-				// Check for error Callbacks
-				//
-				var error = _store('error'),
-					cb = null;
-				if(error && "callback" in error && error.callback in listeners){
-
-					// to do remove from session object...
-					cb = error.callback;
-					try{
-						delete error.callback;
-					}catch(e){}
-
-					// Update store
-					_store('error',error);
-
-					// fire
-					hello.trigger(cb, error );
-				}
-
-				//
-				for(var x in _services){if(_services.hasOwnProperty(x)){
-				
-					// Get session
-					var session = hello.getAuthResponse(x);
-					var token = ( session ? session.access_token : null);
-					var evt = '';
-
-					//
-					// Listen for callbacks fired from Signin
-					//
-					if(session && "callback" in session && session.callback in listeners){
-
-						// to do remove from session object...
-						cb = session.callback;
-						try{
-							delete session.callback;
-						}catch(e){}
-
-						// Update store
-						_store(x,session);
-
-						// fire
-						hello.trigger(cb, { network:x, authResponse: session } );
-					}
-					
-					//
-					// Refresh login
-					//
-					if( ( session && ("expires" in session) && ( !( x in pending ) || pending[x] < ((new Date()).getTime()/1e3) ) && session.expires < ((new Date()).getTime()/1e3) ) ){
-
-						// try to resignin
-						log( x + " has expired trying to resignin" );
-						hello.login(x,{display:'none'});
-
-						// update pending, every 10 minutes
-						pending[x] = ((new Date()).getTime()/1e3) + 600;
-					}
-
-
-					// Has token changed?
-					if( old_tokens[x] === token ){
-						continue;
-					}
-					else{
-						hello.trigger( x+':auth.' + (!token?'logout':'login'), {
-							network:x,
-							authResponse: session
-						} );
-					}
-					
-					old_tokens[x] = token;
-				}}
-
-				// Check error events
-				setTimeout(self, 1000);
-			})();
 
 			return _services;
 		},
@@ -674,7 +227,7 @@ var hello = (function(){
 			//
 			var qs = _merge( p.options, {
 				client_id		: provider.id,
-				scope			: provider.scope.basic,
+				scope			: 'basic',
 				state			: {
 					network : p.network,
 					display : p.options.display,
@@ -693,16 +246,18 @@ var hello = (function(){
 				if(typeof(scope)!=='string'){
 					scope = scope.join(',');
 				}
-				// Save in the State
-				qs.state.scope = scope.split(/,\s/);
-
-				// Replace each with the default scopes
-				qs.scope = (qs.scope+ ',' + scope).replace(/[^,\s]+/ig, function(m){
-					return (m in provider.scope) ? provider.scope[m] : m;
-				});
-				// remove duplication and empty spaces
-				qs.scope = _unique(qs.scope.split(/,+/)).join( provider.scope_delim || ',');
 			}
+			scope = (scope ? scope + ',' : '') + qs.scope;
+
+			// Save in the State
+			qs.state.scope = scope.split(/,\s/);
+
+			// Replace each with the default scopes
+			qs.scope = scope.replace(/[^,\s]+/ig, function(m){
+				return (m in provider.scope) ? provider.scope[m] : '';
+			}).replace(/[,\s]+/ig, ',');
+			// remove duplication and empty spaces
+			qs.scope = _unique(qs.scope.split(/,+/)).join( provider.scope_delim || ',');
 
 			//
 			// Is the user already signed in
@@ -871,7 +426,9 @@ var hello = (function(){
 			// as long as the path isn't flagged as unavaiable, e.g. path == false
 			if( !(p.path in o.uri) || o.uri[p.path] !== false ){
 
-				var url = (p.path in o.uri ? o.uri[p.path] : p.path),
+				var url = (p.path in o.uri ?
+							o.uri[p.path] :
+							( o.uri['default'] ? o.uri['default'] : p.path)),
 					session = this.getAuthResponse(service),
 					token = (session?session.access_token:null);
 
@@ -883,15 +440,20 @@ var hello = (function(){
 						url = o.uri.base + url;
 					}
 
-					var qs = {};
-					
-					if(token){
-						qs.access_token = token;
-					}
-
 					//
 					// build the call
 					var request = function(){
+
+						var qs = {};
+						
+						if(token){
+							qs['access_token'] = token;
+						}
+
+						if(o.querystring){
+							// Make amendments to the standard query
+							o.querystring(qs);
+						}
 
 						// Update the resource_uri
 						url += ( url.indexOf('?') > -1 ? "&" : "?" );
@@ -919,7 +481,6 @@ var hello = (function(){
 
 						// Can we use XHR for Cross domain delivery?
 						if( 'withCredentials' in new XMLHttpRequest() && (!("xhr" in o) || (config = o.xhr(p))) ){
-
 
 							var r = new XMLHttpRequest();
 
@@ -1140,10 +701,13 @@ var hello = (function(){
 		//
 		// Utilities
 		//
-		_param : _param,
-		_store : _store,
-		_append : _append,
-		_merge : _merge
+		utils : {
+			param : _param,
+			hasBinary : _hasBinary,
+			store : _store,
+			append : _append,
+			merge : _merge
+		}
 	};
 
 
@@ -1187,7 +751,7 @@ var hello = (function(){
 
 					// Save on the parent window the new credentials
 					// This fixes an IE10 bug i think... atleast it does for me.
-					win.hello._store(obj.network,obj);
+					win.hello.utils.store(obj.network,obj);
 				}
 
 				// Update store
@@ -1205,13 +769,11 @@ var hello = (function(){
 	// Save session, from redirected authentication
 	// #access_token has come in?
 	//
-	var p = _param(window.location.hash||null);
+	// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
+	// SoundCloud is the state in the querystring and the rest in the hashtag
+	var p = _merge(_param(window.location.search||''), _param(window.location.hash||''));
 
-	if(!p){
-		// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
-		p = _param(window.location.search);
-	}
-
+	
 	// if p.state
 	if( p && "state" in p ){
 
@@ -1225,7 +787,7 @@ var hello = (function(){
 		}
 
 		// access_token?
-		if( ("access_token" in p&&p.access_token) && p.network in _services){
+		if( ("access_token" in p&&p.access_token) && p.network ){
 
 			if(parseInt(p.expires_in,10) === 0){
 				// Facebook, tut tut tut,
@@ -1244,16 +806,21 @@ var hello = (function(){
 		//error=?
 		//&error_description=?
 		//&state=?
-		else if( ("error" in p && p.error) && p.network in _services){
-			p.error_message = p.error_message || p.error_description;
+		else if( ("error" in p && p.error) && p.network ){
+			// Error object
+			p.error = {
+				code: p.error,
+				message : p.error_message || p.error_description
+			};
 
-			authCallback( 'error', p );
+			// Let the state handler handle it.
+			authCallback( p.network, p );
 		}
 
 		// API Calls
 		// IFRAME HACK
 		// Result is serialized JSON string.
-		if(p&&p.callback&&"result" in p && p.result){
+		if(p&&p.callback&&"result" in p && p.result ){
 			// trigger a function in the parent
 			if(p.callback in window.parent){
 				window.parent[p.callback](JSON.parse(p.result));
@@ -1925,6 +1492,22 @@ var hello = (function(){
 
 
 	//
+	// Some of the providers require that only MultiPart is used with non-binary forms.
+	// This function checks whether the form contains binary data
+	function _hasBinary(data){
+		for(var x in data ) if(data.hasOwnProperty(x)){
+			if( (_domInstance('input', data[x]) && data[x].type === 'file')	||
+				("FileList" in window && data[x] instanceof window.FileList) ||
+				("File" in window && data[x] instanceof window.File) ||
+				("Blob" in window && data[x] instanceof window.Blob)
+			){
+				return true;
+			}
+		}
+		return false;
+	}
+
+	//
 	// dataToJSON
 	// This takes a FormElement and converts it to a JSON object
 	//
@@ -2035,3 +1618,433 @@ var hello = (function(){
 	}
 
 })();
+
+
+
+
+//
+// GOOGLE API
+//
+(function(){
+
+	// Format
+	// Ensure each record contains a name, id etc.
+	function formatItem(o){
+		if(o.error){
+			return;
+		}
+		if(!o.name){
+			o.name = o.title || o.message || o.message;
+		}
+		if(!o.picture){
+			o.picture = o.thumbnailLink;
+		}
+		if(!o.thumbnail){
+			o.thumbnail = o.thumbnailLink;
+		}
+		if(o.mimeType === "application/vnd.google-apps.folder"){
+			o.type = "folder";
+			o.files = "https://www.googleapis.com/drive/v2/files?q=%22"+o.id+"%22+in+parents";
+		}
+	}
+
+	// Google has a horrible JSON API
+	function gEntry(o){
+
+		var entry = function(a){
+			var i=0, _a;
+			var p = {
+				id		: a.id.$t,
+				name	: a.title.$t,
+				description	: a.summary.$t,
+				updated_time : a.updated.$t,
+				created_time : a.published.$t,
+				picture : a['media$group']['media$content'][0].url,
+				thumbnail : a['media$group']['media$content'][0].url,
+				width : a['media$group']['media$content'][0].width,
+				height : a['media$group']['media$content'][0].height
+//				original : a
+			};
+			// Get feed/children
+			if("link" in a){
+				for(i=0;i<a.link.length;i++){
+					if(a.link[i].rel.match(/\#feed$/)){
+						p.photos = a.link[i].href;
+						p.files = a.link[i].href;
+						p.upload_location = a.link[i].href;
+						break;
+					}
+				}
+			}
+
+			// Get images of different scales
+			if('category' in a&&a['category'].length){
+				_a  = a['category'];
+				for(i=0;i<_a.length;i++){
+					if(_a[i].scheme&&_a[i].scheme.match(/\#kind$/)){
+						p.type = _a[i].term.replace(/^.*?\#/,'');
+					}
+				}
+			}
+
+			// Get images of different scales
+			if('media$thumbnail' in a['media$group']){
+				_a = a['media$group']['media$thumbnail'];
+				p.thumbnail = a['media$group']['media$thumbnail'][0].url;
+				p.images = [];
+				for(i=0;i<_a.length;i++){
+					p.images.push({
+						source : _a[i].url,
+						width : _a[i].width,
+						height : _a[i].height
+					});
+				}
+				p.images.push({
+					source : a['media$group']['media$content'][0].url,
+					width : a['media$group']['media$content'][0].width,
+					height : a['media$group']['media$content'][0].height
+				});
+			}
+			return p;
+		};
+
+		var r = [];
+		if("feed" in o && "entry" in o.feed){
+			for(i=0;i<o.feed.entry.length;i++){
+				r.push(entry(o.feed.entry[i]));
+			}
+			return {
+				//name : o.feed.title.$t,
+				//updated : o.feed.updated.$t,
+				data : r
+			};
+		}
+
+		// Old style, picasa, etc...
+		if( "entry" in o ){
+			return entry(o.entry);
+		}else if( "items" in o ){
+			for(var i=0;i<o.items.length;i++){
+				formatItem( o.items[i] );
+			}
+			return {
+				data : o.items
+			};
+		}
+		else{
+			formatItem( o );
+			return o;
+		}
+	}
+
+
+
+	//
+	// Embed
+	hello.init({
+		google : {
+			name : "Google Plus",
+			uri : {
+				// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
+				auth : "https://accounts.google.com/o/oauth2/auth",
+	//				me	: "plus/v1/people/me?pp=1",
+				me : 'oauth2/v1/userinfo?alt=json',
+				base : "https://www.googleapis.com/",
+				'me/friends' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
+				'me/share' : 'plus/v1/people/me/activities/public',
+				'me/feed' : 'plus/v1/people/me/activities/public',
+				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json',
+				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=100',
+				"me/files" : 'https://www.googleapis.com/drive/v2/files?q=%22root%22+in+parents'
+			},
+			scope : {
+				//,
+				basic : "https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
+				email			: '',
+				birthday		: '',
+				events			: '',
+				photos			: 'https://picasaweb.google.com/data/',
+				videos			: 'http://gdata.youtube.com',
+				friends			: 'https://www.google.com/m8/feeds',
+				files			: 'https://www.googleapis.com/auth/drive.readonly',
+				
+				publish			: '',
+				publish_files	: 'https://www.googleapis.com/auth/drive',
+				create_event	: '',
+
+				offline_access : ''
+			},
+			scope_delim : ' ',
+			wrap : {
+				me : function(o){
+					if(o.id){
+						o.last_name = o.family_name || o.name.familyName;
+						o.first_name = o.given_name || o.name.givenName;
+	//						o.name = o.first_name + ' ' + o.last_name;
+						o.picture = o.picture || o.image.url;
+						o.thumbnail = o.picture;
+						o.name = o.displayName || o.name;
+					}
+					return o;
+				},
+				'me/friends'	: function(o){
+					var r = [];
+					if("feed" in o && "entry" in o.feed){
+						for(var i=0;i<o.feed.entry.length;i++){
+							var a = o.feed.entry[i];
+							r.push({
+								id		: a.id.$t,
+								name	: a.title.$t,
+								email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
+								updated_time : a.updated.$t,
+								picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null,
+								thumbnail : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null
+							});
+						}
+						return {
+							//name : o.feed.title.$t,
+							//updated : o.feed.updated.$t,
+							data : r
+						};
+					}
+					return o;
+				},
+				'me/share' : function(o){
+					o.data = o.items;
+					try{
+						delete o.items;
+					}catch(e){
+						o.items = null;
+					}
+					return o;
+				},
+				'me/feed' : function(o){
+					o.data = o.items;
+					try{
+						delete o.items;
+					}catch(e){
+						o.items = null;
+					}
+					return o;
+				},
+				'me/albums' : gEntry,
+				'me/photos' : gEntry,
+				'default' : gEntry
+			},
+			xhr : function(p){
+				if(p.method==='post'){
+	/*					if(p.data.file){
+						return {handler: gMultiPart};
+					}
+	*/
+					return false;
+				}
+				return {};
+			}
+		}
+	});
+})();
+
+
+//
+// Windows
+hello.init({
+	windows : {
+		name : 'Windows live',
+
+		uri : {
+			// REF: http://msdn.microsoft.com/en-us/library/hh243641.aspx
+			auth : 'https://oauth.live.com/authorize',
+			base : 'https://apis.live.net/v5.0/',
+			"me/share" : function(p,callback){
+				// If this is a POST them return
+				callback( p.method==='get' ? "me/feed" : "me/share" );
+			},
+			"me/feed" : function(p,callback){
+				// If this is a POST them return
+				callback( p.method==='get' ? "me/feed" : "me/share" );
+			},
+			"me/files" : 'me/skydrive/files'
+
+		},
+		scope : {
+			basic			: 'wl.signin,wl.basic',
+			email			: 'wl.emails',
+			birthday		: 'wl.birthday',
+			events			: 'wl.calendars',
+			photos			: 'wl.photos',
+			videos			: 'wl.photos',
+			friends			: '',
+			files			: 'wl.skydrive',
+			
+			publish			: 'wl.share',
+			publish_files	: 'wl.skydrive_update',
+			create_event	: 'wl.calendars_update,wl.events_create',
+
+			offline_access	: 'wl.offline_access'
+		},
+		wrap : {
+			me : function(o){
+				if(o.id){
+					o.email = (o.emails?o.emails.preferred:null);
+					o.picture = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
+					o.thumbnail = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
+				}
+				return o;
+			},
+			'me/friends' : function(o){
+				if("data" in o){
+					for(var i=0;i<o.data.length;i++){
+						o.data[i].picture = 'https://apis.live.net/v5.0/'+o.data[i].id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
+						o.data[i].thumbnail = 'https://apis.live.net/v5.0/'+o.data[i].id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
+					}
+				}
+				return o;
+			},
+			'me/albums' : function(o){
+				if("data" in o){
+					for(var i=0;i<o.data.length;i++){
+						o.data[i].photos = 'https://apis.live.net/v5.0/'+o.data[i].id+'/photos';
+						o.data[i].files = 'https://apis.live.net/v5.0/'+o.data[i].id+'/photos';
+					}
+				}
+				return o;
+			},
+			'default' : function(o){
+				if("data" in o){
+					for(var i=0;i<o.data.length;i++){
+						if(o.data[i].picture){
+							o.data[i].thumbnail = o.data[i].picture;
+						}
+					}
+				}
+				return o;
+			}
+		},
+		xhr : function(p){
+			if(p.method==='post'&& !hello.utils.hasBinary(p.data) ){
+				p.data = JSON.stringify(p.data);
+				return {
+					contentType : 'application/json'
+				};
+			}
+			return {};
+		},
+		jsonp : function(p){
+			if( p.method.toLowerCase() !== 'get'){
+				//p.data = {data: JSON.stringify(p.data), method: p.method.toLowerCase()};
+				p.data.method = p.method.toLowerCase();
+				p.method = 'get';
+			}
+			return p;
+		}
+	}
+});
+
+
+//
+// Facebook
+hello.init({
+	facebook : {
+		name : 'Facebook',
+
+		uri : {
+			// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
+			auth : 'http://www.facebook.com/dialog/oauth/',
+			base : 'https://graph.facebook.com/',
+			'me/share' : 'me/feed',
+			'me/files' : 'me/albums'
+		},
+		scope : {
+			basic			: '',
+			email			: 'email',
+			birthday		: 'user_birthday',
+			events			: 'user_events',
+			photos			: 'user_photos,user_videos',
+			videos			: 'user_photos,user_videos',
+			friends			: '',
+			files			: 'user_photos,user_videos',
+			
+			publish_files	: 'user_photos,user_videos,publish_stream',
+			publish			: 'publish_stream',
+			create_event	: 'create_event',
+
+			offline_access : 'offline_access'
+		},
+		wrap : {
+			me : function(o){
+				if(o.id){
+					o.picture = 'http://graph.facebook.com/'+o.id+'/picture';
+					o.thumbnail = 'http://graph.facebook.com/'+o.id+'/picture';
+				}
+				return o;
+			},
+			'me/friends' : function(o){
+				if("data" in o){
+					for(var i=0;i<o.data.length;i++){
+						o.data[i].picture = 'http://graph.facebook.com/'+o.data[i].id+'/picture';
+						o.data[i].thumbnail = 'http://graph.facebook.com/'+o.data[i].id+'/picture';
+					}
+				}
+				return o;
+			},
+			'me/albums' : function(o){
+				if("data" in o){
+					for(var i=0;i<o.data.length;i++){
+						o.data[i].files = 'https://graph.facebook.com/'+o.data[i].id+'/photos';
+						o.data[i].photos = 'https://graph.facebook.com/'+o.data[i].id+'/photos';
+						if(o.data[i].cover_photo){
+							o.data[i].thumbnail = 'https://graph.facebook.com/'+o.data[i].cover_photo+'/picture?access_token='+hello.getAuthResponse('facebook').access_token;
+						}
+						o.data[i].type = "album";
+						if(o.data[i].can_upload){
+							o.data[i].upload_location = 'https://graph.facebook.com/'+o.data[i].id+'/photos';
+						}
+					}
+				}
+				return o;
+			},
+			'me/files' : function(o){return this["me/albums"](o);},
+			'default' : function(o){
+				if("data" in o){
+					for(var i=0;i<o.data.length;i++){
+						if(o.data[i].picture){
+							o.data[i].thumbnail = o.data[i].picture;
+						}
+						if(o.data[i].cover_photo){
+							o.data[i].thumbnail = 'https://graph.facebook.com/'+o.data[i].cover_photo+'/picture?access_token='+hello.getAuthResponse('facebook').access_token;
+						}
+					}
+				}
+				return o;
+			}
+		},
+
+		// special requirements for handling XHR
+		xhr : function(p){
+			if(p.method==='get'||p.method==='post'){
+				return {};
+			}
+			else{
+				return false;
+			}
+		},
+
+		// Special requirements for handling JSONP fallback
+		jsonp : function(p){
+			if( p.method.toLowerCase() !== 'get' && !hello.utils.hasBinary(p.data) ){
+				p.data.method = p.method.toLowerCase();
+				p.method = 'get';
+			}
+			return p;
+		},
+
+		// Special requirements for iframe form hack
+		post : function(p){
+			return {
+				// fire the callback onload
+				callbackonload : true
+			};
+		}
+	}
+});

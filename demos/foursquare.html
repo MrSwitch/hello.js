@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/_packages/document.css"></script>
+<script src="/_packages/document.js"></script>
+
+<script src="client_ids.js"></script>
+<script src="../hello.js"></script>
+<script src="../modules/foursquare.js"></script>
+
+<title>HelloJS and FourSquare</title>
+<h1>HelloJS and FourSquare</h1>
+
+<button id='foursquare' onclick="hello.login('foursquare');">FourSquare</button>
+<div id="result"></div>
+<script class="pre">
+hello.subscribe('auth.login', function(r){
+	// Get Profile
+	console.log("auth.login");
+	hello.api(r.network+':/me', function(p){
+		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
+	});
+});
+
+hello.init({
+	foursquare : '3HEXMBQVH2SV0VXUKXOGQRPWH1PUTEIZN4KBDY5L54ZDXCDP'
+},	{redirect_uri:'../redirect.html'});
+</script>
