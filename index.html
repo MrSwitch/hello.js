@@ -173,20 +173,16 @@ input[name=path]{
 	<nav class="toc"></nav>
 	<header>
 		<h1><img src="favicon.ico" width=64 height=64 style="vertical-align:middle;margin-right:20px;">hello.js</h1>
-		<blockquote><p>A Javascript API for <a href="http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf" target="_blank">OAuth2</a> authentication and REST inspection of third party 
-		API&#39;s like Google+, Facebook Graph and Windows Live Connect. A developer may code against this very familiar looking API whilst switching seemlessly between REST URL's and Login URL's pertaining to Windows, Facebook and or Google (more to come) no more spaghetti code. 
-
-<p>It's built to be agnostic, just like OAuth2. Its extensible so you may add your own provider, assuming they support OAuth2 and have a REST interface that supports CORS and or JSONP...
-
-<p>	<b>Yeah Yeah, enough jargon, yawn! Lets cut to a demo:</b> Load my profile information from
+		<blockquote><p>A client-side Javascript SDK for authenticating with any number of <a href="http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf" target="_blank">OAuth2</a> web services and querying with their REST API's. <b>Standardizes</b> paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. Its <b>modular</b> so that list is growing. ... no more spaghetti code and. 
+		</blockquote>
+	</header>
+	<h2>Quick Demo</h2>
+	<p>Load my profile information</p>
 	<div id="profile">
 		<button id="profile_windows" onclick="hello.login('windows')">windows</button>,
 		<button id="profile_facebook" onclick="hello.login('facebook')">facebook</button> or
 		<button id="profile_google" onclick="hello.login('google')">google</button>
 	</div>
-</p>
-</blockquote>
-	</header>
 
 	<h2>Features</h2>
 
