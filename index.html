@@ -495,22 +495,30 @@ hello.api("me", function(json){
 	<p>Bind a callback to an event. An event maybe triggered by a change in user state or a change in some detail. </p>
 	<h4>hello.subscribe( event, callback );</h4>
 <table>
-	<tr>
-		<th>event</th>
-		<th>description</th>
-	</tr>
-	<tr>
-		<td>auth</td>
-		<td>Triggered whenever session changes</td>
-	</tr>
-	<tr>
-		<td>auth.login</td>
-		<td>Triggered whenever a user logs in</td>
-	</tr>
-	<tr>
-		<td>auth.logout</td>
-		<td>Triggered whenever a user logs out</td>
-	</tr>
+	<thead>
+		<tr>
+			<th>event</th>
+			<th>description</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>auth</td>
+			<td>Triggered whenever session changes</td>
+		</tr>
+		<tr>
+			<td>auth.login</td>
+			<td>Triggered whenever a user logs in</td>
+		</tr>
+		<tr>
+			<td>auth.logout</td>
+			<td>Triggered whenever a user logs out</td>
+		</tr>
+		<tr>
+			<td>auth.update</td>
+			<td>Triggered whenever a users credentials change</td>
+		</tr>
+	</tbody>
 </table>
 	<h4>Example:</h4>
 <pre class="tryit">

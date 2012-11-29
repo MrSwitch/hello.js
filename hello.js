@@ -46,7 +46,7 @@ var hello = (function(){
 	var _services = {};
 
 	// Monitor for a change in state and fire
-	var old_tokens = {}, pending = {};
+	var old_session = {}, pending = {};
 
 	//
 	// Monitoring session state
@@ -62,8 +62,8 @@ var hello = (function(){
 			}
 		
 			// Get session
-			var session = hello.getAuthResponse(x);
-			var token = ( session ? session.access_token : null);
+			var session = hello.getAuthResponse(x) || {};
+			var oldsess = old_session[x] || {};
 			var evt = '';
 
 			//
@@ -87,29 +87,47 @@ var hello = (function(){
 			//
 			// Refresh login
 			//
-			if( ( session && ("expires" in session) && ( !( x in pending ) || pending[x] < ((new Date()).getTime()/1e3) ) && session.expires < ((new Date()).getTime()/1e3) ) ){
+			if( session && ("expires" in session) && session.expires < ((new Date()).getTime()/1e3) ){
 
-				// try to resignin
-				log( x + " has expired trying to resignin" );
-				hello.login(x,{display:'none'});
+				if( !( x in pending ) || pending[x] < ((new Date()).getTime()/1e3) ) {
+					// try to resignin
+					log( x + " has expired trying to resignin" );
+					hello.login(x,{display:'none'});
 
-				// update pending, every 10 minutes
-				pending[x] = ((new Date()).getTime()/1e3) + 600;
-			}
-
-
-			// Has token changed?
-			if( old_tokens[x] === token ){
+					// update pending, every 10 minutes
+					pending[x] = ((new Date()).getTime()/1e3) + 600;
+				}
+				// If session has expired then we dont want to store its value until it can be established that its been updated
 				continue;
 			}
-			else{
-				hello.trigger( x+':auth.' + (!token?'logout':'login'), {
+			// Has session changed?
+			else if( oldsess.access_token === session.access_token &&
+						oldsess.expires === session.expires ){
+				continue;
+			}
+			// Access_token has been removed
+			else if( !session.access_token && oldsess.access_token ){
+				hello.trigger( x+':auth.logout', {
+					network : x,
+					authResponse : session
+				});
+			}
+			// Access_token has been created
+			else if( session.access_token && !oldsess.access_token ){
+				hello.trigger( x+':auth.login', {
+					network:x,
+					authResponse: session
+				} );
+			}
+			// Access_token has been updated
+			else if( session.expires !== oldsess.expires ){
+				hello.trigger( x+':auth.update', {
 					network:x,
 					authResponse: session
 				} );
 			}
 			
-			old_tokens[x] = token;
+			old_session[x] = session;
 		}}
 
 		// Check error events
@@ -195,7 +213,6 @@ var hello = (function(){
 			// merge/override options with app defaults
 			p.options = _merge(_options, p.options || {} );
 
-
 			// Is our service valid?
 			if( typeof(p.network) !== 'string' ){
 				// trigger the default login.
@@ -205,7 +222,7 @@ var hello = (function(){
 
 			//
 			var provider  = _services[p.network],
-				callback_id = '';
+				callback_id = "" + Math.round(Math.random()*1e9);
 
 			//
 			// Callback
@@ -213,13 +230,9 @@ var hello = (function(){
 			//
 			var responded = false;
 			if(p.callback){
-				// choose a random callback ID string
-				callback_id = "" + Math.round(Math.random()*1e9);
-				
 				// pass in a self unsubscribing function
 				this.subscribe(callback_id, function self(){ responded = true; hello.unsubscribe(callback_id,self); p.callback.apply(this, arguments);} );
 			}
-
 
 			//
 			// QUERY STRING
@@ -337,10 +350,13 @@ var hello = (function(){
 		// @param function callback
 		//
 		logout : function(s, callback){
-			if(s && _store(s)){
-				_store(s,'');
+
+			var p = _arguments({name:'s', callback:"f" }, arguments);
+
+			if(p.name && _store(p.name)){
+				_store(p.name,'');
 			}
-			else if(!s){
+			else if(!p.name){
 				for(var x in _services){if(_services.hasOwnProperty(x)){
 					hello.logout(x);
 				}}
@@ -349,10 +365,10 @@ var hello = (function(){
 				// trigger callback
 			}
 			else{
-				log( s + ' had no session' );
+				log( p.name + ' had no session' );
 			}
-			if(callback){
-				callback(false);
+			if(p.callback){
+				p.callback(false);
 			}
 		},
 
@@ -440,177 +456,142 @@ var hello = (function(){
 						url = o.uri.base + url;
 					}
 
-					//
-					// build the call
-					var request = function(){
 
-						var qs = {};
-						
-						if(token){
-							qs['access_token'] = token;
-						}
+					var qs = {};
+					
+					if(token){
+						qs['access_token'] = token;
+					}
 
-						if(o.querystring){
-							// Make amendments to the standard query
-							o.querystring(qs);
-						}
+					if(o.querystring){
+						// Make amendments to the standard querystring
+						o.querystring(qs);
+					}
 
-						// Update the resource_uri
-						url += ( url.indexOf('?') > -1 ? "&" : "?" );
+					// Update the resource_uri
+					url += ( url.indexOf('?') > -1 ? "&" : "?" );
 
-						// Format the data
-						if( !_isEmpty(p.data) && !_dataToJSON(p) ){
-							// If we can't format the post then, we are going to run the iFrame hack
-							_post( url + _param(qs), p.data, ("post" in o ? o.post(p) : null), callback);
-							return;
-						}
+					// Format the data
+					if( !_isEmpty(p.data) && !_dataToJSON(p) ){
+						// If we can't format the post then, we are going to run the iFrame hack
+						_post( url + _param(qs), p.data, ("post" in o ? o.post(p) : null), callback);
+						return;
+					}
 
-						// Each provider and their protocol has unique features
-						// We place it in the config
-						var config ={};
+					// Each provider and their protocol has unique features
+					// We place it in the config
+					var config ={};
 
 
-						// the delete callback needs a better response
-						if(p.method === 'delete'){
-							var _callback = callback;
-							callback = function(r){
-								_callback((!r||_isEmpty(r))? {response:'deleted'} : r);
-							};
-						}
-
-
-						// Can we use XHR for Cross domain delivery?
-						if( 'withCredentials' in new XMLHttpRequest() && (!("xhr" in o) || (config = o.xhr(p))) ){
-
-							var r = new XMLHttpRequest();
-
-							// xhr.responseType = "json"; // is not supported in any of the vendors yet.
-							r.onload = function(e){
-								var json = r.responseText ? JSON.parse(r.responseText) : null;
-								callback( json || ( p.method!=='delete' ? {error:{message:"Could not get resource"}} : {} ));
-							};
-							r.onerror = function(e){
-								callback(r.responseText?JSON.parse(r.responseText):{error:{message:"There was an error accessing "+ url}});
-							};
-
-							/**
-							// Google Data API needs to overwrite this entirely... Urgh!
-							if(config&&config.handler){
-								config.handler(url, qs, p.data, r);
-								return;
-							}
-							*/
-
-							// Add the token
-							qs.suppress_response_codes = true;
-							url += _param(qs);
-
-							// Should we add the query to the URL?
-							if(p.method === 'get'||p.method === 'delete'){
-								if(!_isEmpty(p.data)){
-									url += (url.indexOf('?')===-1?'?':'&')+_param(p.data);
-								}
-								p.data = null;
-							}
-							else if( p.data && typeof(p.data) !== 'string' && !(p.data instanceof FormData)){
-								// Loop through and add formData
-								var f = new FormData();
-								for( var x in p.data )if(p.data.hasOwnProperty(x)){
-									if( p.data[x] instanceof HTMLInputElement ){
-										if( "files" in p.data[x] && p.data[x].files.length > 0){
-											f.append(x, p.data[x].files[0]);
-										}
-									}
-									else{
-										f.append(x, p.data[x]);
-									}
-								}
-								p.data = f;
-							}
-
-							// Open URL
-							r.open( p.method.toUpperCase(), url );
-
-							if(config.contentType)
-								r.setRequestHeader("Content-Type", config.contentType);
-
-							// Should we wrap the post data in the body of the request?
-							// The fake atrribute is required if this is a shim
-							if( p.data && p.data instanceof FormData && "fake" in p.data && p.data.fake ){
-								r.setRequestHeader("Content-Type", "multipart/form-data; boundary="+ p.data.boundary);
-								r.sendAsBinary(p.data.toString());
-							}
-							else{
-								r.send( p.data );
-							}
-
-							// we're done
-							return {
-								url : url,
-								method : 'XHR',
-								data : p.data
-							};
-						}
-
-						// Otherwise we're on to the old school, IFRAME hacks and JSONP
-						// Preprocess the parameters
-						// Change the p parameters
-						if("jsonp" in o){
-							p = o.jsonp(p);
-						}
-
-						// Is this still a post?
-						if( p.method === 'post' ){
-
-							//qs.channelUrl = window.location.href;
-							return {
-								url : _post( url + _param(qs), p.data, ("post" in o ? o.post(p) : null), callback ),
-								method : 'POST',
-								data : p.data
-							};
-						}
-						// Make the call
-						else{
-
-							qs.callback = '?';
-
-							return {
-								url : _jsonp( url + _param(qs), p.data, callback ),
-								method : 'JSONP'
-							};
-						}
-					};
-
-					// has the session expired?
-					// Compare the session time, if session doesn't exist but we can feign it. Then use autologin
-					// otherwise consider the session is current, or the resource doesn't need it
-					if( ( session && "expires" in session && session.expires < ((new Date()).getTime()/1e3) ) ||
-						(!session && o.autologin) ){
-
-						log("Callback");
-		
-						// trigger refresh
-						hello.login(service, {display:'none'}, function(r){
-						
-							// success?
-							if( typeof(r)==='object' && "error" in r){
-								callback(r);
-								return;
-							}
-
-							// regardless of the response, lets make the request
-							request();
-
-						});
-
-						return {
-							status : 'Signing in'
+					// the delete callback needs a better response
+					if(p.method === 'delete'){
+						var _callback = callback;
+						callback = function(r){
+							_callback((!r||_isEmpty(r))? {response:'deleted'} : r);
 						};
 					}
-					else{
-						return request();
+
+
+					// Can we use XHR for Cross domain delivery?
+					if( 'withCredentials' in new XMLHttpRequest() && (!("xhr" in o) || (config = o.xhr(p))) ){
+
+						var r = new XMLHttpRequest();
+
+						// xhr.responseType = "json"; // is not supported in any of the vendors yet.
+						r.onload = function(e){
+							var json = r.responseText ? JSON.parse(r.responseText) : null;
+							callback( json || ( p.method!=='delete' ? {error:{message:"Could not get resource"}} : {} ));
+						};
+						r.onerror = function(e){
+							callback(r.responseText?JSON.parse(r.responseText):{error:{message:"There was an error accessing "+ url}});
+						};
+
+						/**
+						// Google Data API needs to overwrite this entirely... Urgh!
+						if(config&&config.handler){
+							config.handler(url, qs, p.data, r);
+							return;
+						}
+						*/
+
+						// Add the token
+						qs.suppress_response_codes = true;
+						url += _param(qs);
+
+						// Should we add the query to the URL?
+						if(p.method === 'get'||p.method === 'delete'){
+							if(!_isEmpty(p.data)){
+								url += (url.indexOf('?')===-1?'?':'&')+_param(p.data);
+							}
+							p.data = null;
+						}
+						else if( p.data && typeof(p.data) !== 'string' && !(p.data instanceof FormData)){
+							// Loop through and add formData
+							var f = new FormData();
+							for( var x in p.data )if(p.data.hasOwnProperty(x)){
+								if( p.data[x] instanceof HTMLInputElement ){
+									if( "files" in p.data[x] && p.data[x].files.length > 0){
+										f.append(x, p.data[x].files[0]);
+									}
+								}
+								else{
+									f.append(x, p.data[x]);
+								}
+							}
+							p.data = f;
+						}
+
+						// Open URL
+						r.open( p.method.toUpperCase(), url );
+
+						if(config.contentType)
+							r.setRequestHeader("Content-Type", config.contentType);
+
+						// Should we wrap the post data in the body of the request?
+						// The fake atrribute is required if this is a shim
+						if( p.data && p.data instanceof FormData && "fake" in p.data && p.data.fake ){
+							r.setRequestHeader("Content-Type", "multipart/form-data; boundary="+ p.data.boundary);
+							r.sendAsBinary(p.data.toString());
+						}
+						else{
+							r.send( p.data );
+						}
+
+						// we're done
+						return {
+							url : url,
+							method : 'XHR',
+							data : p.data
+						};
 					}
 
+					// Otherwise we're on to the old school, IFRAME hacks and JSONP
+					// Preprocess the parameters
+					// Change the p parameters
+					if("jsonp" in o){
+						p = o.jsonp(p);
+					}
+
+					// Is this still a post?
+					if( p.method === 'post' ){
+
+						//qs.channelUrl = window.location.href;
+						return {
+							url : _post( url + _param(qs), p.data, ("post" in o ? o.post(p) : null), callback ),
+							method : 'POST',
+							data : p.data
+						};
+					}
+					// Make the call
+					else{
+
+						qs.callback = '?';
+
+						return {
+							url : _jsonp( url + _param(qs), p.data, callback ),
+							method : 'JSONP'
+						};
+					}
 				};
 
 				// Make request
