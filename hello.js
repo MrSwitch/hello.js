@@ -229,10 +229,14 @@ var hello = (function(){
 			// Save the callback until state comes back.
 			//
 			var responded = false;
-			if(p.callback){
-				// pass in a self unsubscribing function
-				this.subscribe(callback_id, function self(){ responded = true; hello.unsubscribe(callback_id,self); p.callback.apply(this, arguments);} );
-			}
+			this.subscribe(callback_id, function self(){
+				responded = true;
+				hello.unsubscribe(callback_id,self);
+				if(p.callback){
+					p.callback.apply(this, arguments);
+				}
+			});
+
 
 			//
 			// QUERY STRING
@@ -415,7 +419,7 @@ var hello = (function(){
 			_timeout = p.timeout || _timeout;
 			
 			
-			log("API:",p);
+			log("API: "+p.method.toUpperCase()+" '"+p.path+"' (request)",p);
 			
 			var o = _services[service];
 			
@@ -429,14 +433,14 @@ var hello = (function(){
 			//
 			// Callback wrapper?
 			// Change the incoming values so that they are have generic values according to the path that is defined
-			var callback = p.callback;
-			if( o.wrap && ( (p.path in o.wrap) || ("default" in o.wrap) )){
-				callback = function(r){
+			var callback = function(r){
+				if( o.wrap && ( (p.path in o.wrap) || ("default" in o.wrap) )){
 					var wrap = (p.path in o.wrap ? p.path : "default");
-					log(p.path,r);
-					p.callback(o.wrap[wrap](r));
-				};
-			}
+					r = o.wrap[wrap](r);
+				}
+				log("API: "+p.method.toUpperCase()+" '"+p.path+"' (response)", r);
+				p.callback(r);
+			};
 
 			// push out to all networks
 			// as long as the path isn't flagged as unavaiable, e.g. path == false
@@ -668,7 +672,7 @@ var hello = (function(){
 		//
 		trigger : function(evt, data){
 			// loop through the events
-			log("Trigger", evt, JSON.stringify(listeners));
+			log("Trigger: '"+ evt+"'", data);
 
 			for(var x in listeners){if(listeners.hasOwnProperty(x)){
 				if( evt.indexOf(x) > -1 ){
@@ -825,6 +829,9 @@ var hello = (function(){
 	// [@param,..]
 	//
 	function log() {
+		if(typeof arguments[0] === 'string'){
+			arguments[0] = "HelloJS-" + arguments[0];
+		}
 		if (typeof(console) === 'undefined'||typeof(console.log) === 'undefined'){ return; }
 		if (typeof console.log === 'function') {
 			console.log.apply(console, arguments); // FF, CHROME, Webkit
