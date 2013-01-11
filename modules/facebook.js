@@ -80,7 +80,7 @@ hello.init({
 		// special requirements for handling XHR
 		xhr : function(p){
 			if(p.method==='get'||p.method==='post'){
-				return {};
+				return true;
 			}
 			else{
 				return false;
@@ -93,7 +93,6 @@ hello.init({
 				p.data.method = p.method.toLowerCase();
 				p.method = 'get';
 			}
-			return p;
 		},
 
 		// Special requirements for iframe form hack

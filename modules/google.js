@@ -209,13 +209,9 @@
 			},
 			xhr : function(p){
 				if(p.method==='post'){
-	/*					if(p.data.file){
-						return {handler: gMultiPart};
-					}
-	*/
 					return false;
 				}
-				return {};
+				return true;
 			}
 		}
 	});

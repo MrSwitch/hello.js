@@ -77,11 +77,11 @@ hello.init({
 		xhr : function(p){
 			if(p.method==='post'&& !hello.utils.hasBinary(p.data) ){
 				p.data = JSON.stringify(p.data);
-				return {
-					contentType : 'application/json'
+				p.headers = {
+					'Content-Type' : 'application/json'
 				};
 			}
-			return {};
+			return true;
 		},
 		jsonp : function(p){
 			if( p.method.toLowerCase() !== 'get'){
@@ -89,7 +89,6 @@ hello.init({
 				p.data.method = p.method.toLowerCase();
 				p.method = 'get';
 			}
-			return p;
 		}
 	}
 });

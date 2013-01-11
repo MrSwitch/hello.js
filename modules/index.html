@@ -9,10 +9,10 @@
 <p>HelloJS is extensible, i.e. you can add new services to it as long as you can get your head around the important parts.
 
 <blockquote>
-	<p>Modules are JSON objects that define the URL's for things like the login page and the REST'ful webserver. They're also a place which standardise a services naming conventions, path locations, scopes, data response augmentation and delivery mechanisms.
+	<p>Modules are just small javascript scripts that define the URL's for things like the login page and the REST'ful webserver. They're also a place which standardise a naming convention e.g. path locations, scopes, data response and delivery mechanisms.
 </blockquote>
 
-<h2>HelloJS already has you covered</h2>
+<h2>HelloJS already has you connected</h2>
 <p>The table shows the services which are already documented on HelloJS. Simply include these scripts in your page after your HelloJS script tag</p>
 <table>
 	<thead>
@@ -24,8 +24,8 @@
 	</thead>
 	<tbody>
 		<tr>
-			<td><a href="google.js">google.js</a></td>
-			<td></td>
+			<td><a href="dropbox.js">dropbox.js</a></td>
+			<td><a href="../demos/dropbox.html">dropbox demo</a></td>
 			<td></td>
 		</tr>
 		<tr>
@@ -34,8 +34,8 @@
 			<td></td>
 		</tr>
 		<tr>
-			<td><a href="windows.js">windows.js</a></td>
-			<td></td>
+			<td><a href="foursquare.js">foursquare.js</a></td>
+			<td><a href="../demos/foursquare.html">foursquare demo</a></td>
 			<td></td>
 		</tr>
 		<tr>
@@ -44,13 +44,33 @@
 			<td></td>
 		</tr>
 		<tr>
+			<td><a href="google.js">google.js</a></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td><a href="linkedin.js">linkedin.js</a></td>
+			<td><a href="../demos/linkedin.html">linkedin demo</a></td>
+			<td></td>
+		</tr>
+		<tr>
 			<td><a href="soundcloud.js">soundcloud.js</a></td>
 			<td><a href="../demos/soundcloud.html">soundcloud demo</a></td>
 			<td></td>
 		</tr>
 		<tr>
-			<td><a href="foursquare.js">foursquare.js</a></td>
-			<td><a href="../demos/foursquare.html">foursquare demo</a></td>
+			<td><a href="twitter.js">twitter.js</a></td>
+			<td><a href="../demos/twitter.html">twitter demo</a></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td><a href="windows.js">windows.js</a></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td><a href="yahoo.js">yahoo.js</a></td>
+			<td><a href="../demos/yahoo.html">yahoo demo</a></td>
 			<td></td>
 		</tr>
 	</tbody>
@@ -77,6 +97,39 @@
 			<td></td>
 			<td>An array=&gt;key map of the paths to translate. The keys "auth" and "base" are required</td>
 			<td>required</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>oauth</td>
+			<td colspan="3">
+				<i>Object</i>
+				<table>
+					<thead><tr><th>name</th><th>type</th><th>description</th></tr></thead>
+					<tbody>
+						<tr>
+							<td>version</td>
+							<td>string</td>
+							<td>Version of OAuth, "1.0", "1.0a", "2"</td>
+						</tr>
+						<tr>
+							<td>request</td>
+							<td>url</td>
+							<td>Path of the first leg of OAuth 1</td>
+						</tr>
+						<tr>
+							<td>auth</td>
+							<td>url</td>
+							<td>Path of the authorization URL, second leg of OAuth 1</td>
+						</tr>
+						<tr>
+							<td>token</td>
+							<td>url</td>
+							<td>Path to get the Access token, the third leg of OAuth 1</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+			<td>optional*</td>
 			<td></td>
 		</tr>
 		<tr>
@@ -137,7 +190,7 @@
 		</tr>
 	</tbody>
 </table>
-
+<p>*optional: If the service is an OAuth 1.0/1.0a version then 'oauth' object is required.</p>
 <h2>Contributing modules</h2>
 <p>That would be fantastic if you could. Please make the following updates so its easiy for people to discover and test.</p>
 <ul>
