@@ -3,29 +3,26 @@
 <link rel="stylesheet" href="/_packages/document.css"></script>
 <script src="/_packages/document.js"></script>
 
-<script src="client_ids.js"></script>
 <script src="../hello.js"></script>
-<script src="../modules/soundcloud.js"></script>
 
-<title>HelloJS and SoundCloud</title>
-<h1>HelloJS and SoundCloud</h1>
+<title>HelloJS and PayPal</title>
+<h1>HelloJS and PayPal</h1>
 
-<button id='soundcloud' onclick="hello.login('soundcloud');">SoundCloud</button>
+<button id='paypal' onclick="hello.login('paypal');">PayPal</button>
 <div id="result"></div>
 <script class="pre">
 hello.subscribe('auth.login', function(r){
 	// Get Profile
-	console.log("auth.login");
 	hello.api(r.network+':/me', function(p){
 		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
 	});
-	hello.api(r.network+':/tracks', function(r){
+	hello.api(r.network+':/user/repos', function(r){
 		console.log(r);
 		for(var i=0;i<r.length;i++){
 			var li = document.createElement('li');
 			var a = document.createElement('a');
-			a.innerHTML = r[i].title;
-			a.href=r[i].permalink_url;
+			a.innerHTML = r[i].full_name;
+			a.href=r[i].html_url;
 			li.appendChild(a);
 			document.getElementById('result').appendChild(li);
 		}
@@ -33,6 +30,11 @@ hello.subscribe('auth.login', function(r){
 });
 
 hello.init({
-	soundcloud : SOUNDCLOUD_CLIENT_ID
+	paypal : {
+		id : '07cf80b1a9ad571263c80a5ab81b745f',
+		uri : {
+			auth : 'https://identity.x.com/xidentity/resources/authorize'
+		}
+	}
 },	{redirect_uri:'../redirect.html'});
 </script>

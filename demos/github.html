@@ -5,12 +5,12 @@
 
 <script src="client_ids.js"></script>
 <script src="../hello.js"></script>
-<script src="../modules/soundcloud.js"></script>
+<script src="../modules/github.js"></script>
 
-<title>HelloJS and SoundCloud</title>
-<h1>HelloJS and SoundCloud</h1>
+<title>HelloJS and Github</title>
+<h1>HelloJS and Github</h1>
 
-<button id='soundcloud' onclick="hello.login('soundcloud');">SoundCloud</button>
+<button id='github' onclick="hello.login('github');">github</button>
 <div id="result"></div>
 <script class="pre">
 hello.subscribe('auth.login', function(r){
@@ -19,13 +19,13 @@ hello.subscribe('auth.login', function(r){
 	hello.api(r.network+':/me', function(p){
 		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
 	});
-	hello.api(r.network+':/tracks', function(r){
+	hello.api(r.network+':/user/repos', function(r){
 		console.log(r);
 		for(var i=0;i<r.length;i++){
 			var li = document.createElement('li');
 			var a = document.createElement('a');
-			a.innerHTML = r[i].title;
-			a.href=r[i].permalink_url;
+			a.innerHTML = r[i].full_name;
+			a.href=r[i].html_url;
 			li.appendChild(a);
 			document.getElementById('result').appendChild(li);
 		}
@@ -33,6 +33,6 @@ hello.subscribe('auth.login', function(r){
 });
 
 hello.init({
-	soundcloud : SOUNDCLOUD_CLIENT_ID
-},	{redirect_uri:'../redirect.html'});
+	github : GITHUB_CLIENT_ID
+},	{redirect_uri:'../redirect.html', oauth_proxy:OAUTH_PROXY_URL});
 </script>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/_packages/document.css"></script>
+<script src="/_packages/document.js"></script>
+
+<script src="../hello.js"></script>
+<script src="./client_ids.js"></script>
+<script src="../modules/dropbox.js"></script>
+<style>
+	li img{
+		width:24px;
+		height:24px;
+	}
+</style>
+<title>HelloJS and Dropbox</title>
+<h1>HelloJS and Dropbox</h1>
+
+<button id='dropbox' onclick="hello.login('dropbox');">Dropbox</button>
+<div id="result"></div>
+<script class="pre">
+
+hello.subscribe('auth.login', function(r){
+	// Get Profile
+	hello.api(r.network+':/me', function(p){
+		document.getElementById(r.network).innerHTML = "Connected to "+ r.network+" as " + p.name;
+	});
+	// Get Files
+	hello.api(r.network+':/me/files', function getfile(p, target){
+		if(p.error){
+			alert(p.error.message?p.error.message:p.error);
+			return;
+		}
+
+		var ul = document.createElement('ul');
+		for(var i=0;i<p.data.length;i++){
+			(function(item){
+				var li = document.createElement('li');
+				li.innerHTML = (item.thumbnail?"<img src='"+ item.thumbnail +"'/>":'') + "<span>"+item.name+"</span> " + (item.downloadLink ?"<a target='_blank' download='"+item.name+"' href='"+ item.downloadLink +"'>download</a>" : '') + (item.file ?" | <a href='javascript:void(0);'>read</a>" : '');
+				li.getElementsByTagName('span')[0].onclick = function(){
+					var target = this.parentNode;
+					var ul = target.getElementsByTagName('ul'),
+						ul = ul.length>0?ul[0]:false;
+
+					if( ul && ul.style.display === 'none' ){
+						ul.style.display = 'block';
+					}
+					else if( ul ){
+						ul.style.display = 'none';
+					}
+					else if(item.files){
+						hello.api(r.network +":"+item.files, function(r){
+							getfile(r, target);
+						});
+					}
+				};
+				if(li.getElementsByTagName('a')[1]){
+					li.getElementsByTagName('a')[1].onclick = function(){
+						// Get a raw file
+						hello.api(r.network+":"+item.file, function(a){
+							var a = window.URL.createObjectURL(a);
+							window.open(a);
+						});
+					};
+				}
+				ul.appendChild(li);
+			})(p.data[i]);
+		}
+
+		(target||document.getElementById('result')).appendChild(ul);
+	});
+});
+
+hello.init({
+	'dropbox' : DROPBOX_CLIENT_ID, 
+},
+{
+	redirect_uri:'../redirect.html',
+
+	// OAuth Proxy Is required to sercurely handle communications the service
+	// The service https://auth-server.herokuapp.com can be used to authenticate the User+App
+	// And then sign subsequent requests
+	oauth_proxy : OAUTH_PROXY_URL
+});
+</script>

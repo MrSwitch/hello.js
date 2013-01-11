@@ -3,7 +3,6 @@
 <link rel="stylesheet" href="/_packages/document.css"></script>
 <script src="/_packages/document.js"></script>
 
-<script src="client_ids.js"></script>
 <script src="../hello.js"></script>
 <script src="../modules/foursquare.js"></script>
 
@@ -22,6 +21,6 @@ hello.subscribe('auth.login', function(r){
 });
 
 hello.init({
-	foursquare : '3HEXMBQVH2SV0VXUKXOGQRPWH1PUTEIZN4KBDY5L54ZDXCDP'
+	foursquare : FOURSQUARE_CLIENT_ID
 },	{redirect_uri:'../redirect.html'});
 </script>

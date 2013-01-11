@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/_packages/document.css"></script>
+<script src="/_packages/document.js"></script>
+
+<script src="client_ids.js"></script>
+<script src="../hello.js"></script>
+<script src="../modules/linkedin.js"></script>
+
+<title>HelloJS and LinkedIn</title>
+<h1>HelloJS and LinkedIn</h1>
+
+<button id='login' onclick="hello.login('linkedin');">LinkedIn</button>
+<div id="result"></div>
+<script class="pre">
+hello.subscribe('auth.login', function(r){
+	// Get Profile
+	hello.api(r.network+':/me', function(p){
+		document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
+	});
+});
+
+
+hello.init({
+	'linkedin' : LINKEDIN_CLIENT_ID,
+},{
+	scope : ['friends','email'],
+	redirect_uri:'../redirect.html',
+	oauth_proxy: OAUTH_PROXY_URL
+});
+</script>

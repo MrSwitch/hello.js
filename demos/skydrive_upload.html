@@ -53,6 +53,7 @@ img:nth-child(3n){
 	<select id="select"></select>
 </br>
 	<button onclick="postPhoto( select.value, document.getElementById('file').form )">Upload</button>
+	<button onclick="xhrUpload( select.value, document.getElementById('file').files[0] )">Upload XHR</button>
 	<div id="result"></div>
 </blockquote>
 
@@ -60,7 +61,7 @@ img:nth-child(3n){
 function login(){
 	window.location = 'https://oauth.live.com/authorize'+ 
 		'?client_id='+WINDOWS_CLIENT_ID+
-		'&scope=wl.skydrive'+
+		'&scope=wl.skydrive_update'+
 		'&response_type=token'+
 		'&redirect_uri='+encodeURIComponent(window.location.href);
 }
@@ -70,11 +71,6 @@ var access_token = (window.location.hash||window.location.search).match(/access_
 if(access_token){ 
 	// Save the first match
 	localStorage.setItem("access_token", decodeURIComponent(access_token[1]));
-}
-
-
-function httpRequest(url,callback){
-	httpPost(url, null, callback);
 }
 
 var json_counter=0;
@@ -92,25 +88,6 @@ function jsonp(path,callback){
 	sibling.parentNode.insertBefore(script,sibling);
 }
 
-function getAllAlbums(path,callback){
-	// Token
-	var token = localStorage.getItem("access_token");
-
-	// Make JSONP request
-	httpRequest('https://apis.live.net/v5.0/'+path+'?access_token='+token, function(r){
-		// Valid
-		if(!r||r.error){
-			alert("You have an error: "+r.error.message);
-			localStorage.removeItem("access_token");
-			return;
-		}
-		// Loop through the results
-		for(var i=0;i<r.data.length;i++){
-			var item = r.data[i];
-			callback(item);
-		}
-	});
-};
 
 
 //
@@ -160,7 +137,7 @@ function createAlbum(form){
 	var token = localStorage.getItem("access_token");
 
 	if(token){
-		httpPost( 'https://apis.live.net/v5.0/me/albums?access_token='+token, 
+		httpRequest( "POST", 'https://apis.live.net/v5.0/me/albums?access_token='+token, 
 			{
 				name: form.elements['name'].value,
 				description: form.elements['description'].value
@@ -188,14 +165,19 @@ function postPhoto(path, fileInputElement){
 	var token = localStorage.getItem("access_token");
 
 	if(token){
-		// Recursively start searching Skydrive directories for photos, triggers callback on each image
-		httpPost( path + '?access_token=' + token, fileInputElement, function(r){
+		// Post a photo up
+		httpRequest( "POST", path + '?access_token=' + token, {
+			file : fileInputElement 
+		}, function(r){
 			console.log(r);
 			var a = document.createElement('a');
 			a.href = r.source;
 			a.innerHTML = r.name;
 			a.target = "_blank";
 			document.getElementById('result').appendChild(a);
+		}, function(e){
+			console.log("PROGRESS");
+			console.log(e);
 		});
 	}
 	else{
@@ -204,8 +186,77 @@ function postPhoto(path, fileInputElement){
 }
 </script>
 
+
+<script>
+function xhrUpload(path, file){
+
+	var token = localStorage.getItem("access_token");
+
+	// Initiate XML Instance
+	var xhr = new XMLHttpRequest();
+
+	xhr.onload = xhr.onerror = function(e){
+		var text = xhr.responseText;
+		console.log(text?JSON.parse(text):{error:{message:"Post Failed"}});
+	};
+
+	xhr.open("POST", path + '?access_token=' + token, true);
+
+	var fd = new FormData();
+	fd.append('file', file);
+
+	xhr.send( fd );
+}
+</script>
+
+
+
+
 <script class="pre">
-function httpPost(url, data, callback){
+function xhrRequest(method, url, data, complete, progress){
+
+	var xhr = new XMLHttpRequest();
+
+	// xhr.responseType = "json"; // is not widely supported as yet
+
+	xhr.onload = function(e){
+		var text = xhr.responseText;
+		complete(text?JSON.parse(text):{error:{message:"Could not get resource"}});
+	};
+
+	xhr.onerror = function(e){
+		var text = xhr.responseText;
+		complete(text?JSON.parse(text):{error:{message:"Post failed"}})
+	};
+
+	xhr.onprogress = progress;
+
+	xhr.open(method, url, true);
+
+	if(data){
+		// Windows unique, convert to a JSON string if this contains binary data
+		if(!has_binary(data)){
+			data = JSON.stringify(data);
+			xhr.setRequestHeader("Content-Type", 'application/json');
+		}
+		// Create FormData
+		else if(!(data instanceof FormData)){
+
+			// Loop through and add formData
+			var f = new FormData();
+			for( var x in data )if(data.hasOwnProperty(x)){
+				f.append(x, data[x]);
+			}
+			data = f;
+		}
+	}
+
+	xhr.send( data || null );
+}
+</script>
+
+<script class="pre">
+function httpRequest(method, url, data, complete, progress){
 
 	var p = {
 		data : data
@@ -218,37 +269,8 @@ function httpPost(url, data, callback){
 
 	// IE10, FF, Chrome
 	if('withCredentials' in new XMLHttpRequest()){
-		var r = new XMLHttpRequest();
-		// xhr.responseType = "json"; // is not supported in any of the vendors yet.
-		r.onload = function(e){
-			callback(r.responseText?JSON.parse(r.responseText):{error:{message:"Could not get resource"}});
-		};
-		r.onerror = function(e){
-			callback(r.responseText?JSON.parse(r.responseText):{error:{message:"Post failed"}})
-		}
 
-		if(data){
-			r.open('POST', url, true);
-
-			// Windows unique, convert to a JSON string if this contains binary data
-			if(!has_binary(data)){
-				data = JSON.stringify(data);
-				r.setRequestHeader("Content-Type", 'application/json');
-			}
-			// Create FormData
-			else if(!(data instanceof FormData)){
-				// Loop through and add formData
-				var f = new FormData();
-				for( var x in data )if(data.hasOwnProperty(x)){
-					f.append(x, data[x]);
-				}
-				data = f;
-			}
-		}
-		else{
-			r.open('GET', url);
-		}
-		r.send( data || null );
+		xhrRequest( method, url, data, complete, progress );
 	}
 	else{
 
@@ -264,10 +286,10 @@ function httpPost(url, data, callback){
 
 		// Else add the callback on to the URL
 		if(!data){
-			jsonp(url+(qs?'&'+_param(qs):'')+"&callback=?", callback);
+			jsonp(url+(qs?'&'+_param(qs):'')+"&callback=?", complete);
 		}
 		else{
-			iframeHack(url, data, callback);
+			iframeHack(url, data, complete);
 		}
 	}
 }
@@ -276,7 +298,10 @@ function httpPost(url, data, callback){
 // Some of the providers require that only MultiPart is used with non-binary forms.
 // This function checks whether the form contains binary data
 function has_binary(data){
-	if("FormData" in window && data instanceof FormData){
+	if(("FormData" in window && data instanceof FormData)||
+		("File" in window && data instanceof File)||
+		("Blob" in window && data instanceof Blob)
+		){
 		return true;
 	}
 	for(var x in data ) if(data.hasOwnProperty(x)){
@@ -580,13 +605,26 @@ function _dataToJSON(p){
 
 <script>
 if(localStorage.getItem("access_token")){
-	// Recursively start searching Skydrive directories for photos, triggers callback on each image
-	getAllAlbums('me/albums',function(obj){
-		// Create a new image in the DOM, give it some randomness and insert it into the dom.
-		var opt = document.createElement('option');
-		opt.value = obj.upload_location;
-		opt.innerHTML = obj.name;
-		document.getElementById('select').appendChild(opt);
+	// Token
+	var token = localStorage.getItem("access_token");
+
+	// Make httpRequest
+	// Retrieve all albums in SkyDrive
+	httpRequest("GET", 'https://apis.live.net/v5.0/me/albums?access_token='+token, null, function(r){
+		// Valid
+		if(!r||r.error){
+			alert("You have an error: "+r.error.message);
+			localStorage.removeItem("access_token");
+			return;
+		}
+		// Loop through the results
+		for(var i=0;i<r.data.length;i++){
+			var obj = r.data[i];
+			var opt = document.createElement('option');
+			opt.value = obj.upload_location;
+			opt.innerHTML = obj.name;
+			document.getElementById('select').appendChild(opt);
+		}
 	});
 }
 </script>
