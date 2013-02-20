@@ -24,7 +24,12 @@ hello.init({
 			base	: "https://api.twitter.com/1.1/",
 			me		: 'account/verify_credentials.json',
 			"me/friends"	: 'friends/list.json',
-			'me/share' : 'statuses/user_timeline.json'
+			'me/share' : function(p,callback){
+				p.data = {
+					status : p.data.message
+				};
+				callback( p.method==='post' ? 'statuses/update.json?include_entities=1' : 'statuses/user_timeline.json' );
+			}
 		},
 		wrap : {
 			me : function(o){

@@ -481,7 +481,7 @@ var hello = (function(){
 					var qs = {};
 
 					// Format URL
-					var format_url = function( qs_handler ){
+					var format_url = function( qs_handler, callback ){
 
 						// Execute the qs_handler for any additional parameters
 						if(qs_handler){
@@ -494,7 +494,7 @@ var hello = (function(){
 						}
 
 						var path = _qs(url, qs||{} );
-						return _sign(service, path, o.querystring);
+						_sign(service, path, p.method, p.data, o.querystring, callback);
 					};
 
 
@@ -898,7 +898,7 @@ var hello = (function(){
 				}
 			}
 		}
-		return url + ( url.indexOf('?') > -1 ? "&" : "?" ) + _param(params);
+		return url + (!_isEmpty(params) ? ( url.indexOf('?') > -1 ? "&" : "?" ) + _param(params) : '');
 	}
 	
 	//
@@ -1181,7 +1181,7 @@ var hello = (function(){
 
 	//
 	// Add authentication to the URL
-	function _sign(network, path, modify){
+	function _sign(network, path, method, data, modifyQueryString, callback){
 
 		// OAUTH SIGNING PROXY
 		var session = hello.getAuthResponse(network),
@@ -1191,26 +1191,50 @@ var hello = (function(){
 		var proxy = ( service.oauth && parseInt(service.oauth.version,10) === 1 ? hello.settings.oauth_proxy : null);
 
 		if(proxy){
-			return _qs(proxy, {
-				path : path,
-				access_token : token||''
-			});
+
+			if(method.toUpperCase()!=='GET'){
+				// Make an call to get a OAuth1 signed URL before calling the response
+				var url = _qs(proxy, {
+					path : path,
+					access_token : token||'',
+					method : method,
+					data : (data ? JSON.stringify(data) : null)
+				});
+
+				if("withCredentials" in new XMLHttpRequest()){
+					_xhr("GET", url, null, null, callback);
+				}
+				else{
+					_jsonp(url + "&callback=?", callback);
+				}
+			}
+			else{
+				callback( _qs(proxy, {
+					path : path,
+					access_token : token||''
+				}));
+			}
+			return;
 		}
 		var qs = { 'access_token' : token||'' };
 
-		if(modify){
-			modify(qs);
+		if(modifyQueryString){
+			modifyQueryString(qs);
 		}
 
-		return _qs( path, qs);
+		callback(  _qs( path, qs) );
 	}
 
 	//
 	// Authentication
-	function _xhr(method, path, headers, data, callback){
+	function _xhr(method, pathFunc, headers, data, callback){
 
-		var r = new XMLHttpRequest(),
-			url;
+		if(typeof(pathFunc)!=='function'){
+			var path = pathFunc;
+			pathFunc = function(qs, callback){callback(_qs( path, qs ));};
+		}
+
+		var r = new XMLHttpRequest();
 
 		// Binary?
 		var binary = false;
@@ -1236,7 +1260,7 @@ var hello = (function(){
 				json = JSON.parse(r.responseText);
 			}catch(_e){}
 
-			callback(json||{error:{message:"There was an error accessing "+ url}});
+			callback(json||{error:{message:"There was an error accessing network"}});
 		};
 
 		var qs = {}, x;
@@ -1265,28 +1289,31 @@ var hello = (function(){
 		}
 
 		// Create url
-		url = ( typeof(path)==='function' ? path(qs) : _qs( path, qs ) );
 
-		// Open the path, async
-		r.open( method, url, true );
+		pathFunc(qs, function(url){
 
-		if(binary){
-			if("responseType" in r){
-				r.responseType = binary;
+			// Open the path, async
+			r.open( method, url, true );
+
+			if(binary){
+				if("responseType" in r){
+					r.responseType = binary;
+				}
+				else{
+					r.overrideMimeType("text/plain; charset=x-user-defined");
+				}
 			}
-			else{
-				r.overrideMimeType("text/plain; charset=x-user-defined");
-			}
-		}
 
-		// Set any bespoke headers
-		if(headers){
-			for(x in headers){
-				r.setRequestHeader(x, headers[x]);
+			// Set any bespoke headers
+			if(headers){
+				for(var x in headers){
+					r.setRequestHeader(x, headers[x]);
+				}
 			}
-		}
 
-		r.send( data );
+			r.send( data );
+		});
+
 
 		return r;
 	}
@@ -1295,10 +1322,11 @@ var hello = (function(){
 	//
 	// JSONP
 	// Injects a script tag into the dom to be executed and appends a callback function to the window object
-	// TODO: IE triggering a click event to initiate the code, can't repo this apparent bug.
+	// @param string/function pathFunc either a string of the URL or a callback function pathFunc(querystringhash, continueFunc);
+	// @param function callback a function to call on completion;
 	//
+	function _jsonp(pathFunc,callback){
 
-	function _jsonp(path,callback){
 
 		// Add data
 		
@@ -1318,13 +1346,12 @@ var hello = (function(){
 				}
 			};
 
-		if(typeof(path)==='function'){
-			path = path(function(qs){
-				qs.callback = cb_name;
-			});
-		}
-		else{
+		// The URL is a function for some cases and as such
+		// Determine its value with a callback containing the new parameters of this function.
+		if(typeof(pathFunc)!=='function'){
+			var path = pathFunc;
 			path = path.replace(new RegExp("=\\?(&|$)"),'='+cb_name+'$1');
+			pathFunc = function(qs, callback){ callback(_qs(path, qs));};
 		}
 
 		// Add callback to the window object
@@ -1335,52 +1362,55 @@ var hello = (function(){
 			}catch(e){}
 		};
 
-		// Build script tag
-		script = _append('script',{
-			id:cb_name,
-			name:cb_name,
-			src: path,
-			async:true,
-			onload:cb,
-			onerror:cb,
-			onreadystatechange : function(){
-				if(/loaded|complete/i.test(this.readyState)){
-					cb();
+		pathFunc(function(qs){
+				qs.callback = cb_name;
+			}, function(url){
+
+			// Build script tag
+			script = _append('script',{
+				id:cb_name,
+				name:cb_name,
+				src: url,
+				async:true,
+				onload:cb,
+				onerror:cb,
+				onreadystatechange : function(){
+					if(/loaded|complete/i.test(this.readyState)){
+						cb();
+					}
 				}
-			}
-		});
-
-		// Opera fix error
-		// Problem: If an error occurs with script loading Opera fails to trigger the script.onerror handler we specified
-		// Fix:
-		// By setting the request to synchronous we can trigger the error handler when all else fails.
-		// This action will be ignored if we've already called the callback handler "cb" with a successful onload event
-		if( window.navigator.userAgent.toLowerCase().indexOf('opera') > -1 ){
-			operafix = _append('script',{
-				text:"document.getElementById('"+cb_name+"').onerror();"
 			});
-			script.async = false;
-		}
 
-		// Add timeout
-		window.setTimeout(function(){
-			result = {error:{message:'timeout',code:'timeout'}};
-			cb();
-		}, _timeout);
+			// Opera fix error
+			// Problem: If an error occurs with script loading Opera fails to trigger the script.onerror handler we specified
+			// Fix:
+			// By setting the request to synchronous we can trigger the error handler when all else fails.
+			// This action will be ignored if we've already called the callback handler "cb" with a successful onload event
+			if( window.navigator.userAgent.toLowerCase().indexOf('opera') > -1 ){
+				operafix = _append('script',{
+					text:"document.getElementById('"+cb_name+"').onerror();"
+				});
+				script.async = false;
+			}
 
-		// Todo:
-		// Add fix for msie,
-		// However: unable recreate the bug of firing off the onreadystatechange before the script content has been executed and the value of "result" has been defined.
-		// Inject script tag into the head element
-		head.appendChild(script);
-		
-		// Append Opera Fix to run after our script
-		if(operafix){
-			head.appendChild(operafix);
-		}
+			// Add timeout
+			window.setTimeout(function(){
+				result = {error:{message:'timeout',code:'timeout'}};
+				cb();
+			}, _timeout);
 
-		// return the request url
-		return script.src;
+			// Todo:
+			// Add fix for msie,
+			// However: unable recreate the bug of firing off the onreadystatechange before the script content has been executed and the value of "result" has been defined.
+			// Inject script tag into the head element
+			head.appendChild(script);
+			
+			// Append Opera Fix to run after our script
+			if(operafix){
+				head.appendChild(operafix);
+			}
+
+		});
 	}
 
 
@@ -1391,7 +1421,14 @@ var hello = (function(){
 	// @param object data, key value data to send
 	// @param function callback, function to execute in response
 	//
-	function _post(path, data, options, callback){
+	function _post(pathFunc, data, options, callback){
+
+		// The URL is a function for some cases and as such
+		// Determine its value with a callback containing the new parameters of this function.
+		if(typeof(pathFunc)!=='function'){
+			var path = pathFunc;
+			pathFunc = function(qs, callback){ callback(_qs(path, qs));};
+		}
 
 		// This hack needs a form
 		var form = null,
@@ -1468,7 +1505,6 @@ var hello = (function(){
 		document.body.appendChild(win);
 
 		// Add some additional query parameters to the URL
-		var url;
 		var qs = {
 			"suppress_response_codes":true,
 			'redirect_uri':hello.settings.redirect_uri,
@@ -1476,14 +1512,7 @@ var hello = (function(){
 			'callbackUrl':hello.settings.redirect_uri,
 			'redirect-uri':hello.settings.redirect_uri
 		};
-		// The URL is a function for some cases and as such
-		// Determine its value with a callback containing the new parameters of this function.
-		if(typeof(path)==='function'){
-			url = path(qs);
-		}
-		else{
-			url = _qs(path, qs);
-		}
+		qs = {};
 
 		// if we are just posting a single item
 		if( _domInstance('form', data) ){
@@ -1585,14 +1614,19 @@ var hello = (function(){
 
 		// Set the target of the form
 		form.setAttribute('method', 'POST');
-		form.setAttribute('action', url);
 		form.setAttribute('target', callbackID);
 		form.target = callbackID;
 
-		// Submit the form
-		setTimeout(function(){
-			form.submit();
-		},100);
+
+		// Call the path
+		pathFunc( qs, function(url){
+			form.setAttribute('action', url);
+
+			// Submit the form
+			setTimeout(function(){
+				form.submit();
+			},100);
+		});
 
 		// Build an iFrame and inject it into the DOM
 		//var ifm = _append('iframe',{id:'_'+Math.round(Math.random()*1e9), style:shy});

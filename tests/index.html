@@ -4,11 +4,15 @@
 	<title>hello.js testing</title>
 	<link rel="stylesheet" href="/_packages/document.css" />
 
+<link rel="stylesheet" href="../css/zocial.css"/>
+
 <!--- Oh IE7 -->
 <script src="http://ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js"></script>
 
 <script src="/_packages/knockout.js"></script>
 <script src="/_packages/document.js"></script>
+
+
 
 <style>
 
@@ -39,15 +43,30 @@
 	tr.debug{
 		background-color:#E7F6EC;
 	}
+	button{
+		color:black;
+		border: 1px solid #D2D2D2;
+		border-radius:10px;
+		background-color:#fff;
+	}
+	.zocial.icon{
+		vertical-align: top;
+		color:black;
+		border-color: transparent;
+		border-radius:2px;
+		background-color:transparent;
+	}
 
 	button.run:before{
 		content:"\025BA";		
 	}
+	button.working:before{
+		content:"\02589";
+	}
 
 	button.response{
 		color : white;
-		border:0;
-		border-radius:4px;
+		border-color:transparent;
 	}
 	button.response.error{
 		background-color:red;
@@ -58,11 +77,17 @@
 	button.response.exception{
 		background-color:orange;
 	}
+	button.pending{
+		background-color:lime;
+	}
 	button.response.error:after{
-		content: "\000D7";
+		content: "\02716";
 	}
 	button.response.passed:after{
-		content: "\02713";
+		content: "\02714";
+	}
+	button.response.exception:after{
+		content: "?";
 	}
 
 	pre *{
@@ -75,6 +100,7 @@
 <!-- AUTHENTICATION -->
 <script src="../hello.js"></script>
 <script src="../demos/client_ids.js"></script>
+<script src="modules.js"></script>
 </head>
 <body>
 
@@ -85,7 +111,7 @@
 	<ol>
 		<li>Select the scope of the services you want to test
 		<li>Click the signin buttons along the top of the table, and give consent to the application
-		<li>Click the <button class="run"></button> to run individual tests, alternatively <button class="run">All</button> to run all the tests in the column
+		<li>Click the <button class="run"></button> to run individual tests / all tests in a column
 		<li>Click on the <button class="response passed"></button> or <button class="response error"></button> response button's to view the data
 	</ol>
 	</blockquote>
@@ -96,7 +122,7 @@
 			<th>method</th>
 			<th><label><input type="checkbox" data-bind="checked: scopes().length===checkedScopes().length, click:function(){ scopes().length===checkedScopes().length ? checkedScopes.removeAll() : checkAllScopes() }">scopes </label></th>
 			<!-- ko foreach:networks -->
-			<th><button data-bind="text: name, click:login" title="Signin"></button><button data-bind="click:runAll" class="run" title="Run all tests in this column">All</button></th>
+			<th><button data-bind="click:login, attr:{'class':'zocial icon ' + name, title:'Signin to '+ displayName}" title="Signin"></button><button data-bind="click:runAll" class="run" title="Run all tests in this column"></button></th>
 			<!-- /ko -->
 		</tr>
 	</thead>
@@ -110,8 +136,8 @@
 			</td>
 			<!-- ko foreach:variants -->
 			<td>
-				<button data-bind="click:run" class="run" title="Run this test"></button>
-				<button class="response" data-bind="css: { error : passed() === false, passed : passed() === true, exception:status()==='exception' }, visible:response, click:function(){if($parent.debug()&&showResponse()){ showResponse(false);$parent.debug(false); return; } $parent.debug(true);ko.utils.arrayForEach($parent.variants(), function(c){c.showResponse(false);});showResponse(true);}, text: status()==='exception'?'exception':'response'"></button>
+				<button data-bind="visible: enabled, click:run, css:{ working: status()==='working'}" class="run" title="Run this test"></button>
+				<button class="response" data-bind="visible: enabled, css: { error : passed() === false, passed : passed() === true, exception:status()==='exception' }, visible:response, click:function(){if($parent.debug()&&showResponse()){ showResponse(false);$parent.debug(false); return; } $parent.debug(true);ko.utils.arrayForEach($parent.variants(), function(c){c.showResponse(false);});showResponse(true);}"></button>
 			</td>
 			<!-- /ko -->
 		</tr>
@@ -163,7 +189,9 @@ var reg = {
 	url : /^https?\:\/\//,
 	name : /^[\w\d\s\-]+$/,
 	id : /^[\w\d\@\-]+$/,
-	string : /^\S+$/
+	string : /^\S+$/,
+	optional_name : /^[\w\d\s\-]*$/,
+	optional_url : /^(https?\:\/\/|$)/
 }
 
 
@@ -174,12 +202,14 @@ var tests = [
 		expected : {
 			name : reg.name,
 			id : reg.id,
-			first_name : reg.name,
+/*			first_name : reg.name,
 			last_name : reg.name,
-			thumbnail : reg.url
+*/
+			thumbnail : reg.optional_url
 		}
 	},
 	{
+		test : ['facebook', 'google', 'windows', 'linkedin', 'twitter', 'github'],
 		method : 'get',
 		path : 'me/friends',
 		scope : ["friends"],
@@ -191,6 +221,7 @@ var tests = [
 		}
 	},
 	{
+		test : ['facebook', 'google', 'windows', 'twitter'],
 		method : 'get',
 		path : 'me/share',
 		expected : {
@@ -198,6 +229,7 @@ var tests = [
 		}
 	},
 	{
+		test : ['facebook', 'google', 'windows', 'twitter'],
 		method : 'post',
 		path : 'me/share',
 		scope : ["publish"],
@@ -207,6 +239,7 @@ var tests = [
 		}
 	},
 	{
+		test : ['facebook', 'google', 'windows'],
 		method : 'get',
 		path : 'me/albums',
 		scope : ["photos"],
@@ -220,6 +253,7 @@ var tests = [
 		}
 	},
 	{
+		test : ['facebook', 'google', 'windows'],
 		method : 'get',
 		path : '[ALBUM_PHOTOS_PATH]',
 		scope : ["photos"],
@@ -242,6 +276,7 @@ var tests = [
 		}
 	},
 	{
+		test : ['facebook', 'google', 'windows'],
 		method : 'get',
 		path : 'me/photos',
 		scope : ["photos"],
@@ -254,6 +289,7 @@ var tests = [
 		}
 	},
 	{
+		test : ['facebook', 'google', 'windows'],
 		method : 'get',
 		path : '[PHOTO_ID]',
 		scope : ["photos"],
@@ -285,6 +321,7 @@ var tests = [
 		}
 	},
 	{
+		test : ['facebook', 'google', 'windows'],
 		method : 'post',
 		path : 'me/albums',
 		scope : ["publish_files"],
@@ -297,6 +334,7 @@ var tests = [
 		}
 	},
 	{
+		test : ['facebook', 'google', 'windows'],
 		method : 'delete',
 		path : '[ALBUM_ID]',
 		scope : ["publish_files"],
@@ -324,6 +362,7 @@ var tests = [
 		}
 	},
 	{
+		test : ['facebook', 'google', 'windows','dropbox'],
 		method : 'get',
 		path : 'me/files',
 		scope : ["files"],
@@ -355,9 +394,12 @@ function Test(test,network,parent){
 
 	this.variants = ko.observableArray([]);
 	if(!network){
-		for(var x in CLIENT_IDS){
+		for(var x in CLIENT_IDS_ALL){
 			this.variants.push(new Test(test,x,this));
 		}
+	}
+	else {
+		this.enabled = (!test.test || _indexOf( test.test, network ) > -1 );
 	}
 
 	this.expected = test.expected;
@@ -431,6 +473,9 @@ function Test(test,network,parent){
 
 function Provider(network){
 	this.name = network;
+	this.displayName = network.replace(/^[a-z]/,function(m){
+		return m.toUpperCase();
+	});
 	this.runAll = function(){
 		hello.login(network, {scope: model.checkedScopes() }, function(r){
 			if(!r||r.error){
@@ -453,6 +498,9 @@ function Provider(network){
 				var test = tests[i];
 				if(!test){
 					return;
+				}
+				else if(!test.enabled){
+					loop(++i);
 				}
 				else{
 					test.run(function(){
@@ -507,7 +555,7 @@ if(!Object.keys){
 	}
 }
 
-ko.utils.arrayForEach( Object.keys(CLIENT_IDS), function(network){
+ko.utils.arrayForEach( Object.keys(CLIENT_IDS_ALL), function(network){
 	model.networks.push(new Provider(network));
 });
 
@@ -522,7 +570,7 @@ hello.subscribe('auth.login', function(o){
 });
 
 // Initiate the library
-hello.init(CLIENT_IDS,{redirect_uri: '../redirect.html'});
+hello.init(CLIENT_IDS_ALL,{redirect_uri: '../redirect.html', oauth_proxy:OAUTH_PROXY_URL});
 
 
 //
@@ -593,10 +641,10 @@ function Dictionary(data) {
 
 function testExpected(test,r){
 	for(var x in test){
-		if(!r || !(x in r)){
-			b = false;
+		if(!r || !(x in r) ){
+			b = test[x] instanceof RegExp && test[x].test("");
 		}
-		else if( tests[x] === null ){
+		else if( test[x] === null ){
 			// no test
 			b = true;
 		}

@@ -5,14 +5,17 @@
 
 <script src="client_ids.js"></script>
 <script src="../hello.js"></script>
+<script src="../modules/dropbox.js"></script>
+<script src="../modules/yahoo.js"></script>
 
 
 <title>HelloJS and OAuth 1.0</title>
 
 <button id='yahoo' onclick="hello.login('yahoo');">yahoo</button>
-<button id='facebook' onclick="hello.login('dropbox');">dropbox</button>
+<button id='dropbox' onclick="hello.login('dropbox');">dropbox</button>
 
 <script class="pre">
+
 hello.subscribe('auth.login', function(r){
 	// Get Profile
 	hello.api(r.network+'/me', function(p){
@@ -21,20 +24,8 @@ hello.subscribe('auth.login', function(r){
 });
 
 hello.init({
-	yahoo : {
-		id : '123456891011121314151617181920',
-		oauth_version : 1,
-		urls : {
-			request_url : 'https://api.login.yahoo.com/oauth/v2/get_request_token',
-			auth_url : 'https://api.login.yahoo.com/oauth/v2/get_request_token',
-		}
-	},
-	dropbox : {
-		id : 't5s644xtv7n4oth'
-		oauth_version : 1,
-		urls : {
-			request_url : 'https://api.dropbox.com/1/oauth/request_token'
-		} 
-	} 
-},	{redirect_uri:'../redirect.html'});
+	yahoo : '123456891011121314151617181920',
+	dropbox : 't5s644xtv7n4oth'
+}, {redirect_uri:'../redirect.html'});
+
 </script>

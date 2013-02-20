@@ -19,12 +19,19 @@
 	<h2>Friends list</h2>
 	<ul id="list"></ul>
 
+<h2>Include hello.js and the modules</h2>
+<p>One should merge these for performance.</p>
 <script class="pre" src="../hello.js"></script>
+<script class="pre" src="../modules/windows.js"></script>
+<script class="pre" src="../modules/facebook.js"></script>
+<script class="pre" src="../modules/google.js"></script>
 
+<h2>Initiate</h2>
 <script class="pre">
 hello.init( CLIENT_IDS, {redirect_uri:'../redirect.html'} );
 </script>
 
+<h2>Build Button events</h2>
 <script class="pre">
 function getFriends(network){
 	hello.login( network, {scope:'friends'}, function(auth){

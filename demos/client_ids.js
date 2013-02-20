@@ -43,8 +43,8 @@ var YAHOO_CLIENT_ID = {
 }[window.location.hostname];
 
 var TWITTER_CLIENT_ID = {
-	'local.knarly.com' : 'SXpuxbSUvgWBhiDfsorsWQ',
-	'adodson.com' : ''
+	'local.knarly.com' : 'krGNvpEVVBE27jcemC6uA',
+	'adodson.com' : 'eQuyZuECKWPiv3D7E4qdg'
 }[window.location.hostname];
 
 var SOUNDCLOUD_CLIENT_ID = {
