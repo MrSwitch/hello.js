@@ -9,7 +9,7 @@
 <script src="../modules/yahoo.js"></script>
 
 
-<title>HelloJS and OAuth 1.0</title>
+<title>HelloJS using OAuth 1.0/1.0a Providers</title>
 
 <button id='yahoo' onclick="hello.login('yahoo');">yahoo</button>
 <button id='dropbox' onclick="hello.login('dropbox');">dropbox</button>
@@ -24,8 +24,8 @@ hello.subscribe('auth.login', function(r){
 });
 
 hello.init({
-	yahoo : '123456891011121314151617181920',
-	dropbox : 't5s644xtv7n4oth'
+	yahoo : YAHOO_CLIENT_ID,
+	dropbox : DROPBOX_CLIENT_ID
 }, {redirect_uri:'../redirect.html'});
 
 </script>
