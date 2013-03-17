@@ -7,7 +7,7 @@ hello.init({
 
 		uri : {
 			// REF: http://msdn.microsoft.com/en-us/library/hh243641.aspx
-			auth : 'https://oauth.live.com/authorize',
+			auth : 'https://login.live.com/oauth20_authorize.srf',
 			base : 'https://apis.live.net/v5.0/',
 			"me/share" : function(p,callback){
 				// If this is a POST them return
