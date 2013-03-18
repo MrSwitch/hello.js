@@ -135,6 +135,7 @@ var hello = (function(){
 			redirect_uri  : window.location.href.split('#')[0],
 			response_type : 'token',
 			display       : 'popup',
+			oauth_proxy   : 'https://auth-server.herokuapp.com/proxy',
 			state         : ''
 		},
 
