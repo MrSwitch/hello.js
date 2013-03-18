@@ -29,17 +29,17 @@ var CLIENT_IDS = {
 
 var DROPBOX_CLIENT_ID = {
 	'local.knarly.com' : 't5s644xtv7n4oth',
-	'adodson.com' : ''
+	'adodson.com' : 't5s644xtv7n4oth'
 }[window.location.hostname];
 
 var LINKEDIN_CLIENT_ID = {
 	'local.knarly.com' : 'exgsps7wo5o7',
-	'adodson.com' : ''
+	'adodson.com' : 'exgsps7wo5o7'
 }[window.location.hostname];
 
 var YAHOO_CLIENT_ID = {
 	'local.knarly.com' : 'dj0yJmk9TTNoTWV6eE5ObW5NJmQ9WVdrOWVtSmhVbk5pTm1VbWNHbzlNVFUxT0RNeU16UTJNZy0tJnM9Y29uc3VtZXJzZWNyZXQmeD0yZQ--',
-	'adodson.com' : ''
+	'adodson.com' : 'dj0yJmk9TTNoTWV6eE5ObW5NJmQ9WVdrOWVtSmhVbk5pTm1VbWNHbzlNVFUxT0RNeU16UTJNZy0tJnM9Y29uc3VtZXJzZWNyZXQmeD0yZQ--'
 }[window.location.hostname];
 
 var TWITTER_CLIENT_ID = {
@@ -49,17 +49,17 @@ var TWITTER_CLIENT_ID = {
 
 var SOUNDCLOUD_CLIENT_ID = {
 	'local.knarly.com' : '8a4a19f86cdab097fa71a15ab26a01d6',
-	'adodson.com' : ''
+	'adodson.com' : '47a386647dadf913e559c12ef6db4292'
 }[window.location.hostname];
 
 var FOURSQUARE_CLIENT_ID = {
 	'local.knarly.com' : '3HEXMBQVH2SV0VXUKXOGQRPWH1PUTEIZN4KBDY5L54ZDXCDP',
-	'adodson.com' : ''
+	'adodson.com' : 'MFRXCJP1TKMUSYC2JBYU50L0IH0GJP1HTNS1BV0ML3NNXG5B'
 }[window.location.hostname];
 
 var GITHUB_CLIENT_ID = {
 	'local.knarly.com' : 'ca7e06a718b2e8eef737',
-	'adodson.com' : ''
+	'adodson.com' : 'd934ef34e2e40cf9b00a'
 }[window.location.hostname];
 
 
