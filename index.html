@@ -15,6 +15,9 @@
 	min-height:75px;
 }
 	#profile button{
+		width:250px;
+	}
+	button.zocial{
 		display:inline-block;
 		padding:10px;
 		vertical-align:middle;
@@ -25,15 +28,14 @@
 		border-radius: 5px;
 		font-size:120%;
 		line-height:1.8;
-		width:250px;
 	}
-	#profile button img{
+	button.zocial img{
 		height:30px;
 		vertical-align:middle;
 		margin-left:20px;
 		float:right;
 	}
-	#profile button span{
+	button.zocial span{
 		clear:left;
 	}
 
@@ -122,6 +124,20 @@ header nav a{
 	display: inline-block;
 	text-decoration: none;
 }
+
+body > form{
+	margin:0 -50px;
+	width:100%;
+	padding:50px;
+	background-color: rgb(255, 232, 223);
+	box-shadow:0 10px 10px -10px black;;
+	box-sizing:content-box;
+}
+body > form > h2,body > form > h3{
+	margin-top:0;
+	padding-top:0;
+}
+
 </style>
 	
 
@@ -225,9 +241,12 @@ header nav a{
 		<li>Anything not listed i have no knowledge of and would appreciate input.
 	</ul>
 
-	<h2>Download</h2>
-	<p>Cherry pick the services you need.</p>
 	<form id="download_form">
+
+		<h2>Download</h2>
+
+		<p>Select the services you need, and generate the script to embed</p>
+
 		<label><input type="checkbox" value="windows" name="services"/> Windows</label>
 		<label><input type="checkbox" value="facebook" name="services"/> Facebook</label>
 		<label><input type="checkbox" value="google" name="services"/>Google</label>
@@ -518,68 +537,64 @@ can gather these can be quite intrusive so only ask permission for scopes which
 are obvious to your app. You may always 
 request more from the user later.</p>
 </header>
+
+<form class="setscopes" onsubmit="return false;" style="display:inline-block;">
+
+	<h3>Update scope settings</h3>
+	<p>The table shows how the providers have different scopes, however HelloJS sync's the names, so you only have to ever know what HelloJS calls them.</p> 
+
+	<p>Select the scopes you want to use and update the current session.</p> 
+
 <table>
 	<thead>
-		<tr><td></td><th><code>scope</code></th><th>Facebook</th><th>Windows Live</th><th>Google</th></tr>
+		<tr><th><code>scope</code></th><th>Facebook</th><th>Windows Live</th><th>Google</th></tr>
 	</thead>
 	<tbody>
-		<tr class="break">
-			<th rowspan="7">View</th>
+		<tr>
 			<th colspan="4"></th>
 		</tr>
 		<tr>
 			<th><em>default</em></th><td>&nbsp;</td><td>wl.signin, wl.basic</td><td>https://www.googleapis.com/auth/plus.me</td>
 		</tr>
 		<tr>
-			<th><q>email</q></th><td>email</td><td>wl.emails</td><td></td>
+			<th><input type="checkbox" name="scopes" value="email"/><q>email</q></th><td>email</td><td>wl.emails</td><td></td>
 		</tr>
 		<tr>
-			<th><q>birthday</q></th><td>user_birthday</td><td>wl.birthday</td><td></td>
+			<th><input type="checkbox" name="scopes" value="birthday"/> <q>birthday</q></th><td>user_birthday</td><td>wl.birthday</td><td></td>
 		</tr>
 		<tr>
-			<th><q>events</q></th><td>user_events</td><td>wl.calenders</td><td></td>
+			<th><input type="checkbox" name="scopes" value="events"/> <q>events</q></th><td>user_events</td><td>wl.calenders</td><td></td>
 		</tr>
 		<tr>
-			<th><q>photos</q>, <q>videos</q></th><td>user_photos,user_videos</td><td>wl.photos</td><td></td>
+			<th><input type="checkbox" name="scopes" value="photos"/> <q>photos</q></br /><input type="checkbox" name="scopes" value="videos"/> <q>videos</q></th><td>user_photos,user_videos</td><td>wl.photos</td><td></td>
 		</tr>
 		<tr>
-			<th><q>friends</q></th><td></td><td></td><td>https://www.google.com/m8/feeds</td>
+			<th><input type="checkbox" name="scopes" value="friends"/> <q>friends</q></th><td></td><td></td><td>https://www.google.com/m8/feeds</td>
 		</tr>
-		<tr class="break">
-			<th rowspan="3">Edit</th>
+		<tr>
 			<th colspan="4"></th>
 		</tr>
 		<tr>
-			<th><q>publish</q></th><td>publish_streams</td><td>wl.share</td><td></td>
+			<th><input type="checkbox" name="scopes" value="publish"/> <q>publish</q></th><td>publish_streams</td><td>wl.share</td><td></td>
 		</tr>
 		<tr>
-			<th><q>create_event</q></th><td>create_event</td><td>wl.calendars_update,wl.events_create</td><td></td>
+			<th><input type="checkbox" name="scopes" value="create_event"/> <q>create_event</q></th><td>create_event</td><td>wl.calendars_update,wl.events_create</td><td></td>
 		</tr>
-		<tr class="break">
-			<th rowspan="2">Misc</th>
+		<tr>
 			<th colspan="4"></th>
 		</tr>
 		<tr>
-			<th><q>offline_access</q></th><td>offline_access</td><td>wl.offline_access</td><td></td>
+			<th><input type="checkbox" name="scopes" value="offline_access"/> <q>offline_access</q></th><td>offline_access</td><td>wl.offline_access</td><td></td>
 		</tr>
 	</tbody>
 </table>
 
-
-<form class="setscopes" onsubmit="return false;" style="display:inline-block;">
-	<label>bithday</label><input type="checkbox" name="scopes" value="birthday"/>,
-	<label>email</label><input type="checkbox" name="scopes" value="email"/>,
-	<label>photos</label><input type="checkbox" name="scopes" value="photos"/>,
-	<label>videos</label><input type="checkbox" name="scopes" value="videos"/>,
-	<label>friends</label><input type="checkbox" name="scopes" value="friends"/>
-	<label>publish</label><input type="checkbox" name="scopes" value="publish"/>,
-	<label>events</label><input type="checkbox" name="scopes" value="events"/>,
-	<label>create_event</label><input type="checkbox" name="scopes" value="create_event"/>,
-	<label>offline_access</label><input type="checkbox" name="scopes" value="offline_access"/>
+	<p>
+		<button class="zocial google" type="button" onclick="hello.login('google',{scope:$(scopes).serialize().replace(/\&?scopes=/g,',')}, function(){alert('You have signed into google')} );">google</button>
+		<button class="zocial facebook" type="button" onclick="hello.login('facebook',{scope:$(scopes).serialize().replace(/\&?scopes=/g,',')}, function(){alert('You have signed into facebook')});">facebook</button>
+		<button class="zocial windows" type="button" onclick="hello.login('windows',{scope:$(scopes).serialize().replace(/\&?scopes=/g,',')}, function(){alert('You have signed into windows live')});">windows</button>
+	</p>
 </form>
-	<button onclick="hello.login('google',{scope:scopes('form.setscopes')}, function(){alert('You have signed into google')} );">google</button>
-	<button onclick="hello.login('facebook',{scope:scopes('form.setscopes')}, function(){alert('You have signed into facebook')});">facebook</button>
-	<button onclick="hello.login('windows',{scope:scopes('form.setscopes')}, function(){alert('You have signed into windows live')});">windows</button>
 
 
 
@@ -620,15 +635,16 @@ e.g.
 <pre>hello.api("me", function(json){console.log(json);})</pre>
 <p>Below is a REST playground, clicking the paths on the left will return the results on the right</p>
 
-<h3>Play Ground</h3>
-
-<ul class="tabs">
-	<li onclick='restTabs("windows:")'>Windows
-	<li onclick='restTabs("facebook:")'>FaceBook
-	<li onclick='restTabs("google:")'>Google
-</ul>
 <form class="rest" id="playground">
+
+	<h3>Play Ground</h3>
+
+	<button class="windows zocial" type="button" onclick='restTabs("windows:")'>Windows</button>
+	<button class="facebook zocial" type="button" onclick='restTabs("facebook:")'>FaceBook</button>
+	<button class="google zocial" type="button" onclick='restTabs("google:")'>Google</button>
+
 	<input type="text" name="path" placeholder="Select a path and click `Run`" list="restpaths"/>
+
 	e.g...
 	<ul>
 		<li>/me</li>
@@ -643,6 +659,7 @@ e.g.
 	<br />
 	<button type="submit">Run</button><button type="button" onclick="document.getElementById('restoutput').innerHTML = '';">clear</button> <a href="#ScopeandPermissions">update your scopes and permissions</a>
 	<pre id="restoutput" style="min-height:400px;"></pre>
+
 </form>
 
 
@@ -907,6 +924,7 @@ window.saveAs || ( window.saveAs = (window.navigator.msSaveBlob ? function(b,n){
 
 <script>
 function restTabs(path){
+	console.log(path);
 	var input = document.getElementById('playground').elements.path;
 
 	network = ( path.match(/^([^:]+)\:/) || input.value.match(/^([^:]+)\:/) );
