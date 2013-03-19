@@ -15,6 +15,7 @@
 	<button onclick="getFriends('google')">Get friends from Google</button>
 	<button onclick="getFriends('facebook')">Get friends from Facebook</button>
 	<button onclick="getFriends('windows')">Get friends from Windows</button>
+	<button onclick="getFriends('yahoo')">Get friends from Yahoo</button>
 
 	<h2>Friends list</h2>
 	<ul id="list"></ul>
@@ -25,10 +26,11 @@
 <script class="pre" src="../modules/windows.js"></script>
 <script class="pre" src="../modules/facebook.js"></script>
 <script class="pre" src="../modules/google.js"></script>
+<script class="pre" src="../modules/yahoo.js"></script>
 
 <h2>Initiate</h2>
 <script class="pre">
-hello.init( CLIENT_IDS, {redirect_uri:'../redirect.html'} );
+hello.init( CLIENT_IDS_ALL, {redirect_uri:'../redirect.html', oauth_proxy : OAUTH_PROXY_URL, scope:"friends" } );
 </script>
 
 <h2>Build Button events</h2>
