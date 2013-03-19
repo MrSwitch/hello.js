@@ -31,6 +31,7 @@ hello.init({
 			"me/friends" : function(o){
 				var contact,field;
 				o.data = o.query.results.contact;
+				delete o.query;
 				for(var i=0;i<o.data.length;i++){
 					contact = o.data[i];
 					o.data[i].id = null;
