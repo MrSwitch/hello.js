@@ -25,63 +25,63 @@ Looking for more? HelloJS supports a lot more actions than just getting the user
 	<tbody>
 		<tr>
 			<th class="method get"><a href="demos/profile.html">Profile: name, picture (email)</a></th>
-			<td>&check;</td>
-			<td>&check;</td>
-			<td>&check;</td>
+			<td>&#10003;</td>
+			<td>&#10003;</td>
+			<td>&#10003;</td>
 		</tr>
 		<tr>
 			<th class="method get"><a href="demos/friends.html">Friends/Contacts: name, id (email)</a></th>
-			<td>&check;</td>
-			<td>&check;</td>
-			<td>&check;</td>
+			<td>&#10003;</td>
+			<td>&#10003;</td>
+			<td>&#10003;</td>
 		</tr>
 		<tr>
 			<th class="method get">Albums, name, id, web link</th>
-			<td>&check;</td>
-			<td>&check;</td>
-			<td>&check;</td>
+			<td>&#10003;</td>
+			<td>&#10003;</td>
+			<td>&#10003;</td>
 		</tr>
 		<tr>
 			<th class="method get"><a href="demos/albums.html">Photos in albums, names, links</a></th>
-			<td>&check;</td>
-			<td>&check;</td>
-			<td>&check;</td>
+			<td>&#10003;</td>
+			<td>&#10003;</td>
+			<td>&#10003;</td>
 		</tr>
 		<tr>
 			<th class="method get">Photo file: url, dimensions</th>
-			<td>&check;</td>
-			<td>&check;</td>
-			<td>&check;</td>
+			<td>&#10003;</td>
+			<td>&#10003;</td>
+			<td>&#10003;</td>
 		</tr>
 		<tr>
 			<th class="method post">Create a new album</th>
-			<td>&check;</td>
-			<td>&check;</td>
+			<td>&#10003;</td>
+			<td>&#10003;</td>
 			<td></td>
 		</tr>
 		<tr>
 			<th class="method post"><a href="demos/upload.html">Upload a photo</a></th>
-			<td>&check;</td>
-			<td>&check;</td>
+			<td>&#10003;</td>
+			<td>&#10003;</td>
 			<td></td>
 		</tr>
 		<tr>
 			<th class="method delete">Delete an album</th>
-			<td>&check;</td>
-			<td>&cross;</td>
+			<td>&#10003;</td>
+			<td>&#10007;</td>
 			<td></td>
 		</tr>
 		<tr>
 			<th class="method get"><a href="demos/activities.html">Status updates</a></th>
-			<td>&cross;</td>
-			<td>&check;</td>
-			<td>&check;</td>
+			<td>&#10007;</td>
+			<td>&#10003;</td>
+			<td>&#10003;</td>
 		</tr>
 		<tr>
 			<th class="method post"><a href="demos/share.html">Update Status</a></th>
-			<td>&check;</td>
-			<td>&check;</td>
-			<td>&cross;</td>
+			<td>&#10003;</td>
+			<td>&#10003;</td>
+			<td>&#10007;</td>
 		</tr>
 	</tbody>
 </table>
@@ -613,18 +613,18 @@ By default the service uses [http://auth-server.herokuapp.com/](http://auth-serv
 	<tbody>
 	<tr>
 		<th>hello.js</th>
-		<td>&check;</td>
-		<td>&check;</td>
-		<td>&check;</td>
-		<td>&check;<sup>1,2</sup></td>
-		<td>&check;</td>
-		<td>&check;</td>
-		<td>&check;</td>
-		<td>&check;</td>
-		<td>&check;</td>
-		<td>&check;<sup>3</sup></td>
-		<td>&check;</td>
-		<td>&check;<sup>4</sup></td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&#10003;<sup>1,2</sup></td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&#10003;</td>
+		<td>&#10003;<sup>3</sup></td>
+		<td>&#10003;</td>
+		<td>&#10003;<sup>4</sup></td>
 	</tr>
 	</tbody>
 </table>
