@@ -88,8 +88,8 @@ Looking for more? HelloJS supports a lot more actions than just getting the user
 
 
 
-Items marked with a &check; are fully working and can be [tested here](./tests/). 
-Items marked with a &cross; aren't provided by the provider at this time. 
+Items marked with a &#10003; are fully working and can be [tested here](./tests/). 
+Items marked with a &#10007; aren't provided by the provider at this time. 
 Blank items are work in progress, but there is good evidence that they can be done.
 Anything not listed i have no knowledge of and would appreciate input.
 
