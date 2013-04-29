@@ -6,13 +6,6 @@
 A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and OAuth1 with a [oauth proxy](#OAuthProxy)) web services and querying their REST API's. HelloJS Standardizes paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. Its modular so that list is [growing](modules.html). No more spaghetti code! 
 
 
-## ...I did not understand any of that
-Dont worry, here's a demo which illustrates what HelloJS can do. Connect a user through a service they belong too, e.g.
-
-
-	<button id="profile_windows" class="zocial windows" onclick="hello.login('windows')">Signin to Windows</button>,
-	<button id="profile_facebook" class="zocial facebook" onclick="hello.login('facebook')">Signin to Facebook</button>
-	<button id="profile_google" class="zocial google" onclick="hello.login('google')">Signin to Google</button>
 
 
 ## Features
@@ -32,95 +25,76 @@ Looking for more? HelloJS supports a lot more actions than just getting the user
 	<tbody>
 		<tr>
 			<th class="method get"><a href="demos/profile.html">Profile: name, picture (email)</a></th>
-			<td class="yes"></td>
-			<td class="yes"></td>
-			<td class="yes"></td>
+			<td>&check;</td>
+			<td>&check;</td>
+			<td>&check;</td>
 		</tr>
 		<tr>
 			<th class="method get"><a href="demos/friends.html">Friends/Contacts: name, id (email)</a></th>
-			<td class="yes"></td>
-			<td class="yes"></td>
-			<td class="yes"></td>
+			<td>&check;</td>
+			<td>&check;</td>
+			<td>&check;</td>
 		</tr>
 		<tr>
 			<th class="method get">Albums, name, id, web link</th>
-			<td class="yes"></td>
-			<td class="yes"></td>
-			<td class="yes"></td>
+			<td>&check;</td>
+			<td>&check;</td>
+			<td>&check;</td>
 		</tr>
 		<tr>
 			<th class="method get"><a href="demos/albums.html">Photos in albums, names, links</a></th>
-			<td class="yes"></td>
-			<td class="yes"></td>
-			<td class="yes"></td>
+			<td>&check;</td>
+			<td>&check;</td>
+			<td>&check;</td>
 		</tr>
 		<tr>
 			<th class="method get">Photo file: url, dimensions</th>
-			<td class="yes"></td>
-			<td class="yes"></td>
-			<td class="yes"></td>
+			<td>&check;</td>
+			<td>&check;</td>
+			<td>&check;</td>
 		</tr>
 		<tr>
 			<th class="method post">Create a new album</th>
-			<td class="yes"></td>
-			<td class="yes"></td>
+			<td>&check;</td>
+			<td>&check;</td>
 			<td></td>
 		</tr>
 		<tr>
 			<th class="method post"><a href="demos/upload.html">Upload a photo</a></th>
-			<td class="yes"></td>
-			<td class="yes"></td>
+			<td>&check;</td>
+			<td>&check;</td>
 			<td></td>
 		</tr>
 		<tr>
 			<th class="method delete">Delete an album</th>
-			<td class="yes"></td>
-			<td class="no"></td>
+			<td>&check;</td>
+			<td>&cross;</td>
 			<td></td>
 		</tr>
 		<tr>
 			<th class="method get"><a href="demos/activities.html">Status updates</a></th>
-			<td class="no"></td>
-			<td class="yes"></td>
-			<td class="yes"></td>
+			<td>&cross;</td>
+			<td>&check;</td>
+			<td>&check;</td>
 		</tr>
 		<tr>
 			<th class="method post"><a href="demos/share.html">Update Status</a></th>
-			<td class="yes"></td>
-			<td class="yes"></td>
-			<td class="no"></td>
+			<td>&check;</td>
+			<td>&check;</td>
+			<td>&cross;</td>
 		</tr>
 	</tbody>
 </table>
 
 
 
-Items marked with a  are fully working and can be [tested here](./tests/). 
-Items marked with a  aren't provided by the provider at this time. 
+Items marked with a &check; are fully working and can be [tested here](./tests/). 
+Items marked with a &cross; aren't provided by the provider at this time. 
 Blank items are work in progress, but there is good evidence that they can be done.
 Anything not listed i have no knowledge of and would appreciate input.
 
 
 
-
-
-
-## Download
-
-Select the services you need, and generate the script to embed
-
- Windows
- Facebook
-Google
- Yahoo 
- Twitter 
- LinkedIn 
- Github 
- Dropbox 
-
-
-Download All or Download Selected
- Minify 
 
 
 
@@ -157,7 +131,7 @@ Register your application with atleast one of the following networks. Ensure you
 Just add onclick events to call hello.login(network). Style your buttons as you like, i've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts
 
 
-&lt;button onclick="hello.login('windows')"&gt;windows&lt;/button&gt;
+	&lt;button onclick="hello.login('windows')"&gt;windows&lt;/button&gt;
 
 
 
@@ -286,9 +260,9 @@ If a network string is provided: A consent window to authenticate with that netw
 #### Examples:
 
 
-hello.login(&#39;facebook&#39;, function(){
-	alert("You are signed in to Facebook");
-});
+	hello.login(&#39;facebook&#39;, function(){
+		alert("You are signed in to Facebook");
+	});
 
 
 ### hello.logout()
@@ -313,9 +287,9 @@ Remove all sessions or individual sessions.
 #### Example:
 
 
-hello.logout(&#39;facebook&#39;, function(){
-	alert("Signed out");
-});
+	hello.logout(&#39;facebook&#39;, function(){
+		alert("Signed out");
+	});
 
 
 ### hello.getAuthResponse()
@@ -335,7 +309,7 @@ Get the current status of the session, this is an synchronous request and does n
 #### Examples:
 
 
-alert((hello.getAuthResponse(&#39;facebook&#39;)?&quot;Signed&quot;:&#39;Not signed&#39;) + &#39; into FaceBook, &#39; +( hello.getAuthResponse(&#39;windows&#39;)?&quot;Signed&quot;:&#39;Not signed&#39;)+&quot;into Windows Live&quot;);
+	alert((hello.getAuthResponse(&#39;facebook&#39;)?&quot;Signed&quot;:&#39;Not signed&#39;) + &#39; into FaceBook, &#39; +( hello.getAuthResponse(&#39;windows&#39;)?&quot;Signed&quot;:&#39;Not signed&#39;)+&quot;into Windows Live&quot;);
 
 
 
@@ -368,13 +342,13 @@ Make calls to the API for getting and posting data
 #### Examples:
 
 
-hello.api("me", function(json){
-	if(!json||json.error){
-		alert("Whoops!");
-		return;
-	}
-	alert("Your name is "+ json.name);
-});
+	hello.api("me", function(json){
+		if(!json||json.error){
+			alert("Whoops!");
+			return;
+		}
+		alert("Your name is "+ json.name);
+	});
 
 
 ## Event subscription
@@ -626,10 +600,10 @@ By default the service uses [http://auth-server.herokuapp.com/](http://auth-serv
 		<th><div class="ie9"></div>IE9</th>
 		<th><div class="ie8"></div>IE8</th>
 		<th><div class="ie7"></div>IE7</th>
-		<th><div class="ff"></div></th>
-		<th><div class="cr"></div></th>
-		<th><div class="sa"></div></th>
-		<th><div class="op"></div></th>
+		<th><div class="ff"></div>FF</th>
+		<th><div class="cr"></div>CR</th>
+		<th><div class="sa"></div>SA</th>
+		<th><div class="op"></div>OP</th>
 		<th><div class="op"></div>Mob</th>
 		<th><div class="op"></div>Mini5</th>
 		<th>iOS</th>
@@ -639,19 +613,22 @@ By default the service uses [http://auth-server.herokuapp.com/](http://auth-serv
 	<tbody>
 	<tr>
 		<th>hello.js</th>
-		<td class="yes" colspan=3></td>
-		<td class="yes"><sup>1,2</sup></td>
-		<td class="yes"></td>
-		<td class="yes"></td>
-		<td class="yes"></td>
-		<td class="yes"></td>
-		<td class="yes"></td>
-		<td class="yes"><sup>3</sup></td>
-		<td class="yes"></td>
-		<td class="yes"><sup>4</sup></td>
+		<td>&check;</td>
+		<td>&check;</td>
+		<td>&check;</td>
+		<td>&check;<sup>1,2</sup></td>
+		<td>&check;</td>
+		<td>&check;</td>
+		<td>&check;</td>
+		<td>&check;</td>
+		<td>&check;</td>
+		<td>&check;<sup>3</sup></td>
+		<td>&check;</td>
+		<td>&check;<sup>4</sup></td>
 	</tr>
 	</tbody>
 </table>
+
 
 
 IE7: Makes beeping sounds whenever the POST, PUT or DELETE methods are 
@@ -659,6 +636,7 @@ used - because of the XD, IFrame+Form+hack.
 - IE7: Requires JSON.js and localStorage shims
 - Opera Mini: Supports inline consent only, i.e. reloads original page.
 - WP7: Supports inline consent only, i.e. reloads original page.
+
 
 
 
