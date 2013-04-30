@@ -5,307 +5,223 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 	<link rel="stylesheet" href="/css-social-buttons/css/zocial.css"/>
 	<link rel="stylesheet" href="/_packages/document.css" />
-	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+	<link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon" />
 	<script src="demos/client_ids.js"></script>
 	<script src="/_packages/document.js"></script>
-
-<style>
-#profile{
-	min-height:75px;
-}
-	button.zocial img{
-		height:24px;
-		vertical-align:middle;
-	}
-	button.zocial span{
-		clear:left;
-	}
-
-
-
-/**
- * REST EXPOLORER
- */
-
-ul.tabs{
-	margin:0;
-	padding:0;
-}
-	ul.tabs li{
-		display: inline-block;
-		border:1px solid #eee;
-		background-color: #f4f4f4;
-		padding:5px 10px;
-	}
-
-input[name=path]{
-	display:block;
-	width:100%;
-	padding:5px;
-	box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	font-size:20px;
-	margin:0;
-	border:1px solid #e4e4e4;
-	border-top-width:10px;
-}
-
-#playground > ul,
-#playground > ul > li{
-	display: inline-block;
-	margin:0;
-	padding:0;
-}
-#playground > ul > li:after{
-	content:", ";
-}
-
-#playground > ul > li:hover{
-	background-color: rgba(0,0,0,0.05);
-}
-
-
-.method:before{
-	vertical-align:top;
-	color:white;
-	text-transform:uppercase;
-	padding:3px 0px;
-	border-radius:3px;
-	font-size:0.7em;
-	min-width:60px;
-	text-align:center;
-	display: inline-block;
-	margin:5px;
-}
-
-.method.get:before{
-	content:"GET";
-	background-color: #0F6AB4;
-}
-.method.post:before{
-	content:"POST";
-	background-color: #10A54A;
-}
-.method.put:before{
-	content:"PUT";
-	background-color: #C5862B;
-}
-.method.delete:before{
-	content:"DELETE";
-	background-color: red;
-}
-
-header nav{
-	float: right;
-}
-header nav a{
-	font-size:1.2em;
-	padding:5px;
-	background-color:#F5F7F5;
-	border:1px solid #CCC;
-	display: inline-block;
-	text-decoration: none;
-}
-
-
-</style>
-	
-
+	<link rel="stylesheet" href="assets/index.css"/>
 </head>
 <body>
-	<nav class="toc"></nav>
-	<header>
-		<h1><img src="favicon.ico" width=64 height=64 style="vertical-align:middle;margin-right:20px;">hello.js</h1>
-		<blockquote><p>A client-side Javascript SDK for authenticating with <a href="http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf" target="_blank">OAuth2</a> (and <b>OAuth1</b> with a <a href="#OAuthProxy">oauth proxy</a>) web services and querying their REST API's. HelloJS <b>Standardizes</b> paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. Its <b>modular</b> so that list is <a href="modules/">growing</a>. No more spaghetti code! 
-		</blockquote>
-	</header>
-	<h2>...I did not understand any of that</h2>
-	<p>Dont worry, here's a demo which illustrates what HelloJS can do. Connect a user through a service they belong too, e.g.</p>
-	<div id="profile">
-		<button id="profile_windows" class="zocial windows" onclick="hello.login('windows')">Signin to Windows</button>,
-		<button id="profile_facebook" class="zocial facebook" onclick="hello.login('facebook')">Signin to Facebook</button>
-		<button id="profile_google" class="zocial google" onclick="hello.login('google')">Signin to Google</button>
-	</div>
 
-	<h2>Features</h2>
+<nav class="toc"></nav>
 
-	<p>Looking for more? HelloJS supports a lot more actions than just getting the users profile. Like, matching users with a users social friends list, sharing events with the users social streams, accessing and playing around with a users photos. Lets see if these whet your appetite ...</p>
-	<table>
-		<thead>
-			<tr>
-				<th></th>
-				<th>Windows</th>
-				<th>FaceBook</th>
-				<th>Google</th>
-				<th><a href="tests/">More..</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr>
-				<th class="method get"><a href="demos/profile.html">Profile: name, picture (email)</a></th>
-				<td class="yes"></td>
-				<td class="yes"></td>
-				<td class="yes"></td>
-			</tr>
-			<tr>
-				<th class="method get"><a href="demos/friends.html">Friends/Contacts: name, id (email)</a></th>
-				<td class="yes"></td>
-				<td class="yes"></td>
-				<td class="yes"></td>
-			</tr>
-			<tr>
-				<th class="method get">Albums, name, id, web link</th>
-				<td class="yes"></td>
-				<td class="yes"></td>
-				<td class="yes"></td>
-			</tr>
-			<tr>
-				<th class="method get"><a href="demos/albums.html">Photos in albums, names, links</a></th>
-				<td class="yes"></td>
-				<td class="yes"></td>
-				<td class="yes"></td>
-			</tr>
-			<tr>
-				<th class="method get">Photo file: url, dimensions</th>
-				<td class="yes"></td>
-				<td class="yes"></td>
-				<td class="yes"></td>
-			</tr>
-			<tr>
-				<th class="method post">Create a new album</th>
-				<td class="yes"></td>
-				<td class="yes"></td>
-				<td></td>
-			</tr>
-			<tr>
-				<th class="method post"><a href="demos/upload.html">Upload a photo</a></th>
-				<td class="yes"></td>
-				<td class="yes"></td>
-				<td></td>
-			</tr>
-			<tr>
-				<th class="method delete">Delete an album</th>
-				<td class="yes"></td>
-				<td class="no"></td>
-				<td></td>
-			</tr>
-			<tr>
-				<th class="method get"><a href="demos/activities.html">Status updates</a></th>
-				<td class="no"></td>
-				<td class="yes"></td>
-				<td class="yes"></td>
-			</tr>
-			<tr>
-				<th class="method post"><a href="demos/share.html">Update Status</a></th>
-				<td class="yes"></td>
-				<td class="yes"></td>
-				<td class="no"></td>
-			</tr>
-		</tbody>
-	</table>
+<h1><img src="assets/favicon.ico" width=64 height=64 style="vertical-align:middle;margin-right:20px;">hello.js</h1>
 
-	<ul>
-		<li>Items marked with a <span class="yes"></span> are fully working and can be <a href="./tests/">tested here</a>. 
-		<li>Items marked with a <span class="no"></span> aren't provided by the provider at this time. 
-		<li>Blank items are work in progress, but there is good evidence that they can be done.
-		<li>Anything not listed i have no knowledge of and would appreciate input.
-	</ul>
+<blockquote><p>A client-side Javascript SDK for authenticating with <a href="http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf" target="_blank">OAuth2</a> (and <b>OAuth1</b> with a <a href="#OAuthProxy">oauth proxy</a>) web services and querying their REST API's. HelloJS <b>Standardizes</b> paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. Its <b>modular</b> so that list is <a href="modules.html">growing</a>. No more spaghetti code! 
+</blockquote>
 
-	<form id="download_form">
+<!--NO-MARKDOWN-->
+<h2>...I did not understand any of that</h2>
+<p>Dont worry, here's a demo which illustrates what HelloJS can do. Connect a user through a service they belong too, e.g.</p>
 
-		<h2>Download</h2>
+<div id="profile">
+	<button id="profile_windows" class="zocial windows" onclick="hello.login('windows')">Signin to Windows</button>,
+	<button id="profile_facebook" class="zocial facebook" onclick="hello.login('facebook')">Signin to Facebook</button>
+	<button id="profile_google" class="zocial google" onclick="hello.login('google')">Signin to Google</button>
+</div>
 
-		<p>Select the services you need, and generate the script to embed</p>
+<!--/NO-MARKDOWN-->
 
-		<label><input type="checkbox" value="windows" name="services"/> Windows</label>
-		<label><input type="checkbox" value="facebook" name="services"/> Facebook</label>
-		<label><input type="checkbox" value="google" name="services"/>Google</label>
-		<label><input type="checkbox" value="yahoo" name="services"/> Yahoo </label>
-		<label><input type="checkbox" value="twitter" name="services" /> Twitter </label>
-		<label><input type="checkbox" value="linkedin" name="services" /> LinkedIn </label>
-		<label><input type="checkbox" value="github" name="services" /> Github </label>
-		<label><input type="checkbox" value="dropbox" name="services" /> Dropbox </label>
-		<br/>
-		<input type="hidden" name="all"/>
-		<button type="submit" onclick="$('input[name=all]',this.form).val(1);">Download All</button> or <button type="submit" name="submit" value="selected">Download Selected</button>
-		<label><input type="checkbox" value="1" name="minify" /> Minify </label>
-	</form>
+<h2>Features</h2>
+
+<p>Looking for more? HelloJS supports a lot more actions than just getting the users profile. Like, matching users with a users social friends list, sharing events with the users social streams, accessing and playing around with a users photos. Lets see if these whet your appetite ...</p>
+
+<table>
+	<thead>
+		<tr>
+			<th></th>
+			<th>Windows</th>
+			<th>FaceBook</th>
+			<th>Google</th>
+			<th><a href="tests/">More..</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<th class="method get"><a href="demos/profile.html">Profile: name, picture (email)</a></th>
+			<td>&check;</td>
+			<td>&check;</td>
+			<td>&check;</td>
+		</tr>
+		<tr>
+			<th class="method get"><a href="demos/friends.html">Friends/Contacts: name, id (email)</a></th>
+			<td>&check;</td>
+			<td>&check;</td>
+			<td>&check;</td>
+		</tr>
+		<tr>
+			<th class="method get">Albums, name, id, web link</th>
+			<td>&check;</td>
+			<td>&check;</td>
+			<td>&check;</td>
+		</tr>
+		<tr>
+			<th class="method get"><a href="demos/albums.html">Photos in albums, names, links</a></th>
+			<td>&check;</td>
+			<td>&check;</td>
+			<td>&check;</td>
+		</tr>
+		<tr>
+			<th class="method get">Photo file: url, dimensions</th>
+			<td>&check;</td>
+			<td>&check;</td>
+			<td>&check;</td>
+		</tr>
+		<tr>
+			<th class="method post">Create a new album</th>
+			<td>&check;</td>
+			<td>&check;</td>
+			<td></td>
+		</tr>
+		<tr>
+			<th class="method post"><a href="demos/upload.html">Upload a photo</a></th>
+			<td>&check;</td>
+			<td>&check;</td>
+			<td></td>
+		</tr>
+		<tr>
+			<th class="method delete">Delete an album</th>
+			<td>&check;</td>
+			<td>&cross;</td>
+			<td></td>
+		</tr>
+		<tr>
+			<th class="method get"><a href="demos/activities.html">Status updates</a></th>
+			<td>&cross;</td>
+			<td>&check;</td>
+			<td>&check;</td>
+		</tr>
+		<tr>
+			<th class="method post"><a href="demos/share.html">Update Status</a></th>
+			<td>&check;</td>
+			<td>&check;</td>
+			<td>&cross;</td>
+		</tr>
+	</tbody>
+</table>
 
 
-	<h2>Quick Start</h2>
-	<p>Quick start shows you how to go from zero to loading in the name and picture of a user, like in the demo above.</p>
-	<ol>
-		<li>Register your app domain
-		<li>Include hello.js script 
-		<li>Create the signin buttons
-		<li>Setup listener for login and retrieve user info.
-		<li>Initiate the client_ids and all listeners
-	</ol>
+<ul>
+<li>Items marked with a <span>&check;</span> are fully working and can be <a href="./tests/">tested here</a>. 
+<li>Items marked with a <span>&cross;</span> aren't provided by the provider at this time. 
+<li>Blank items are work in progress, but there is good evidence that they can be done.
+<li>Anything not listed i have no knowledge of and would appreciate input.
+</ul>
 
-	<h3>1. Register</h3>
-	<p>Register your application with atleast one of the following networks. Ensure you register the correct domain as they can be quite picky</p>
-	<ul>
-		<!-- 
-		<li><a target="_blank" href="http://msdn.microsoft.com/en-us/library/hh243641.aspx">Windows Live</a></li>
-		<li><a target="_blank" href="http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html">Google+</a></li>
-		<li><a target="_blank" href="http://developers.facebook.com/docs/reference/dialogs/oauth/">FaceBook</a></li>
-		-->
-		<li><a target="_blank" href="https://developers.facebook.com/apps">FaceBook</a></li>
-		<li><a target="_blank" href="https://manage.dev.live.com/">Windows Live</a></li>
-		<li><a target="_blank" href="https://code.google.com/apis/console/b/0/#:access">Google +</a></li>
-	</ul>
-	<h3>2. Include Hello.js script in your page</h3>
 
-<script class="pre" src="hello.all.js"></script>
+<!--NO-MARKDOWN-->
+<form id="download_form">
 
-	<h3>3. Create the signin buttons</h3>
-	<p>Just add onclick events to call hello.login(network). Style your buttons as you like, i've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts</p>
+<h2>Download</h2>
+
+<p>Select the services you need, and generate the script to embed</p>
+
+<label><input type="checkbox" value="windows" name="services"/> Windows</label>
+<label><input type="checkbox" value="facebook" name="services"/> Facebook</label>
+<label><input type="checkbox" value="google" name="services"/>Google</label>
+<label><input type="checkbox" value="yahoo" name="services"/> Yahoo </label>
+<label><input type="checkbox" value="twitter" name="services" /> Twitter </label>
+<label><input type="checkbox" value="linkedin" name="services" /> LinkedIn </label>
+<label><input type="checkbox" value="github" name="services" /> Github </label>
+<label><input type="checkbox" value="dropbox" name="services" /> Dropbox </label>
+<br/>
+<input type="hidden" name="all"/>
+<button type="submit" onclick="$('input[name=all]',this.form).val(1);">Download All</button> or <button type="submit" name="submit" value="selected">Download Selected</button>
+<label><input type="checkbox" value="1" name="minify" /> Minify </label>
+</form>
+<!--/NO-MARKDOWN-->
+
+
+<h2>Quick Start</h2>
+<p>Quick start shows you how to go from zero to loading in the name and picture of a user, like in the demo above.</p>
+<ol>
+<li>Register your app domain
+<li>Include hello.js script 
+<li>Create the signin buttons
+<li>Setup listener for login and retrieve user info.
+<li>Initiate the client_ids and all listeners
+</ol>
+
+<h3>1. Register</h3>
+
+<p>Register your application with atleast one of the following networks. Ensure you register the correct domain as they can be quite picky</p>
+
+<ul>
+<!-- 
+<li><a target="_blank" href="http://msdn.microsoft.com/en-us/library/hh243641.aspx">Windows Live</a></li>
+<li><a target="_blank" href="http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html">Google+</a></li>
+<li><a target="_blank" href="http://developers.facebook.com/docs/reference/dialogs/oauth/">FaceBook</a></li>
+-->
+<li><a target="_blank" href="https://developers.facebook.com/apps">FaceBook</a></li>
+<li><a target="_blank" href="https://manage.dev.live.com/">Windows Live</a></li>
+<li><a target="_blank" href="https://code.google.com/apis/console/b/0/#:access">Google +</a></li>
+</ul>
+
+<h3>2. Include Hello.js script in your page</h3>
+
+	<script class="pre" src="./dist/hello.all.min.js"></script>
+
+<h3>3. Create the signin buttons</h3>
+<p>Just add onclick events to call hello.login(network). Style your buttons as you like, i've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts</p>
+
 <pre>
-&lt;button onclick="hello.login('windows')"&gt;windows&lt;/button&gt;
+	&lt;button onclick="hello.login('windows')"&gt;windows&lt;/button&gt;
 </pre>
 
 
-	<h3>4. Add listeners for the user login</h3>
-	<p>Lets define a simple function, which will load a user profile into the page after they signin and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.</p>
+<h3>4. Add listeners for the user login</h3>
 
+<p>Lets define a simple function, which will load a user profile into the page after they signin and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.</p>
 
 
 <script class="pre">
-hello.subscribe('auth.login', function(auth){
-	
-	// call user information, for the given network
-	hello.api( auth.network + '/me', function(r){
-		if(!r.id || !!document.getElementById(r.id) ){
-			return;
-		}
-		var target = document.getElementById("profile_"+ auth.network );
-		target.innerHTML = '<img src="'+ r.picture +'" /> Hey '+r.name;
+	hello.subscribe('auth.login', function(auth){
+		
+		// call user information, for the given network
+		hello.api( auth.network + '/me', function(r){
+			if(!r.id || !!document.getElementById(r.id) ){
+				return;
+			}
+			var target = document.getElementById("profile_"+ auth.network );
+			target.innerHTML = '<img src="'+ r.picture +'" /> Hey '+r.name;
 
+		});
 	});
-});
 </script>
 
-	<h3>5. Configure hello.js with your client_id's and initiate all listeners</h3>
-	<p>Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the <code>hello.init</code> function. e.g....</p>
+<h3>5. Configure hello.js with your client_id's and initiate all listeners</h3>
+
+<p>Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the <code>hello.init</code> function. e.g....</p>
 
 <script class="pre">
-hello.init({ 
-	facebook : FACEBOOK_CLIENT_ID,
-	windows  : WINDOWS_CLIENT_ID,
-	google   : GOOGLE_CLIENT_ID
-},{redirect_uri:'redirect.html'});
+	hello.init({ 
+		facebook : FACEBOOK_CLIENT_ID,
+		windows  : WINDOWS_CLIENT_ID,
+		google   : GOOGLE_CLIENT_ID
+	},{redirect_uri:'redirect.html'});
 </script>
 
 <p>That's it. The code above actually powers the demo at the start so, no excuses.</p>
 
-<header>
-	<h2>Core Methods</h2>
-</header>
+
+<h2>Core Methods</h2>
+
 <h3>hello.init()</h3>
+
 <p>Initiate the environment. And add the application credentials</p> 
+
 <h4>hello.init( {facebook: <em>id</em>, windows: <em>id</em>, google: <em>id, 
 ....</em> } )</h4>
+
 <table>
 	<thead>
 	<tr><th>name</th><th>type</th></tr>
@@ -313,36 +229,41 @@ hello.init({
 	<tbody>
 		<tr><td>credentials</td><td>
 	<i>object( key =&gt; value, ...&nbsp; )</i>
-<table>
-	<thead>
-	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
-		argument</th><th>default</th></tr>
-	</thead>
-	<tbody>
-	<tr><td>key</td><td><i>string</i></td><td><q>windows</q>, <q>facebook</q> or <q>google</q></td><td>
-		App name&#39;s</td><td><em>required</em></td><td>n/a</td></tr>
-	<tr><td>value</td><td><i>string</i></td><td>
-		<q>0000000AB1234</q></td><td>ID of the service to connect to</td><td>
-		<em>required</em></td><td>n/a</td></tr>
-	</tbody>
-</table>
-		</td></tr>
+	<table>
+		<thead>
+		<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
+			argument</th><th>default</th></tr>
+		</thead>
+		<tbody>
+		<tr><td>key</td><td><i>string</i></td><td><q>windows</q>, <q>facebook</q> or <q>google</q></td><td>
+			App name&#39;s</td><td><em>required</em></td><td>n/a</td></tr>
+		<tr><td>value</td><td><i>string</i></td><td>
+			<q>0000000AB1234</q></td><td>ID of the service to connect to</td><td>
+			<em>required</em></td><td>n/a</td></tr>
+		</tbody>
+	</table>
+	</td></tr>
 	<tr><td>options</td><td>
 	set's default <i>options</i>, as in hello.login()</i>
-		</td></tr>
+	</td></tr>
 	</tbody>
-	</table>
+</table>
+
 <h4>Example:</h4>
+
 <pre>
-hello.init({
-	facebook : '359288236870',
-	windows : '000000004403AD10'
-});
+	hello.init({
+		facebook : '359288236870',
+		windows : '000000004403AD10'
+	});
 </pre>
 
 <h3>hello.login()</h3>
+
 <p>If a network string is provided: A consent window to authenticate with that network will be initiated. Else if no network is provided a prompt to select one of the networks will open. A callback will be executed if the user authenticates and or cancels the authentication flow.</p>
+
 <h4>hello.login( [network] [,options] [, callback() ] )</h4>
+
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
 		argument</th><th>default</th></tr>
@@ -378,16 +299,21 @@ hello.init({
 		<em>null</em></td></tr>
 	</td></tr>
 </table>
+
 <h4>Examples:</h4>
+
 <pre class="tryitoffline">
-hello.login(&#39;facebook&#39;, function(){
-	alert("You are signed in to Facebook");
-});
+	hello.login(&#39;facebook&#39;, function(){
+		alert("You are signed in to Facebook");
+	});
 </pre>
 
 <h3>hello.logout()</h3>
+
 <p>Remove all sessions or individual sessions.</p>
+
 <h4>hello.logout( [network] [, callback() ] )</h4>
+
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
 		argument</th><th>default</th></tr>
@@ -400,16 +326,21 @@ hello.login(&#39;facebook&#39;, function(){
 		<em>optional</em></td><td>
 		<em>null</em></td></tr>
 </table>
+
 <h4>Example:</h4>
+
 <pre class="tryit">
-hello.logout(&#39;facebook&#39;, function(){
-	alert("Signed out");
-});
+	hello.logout(&#39;facebook&#39;, function(){
+		alert("Signed out");
+	});
 </pre>
 
 <h3>hello.getAuthResponse()</h3>
+
 <p>Get the current status of the session, this is an synchronous request and does not validate any session cookies which may have expired.</p>
+
 <h4>hello.getAuthResponse( network );</h4>
+
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
 		argument</th><th>default</th></tr>
@@ -417,15 +348,20 @@ hello.logout(&#39;facebook&#39;, function(){
 		<em>optional</em></td><td>
 		<em>current</em></td></tr>
 </table>
+
 <h4>Examples:</h4>
+
 <pre class="tryitoffline">
-alert((hello.getAuthResponse(&#39;facebook&#39;)?&quot;Signed&quot;:&#39;Not signed&#39;) + &#39; into FaceBook, &#39; +( hello.getAuthResponse(&#39;windows&#39;)?&quot;Signed&quot;:&#39;Not signed&#39;)+&quot;into Windows Live&quot;);
+	alert((hello.getAuthResponse(&#39;facebook&#39;)?&quot;Signed&quot;:&#39;Not signed&#39;) + &#39; into FaceBook, &#39; +( hello.getAuthResponse(&#39;windows&#39;)?&quot;Signed&quot;:&#39;Not signed&#39;)+&quot;into Windows Live&quot;);
 </pre>
 
 
 <h3>hello.api()</h3>
+
 <p>Make calls to the API for getting and posting data</p>
+
 <h4>hello.api( [ path ], [ method ], [ data ], [ callback(json) ] )</h4>
+
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
 		argument</th><th>default</th></tr>
@@ -444,21 +380,29 @@ alert((hello.getAuthResponse(&#39;facebook&#39;)?&quot;Signed&quot;:&#39;Not sig
 		<em>optional</em></td><td>
 		<em>null</em></td></tr>
 </table>
+
+
 <h4>Examples:</h4>
+
 <pre class="tryit">
-hello.api("me", function(json){
-	if(!json||json.error){
-		alert("Whoops!");
-		return;
-	}
-	alert("Your name is "+ json.name);
-});
+	hello.api("me", function(json){
+		if(!json||json.error){
+			alert("Whoops!");
+			return;
+		}
+		alert("Your name is "+ json.name);
+	});
 </pre>
 
 <h2>Event subscription</h2>
-	<h3>hello.subscribe()</h3>
-	<p>Bind a callback to an event. An event maybe triggered by a change in user state or a change in some detail. </p>
-	<h4>hello.subscribe( event, callback );</h4>
+
+<h3>hello.subscribe()</h3>
+
+<p>Bind a callback to an event. An event maybe triggered by a change in user state or a change in some detail. </p>
+
+<h4>hello.subscribe( event, callback );</h4>
+
+
 <table>
 	<thead>
 		<tr>
@@ -485,18 +429,26 @@ hello.api("me", function(json){
 		</tr>
 	</tbody>
 </table>
-	<h4>Example:</h4>
+
+
+<h4>Example:</h4>
+
 <pre class="tryit">
-var sessionstart =  function(){
-	alert("Session has started");
-};
-hello.subscribe("auth.login",sessionstart);
+	var sessionstart =  function(){
+		alert("Session has started");
+	};
+	hello.subscribe("auth.login",sessionstart);
 </pre>
-	<h3>hello.unsubscribe()</h3>
-	<p>Remove a callback, both event name and function must exist</p>
-	<h4>hello.unsubscribe( event, callback );</h4>
+
+
+<h3>hello.unsubscribe()</h3>
+
+<p>Remove a callback, both event name and function must exist</p>
+
+<h4>hello.unsubscribe( event, callback );</h4>
+
 <pre class="tryit">
-hello.unsubscribe("auth.login",sessionstart);
+	hello.unsubscribe("auth.login",sessionstart);
 </pre>
 
 
@@ -511,10 +463,11 @@ request more from the user later.</p>
 
 <form class="setscopes" onsubmit="return false;" style="display:inline-block;">
 
-	<h3>Update scope settings</h3>
-	<p>The table shows how the providers have different scopes, however HelloJS sync's the names, so you only have to ever know what HelloJS calls them.</p> 
+<h3>Update scope settings</h3>
 
-	<p>Select the scopes you want to use and update the current session.</p> 
+<p>The table shows how the providers have different scopes, however HelloJS sync's the names, so you only have to ever know what HelloJS calls them.</p> 
+
+<p>Select the scopes you want to use and update the current session.</p> 
 
 <table>
 	<thead>
@@ -560,19 +513,21 @@ request more from the user later.</p>
 	</tbody>
 </table>
 
-	<p>
-		<button class="zocial google" type="button" onclick="hello.login('google',{scope:$(scopes).serialize().replace(/\&?scopes=/g,',')}, function(){alert('You have signed into google')} );">google</button>
-		<button class="zocial facebook" type="button" onclick="hello.login('facebook',{scope:$(scopes).serialize().replace(/\&?scopes=/g,',')}, function(){alert('You have signed into facebook')});">facebook</button>
-		<button class="zocial windows" type="button" onclick="hello.login('windows',{scope:$(scopes).serialize().replace(/\&?scopes=/g,',')}, function(){alert('You have signed into windows live')});">windows</button>
-	</p>
-</form>
+<p>
+<button class="zocial google" type="button" onclick="hello.login('google',{scope:$(scopes).serialize().replace(/\&?scopes=/g,',')}, function(){alert('You have signed into google')} );">google</button>
+<button class="zocial facebook" type="button" onclick="hello.login('facebook',{scope:$(scopes).serialize().replace(/\&?scopes=/g,',')}, function(){alert('You have signed into facebook')});">facebook</button>
+<button class="zocial windows" type="button" onclick="hello.login('windows',{scope:$(scopes).serialize().replace(/\&?scopes=/g,',')}, function(){alert('You have signed into windows live')});">windows</button>
+</p>
 
+</form>
 
 
 <h2 id="REST API">REST API</h2>
 
 <h3>Path Translation</h3>
+
 <p>hello.js translates paths if there are common paths across services.</p>
+
 <table>
 	<thead>
 		<tr><th><code>hello.js</code></th><th>Facebook</th><th>Windows Live</th><th>Google</th></tr>
@@ -608,39 +563,40 @@ e.g.
 
 <form class="rest" id="playground">
 
-	<h3>Play Ground</h3>
+<h3>Play Ground</h3>
 
-	<button class="windows zocial" type="button" onclick='restTabs("windows:")'>Windows</button>
-	<button class="facebook zocial" type="button" onclick='restTabs("facebook:")'>FaceBook</button>
-	<button class="google zocial" type="button" onclick='restTabs("google:")'>Google</button>
+<button class="windows zocial" type="button" onclick='restTabs("windows:")'>Windows</button>
+<button class="facebook zocial" type="button" onclick='restTabs("facebook:")'>FaceBook</button>
+<button class="google zocial" type="button" onclick='restTabs("google:")'>Google</button>
 
-	<input type="text" name="path" placeholder="Select a path and click `Run`" list="restpaths"/>
+<input type="text" name="path" placeholder="Select a path and click `Run`" list="restpaths"/>
 
-	e.g...
-	<ul>
-		<li>/me</li>
-		<li>/me/friends</li>
-		<li>/me/feed</li>
-		<li>/me/home</li>
-		<li>/me/photos</li>
-		<li>/me/albums</li>
-		<li>/me/videos</li>
-		<li>/me/events</li>
-	</ul>
-	<br />
-	<button type="submit">Run</button><button type="button" onclick="document.getElementById('restoutput').innerHTML = '';">clear</button> <a href="#ScopeandPermissions">update your scopes and permissions</a>
-	<pre id="restoutput" style="min-height:400px;"></pre>
+e.g...
+<ul>
+<li>/me</li>
+<li>/me/friends</li>
+<li>/me/feed</li>
+<li>/me/home</li>
+<li>/me/photos</li>
+<li>/me/albums</li>
+<li>/me/videos</li>
+<li>/me/events</li>
+</ul>
+<br />
+<button type="submit">Run</button><button type="button" onclick="document.getElementById('restoutput').innerHTML = '';">clear</button> <a href="#ScopeandPermissions">update your scopes and permissions</a>
+<pre id="restoutput" style="min-height:400px;"></pre>
 
 </form>
 
 
+<h3>Error handling</h3>
 
-
-	<h3>Error handling</h3>
 <p>For hello.api([path], [<em>callback</em>]) the first parameter of <em>callback</em> 
 upon error will be either <i>boolean (false)</i> or be an error <i>object</i> as 
 described below.</p>
+
 <h4>Error Object</h4>
+
 <table>
 	<thead>
 		<tr><th>name</th><th>type</th></tr>
@@ -661,20 +617,24 @@ described below.</p>
 		Error message</td><td><em>required</em></td><td>n/a</td></tr>
 	</tbody>
 </table>
-	</td></tr>
-	</tbody>
-	</table>
+
+</td></tr>
+</tbody>
+</table>
 
 
 <h2>Extending the services</h2>
-<p>Services are added to HelloJS as "modules" for more information about creating your own modules and examples, go to <a href="./modules/">Modules</a></p>
+<p>Services are added to HelloJS as "modules" for more information about creating your own modules and examples, go to <a href="./modules.html">Modules</a></p>
 
 <h2>OAuth Proxy</h2>
+
 <p>OAuth 1.0 and OAuth 1.0a require a server side handshake with the secret key. OAuth 1 does not use the redirect_uri to verify the application, unlike OAuth2. Making HelloJS work with OAuth1 therefore requires a proxy server to sign requests.</p>
 
 <p>By default the service uses <a href="http://auth-server.herokuapp.com/">http://auth-server.herokuapp.com/</a> as its proxy. Developers may add their own network registration AppID/client_id and secret to this service thus supporting OAuth1.0 and OAuth1.0a web services.</p>
 
-	<h2>Browser Support</h2>
+
+<h2>Browser Support</h2>
+
 <table>
 	<thead>
 	<tr>
@@ -683,10 +643,10 @@ described below.</p>
 		<th><div class="ie9"></div>IE9</th>
 		<th><div class="ie8"></div>IE8</th>
 		<th><div class="ie7"></div>IE7</th>
-		<th><div class="ff"></div></th>
-		<th><div class="cr"></div></th>
-		<th><div class="sa"></div></th>
-		<th><div class="op"></div></th>
+		<th><div class="ff"></div>FF</th>
+		<th><div class="cr"></div>CR</th>
+		<th><div class="sa"></div>SA</th>
+		<th><div class="op"></div>OP</th>
 		<th><div class="op"></div>Mob</th>
 		<th><div class="op"></div>Mini5</th>
 		<th>iOS</th>
@@ -696,252 +656,35 @@ described below.</p>
 	<tbody>
 	<tr>
 		<th>hello.js</th>
-		<td class="yes" colspan=3></td>
-		<td class="yes"><sup>1,2</sup></td>
-		<td class="yes"></td>
-		<td class="yes"></td>
-		<td class="yes"></td>
-		<td class="yes"></td>
-		<td class="yes"></td>
-		<td class="yes"><sup>3</sup></td>
-		<td class="yes"></td>
-		<td class="yes"><sup>4</sup></td>
+		<td>&check;</td>
+		<td>&check;</td>
+		<td>&check;</td>
+		<td>&check;<sup>1,2</sup></td>
+		<td>&check;</td>
+		<td>&check;</td>
+		<td>&check;</td>
+		<td>&check;</td>
+		<td>&check;</td>
+		<td>&check;<sup>3</sup></td>
+		<td>&check;</td>
+		<td>&check;<sup>4</sup></td>
 	</tr>
 	</tbody>
 </table>
+
 <ol>
-	<li><span>IE7</span>: Makes beeping sounds whenever the POST, PUT or DELETE methods are 
-	used - because of the XD, IFrame+Form+hack.</li>
-	<li><span>IE7</span>: Requires JSON.js and localStorage shims</li>
-	<li><span>Opera Mini</span>: Supports inline consent only, i.e. reloads original page.</li>
-	<li><span>WP7</span>: Supports inline consent only, i.e. reloads original page.</li>
+
+<li><span>IE7</span>: Makes beeping sounds whenever the POST, PUT or DELETE methods are 
+used - because of the XD, IFrame+Form+hack.</li>
+<li><span>IE7</span>: Requires JSON.js and localStorage shims</li>
+<li><span>Opera Mini</span>: Supports inline consent only, i.e. reloads original page.</li>
+<li><span>WP7</span>: Supports inline consent only, i.e. reloads original page.</li>
+
 </ol>
 
-<script>
-//<![CDATA[
-	var local = ( /local/.test(window.location.host) ? 1 : 0);
-	function loadScript(a){
-		for(var i=0;i<a.length;i++){
-			document.write('<script src="'+a[i]+'"><\/script>');
-		}
-	}
-	loadScript([['http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js','/_packages/jquery.js'][local]]);
-//]]>
-</script>
-<script>
-
-	/**
-	 * Dump the response from the server after a given element
-	 */
-	function dump(r,target){
-		var $log = $('<pre />');
-		
-		//console.log('Dump');
-		
-		if($(target).get(0).tagName !== 'PRE'){
-			if( $(target).next().get(0).tagName === 'PRE' ){
-				$log = $(target).next();
-			}
-			else {
-				$(target).after($log);
-			}
-		}else{
-			$log = $(target);
-		}
-
-		var i=0;
-		$((function drilldown(name, json){
-			var link;
-			if(typeof(json)!=='object'||json===null||json.length==0){ 
-				return '<b>'+name + '<\/b>: <span class="'+ typeof(json) +'">' + json + '<\/span>';
-			}
-			var s='';
-			for ( var x in json ){
-				s += '<li>'+drilldown(x,json[x])+'<\/li>';
-			}
-			return '<div><a href="javascript:void(0);" class="toggle">'+ name +'</a>: <ul class="hide">' + s + '<\/ul></div>';
-		})(typeof(r),r))
-		.find('a.toggle')
-		.click(function(){
-			$(this).next('ul').toggleClass("hide");
-		})
-		.end()
-		.appendTo($log);
-	}
-
-</script>
-
-<script>
-	function scopes(frm){
-		return $.map($(frm).serializeArray(),function(n,i){
-			return n.value;
-		}).join(',');
-	}
-</script>
-
+<script src="/_packages/jquery.js"></script>
+<script src="assets/index.js"></script>
 <script src="https://raw.github.com/austincheney/Pretty-Diff/master/lib/fulljsmin.js"></script>
-
-<script>
-
-$('#download_form').submit(function (e){
-
-	var all = $('input[name=all]',this).val();
-	$('input[name=all]',this).val("");
-
-	var minify = !!$('input[name=minify]',this).attr('checked');
-
-	e.preventDefault();
-
-	var services = $.map($("input[name=services]","form").filter(!!all?"*":":checked"), function(r){return r.value;});
-
- 	var script = [];
-
-	// download the service via XHR
-	$.ajax({
-		url : "hello.js",
-		dataType : 'text',
-		success : function(r){
-			script.unshift(minify?jsmin({source:r}):r);
-			if(script.length===services.length+1){
-				download( script.join("\n"), "text/plain", "hello.js" );
-			}
-		},
-		error : function(){
-			console.error("whoops");
-		}
-	});
-
-	$(services).each(function(i, name){
-		// download the service via XHR
-		$.ajax({
-			url : 'modules/'+name+".js",
-			dataType : 'text',
-			success : function(r){
-				script.push(minify?jsmin({source:r}):r);
-				if(script.length===services.length+1){
-					download( script.join("\n"), "text/plain", "hello.js" );
-				}
-			},
-			error : function(){
-				console.error("whoops");
-			}
-		});
-	});
-});
-
-
-function download(body, type, filename){
-
-	var blob;
-	try{
-		blob = new Blob([body], { "type" : type||"text/plain" }); // the blob
-	}
-	catch(e){
-		try{
-			var bb = new BlobBuilder();
-			bb.append(body);
-			blob = bb.getBlob("text\/xml");			
-		}catch(e){
-		}
-	}
-
-	if(blob){
-		window.saveAs(blob, filename);
-	}
-	else{
-		window.open("data:"+(type||"text/plain")+";base64,"+btoa(body));
-	}
-}
-
-window.saveAs || ( window.saveAs = (window.navigator.msSaveBlob ? function(b,n){ return window.navigator.msSaveBlob(b,n); } : false) || window.webkitSaveAs || window.mozSaveAs || window.msSaveAs || (function(){
- 
-	// URL's
-	window.URL || (window.URL = window.webkitURL);
- 
-	if(!window.URL){
-		return false;
-	}
- 
-	return function(blob,name){
-		var url = URL.createObjectURL(blob);
- 
-		// Test for download link support
-		if( "download" in document.createElement('a') ){
- 
-			var a = document.createElement('a');
-			a.setAttribute('href', url);
-			a.setAttribute('download', name);
- 
-			// Create Click event
-			var clickEvent = document.createEvent ("MouseEvent");
-			clickEvent.initMouseEvent ("click", true, true, window, 0, 
-				event.screenX, event.screenY, event.clientX, event.clientY, 
-				event.ctrlKey, event.altKey, event.shiftKey, event.metaKey, 
-				0, null);
- 
-			// dispatch click event to simulate download
-			a.dispatchEvent (clickEvent);
- 
-		}
-		else{
-			// fallover, open resource in new tab.
-			window.open(url, '_blank', '');
-		}
-	};
- 
-})() );
-
-</script>
-
-<script>
-function restTabs(path){
-	console.log(path);
-	var input = document.getElementById('playground').elements.path;
-
-	network = ( path.match(/^([^:]+)\:/) || input.value.match(/^([^:]+)\:/) );
-	if(network){
-		network = network[1];
-	}
-
-	var pathname = (path.match(/[^:]+$/)||input.value.match(/[^:]+$/));
-	if(pathname){
-		pathname = pathname[0];
-	}
-
-	path = (network?network+":":'') + (pathname||'');
-
-	var action = function(){
-		input.value = path;
-	};
-
-	if(network){
-		var service = hello.getAuthResponse(network);
-		( !service || (service.expires && service.expires < ((new Date()).getTime()/1e3) ) )
-			? hello.login(network, action)
-			: action();
-	}
-	else{
-		action();
-	}
-}
-
-
-
-$("form.rest").each(function(i){
-	var $frm = $(this).submit(function(e){
-			e.preventDefault();
-			e.stopPropagation();
-			var path = $inpt.val();
-			hello.api( path, function (json, network){
-				dump(path, $pre );
-				dump(json, $pre );
-			});
-		}),
-		$pre = $('pre',this),
-		$inpt = $('input[name=path]', this);
-});
-
-</script>
 
 </body>
 </html>

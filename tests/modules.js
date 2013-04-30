@@ -3,7 +3,7 @@
 // Load all modules
 function loadModule(a){
 	for(var i=0;i<a.length;i++){
-		document.write('<script src="../modules/'+a[i]+'"><\/script>');
+		document.write('<script src="../src/modules/'+a[i]+'"><\/script>');
 	}
 }
 
