@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/_packages/document.css"></script>
+<script src="/_packages/document.js"></script>
+
+<script src="client_ids.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/modules/instagram.js"></script>
+
+<title>HelloJS and Instagram</title>
+<h1>HelloJS and Instagram</h1>
+
+<button id='instagram' onclick="hello.login('instagram');">intagram</button>
+<div id="result"></div>
+<script class="pre">
+hello.subscribe('auth.login', function(r){
+	// Get Profile
+	console.log("auth.login");
+	hello.api(r.network+':/me', function(p){
+		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
+	});
+	hello.api(r.network+':/me/photos', function(r){
+		console.log(r);
+		for(var i=0;i<r.data.length;i++){
+			var li = document.createElement('li');
+			var img = document.createElement('img');
+			img.title = r.data[i].name;
+			img.src=r.data[i].thumbnail;
+			li.appendChild(img);
+			document.getElementById('result').appendChild(li);
+		}
+	});
+});
+
+hello.init({
+	instagram : INSTAGRAM_CLIENT_ID
+},	{redirect_uri:'../redirect.html'});
+</script>

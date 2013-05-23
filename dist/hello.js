@@ -249,7 +249,6 @@ var hello = (function(){
 				client_id	: provider.id,
 				scope		: 'basic',
 				state		: {
-
 					client_id	: provider.id,
 					network		: p.network,
 					display		: p.options.display,
@@ -315,6 +314,13 @@ var hello = (function(){
 			// Convert state to a string
 			qs.state = JSON.stringify(qs.state);
 
+			// Loop through and remove unwanted attributes from the path
+			for(var x in qs){
+				if(qs.hasOwnProperty(x) && _indexOf(['response_type','redirect_uri','state', 'client_id'], x) === -1 ){
+					delete qs[x];
+				}
+			}
+
 			//
 			// URL
 			//
@@ -331,13 +337,13 @@ var hello = (function(){
 			// Trigger how we want this displayed
 			// Calling Quietly?
 			//
-			if( qs.display === 'none' ){
+			if( p.options.display === 'none' ){
 				// signin in the background, iframe
 				_append('iframe', { src : url, style : shy }, 'body');
 			}
 
 			// Triggering popup?
-			else if( qs.display === 'popup'){
+			else if( p.options.display === 'popup'){
 
 				// Trigger callback
 				var popup = window.open(
@@ -806,6 +812,7 @@ var hello = (function(){
 	// [@param,..]
 	//
 	function log() {
+		return;
 		if(typeof arguments[0] === 'string'){
 			arguments[0] = "HelloJS-" + arguments[0];
 		}

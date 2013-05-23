@@ -62,6 +62,11 @@ var GITHUB_CLIENT_ID = {
 	'adodson.com' : 'd934ef34e2e40cf9b00a'
 }[window.location.hostname];
 
+var INSTAGRAM_CLIENT_ID = {
+	'local.knarly.com' : 'bfbbf362ac3148aeb1150e5b8256bbe9',
+	'adodson.com' : '264d13a33ba845f396a152cc326e6f5d'
+}[window.location.hostname];
+
 
 // To make it a little easier
 var CLIENT_IDS_ALL = {

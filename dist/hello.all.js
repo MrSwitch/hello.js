@@ -249,7 +249,6 @@ var hello = (function(){
 				client_id	: provider.id,
 				scope		: 'basic',
 				state		: {
-
 					client_id	: provider.id,
 					network		: p.network,
 					display		: p.options.display,
@@ -315,6 +314,13 @@ var hello = (function(){
 			// Convert state to a string
 			qs.state = JSON.stringify(qs.state);
 
+			// Loop through and remove unwanted attributes from the path
+			for(var x in qs){
+				if(qs.hasOwnProperty(x) && _indexOf(['response_type','redirect_uri','state', 'client_id'], x) === -1 ){
+					delete qs[x];
+				}
+			}
+
 			//
 			// URL
 			//
@@ -331,13 +337,13 @@ var hello = (function(){
 			// Trigger how we want this displayed
 			// Calling Quietly?
 			//
-			if( qs.display === 'none' ){
+			if( p.options.display === 'none' ){
 				// signin in the background, iframe
 				_append('iframe', { src : url, style : shy }, 'body');
 			}
 
 			// Triggering popup?
-			else if( qs.display === 'popup'){
+			else if( p.options.display === 'popup'){
 
 				// Trigger callback
 				var popup = window.open(
@@ -806,6 +812,7 @@ var hello = (function(){
 	// [@param,..]
 	//
 	function log() {
+		return;
 		if(typeof arguments[0] === 'string'){
 			arguments[0] = "HelloJS-" + arguments[0];
 		}
@@ -2253,6 +2260,51 @@ hello.init({
 		}
 	});
 })();
+//
+// GitHub
+//
+hello.init({
+	instagram : {
+		name : 'Instagram',
+		uri : {
+			auth : 'https://instagram.com/oauth/authorize/',
+			base : 'https://api.instagram.com/v1/',
+			'me' : 'users/self',
+			'me/feed' : 'users/self/feed',
+			'me/photos' : 'users/self/media/recent?min_id=0',
+			'me/friends' : 'users/self/follows'
+		},
+		scope : {
+			basic : 'basic'
+		},
+		wrap : {
+			me : function(o){
+
+				if("data" in o ){
+					o.id = o.data.id;
+					o.thumbnail = o.data.profile_picture;
+					o.name = o.data.full_name || o.data.username;
+				}
+				return o;
+			},
+			"me/photos" : function(o){
+				if("data" in o){
+					for(var i=0;i<o.data.length;i++){
+						if(o.data[i].type !== 'image'){
+							delete o.data[i];
+							i--;
+						}
+						o.data[i].thumbnail = o.data[i].images.thumbnail.url;
+						o.data[i].picture = o.data[i].images.standard_resolution.url;
+					}
+				}
+				return o;
+			}
+		},
+		// Use JSONP
+		xhr : false
+	}
+});
 (function(){
 
 function formatUser(o){
@@ -2507,9 +2559,9 @@ hello.init({
 			token	: 'https://api.login.yahoo.com/oauth/v2/get_token'
 		},
 		uri : {
-			base	: "http://social.yahooapis.com/v1/",
-			me		: "http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.profile%20where%20guid%3Dme&format=json",
-			"me/friends"	: 'http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.contacts%20where%20guid=me&format=json'
+			base	: "https://social.yahooapis.com/v1/",
+			me		: "https://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.profile%20where%20guid%3Dme&format=json",
+			"me/friends"	: 'https://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.contacts%20where%20guid=me&format=json'
 		},
 		wrap : {
 			me : function(o){
