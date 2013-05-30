@@ -316,7 +316,7 @@ var hello = (function(){
 
 			// Loop through and remove unwanted attributes from the path
 			for(var x in qs){
-				if(qs.hasOwnProperty(x) && _indexOf(['response_type','redirect_uri','state', 'client_id'], x) === -1 ){
+				if(qs.hasOwnProperty(x) && _indexOf(['response_type','redirect_uri','state', 'client_id', 'scope'], x) === -1 ){
 					delete qs[x];
 				}
 			}
@@ -2296,6 +2296,7 @@ hello.init({
 						}
 						o.data[i].thumbnail = o.data[i].images.thumbnail.url;
 						o.data[i].picture = o.data[i].images.standard_resolution.url;
+						o.data[i].name = o.data[i].caption ? o.data[i].caption.text : null;
 					}
 				}
 				return o;
