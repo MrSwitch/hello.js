@@ -34,6 +34,7 @@ hello.init({
 						}
 						o.data[i].thumbnail = o.data[i].images.thumbnail.url;
 						o.data[i].picture = o.data[i].images.standard_resolution.url;
+						o.data[i].name = o.data[i].caption ? o.data[i].caption.text : null;
 					}
 				}
 				return o;
