@@ -698,14 +698,14 @@ var hello = (function(){
 					win.hello.trigger(obj.network+":"+cb+".failed", obj );
 				}
 				else{
+					// Save on the parent window the new credentials
+					// This fixes an IE10 bug i think... atleast it does for me.
+					win.hello.utils.store(obj.network,obj);
+
 					win.hello.trigger(obj.network+":"+cb+".login", {
 						network : obj.network,
 						authResponse : obj
 					});
-
-					// Save on the parent window the new credentials
-					// This fixes an IE10 bug i think... atleast it does for me.
-					win.hello.utils.store(obj.network,obj);
 				}
 
 				// Update store
