@@ -1,99 +1,13 @@
-#profile{
-	min-height:75px;
-}
-	button.zocial img{
-		height:24px;
-		vertical-align:middle;
-	}
-	button.zocial span{
-		clear:left;
-	}
-
-
-
-/**
- * REST EXPOLORER
- */
-
-ul.tabs{
-	margin:0;
-	padding:0;
-}
-	ul.tabs li{
-		display: inline-block;
-		border:1px solid #eee;
-		background-color: #f4f4f4;
-		padding:5px 10px;
-	}
-
-input[name=path]{
-	display:block;
-	width:100%;
-	padding:5px;
-	box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	font-size:20px;
-	margin:0;
-	border:1px solid #e4e4e4;
-	border-top-width:10px;
-}
-
-#playground > ul,
-#playground > ul > li{
-	display: inline-block;
-	margin:0;
-	padding:0;
-}
-#playground > ul > li:after{
-	content:", ";
-}
-
-#playground > ul > li:hover{
-	background-color: rgba(0,0,0,0.05);
-}
-
-
-.method:before{
-	vertical-align:top;
-	color:white;
-	text-transform:uppercase;
-	padding:3px 0px;
-	border-radius:3px;
-	font-size:0.7em;
-	min-width:60px;
-	text-align:center;
-	display: inline-block;
-	margin:5px;
-}
-
-.method.get:before{
-	content:"GET";
-	background-color: #0F6AB4;
-}
-.method.post:before{
-	content:"POST";
-	background-color: #10A54A;
-}
-.method.put:before{
-	content:"PUT";
-	background-color: #C5862B;
-}
-.method.delete:before{
-	content:"DELETE";
-	background-color: red;
-}
-
-header nav{
-	float: right;
-}
-header nav a{
-	font-size:1.2em;
-	padding:5px;
-	background-color:#F5F7F5;
-	border:1px solid #CCC;
-	display: inline-block;
-	text-decoration: none;
-}
-
-
+#profile{min-height:75px;}
+button.zocial img{height:24px;vertical-align:middle;}
+button.zocial span{clear:left;}
+ul.tabs{margin:0;padding:0;}ul.tabs li{display:inline-block;border:1px solid #eee;background-color:#f4f4f4;padding:5px 10px;}
+input[name=path]{display:block;width:100%;padding:5px;box-sizing:border-box;-webkit-box-sizing:border-box;-moz-box-sizing:border-box;font-size:20px;margin:0;border:1px solid #e4e4e4;border-top-width:10px;}
+#playground>ul>li{display:inline-block;margin:0;padding:0;}#playground>ul>li:after{content:", ";}
+#playground>ul>li:hover{background-color:rgba(0, 0, 0, 0.05);}
+.method:before{vertical-align:top;color:white;text-transform:uppercase;padding:3px 0px;border-radius:3px;font-size:0.7em;min-width:60px;text-align:center;display:inline-block;margin:5px;}
+.method.get:before{content:"GET";background-color:#0F6AB4;}
+.method.post:before{content:"POST";background-color:#10A54A;}
+.method.put:before{content:"PUT";background-color:#C5862B;}
+.method.delete:before{content:"DELETE";background-color:red;}
+header nav{float:right;}header nav a{font-size:1.2em;padding:5px;background-color:#F5F7F5;border:1px solid #CCC;display:inline-block;text-decoration:none;}
