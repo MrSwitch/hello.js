@@ -1,3 +1,6 @@
+//
+// Yahoo
+//
 // Register Yahoo developer
 hello.init({
 	'yahoo' : {

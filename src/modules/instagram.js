@@ -1,5 +1,5 @@
 //
-// GitHub
+// Instagram
 //
 hello.init({
 	instagram : {
