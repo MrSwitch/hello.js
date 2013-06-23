@@ -20,14 +20,11 @@ hello.subscribe('auth.login', function(r){
 		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
 	});
 	hello.api(r.network+':/me/photos', function(r){
-		console.log(r);
 		for(var i=0;i<r.data.length;i++){
-			var li = document.createElement('li');
 			var img = document.createElement('img');
 			img.title = r.data[i].name;
 			img.src=r.data[i].thumbnail;
-			li.appendChild(img);
-			document.getElementById('result').appendChild(li);
+			document.getElementById('result').appendChild(img);
 		}
 	});
 });
