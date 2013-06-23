@@ -316,7 +316,7 @@ var hello = (function(){
 
 			// Loop through and remove unwanted attributes from the path
 			for(var x in qs){
-				if(qs.hasOwnProperty(x) && _indexOf(['response_type','redirect_uri','state', 'client_id', 'scope'], x) === -1 ){
+				if(qs.hasOwnProperty(x) && _indexOf(['response_type','redirect_uri','state', 'client_id', 'scope', 'display'], x) === -1 ){
 					delete qs[x];
 				}
 			}
@@ -698,14 +698,14 @@ var hello = (function(){
 					win.hello.trigger(obj.network+":"+cb+".failed", obj );
 				}
 				else{
+					// Save on the parent window the new credentials
+					// This fixes an IE10 bug i think... atleast it does for me.
+					win.hello.utils.store(obj.network,obj);
+
 					win.hello.trigger(obj.network+":"+cb+".login", {
 						network : obj.network,
 						authResponse : obj
 					});
-
-					// Save on the parent window the new credentials
-					// This fixes an IE10 bug i think... atleast it does for me.
-					win.hello.utils.store(obj.network,obj);
 				}
 
 				// Update store

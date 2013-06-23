@@ -2,28 +2,27 @@
 <link rel="stylesheet" href="/_packages/document.css"></script>
 <script src="/_packages/document.js"></script>
 <script src="client_ids.js"></script>
-
 <h1>Upload Photo Demo with Hello.js</h1>
 
-<blockquote>
+<h2>Please signin to gather a list of Albums you already have created</h2>
 
-	<h2>Signin</h2>
+<button id="windows" onclick="hello.login('windows');">Login Windows</button>
+<button id="facebook" onclick="hello.login('facebook');">Login Facebook</button>
+<button id="google" onclick="hello.login('google');">Login Google</button>
 
-	<button id="windows" onclick="hello.login('windows');">Login Windows</button>
-	<button id="facebook" onclick="hello.login('facebook');">Login Facebook</button>
-	<button id="google" onclick="hello.login('google');">Login Google</button>
+<h2>Upload form</h2>
 
-	<h2>Upload form</h2>
+<form>
 
-	<select id="albums"></select>
+	<label>Please select an album from the dropdown<select id="albums"></select></label>
 
-	<form>
-		<input type="file" id="file"/>
-	</form>
+	<input type="file" id="file"/>
 
 	<button type="button" onclick="upload()">Upload</button>
-	<div id="result"></div>
-</blockquote>
+
+</form>
+
+<div id="result"></div>
 
 <p>Include hello.js + modules</p>
 <script class="pre" src="../src/hello.js"></script>
