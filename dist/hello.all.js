@@ -1783,6 +1783,9 @@ function format_file(o){
 		// this is a file, let it through unformatted
 		return;
 	}
+	if("error" in o){
+		return;
+	}
 
 	var path = o.root + o.path.replace(/\&/g, '%26');
 	if(o.thumb_exists){
