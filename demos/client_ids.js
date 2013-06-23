@@ -67,6 +67,11 @@ var INSTAGRAM_CLIENT_ID = {
 	'adodson.com' : '264d13a33ba845f396a152cc326e6f5d'
 }[window.location.hostname];
 
+var BOX_CLIENT_ID = {
+	'local.knarly.com' : 'rdyb5se2fcuioryle3qdw2wcrps959x4',
+	'adodson.com' : '264d13a33ba845f396a152cc326e6f5d'
+}[window.location.hostname];
+
 
 // To make it a little easier
 var CLIENT_IDS_ALL = {
@@ -76,6 +81,7 @@ var CLIENT_IDS_ALL = {
 	dropbox : DROPBOX_CLIENT_ID,
 	twitter : TWITTER_CLIENT_ID,
 	yahoo : YAHOO_CLIENT_ID,
+	instagram : INSTAGRAM_CLIENT_ID,
 	linkedin : LINKEDIN_CLIENT_ID,
 	soundcloud : SOUNDCLOUD_CLIENT_ID,
 	foursquare : FOURSQUARE_CLIENT_ID,

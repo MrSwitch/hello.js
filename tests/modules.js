@@ -14,6 +14,7 @@ loadModule([
 	'dropbox.js',
 	'twitter.js',
 	'yahoo.js',
+	'instagram.js',
 	'linkedin.js',
 	'foursquare.js',
 	'github.js',
