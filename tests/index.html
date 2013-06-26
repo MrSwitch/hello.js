@@ -117,6 +117,10 @@
 	</blockquote>
 
 <table>
+	<colgroup>
+		<col></col>
+		<col style="background:#E9E9E9;"></col>
+	</colgroup>
 	<thead>
 		<tr>
 			<th>method</th>
@@ -128,7 +132,7 @@
 	</thead>
 	<tbody data-bind="foreach: tests">
 		<tr data-bind="css: {debug: debug()}">
-			<td class="method" data-bind="click:function(){debug()?debug(false):debug(true);}"><span data-bind="attr:{ 'class' : method }, text:method"></span> <b data-bind="text: path"></b></td>
+			<td class="method" data-bind="click:function(){debug()?debug(false):debug(true);}"><span data-bind="attr:{ 'class' : method }, text:method"></span> <b data-bind="text: path"></b><p data-bind="text:title"></p></td>
 			<td>
 				<!-- ko foreach:scope -->
 				<label><input type="checkbox" data-bind="checked:$root.checkedScopes, value:$data"/><span data-bind="text:$data"></span></label>
@@ -197,6 +201,7 @@ var reg = {
 
 var tests = [
 	{
+		title : "Get my profile",
 		method : 'get',
 		path : 'me',
 		expected : {
@@ -209,6 +214,7 @@ var tests = [
 		}
 	},
 	{
+		title : "List my friends",
 		test : ['facebook', 'google', 'windows', 'linkedin', 'twitter', 'github', 'yahoo'],
 		method : 'get',
 		path : 'me/friends',
@@ -221,6 +227,7 @@ var tests = [
 		}
 	},
 	{
+		title : "List my recent status messages",
 		test : ['facebook', 'google', 'windows', 'twitter'],
 		method : 'get',
 		path : 'me/share',
@@ -229,6 +236,7 @@ var tests = [
 		}
 	},
 	{
+		title : "Post a status message for me",
 		test : ['facebook', 'google', 'windows', 'twitter'],
 		method : 'post',
 		path : 'me/share',
@@ -240,6 +248,7 @@ var tests = [
 		}
 	},
 	{
+		title : "List my albums",
 		test : ['facebook', 'google', 'windows'],
 		method : 'get',
 		path : 'me/albums',
@@ -254,6 +263,7 @@ var tests = [
 		}
 	},
 	{
+		title : "List my photos from one of my Albums",
 		test : ['facebook', 'google', 'windows'],
 		method : 'get',
 		path : '[ALBUM_ID]',
@@ -277,6 +287,7 @@ var tests = [
 		}
 	},
 	{
+		title : "List my photos",
 		test : ['facebook', 'google', 'windows', 'instagram'],
 		method : 'get',
 		path : 'me/photos',
@@ -290,6 +301,7 @@ var tests = [
 		}
 	},
 	{
+		title : "Get a photo by ID",
 		test : ['facebook', 'google', 'windows'],
 		method : 'get',
 		path : '[PHOTO_ID]',
@@ -322,6 +334,7 @@ var tests = [
 		}
 	},
 	{
+		title : "Create a new Album",
 		test : ['facebook', 'google', 'windows'],
 		method : 'post',
 		path : 'me/albums',
@@ -335,6 +348,7 @@ var tests = [
 		}
 	},
 	{
+		title : "Upload image to Album",
 		test : ['facebook', 'google', 'windows'],
 		method : 'post',
 		path : '[ALBUM_ID]/upload_location',
@@ -368,6 +382,42 @@ var tests = [
 		}
 	},
 	{
+		title : "Add image to Album via URL",
+		test : ['facebook'],
+		method : 'post',
+		path : '[ALBUM_ID]/upload_location',
+		scope : ["publish_files"],
+		setup : function(test, callback){
+			hello.api(test.network+":me/albums", function(r){
+				if("data" in r && r.data.length > 0){
+
+					// Find the one with the name "New test album"
+					for(var i=0;i<r.data.length;i++){
+						if(r.data[i].name === "TestAlbum"){
+
+							// redefine the new test album
+							test.path = r.data[i].upload_location;
+							callback();
+							return;
+						}
+					}
+					callback("Failed to setup: Could not find the album 'TestAlbum'");
+				}
+				else{
+					callback("Failed to setup: the user has no Albums");
+				}
+			})
+		},
+		data : {
+			url : "http://adodson.com/hello.js/assets/logo.png",
+			name : "Hello"
+		},
+		expected : {
+			id : reg.string
+		}
+	},
+	{
+		title : "Remove an album",
 		test : ['facebook', 'google', 'windows'],
 		method : 'delete',
 		path : '[ALBUM_ID]',
@@ -396,6 +446,7 @@ var tests = [
 		}
 	},
 	{
+		title : "List my files",
 		test : ['facebook', 'google', 'windows','dropbox'],
 		method : 'get',
 		path : 'me/files',
@@ -431,6 +482,7 @@ function Test(test,network,parent){
 
 	this.scope = ko.observableArray(test.scope||[]);
 	this.setup = test.setup;
+	this.title = test.title;
 	this.network = network;
 
 	this.variants = ko.observableArray([]);
