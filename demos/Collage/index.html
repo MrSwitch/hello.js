@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <link rel="stylesheet" href="style.css" />
-<script src../src/hello.js/demos/client_ids.js"></script>
-<script src../src/hello.js/hello.all.js"></script>
+<script src="../client_ids.js"></script>
+<script src="../../dist/hello.all.js"></script>
 <script src="fabric.js"></script>
 <script src="/_packages/track.js"></script>
 <header>
@@ -14,6 +14,7 @@
 	<p>Play around with your images from 
 
 		<button onclick="loadImages('windows')">Skydrive</button>,
+		<button onclick="loadImages('flickr')">Flickr</button>,
 		<button onclick="loadImages('facebook')">FaceBook</button> or
 		<button onclick="loadImages('google')">Google</button>
 
@@ -102,6 +103,7 @@ function loadImages(network){
 	});
 };
 
-hello.init(CLIENT_IDS,{scope:'photos',redirect_uri../src/hello.js/redirect.html"});
+CLIENT_IDS.flickr = FLICKR_CLIENT_ID;
+hello.init(CLIENT_IDS,{scope:'photos',redirect_uri="../../redirect.html"});
 
 </script>

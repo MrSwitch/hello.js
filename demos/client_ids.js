@@ -72,6 +72,11 @@ var BOX_CLIENT_ID = {
 	'adodson.com' : '264d13a33ba845f396a152cc326e6f5d'
 }[window.location.hostname];
 
+var FLICKR_CLIENT_ID = {
+	'local.knarly.com' : 'XXXXXXX',
+	'adodson.com' : 'YYYYYYYY'
+}[window.location.hostname];
+
 
 // To make it a little easier
 var CLIENT_IDS_ALL = {
@@ -85,7 +90,8 @@ var CLIENT_IDS_ALL = {
 	linkedin : LINKEDIN_CLIENT_ID,
 	soundcloud : SOUNDCLOUD_CLIENT_ID,
 	foursquare : FOURSQUARE_CLIENT_ID,
-	github : GITHUB_CLIENT_ID
+	github : GITHUB_CLIENT_ID,
+	flickr: FLICKR_CLIENT_ID
 };
 
 
