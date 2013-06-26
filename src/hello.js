@@ -1371,7 +1371,9 @@ var hello = (function(){
 		};
 
 		pathFunc(function(qs){
-				qs.callback = cb_name;
+				for(var x in qs){ if(qs.hasOwnProperty(x)){
+					if (qs[x] === '?') qs[x] = cb_name;
+				}}
 			}, function(url){
 
 			// Build script tag
