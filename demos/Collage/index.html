@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <link rel="stylesheet" href="style.css" />
 <script src="../client_ids.js"></script>
-<script src="../../dist/hello.all.js"></script>
+<script src="../../src/hello.js"></script>
+<script src="../../src/modules/flickr.js"></script>
+<script src="../../src/modules/windows.js"></script>
+<script src="../../src/modules/facebook.js"></script>
+<script src="../../src/modules/google.js"></script>
 <script src="fabric.js"></script>
 <script src="/_packages/track.js"></script>
 <header>
@@ -104,6 +108,10 @@ function loadImages(network){
 };
 
 CLIENT_IDS.flickr = FLICKR_CLIENT_ID;
-hello.init(CLIENT_IDS,{scope:'photos',redirect_uri="../../redirect.html"});
+hello.init(CLIENT_IDS,{
+	scope:'photos',
+	redirect_uri:"../../redirect.html",
+	oauth_proxy : OAUTH_PROXY_URL
+});
 
 </script>

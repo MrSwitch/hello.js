@@ -73,8 +73,8 @@ var BOX_CLIENT_ID = {
 }[window.location.hostname];
 
 var FLICKR_CLIENT_ID = {
-	'local.knarly.com' : 'XXXXXXX',
-	'adodson.com' : 'YYYYYYYY'
+	'local.knarly.com' : '46dfea40b0f9d3765bc598966b5955d3',
+	'adodson.com' : '8d7cfb86e6d6bfab49579c3bfdb95796'
 }[window.location.hostname];
 
 

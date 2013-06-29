@@ -9,6 +9,7 @@ function loadModule(a){
 
 loadModule([
 	'facebook.js',
+	'flickr.js',
 	'google.js',
 	'windows.js',
 	'dropbox.js',
