@@ -33,23 +33,25 @@ hello.init({
 			// It might be better to loop through the social.relationshipd table with has unique ID's of users.
 			"me/friends" : function(o){
 				var contact,field;
-				o.data = o.query.results.contact;
-				delete o.query;
-				for(var i=0;i<o.data.length;i++){
-					contact = o.data[i];
-					o.data[i].id = null;
-					for(var j=0;j<contact.fields.length;j++){
-						field = contact.fields[j];
-						if(field.type === 'email'){
-							o.data[i].email = field.value;
-						}
-						if(field.type === 'name'){
-							o.data[i].first_name = field.value.givenName;
-							o.data[i].last_name = field.value.familyName;
-							o.data[i].name = field.value.givenName + ' ' + field.value.familyName;
-						}
-						if(field.type === 'yahooid'){
-							o.data[i].id = field.value;
+				if(o.query&&o.query.results&&o.query.results.contact){
+					o.data = o.query.results.contact;
+					delete o.query;
+					for(var i=0;i<o.data.length;i++){
+						contact = o.data[i];
+						o.data[i].id = null;
+						for(var j=0;j<contact.fields.length;j++){
+							field = contact.fields[j];
+							if(field.type === 'email'){
+								o.data[i].email = field.value;
+							}
+							if(field.type === 'name'){
+								o.data[i].first_name = field.value.givenName;
+								o.data[i].last_name = field.value.familyName;
+								o.data[i].name = field.value.givenName + ' ' + field.value.familyName;
+							}
+							if(field.type === 'yahooid'){
+								o.data[i].id = field.value;
+							}
 						}
 					}
 				}

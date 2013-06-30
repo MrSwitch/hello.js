@@ -4,6 +4,9 @@
 (function(){
 
 function formatUser(o){
+	if(!o.error){
+		return;
+	}
 	o.first_name = o.firstName;
 	o.last_name = o.lastName;
 	o.name = o.formattedName || (o.first_name + ' ' + o.last_name);

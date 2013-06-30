@@ -457,15 +457,15 @@ var hello = (function(){
 			//
 			// Callback wrapper?
 			// Change the incoming values so that they are have generic values according to the path that is defined
-			var callback = function(r){
+			var callback = function(r,code){
 				if( o.wrap && ( (p.path in o.wrap) || ("default" in o.wrap) )){
 					var wrap = (p.path in o.wrap ? p.path : "default");
 					var time = (new Date()).getTime();
-					r = o.wrap[wrap](r);
+					r = o.wrap[wrap](r,code);
 					log("Processig took" + ((new Date()).getTime() - time));
 				}
 				log("API: "+p.method.toUpperCase()+" '"+p.path+"' (response)", r);
-				p.callback(r);
+				p.callback(r,code);
 			};
 
 			// push out to all networks
@@ -518,8 +518,8 @@ var hello = (function(){
 					// the delete callback needs a better response
 					if(p.method === 'delete'){
 						var _callback = callback;
-						callback = function(r){
-							_callback((!r||_isEmpty(r))? {response:'deleted'} : r);
+						callback = function(r, code){
+							_callback((!r||_isEmpty(r))? {response:'deleted'} : r, code);
 						};
 					}
 
@@ -1258,9 +1258,19 @@ var hello = (function(){
 			var json = r.response;
 			try{
 				json = JSON.parse(r.responseText);
-			}catch(_e){}
-			
-			callback( json || ( method!=='DELETE' ? {error:{message:"Could not get resource"}} : {} ));
+			}catch(_e){
+				if(r.status===401){
+					json = {
+						error : {
+							code : "access_denied",
+							message : r.statusText
+						}
+					};
+				}
+			}
+
+
+			callback( json || ( method!=='DELETE' ? {error:{message:"Could not get resource"}} : {} ), r.status );
 		};
 		r.onerror = function(e){
 			var json = r.responseText;
@@ -1268,7 +1278,10 @@ var hello = (function(){
 				json = JSON.parse(r.responseText);
 			}catch(_e){}
 
-			callback(json||{error:{message:"There was an error accessing network"}});
+			callback(json||{error:{
+				code: "access_denied",
+				message: "Could not get resource"
+			}});
 		};
 
 		var qs = {}, x;

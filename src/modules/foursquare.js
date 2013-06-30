@@ -18,6 +18,15 @@ hello.init({
 		},
 		wrap : {
 			me : function(o){
+				if(o.meta&&o.meta.code===400){
+					o = {
+						error : {
+							code : "access_denied",
+							message : o.meta.errorDetail
+						}
+					};
+					return o;
+				}
 				o = o.response.user;
 				if(o.id){
 					o.thumbnail = o.photo.prefix + '100x100'+ o.photo.suffix;
@@ -27,7 +36,7 @@ hello.init({
 			},
 			'default' : function(){
 
-			} 
+			}
 		}
 	}
 });

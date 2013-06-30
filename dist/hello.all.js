@@ -457,15 +457,15 @@ var hello = (function(){
 			//
 			// Callback wrapper?
 			// Change the incoming values so that they are have generic values according to the path that is defined
-			var callback = function(r){
+			var callback = function(r,code){
 				if( o.wrap && ( (p.path in o.wrap) || ("default" in o.wrap) )){
 					var wrap = (p.path in o.wrap ? p.path : "default");
 					var time = (new Date()).getTime();
-					r = o.wrap[wrap](r);
+					r = o.wrap[wrap](r,code);
 					log("Processig took" + ((new Date()).getTime() - time));
 				}
 				log("API: "+p.method.toUpperCase()+" '"+p.path+"' (response)", r);
-				p.callback(r);
+				p.callback(r,code);
 			};
 
 			// push out to all networks
@@ -518,8 +518,8 @@ var hello = (function(){
 					// the delete callback needs a better response
 					if(p.method === 'delete'){
 						var _callback = callback;
-						callback = function(r){
-							_callback((!r||_isEmpty(r))? {response:'deleted'} : r);
+						callback = function(r, code){
+							_callback((!r||_isEmpty(r))? {response:'deleted'} : r, code);
 						};
 					}
 
@@ -1258,9 +1258,19 @@ var hello = (function(){
 			var json = r.response;
 			try{
 				json = JSON.parse(r.responseText);
-			}catch(_e){}
-			
-			callback( json || ( method!=='DELETE' ? {error:{message:"Could not get resource"}} : {} ));
+			}catch(_e){
+				if(r.status===401){
+					json = {
+						error : {
+							code : "access_denied",
+							message : r.statusText
+						}
+					};
+				}
+			}
+
+
+			callback( json || ( method!=='DELETE' ? {error:{message:"Could not get resource"}} : {} ), r.status );
 		};
 		r.onerror = function(e){
 			var json = r.responseText;
@@ -1268,7 +1278,10 @@ var hello = (function(){
 				json = JSON.parse(r.responseText);
 			}catch(_e){}
 
-			callback(json||{error:{message:"There was an error accessing network"}});
+			callback(json||{error:{
+				code: "access_denied",
+				message: "Could not get resource"
+			}});
 		};
 
 		var qs = {}, x;
@@ -2214,6 +2227,15 @@ hello.init({
 		},
 		wrap : {
 			me : function(o){
+				if(o.meta&&o.meta.code===400){
+					o = {
+						error : {
+							code : "access_denied",
+							message : o.meta.errorDetail
+						}
+					};
+					return o;
+				}
 				o = o.response.user;
 				if(o.id){
 					o.thumbnail = o.photo.prefix + '100x100'+ o.photo.suffix;
@@ -2223,7 +2245,7 @@ hello.init({
 			},
 			'default' : function(){
 
-			} 
+			}
 		}
 	}
 });
@@ -2244,17 +2266,31 @@ hello.init({
 			'me/friends' : 'user/following'
 		},
 		wrap : {
-			me : function(o){
+			me : function(o,code){
 				if(o.id){
 					o.picture = o.avatar_url;
 					o.thumbnail = o.avatar_url;
 					o.name = o.login;
 				}
+				else if(code===401||code===403){
+					o.error = {
+						code : "access_denied",
+						message : o.message
+					};
+					delete o.message;
+				}
 				return o;
 			},
-			"me/friends" : function(o){
+			"me/friends" : function(o,code){
 				if(Object.prototype.toString.call(o) === '[object Array]'){
 					return {data:o};
+				}
+				else if(code===401||code===403){
+					o.error = {
+						code : "access_denied",
+						message : o.message
+					};
+					delete o.message;
 				}
 				return o;
 			}
@@ -2532,6 +2568,9 @@ hello.init({
 (function(){
 
 function formatUser(o){
+	if(!o.error){
+		return;
+	}
 	o.first_name = o.firstName;
 	o.last_name = o.lastName;
 	o.name = o.formattedName || (o.first_name + ' ' + o.last_name);
@@ -2811,23 +2850,25 @@ hello.init({
 			// It might be better to loop through the social.relationshipd table with has unique ID's of users.
 			"me/friends" : function(o){
 				var contact,field;
-				o.data = o.query.results.contact;
-				delete o.query;
-				for(var i=0;i<o.data.length;i++){
-					contact = o.data[i];
-					o.data[i].id = null;
-					for(var j=0;j<contact.fields.length;j++){
-						field = contact.fields[j];
-						if(field.type === 'email'){
-							o.data[i].email = field.value;
-						}
-						if(field.type === 'name'){
-							o.data[i].first_name = field.value.givenName;
-							o.data[i].last_name = field.value.familyName;
-							o.data[i].name = field.value.givenName + ' ' + field.value.familyName;
-						}
-						if(field.type === 'yahooid'){
-							o.data[i].id = field.value;
+				if(o.query&&o.query.results&&o.query.results.contact){
+					o.data = o.query.results.contact;
+					delete o.query;
+					for(var i=0;i<o.data.length;i++){
+						contact = o.data[i];
+						o.data[i].id = null;
+						for(var j=0;j<contact.fields.length;j++){
+							field = contact.fields[j];
+							if(field.type === 'email'){
+								o.data[i].email = field.value;
+							}
+							if(field.type === 'name'){
+								o.data[i].first_name = field.value.givenName;
+								o.data[i].last_name = field.value.familyName;
+								o.data[i].name = field.value.givenName + ' ' + field.value.familyName;
+							}
+							if(field.type === 'yahooid'){
+								o.data[i].id = field.value;
+							}
 						}
 					}
 				}
