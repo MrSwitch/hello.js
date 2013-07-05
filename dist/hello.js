@@ -351,6 +351,9 @@ var hello = (function(){
 					'Authentication',
 					"resizeable=true,height=550,width=500,left="+((window.innerWidth-500)/2)+",top="+((window.innerHeight-550)/2)
 				);
+				// Ensure popup window has focus upon reload, Fix for FF.
+				popup.focus();
+
 				var self = this;
 				var timer = setInterval(function(){
 					if(popup.closed){
