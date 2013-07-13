@@ -93,6 +93,14 @@
 	pre *{
 		word-break:break-word;
 	}
+	th{
+		font-weight: normal;
+	}
+
+	a:hover{
+		cursor:pointer;
+		text-decoration: underline;
+	}
 
 
 </style>
@@ -126,7 +134,7 @@
 			<th>method</th>
 			<th><label><input type="checkbox" data-bind="checked: scopes().length===checkedScopes().length, click:function(){ scopes().length===checkedScopes().length ? checkedScopes.removeAll() : checkAllScopes() }">scopes </label></th>
 			<!-- ko foreach:networks -->
-			<th><button data-bind="click:login, attr:{'class':'zocial icon ' + name, title:'Signin to '+ displayName}" title="Signin"></button><button data-bind="click:runAll" class="run" title="Run all tests in this column"></button></th>
+			<th><button data-bind="click:login, attr:{'class':'zocial icon ' + name, title:'Signin to '+ displayName}" title="Signin"></button><button data-bind="click:runAll" class="run" title="Run all tests in this column"></button><a data-bind="click:logout, visible:online" title="Logout">logout</a></th>
 			<!-- /ko -->
 		</tr>
 	</thead>
@@ -459,6 +467,36 @@ var tests = [
 				photos : reg.string
 			}]
 		}
+	},
+	{
+		title : "Create a directory",
+		test : ['dropbox'],
+		method : 'post',
+		path : 'me/files',
+		scope : ["files"],
+		expected : {
+			data : [{
+				id : reg.string,
+				name : reg.name,
+				picture : reg.url,
+				photos : reg.string
+			}]
+		}
+	},
+	{
+		title : "Upload my file",
+		test : ['dropbox'],
+		method : 'post',
+		path : 'me/files',
+		scope : ["files"],
+		data : {
+			file : "/hello.js/assets/logo.png",
+			name : "HelloLogo.png"
+		},
+		expected : {
+			id : reg.string,
+			name : reg.name
+		}
 	}
 ];
 
@@ -614,6 +652,10 @@ function Provider(network){
 	this.login = function(){
 		hello.login(network, {scope: model.checkedScopes() });
 	};
+	this.logout = function(){
+		this.online(false);
+		hello.logout(network);
+	};
 	this.online = ko.observable(false);
 }
 
@@ -664,7 +706,7 @@ ko.utils.arrayForEach( Object.keys(CLIENT_IDS_ALL), function(network){
 // Subscribe to the authentication
 hello.subscribe('auth.login', function(o){
 	ko.utils.arrayForEach( model.networks(), function(network){
-		if(o.network===network){
+		if(o.network===network.name){
 			network.online(true);
 		}
 	});	
