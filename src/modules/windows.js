@@ -74,15 +74,7 @@ hello.init({
 				return o;
 			}
 		},
-		xhr : function(p){
-			if(p.method==='post'&& !hello.utils.hasBinary(p.data) ){
-				p.data = JSON.stringify(p.data);
-				p.headers = {
-					'Content-Type' : 'application/json'
-				};
-			}
-			return true;
-		},
+		xhr : false,
 		jsonp : function(p){
 			if( p.method.toLowerCase() !== 'get'){
 				//p.data = {data: JSON.stringify(p.data), method: p.method.toLowerCase()};
