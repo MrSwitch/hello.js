@@ -76,7 +76,7 @@ hello.init({
 		},
 		xhr : false,
 		jsonp : function(p){
-			if( p.method.toLowerCase() !== 'get'){
+			if( p.method.toLowerCase() !== 'get' && !hello.utils.hasBinary(p.data) ){
 				//p.data = {data: JSON.stringify(p.data), method: p.method.toLowerCase()};
 				p.data.method = p.method.toLowerCase();
 				p.method = 'get';

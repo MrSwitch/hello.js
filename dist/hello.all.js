@@ -1208,15 +1208,15 @@ var hello = (function(){
 				var url = _qs(proxy, {
 					path : path,
 					access_token : token||'',
-					method : method,
-					data : (data ? JSON.stringify(data) : null)
+					method : method
+//					data : (data ? JSON.stringify(data) : null)
 				});
 
 				if("withCredentials" in new XMLHttpRequest()){
-					_xhr("GET", url, null, null, callback);
+					_xhr(method, url, null, data, callback);
 				}
 				else{
-					_jsonp(url + "&callback=?", callback);
+					_jsonp(_qs( url, {callback:'?',data: JSON.stringify(data)}), callback);
 				}
 			}
 			else{
@@ -1532,13 +1532,14 @@ var hello = (function(){
 
 		// Add some additional query parameters to the URL
 		var qs = {
-			"suppress_response_codes":true,
+//			"suppress_response_codes":true,
 			'redirect_uri':hello.settings.redirect_uri,
-			'state':JSON.stringify({callback:callbackID}),
-			'callbackUrl':hello.settings.redirect_uri,
-			'redirect-uri':hello.settings.redirect_uri
+			'state':JSON.stringify({callback:callbackID})
+//			,
+//			'callbackUrl':hello.settings.redirect_uri,
+//			'redirect-uri':hello.settings.redirect_uri
 		};
-		qs = {};
+		//qs = {};
 
 		// if we are just posting a single item
 		if( _domInstance('form', data) ){
@@ -2802,7 +2803,7 @@ hello.init({
 		},
 		xhr : false,
 		jsonp : function(p){
-			if( p.method.toLowerCase() !== 'get'){
+			if( p.method.toLowerCase() !== 'get' && !hello.utils.hasBinary(p.data) ){
 				//p.data = {data: JSON.stringify(p.data), method: p.method.toLowerCase()};
 				p.data.method = p.method.toLowerCase();
 				p.method = 'get';

@@ -20,69 +20,31 @@ hello.ui.filePicker = function(options, callback){
 		options = {};
 	}
 
-	var main_el = doc.createElement('div');
-	main_el.id = prefix + "main";
-	main_el.innerHTML = '<div id="'+prefix+'header">'
-		+'<div id="'+prefix+'nav">'
-		+'</div>'
-		+'	<div id="'+prefix+'path">'
-		+'		<button id="'+prefix+'upload_btn">Upload</button>'
-		+'	</div>'
-		+'</div>'
-		+'<div id="'+prefix+'body">'
-		+'	<ul id="'+prefix+'local"></ul>'
-		+'	<div id="'+prefix+'camera">'
-		+' 		<video autoplay=true></video><button>Snap</button><ul id="'+prefix+'snaps"></ul>'
-		+'  </div>'
-		+'</div>'
-		+'<div id="'+prefix+'footer"><span id="'+prefix+'info">none</span><button id="'+prefix+'done">Done</button> <button id="'+prefix+'cancel">Cancel</button><span>"Esc"</span></div>';
-
-	// Popup?
-	/*
-	if(options.display === 'popup'){
-		win = window.open(null, "FilePicker", "height=550,width=800,left="+((window.innerWidth-800)/2)+",top="+((window.innerHeight-550)/2));
-		// Define the window body as the element to append to
-		options.element = win.document.body;
-		doc = win.document;
-		// Grab the CSS stylesheet and inject it into the win.head
-		options.stylesheet || (options.stylesheet = (function(){
-			var links = document.getElementsByTagName('link');
-			for(var i=0;i<links.length;i++){
-				if(links[i].rel === "stylesheet" && links[i].href.match(/FilePicker.css$/i)){
-					return links[i].href;
-				}
-			}
-		})());
-		var css = doc.createElement('link');
-		css.rel="stylesheet";
-		css.href=options.stylesheet;
-		doc.head.appendChild(css);
-	}
-	*/
+	var main_el = create('div', {'class':prefix + "main"});
+		var head_el = create('div', {'class':prefix + "head"}, main_el);
+			var nav_el = create('div', {'class':prefix + "nav"}, head_el);
+			var path_el = create('div', {'class':prefix + "path"}, head_el);
+				var upload_btn = create('button', {'class':prefix + "upload_btn", "text":'Upload'}, path_el);
+		var body_el = create('div', {'class':prefix + "body"}, main_el);
+			var select_el = create('ul', {'class':prefix + "local", id:prefix + "local"}, body_el);
+			var camera_el = create('div', {'class':prefix + "camera",id:prefix + "camera"}, body_el);
+				var video_el = create('video', {'autoplay':true}, camera_el);
+				var snap_btn = create('button', {}, camera_el);
+		var footer_el = create('div', {'class':prefix + "footer"}, main_el);
+			var info_el = create('span', {'class':prefix + "info", 'text':'none'}, footer_el);
+			var done_el = create('button', {'class':prefix + "button", 'text':'Done'}, footer_el);
+			var cancel_el = create('button', {'class':prefix + "cancel", 'text':'Cancel'}, footer_el);
 
 	// Container
 	if(!options.element){
-		main_el.className = prefix + 'noframe';
+		main_el.className = main_el.className + " " + prefix + 'noframe';
 		options.element = document.body;
 	}
 
 	options.element.appendChild(main_el);
 
 
-	var home_el = doc.getElementById(prefix+"default"),
-		nav_el = doc.getElementById(prefix+"nav"),
-		body_el = doc.getElementById(prefix+"body"),
-		path_el = doc.getElementById(prefix+"path"),
-		select_el = doc.getElementById(prefix+"local"),
-		upload_btn = doc.getElementById(prefix+"upload_btn"),
-		done_el = doc.getElementById(prefix+"done"),
-		camera_el = doc.getElementById(prefix+"camera"),
-		snaps_el = camera_el.getElementsByTagName("ul")[0],
-
-		info_el = doc.getElementById(prefix+"info"),
-		cancel_el = doc.getElementById(prefix+"cancel"),
-
-		global_counter = 0,
+	var global_counter = 0,
 		ref = [],
 		current_bucket = select_el,
 		current_network = null,
@@ -684,6 +646,22 @@ hello.ui.filePicker = function(options, callback){
 		} else {
 			obj.detachEvent("on" + eventName, listener);
 		}
+	}
+
+	function create(type,attr,parent){
+		var el = doc.createElement(type);
+		for(var x in attr){
+			if(x==='text'){
+				el.innerHTML = attr[x];
+			}
+			else{
+				el.setAttribute(x,attr[x]);
+			}
+		}
+		if(parent){
+			parent.appendChild(el);
+		}
+		return el;
 	}
 
 	addEvent(doc, "keydown", function self(e){
