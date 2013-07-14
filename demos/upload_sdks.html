@@ -7,7 +7,7 @@
 
 <blockquote>
 	<h2>Signin buttons</h2>
-	<button id="windows" onclick="WL.login();">Login Windows</button>
+	<button id="windows" onclick="WL.logout();WL.login('wl.skydrive_update');">Login Windows</button>
 	<button id="facebook" onclick="FB.login();">Login Facebook</button>
 	<button id="google">Login Google</button>
 
@@ -32,7 +32,7 @@
 
 <p>Include both the SDK's</p>
 <script src="//connect.facebook.net/en_US/all.js" class="pre"></script>
-<script src="//js.live.net/v5.0/wl.js" class="pre"></script>
+<script src="//js.live.net/v5.0/wl.debug.js" class="pre"></script>
 <script src="https://apis.google.com/js/client.js?onload=gapiLoaded" class="pre"></script>
 
 <p>Add event listeners for the login completed event and make a request for the users profile. Once that's loaded push it to the page. </p>
@@ -109,7 +109,7 @@ function uploadWL(){
 	WL.upload({
 		path:document.getElementById('wl_albums').value,
 		element:'file',
-		overwrite:false
+		overwrite:true
 	}).then(function(e){
 		console.log("Success");
 		console.log(e);
@@ -122,7 +122,7 @@ function uploadFB(){
 	FB.upload({
 		path:document.getElementById('fb_albums').value,
 		element:'file',
-		overwrite:false
+		overwrite:true
 	}).then(function(e){
 		console.log("Success");
 		console.log(e);
