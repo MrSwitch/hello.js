@@ -12,22 +12,35 @@
 
 <button id='instagram' onclick="hello.login('instagram');">intagram</button>
 <div id="result"></div>
+<button id="more" style="display:none;">Load more</button>
 <script class="pre">
+
+var more = document.getElementById('more');
+
 hello.subscribe('auth.login', function(r){
 	// Get Profile
 	console.log("auth.login");
 	hello.api(r.network+':/me', function(p){
 		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
 	});
-	hello.api(r.network+':/me/photos', function(r){
+
+	getPhotos(r.network+':/me/photos', null);
+});
+
+function getPhotos(path, data){
+	hello.api(path, data, function(r){
 		for(var i=0;i<r.data.length;i++){
 			var img = document.createElement('img');
 			img.title = r.data[i].name;
 			img.src=r.data[i].thumbnail;
 			document.getElementById('result').appendChild(img);
 		}
+		more.style.display = r.pagination && r.pagination.next_url ? 'block' : 'none';
+		if(r.pagination&&r.pagination.next_max_id){
+			more.onclick = function(){getPhotos('instagram:/me/photos',{max_id:r.pagination.next_max_id});};
+		}
 	});
-});
+}
 
 hello.init({
 	instagram : INSTAGRAM_CLIENT_ID
