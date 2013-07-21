@@ -9,9 +9,9 @@
 
 // Require IO operations
 // This package can be found
-var buildDist = require('../_packages/buildDist.js');
+var shunt = require('shunt');
 
-buildDist({
+shunt({
 	'dist/hello.js' : 'src/hello.js',
 	'dist/hello.all.js' : ['src/hello.js', 'src/modules/'],
 	'README.md' : './index.html'
