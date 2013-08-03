@@ -4,7 +4,7 @@
 (function(){
 
 function formatUser(o){
-	if(!o.error){
+	if(o.error){
 		return;
 	}
 	o.first_name = o.firstName;
