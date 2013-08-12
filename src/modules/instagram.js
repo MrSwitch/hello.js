@@ -4,6 +4,9 @@
 hello.init({
 	instagram : {
 		name : 'Instagram',
+		auth_options: {
+			display: ''
+		},
 		uri : {
 			auth : 'https://instagram.com/oauth/authorize/',
 			base : 'https://api.instagram.com/v1/',

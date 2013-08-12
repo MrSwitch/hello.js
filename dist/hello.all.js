@@ -245,7 +245,6 @@ var hello = (function(){
 			// querystring parameters, we may pass our own arguments to form the querystring
 			//
 			var qs = _merge( p.options, {
-
 				client_id	: provider.id,
 				scope		: 'basic',
 				state		: {
@@ -320,6 +319,14 @@ var hello = (function(){
 					delete qs[x];
 				}
 			}
+
+
+			//
+			// Override login querystrings from auth_options
+			if(provider.auth_options){
+				qs = _merge(qs, provider.auth_options );
+			}
+
 
 			//
 			// URL
@@ -2531,6 +2538,9 @@ hello.init({
 hello.init({
 	instagram : {
 		name : 'Instagram',
+		auth_options: {
+			display: ''
+		},
 		uri : {
 			auth : 'https://instagram.com/oauth/authorize/',
 			base : 'https://api.instagram.com/v1/',
