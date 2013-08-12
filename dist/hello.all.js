@@ -1605,6 +1605,7 @@ var hello = (function(){
 
 					// Create an input element
 					var input = document.createElement('input');
+					input.setAttribute('type', 'hidden');
 					input.setAttribute('name', x);
 
 					// Does it have a value attribute?
@@ -2331,6 +2332,8 @@ hello.init({
 	function gEntry(o){
 
 		var entry = function(a){
+
+			var media = a['media$group']['media$content'].length ? a['media$group']['media$content'][0] : {};
 			var i=0, _a;
 			var p = {
 				id		: a.id.$t,
@@ -2338,10 +2341,10 @@ hello.init({
 				description	: a.summary.$t,
 				updated_time : a.updated.$t,
 				created_time : a.published.$t,
-				picture : a['media$group']['media$content'][0].url,
-				thumbnail : a['media$group']['media$content'][0].url,
-				width : a['media$group']['media$content'][0].width,
-				height : a['media$group']['media$content'][0].height
+				picture : media ? media.url : null,
+				thumbnail : media ? media.url : null,
+				width : media.width,
+				height : media.height
 //				original : a
 			};
 			// Get feed/children
@@ -2367,7 +2370,7 @@ hello.init({
 			}
 
 			// Get images of different scales
-			if('media$thumbnail' in a['media$group']){
+			if('media$thumbnail' in a['media$group'] && a['media$group']['media$thumbnail'].length){
 				_a = a['media$group']['media$thumbnail'];
 				p.thumbnail = a['media$group']['media$thumbnail'][0].url;
 				p.images = [];
@@ -2378,11 +2381,14 @@ hello.init({
 						height : _a[i].height
 					});
 				}
-				p.images.push({
-					source : a['media$group']['media$content'][0].url,
-					width : a['media$group']['media$content'][0].width,
-					height : a['media$group']['media$content'][0].height
-				});
+				_a = a['media$group']['media$content'].length ? a['media$group']['media$content'][0] : null;
+				if(_a){
+					p.images.push({
+						source : _a.url,
+						width : _a.width,
+						height : _a.height
+					});
+				}
 			}
 			return p;
 		};
@@ -2572,7 +2578,7 @@ hello.init({
 (function(){
 
 function formatUser(o){
-	if(!o.error){
+	if(o.error){
 		return;
 	}
 	o.first_name = o.firstName;

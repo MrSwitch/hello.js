@@ -1605,6 +1605,7 @@ var hello = (function(){
 
 					// Create an input element
 					var input = document.createElement('input');
+					input.setAttribute('type', 'hidden');
 					input.setAttribute('name', x);
 
 					// Does it have a value attribute?
