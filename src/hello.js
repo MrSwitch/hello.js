@@ -132,11 +132,19 @@ var hello = (function(){
 		// #fragment not allowed
 		//
 		settings : {
+
+			//
+			// OAuth 2 authentication defaults
 			redirect_uri  : window.location.href.split('#')[0],
 			response_type : 'token',
 			display       : 'popup',
-			oauth_proxy   : 'https://auth-server.herokuapp.com/proxy',
-			state         : ''
+			state         : '',
+
+			//
+			// OAuth 1 shim
+			// This is the path to the OAuth1 server for signing user requests
+			// Wanna recreate your own? checkout https://github.com/MrSwitch/node-oauth-shim
+			oauth_proxy   : 'https://auth-server.herokuapp.com/proxy'
 		},
 
 		//
