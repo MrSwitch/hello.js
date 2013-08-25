@@ -469,17 +469,18 @@ var tests = [
 		}
 	},
 	{
-		title : "Create a directory",
+		title : "Create a folder",
 		test : ['dropbox'],
 		method : 'post',
-		path : 'me/files',
+		path : 'me/folders',
 		scope : ["files"],
+		data : {
+			name : 'TestFolder'
+		},
 		expected : {
 			data : [{
 				id : reg.string,
-				name : reg.name,
-				picture : reg.url,
-				photos : reg.string
+				name : reg.name
 			}]
 		}
 	},
@@ -490,6 +491,7 @@ var tests = [
 		path : 'me/files',
 		scope : ["files"],
 		data : {
+			dir : 'TestFolder',
 			file : "/hello.js/assets/logo.png",
 			name : "HelloLogo.png"
 		},
@@ -559,7 +561,22 @@ function Test(test,network,parent){
 			// Can't grab it from the dictionary so...
 			if("file" in data){
 				// lets define the form as the data source
-				data = document.getElementById(parent.formId());
+				var data = document.getElementById(parent.formId());
+				/*
+				var form = document.getElementById(parent.formId());
+				var data = {};
+				for(var i=0;i<form.length;i++){
+					var input = form[i];
+					if(input.name&&!input.disabled){
+						if(input.type==='file'){
+							data[input.name] = input;
+						}
+						else{
+							data[input.name] = input.value || input.innerHTML;
+						}
+					}
+				}
+				*/
 			}
 
 			var cb = function(r){

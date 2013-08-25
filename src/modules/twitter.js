@@ -28,9 +28,11 @@ hello.init({
 			me		: 'account/verify_credentials.json',
 			"me/friends"	: 'friends/list.json',
 			'me/share' : function(p,callback){
-				p.data = {
-					status : p.data.message
-				};
+				if(p.data&&p.method==='post'){
+					p.data = {
+						status : p.data.message
+					};
+				}
 				callback( p.method==='post' ? 'statuses/update.json?include_entities=1' : 'statuses/user_timeline.json' );
 			}
 		},
@@ -56,7 +58,15 @@ hello.init({
 				return o;
 			}
 		},
-		xhr : false
+		xhr : function(p){
+			// If this is GET request it'll be relocated, otherwise
+			// Else, it'll proxy through the server
+			if(p.method==='post'&&p.data&&!hello.utils.hasBinary(p.data)){
+				p.data = hello.utils.param(p.data);
+			}
+
+			return (p.method!=='get');
+		}
 	}
 });
 

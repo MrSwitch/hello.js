@@ -544,8 +544,6 @@ var hello = (function(){
 					// Can we use XHR for Cross domain delivery?
 					if( 'withCredentials' in new XMLHttpRequest() && ( !("xhr" in o) || ( o.xhr && o.xhr(p,qs) ) ) ){
 
-						qs.suppress_response_codes = true;
-
 						var x = _xhr(p.method, format_url, p.headers, p.data, callback );
 
 						// we're done
@@ -1214,34 +1212,19 @@ var hello = (function(){
 			service = _services[network],
 			token = (session ? session.access_token : null);
 
+		// Is this an OAuth1 endpoint
 		var proxy = ( service.oauth && parseInt(service.oauth.version,10) === 1 ? hello.settings.oauth_proxy : null);
 
 		if(proxy){
+			// Use the proxy as a path
+			callback( _qs(proxy, {
+				path : path,
+				access_token : token||''
+			}));
 
-			if(method.toUpperCase()!=='GET'){
-				// Make an call to get a OAuth1 signed URL before calling the response
-				var url = _qs(proxy, {
-					path : path,
-					access_token : token||'',
-					method : method
-//					data : (data ? JSON.stringify(data) : null)
-				});
-
-				if("withCredentials" in new XMLHttpRequest()){
-					_xhr(method, url, null, data, callback);
-				}
-				else{
-					_jsonp(_qs( url, {callback:'?',data: JSON.stringify(data)}), callback);
-				}
-			}
-			else{
-				callback( _qs(proxy, {
-					path : path,
-					access_token : token||''
-				}));
-			}
 			return;
 		}
+
 		var qs = { 'access_token' : token||'' };
 
 		if(modifyQueryString){
@@ -1715,20 +1698,29 @@ var hello = (function(){
 			// Create a data string
 			for(var i=0;i<kids.length;i++){
 
+				var input = kids[i];
+
+				// If the name of the input is empty or diabled, dont add it.
+				if(input.disabled||!input.name){
+					continue;
+				}
+
 				// Is this a file, does the browser not support 'files' and 'FormData'?
-				if( kids[i].type === 'file' ){
+				if( input.type === 'file' ){
 					// the browser does not XHR2
 					if("FormData" in window){
 						// include the whole element
-						json[kids[i].name] = kids[i];
-						break;
+						json[input.name] = input;
+						continue;
 					}
-					else if( !("files" in kids[i]) ){
+					else if( !("files" in input) ){
+
+						// Cancel this approach the browser does not support the FileAPI
 						return false;
 					}
 				}
 				else{
-					json[ kids[i].name ] = kids[i].value || kids[i].innerHTML;
+					json[ input.name ] = input.value || input.innerHTML;
 				}
 			}
 

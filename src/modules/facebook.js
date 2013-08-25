@@ -78,8 +78,9 @@ hello.init({
 		},
 
 		// special requirements for handling XHR
-		xhr : function(p){
+		xhr : function(p,qs){
 			if(p.method==='get'||p.method==='post'){
+				qs.suppress_response_codes = true;
 				return true;
 			}
 			else{

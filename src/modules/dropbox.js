@@ -30,6 +30,9 @@ function format_file(o){
 		encodeURIComponent('https://api-content.dropbox.com/1/files/'+ path ) + '&access_token=' + hello.getAuthResponse('dropbox').access_token;
 		o.file = 'https://api-content.dropbox.com/1/files/'+ path;
 	}
+	if(!o.id){
+		o.id = o.name;
+	}
 //	o.media = "https://api-content.dropbox.com/1/files/" + path;
 }
 
@@ -47,7 +50,23 @@ hello.init({
 		uri : {
 			base	: "https://api.dropbox.com/1/",
 			me		: 'account/info',
-			"me/files"	: 'metadata/dropbox',
+			"me/files"	: function(p,callback){
+				if(p.method === 'get'){
+					callback('metadata/dropbox');
+					return;
+				}
+				var path = p.data.dir;
+				delete p.data.dir;
+				callback('https://api-content.dropbox.com/1/files/dropbox/'+path);
+			},
+			"me/folders" : function(p, callback){
+				var name = p.data.name;
+				p.data = null;
+				callback('fileops/create_folder?'+hello.utils.param({
+					path : name,
+					root : 'dropbox'
+				}));
+			},
 			"default" : function(p,callback){
 				if(p.path.match("https://api-content.dropbox.com/1/files/")){
 					// this is a file, return binary data
@@ -73,7 +92,7 @@ hello.init({
 			},
 			"default"	: function(o){
 
-				if(o.is_dir){
+				if(o.is_dir && o.contents){
 					o.data = o.contents;
 					delete o.contents;
 
@@ -90,11 +109,15 @@ hello.init({
 		},
 		// doesn't return the CORS headers
 		xhr : function(p){
-			// for getting content DropBox supports the allow-cross-origin-resource
+			// forgetting content DropBox supports the allow-cross-origin-resource
 			if(p.path.match("https://api-content.dropbox.com/")){
+				//p.data = p.data.file.files[0];
+				return false;
+			}
+			else if(p.path.match("me/files")&&p.method==='post'){
 				return true;
 			}
-			return false;
+			return true;
 		}
 	}
 });
