@@ -12,7 +12,7 @@ hello.init({
 			base : 'https://api.instagram.com/v1/',
 			'me' : 'users/self',
 			'me/feed' : 'users/self/feed',
-			'me/photos' : 'users/self/media/recent?min_id=0',
+			'me/photos' : 'users/self/media/recent?min_id=0&count=100',
 			'me/friends' : 'users/self/follows'
 		},
 		scope : {
