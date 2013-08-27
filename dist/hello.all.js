@@ -132,11 +132,19 @@ var hello = (function(){
 		// #fragment not allowed
 		//
 		settings : {
+
+			//
+			// OAuth 2 authentication defaults
 			redirect_uri  : window.location.href.split('#')[0],
 			response_type : 'token',
 			display       : 'popup',
-			oauth_proxy   : 'https://auth-server.herokuapp.com/proxy',
-			state         : ''
+			state         : '',
+
+			//
+			// OAuth 1 shim
+			// This is the path to the OAuth1 server for signing user requests
+			// Wanna recreate your own? checkout https://github.com/MrSwitch/node-oauth-shim
+			oauth_proxy   : 'https://auth-server.herokuapp.com/proxy'
 		},
 
 		//
@@ -430,7 +438,10 @@ var hello = (function(){
 			
 			// data
 			p.data = p.data || {};
-			
+
+			// Extrapolate the data from a form element
+			_dataToJSON(p);
+
 			// Path
 			p.path = p.path.replace(/^\/+/,'');
 			var a = (p.path.split(/[\/\:]/,2)||[])[0].toLowerCase();
@@ -535,8 +546,6 @@ var hello = (function(){
 
 					// Can we use XHR for Cross domain delivery?
 					if( 'withCredentials' in new XMLHttpRequest() && ( !("xhr" in o) || ( o.xhr && o.xhr(p,qs) ) ) ){
-
-						qs.suppress_response_codes = true;
 
 						var x = _xhr(p.method, format_url, p.headers, p.data, callback );
 
@@ -1206,34 +1215,19 @@ var hello = (function(){
 			service = _services[network],
 			token = (session ? session.access_token : null);
 
+		// Is this an OAuth1 endpoint
 		var proxy = ( service.oauth && parseInt(service.oauth.version,10) === 1 ? hello.settings.oauth_proxy : null);
 
 		if(proxy){
+			// Use the proxy as a path
+			callback( _qs(proxy, {
+				path : path,
+				access_token : token||''
+			}));
 
-			if(method.toUpperCase()!=='GET'){
-				// Make an call to get a OAuth1 signed URL before calling the response
-				var url = _qs(proxy, {
-					path : path,
-					access_token : token||'',
-					method : method
-//					data : (data ? JSON.stringify(data) : null)
-				});
-
-				if("withCredentials" in new XMLHttpRequest()){
-					_xhr(method, url, null, data, callback);
-				}
-				else{
-					_jsonp(_qs( url, {callback:'?',data: JSON.stringify(data)}), callback);
-				}
-			}
-			else{
-				callback( _qs(proxy, {
-					path : path,
-					access_token : token||''
-				}));
-			}
 			return;
 		}
+
 		var qs = { 'access_token' : token||'' };
 
 		if(modifyQueryString){
@@ -1707,20 +1701,29 @@ var hello = (function(){
 			// Create a data string
 			for(var i=0;i<kids.length;i++){
 
+				var input = kids[i];
+
+				// If the name of the input is empty or diabled, dont add it.
+				if(input.disabled||!input.name){
+					continue;
+				}
+
 				// Is this a file, does the browser not support 'files' and 'FormData'?
-				if( kids[i].type === 'file' ){
+				if( input.type === 'file' ){
 					// the browser does not XHR2
 					if("FormData" in window){
 						// include the whole element
-						json[kids[i].name] = kids[i];
-						break;
+						json[input.name] = input;
+						continue;
 					}
-					else if( !("files" in kids[i]) ){
+					else if( !("files" in input) ){
+
+						// Cancel this approach the browser does not support the FileAPI
 						return false;
 					}
 				}
 				else{
-					json[ kids[i].name ] = kids[i].value || kids[i].innerHTML;
+					json[ input.name ] = input.value || input.innerHTML;
 				}
 			}
 
@@ -1832,6 +1835,9 @@ function format_file(o){
 		encodeURIComponent('https://api-content.dropbox.com/1/files/'+ path ) + '&access_token=' + hello.getAuthResponse('dropbox').access_token;
 		o.file = 'https://api-content.dropbox.com/1/files/'+ path;
 	}
+	if(!o.id){
+		o.id = o.name;
+	}
 //	o.media = "https://api-content.dropbox.com/1/files/" + path;
 }
 
@@ -1849,7 +1855,23 @@ hello.init({
 		uri : {
 			base	: "https://api.dropbox.com/1/",
 			me		: 'account/info',
-			"me/files"	: 'metadata/dropbox',
+			"me/files"	: function(p,callback){
+				if(p.method === 'get'){
+					callback('metadata/dropbox');
+					return;
+				}
+				var path = p.data.dir;
+				delete p.data.dir;
+				callback('https://api-content.dropbox.com/1/files/dropbox/'+path);
+			},
+			"me/folders" : function(p, callback){
+				var name = p.data.name;
+				p.data = null;
+				callback('fileops/create_folder?'+hello.utils.param({
+					path : name,
+					root : 'dropbox'
+				}));
+			},
 			"default" : function(p,callback){
 				if(p.path.match("https://api-content.dropbox.com/1/files/")){
 					// this is a file, return binary data
@@ -1875,7 +1897,7 @@ hello.init({
 			},
 			"default"	: function(o){
 
-				if(o.is_dir){
+				if(o.is_dir && o.contents){
 					o.data = o.contents;
 					delete o.contents;
 
@@ -1892,11 +1914,15 @@ hello.init({
 		},
 		// doesn't return the CORS headers
 		xhr : function(p){
-			// for getting content DropBox supports the allow-cross-origin-resource
+			// forgetting content DropBox supports the allow-cross-origin-resource
 			if(p.path.match("https://api-content.dropbox.com/")){
+				//p.data = p.data.file.files[0];
+				return false;
+			}
+			else if(p.path.match("me/files")&&p.method==='post'){
 				return true;
 			}
-			return false;
+			return true;
 		}
 	}
 });
@@ -1983,8 +2009,9 @@ hello.init({
 		},
 
 		// special requirements for handling XHR
-		xhr : function(p){
+		xhr : function(p,qs){
 			if(p.method==='get'||p.method==='post'){
+				qs.suppress_response_codes = true;
 				return true;
 			}
 			else{
@@ -2470,10 +2497,10 @@ hello.init({
 			wrap : {
 				me : function(o){
 					if(o.id){
-						o.last_name = o.family_name || o.name.familyName;
-						o.first_name = o.given_name || o.name.givenName;
+						o.last_name = o.family_name || (o.name? o.name.familyName : null);
+						o.first_name = o.given_name || (o.name? o.name.givenName : null);
 	//						o.name = o.first_name + ' ' + o.last_name;
-						o.picture = o.picture || o.image.url;
+						o.picture = o.picture || ( o.image ? o.image.url : null);
 						o.thumbnail = o.picture;
 						o.name = o.displayName || o.name;
 					}
@@ -2546,7 +2573,7 @@ hello.init({
 			base : 'https://api.instagram.com/v1/',
 			'me' : 'users/self',
 			'me/feed' : 'users/self/feed',
-			'me/photos' : 'users/self/media/recent?min_id=0',
+			'me/photos' : 'users/self/media/recent?min_id=0&count=100',
 			'me/friends' : 'users/self/follows'
 		},
 		scope : {
@@ -2707,9 +2734,11 @@ hello.init({
 			me		: 'account/verify_credentials.json',
 			"me/friends"	: 'friends/list.json',
 			'me/share' : function(p,callback){
-				p.data = {
-					status : p.data.message
-				};
+				if(p.data&&p.method==='post'){
+					p.data = {
+						status : p.data.message
+					};
+				}
 				callback( p.method==='post' ? 'statuses/update.json?include_entities=1' : 'statuses/user_timeline.json' );
 			}
 		},
@@ -2735,7 +2764,15 @@ hello.init({
 				return o;
 			}
 		},
-		xhr : false
+		xhr : function(p){
+			// If this is GET request it'll be relocated, otherwise
+			// Else, it'll proxy through the server
+			if(p.method==='post'&&p.data&&!hello.utils.hasBinary(p.data)){
+				p.data = hello.utils.param(p.data);
+			}
+
+			return (p.method!=='get');
+		}
 	}
 });
 
