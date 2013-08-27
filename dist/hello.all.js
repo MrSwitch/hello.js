@@ -2629,9 +2629,9 @@ hello.init({
 
 		// Ensure that you define an oauth_proxy
 		oauth : {
-			version : "1.0a",
+			version : 2,
 			auth	: "https://api.linkedin.com/uas/oauth/authenticate",
-			request : 'https://api.linkedin.com/uas/oauth/requestToken?scope=r_fullprofile%2Br_emailaddress%2Br_network',
+			request : 'https://api.linkedin.com/uas/oauth/requestToken?scope=r_fullprofile%20r_emailaddress%20r_network',
 			token	: 'https://api.linkedin.com/uas/oauth/accessToken'
 		},
 		uri : {
