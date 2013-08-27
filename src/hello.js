@@ -438,7 +438,10 @@ var hello = (function(){
 			
 			// data
 			p.data = p.data || {};
-			
+
+			// Extrapolate the data from a form element
+			_dataToJSON(p);
+
 			// Path
 			p.path = p.path.replace(/^\/+/,'');
 			var a = (p.path.split(/[\/\:]/,2)||[])[0].toLowerCase();
