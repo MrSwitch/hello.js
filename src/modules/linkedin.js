@@ -33,6 +33,7 @@ hello.init({
 			email	: 'r_emailaddress',
 			friends : 'r_network'
 		},
+		scope_delim : ' ',
 		wrap : {
 			me : function(o){
 				formatUser(o);
