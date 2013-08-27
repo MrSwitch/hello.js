@@ -159,10 +159,10 @@
 			wrap : {
 				me : function(o){
 					if(o.id){
-						o.last_name = o.family_name || o.name.familyName;
-						o.first_name = o.given_name || o.name.givenName;
+						o.last_name = o.family_name || (o.name? o.name.familyName : null);
+						o.first_name = o.given_name || (o.name? o.name.givenName : null);
 	//						o.name = o.first_name + ' ' + o.last_name;
-						o.picture = o.picture || o.image.url;
+						o.picture = o.picture || ( o.image ? o.image.url : null);
 						o.thumbnail = o.picture;
 						o.name = o.displayName || o.name;
 					}
