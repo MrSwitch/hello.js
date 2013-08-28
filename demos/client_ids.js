@@ -32,10 +32,7 @@ var DROPBOX_CLIENT_ID = {
 	'adodson.com' : 't5s644xtv7n4oth'
 }[window.location.hostname];
 
-var LINKEDIN_CLIENT_ID = {
-	'local.knarly.com' : 'exgsps7wo5o7',
-	'adodson.com' : 'exgsps7wo5o7'
-}[window.location.hostname];
+var LINKEDIN_CLIENT_ID = 'bixrjszkfk0j'; // 'exgsps7wo5o7'
 
 var YAHOO_CLIENT_ID = {
 	'local.knarly.com' : 'dj0yJmk9TTNoTWV6eE5ObW5NJmQ9WVdrOWVtSmhVbk5pTm1VbWNHbzlNVFUxT0RNeU16UTJNZy0tJnM9Y29uc3VtZXJzZWNyZXQmeD0yZQ--',

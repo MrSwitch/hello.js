@@ -16,28 +16,20 @@ function formatUser(o){
 hello.init({
 	'linkedin' : {
 
-/*
 		auth_options: {
 			response_type: 'code'
 		},
 		oauth : {
 			version : 2,
-			grant	: "https://www.linkedin.com/uas/oauth2/accessToken",
-			// Force that the grant data is passed via the querystring rather than the POST body
-			grant_data : 'querystring'
+			grant	: "https://www.linkedin.com/uas/oauth2/accessToken"
+		},
+		querystring : function(qs){
+			// Linkedin signs requests with the parameter 'oauth2_access_token'... yeah anotherone who thinks they should be different!
+			qs.oauth2_access_token = qs.access_token;
+			delete qs.access_token;
 		},
 		uri : {
 			auth	: "https://www.linkedin.com/uas/oauth2/authorization",
-*/
-
-		// Ensure that you define an oauth_proxy
-		oauth : {
-			version : "1.0a",
-			auth	: "https://api.linkedin.com/uas/oauth/authenticate",
-			request : 'https://api.linkedin.com/uas/oauth/requestToken?scope=r_fullprofile%20r_emailaddress%20r_network',
-			token	: 'https://api.linkedin.com/uas/oauth/accessToken'
-		},
-		uri : {
 			base	: "https://api.linkedin.com/v1/",
 			me		: 'people/~:(picture-url,first-name,last-name,id,formatted-name)',
 			"me/friends"	: 'people/~/connections'
