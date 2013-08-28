@@ -2627,9 +2627,23 @@ function formatUser(o){
 hello.init({
 	'linkedin' : {
 
-		// Ensure that you define an oauth_proxy
+/*
+		auth_options: {
+			response_type: 'code'
+		},
 		oauth : {
 			version : 2,
+			grant	: "https://www.linkedin.com/uas/oauth2/accessToken",
+			// Force that the grant data is passed via the querystring rather than the POST body
+			grant_data : 'querystring'
+		},
+		uri : {
+			auth	: "https://www.linkedin.com/uas/oauth2/authorization",
+*/
+
+		// Ensure that you define an oauth_proxy
+		oauth : {
+			version : "1.0a",
 			auth	: "https://api.linkedin.com/uas/oauth/authenticate",
 			request : 'https://api.linkedin.com/uas/oauth/requestToken?scope=r_fullprofile%20r_emailaddress%20r_network',
 			token	: 'https://api.linkedin.com/uas/oauth/accessToken'
