@@ -17,10 +17,9 @@
 <script class="pre">
 hello.subscribe('auth.login', function(r){
 	// Get Profile
-	hello.api(r.network+'/me', function(p){
+	hello( r.network ).api( '/me' ).success( function(p){
 		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
 	});
 });
-
-hello.init(CLIENT_IDS,	{redirect_uri:'../redirect.html'});
+hello.init( CLIENT_IDS,	{redirect_uri:'../redirect.html'});
 </script>
