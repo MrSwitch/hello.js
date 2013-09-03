@@ -81,7 +81,7 @@ hello.utils.extend( hello, {
 	//
 	service : function(service){
 
-		this.utils.warn("`hello.service` is deprecated");
+		//this.utils.warn("`hello.service` is deprecated");
 
 		if(typeof (service) !== 'undefined' ){
 			return this.utils.store( 'sync_service', service );
@@ -136,26 +136,23 @@ hello.utils.extend( hello, {
 	// @param object opts, contains a key value pair of options used for defining the authentication defaults
 	// @param number timeout, timeout in seconds
 	//
-	init : function(services,opts,timeout){
+	init : function(services,options){
 
 		if(!services){
 			return this.services;
 		}
 
-		// Arguments
-		var p = this.utils.args({services:'o!',opts:'o',timeout:'i'},arguments);
-
 		// Define provider credentials
 		// Reformat the ID field
-		for( var x in p.services ){if(p.services.hasOwnProperty(x)){
-			if( typeof(p.services[x]) !== 'object' ){
-				p.services[x] = {id : p.services[x]};
+		for( var x in services ){if(services.hasOwnProperty(x)){
+			if( typeof(services[x]) !== 'object' ){
+				services[x] = {id : services[x]};
 			}
 		}}
 
 		//
 		// merge services if there already exists some
-		this.services = this.utils.merge(this.services, p.services);
+		this.services = this.utils.merge(this.services, services);
 
 		//
 		// Format the incoming
@@ -165,17 +162,13 @@ hello.utils.extend( hello, {
 
 		//
 		// Update the default settings with this one.
-		if(p.opts){
-			this.settings = this.utils.merge(this.settings, p.opts);
+		if(options){
+			this.settings = this.utils.merge(this.settings, options);
 
-			if("redirect_uri" in p.opts){
-				this.settings.redirect_uri = this.utils.realPath(p.opts.redirect_uri);
+			// Do this immediatly incase the browser changes the current path.
+			if("redirect_uri" in options){
+				this.settings.redirect_uri = this.utils.realPath(options.redirect_uri);
 			}
-		}
-
-		// Timeout
-		if(p.timeout){
-			this.settings.timeout = p.timeout;
 		}
 
 		return this;
@@ -214,17 +207,20 @@ hello.utils.extend( hello, {
 		// Network
 		p.network = this.settings.default_service = p.network || this.settings.default_service;
 
-		// Is our service valid?
-		if( typeof(p.network) !== 'string' ){
-			// trigger the default login.
-			// ahh we dont have one.
-			throw Error('Hello.login: Please specify a network service. e.g. hello.use("facebook").login()');
-		}
-
 		//
 		// Bind listener
 		this.on('complete', p.callback);
 
+		// Is our service valid?
+		if( typeof(p.network) !== 'string' || !( p.network in this.services ) ){
+			// trigger the default login.
+			// ahh we dont have one.
+			self.emitAfter('error complete', {error:{
+				code : 'invalid_network',
+				message : 'The provided network was not recognized'
+			}});
+			return this;
+		}
 
 		//
 		var provider  = this.services[p.network];
@@ -305,12 +301,16 @@ hello.utils.extend( hello, {
 		// Is the user already signed in
 		//
 		var session = this.getAuthResponse(p.network);
-		if( session && "expires" in session && session.expires > ((new Date()).getTime()/1e3) ){
+		if( session && "access_token" in session && session.access_token && "expires" in session && session.expires > ((new Date()).getTime()/1e3) ){
 			// What is different about the scopes in the session vs the scopes in the new login?
 			var diff = this.utils.diff( session.scope || [], qs.state.scope || [] );
 			if(diff.length===0){
+
+				// Nothing has changed
+				this.emit("notice", "User already has a valid access_token");
+
 				// Ok trigger the callback
-				this.emit("complete success login", {
+				this.emitAfter("complete success login", {
 					network : p.network,
 					authResponse : session
 				});
@@ -361,6 +361,9 @@ hello.utils.extend( hello, {
 		else{
 			url = this.utils.qs( provider.uri.auth, qs );
 		}
+
+		this.emit("notice", "Authorization URL " + url );
+
 
 		//
 		// Execute
@@ -417,6 +420,7 @@ hello.utils.extend( hello, {
 			arguments.callee.prototype = this;
 			return new arguments.callee(p);
 		}
+		var self = this;
 
 		// Create an instance of Events
 		this.utils.Event.call(this);
@@ -424,7 +428,16 @@ hello.utils.extend( hello, {
 		// Add callback to events
 		this.on('complete', p.callback);
 
+		// Netowrk
+		p.name = p.name || this.settings.default_service;
 
+		if( p.name && !( p.name in this.services ) ){
+			this.emitAfter("complete error", {error:{
+				code : 'invalid_network',
+				message : 'The network was unrecognized'
+			}});
+			return this;
+		}
 		if(p.name && this.utils.store(p.name)){
 			this.utils.store(p.name,'');
 		}
@@ -437,11 +450,15 @@ hello.utils.extend( hello, {
 			// trigger callback
 		}
 		else{
-			this.emit("warning", p.name + ' had no session' );
+			this.emitAfter("complete error", {error:{
+				code : 'invalid_session',
+				message : 'There was no session to remove'
+			}});
+			return this;
 		}
 
 		// Emit events by default
-		this.emit("complete logout success auth.logout auth", true);
+		this.emitAfter("complete logout success auth.logout auth", true);
 
 		return this;
 	},
@@ -814,11 +831,9 @@ hello.utils.extend( hello.utils, {
 	//
 	Event : function(){
 
-		// Store local list of events
-		var events = {};
+		// Event list
+		this.events = {};
 
-		// List of events which have already been fired
-		var emitted = {};
 
 		//
 		// On, Subscribe to events
@@ -832,11 +847,7 @@ hello.utils.extend( hello.utils, {
 				for(var i=0;i<a.length;i++){
 
 					// Has this event already been fired on this instance?
-					if(a[i] in emitted){
-						callback.call(this, emitted[a[i]]);
-					} else {
-						events[a[i]] = [callback].concat(events[a[i]]||[]);
-					}
+					this.events[a[i]] = [callback].concat(this.events[a[i]]||[]);
 				}
 			}
 
@@ -851,9 +862,9 @@ hello.utils.extend( hello.utils, {
 		//
 		this.off = function(evt, callback){
 
-			this.findEvents(evt, function(evt, events, i){
-				if(!callback || events[i] === callback){
-					events.splice(i,1);
+			this.findEvents(evt, function(name, index){
+				if(!callback || this.events[name][index] === callback){
+					this.events[name][index].splice(i,1);
 				}
 			});
 
@@ -865,19 +876,20 @@ hello.utils.extend( hello.utils, {
 		// Triggers any subscribed events
 		//
 		this.emit =function(evt, data){
-			// loop through the events
 
-			// Store this emitted list
-			var a = evt.split(/[\s\,]+/);
-			for(var i=0;i<a.length;i++){
-				emitted[a[i]] = data;
-			}
+			// Get arguments as an Array, knock off the first one
+			var args = Array.prototype.slice.call(arguments, 1);
+			args.push(evt);
 
 			// Find the callbacks which match the condition and call
 			var proto = this;
 			while( proto && proto.findEvents ){
-				proto.findEvents(evt, function(callback){
-					callback.call(this, data);
+				proto.findEvents(evt, function(name, index){
+					// Replace the last property with the event name
+					args[args.length-1] = name;
+
+					// Trigger
+					this.events[name][index].apply(this, args);
 				});
 
 				proto = this.utils.getPrototypeOf(proto);
@@ -888,6 +900,14 @@ hello.utils.extend( hello.utils, {
 
 		//
 		// Easy functions
+		this.emitAfter = function(){
+			var self = this, 
+				args = arguments;
+			setTimeout(function(){
+				self.emit.apply(self, args);
+			},0);
+			return this;
+		};
 		this.success = function(callback){
 			return this.on("success",callback);
 		};
@@ -903,11 +923,11 @@ hello.utils.extend( hello.utils, {
 
 			var a = evt.split(/[\s\,]+/);
 
-			for(var x in events){if(events.hasOwnProperty(x)){
-				if( this.utils.indexOf(a,x) > -1 ){
-					for(var i=0;i<events[x].length;i++){
+			for(var name in this.events){if(this.events.hasOwnProperty(name)){
+				if( this.utils.indexOf(a,name) > -1 ){
+					for(var i=0;i<this.events[name].length;i++){
 						// Emit on the local instance of this
-						callback.call(this, events[x][i], events[x], i);
+						callback.call(this, name, i);
 					}
 				}
 			}}
@@ -932,6 +952,7 @@ hello.utils.extend( hello.utils, {
 				}catch(e){}
 			}
 		};
+		return guid;
 	}
 
 });
@@ -1262,8 +1283,8 @@ hello.api = function(){
 	
 	// Have we got a service
 	if(!o){
-		this.emit("complete", {error:{
-			code : "invalid_request",
+		self.emitAfter("complete error", {error:{
+			code : "invalid_network",
 			message : "Could not match the service requested: " + p.network
 		}});
 		return this;
@@ -1318,6 +1339,9 @@ hello.api = function(){
 				}
 
 				var path = self.utils.qs(url, qs||{} );
+
+				self.emit("notice", "Request " + path);
+
 				_sign(p.network, path, p.method, p.data, o.querystring, callback);
 			};
 
@@ -1392,7 +1416,10 @@ hello.api = function(){
 		}
 	}
 	else{
-		this.emit("warning", 'The path "'+ p.path +'" is not recognised');
+		this.emitAfter("complete error", {error:{
+			code:'invalid_path',
+			message:'The provided path is not available on the selected network'
+		}});
 	}
 
 	return this;
