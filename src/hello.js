@@ -471,7 +471,28 @@ hello.utils.extend( hello, {
 	// @param string optional, name of the service to get information about.
 	//
 	getAuthResponse : function(service){
-		return this.utils.store(service||this.service());
+
+		if(!(this instanceof arguments.callee)){
+			// Invoke as an instance
+			arguments.callee.prototype = this;
+			return new arguments.callee(service);
+		}
+
+		// Create an instance of Events
+		this.utils.Event.call(this);
+
+		// If the service doesn't exist
+		service = service || this.settings.default_service;
+
+		if( !service || !( service in this.services ) ){
+			this.emit("complete error", {error:{
+				code : 'invalid_network',
+				message : 'The network was unrecognized'
+			}});
+		}
+
+
+		return this.utils.store(service);
 	},
 
 
