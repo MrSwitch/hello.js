@@ -108,7 +108,33 @@
 <!-- AUTHENTICATION -->
 <script src="../src/hello.js"></script>
 <script src="../demos/client_ids.js"></script>
-<script src="modules.js"></script>
+<script>
+
+	//
+	// hello.all.js
+	// Load all modules
+	function loadModule(a){
+		for(var i=0;i<a.length;i++){
+			document.write('<script src="../src/modules/'+a[i]+'"><\/script>');
+		}
+	}
+
+	loadModule([
+		'facebook.js',
+		'flickr.js',
+		'google.js',
+		'windows.js',
+		'dropbox.js',
+		'twitter.js',
+		'yahoo.js',
+		'instagram.js',
+		'linkedin.js',
+		'foursquare.js',
+		'github.js',
+		'soundcloud.js'
+	]);
+
+</script>
 </head>
 <body class="fullscreen">
 
