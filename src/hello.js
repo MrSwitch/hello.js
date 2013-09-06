@@ -100,7 +100,9 @@ hello.utils.extend( hello, {
 	// Define a new instance of the Hello library with a default service
 	use : function(service){
 		// Create a new
+
 		var F = function(){
+
 			var settings = this.settings;
 
 			// Reassign the settings
@@ -112,14 +114,20 @@ hello.utils.extend( hello, {
 			if(Object.setPrototypeOf){
 				Object.setPrototypeOf(this.settings, settings);
 			}
-			else{
+			else if(this.settings.__proto__){
 				this.settings.__proto__ = settings;
 			}
-		};
+			else{
+				// else can't extend its prototype, do the static thing
+				for(var x in settings)if( settings.hasOwnProperty(x) && !( x in this.settings ) ){
+					this.settings[x] = settings[x];
+				}
+			}
+		}
 
-		// Extend constructor with the mixin
 		F.prototype = this;
 
+		// Invoke as an instance
 		var f = new F();
 
 		// Create an instance of Events
@@ -189,14 +197,14 @@ hello.utils.extend( hello, {
 		if(!(this instanceof arguments.callee)){
 			// Invoke as an instance
 			arguments.callee.prototype = this;
-			return new arguments.callee(p);
+			var self = new arguments.callee(p);
+			// Create an instance of Events
+			this.utils.Event.call(self);
+			return self;
 		}
 
 		// Apply the args
 		this.args = p;
-
-		// Create an instance of Events
-		this.utils.Event.call(this);
 
 		// Local vars
 		var url, self = this;
@@ -418,12 +426,13 @@ hello.utils.extend( hello, {
 		if(!(this instanceof arguments.callee)){
 			// Invoke as an instance
 			arguments.callee.prototype = this;
-			return new arguments.callee(p);
+			var self = new arguments.callee(p);
+			// Create an instance of Events
+			this.utils.Event.call(self);
+			return self;
 		}
 		var self = this;
 
-		// Create an instance of Events
-		this.utils.Event.call(this);
 
 		// Add callback to events
 		this.on('complete', p.callback);
@@ -475,11 +484,11 @@ hello.utils.extend( hello, {
 		if(!(this instanceof arguments.callee)){
 			// Invoke as an instance
 			arguments.callee.prototype = this;
-			return new arguments.callee(service);
+			var self = new arguments.callee(service);
+			// Create an instance of Events
+			this.utils.Event.call(self);
+			return self;
 		}
-
-		// Create an instance of Events
-		this.utils.Event.call(this);
 
 		// If the service doesn't exist
 		service = service || this.settings.default_service;
@@ -489,6 +498,7 @@ hello.utils.extend( hello, {
 				code : 'invalid_network',
 				message : 'The network was unrecognized'
 			}});
+			return null;
 		}
 
 
@@ -841,8 +851,11 @@ hello.utils.extend( hello.utils, {
 		if(Object.getPrototypeOf){
 			return Object.getPrototypeOf(obj);
 		}
-		else{
+		else if(obj.__proto__){
 			return obj.__proto__;
+		}
+		else if(obj.prototype && obj !== obj.prototype.constructor){
+			return obj.prototype.constructor;
 		}
 	},
 
@@ -885,7 +898,7 @@ hello.utils.extend( hello.utils, {
 
 			this.findEvents(evt, function(name, index){
 				if(!callback || this.events[name][index] === callback){
-					this.events[name][index].splice(i,1);
+					this.events[name].splice(index,1);
 				}
 			});
 
@@ -922,7 +935,7 @@ hello.utils.extend( hello.utils, {
 		//
 		// Easy functions
 		this.emitAfter = function(){
-			var self = this, 
+			var self = this,
 				args = arguments;
 			setTimeout(function(){
 				self.emit.apply(self, args);
@@ -1009,16 +1022,16 @@ hello.unsubscribe = hello.off;
 
 	(function self(){
 		// Loop through the services
-		for(var x in hello.services){if(hello.services.hasOwnProperty(x)){
+		for(var name in hello.services){if(hello.services.hasOwnProperty(name)){
 
-			if(!hello.services[x].id){
+			if(!hello.services[name].id){
 				// we haven't attached an ID so dont listen.
 				continue;
 			}
 		
 			// Get session
-			var session = hello.getAuthResponse(x) || {};
-			var oldsess = old_session[x] || {};
+			var session = hello.utils.store(name) || {};
+			var oldsess = old_session[name] || {};
 			var evt = '';
 
 			//
@@ -1034,10 +1047,13 @@ hello.unsubscribe = hello.off;
 
 				// Update store
 				// Removing the callback
-				hello.utils.store(x,session);
+				hello.utils.store(name,session);
 
 				// Emit global events
-				window[cb](session);
+				try{
+					window[cb](session);
+				}
+				catch(e){}
 			}
 			
 			//
@@ -1045,13 +1061,13 @@ hello.unsubscribe = hello.off;
 			//
 			if( session && ("expires" in session) && session.expires < ((new Date()).getTime()/1e3) ){
 
-				if( !( x in pending ) || pending[x] < ((new Date()).getTime()/1e3) ) {
+				if( !( name in pending ) || pending[name] < ((new Date()).getTime()/1e3) ) {
 					// try to resignin
-					hello.emit("notice", x + " has expired trying to resignin" );
-					hello.login(x,{display:'none'});
+					hello.emit("notice", name + " has expired trying to resignin" );
+					hello.login(name,{display:'none'});
 
 					// update pending, every 10 minutes
-					pending[x] = ((new Date()).getTime()/1e3) + 600;
+					pending[name] = ((new Date()).getTime()/1e3) + 600;
 				}
 				// If session has expired then we dont want to store its value until it can be established that its been updated
 				continue;
@@ -1064,26 +1080,26 @@ hello.unsubscribe = hello.off;
 			// Access_token has been removed
 			else if( !session.access_token && oldsess.access_token ){
 				hello.emit('auth.logout', {
-					network : x,
+					network: name,
 					authResponse : session
 				});
 			}
 			// Access_token has been created
 			else if( session.access_token && !oldsess.access_token ){
 				hello.emit('auth.login', {
-					network:x,
+					network: name,
 					authResponse: session
 				} );
 			}
 			// Access_token has been updated
 			else if( session.expires !== oldsess.expires ){
 				hello.emit('auth.update', {
-					network:x,
+					network: name,
 					authResponse: session
 				} );
 			}
 			
-			old_session[x] = session;
+			old_session[name] = session;
 		}}
 
 		// Check error events
