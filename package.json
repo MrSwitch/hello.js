@@ -1,12 +1,12 @@
 {
   "name": "HelloJS",
   "version": "0.0.1",
-  "scripts":{
-  	"test" : "karma start ./tests/karma.conf.js",
-  	"build" : "node _build.js"
+  "scripts": {
+    "test": "karma start ./tests/karma.conf.js",
+    "build": "node _build.js"
   },
-  "devDependencies" : {
-    "shunt" : "*",
+  "devDependencies": {
+    "shunt": "*",
     "karma-firefox-launcher": "~0.1.0",
     "karma-script-launcher": "~0.1.0",
     "karma-chrome-launcher": "~0.1.0",
@@ -19,6 +19,7 @@
     "karma-junit-reporter": "0.0.2",
     "karma-mocha": "0.0.4",
     "karma-coverage": "0.0.4",
-    "chai": "~1.5.0"
+    "karma-expect": "~1.0.0",
+    "sinon": "~1.7.3"
   }
 }

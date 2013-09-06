@@ -4,11 +4,12 @@ module.exports = function (karma) {
 // base path, that will be used to resolve files and exclude
         basePath: './',
 
-        frameworks: ['mocha'],
+        frameworks: ['mocha', 'expect'],
 
 // list of files / patterns to load in the browser
         files: [
-            {pattern: '../node_modules/chai/chai.js', include: true},
+//            {pattern: '../node_modules/chai/chai.js', include: true},
+            { pattern: '../node_modules/sinon/pkg/sinon.js', watched: false, include: true },
             '../src/*.js',
             '../src/*/*.js',
             '../tests/*.js'
@@ -92,9 +93,12 @@ module.exports = function (karma) {
 
 
         plugins: [
-            'karma-mocha',
             'karma-chrome-launcher',
-            'karma-firefox-launcher'
+            'karma-firefox-launcher',
+            'karma-expect',
+            'karma-mocha'
+            //,
+//            'karma-jasmine'
    //         'karma-junit-reporter',
    //         'karma-coverage'
         ]

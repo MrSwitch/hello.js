@@ -23,10 +23,10 @@ describe('Hello Core', function(){
 
 		var test_response = function(done){
 			return function(data, type){
-				assert.equal(type, "error");
-				assert.typeOf(data, "object");
-				assert.property(data, "error");
-				assert.equal(data.error.code, "invalid_network");
+				expect(type).to.be("error");
+				expect(data).to.be.a("object");
+				expect(data).to.have.property("error");
+				expect(data.error.code).to.be("invalid_network");
 				done();
 			};
 		};
@@ -66,8 +66,8 @@ describe('Hello Core', function(){
 
 		var test_response = function(done){
 			return function(data, type){
-				assert.equal(event_name, type);
-				assert.equal(arbitary_data, data);
+				expect( event_name ).to.be( type );
+				expect( arbitary_data ).to.be( data);
 				done();
 			};
 		};
@@ -75,8 +75,24 @@ describe('Hello Core', function(){
 		it('should trigger event on constructor', function(done){
 
 			// Make request
-			hello.on(event_name, test_response(done));
+			var func = test_response(done);
+			hello.on(event_name, func);
 			hello.emit(event_name, arbitary_data);
+
+		});
+		it('should remove event from constructor', function(done){
+
+			var spy = sinon.spy(function(){
+				console.log("Whooo");
+			});
+
+			hello.on("notfired", spy );
+			hello.off("notfired", spy );
+			hello.emit("notfired", arbitary_data);
+			setTimeout(function(){
+				expect( !spy.called ).to.be.ok();
+				done();
+			},10);
 
 		});
 		it('should trigger event on instance', function(done){

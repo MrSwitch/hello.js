@@ -12,7 +12,7 @@ describe('Modules all', function(){
 		// Loop through all services
 		for(var name in hello.services){
 			var path = hello.services[name].uri.auth||hello.services[name].oauth.auth;
-			assert.match( path, /^https?\:\/\// );
+			expect( path ).to.match( /^https?\:\/\// );
 		}
 	});
 
@@ -23,9 +23,9 @@ describe('Modules all', function(){
 		for(var name in hello.services){
 			var oauth = hello.services[name].oauth;
 			if(oauth && parseInt(oauth.version,10) === 1 ){
-				assert.match( oauth.auth, MATCH_URL );
-				assert.match( oauth.token, MATCH_URL );
-				assert.match( oauth.request, MATCH_URL );
+				expect( oauth.auth ).to.match( MATCH_URL );
+				expect( oauth.token ).to.match( MATCH_URL );
+				expect( oauth.request ).to.match( MATCH_URL );
 			}
 		}
 	});
