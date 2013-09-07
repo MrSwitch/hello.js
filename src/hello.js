@@ -1524,9 +1524,9 @@ hello.utils.extend( hello.utils, {
 		if(window[test]){
 			return data instanceof window[test];
 		}else if(window.Element){
-			return data instanceof window.Element && (!type || data.tagName === type);
+			return data instanceof window.Element && (!type || (data.tagName&&data.tagName.toLowerCase() === type));
 		}else{
-			return (!(data instanceof Object||data instanceof Array||data instanceof String||data instanceof Number) && data.tagName && data.tagName === type );
+			return (!(data instanceof Object||data instanceof Array||data instanceof String||data instanceof Number) && data.tagName && data.tagName.toLowerCase() === type );
 		}
 	},
 
