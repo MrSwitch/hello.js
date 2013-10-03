@@ -14,6 +14,17 @@ function formatUser(o){
 	}
 }
 
+function formaterror(o){
+	if(o.errors){
+		var e = o.errors[0];
+		o.error = {
+			code : "request_failed",
+			message : e.message
+		};
+	}
+}
+
+
 hello.init({
 	'twitter' : {
 		// Ensure that you define an oauth_proxy
@@ -24,24 +35,24 @@ hello.init({
 			token	: 'https://twitter.com/oauth/access_token'
 		},
 		uri : {
-			base	: "https://api.twitter.com/1.1/",
+			base	: "http://api.twitter.com/1.1/",
 			me		: 'account/verify_credentials.json',
 			"me/friends"	: 'friends/list.json',
 			'me/share' : function(p,callback){
-				if(p.data&&p.method==='post'){
-					p.data = {
-						status : p.data.message
-					};
-				}
-				callback( p.method==='post' ? 'statuses/update.json?include_entities=1' : 'statuses/user_timeline.json' );
+				var data = p.data;
+				p.data = null;
+
+				callback( p.method==='post' ? 'statuses/update.json?include_entities=1&status='+data.message : 'statuses/user_timeline.json' );
 			}
 		},
 		wrap : {
 			me : function(o){
+				formaterror(o);
 				formatUser(o);
 				return o;
 			},
 			"me/friends" : function(o){
+				formaterror(o);
 				if(o.users){
 					o.data = o.users;
 					for(var i=0;i<o.data.length;i++){
@@ -52,6 +63,7 @@ hello.init({
 				return o;
 			},
 			"me/share" : function(o){
+				formaterror(o);
 				if(!o.error&&"length" in o){
 					return {data : o};
 				}
@@ -59,12 +71,7 @@ hello.init({
 			}
 		},
 		xhr : function(p){
-			// If this is GET request it'll be relocated, otherwise
-			// Else, it'll proxy through the server
-			if(p.method==='post'&&p.data&&!hello.utils.hasBinary(p.data)){
-				p.data = hello.utils.param(p.data);
-			}
-
+			// Rely on the proxy for non-GET requests.
 			return (p.method!=='get');
 		}
 	}

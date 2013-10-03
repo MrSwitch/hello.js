@@ -1478,9 +1478,11 @@ hello.api = function(){
 			// Use the proxy as a path
 			callback( self.utils.qs(proxy, {
 				path : path,
-				access_token : token||''
+				access_token : token||'',
+				then : (method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
+				method : method,
+				suppress_response_codes : true
 			}));
-
 			return;
 		}
 
