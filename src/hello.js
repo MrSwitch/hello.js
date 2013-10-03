@@ -1219,12 +1219,13 @@ var hello = (function(){
 		var proxy = ( service.oauth && parseInt(service.oauth.version,10) === 1 ? hello.settings.oauth_proxy : null);
 
 		if(proxy){
-			// Use the proxy as a path
 			callback( _qs(proxy, {
 				path : path,
-				access_token : token||''
+				access_token : token||'',
+				then : (method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
+				method : method,
+				suppress_response_codes : true
 			}));
-
 			return;
 		}
 
