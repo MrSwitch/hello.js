@@ -197,11 +197,11 @@ hello.utils.extend( hello, {
 		if(!(this instanceof arguments.callee)){
 			// Invoke as an instance
 			arguments.callee.prototype = this;
-			var self = new arguments.callee(p);
-			// Create an instance of Events
-			this.utils.Event.call(self);
-			return self;
+			return new arguments.callee(p);
 		}
+
+		// Create an instance of Events
+		this.utils.Event.call(this);
 
 		// Apply the args
 		this.args = p;
@@ -308,7 +308,7 @@ hello.utils.extend( hello, {
 		//
 		// Is the user already signed in
 		//
-		var session = this.getAuthResponse(p.network);
+		var session = new this.getAuthResponse(p.network);
 		if( session && "access_token" in session && session.access_token && "expires" in session && session.expires > ((new Date()).getTime()/1e3) ){
 			// What is different about the scopes in the session vs the scopes in the new login?
 			var diff = this.utils.diff( session.scope || [], qs.state.scope || [] );
@@ -426,13 +426,13 @@ hello.utils.extend( hello, {
 		if(!(this instanceof arguments.callee)){
 			// Invoke as an instance
 			arguments.callee.prototype = this;
-			var self = new arguments.callee(p);
-			// Create an instance of Events
-			this.utils.Event.call(self);
-			return self;
+			return new arguments.callee(p);
 		}
-		var self = this;
 
+		// Create an instance of Events
+		this.utils.Event.call(this);
+
+		var self = this;
 
 		// Add callback to events
 		this.on('complete', p.callback);
@@ -484,11 +484,11 @@ hello.utils.extend( hello, {
 		if(!(this instanceof arguments.callee)){
 			// Invoke as an instance
 			arguments.callee.prototype = this;
-			var self = new arguments.callee(service);
-			// Create an instance of Events
-			this.utils.Event.call(self);
-			return self;
+			return new arguments.callee(service);
 		}
+
+		// Create an instance of Events
+		this.utils.Event.call(this);
 
 		// If the service doesn't exist
 		service = service || this.settings.default_service;
@@ -867,7 +867,6 @@ hello.utils.extend( hello.utils, {
 
 		// Event list
 		this.events = {};
-
 
 		//
 		// On, Subscribe to events
@@ -1467,7 +1466,7 @@ hello.api = function(){
 	function _sign(network, path, method, data, modifyQueryString, callback){
 
 		// OAUTH SIGNING PROXY
-		var session = self.getAuthResponse(network),
+		var session = new self.getAuthResponse(network),
 			service = self.services[network],
 			token = (session ? session.access_token : null);
 
