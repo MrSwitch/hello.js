@@ -2,6 +2,19 @@
 
 describe('Hello Core', function(){
 
+
+	var invalid_network = function(done, event_name){
+		event_name = event_name || 'error';
+		return function(data, type){
+			expect(type).to.be(event_name);
+			expect(data).to.be.a("object");
+			expect(data).to.have.property("error");
+			expect(data.error.code).to.be("invalid_network");
+			done();
+		};
+	};
+
+
 	before(function(){
 
 	});
@@ -21,43 +34,102 @@ describe('Hello Core', function(){
 	//
 	describe('Invalid network', function(){
 
-		var test_response = function(done){
-			return function(data, type){
-				expect(type).to.be("error");
-				expect(data).to.be.a("object");
-				expect(data).to.have.property("error");
-				expect(data.error.code).to.be("invalid_network");
-				done();
-			};
-		};
-
 		it('should trigger an error when accessed through login', function(done){
 
 			// Make request
-			hello("Facelessbook").login().on('error', test_response(done));
+			hello("Facelessbook").login().on('error', invalid_network(done));
 
 		});
 		it('should trigger an error when accessed through logout', function(done){
 
 			// Make request
-			hello("Facelessbook").logout().on('error', test_response(done));
+			hello("Facelessbook").logout().on('error', invalid_network(done));
 
 		});
 		it('should trigger an error when accessed through api', function(done){
 
 			// Make request
-			hello("Facelessbook").api("/").on('error', test_response(done));
+			hello("Facelessbook").api("/").on('error', invalid_network(done));
 
 		});
 		it('should trigger an error when accessed through getAuthResponse', function(done){
 
 			// Make request
-			hello("Facelessbook").on('error', test_response(done)).getAuthResponse();
+			hello("Facelessbook").on('error', invalid_network(done)).getAuthResponse();
 
 		});
 	});
 
 
+	//
+	// Login
+	//
+	describe('Login', function(){
+
+		it('should assign a complete event', function(){
+			var instance = hello.login('test', function(){});
+			expect( instance.events ).to.have.property( 'complete' );
+		});
+
+		it('should throw a completed event if network name is wrong', function(done){
+			hello.login('test', invalid_network(done, "complete") );
+		});
+		it('should throw a error event if network name is wrong', function(done){
+			var instance = hello.login('test');
+			instance.on('error', invalid_network(done));
+		});
+	});
+
+	//
+	// Logout
+	//
+	describe('Logout', function(){
+
+		it('should assign a complete event', function(){
+			var instance = hello.logout('test', function(){});
+			expect( instance.events ).to.have.property( 'complete' );
+		});
+
+		it('should throw a completed event if network name is wrong', function(done){
+			var instance = hello.logout('test', function(e){
+				expect( e ).to.have.property( 'error' );
+				done();
+			});
+		});
+		it('should throw a error event if network name is wrong', function(done){
+			var instance = hello.logout('test');
+			instance.on('error', function(){
+				done();
+			});
+		});
+	});
+
+
+
+	//
+	// Api
+	//
+	describe('API', function(){
+
+		it('should assign a complete event', function(){
+			var instance = hello('test').api('/', function(){});
+			expect( instance.events ).to.have.property( 'complete' );
+		});
+
+		it('should throw a completed event if network name is wrong', function(done){
+			hello('test').api('/', invalid_network(done, "complete") );
+		});
+
+		it('should throw a error event if network name is wrong', function(done){
+			var instance = hello('test').api("/");
+			instance.on('error', invalid_network(done));
+		});
+	});
+
+
+	//
+	// UTILS
+	//
 	describe('Utils.Events', function(){
 
 		// Pass an arbitary piece of data around
