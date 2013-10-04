@@ -1168,7 +1168,7 @@ hello.unsubscribe = hello.off;
 	// #access_token has come in?
 	//
 	// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
-	// SoundCloud is the state in the querystring and the rest in the hashtag
+	// SoundCloud is the state in the querystring and the token in the hashtag, so we'll mix the two together
 	var p = hello.utils.merge(hello.utils.param(window.location.search||''), hello.utils.param(window.location.hash||''));
 
 	
