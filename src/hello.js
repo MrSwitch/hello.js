@@ -360,11 +360,13 @@ var hello = (function(){
 			// Triggering popup?
 			else if( p.options.display === 'popup'){
 
+				var windowHeight = p.options.window_height || "550";
+				var windowWidth = p.options.window_width || "500";
 				// Trigger callback
 				var popup = window.open(
 					url,
 					'Authentication',
-					"resizeable=true,height=550,width=500,left="+((window.innerWidth-500)/2)+",top="+((window.innerHeight-550)/2)
+					"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left="+((window.innerWidth-500)/2)+",top="+((window.innerHeight-550)/2)
 				);
 				// Ensure popup window has focus upon reload, Fix for FF.
 				popup.focus();
