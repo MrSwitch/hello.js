@@ -32,12 +32,17 @@ hello.init({
 			auth	: "https://www.linkedin.com/uas/oauth2/authorization",
 			base	: "https://api.linkedin.com/v1/",
 			me		: 'people/~:(picture-url,first-name,last-name,id,formatted-name)',
-			"me/friends"	: 'people/~/connections'
+			"me/friends"	: 'people/~/connections',
+			"me/share" : function(p, next){
+				// POST unsupported
+				next( p.method === 'get' ? 'people/~/network/updates' : 'people/~/current-status' );
+			}
 		},
 		scope : {
 			basic	: 'r_fullprofile',
 			email	: 'r_emailaddress',
-			friends : 'r_network'
+			friends : 'r_network',
+			publish : 'rw_nus'
 		},
 		scope_delim : ' ',
 		wrap : {
@@ -54,10 +59,24 @@ hello.init({
 					delete o.values;
 				}
 				return o;
+			},
+			"me/share" : function(o){
+				if(o.values){
+					o.data = o.values;
+					for(var i=0;i<o.data.length;i++){
+						formatUser(o.data[i]);
+						o.data[i].message = o.data[i].headline;
+					}
+					delete o.values;
+				}
+				return o;
 			}
 		},
 		jsonp : function(p,qs){
 			qs.format = 'jsonp';
+			if(p.method==='get'){
+				qs['error-callback'] = '?';
+			}
 		},
 		xhr : false
 	}
