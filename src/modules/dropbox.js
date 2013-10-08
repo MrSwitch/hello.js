@@ -2,6 +2,15 @@
 // Dropbox
 //
 (function(){
+
+function formatError(o){
+	if(o&&"error" in o){
+		o.error = {
+			code : "server_error",
+			message : o.error
+		};
+	}
+}
 	
 function format_file(o){
 
@@ -85,6 +94,7 @@ hello.init({
 		},
 		wrap : {
 			me : function(o){
+				formatError(o);
 				if(!o.uid){
 					return o;
 				}
@@ -97,7 +107,7 @@ hello.init({
 				return o;
 			},
 			"default"	: function(o){
-
+				formatError(o);
 				if(o.is_dir && o.contents){
 					o.data = o.contents;
 					delete o.contents;

@@ -52,7 +52,7 @@ function checkResponse(jsonResult, o){
 		return {
 			error : {
 				code : "invalid_request",
-				message : "Failed to get data from Flickr"
+				message : jsonResult.message || "Failed to get data from Flickr"
 			}
 		};
 	}
@@ -71,6 +71,10 @@ hello.init({
 			auth	: "http://www.flickr.com/services/oauth/authorize?perms=read",
 			request : 'http://www.flickr.com/services/oauth/request_token',
 			token	: 'http://www.flickr.com/services/oauth/access_token'
+		},
+		logout : function(){
+			// Function is executed when the user logs out.
+			flickr_user = null;
 		},
 		name : "Flickr",
 		jsonp: function(p,qs){

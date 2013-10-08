@@ -448,6 +448,13 @@ hello.utils.extend( hello, {
 			return this;
 		}
 		if(p.name && this.utils.store(p.name)){
+
+			// Trigger a logout callback on the provider
+			if(typeof(this.services[p.name].logout) === 'function'){
+				this.services[p.name].logout(p);
+			}
+
+			// Remove from the store
 			this.utils.store(p.name,'');
 		}
 		else if(!p.name){

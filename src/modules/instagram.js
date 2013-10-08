@@ -1,6 +1,18 @@
 //
 // Instagram
 //
+(function(){
+
+function formatError(o){
+	if(o && "meta" in o && "error_type" in o.meta){
+		o.error = {
+			code : o.meta.error_type,
+			message : o.meta.error_message
+		};
+	}
+}
+
+
 hello.init({
 	instagram : {
 		name : 'Instagram',
@@ -23,6 +35,8 @@ hello.init({
 		wrap : {
 			me : function(o){
 
+				formatError(o);
+
 				if("data" in o ){
 					o.id = o.data.id;
 					o.thumbnail = o.data.profile_picture;
@@ -31,6 +45,9 @@ hello.init({
 				return o;
 			},
 			"me/photos" : function(o){
+
+				formatError(o);
+
 				if("data" in o){
 					for(var i=0;i<o.data.length;i++){
 						if(o.data[i].type !== 'image'){
@@ -49,3 +66,4 @@ hello.init({
 		xhr : false
 	}
 });
+})();

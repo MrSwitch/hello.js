@@ -2,6 +2,17 @@
 // Yahoo
 //
 // Register Yahoo developer
+(function(){
+
+function formatError(o){
+	if(o && "meta" in o && "error_type" in o.meta){
+		o.error = {
+			code : o.meta.error_type,
+			message : o.meta.error_message
+		};
+	}
+}
+
 hello.init({
 	'yahoo' : {
 		// Ensure that you define an oauth_proxy
@@ -18,6 +29,7 @@ hello.init({
 		},
 		wrap : {
 			me : function(o){
+				formatError(o);
 				if(o.query&&o.query.results&&o.query.results.profile){
 					o = o.query.results.profile;
 					o.id = o.guid;
@@ -32,6 +44,7 @@ hello.init({
 			// Can't get ID's
 			// It might be better to loop through the social.relationshipd table with has unique ID's of users.
 			"me/friends" : function(o){
+				formatError(o);
 				var contact,field;
 				if(o.query&&o.query.results&&o.query.results.contact){
 					o.data = o.query.results.contact;
@@ -61,3 +74,5 @@ hello.init({
 		xhr : false
 	}
 });
+
+})();

@@ -3,6 +3,16 @@
 //
 (function(){
 
+function formatError(o){
+	if(o && "errorCode" in o){
+		o.error = {
+			code : o.status,
+			message : o.message
+		};
+	}
+}
+
+
 function formatUser(o){
 	if(o.error){
 		return;
@@ -47,10 +57,12 @@ hello.init({
 		scope_delim : ' ',
 		wrap : {
 			me : function(o){
+				formatError(o);
 				formatUser(o);
 				return o;
 			},
 			"me/friends" : function(o){
+				formatError(o);
 				if(o.values){
 					o.data = o.values;
 					for(var i=0;i<o.data.length;i++){
@@ -61,6 +73,7 @@ hello.init({
 				return o;
 			},
 			"me/share" : function(o){
+				formatError(o);
 				if(o.values){
 					o.data = o.values;
 					for(var i=0;i<o.data.length;i++){

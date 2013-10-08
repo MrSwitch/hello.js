@@ -30,4 +30,35 @@ describe('Modules all', function(){
 		}
 	});
 
+	it('return error object when an api request is made with an unverified user', function(done){
+
+		this.timeout(20000);
+
+		var i=0;
+
+		function contains_error_callback(data){
+
+			expect(data).to.be.a("object");
+			expect(data).to.have.property("error");
+			expect(data.error).to.have.property("code");
+
+			if(--i <= 0){
+				done();
+			}
+		}
+
+		// Loop through all services
+		for(var name in hello.services){
+			// i++
+			i++;
+
+			// ensure user is signed out
+			hello.logout(name);
+
+			// Make a request that returns an error object
+			hello(name).api('me', contains_error_callback);
+		}
+	});
+	/**/
+
 });
