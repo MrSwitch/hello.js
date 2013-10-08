@@ -267,8 +267,11 @@ hello.utils.extend( hello, {
 		// QUERY STRING
 		// querystring parameters, we may pass our own arguments to form the querystring
 		//
-		var qs = this.utils.merge( p.options, {
+		p.qs = {
 			client_id	: provider.id,
+			response_type : p.options.response_type,
+			redirect_uri : p.options.redirect_uri,
+			display		: p.options.display,
 			scope		: 'basic',
 			state		: {
 				client_id	: provider.id,
@@ -278,7 +281,7 @@ hello.utils.extend( hello, {
 				state		: p.options.state,
 				oauth_proxy : p.options.oauth_proxy
 			}
-		});
+		};
 
 		//
 		// SCOPES
@@ -291,27 +294,27 @@ hello.utils.extend( hello, {
 				scope = scope.join(',');
 			}
 		}
-		scope = (scope ? scope + ',' : '') + qs.scope;
+		scope = (scope ? scope + ',' : '') + p.qs.scope;
 
 		// Save in the State
-		qs.state.scope = scope.split(/,\s/);
+		p.qs.state.scope = scope.split(/,\s/);
 
 		// Map replace each scope with the providers default scopes
-		qs.scope = scope.replace(/[^,\s]+/ig, function(m){
+		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m){
 			return (m in provider.scope) ? provider.scope[m] : '';
 		}).replace(/[,\s]+/ig, ',');
 
 		// remove duplication and empty spaces
-		qs.scope = this.utils.unique(qs.scope.split(/,+/)).join( provider.scope_delim || ',');
+		p.qs.scope = this.utils.unique(p.qs.scope.split(/,+/)).join( provider.scope_delim || ',');
 
 
 		//
 		// Is the user already signed in
 		//
-		var session = new this.getAuthResponse(p.network);
+		var session = this.getAuthResponse.call(hello, p.network);
 		if( session && "access_token" in session && session.access_token && "expires" in session && session.expires > ((new Date()).getTime()/1e3) ){
 			// What is different about the scopes in the session vs the scopes in the new login?
-			var diff = this.utils.diff( session.scope || [], qs.state.scope || [] );
+			var diff = this.utils.diff( session.scope || [], p.qs.state.scope || [] );
 			if(diff.length===0){
 
 				// Nothing has changed
@@ -332,31 +335,24 @@ hello.utils.extend( hello, {
 		// REDIRECT_URI
 		// Is the redirect_uri root?
 		//
-		qs.redirect_uri = this.utils.realPath(qs.redirect_uri);
+		p.qs.redirect_uri = this.utils.realPath(p.qs.redirect_uri);
 
 		// Add OAuth to state
 		if(provider.oauth){
-			qs.state.oauth = provider.oauth;
+			p.qs.state.oauth = provider.oauth;
 		}
 
 		// Convert state to a string
-		qs.state = JSON.stringify(qs.state);
-
-
-		// Sanitize
-		// Remove unwanted attributes from the path
-		for(var x in qs){
-			if(qs.hasOwnProperty(x) && this.utils.indexOf(['response_type','redirect_uri','state', 'client_id', 'scope', 'display'], x) === -1 ){
-				delete qs[x];
-			}
-		}
+		p.qs.state = JSON.stringify(p.qs.state);
 
 
 		// Bespoke
 		// Override login querystrings from auth_options
-		if(provider.auth_options){
-			qs = this.utils.merge(qs, provider.auth_options );
+		if("login" in provider && typeof(provider.login) === 'function'){
+			// Format the paramaters according to the providers formatting function
+			provider.login(p);
 		}
+
 
 
 		//
@@ -364,10 +360,10 @@ hello.utils.extend( hello, {
 		//
 		if( provider.oauth && parseInt(provider.oauth.version,10) === 1 ){
 			// Turn the request to the OAuth Proxy for 3-legged auth
-			url = this.utils.qs( p.options.oauth_proxy, qs );
+			url = this.utils.qs( p.options.oauth_proxy, p.qs );
 		}
 		else{
-			url = this.utils.qs( provider.uri.auth, qs );
+			url = this.utils.qs( provider.uri.auth, p.qs );
 		}
 
 		this.emit("notice", "Authorization URL " + url );

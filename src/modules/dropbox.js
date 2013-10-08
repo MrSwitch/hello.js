@@ -39,6 +39,12 @@ function format_file(o){
 hello.init({
 	'dropbox' : {
 
+		login : function(p){
+			// The dropbox login window is a different size.
+			p.options.window_width = 1000;
+			p.options.window_height = 1000;
+		},
+
 		// Define the OAuth Settings of the service
 		// Ensure that you define an oauth_proxy
 		oauth : {

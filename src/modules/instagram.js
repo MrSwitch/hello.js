@@ -4,8 +4,10 @@
 hello.init({
 	instagram : {
 		name : 'Instagram',
-		auth_options: {
-			display: ''
+		login: function(p){
+			// Instagram throws errors like "Javascript API is unsupported" if the display is 'popup'.
+			// Make the display anything but 'popup'
+			p.qs.display = '';
 		},
 		uri : {
 			auth : 'https://instagram.com/oauth/authorize/',

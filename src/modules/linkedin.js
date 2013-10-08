@@ -16,8 +16,8 @@ function formatUser(o){
 hello.init({
 	'linkedin' : {
 
-		auth_options: {
-			response_type: 'code'
+		login: function(p){
+			p.qs.response_type = 'code';
 		},
 		oauth : {
 			version : 2,
