@@ -872,7 +872,15 @@ hello.utils.extend( hello.utils, {
 	//
 	Event : function(){
 
-		// Event list
+		// If this doesn't support getProtoType then we can't get prototype.events of the parent
+		// So lets get the current instance events, and add those to a parent property
+		this.parent = {
+			events : this.events,
+			findEvents : this.findEvents,
+			parent : this.parent,
+			utils : this.utils
+		};
+
 		this.events = {};
 
 		//
@@ -932,7 +940,8 @@ hello.utils.extend( hello.utils, {
 					this.events[name][index].apply(this, args);
 				});
 
-				proto = this.utils.getPrototypeOf(proto);
+				// proto = this.utils.getPrototypeOf(proto);
+				proto = proto.parent;
 			}
 
 			return this;
