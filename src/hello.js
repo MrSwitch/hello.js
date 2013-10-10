@@ -244,6 +244,10 @@ hello.utils.extend( hello, {
 		var callback_id = this.utils.globalEvent(function(obj){
 
 			//
+			// Cancel the popup close listener
+			responded = true;
+
+			//
 			// Handle these response using the local
 			// Trigger on the parent
 			if(!obj.error){
@@ -251,14 +255,19 @@ hello.utils.extend( hello, {
 				// Save on the parent window the new credentials
 				// This fixes an IE10 bug i think... atleast it does for me.
 				self.utils.store(obj.network,obj);
-			}
-			responded = true;
 
-			// Trigger local complete events
-			self.emit("complete success login auth.login auth", {
-				network : obj.network,
-				authResponse : obj
-			});
+				// Trigger local complete events
+				self.emit("complete success login auth.login auth", {
+					network : obj.network,
+					authResponse : obj
+				});
+			}
+			else{
+				// Trigger local complete events
+				self.emit("complete error failed auth.failed", {
+					error : obj.error
+				});
+			}
 		});
 
 
@@ -399,7 +408,7 @@ hello.utils.extend( hello, {
 				if(popup.closed){
 					clearInterval(timer);
 					if(!responded){
-						self.emit("complete failed error", {error:{code:"user_cancelled", message:"Cancelled"}, network:p.network });
+						self.emit("complete failed error", {error:{code:"cancelled", message:"Login has been cancelled"}, network:p.network });
 					}
 				}
 			}, 100);
