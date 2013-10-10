@@ -1,6 +1,19 @@
 //
 // GitHub
 //
+(function(){
+
+function formatError(o,code){
+	code = code || ( o && "meta" in o && "status" in o.meta && o.meta.status );
+	if( (code===401||code===403) ){
+		o.error = {
+			code : "access_denied",
+			message : o.message
+		};
+		delete o.message;
+	}
+}
+
 hello.init({
 	github : {
 		name : 'GitHub',
@@ -16,33 +29,27 @@ hello.init({
 		},
 		wrap : {
 			me : function(o,code){
+
+				formatError(o,code);
+
 				if(o.id){
 					o.picture = o.avatar_url;
 					o.thumbnail = o.avatar_url;
 					o.name = o.login;
 				}
-				else if(code===401||code===403){
-					o.error = {
-						code : "access_denied",
-						message : o.message
-					};
-					delete o.message;
-				}
 				return o;
 			},
 			"me/friends" : function(o,code){
+
+				formatError(o,code);
+
 				if(Object.prototype.toString.call(o) === '[object Array]'){
 					return {data:o};
-				}
-				else if(code===401||code===403){
-					o.error = {
-						code : "access_denied",
-						message : o.message
-					};
-					delete o.message;
 				}
 				return o;
 			}
 		}
 	}
 });
+
+})();

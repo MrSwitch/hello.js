@@ -7,7 +7,7 @@ function formatError(o){
 	if(o&&"error" in o){
 		o.error = {
 			code : "server_error",
-			message : o.error
+			message : o.error.message || o.error
 		};
 	}
 }

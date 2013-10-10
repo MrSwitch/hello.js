@@ -47,17 +47,44 @@ function getPhoto(id, farm, server, secret, size){
 function formatUser(o){
 }
 
-function checkResponse(jsonResult, o){
-	if (!jsonResult.stat || jsonResult.stat.toLowerCase()!='ok' || !jsonResult[o]) {
-		return {
-			error : {
-				code : "invalid_request",
-				message : jsonResult.message || "Failed to get data from Flickr"
-			}
+function formatError(o){
+	if(o && o.stat && o.stat.toLowerCase()!='ok'){
+		o.error = {
+			code : "invalid_request",
+			message : o.message
 		};
 	}
-	return jsonResult[o];
 }
+
+function formatPhotos(o){
+	if (o.photoset || o.photos){
+		var set = (o.photoset) ? 'photoset' : 'photos';
+		o = checkResponse(o, set);
+		o.data = o.photo;
+		delete o.photo;
+		for(var i=0;i<o.data.length;i++){
+			var photo = o.data[i];
+			photo.name = photo.title;
+			photo.picture = getPhoto(photo.id, photo.farm, photo.server, photo.secret, '');
+			photo.source = getPhoto(photo.id, photo.farm, photo.server, photo.secret, 'b');
+			photo.thumbnail = getPhoto(photo.id, photo.farm, photo.server, photo.secret, 'm');
+		}
+	}
+}
+function checkResponse(o, key){
+
+	if( key in o) {
+		o = o[key];
+	}
+	else if(!("error" in o)){
+		o.error = {
+			code : "invalid_request",
+			message : o.message || "Failed to get data from Flickr"
+		};
+	}
+	return o;
+}
+
 
 // this is not exactly neat but avoid to call
 // the method 'flickr.test.login' for each api call
@@ -108,6 +135,7 @@ hello.init({
 		},
 		wrap : {
 			me : function(o){
+				formatError(o);
 				o = checkResponse(o, "person");
 				if(o.id){
 					if(o.realname){
@@ -122,89 +150,44 @@ hello.init({
 				return o;
 			},
 			"me/friends" : function(o){
-				if (o.stat.toLowerCase()!='ok'){
-					o = {
-						error : {
-							code : "invalid_request",
-							message : o.message
-						}
-					};
-					return o;
-				}
-				o.data = o.contacts.contact;
-				delete o.contacts;
-				for(var i=0;i<o.data.length;i++){
-					var item = o.data[i];
-					item.id = item.nsid;
-					item.name = item.realname || item.username;
-					item.thumbnail = getBuddyIcon(item, 'm');
+				formatError(o);
+				if(o.contacts){
+					o.data = o.contacts.contact;
+					delete o.contacts;
+					for(var i=0;i<o.data.length;i++){
+						var item = o.data[i];
+						item.id = item.nsid;
+						item.name = item.realname || item.username;
+						item.thumbnail = getBuddyIcon(item, 'm');
+					}
 				}
 				return o;
 			},
 			"me/albums" : function(o){
-				if (o.stat.toLowerCase()!='ok'){
-					o = {
-						error : {
-							code : "invalid_request",
-							message : o.message
-						}
-					};
-					return o;
-				}
+				formatError(o);
 				o = checkResponse(o, "photosets");
-				o.data = o.photoset;
-				delete o.photoset;
-				for(var i=0;i<o.data.length;i++){
-					var item = o.data[i];
-					item.name = item.title._content;
-					item.photos = "http://api.flickr.com/services/rest" + getApiUrl("flickr.photosets.getPhotos", {photoset_id: item.id}, true);
+				if(o.photosets){
+					o.data = o.photoset;
+					delete o.photoset;
+					for(var i=0;i<o.data.length;i++){
+						var item = o.data[i];
+						item.name = item.title._content;
+						item.photos = "http://api.flickr.com/services/rest" + getApiUrl("flickr.photosets.getPhotos", {photoset_id: item.id}, true);
+					}
 				}
 				return o;
 			},
 			"me/photos" : function(o){
-				if (o.stat.toLowerCase()!='ok'){
-					o = {
-						error : {
-							code : "invalid_request",
-							message : o.message
-						}
-					};
-					return o;
-				}
-				o.data = o.photos.photo;
-				delete o.photos;
-				for(var i=0;i<o.data.length;i++){
-					var photo = o.data[i];
-					photo.name = photo.title;
-					photo.picture = getPhoto(photo.id, photo.farm, photo.server, photo.secret, '');
-					photo.source = getPhoto(photo.id, photo.farm, photo.server, photo.secret, 'b');
-					photo.thumbnail = getPhoto(photo.id, photo.farm, photo.server, photo.secret, 'm');
-				}
+				formatError(o);
+				formatPhotos(o);
+
 				return o;
 			},
 			"default" : function(o){
-				if (o.stat.toLowerCase()!='ok'){
-					o = {
-						error : {
-							code : "invalid_request",
-							message : o.message
-						}
-					};
-					return o;
-				}
-				if (o.photoset || o.photos){
-					var set = (o.photoset) ? 'photoset' : 'photos';
-					o = checkResponse(o, set);
-					o.data = [];
-					for(var i=0;i<o.photo.length;i++){
-						var photo = o.photo[i];
-						o.data.push({
-							picture: getPhoto(photo.id, photo.farm, photo.server, photo.secret, ''),
-							source: getPhoto(photo.id, photo.farm, photo.server, photo.secret, 'b'),
-							thumbnail: getPhoto(photo.id, photo.farm, photo.server, photo.secret, 'm')
-						});
-					}
-				}
+
+				formatError(o);
+				formatPhotos(o);
+
 				return o;
 			}
 		},

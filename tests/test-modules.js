@@ -32,7 +32,7 @@ describe('Modules all', function(){
 
 	it('return error object when an api request is made with an unverified user', function(done){
 
-		this.timeout(20000);
+		this.timeout(60000);
 
 		var i=0;
 
@@ -41,6 +41,9 @@ describe('Modules all', function(){
 			expect(data).to.be.a("object");
 			expect(data).to.have.property("error");
 			expect(data.error).to.have.property("code");
+			expect(data.error).to.have.property("message");
+			expect(data.error.code).to.not.be.an("object");
+			expect(data.error.message).to.not.be.an("object");
 
 			if(--i <= 0){
 				done();
