@@ -27,10 +27,12 @@ hello.init({
 					};
 					return o;
 				}
-				o = o.response.user;
-				if(o.id){
-					o.thumbnail = o.photo.prefix + '100x100'+ o.photo.suffix;
-					o.name = o.firstName + ' ' + o.lastName;
+				if(o && o.response){
+					o = o.response.user;
+					if(o.id){
+						o.thumbnail = o.photo.prefix + '100x100'+ o.photo.suffix;
+						o.name = o.firstName + ' ' + o.lastName;
+					}
 				}
 				return o;
 			},
