@@ -774,7 +774,11 @@ ko.bindingHandlers.beautify = {
 		value = (JSON.stringify(value,fixRegExp,2)||'').replace(/https?:\/\/[^\'\"\s]+/ig, function(r){
 			return r.link(r).replace('<a ', '<a target="_blank" ');
 		}).replace(/\"(\/.*?\/)\"/ig, function(m,a){
+			// Format the RegExp to make it look good
 			return a;
+		}).replace(/\"(.*?)\"\:/ig, function(m,a){
+			// Format the key to look a different
+			return "<i>"+a+":</i>";
 		});
 
         element.innerHTML = value; // Make the element visible
