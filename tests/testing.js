@@ -5,6 +5,8 @@
 //var should = chai.should();
 
 mocha.setup('bdd');
+mocha.setup({ignoreLeaks: true});
+//mocha.setup({globals: [/^_hellojs_/]});
 /*
 jasmine.Matchers.prototype.toBeTypeOf = function(expected) {
 	var actual, notText, objType;
