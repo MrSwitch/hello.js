@@ -126,10 +126,6 @@
 		google : {
 			name : "Google Plus",
 
-			// AutoRefresh
-			// Signin once token expires?
-			autorefresh : false,
-
 			uri : {
 				// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
 				auth : "https://accounts.google.com/o/oauth2/auth",
