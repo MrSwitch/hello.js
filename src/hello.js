@@ -1045,6 +1045,9 @@ hello.unsubscribe = hello.off;
 
 
 	(function self(){
+
+		var CURRENT_TIME = ((new Date()).getTime()/1e3);
+
 		// Loop through the services
 		for(var name in hello.services){if(hello.services.hasOwnProperty(name)){
 
@@ -1055,6 +1058,7 @@ hello.unsubscribe = hello.off;
 		
 			// Get session
 			var session = hello.utils.store(name) || {};
+			var provider = hello.services[name];
 			var oldsess = old_session[name] || {};
 			var evt = '';
 
@@ -1083,15 +1087,19 @@ hello.unsubscribe = hello.off;
 			//
 			// Refresh login
 			//
-			if( session && ("expires" in session) && session.expires < ((new Date()).getTime()/1e3) ){
+			if( session && ("expires" in session) && session.expires < CURRENT_TIME ){
 
-				if( !( name in pending ) || pending[name] < ((new Date()).getTime()/1e3) ) {
+				// Refresh
+				var refresh = ("autorefresh" in provider) ? provider.autorefresh : true;
+
+				// Does this provider support refresh
+				if( refresh && (!( name in pending ) || pending[name] < CURRENT_TIME) ) {
 					// try to resignin
 					hello.emit("notice", name + " has expired trying to resignin" );
 					hello.login(name,{display:'none'});
 
 					// update pending, every 10 minutes
-					pending[name] = ((new Date()).getTime()/1e3) + 600;
+					pending[name] = CURRENT_TIME + 600;
 				}
 				// If session has expired then we dont want to store its value until it can be established that its been updated
 				continue;

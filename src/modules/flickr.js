@@ -103,6 +103,12 @@ hello.init({
 			// Function is executed when the user logs out.
 			flickr_user = null;
 		},
+
+		// AutoRefresh
+		// Signin once token expires?
+		autorefresh : false,
+
+
 		name : "Flickr",
 		jsonp: function(p,qs){
 			if(p.method.toLowerCase() == "get"){

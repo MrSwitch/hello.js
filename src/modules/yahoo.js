@@ -22,6 +22,11 @@ hello.init({
 			request : 'https://api.login.yahoo.com/oauth/v2/get_request_token',
 			token	: 'https://api.login.yahoo.com/oauth/v2/get_token'
 		},
+
+		// AutoRefresh
+		// Signin once token expires?
+		autorefresh : false,
+
 		uri : {
 			base	: "https://social.yahooapis.com/v1/",
 			me		: "https://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.profile%20where%20guid%3Dme&format=json",

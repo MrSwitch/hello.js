@@ -34,6 +34,11 @@ hello.init({
 			request : 'https://twitter.com/oauth/request_token',
 			token	: 'https://twitter.com/oauth/access_token'
 		},
+
+		// AutoRefresh
+		// Signin once token expires?
+		autorefresh : false,
+
 		uri : {
 			base	: "http://api.twitter.com/1.1/",
 			me		: 'account/verify_credentials.json',
