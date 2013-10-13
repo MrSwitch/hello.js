@@ -126,6 +126,14 @@
 		google : {
 			name : "Google Plus",
 
+			// Login
+			login : function(p){
+				// Google doesn't like display=none
+				if(p.qs.display==='none'){
+					p.qs.display = '';
+				}
+			},
+
 			uri : {
 				// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
 				auth : "https://accounts.google.com/o/oauth2/auth",
