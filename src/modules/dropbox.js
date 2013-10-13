@@ -54,20 +54,24 @@ hello.init({
 			p.options.window_height = 1000;
 		},
 
-		// Define the OAuth Settings of the service
-		// Ensure that you define an oauth_proxy
-		oauth : {
-			version : "1.0",
-			auth	: "https://www.dropbox.com/1/oauth/authorize",
-			request : 'https://api.dropbox.com/1/oauth/request_token',
-			token	: 'https://api.dropbox.com/1/oauth/access_token'
+		/*
+		// DropBox does not allow Unsecure HTTP URI's in the redirect_uri field
+		// ... otherwise i'd love to use OAuth2
+
+		//p.qs.response_type = 'code';
+		oauth:{
+			version:2,
+			auth	: "https://www.dropbox.com/1/oauth2/authorize",
+			grant	: 'https://api.dropbox.com/1/oauth2/token'
 		},
+		*/
 
 		// AutoRefresh
 		// Signin once token expires?
 		autorefresh : false,
 
 		uri : {
+			auth	: "https://www.dropbox.com/1/oauth/authorize",
 			base	: "https://api.dropbox.com/1/",
 			me		: 'account/info',
 			"me/files"	: function(p,callback){
