@@ -571,7 +571,6 @@ hello.utils.extend( hello.utils, {
 		if(typeof(s)==='string'){
 
 			m = s.replace(/^[\#\?]/,'').match(/([^=\/\&]+)=([^\&]+)/g);
-			this.log(m);
 			if(m){
 				for(var i=0;i<m.length;i++){
 					b = m[i].split('=');
@@ -676,7 +675,6 @@ hello.utils.extend( hello.utils, {
 			target.appendChild(n);
 		}
 		else if(typeof(target)==='string'){
-			this.log(target);
 			document.getElementsByTagName(target)[0].appendChild(n);
 		}
 		return n;
@@ -750,7 +748,7 @@ hello.utils.extend( hello.utils, {
 			}
 			
 			else if( typeof( o[x] ) === 'string' && o[x].indexOf('!')>-1 ){
-				this.log("Whoops! " + x + " not defined");
+				// ("Whoops! " + x + " not defined");
 				return false;
 			}
 		}}
@@ -2104,7 +2102,7 @@ hello.utils.extend( hello.utils, {
 						data[x] = data[x][0];
 					}
 					else{
-						utils.log("We were expecting the FileList to contain one file");
+						//("We were expecting the FileList to contain one file");
 					}
 				}
 				else if( this.domInstance('input', data[x]) && data[x].type === 'file' ){
