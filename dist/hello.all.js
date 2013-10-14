@@ -571,7 +571,6 @@ hello.utils.extend( hello.utils, {
 		if(typeof(s)==='string'){
 
 			m = s.replace(/^[\#\?]/,'').match(/([^=\/\&]+)=([^\&]+)/g);
-			this.log(m);
 			if(m){
 				for(var i=0;i<m.length;i++){
 					b = m[i].split('=');
@@ -676,7 +675,6 @@ hello.utils.extend( hello.utils, {
 			target.appendChild(n);
 		}
 		else if(typeof(target)==='string'){
-			this.log(target);
 			document.getElementsByTagName(target)[0].appendChild(n);
 		}
 		return n;
@@ -750,7 +748,7 @@ hello.utils.extend( hello.utils, {
 			}
 			
 			else if( typeof( o[x] ) === 'string' && o[x].indexOf('!')>-1 ){
-				this.log("Whoops! " + x + " not defined");
+				// ("Whoops! " + x + " not defined");
 				return false;
 			}
 		}}
@@ -2104,7 +2102,7 @@ hello.utils.extend( hello.utils, {
 						data[x] = data[x][0];
 					}
 					else{
-						utils.log("We were expecting the FileList to contain one file");
+						//("We were expecting the FileList to contain one file");
 					}
 				}
 				else if( this.domInstance('input', data[x]) && data[x].type === 'file' ){
@@ -2193,20 +2191,24 @@ hello.init({
 			p.options.window_height = 1000;
 		},
 
-		// Define the OAuth Settings of the service
-		// Ensure that you define an oauth_proxy
-		oauth : {
-			version : "1.0",
-			auth	: "https://www.dropbox.com/1/oauth/authorize",
-			request : 'https://api.dropbox.com/1/oauth/request_token',
-			token	: 'https://api.dropbox.com/1/oauth/access_token'
+		/*
+		// DropBox does not allow Unsecure HTTP URI's in the redirect_uri field
+		// ... otherwise i'd love to use OAuth2
+
+		//p.qs.response_type = 'code';
+		oauth:{
+			version:2,
+			auth	: "https://www.dropbox.com/1/oauth2/authorize",
+			grant	: 'https://api.dropbox.com/1/oauth2/token'
 		},
+		*/
 
 		// AutoRefresh
 		// Signin once token expires?
 		autorefresh : false,
 
 		uri : {
+			auth	: "https://www.dropbox.com/1/oauth/authorize",
 			base	: "https://api.dropbox.com/1/",
 			me		: 'account/info',
 			"me/files"	: function(p,callback){
@@ -2820,6 +2822,14 @@ hello.init({
 	hello.init({
 		google : {
 			name : "Google Plus",
+
+			// Login
+			login : function(p){
+				// Google doesn't like display=none
+				if(p.qs.display==='none'){
+					p.qs.display = '';
+				}
+			},
 
 			uri : {
 				// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html

@@ -13,7 +13,7 @@
 <button id='soundcloud' onclick="hello.login('soundcloud');">SoundCloud</button>
 <div id="result"></div>
 <script class="pre">
-hello.subscribe('auth.login', function(r){
+hello.on('auth.login', function(r){
 	// Get Profile
 	console.log("auth.login");
 	hello.api(r.network+':/me', function(p){

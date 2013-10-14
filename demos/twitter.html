@@ -12,7 +12,7 @@
 <button id='login' onclick="hello.login('twitter');">Twitter</button>
 <div id="result"></div>
 <script class="pre">
-hello.subscribe('auth.login', function(r){
+hello.on('auth.login', function(r){
 	// Get Profile
 	hello.api(r.network+':/me', function(p){
 		document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;

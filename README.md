@@ -141,7 +141,7 @@ Lets define a simple function, which will load a user profile into the page afte
 
 
 
-	hello.subscribe('auth.login', function(auth){
+	hello.on('auth.login', function(auth){
 		
 		// call user information, for the given network
 		hello.api( auth.network + '/me', function(r){
@@ -353,11 +353,11 @@ Make calls to the API for getting and posting data
 
 ## Event subscription
 
-### hello.subscribe()
+### hello.on()
 
 Bind a callback to an event. An event maybe triggered by a change in user state or a change in some detail. 
 
-#### hello.subscribe( event, callback );
+#### hello.on( event, callback );
 
 
 <table>
@@ -394,18 +394,18 @@ Bind a callback to an event. An event maybe triggered by a change in user state 
 	var sessionstart =  function(){
 		alert("Session has started");
 	};
-	hello.subscribe("auth.login",sessionstart);
+	hello.on("auth.login",sessionstart);
 
 
 
-### hello.unsubscribe()
+### hello.off()
 
 Remove a callback, both event name and function must exist
 
-#### hello.unsubscribe( event, callback );
+#### hello.off( event, callback );
 
 
-	hello.unsubscribe("auth.login",sessionstart);
+	hello.off("auth.login",sessionstart);
 
 
 

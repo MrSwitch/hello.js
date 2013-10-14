@@ -19,7 +19,7 @@
 <div id="result"></div>
 <script class="pre">
 
-hello.subscribe('auth.login', function(r){
+hello.on('auth.login', function(r){
 	// Get Profile
 	hello.api(r.network+':/me', function(p){
 		document.getElementById(r.network).innerHTML = "Connected to "+ r.network+" as " + p.name;

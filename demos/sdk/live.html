@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/_packages/document.css"></script>
+<script src="/_packages/document.js"></script>
+<script src="../client_ids.js"></script>
+<script src="//js.live.net/v5.0/wl.debug.js"></script>
+<title>Windows Live demo</title>
+<button onclick="WL.login({scope:'WL.signin'});">Signin</button>
+<button onclick="WL.api('me', function(){console.log(arguments)});">Get Me</button>
+
+<script>
+	WL.init({
+		client_id:WINDOWS_CLIENT_ID,
+		redirect_uri: window.location.href,
+		scope: "wl.signin", 
+		response_type: "token"
+	});
+</script>

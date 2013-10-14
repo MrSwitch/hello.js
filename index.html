@@ -184,7 +184,7 @@
 
 
 <script class="pre">
-	hello.subscribe('auth.login', function(auth){
+	hello.on('auth.login', function(auth){
 		
 		// call user information, for the given network
 		hello.api( auth.network + '/me', function(r){
@@ -396,11 +396,11 @@
 
 <h2>Event subscription</h2>
 
-<h3>hello.subscribe()</h3>
+<h3>hello.on()</h3>
 
 <p>Bind a callback to an event. An event maybe triggered by a change in user state or a change in some detail. </p>
 
-<h4>hello.subscribe( event, callback );</h4>
+<h4>hello.on( event, callback );</h4>
 
 
 <table>
@@ -437,18 +437,18 @@
 	var sessionstart =  function(){
 		alert("Session has started");
 	};
-	hello.subscribe("auth.login",sessionstart);
+	hello.on("auth.login",sessionstart);
 </pre>
 
 
-<h3>hello.unsubscribe()</h3>
+<h3>hello.off()</h3>
 
 <p>Remove a callback, both event name and function must exist</p>
 
-<h4>hello.unsubscribe( event, callback );</h4>
+<h4>hello.off( event, callback );</h4>
 
 <pre class="tryit">
-	hello.unsubscribe("auth.login",sessionstart);
+	hello.off("auth.login",sessionstart);
 </pre>
 
 

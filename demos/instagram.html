@@ -17,7 +17,7 @@
 
 var more = document.getElementById('more');
 
-hello.subscribe('auth.login', function(r){
+hello.on('auth.login', function(r){
 	// Get Profile
 	console.log("auth.login");
 	hello.api(r.network+':/me', function(p){

@@ -23,13 +23,13 @@
 
 <script class="pre">
 var log = document.getElementById('log');
-hello.subscribe( "auth", function(e){
+hello.on( "auth", function(e){
 	log.value = "AUTH:" + JSON.stringify( e ) + "\n" + log.value;
 });
-hello.subscribe( "auth.failed", function(e){
+hello.on( "auth.failed", function(e){
 	log.value = "AUTH.FAILED:" + JSON.stringify( e ) + "\n" + log.value;
 });
-hello.subscribe( "auth.login", function(e){
+hello.on( "auth.login", function(e){
 	log.value = "AUTH.LOGIN:" + JSON.stringify( e ) + "\n" + log.value;
 });
 hello.init( CLIENT_IDS, {redirect_uri:'../redirect.html'} );

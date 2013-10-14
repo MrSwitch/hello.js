@@ -747,7 +747,7 @@ ko.utils.arrayForEach( Object.keys(CLIENT_IDS_ALL), function(network){
 
 
 // Subscribe to the authentication
-hello.subscribe('auth.login', function(o){
+hello.on('auth.login', function(o){
 	ko.utils.arrayForEach( model.networks(), function(network){
 		if(o.network===network.name){
 			network.online(true);

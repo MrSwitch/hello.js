@@ -116,7 +116,7 @@ function uploadCallback(r){
 </script>
 <script class="pre">
 // Windows Live
-hello.subscribe('auth.login', function(auth){
+hello.on('auth.login', function(auth){
 
 	// Get Profile
 	hello.api(auth.network+':me', function(r){
