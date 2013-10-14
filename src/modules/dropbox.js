@@ -57,6 +57,7 @@ hello.init({
 		/*
 		// DropBox does not allow Unsecure HTTP URI's in the redirect_uri field
 		// ... otherwise i'd love to use OAuth2
+		// Follow request https://forums.dropbox.com/topic.php?id=106505
 
 		//p.qs.response_type = 'code';
 		oauth:{
