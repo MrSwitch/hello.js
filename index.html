@@ -682,6 +682,24 @@ used - because of the XD, IFrame+Form+hack.</li>
 
 </ol>
 
+<h2>Contributing</h2>
+<p>Please contribute! I leave this to the end of the page to say but if you've read this far you'r obviously dedicated. If you think something could be said better, find something buggy or missing from the code, documentation or demos then please shout back.</p>
+<h3>Changing code?</h3>
+<p>Please adopt the continuous integration tests.</p>
+
+<pre>
+	#Using NodeJS on your dev environment, cd into the project root and install dev dependencies 
+	npm install -l
+
+	# run continuous integration tests
+	npm test
+
+	# open a couple of browsers wuth the given URL, e.g. it'll say "Karma v0.9.8 server started at http://localhost:9876/", so open that URL in a couple of browsers.
+	# Save any changes and the tests will be initated
+</pre>
+
+
+
 <script src="/_packages/jquery.js"></script>
 <script src="assets/index.js"></script>
 <script src="https://raw.github.com/austincheney/Pretty-Diff/master/lib/fulljsmin.js"></script>

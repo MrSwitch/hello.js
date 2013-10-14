@@ -639,6 +639,24 @@ used - because of the XD, IFrame+Form+hack.
 
 
 
+## Contributing
+Please contribute! I leave this to the end of the page to say but if you've read this far you'r obviously dedicated. If you think something could be said better, find something buggy or missing from the code, documentation or demos then please shout back.
+### Changing code?
+Please adopt the continuous integration tests.
+
+
+	#Using NodeJS on your dev environment, cd into the project root and install dev dependencies 
+	npm install -l
+
+	# run continuous integration tests
+	npm test
+
+	# open a couple of browsers wuth the given URL, e.g. it'll say "Karma v0.9.8 server started at http://localhost:9876/", so open that URL in a couple of browsers.
+	# Save any changes and the tests will be initated
+
+
+
+
 
 
 
