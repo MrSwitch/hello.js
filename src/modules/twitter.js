@@ -3,6 +3,7 @@
 //
 (function(){
 
+
 function formatUser(o){
 	if(o.id){
 		if(o.name){
@@ -12,6 +13,18 @@ function formatUser(o){
 		}
 		o.thumbnail = o.profile_image_url;
 	}
+}
+
+function formatFriends(o){
+	formaterror(o);
+	if(o.users){
+		o.data = o.users;
+		for(var i=0;i<o.data.length;i++){
+			formatUser(o.data[i]);
+		}
+		delete o.users;
+	}
+	return o;
 }
 
 function formaterror(o){
@@ -24,6 +37,32 @@ function formaterror(o){
 	}
 }
 
+/*
+// THE DOCS SAY TO DEFINE THE USER IN THE REQUEST
+// ... although its not actually required.
+
+var user_id;
+
+function withUserId(callback){
+	if(user_id){
+		callback(user_id);
+	}
+	else{
+		hello.api('twitter:/me', function(o){
+			user_id = o.id;
+			callback(o.id);
+		});
+	}
+}
+
+function sign(url){
+	return function(p, callback){
+		withUserId(function(user_id){
+			callback(url+'?user_id='+user_id);
+		});
+	};
+}
+*/
 
 hello.init({
 	'twitter' : {
@@ -43,6 +82,8 @@ hello.init({
 			base	: "http://api.twitter.com/1.1/",
 			me		: 'account/verify_credentials.json',
 			"me/friends"	: 'friends/list.json',
+			"me/following"	: 'friends/list.json',
+			"me/followers"	: 'followers/list.json',
 			'me/share' : function(p,callback){
 				var data = p.data;
 				p.data = null;
@@ -56,17 +97,10 @@ hello.init({
 				formatUser(o);
 				return o;
 			},
-			"me/friends" : function(o){
-				formaterror(o);
-				if(o.users){
-					o.data = o.users;
-					for(var i=0;i<o.data.length;i++){
-						formatUser(o.data[i]);
-					}
-					delete o.users;
-				}
-				return o;
-			},
+			"me/friends" : formatFriends,
+			"me/followers" : formatFriends,
+			"me/following" : formatFriends,
+
 			"me/share" : function(o){
 				formaterror(o);
 				if(!o.error&&"length" in o){
