@@ -65,13 +65,19 @@ hello.init({
 			grant	: 'https://api.dropbox.com/1/oauth2/token'
 		},
 		*/
+		oauth : {
+			version : "1.0",
+			auth	: "https://www.dropbox.com/1/oauth/authorize",
+			request : 'https://api.dropbox.com/1/oauth/request_token',
+			token	: 'https://api.dropbox.com/1/oauth/access_token'
+		},
 
 		// AutoRefresh
 		// Signin once token expires?
 		autorefresh : false,
 
 		uri : {
-			auth	: "https://www.dropbox.com/1/oauth/authorize",
+			//auth	: "https://www.dropbox.com/1/oauth/authorize",
 			base	: "https://api.dropbox.com/1/",
 			me		: 'account/info',
 			"me/files"	: function(p,callback){
