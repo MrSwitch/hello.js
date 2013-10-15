@@ -13,6 +13,23 @@ function formatError(o){
 }
 
 
+function formatFriends(o){
+	if(o && "data" in o ){
+		for(var i=0;i<o.data.length;i++){
+			formatFriend(o.data[i]);
+		}
+	}
+	return o;
+}
+
+function formatFriend(o){
+	if(o.id){
+		o.thumbnail = o.profile_picture;
+		o.name = o.full_name || o.username;
+	}
+}
+
+
 hello.init({
 	instagram : {
 		name : 'Instagram',
@@ -27,10 +44,13 @@ hello.init({
 			'me' : 'users/self',
 			'me/feed' : 'users/self/feed',
 			'me/photos' : 'users/self/media/recent?min_id=0&count=100',
-			'me/friends' : 'users/self/follows'
+			'me/friends' : 'users/self/follows',
+			'me/following' : 'users/self/follows',
+			'me/followers' : 'users/self/followed-by'
 		},
 		scope : {
-			basic : 'basic'
+			basic : 'basic',
+			friends : 'relationships'
 		},
 		wrap : {
 			me : function(o){
@@ -44,6 +64,9 @@ hello.init({
 				}
 				return o;
 			},
+			"me/friends" : formatFriends,
+			"me/following" : formatFriends,
+			"me/followers" : formatFriends,
 			"me/photos" : function(o){
 
 				formatError(o);

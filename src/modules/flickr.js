@@ -94,6 +94,21 @@ function checkResponse(o, key){
 	return o;
 }
 
+function formatFriends(o){
+	formatError(o);
+	if(o.contacts){
+		o.data = o.contacts.contact;
+		delete o.contacts;
+		for(var i=0;i<o.data.length;i++){
+			var item = o.data[i];
+			item.id = item.nsid;
+			item.name = item.realname || item.username;
+			item.thumbnail = getBuddyIcon(item, 'm');
+		}
+	}
+	return o;
+}
+
 
 // this is not exactly neat but avoid to call
 // the method 'flickr.test.login' for each api call
@@ -129,6 +144,8 @@ hello.init({
 			base		: "http://api.flickr.com/services/rest",
 			"me"		: sign("flickr.people.getInfo"),
 			"me/friends": sign("flickr.contacts.getList"),
+			"me/following": sign("flickr.contacts.getList"),
+			"me/followers": sign("flickr.contacts.getList"),
 			"me/albums"	: sign("flickr.photosets.getList"),
 			"me/photos" : sign("flickr.people.getPhotos")
 		},
@@ -148,20 +165,9 @@ hello.init({
 				}
 				return o;
 			},
-			"me/friends" : function(o){
-				formatError(o);
-				if(o.contacts){
-					o.data = o.contacts.contact;
-					delete o.contacts;
-					for(var i=0;i<o.data.length;i++){
-						var item = o.data[i];
-						item.id = item.nsid;
-						item.name = item.realname || item.username;
-						item.thumbnail = getBuddyIcon(item, 'm');
-					}
-				}
-				return o;
-			},
+			"me/friends" : formatFriends,
+			"me/followers" : formatFriends,
+			"me/following" : formatFriends,
 			"me/albums" : function(o){
 				formatError(o);
 				o = checkResponse(o, "photosets");

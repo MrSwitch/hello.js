@@ -23,6 +23,20 @@ function formatUser(o){
 	o.thumbnail = o.pictureUrl;
 }
 
+
+function formatFriends(o){
+	formatError(o);
+	if(o.values){
+		o.data = o.values;
+		for(var i=0;i<o.data.length;i++){
+			formatUser(o.data[i]);
+		}
+		delete o.values;
+	}
+	return o;
+}
+
+
 hello.init({
 	'linkedin' : {
 
@@ -43,6 +57,8 @@ hello.init({
 			base	: "https://api.linkedin.com/v1/",
 			me		: 'people/~:(picture-url,first-name,last-name,id,formatted-name)',
 			"me/friends"	: 'people/~/connections',
+			"me/followers"	: 'people/~/connections',
+			"me/following"	: 'people/~/connections',
 			"me/share" : function(p, next){
 				// POST unsupported
 				next( p.method === 'get' ? 'people/~/network/updates' : 'people/~/current-status' );
@@ -61,17 +77,9 @@ hello.init({
 				formatUser(o);
 				return o;
 			},
-			"me/friends" : function(o){
-				formatError(o);
-				if(o.values){
-					o.data = o.values;
-					for(var i=0;i<o.data.length;i++){
-						formatUser(o.data[i]);
-					}
-					delete o.values;
-				}
-				return o;
-			},
+			"me/friends" : formatFriends,
+			"me/following" : formatFriends,
+			"me/followers" : formatFriends,
 			"me/share" : function(o){
 				formatError(o);
 				if(o.values){

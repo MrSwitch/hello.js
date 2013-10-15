@@ -1,6 +1,26 @@
 //
 // Facebook
 //
+(function(){
+
+function formatUser(o){
+	if(o.id){
+		o.picture = 'http://graph.facebook.com/'+o.id+'/picture';
+		o.thumbnail = 'http://graph.facebook.com/'+o.id+'/picture';
+	}
+	return o;
+}
+
+function formatFriends(o){
+	if("data" in o){
+		for(var i=0;i<o.data.length;i++){
+			formatUser(o.data[i]);
+		}
+	}
+	return o;
+}
+
+
 hello.init({
 	facebook : {
 		name : 'Facebook',
@@ -9,6 +29,9 @@ hello.init({
 			// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
 			auth : 'http://www.facebook.com/dialog/oauth/',
 			base : 'https://graph.facebook.com/',
+			'me/friends' : 'me/friends',
+			'me/following' : 'me/friends',
+			'me/followers' : 'me/friends',
 			'me/share' : 'me/feed',
 			'me/files' : 'me/albums'
 		},
@@ -29,22 +52,10 @@ hello.init({
 			offline_access : 'offline_access'
 		},
 		wrap : {
-			me : function(o){
-				if(o.id){
-					o.picture = 'http://graph.facebook.com/'+o.id+'/picture';
-					o.thumbnail = 'http://graph.facebook.com/'+o.id+'/picture';
-				}
-				return o;
-			},
-			'me/friends' : function(o){
-				if("data" in o){
-					for(var i=0;i<o.data.length;i++){
-						o.data[i].picture = 'http://graph.facebook.com/'+o.data[i].id+'/picture';
-						o.data[i].thumbnail = 'http://graph.facebook.com/'+o.data[i].id+'/picture';
-					}
-				}
-				return o;
-			},
+			me : formatUser,
+			'me/friends' : formatFriends,
+			'me/following' : formatFriends,
+			'me/followers' : formatFriends,
 			'me/albums' : function(o){
 				if("data" in o){
 					for(var i=0;i<o.data.length;i++){
@@ -105,3 +116,6 @@ hello.init({
 		}
 	}
 });
+
+
+})();

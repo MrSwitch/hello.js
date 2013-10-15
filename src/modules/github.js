@@ -14,6 +14,14 @@ function formatError(o,code){
 	}
 }
 
+function formatUser(o){
+	if(o.id){
+		o.picture = o.avatar_url;
+		o.thumbnail = o.avatar_url;
+		o.name = o.login;
+	}
+}
+
 hello.init({
 	github : {
 		name : 'GitHub',
@@ -25,26 +33,28 @@ hello.init({
 			auth : 'https://github.com/login/oauth/authorize',
 			base : 'https://api.github.com/',
 			'me' : 'user',
-			'me/friends' : 'user/following'
+			'me/friends' : 'user/following',
+			'me/following' : 'user/following',
+			'me/followers' : 'user/followers'
 		},
 		wrap : {
 			me : function(o,code){
 
 				formatError(o,code);
+				formatUser(o);
 
-				if(o.id){
-					o.picture = o.avatar_url;
-					o.thumbnail = o.avatar_url;
-					o.name = o.login;
-				}
 				return o;
 			},
-			"me/friends" : function(o,code){
+			"default" : function(o,code){
 
 				formatError(o,code);
 
 				if(Object.prototype.toString.call(o) === '[object Array]'){
-					return {data:o};
+					o = {data:o};
+
+					for(var i=0;i<o.data.length;i++){
+						formatUser(o.data[i]);
+					}
 				}
 				return o;
 			}

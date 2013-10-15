@@ -118,7 +118,28 @@
 		}
 	}
 
-
+	function formatFriends(o){
+		var r = [];
+		if("feed" in o && "entry" in o.feed){
+			for(var i=0;i<o.feed.entry.length;i++){
+				var a = o.feed.entry[i];
+				r.push({
+					id		: a.id.$t,
+					name	: a.title.$t,
+					email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
+					updated_time : a.updated.$t,
+					picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null,
+					thumbnail : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null
+				});
+			}
+			return {
+				//name : o.feed.title.$t,
+				//updated : o.feed.updated.$t,
+				data : r
+			};
+		}
+		return o;
+	}
 
 	//
 	// Embed
@@ -141,6 +162,8 @@
 				me : 'oauth2/v1/userinfo?alt=json',
 				base : "https://www.googleapis.com/",
 				'me/friends' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
+				'me/following' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
+				'me/followers' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
 				'me/share' : 'plus/v1/people/me/activities/public',
 				'me/feed' : 'plus/v1/people/me/activities/public',
 				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json',
@@ -177,28 +200,9 @@
 					}
 					return o;
 				},
-				'me/friends'	: function(o){
-					var r = [];
-					if("feed" in o && "entry" in o.feed){
-						for(var i=0;i<o.feed.entry.length;i++){
-							var a = o.feed.entry[i];
-							r.push({
-								id		: a.id.$t,
-								name	: a.title.$t,
-								email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
-								updated_time : a.updated.$t,
-								picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null,
-								thumbnail : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null
-							});
-						}
-						return {
-							//name : o.feed.title.$t,
-							//updated : o.feed.updated.$t,
-							data : r
-						};
-					}
-					return o;
-				},
+				'me/friends'	: formatFriends,
+				'me/followers'	: formatFriends,
+				'me/following'	: formatFriends,
 				'me/share' : function(o){
 					o.data = o.items;
 					try{

@@ -249,9 +249,35 @@ var tests = [
 	},
 	{
 		title : "List my friends",
-		test : ['facebook', 'google', 'windows', 'linkedin', 'twitter', 'github', 'yahoo', 'flickr'],
+		test : ['facebook', 'google', 'windows', 'linkedin', 'twitter', 'github', 'yahoo', 'instagram', 'soundcloud', 'foursquare','flickr'],
 		method : 'get',
 		path : 'me/friends',
+		scope : ["friends"],
+		expected : {
+			data : [{
+				name : reg.name,
+				thumbnail : reg.url
+			}]
+		}
+	},
+	{
+		title : "List my followers",
+		test : ['facebook', 'google', 'windows', 'linkedin', 'twitter', 'github', 'instagram', 'soundcloud','foursquare','flickr'],
+		method : 'get',
+		path : 'me/followers',
+		scope : ["friends"],
+		expected : {
+			data : [{
+				name : reg.name,
+				thumbnail : reg.url
+			}]
+		}
+	},
+	{
+		title : "List who i'm following",
+		test : ['facebook', 'google', 'windows', 'linkedin', 'twitter', 'github', 'yahoo', 'instagram', 'soundcloud', 'foursquare', 'flickr'],
+		method : 'get',
+		path : 'me/following',
 		scope : ["friends"],
 		expected : {
 			data : [{

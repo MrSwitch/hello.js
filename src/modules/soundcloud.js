@@ -1,6 +1,17 @@
 //
 // SoundCloud
 //
+(function(){
+
+
+function formatUser(o){
+	if(o.id){
+		o.picture = o.avatar_url;
+		o.thumbnail = o.avatar_url;
+		o.name = o.username || o.full_name;
+	}
+}
+
 hello.init({
 	soundcloud : {
 		name : 'SoundCloud',
@@ -20,6 +31,10 @@ hello.init({
 		uri : {
 			auth : 'https://soundcloud.com/connect',
 			base : 'https://api.soundcloud.com/',
+			'me' : 'me.json',
+			'me/friends' : 'me/followings.json',
+			'me/followers' : 'me/followers.json',
+			'me/following' : 'me/followings.json',
 			'default' : function(p, callback){
 				// include ".json at the end of each request"
 				callback(p.path + '.json');
@@ -28,13 +43,22 @@ hello.init({
 		// Response handlers
 		wrap : {
 			me : function(o){
-				if(o.id){
-					o.picture = o.avatar_url;
-					o.thumbnail = o.avatar_url;
-					o.name = o.username;
+				formatUser(o);
+				return o;
+			},
+			"default" : function(o){
+				if(o instanceof Array){
+					o = {
+						data : o
+					};
+					for(var i=0;i<o.data.length;i++){
+						formatUser(o.data[i]);
+					}
 				}
 				return o;
 			}
 		}
 	}
 });
+
+})();

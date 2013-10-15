@@ -1,6 +1,32 @@
 //
 // FourSquare
 //
+(function(){
+
+function formatError(o){
+	if(o.meta&&o.meta.code===400){
+		o.error = {
+			code : "access_denied",
+			message : o.meta.errorDetail
+		};
+	}
+}
+
+function formatUser(o){
+	if(o.id){
+		o.thumbnail = o.photo.prefix + '100x100'+ o.photo.suffix;
+		o.name = o.firstName + ' ' + o.lastName;
+		o.first_name = o.firstName;
+		o.last_name = o.lastName;
+		if(o.contact){
+			if(o.contact.email){
+				o.email = o.contact.email;
+			}
+		}
+	}
+}
+
+
 hello.init({
 	foursquare : {
 		name : 'FourSquare',
@@ -14,31 +40,35 @@ hello.init({
 		uri : {
 			auth : 'https://foursquare.com/oauth2/authenticate',
 			base : 'https://api.foursquare.com/v2/',
-			'me' : 'users/self'
+			'me' : 'users/self',
+			'me/friends' : 'users/self/friends',
+			'me/followers' : 'users/self/friends',
+			'me/following' : 'users/self/friends'
 		},
 		wrap : {
 			me : function(o){
-				if(o.meta&&o.meta.code===400){
-					o = {
-						error : {
-							code : "access_denied",
-							message : o.meta.errorDetail
-						}
-					};
-					return o;
-				}
+				formatError(o);
 				if(o && o.response){
 					o = o.response.user;
-					if(o.id){
-						o.thumbnail = o.photo.prefix + '100x100'+ o.photo.suffix;
-						o.name = o.firstName + ' ' + o.lastName;
-					}
+					formatUser(o);
 				}
 				return o;
 			},
-			'default' : function(){
+			'default' : function(o){
+				formatError(o);
 
+				// Format Friends
+				if(o && "response" in o && "friends" in o.response && "items" in o.response.friends ){
+					o.data = o.response.friends.items;
+					delete o.response;
+					for(var i=0;i<o.data.length;i++){
+						formatUser(o.data[i]);
+					}
+				}
+				return o;
 			}
 		}
 	}
 });
+
+})();
