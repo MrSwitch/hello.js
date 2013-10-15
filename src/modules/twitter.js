@@ -35,7 +35,7 @@ hello.init({
 			token	: 'https://twitter.com/oauth/access_token'
 		},
 		uri : {
-			base	: "http://api.twitter.com/1.1/",
+			base	: "https://api.twitter.com/1.1/",
 			me		: 'account/verify_credentials.json',
 			"me/friends"	: 'friends/list.json',
 			'me/share' : function(p,callback){
