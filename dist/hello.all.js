@@ -2194,6 +2194,7 @@ hello.init({
 		/*
 		// DropBox does not allow Unsecure HTTP URI's in the redirect_uri field
 		// ... otherwise i'd love to use OAuth2
+		// Follow request https://forums.dropbox.com/topic.php?id=106505
 
 		//p.qs.response_type = 'code';
 		oauth:{
@@ -2202,13 +2203,19 @@ hello.init({
 			grant	: 'https://api.dropbox.com/1/oauth2/token'
 		},
 		*/
+		oauth : {
+			version : "1.0",
+			auth	: "https://www.dropbox.com/1/oauth/authorize",
+			request : 'https://api.dropbox.com/1/oauth/request_token',
+			token	: 'https://api.dropbox.com/1/oauth/access_token'
+		},
 
 		// AutoRefresh
 		// Signin once token expires?
 		autorefresh : false,
 
 		uri : {
-			auth	: "https://www.dropbox.com/1/oauth/authorize",
+			//auth	: "https://www.dropbox.com/1/oauth/authorize",
 			base	: "https://api.dropbox.com/1/",
 			me		: 'account/info',
 			"me/files"	: function(p,callback){
@@ -2423,6 +2430,15 @@ function withUser(cb){
 	}
 }
 
+function sign(url){
+	return function(p, callback){
+		withUser(function(){
+			callback(getApiUrl(url, flickr_user, true));
+		});
+	};
+}
+
+
 function getBuddyIcon(profile, size){
 	var url="http://www.flickr.com/images/buddyicon.gif";
 	if (profile.nsid && profile.iconserver && profile.iconfarm){
@@ -2512,27 +2528,11 @@ hello.init({
 			}
 		},
 		uri : {
-			base	: "http://api.flickr.com/services/rest",
-			me		: function(p, callback){
-				withUser(function(){
-					callback(getApiUrl("flickr.people.getInfo", flickr_user, true));
-				});
-			},
-			"me/friends": function(p, callback){
-				withUser(function(){
-					callback(getApiUrl("flickr.contacts.getList", flickr_user, true));
-				});
-			},
-			"me/albums"	: function(p,callback){
-				withUser(function(){
-					callback(getApiUrl("flickr.photosets.getList", flickr_user, true));
-				});
-			},
-			"me/photos" : function(p, callback) {
-				withUser(function(){
-					callback(getApiUrl("flickr.people.getPhotos", flickr_user, true));
-				});
-			}
+			base		: "http://api.flickr.com/services/rest",
+			"me"		: sign("flickr.people.getInfo"),
+			"me/friends": sign("flickr.contacts.getList"),
+			"me/albums"	: sign("flickr.photosets.getList"),
+			"me/photos" : sign("flickr.people.getPhotos")
 		},
 		wrap : {
 			me : function(o){
@@ -3140,6 +3140,7 @@ hello.init({
 //
 (function(){
 
+
 function formatUser(o){
 	if(o.id){
 		if(o.name){
@@ -3149,6 +3150,18 @@ function formatUser(o){
 		}
 		o.thumbnail = o.profile_image_url;
 	}
+}
+
+function formatFriends(o){
+	formaterror(o);
+	if(o.users){
+		o.data = o.users;
+		for(var i=0;i<o.data.length;i++){
+			formatUser(o.data[i]);
+		}
+		delete o.users;
+	}
+	return o;
 }
 
 function formaterror(o){
@@ -3161,6 +3174,32 @@ function formaterror(o){
 	}
 }
 
+/*
+// THE DOCS SAY TO DEFINE THE USER IN THE REQUEST
+// ... although its not actually required.
+
+var user_id;
+
+function withUserId(callback){
+	if(user_id){
+		callback(user_id);
+	}
+	else{
+		hello.api('twitter:/me', function(o){
+			user_id = o.id;
+			callback(o.id);
+		});
+	}
+}
+
+function sign(url){
+	return function(p, callback){
+		withUserId(function(user_id){
+			callback(url+'?user_id='+user_id);
+		});
+	};
+}
+*/
 
 hello.init({
 	'twitter' : {
@@ -3177,9 +3216,11 @@ hello.init({
 		autorefresh : false,
 
 		uri : {
-			base	: "http://api.twitter.com/1.1/",
+			base	: "https://api.twitter.com/1.1/",
 			me		: 'account/verify_credentials.json',
 			"me/friends"	: 'friends/list.json',
+			"me/following"	: 'friends/list.json',
+			"me/followers"	: 'followers/list.json',
 			'me/share' : function(p,callback){
 				var data = p.data;
 				p.data = null;
@@ -3193,17 +3234,10 @@ hello.init({
 				formatUser(o);
 				return o;
 			},
-			"me/friends" : function(o){
-				formaterror(o);
-				if(o.users){
-					o.data = o.users;
-					for(var i=0;i<o.data.length;i++){
-						formatUser(o.data[i]);
-					}
-					delete o.users;
-				}
-				return o;
-			},
+			"me/friends" : formatFriends,
+			"me/followers" : formatFriends,
+			"me/following" : formatFriends,
+
 			"me/share" : function(o){
 				formaterror(o);
 				if(!o.error&&"length" in o){
@@ -3338,8 +3372,8 @@ hello.init({
 
 		uri : {
 			base	: "https://social.yahooapis.com/v1/",
-			me		: "https://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.profile%20where%20guid%3Dme&format=json",
-			"me/friends"	: 'https://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.contacts%20where%20guid=me&format=json'
+			me		: "http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.profile%20where%20guid%3Dme&format=json",
+			"me/friends"	: 'http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.contacts%20where%20guid=me&format=json'
 		},
 		wrap : {
 			me : function(o){

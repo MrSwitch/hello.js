@@ -79,7 +79,7 @@ hello.init({
 		autorefresh : false,
 
 		uri : {
-			base	: "http://api.twitter.com/1.1/",
+			base	: "https://api.twitter.com/1.1/",
 			me		: 'account/verify_credentials.json',
 			"me/friends"	: 'friends/list.json',
 			"me/following"	: 'friends/list.json',
