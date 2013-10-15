@@ -360,11 +360,13 @@ var hello = (function(){
 			// Triggering popup?
 			else if( p.options.display === 'popup'){
 
+				var windowHeight = p.options.window_height || 550;
+				var windowWidth = p.options.window_width || 500;
 				// Trigger callback
 				var popup = window.open(
 					url,
 					'Authentication',
-					"resizeable=true,height=550,width=500,left="+((window.innerWidth-500)/2)+",top="+((window.innerHeight-550)/2)
+					"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left="+((window.innerWidth-windowWidth)/2)+",top="+((window.innerHeight-windowHeight)/2)
 				);
 				// Ensure popup window has focus upon reload, Fix for FF.
 				popup.focus();
@@ -1219,12 +1221,13 @@ var hello = (function(){
 		var proxy = ( service.oauth && parseInt(service.oauth.version,10) === 1 ? hello.settings.oauth_proxy : null);
 
 		if(proxy){
-			// Use the proxy as a path
 			callback( _qs(proxy, {
 				path : path,
-				access_token : token||''
+				access_token : token||'',
+				then : (method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
+				method : method,
+				suppress_response_codes : true
 			}));
-
 			return;
 		}
 
@@ -2643,12 +2646,17 @@ hello.init({
 			auth	: "https://www.linkedin.com/uas/oauth2/authorization",
 			base	: "https://api.linkedin.com/v1/",
 			me		: 'people/~:(picture-url,first-name,last-name,id,formatted-name)',
-			"me/friends"	: 'people/~/connections'
+			"me/friends"	: 'people/~/connections',
+			"me/share" : function(p, next){
+				// POST unsupported
+				next( p.method === 'get' ? 'people/~/network/updates' : 'people/~/current-status' );
+			}
 		},
 		scope : {
 			basic	: 'r_fullprofile',
 			email	: 'r_emailaddress',
-			friends : 'r_network'
+			friends : 'r_network',
+			publish : 'rw_nus'
 		},
 		scope_delim : ' ',
 		wrap : {
@@ -2665,10 +2673,24 @@ hello.init({
 					delete o.values;
 				}
 				return o;
+			},
+			"me/share" : function(o){
+				if(o.values){
+					o.data = o.values;
+					for(var i=0;i<o.data.length;i++){
+						formatUser(o.data[i]);
+						o.data[i].message = o.data[i].headline;
+					}
+					delete o.values;
+				}
+				return o;
 			}
 		},
 		jsonp : function(p,qs){
 			qs.format = 'jsonp';
+			if(p.method==='get'){
+				qs['error-callback'] = '?';
+			}
 		},
 		xhr : false
 	}
@@ -2727,6 +2749,17 @@ function formatUser(o){
 	}
 }
 
+function formaterror(o){
+	if(o.errors){
+		var e = o.errors[0];
+		o.error = {
+			code : "request_failed",
+			message : e.message
+		};
+	}
+}
+
+
 hello.init({
 	'twitter' : {
 		// Ensure that you define an oauth_proxy
@@ -2741,20 +2774,20 @@ hello.init({
 			me		: 'account/verify_credentials.json',
 			"me/friends"	: 'friends/list.json',
 			'me/share' : function(p,callback){
-				if(p.data&&p.method==='post'){
-					p.data = {
-						status : p.data.message
-					};
-				}
-				callback( p.method==='post' ? 'statuses/update.json?include_entities=1' : 'statuses/user_timeline.json' );
+				var data = p.data;
+				p.data = null;
+
+				callback( p.method==='post' ? 'statuses/update.json?include_entities=1&status='+data.message : 'statuses/user_timeline.json' );
 			}
 		},
 		wrap : {
 			me : function(o){
+				formaterror(o);
 				formatUser(o);
 				return o;
 			},
 			"me/friends" : function(o){
+				formaterror(o);
 				if(o.users){
 					o.data = o.users;
 					for(var i=0;i<o.data.length;i++){
@@ -2765,6 +2798,7 @@ hello.init({
 				return o;
 			},
 			"me/share" : function(o){
+				formaterror(o);
 				if(!o.error&&"length" in o){
 					return {data : o};
 				}
@@ -2772,12 +2806,7 @@ hello.init({
 			}
 		},
 		xhr : function(p){
-			// If this is GET request it'll be relocated, otherwise
-			// Else, it'll proxy through the server
-			if(p.method==='post'&&p.data&&!hello.utils.hasBinary(p.data)){
-				p.data = hello.utils.param(p.data);
-			}
-
+			// Rely on the proxy for non-GET requests.
 			return (p.method!=='get');
 		}
 	}

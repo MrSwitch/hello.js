@@ -360,11 +360,13 @@ var hello = (function(){
 			// Triggering popup?
 			else if( p.options.display === 'popup'){
 
+				var windowHeight = p.options.window_height || 550;
+				var windowWidth = p.options.window_width || 500;
 				// Trigger callback
 				var popup = window.open(
 					url,
 					'Authentication',
-					"resizeable=true,height=550,width=500,left="+((window.innerWidth-500)/2)+",top="+((window.innerHeight-550)/2)
+					"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left="+((window.innerWidth-windowWidth)/2)+",top="+((window.innerHeight-windowHeight)/2)
 				);
 				// Ensure popup window has focus upon reload, Fix for FF.
 				popup.focus();
@@ -1219,12 +1221,13 @@ var hello = (function(){
 		var proxy = ( service.oauth && parseInt(service.oauth.version,10) === 1 ? hello.settings.oauth_proxy : null);
 
 		if(proxy){
-			// Use the proxy as a path
 			callback( _qs(proxy, {
 				path : path,
-				access_token : token||''
+				access_token : token||'',
+				then : (method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
+				method : method,
+				suppress_response_codes : true
 			}));
-
 			return;
 		}
 
