@@ -28,6 +28,15 @@ function withUser(cb){
 	}
 }
 
+function sign(url){
+	return function(p, callback){
+		withUser(function(){
+			callback(getApiUrl(url, flickr_user, true));
+		});
+	};
+}
+
+
 function getBuddyIcon(profile, size){
 	var url="http://www.flickr.com/images/buddyicon.gif";
 	if (profile.nsid && profile.iconserver && profile.iconfarm){
@@ -117,27 +126,11 @@ hello.init({
 			}
 		},
 		uri : {
-			base	: "http://api.flickr.com/services/rest",
-			me		: function(p, callback){
-				withUser(function(){
-					callback(getApiUrl("flickr.people.getInfo", flickr_user, true));
-				});
-			},
-			"me/friends": function(p, callback){
-				withUser(function(){
-					callback(getApiUrl("flickr.contacts.getList", flickr_user, true));
-				});
-			},
-			"me/albums"	: function(p,callback){
-				withUser(function(){
-					callback(getApiUrl("flickr.photosets.getList", flickr_user, true));
-				});
-			},
-			"me/photos" : function(p, callback) {
-				withUser(function(){
-					callback(getApiUrl("flickr.people.getPhotos", flickr_user, true));
-				});
-			}
+			base		: "http://api.flickr.com/services/rest",
+			"me"		: sign("flickr.people.getInfo"),
+			"me/friends": sign("flickr.contacts.getList"),
+			"me/albums"	: sign("flickr.photosets.getList"),
+			"me/photos" : sign("flickr.people.getPhotos")
 		},
 		wrap : {
 			me : function(o){
