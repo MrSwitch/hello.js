@@ -1087,8 +1087,8 @@ hello.unsubscribe = hello.off;
 			//
 			if( session && ("expires" in session) && session.expires < CURRENT_TIME ){
 
-				// Refresh
-				var refresh = ("autorefresh" in provider) ? provider.autorefresh : true;
+				// If auto refresh is provided then determine if we can refresh based upon its value.
+				var refresh = !("autorefresh" in provider) || provider.autorefresh;
 
 				// Does this provider support refresh
 				if( refresh && (!( name in pending ) || pending[name] < CURRENT_TIME) ) {

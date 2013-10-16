@@ -1087,8 +1087,8 @@ hello.unsubscribe = hello.off;
 			//
 			if( session && ("expires" in session) && session.expires < CURRENT_TIME ){
 
-				// Refresh
-				var refresh = ("autorefresh" in provider) ? provider.autorefresh : true;
+				// If auto refresh is provided then determine if we can refresh based upon its value.
+				var refresh = !("autorefresh" in provider) || provider.autorefresh;
 
 				// Does this provider support refresh
 				if( refresh && (!( name in pending ) || pending[name] < CURRENT_TIME) ) {
@@ -2296,6 +2296,26 @@ hello.init({
 //
 // Facebook
 //
+(function(){
+
+function formatUser(o){
+	if(o.id){
+		o.picture = 'http://graph.facebook.com/'+o.id+'/picture';
+		o.thumbnail = 'http://graph.facebook.com/'+o.id+'/picture';
+	}
+	return o;
+}
+
+function formatFriends(o){
+	if("data" in o){
+		for(var i=0;i<o.data.length;i++){
+			formatUser(o.data[i]);
+		}
+	}
+	return o;
+}
+
+
 hello.init({
 	facebook : {
 		name : 'Facebook',
@@ -2304,6 +2324,9 @@ hello.init({
 			// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
 			auth : 'http://www.facebook.com/dialog/oauth/',
 			base : 'https://graph.facebook.com/',
+			'me/friends' : 'me/friends',
+			'me/following' : 'me/friends',
+			'me/followers' : 'me/friends',
 			'me/share' : 'me/feed',
 			'me/files' : 'me/albums'
 		},
@@ -2324,22 +2347,10 @@ hello.init({
 			offline_access : 'offline_access'
 		},
 		wrap : {
-			me : function(o){
-				if(o.id){
-					o.picture = 'http://graph.facebook.com/'+o.id+'/picture';
-					o.thumbnail = 'http://graph.facebook.com/'+o.id+'/picture';
-				}
-				return o;
-			},
-			'me/friends' : function(o){
-				if("data" in o){
-					for(var i=0;i<o.data.length;i++){
-						o.data[i].picture = 'http://graph.facebook.com/'+o.data[i].id+'/picture';
-						o.data[i].thumbnail = 'http://graph.facebook.com/'+o.data[i].id+'/picture';
-					}
-				}
-				return o;
-			},
+			me : formatUser,
+			'me/friends' : formatFriends,
+			'me/following' : formatFriends,
+			'me/followers' : formatFriends,
 			'me/albums' : function(o){
 				if("data" in o){
 					for(var i=0;i<o.data.length;i++){
@@ -2400,6 +2411,9 @@ hello.init({
 		}
 	}
 });
+
+
+})();
 //
 // Flickr
 //
@@ -2496,6 +2510,21 @@ function checkResponse(o, key){
 	return o;
 }
 
+function formatFriends(o){
+	formatError(o);
+	if(o.contacts){
+		o.data = o.contacts.contact;
+		delete o.contacts;
+		for(var i=0;i<o.data.length;i++){
+			var item = o.data[i];
+			item.id = item.nsid;
+			item.name = item.realname || item.username;
+			item.thumbnail = getBuddyIcon(item, 'm');
+		}
+	}
+	return o;
+}
+
 
 // this is not exactly neat but avoid to call
 // the method 'flickr.test.login' for each api call
@@ -2531,6 +2560,8 @@ hello.init({
 			base		: "http://api.flickr.com/services/rest",
 			"me"		: sign("flickr.people.getInfo"),
 			"me/friends": sign("flickr.contacts.getList"),
+			"me/following": sign("flickr.contacts.getList"),
+			"me/followers": sign("flickr.contacts.getList"),
 			"me/albums"	: sign("flickr.photosets.getList"),
 			"me/photos" : sign("flickr.people.getPhotos")
 		},
@@ -2550,20 +2581,9 @@ hello.init({
 				}
 				return o;
 			},
-			"me/friends" : function(o){
-				formatError(o);
-				if(o.contacts){
-					o.data = o.contacts.contact;
-					delete o.contacts;
-					for(var i=0;i<o.data.length;i++){
-						var item = o.data[i];
-						item.id = item.nsid;
-						item.name = item.realname || item.username;
-						item.thumbnail = getBuddyIcon(item, 'm');
-					}
-				}
-				return o;
-			},
+			"me/friends" : formatFriends,
+			"me/followers" : formatFriends,
+			"me/following" : formatFriends,
 			"me/albums" : function(o){
 				formatError(o);
 				o = checkResponse(o, "photosets");
@@ -2599,6 +2619,32 @@ hello.init({
 //
 // FourSquare
 //
+(function(){
+
+function formatError(o){
+	if(o.meta&&o.meta.code===400){
+		o.error = {
+			code : "access_denied",
+			message : o.meta.errorDetail
+		};
+	}
+}
+
+function formatUser(o){
+	if(o.id){
+		o.thumbnail = o.photo.prefix + '100x100'+ o.photo.suffix;
+		o.name = o.firstName + ' ' + o.lastName;
+		o.first_name = o.firstName;
+		o.last_name = o.lastName;
+		if(o.contact){
+			if(o.contact.email){
+				o.email = o.contact.email;
+			}
+		}
+	}
+}
+
+
 hello.init({
 	foursquare : {
 		name : 'FourSquare',
@@ -2612,34 +2658,38 @@ hello.init({
 		uri : {
 			auth : 'https://foursquare.com/oauth2/authenticate',
 			base : 'https://api.foursquare.com/v2/',
-			'me' : 'users/self'
+			'me' : 'users/self',
+			'me/friends' : 'users/self/friends',
+			'me/followers' : 'users/self/friends',
+			'me/following' : 'users/self/friends'
 		},
 		wrap : {
 			me : function(o){
-				if(o.meta&&o.meta.code===400){
-					o = {
-						error : {
-							code : "access_denied",
-							message : o.meta.errorDetail
-						}
-					};
-					return o;
-				}
+				formatError(o);
 				if(o && o.response){
 					o = o.response.user;
-					if(o.id){
-						o.thumbnail = o.photo.prefix + '100x100'+ o.photo.suffix;
-						o.name = o.firstName + ' ' + o.lastName;
-					}
+					formatUser(o);
 				}
 				return o;
 			},
-			'default' : function(){
+			'default' : function(o){
+				formatError(o);
 
+				// Format Friends
+				if(o && "response" in o && "friends" in o.response && "items" in o.response.friends ){
+					o.data = o.response.friends.items;
+					delete o.response;
+					for(var i=0;i<o.data.length;i++){
+						formatUser(o.data[i]);
+					}
+				}
+				return o;
 			}
 		}
 	}
 });
+
+})();
 //
 // GitHub
 //
@@ -2656,6 +2706,14 @@ function formatError(o,code){
 	}
 }
 
+function formatUser(o){
+	if(o.id){
+		o.picture = o.avatar_url;
+		o.thumbnail = o.avatar_url;
+		o.name = o.login;
+	}
+}
+
 hello.init({
 	github : {
 		name : 'GitHub',
@@ -2667,26 +2725,28 @@ hello.init({
 			auth : 'https://github.com/login/oauth/authorize',
 			base : 'https://api.github.com/',
 			'me' : 'user',
-			'me/friends' : 'user/following'
+			'me/friends' : 'user/following',
+			'me/following' : 'user/following',
+			'me/followers' : 'user/followers'
 		},
 		wrap : {
 			me : function(o,code){
 
 				formatError(o,code);
+				formatUser(o);
 
-				if(o.id){
-					o.picture = o.avatar_url;
-					o.thumbnail = o.avatar_url;
-					o.name = o.login;
-				}
 				return o;
 			},
-			"me/friends" : function(o,code){
+			"default" : function(o,code){
 
 				formatError(o,code);
 
 				if(Object.prototype.toString.call(o) === '[object Array]'){
-					return {data:o};
+					o = {data:o};
+
+					for(var i=0;i<o.data.length;i++){
+						formatUser(o.data[i]);
+					}
 				}
 				return o;
 			}
@@ -2815,7 +2875,28 @@ hello.init({
 		}
 	}
 
-
+	function formatFriends(o){
+		var r = [];
+		if("feed" in o && "entry" in o.feed){
+			for(var i=0;i<o.feed.entry.length;i++){
+				var a = o.feed.entry[i];
+				r.push({
+					id		: a.id.$t,
+					name	: a.title.$t,
+					email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
+					updated_time : a.updated.$t,
+					picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null,
+					thumbnail : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null
+				});
+			}
+			return {
+				//name : o.feed.title.$t,
+				//updated : o.feed.updated.$t,
+				data : r
+			};
+		}
+		return o;
+	}
 
 	//
 	// Embed
@@ -2838,6 +2919,8 @@ hello.init({
 				me : 'oauth2/v1/userinfo?alt=json',
 				base : "https://www.googleapis.com/",
 				'me/friends' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
+				'me/following' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
+				'me/followers' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
 				'me/share' : 'plus/v1/people/me/activities/public',
 				'me/feed' : 'plus/v1/people/me/activities/public',
 				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json',
@@ -2874,28 +2957,9 @@ hello.init({
 					}
 					return o;
 				},
-				'me/friends'	: function(o){
-					var r = [];
-					if("feed" in o && "entry" in o.feed){
-						for(var i=0;i<o.feed.entry.length;i++){
-							var a = o.feed.entry[i];
-							r.push({
-								id		: a.id.$t,
-								name	: a.title.$t,
-								email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
-								updated_time : a.updated.$t,
-								picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null,
-								thumbnail : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null
-							});
-						}
-						return {
-							//name : o.feed.title.$t,
-							//updated : o.feed.updated.$t,
-							data : r
-						};
-					}
-					return o;
-				},
+				'me/friends'	: formatFriends,
+				'me/followers'	: formatFriends,
+				'me/following'	: formatFriends,
 				'me/share' : function(o){
 					o.data = o.items;
 					try{
@@ -2942,6 +3006,23 @@ function formatError(o){
 }
 
 
+function formatFriends(o){
+	if(o && "data" in o ){
+		for(var i=0;i<o.data.length;i++){
+			formatFriend(o.data[i]);
+		}
+	}
+	return o;
+}
+
+function formatFriend(o){
+	if(o.id){
+		o.thumbnail = o.profile_picture;
+		o.name = o.full_name || o.username;
+	}
+}
+
+
 hello.init({
 	instagram : {
 		name : 'Instagram',
@@ -2956,10 +3037,13 @@ hello.init({
 			'me' : 'users/self',
 			'me/feed' : 'users/self/feed',
 			'me/photos' : 'users/self/media/recent?min_id=0&count=100',
-			'me/friends' : 'users/self/follows'
+			'me/friends' : 'users/self/follows',
+			'me/following' : 'users/self/follows',
+			'me/followers' : 'users/self/followed-by'
 		},
 		scope : {
-			basic : 'basic'
+			basic : 'basic',
+			friends : 'relationships'
 		},
 		wrap : {
 			me : function(o){
@@ -2973,6 +3057,9 @@ hello.init({
 				}
 				return o;
 			},
+			"me/friends" : formatFriends,
+			"me/following" : formatFriends,
+			"me/followers" : formatFriends,
 			"me/photos" : function(o){
 
 				formatError(o);
@@ -3021,6 +3108,20 @@ function formatUser(o){
 	o.thumbnail = o.pictureUrl;
 }
 
+
+function formatFriends(o){
+	formatError(o);
+	if(o.values){
+		o.data = o.values;
+		for(var i=0;i<o.data.length;i++){
+			formatUser(o.data[i]);
+		}
+		delete o.values;
+	}
+	return o;
+}
+
+
 hello.init({
 	'linkedin' : {
 
@@ -3041,6 +3142,8 @@ hello.init({
 			base	: "https://api.linkedin.com/v1/",
 			me		: 'people/~:(picture-url,first-name,last-name,id,formatted-name)',
 			"me/friends"	: 'people/~/connections',
+			"me/followers"	: 'people/~/connections',
+			"me/following"	: 'people/~/connections',
 			"me/share" : function(p, next){
 				// POST unsupported
 				next( p.method === 'get' ? 'people/~/network/updates' : 'people/~/current-status' );
@@ -3059,17 +3162,9 @@ hello.init({
 				formatUser(o);
 				return o;
 			},
-			"me/friends" : function(o){
-				formatError(o);
-				if(o.values){
-					o.data = o.values;
-					for(var i=0;i<o.data.length;i++){
-						formatUser(o.data[i]);
-					}
-					delete o.values;
-				}
-				return o;
-			},
+			"me/friends" : formatFriends,
+			"me/following" : formatFriends,
+			"me/followers" : formatFriends,
 			"me/share" : function(o){
 				formatError(o);
 				if(o.values){
@@ -3098,6 +3193,17 @@ hello.init({
 //
 // SoundCloud
 //
+(function(){
+
+
+function formatUser(o){
+	if(o.id){
+		o.picture = o.avatar_url;
+		o.thumbnail = o.avatar_url;
+		o.name = o.username || o.full_name;
+	}
+}
+
 hello.init({
 	soundcloud : {
 		name : 'SoundCloud',
@@ -3117,6 +3223,10 @@ hello.init({
 		uri : {
 			auth : 'https://soundcloud.com/connect',
 			base : 'https://api.soundcloud.com/',
+			'me' : 'me.json',
+			'me/friends' : 'me/followings.json',
+			'me/followers' : 'me/followers.json',
+			'me/following' : 'me/followings.json',
 			'default' : function(p, callback){
 				// include ".json at the end of each request"
 				callback(p.path + '.json');
@@ -3125,16 +3235,25 @@ hello.init({
 		// Response handlers
 		wrap : {
 			me : function(o){
-				if(o.id){
-					o.picture = o.avatar_url;
-					o.thumbnail = o.avatar_url;
-					o.name = o.username;
+				formatUser(o);
+				return o;
+			},
+			"default" : function(o){
+				if(o instanceof Array){
+					o = {
+						data : o
+					};
+					for(var i=0;i<o.data.length;i++){
+						formatUser(o.data[i]);
+					}
 				}
 				return o;
 			}
 		}
 	}
 });
+
+})();
 //
 // Twitter
 //
@@ -3258,6 +3377,26 @@ hello.init({
 //
 // Windows
 //
+
+(function(){
+
+function formatUser(o){
+	if(o.id){
+		o.email = (o.emails?o.emails.preferred:null);
+		o.picture = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
+		o.thumbnail = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
+	}
+}
+
+function formatFriends(o){
+	if("data" in o){
+		for(var i=0;i<o.data.length;i++){
+			formatUser(o.data[i]);
+		}
+	}
+	return o;
+}
+
 hello.init({
 	windows : {
 		name : 'Windows live',
@@ -3266,6 +3405,12 @@ hello.init({
 			// REF: http://msdn.microsoft.com/en-us/library/hh243641.aspx
 			auth : 'https://login.live.com/oauth20_authorize.srf',
 			base : 'https://apis.live.net/v5.0/',
+
+			// Friends
+			"me/friends" : "me/friends",
+			"me/following" : "me/friends",
+			"me/followers" : "me/friends",
+
 			"me/share" : function(p,callback){
 				// If this is a POST them return
 				callback( p.method==='get' ? "me/feed" : "me/share" );
@@ -3275,7 +3420,6 @@ hello.init({
 				callback( p.method==='get' ? "me/feed" : "me/share" );
 			},
 			"me/files" : 'me/skydrive/files'
-
 		},
 		scope : {
 			basic			: 'wl.signin,wl.basic',
@@ -3295,22 +3439,12 @@ hello.init({
 		},
 		wrap : {
 			me : function(o){
-				if(o.id){
-					o.email = (o.emails?o.emails.preferred:null);
-					o.picture = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
-					o.thumbnail = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
-				}
+				formatUser(o);
 				return o;
 			},
-			'me/friends' : function(o){
-				if("data" in o){
-					for(var i=0;i<o.data.length;i++){
-						o.data[i].picture = 'https://apis.live.net/v5.0/'+o.data[i].id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
-						o.data[i].thumbnail = 'https://apis.live.net/v5.0/'+o.data[i].id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
-					}
-				}
-				return o;
-			},
+			'me/friends' : formatFriends,
+			'me/followers' : formatFriends,
+			'me/following' : formatFriends,
 			'me/albums' : function(o){
 				if("data" in o){
 					for(var i=0;i<o.data.length;i++){
@@ -3341,6 +3475,8 @@ hello.init({
 		}
 	}
 });
+
+})();
 //
 // Yahoo
 //
@@ -3354,6 +3490,34 @@ function formatError(o){
 			message : o.meta.error_message
 		};
 	}
+}
+
+function formatFriends(o){
+	formatError(o);
+	var contact,field;
+	if(o.query&&o.query.results&&o.query.results.contact){
+		o.data = o.query.results.contact;
+		delete o.query;
+		for(var i=0;i<o.data.length;i++){
+			contact = o.data[i];
+			o.data[i].id = null;
+			for(var j=0;j<contact.fields.length;j++){
+				field = contact.fields[j];
+				if(field.type === 'email'){
+					o.data[i].email = field.value;
+				}
+				if(field.type === 'name'){
+					o.data[i].first_name = field.value.givenName;
+					o.data[i].last_name = field.value.familyName;
+					o.data[i].name = field.value.givenName + ' ' + field.value.familyName;
+				}
+				if(field.type === 'yahooid'){
+					o.data[i].id = field.value;
+				}
+			}
+		}
+	}
+	return o;
 }
 
 hello.init({
@@ -3370,10 +3534,28 @@ hello.init({
 		// Signin once token expires?
 		autorefresh : false,
 
+		/*
+		// AUTO REFRESH FIX: Bug in Yahoo can't get this to work with node-oauth-shim
+		login : function(o){
+			// Is the user already logged in
+			var auth = hello('yahoo').getAuthResponse();
+
+			// Is this a refresh token?
+			if(o.options.display==='none'&&auth&&auth.access_token&&auth.refresh_token){
+				// Add the old token and the refresh token, including path to the query
+				// See http://developer.yahoo.com/oauth/guide/oauth-refreshaccesstoken.html
+				o.qs.access_token = auth.access_token;
+				o.qs.refresh_token = auth.refresh_token;
+				o.qs.token_url = 'https://api.login.yahoo.com/oauth/v2/get_token';
+			}
+		},
+		*/
+
 		uri : {
 			base	: "https://social.yahooapis.com/v1/",
 			me		: "http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.profile%20where%20guid%3Dme&format=json",
-			"me/friends"	: 'http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.contacts%20where%20guid=me&format=json'
+			"me/friends"	: 'http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.contacts%20where%20guid=me&format=json',
+			"me/following"	: 'http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.contacts%20where%20guid=me&format=json'
 		},
 		wrap : {
 			me : function(o){
@@ -3391,33 +3573,8 @@ hello.init({
 			},
 			// Can't get ID's
 			// It might be better to loop through the social.relationshipd table with has unique ID's of users.
-			"me/friends" : function(o){
-				formatError(o);
-				var contact,field;
-				if(o.query&&o.query.results&&o.query.results.contact){
-					o.data = o.query.results.contact;
-					delete o.query;
-					for(var i=0;i<o.data.length;i++){
-						contact = o.data[i];
-						o.data[i].id = null;
-						for(var j=0;j<contact.fields.length;j++){
-							field = contact.fields[j];
-							if(field.type === 'email'){
-								o.data[i].email = field.value;
-							}
-							if(field.type === 'name'){
-								o.data[i].first_name = field.value.givenName;
-								o.data[i].last_name = field.value.familyName;
-								o.data[i].name = field.value.givenName + ' ' + field.value.familyName;
-							}
-							if(field.type === 'yahooid'){
-								o.data[i].id = field.value;
-							}
-						}
-					}
-				}
-				return o;
-			}
+			"me/friends" : formatFriends,
+			"me/following" : formatFriends
 		},
 		xhr : false
 	}
