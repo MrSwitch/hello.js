@@ -1219,11 +1219,11 @@ hello.unsubscribe = hello.off;
 		if( ("access_token" in p&&p.access_token) && p.network ){
 
 			if(!p.expires_in || parseInt(p.expires_in,10) === 0){
-				// If p.expires_in is unset, 1 hour, otherwise 0 = infinite, aka a month
-				p.expires_in = !p.expires_id ? 3600 : (3600 * 24 * 30);
+				// If p.expires_in is unset, set to 0
+				p.expires_in = 0;
 			}
 			p.expires_in = parseInt(p.expires_in,10);
-			p.expires = ((new Date()).getTime()/1e3) + parseInt(p.expires_in,10);
+			p.expires = ((new Date()).getTime()/1e3) + (p.expires_in || ( 60 * 60 * 24 * 365 ));
 
 			// Make this the default users service
 			hello.service( p.network );
