@@ -55,6 +55,23 @@ hello.init({
 		// Signin once token expires?
 		autorefresh : false,
 
+		/*
+		// AUTO REFRESH FIX: Bug in Yahoo can't get this to work with node-oauth-shim
+		login : function(o){
+			// Is the user already logged in
+			var auth = hello('yahoo').getAuthResponse();
+
+			// Is this a refresh token?
+			if(o.options.display==='none'&&auth&&auth.access_token&&auth.refresh_token){
+				// Add the old token and the refresh token, including path to the query
+				// See http://developer.yahoo.com/oauth/guide/oauth-refreshaccesstoken.html
+				o.qs.access_token = auth.access_token;
+				o.qs.refresh_token = auth.refresh_token;
+				o.qs.token_url = 'https://api.login.yahoo.com/oauth/v2/get_token';
+			}
+		},
+		*/
+
 		uri : {
 			base	: "https://social.yahooapis.com/v1/",
 			me		: "http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.profile%20where%20guid%3Dme&format=json",
