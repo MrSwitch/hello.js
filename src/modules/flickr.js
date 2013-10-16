@@ -16,22 +16,33 @@ function getApiUrl(method, extra_params, skip_network){
 	return url;
 }
 
+// this is not exactly neat but avoid to call
+// the method 'flickr.test.login' for each api call
+var user_id;
+
 function withUser(cb){
-	if(!flickr_user){
-		hello.api(getApiUrl("flickr.test.login"), function(userJson){
-			flickr_user = {"user_id" : checkResponse(userJson, "user").id};
-			cb();
-		});
+
+	var auth = hello.getAuthResponse("flickr");
+
+	if(auth&&auth.user_nsid){
+		cb(auth.user_nsid);
+	}
+	else if(user_id){
+		cb(user_id);
 	}
 	else{
-		cb();
+		hello.api(getApiUrl("flickr.test.login"), function(userJson){
+			// If the
+			user_id = checkResponse(userJson, "user").id;
+			cb(user_id);
+		});
 	}
 }
 
 function sign(url){
 	return function(p, callback){
-		withUser(function(){
-			callback(getApiUrl(url, flickr_user, true));
+		withUser(function(user_id){
+			callback(getApiUrl(url, {"user_id" : user_id}, true));
 		});
 	};
 }
@@ -110,9 +121,6 @@ function formatFriends(o){
 }
 
 
-// this is not exactly neat but avoid to call
-// the method 'flickr.test.login' for each api call
-var flickr_user;
 
 hello.init({
 	'flickr' : {
@@ -125,7 +133,7 @@ hello.init({
 		},
 		logout : function(){
 			// Function is executed when the user logs out.
-			flickr_user = null;
+			user_id = null;
 		},
 
 		// AutoRefresh
