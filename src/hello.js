@@ -1039,12 +1039,21 @@ hello.unsubscribe = hello.off;
 (function(hello){
 
 	// Monitor for a change in state and fire
-	var old_session = {}, pending = {};
+	var old_session = {},
+
+		// Hash of expired tokens
+		expired = {};
 
 
 	(function self(){
 
 		var CURRENT_TIME = ((new Date()).getTime()/1e3);
+		var emit = function(event_name){
+			hello.emit("auth."+event_name, {
+				network: name,
+				authResponse: session
+			});
+		};
 
 		// Loop through the services
 		for(var name in hello.services){if(hello.services.hasOwnProperty(name)){
@@ -1058,7 +1067,6 @@ hello.unsubscribe = hello.off;
 			var session = hello.utils.store(name) || {};
 			var provider = hello.services[name];
 			var oldsess = old_session[name] || {};
-			var evt = '';
 
 			//
 			// Listen for globalEvents that did not get triggered from the child
@@ -1083,22 +1091,30 @@ hello.unsubscribe = hello.off;
 			}
 			
 			//
-			// Refresh login
+			// Refresh token
 			//
 			if( session && ("expires" in session) && session.expires < CURRENT_TIME ){
 
 				// If auto refresh is provided then determine if we can refresh based upon its value.
 				var refresh = !("autorefresh" in provider) || provider.autorefresh;
 
-				// Does this provider support refresh
-				if( refresh && (!( name in pending ) || pending[name] < CURRENT_TIME) ) {
+				// Has the refresh been run recently?
+				if( refresh && (!( name in expired ) || expired[name] < CURRENT_TIME ) ){
 					// try to resignin
 					hello.emit("notice", name + " has expired trying to resignin" );
 					hello.login(name,{display:'none'});
 
-					// update pending, every 10 minutes
-					pending[name] = CURRENT_TIME + 600;
+					// update expired, every 10 minutes
+					expired[name] = CURRENT_TIME + 600;
 				}
+
+				// Does this provider not support refresh
+				else if( !refresh && !( name in expired ) ) {
+					// Label the event
+					emit('expired');
+					expired[name] = true;
+				}
+
 				// If session has expired then we dont want to store its value until it can be established that its been updated
 				continue;
 			}
@@ -1109,27 +1125,24 @@ hello.unsubscribe = hello.off;
 			}
 			// Access_token has been removed
 			else if( !session.access_token && oldsess.access_token ){
-				hello.emit('auth.logout', {
-					network: name,
-					authResponse : session
-				});
+				emit('logout');
 			}
 			// Access_token has been created
 			else if( session.access_token && !oldsess.access_token ){
-				hello.emit('auth.login', {
-					network: name,
-					authResponse: session
-				} );
+				emit('login');
 			}
 			// Access_token has been updated
 			else if( session.expires !== oldsess.expires ){
-				hello.emit('auth.update', {
-					network: name,
-					authResponse: session
-				} );
+				emit('update');
 			}
-			
+
+			// Updated stored session
 			old_session[name] = session;
+
+			// Remove the expired flags
+			if(name in expired){
+				delete expired[name];
+			}
 		}}
 
 		// Check error events
