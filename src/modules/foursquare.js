@@ -29,7 +29,14 @@ function formatUser(o){
 
 hello.init({
 	foursquare : {
+
 		name : 'FourSquare',
+
+		oauth : {
+			version : 2,
+			auth : 'https://foursquare.com/oauth2/authenticate'
+		},
+
 		// Alter the querystring
 		querystring : function(qs){
 			var token = qs.access_token;
@@ -37,9 +44,10 @@ hello.init({
 			qs.oauth_token = token;
 			qs.v = 20121125;
 		},
-		uri : {
-			auth : 'https://foursquare.com/oauth2/authenticate',
-			base : 'https://api.foursquare.com/v2/',
+
+		base : 'https://api.foursquare.com/v2/',
+
+		get : {
 			'me' : 'users/self',
 			'me/friends' : 'users/self/friends',
 			'me/followers' : 'users/self/friends',

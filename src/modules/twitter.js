@@ -78,19 +78,24 @@ hello.init({
 		// Signin once token expires?
 		autorefresh : false,
 
-		uri : {
-			base	: "https://api.twitter.com/1.1/",
-			me		: 'account/verify_credentials.json',
+		base	: "https://api.twitter.com/1.1/",
+
+		get : {
+			"me"			: 'account/verify_credentials.json',
 			"me/friends"	: 'friends/list.json',
 			"me/following"	: 'friends/list.json',
 			"me/followers"	: 'followers/list.json',
+			"me/share"	: 'statuses/user_timeline.json'
+		},
+
+		post : {
 			'me/share' : function(p,callback){
 				var data = p.data;
 				p.data = null;
-
-				callback( p.method==='post' ? 'statuses/update.json?include_entities=1&status='+data.message : 'statuses/user_timeline.json' );
+				callback( 'statuses/update.json?include_entities=1&status='+data.message );
 			}
 		},
+
 		wrap : {
 			me : function(o){
 				formaterror(o);

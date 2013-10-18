@@ -43,27 +43,13 @@ hello.init({
 		login: function(p){
 			p.qs.response_type = 'code';
 		},
+
 		oauth : {
 			version : 2,
+			auth	: "https://www.linkedin.com/uas/oauth2/authorization",
 			grant	: "https://www.linkedin.com/uas/oauth2/accessToken"
 		},
-		querystring : function(qs){
-			// Linkedin signs requests with the parameter 'oauth2_access_token'... yeah anotherone who thinks they should be different!
-			qs.oauth2_access_token = qs.access_token;
-			delete qs.access_token;
-		},
-		uri : {
-			auth	: "https://www.linkedin.com/uas/oauth2/authorization",
-			base	: "https://api.linkedin.com/v1/",
-			me		: 'people/~:(picture-url,first-name,last-name,id,formatted-name)',
-			"me/friends"	: 'people/~/connections',
-			"me/followers"	: 'people/~/connections',
-			"me/following"	: 'people/~/connections',
-			"me/share" : function(p, next){
-				// POST unsupported
-				next( p.method === 'get' ? 'people/~/network/updates' : 'people/~/current-status' );
-			}
-		},
+
 		scope : {
 			basic	: 'r_fullprofile',
 			email	: 'r_emailaddress',
@@ -71,6 +57,27 @@ hello.init({
 			publish : 'rw_nus'
 		},
 		scope_delim : ' ',
+
+		querystring : function(qs){
+			// Linkedin signs requests with the parameter 'oauth2_access_token'... yeah anotherone who thinks they should be different!
+			qs.oauth2_access_token = qs.access_token;
+			delete qs.access_token;
+		},
+
+		base	: "https://api.linkedin.com/v1/",
+
+		get : {
+			"me"			: 'people/~:(picture-url,first-name,last-name,id,formatted-name)',
+			"me/friends"	: 'people/~/connections',
+			"me/followers"	: 'people/~/connections',
+			"me/following"	: 'people/~/connections',
+			"me/share"		: "people/~/network/updates"
+		},
+
+		post : {
+			//"me/share"		: 'people/~/current-status'
+		},
+
 		wrap : {
 			me : function(o){
 				formatError(o);

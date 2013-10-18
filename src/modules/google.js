@@ -155,21 +155,13 @@
 				}
 			},
 
-			uri : {
-				// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
-				auth : "https://accounts.google.com/o/oauth2/auth",
-	//				me	: "plus/v1/people/me?pp=1",
-				me : 'oauth2/v1/userinfo?alt=json',
-				base : "https://www.googleapis.com/",
-				'me/friends' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
-				'me/following' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
-				'me/followers' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
-				'me/share' : 'plus/v1/people/me/activities/public',
-				'me/feed' : 'plus/v1/people/me/activities/public',
-				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json',
-				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=100',
-				"me/files" : 'https://www.googleapis.com/drive/v2/files?q=%22root%22+in+parents'
+			// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
+			oauth : {
+				version : 2,
+				auth : "https://accounts.google.com/o/oauth2/auth"
 			},
+
+			// Authorization scopes
 			scope : {
 				//,
 				basic : "https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
@@ -188,6 +180,37 @@
 				offline_access : ''
 			},
 			scope_delim : ' ',
+
+			// API base URI
+			base : "https://www.googleapis.com/",
+
+			// Map GET requests
+			get : {
+				//	me	: "plus/v1/people/me?pp=1",
+				'me' : 'oauth2/v1/userinfo?alt=json',
+				'me/friends' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
+				'me/following' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
+				'me/followers' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
+				'me/share' : 'plus/v1/people/me/activities/public',
+				'me/feed' : 'plus/v1/people/me/activities/public',
+				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json',
+				'me/album' : function(p,callback){
+					var key = p.data.id;
+					delete p.data.id;
+					callback(key.replace("/entry/", "/feed/"));
+				},
+				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=100',
+				'me/files' : 'drive/v2/files?q=%22root%22+in+parents'
+			},
+
+			post : {
+//				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json'
+			},
+
+			// Map DELETE requests
+			del : {
+			},
+
 			wrap : {
 				me : function(o){
 					if(o.id){

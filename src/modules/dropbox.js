@@ -77,35 +77,44 @@ hello.init({
 		// Signin once token expires?
 		autorefresh : false,
 
-		uri : {
-			//auth	: "https://www.dropbox.com/1/oauth/authorize",
-			base	: "https://api.dropbox.com/1/",
-			me		: 'account/info',
-			"me/files"	: function(p,callback){
-				if(p.method === 'get'){
-					callback('metadata/dropbox');
-					return;
+		// API Base URL
+		base	: "https://api.dropbox.com/1/",
+
+		// Map GET requests
+		get : {
+			"me"		: 'account/info',
+			"me/files"	: "metadata/dropbox",
+			"me/folder"	: "metadata/dropbox/@{id}",
+			"me/folders" : 'metadata/dropbox/',
+			"default" : function(p,callback){
+				if(p.path.match("https://api-content.dropbox.com/1/files/")){
+					// this is a file, return binary data
+					p.method = 'blob';
 				}
-				var path = p.data.dir;
-				delete p.data.dir;
-				callback('https://api-content.dropbox.com/1/files/dropbox/'+path);
+				callback(p.path);
+			}
+		},
+		post : {
+			"me/files" : function(p,callback){
+
+				var path = p.data.id,
+					file_name = p.data.name;
+
+				p.data = {
+					file : p.data.file
+				};
+
+				callback('https://api-content.dropbox.com/1/files_put/dropbox/'+path+"/"+file_name);
 			},
 			"me/folders" : function(p, callback){
+
 				var name = p.data.name;
 				p.data = null;
+
 				callback('fileops/create_folder?'+hello.utils.param({
 					path : name,
 					root : 'dropbox'
 				}));
-			},
-			"default" : function(p,callback){
-				if(p.path.match("https://api-content.dropbox.com/1/files/")){
-					// this is a file, return binary data
-					if(p.method === 'get'){
-						p.method = 'blob';
-					}
-				}
-				callback(p.path);
 			}
 		},
 		wrap : {

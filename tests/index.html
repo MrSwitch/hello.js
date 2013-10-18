@@ -225,8 +225,8 @@
 
 var reg = {
 	url : /^https?\:\/\//,
-	name : /^[\w\d\s\-]+$/,
-	id : /^[\w\d\@\-]+$/,
+	name : /^[\w\d\s\.\-]+$/,
+	id : /^[\w\d\@\.\-]+$/,
 	string : /^\S+$/,
 	optional_name : /^[\w\d\s\-]*$/,
 	optional_url : /^(https?\:\/\/|$)/
@@ -249,12 +249,12 @@ var tests = [
 	},
 	{
 		title : "List my friends",
-		test : ['facebook', 'google', 'windows', 'linkedin', 'twitter', 'github', 'yahoo', 'instagram', 'soundcloud', 'foursquare','flickr'],
 		method : 'get',
 		path : 'me/friends',
 		scope : ["friends"],
 		expected : {
 			data : [{
+				id : reg.id,
 				name : reg.name,
 				thumbnail : reg.url
 			}]
@@ -262,12 +262,12 @@ var tests = [
 	},
 	{
 		title : "List my followers",
-		test : ['facebook', 'google', 'windows', 'linkedin', 'twitter', 'github', 'instagram', 'soundcloud','foursquare','flickr'],
 		method : 'get',
 		path : 'me/followers',
 		scope : ["friends"],
 		expected : {
 			data : [{
+				id : reg.id,
 				name : reg.name,
 				thumbnail : reg.url
 			}]
@@ -275,12 +275,12 @@ var tests = [
 	},
 	{
 		title : "List who i'm following",
-		test : ['facebook', 'google', 'windows', 'linkedin', 'twitter', 'github', 'yahoo', 'instagram', 'soundcloud', 'foursquare', 'flickr'],
 		method : 'get',
 		path : 'me/following',
 		scope : ["friends"],
 		expected : {
 			data : [{
+				id : reg.id,
 				name : reg.name,
 				thumbnail : reg.url
 			}]
@@ -288,7 +288,6 @@ var tests = [
 	},
 	{
 		title : "List my recent status messages",
-		test : ['facebook', 'google', 'windows', 'twitter', 'linkedin'],
 		method : 'get',
 		path : 'me/share',
 		expected : {
@@ -297,7 +296,6 @@ var tests = [
 	},
 	{
 		title : "Post a status message for me",
-		test : ['facebook', 'google', 'windows', 'twitter'],
 		method : 'post',
 		path : 'me/share',
 		scope : ["publish"],
@@ -309,7 +307,6 @@ var tests = [
 	},
 	{
 		title : "List my albums",
-		test : ['facebook', 'google', 'windows','flickr'],
 		method : 'get',
 		path : 'me/albums',
 		scope : ["photos"],
@@ -324,18 +321,22 @@ var tests = [
 	},
 	{
 		title : "List my photos from one of my Albums",
-		test : ['facebook', 'google', 'windows'],
 		method : 'get',
-		path : '[ALBUM_ID]',
+		path : 'me/album',
 		scope : ["photos"],
+		data : {
+			id : "[ALBUM_ID]"
+		},
 		setup : function(test, callback){
-			hello.api(test.network+":me/albums", function(r){
-				if("data" in r && r.data.length > 0){
-					test.path = test.path.replace("[ALBUM_ID]", r.data[0].photos );
+			hello(test.network).api("me/albums").success(function(r){
+				if(r.data.length){
+					test.data.id = test.data.id.replace("[ALBUM_ID]", r.data[0].id );
 					callback();
 					return;
 				}
 				callback("Failed to setup: the user has no albums");
+			}).error(function(){
+				callback("Failed to setup: could not open me/albums");
 			})
 		},
 		expected : {
@@ -348,7 +349,6 @@ var tests = [
 	},
 	{
 		title : "List my photos",
-		test : ['facebook', 'google', 'windows', 'instagram', 'flickr'],
 		method : 'get',
 		path : 'me/photos',
 		scope : ["photos"],
@@ -362,20 +362,24 @@ var tests = [
 	},
 	{
 		title : "Get a photo by ID",
-		test : ['facebook', 'google', 'windows'],
 		method : 'get',
-		path : '[PHOTO_ID]',
+		path : 'me/photo',
 		scope : ["photos"],
+		data : {
+			id : "[PHOTO_ID]"
+		},
 		setup : function(test, callback){
-			hello.api(test.network+":me/albums", function(r){
+			hello(test.network).api("me/albums").success( function(r){
 				if("data" in r && r.data.length > 0){
 
 					// Pick one randomly
 					var i = Math.floor(Math.random()*r.data.length);
 
-					hello.api( test.network + ":" + r.data[i].photos, function(r){
+					hello(test.network).api( "me/album", {
+						id : r.data[i].id
+					}, function(r){
 						if("data" in r && r.data.length > 0){
-							test.path = test.path.replace("[PHOTO_ID]", r.data[0].id );
+							test.data.id = r.data[0].id;
 							callback();
 							return;
 						}
@@ -385,7 +389,9 @@ var tests = [
 				else{
 					callback("Failed to setup: The user has no albums yet");
 				}
-			})
+			}).error(function(){
+				callback("Failed to setup: Error connecting to me/albums");
+			});
 		},
 		expected : {
 //			name : /^.+$/, // FaceBook doesn't always return a name
@@ -395,7 +401,6 @@ var tests = [
 	},
 	{
 		title : "Create a new Album",
-		test : ['facebook', 'google', 'windows'],
 		method : 'post',
 		path : 'me/albums',
 		scope : ["publish_files"],
@@ -409,105 +414,48 @@ var tests = [
 	},
 	{
 		title : "Upload image to Album",
-		test : ['facebook', 'google', 'windows'],
 		method : 'post',
-		path : '[ALBUM_ID]/upload_location',
+		path : 'me/album',
 		scope : ["publish_files"],
-		setup : function(test, callback){
-			hello.api(test.network+":me/albums", function(r){
-				if("data" in r && r.data.length > 0){
-
-					// Find the one with the name "New test album"
-					for(var i=0;i<r.data.length;i++){
-						if(r.data[i].name === "TestAlbum"){
-
-							// redefine the new test album
-							test.path = r.data[i].upload_location;
-							callback();
-							return;
-						}
-					}
-					callback("Failed to setup: Could not find the album 'TestAlbum'");
-				}
-				else{
-					callback("Failed to setup: the user has no Albums");
-				}
-			})
-		},
 		data : {
+			id : "[ALBUM_ID]",
 			file : ""
 		},
+		setup : before_photo_post,
 		expected : {
 			id : reg.string
 		}
 	},
 	{
 		title : "Add image to Album via URL",
-		test : ['facebook'],
 		method : 'post',
-		path : '[ALBUM_ID]/upload_location',
+		path : 'me/album',
 		scope : ["publish_files"],
-		setup : function(test, callback){
-			hello.api(test.network+":me/albums", function(r){
-				if("data" in r && r.data.length > 0){
-
-					// Find the one with the name "New test album"
-					for(var i=0;i<r.data.length;i++){
-						if(r.data[i].name === "TestAlbum"){
-
-							// redefine the new test album
-							test.path = r.data[i].upload_location;
-							callback();
-							return;
-						}
-					}
-					callback("Failed to setup: Could not find the album 'TestAlbum'");
-				}
-				else{
-					callback("Failed to setup: the user has no Albums");
-				}
-			})
-		},
 		data : {
+			id : "[ALBUM_ID]",
 			url : "http://adodson.com/hello.js/assets/logo.png",
 			name : "Hello"
 		},
+		setup : before_photo_post,
 		expected : {
 			id : reg.string
 		}
 	},
 	{
 		title : "Remove an album",
-		test : ['facebook', 'google', 'windows'],
 		method : 'delete',
-		path : '[ALBUM_ID]',
+		path : 'me/album',
 		scope : ["publish_files"],
-		setup : function(test, callback){
-			hello.api(test.network+":me/albums", function(r){
-				if("data" in r && r.data.length > 0){
-
-					// Find the one with the name "New test album"
-					for(var i=0;i<r.data.length;i++){
-						if(r.data[i].name === "TestAlbum"){
-							test.path = r.data[i].id;
-							callback();
-							return;
-						}
-					}
-					callback("Failed to setup: Could not find the album 'New test album'");
-				}
-				else{
-					callback("Failed to setup: the user has no Albums");
-				}
-			})
+		data : {
+			id : '[ALBUM_ID]'
 		},
+		setup : before_photo_post,
 		expected : {
-			response : 'deleted'
+			success : true
 		}
 	},
 	{
 		title : "List my files",
-		test : ['facebook', 'google', 'windows','dropbox'],
 		method : 'get',
 		path : 'me/files',
 		scope : ["files"],
@@ -521,13 +469,11 @@ var tests = [
 		}
 	},
 	{
-		title : "Create a folder",
-		test : ['dropbox'],
-		method : 'post',
+		title : "List folders",
+		method : 'get',
 		path : 'me/folders',
 		scope : ["files"],
 		data : {
-			name : 'TestFolder'
 		},
 		expected : {
 			data : [{
@@ -537,23 +483,135 @@ var tests = [
 		}
 	},
 	{
-		title : "Upload my file",
-		test : ['dropbox'],
+		title : "Create a folder",
 		method : 'post',
-		path : 'me/files',
+		path : 'me/folders',
 		scope : ["files"],
 		data : {
-			dir : 'TestFolder',
-			file : "/hello.js/assets/logo.png",
-			name : "HelloLogo.png"
+			name : 'TestFolder'
 		},
 		expected : {
 			id : reg.string,
 			name : reg.name
 		}
+	},
+	{
+		title : "Get content of folder",
+		method : 'get',
+		path : 'me/folder',
+		scope : ["files"],
+		data : {
+			id : '[FOLDER_ID]'
+		},
+		setup : get_test_folder,
+		expected : {
+			data : [{
+				id : reg.string,
+				name : reg.name
+			}]
+		}
+	},
+	{
+		title : "Upload my file",
+		method : 'post',
+		path : 'me/files',
+		scope : ["files"],
+		data : {
+			id : 'TestFolder',
+			file : "/hello.js/assets/logo.png",
+			name : "TestFile.png"
+		},
+		setup : get_test_folder,
+		expected : {
+			id : reg.string,
+			name : reg.name
+		}
+	},
+	{
+		title : "Delete my file",
+		method : 'delete',
+		path : 'me/files',
+		scope : ["files"],
+		data : {
+			id : '[FILE_ID]'
+		},
+		setup : get_test_file,
+		expected : {
+			success : true
+		}
 	}
 ];
 
+
+///////////////////////////////////
+// BEFORE SETUPS
+
+
+//
+// Get the ID of the test album
+// 
+function before_photo_post(test, callback){
+	hello(test.network).api("me/albums").success(function(r){
+		for(var i=0;i<r.data.length;i++){
+			if(r.data[i].name === "TestAlbum"){
+				var id = r.data[i].id;
+				test.data.id = id;
+				return callback();
+			}
+		}
+		callback("Failed to setup: Could not find the album 'TestAlbum'");
+	}).error(function(){
+		callback("Failed to setup: could not access me/albums");
+	});
+}
+
+
+
+
+function get_test_folder(test, callback){
+	hello(test.network).api("me/folders").success(function(r){
+		for(var i=0;i<r.data.length;i++){
+			var folder = r.data[i];
+			if(folder.name === "TestFolder"){
+				test.data.id = folder.id;
+				return callback();
+			}
+		}
+		callback("Failed to setup: Create folder 'TestFolder' (there's a test above which does this)");
+	}).error(function(){
+		callback("Failed to setup, could not access me/folders");
+	});
+}
+
+function get_test_file(test, callback){
+
+	get_test_folder(test, function(s){
+		if(s){
+			callback(s);
+			return;
+		}
+		hello(test.network).api( "me/files", { id: test.data.id } ).success(function(r){
+			for(var i=0;i<r.data.length;i++){
+				var file = r.data[i];
+				test.data.id = file.id;
+				return callback();
+			}
+			callback("Failed to setup: Create file 'TestFile.png' (there's a test above which does this)");
+		}).error(function(){
+			callback("Failed to setup, could not access me/files");
+		});
+	});
+}
+
+
+
+
+
+
+
+
+
+////////////////////////////////////
 
 function Test(test,network,parent){
 	var self = this;
@@ -584,7 +642,8 @@ function Test(test,network,parent){
 		}
 	}
 	else {
-		this.enabled = (!test.test || _indexOf( test.test, network ) > -1 );
+		var action = {'delete':'del'}[this.method] || this.method;
+		this.enabled = (action in hello.services[network] && test.path in hello.services[network][action] );
 	}
 
 	this.expected = test.expected;
@@ -605,31 +664,37 @@ function Test(test,network,parent){
 	this.run = function(callback){
 		var authResponse = hello.getAuthResponse(network);
 		var test = this;
-		var action = function(r){
-			test.status('working');
-			var data = JSON.parse(ko.toJSON(parent.data.itemsAsObject()));
+		test.data = JSON.parse(ko.toJSON(parent.data.itemsAsObject()));
 
-			// If the data contains a file?
-			// Can't grab it from the dictionary so...
-			if("file" in data){
-				// lets define the form as the data source
-				var data = document.getElementById(parent.formId());
-				/*
-				var form = document.getElementById(parent.formId());
-				var data = {};
-				for(var i=0;i<form.length;i++){
-					var input = form[i];
-					if(input.name&&!input.disabled){
-						if(input.type==='file'){
-							data[input.name] = input;
-						}
-						else{
-							data[input.name] = input.value || input.innerHTML;
-						}
+		// If the data contains a file?
+		// Can't grab it from the dictionary so...
+		if("file" in test.data){
+
+			// lets define the form as the data source
+			test.data = document.getElementById(parent.formId());
+
+			// Format the data now
+			hello.utils.dataToJSON(test);
+
+			/*
+			var form = document.getElementById(parent.formId());
+			var data = {};
+			for(var i=0;i<form.length;i++){
+				var input = form[i];
+				if(input.name&&!input.disabled){
+					if(input.type==='file'){
+						data[input.name] = input;
+					}
+					else{
+						data[input.name] = input.value || input.innerHTML;
 					}
 				}
-				*/
 			}
+			*/
+		}
+
+		var action = function(r){
+			test.status('working');
 
 			var cb = function(r){
 
@@ -658,7 +723,7 @@ function Test(test,network,parent){
 			else{
 				// Call hello.api
 				// Save the request information
-				test.request( hello.api((network?network+":":"")+test.path, test.method, data, cb) );
+				test.request( hello.api((network?network+":":"")+test.path, test.method, test.data, cb) );
 			}
 		};
 
@@ -777,6 +842,12 @@ hello.on('auth.login', function(o){
 	ko.utils.arrayForEach( model.networks(), function(network){
 		if(o.network===network.name){
 			network.online(true);
+		}
+	});	
+}).on('auth.expired auth.logout', function(o){
+	ko.utils.arrayForEach( model.networks(), function(network){
+		if(o.network===network.name){
+			network.online(false);
 		}
 	});	
 });

@@ -78,7 +78,7 @@ function formatError(o){
 
 function formatPhotos(o){
 	if (o.photoset || o.photos){
-		var set = (o.photoset) ? 'photoset' : 'photos';
+		var set = ("photoset" in o) ? 'photoset' : 'photos';
 		o = checkResponse(o, set);
 		o.data = o.photo;
 		delete o.photo;
@@ -90,6 +90,7 @@ function formatPhotos(o){
 			photo.thumbnail = getPhoto(photo.id, photo.farm, photo.server, photo.secret, 'm');
 		}
 	}
+	return o;
 }
 function checkResponse(o, key){
 
@@ -124,6 +125,9 @@ function formatFriends(o){
 
 hello.init({
 	'flickr' : {
+
+		name : "Flickr",
+
 		// Ensure that you define an oauth_proxy
 		oauth : {
 			version : "1.0a",
@@ -131,6 +135,7 @@ hello.init({
 			request : 'http://www.flickr.com/services/oauth/request_token',
 			token	: 'http://www.flickr.com/services/oauth/access_token'
 		},
+
 		logout : function(){
 			// Function is executed when the user logs out.
 			user_id = null;
@@ -140,16 +145,11 @@ hello.init({
 		// Signin once token expires?
 		autorefresh : false,
 
+		// API base URL
+		base		: "http://api.flickr.com/services/rest",
 
-		name : "Flickr",
-		jsonp: function(p,qs){
-			if(p.method.toLowerCase() == "get"){
-				delete qs.callback;
-				qs.jsoncallback = '?';
-			}
-		},
-		uri : {
-			base		: "http://api.flickr.com/services/rest",
+		// Map GET resquests
+		get : {
 			"me"		: sign("flickr.people.getInfo"),
 			"me/friends": sign("flickr.contacts.getList"),
 			"me/following": sign("flickr.contacts.getList"),
@@ -157,6 +157,7 @@ hello.init({
 			"me/albums"	: sign("flickr.photosets.getList"),
 			"me/photos" : sign("flickr.people.getPhotos")
 		},
+
 		wrap : {
 			me : function(o){
 				formatError(o);
@@ -179,7 +180,7 @@ hello.init({
 			"me/albums" : function(o){
 				formatError(o);
 				o = checkResponse(o, "photosets");
-				if(o.photosets){
+				if(o.photoset){
 					o.data = o.photoset;
 					delete o.photoset;
 					for(var i=0;i<o.data.length;i++){
@@ -192,19 +193,22 @@ hello.init({
 			},
 			"me/photos" : function(o){
 				formatError(o);
-				formatPhotos(o);
-
-				return o;
+				return formatPhotos(o);
 			},
 			"default" : function(o){
-
 				formatError(o);
-				formatPhotos(o);
-
-				return o;
+				return formatPhotos(o);
 			}
 		},
-		xhr : false
+
+		xhr : false,
+
+		jsonp: function(p,qs){
+			if(p.method.toLowerCase() == "get"){
+				delete qs.callback;
+				qs.jsoncallback = p.callbackID;
+			}
+		}
 	}
 });
 })();

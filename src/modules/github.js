@@ -27,11 +27,11 @@ hello.init({
 		name : 'GitHub',
 		oauth : {
 			version : 2,
+			auth : 'https://github.com/login/oauth/authorize',
 			grant : 'https://github.com/login/oauth/access_token'
 		},
-		uri : {
-			auth : 'https://github.com/login/oauth/authorize',
-			base : 'https://api.github.com/',
+		base : 'https://api.github.com/',
+		get : {
 			'me' : 'user',
 			'me/friends' : 'user/following',
 			'me/following' : 'user/following',

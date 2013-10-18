@@ -25,16 +25,13 @@ hello.init({
 	facebook : {
 		name : 'Facebook',
 
-		uri : {
-			// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
-			auth : 'http://www.facebook.com/dialog/oauth/',
-			base : 'https://graph.facebook.com/',
-			'me/friends' : 'me/friends',
-			'me/following' : 'me/friends',
-			'me/followers' : 'me/friends',
-			'me/share' : 'me/feed',
-			'me/files' : 'me/albums'
+		// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
+		oauth : {
+			version : 2,
+			auth : 'http://www.facebook.com/dialog/oauth/'
 		},
+
+		// Authorization scopes
 		scope : {
 			basic			: '',
 			email			: 'email',
@@ -51,6 +48,36 @@ hello.init({
 
 			offline_access : 'offline_access'
 		},
+
+		// API Base URL
+		base : 'https://graph.facebook.com/',
+
+		// Map GET requests
+		get : {
+			'me' : 'me',
+			'me/friends' : 'me/friends',
+			'me/following' : 'me/friends',
+			'me/followers' : 'me/friends',
+			'me/share' : 'me/feed',
+			'me/files' : 'me/albums',
+			'me/albums' : 'me/albums',
+			'me/album' : '@{id}/photos',
+			'me/photos' : 'me/photos',
+			'me/photo' : '@{id}'
+		},
+
+		// Map POST requests
+		post : {
+			'me/share' : 'me/feed',
+			'me/albums' : 'me/albums',
+			'me/album' : '@{id}/photos'
+		},
+
+		// Map DELETE requests
+		del : {
+			//'me/album' : '@{id}'
+		},
+
 		wrap : {
 			me : formatUser,
 			'me/friends' : formatFriends,
@@ -92,23 +119,25 @@ hello.init({
 		xhr : function(p,qs){
 			if(p.method==='get'||p.method==='post'){
 				qs.suppress_response_codes = true;
-				return true;
 			}
-			else{
-				return false;
+			else if(p.method === "delete"){
+				qs.method = 'delete';
+				p.method = "post";
 			}
+			return true;
 		},
 
 		// Special requirements for handling JSONP fallback
 		jsonp : function(p){
-			if( p.method.toLowerCase() !== 'get' && !hello.utils.hasBinary(p.data) ){
-				p.data.method = p.method.toLowerCase();
+			var m = p.method.toLowerCase();
+			if( m !== 'get' && !hello.utils.hasBinary(p.data) ){
+				p.data.method = m;
 				p.method = 'get';
 			}
 		},
 
 		// Special requirements for iframe form hack
-		post : function(p){
+		form : function(p){
 			return {
 				// fire the callback onload
 				callbackonload : true

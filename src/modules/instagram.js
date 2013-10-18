@@ -38,9 +38,20 @@ hello.init({
 			// Make the display anything but 'popup'
 			p.qs.display = '';
 		},
-		uri : {
-			auth : 'https://instagram.com/oauth/authorize/',
-			base : 'https://api.instagram.com/v1/',
+
+		oauth : {
+			version : 2,
+			auth : 'https://instagram.com/oauth/authorize/'
+		},
+
+		scope : {
+			basic : 'basic',
+			friends : 'relationships'
+		},
+
+		base : 'https://api.instagram.com/v1/',
+
+		get : {
 			'me' : 'users/self',
 			'me/feed' : 'users/self/feed',
 			'me/photos' : 'users/self/media/recent?min_id=0&count=100',
@@ -48,10 +59,7 @@ hello.init({
 			'me/following' : 'users/self/follows',
 			'me/followers' : 'users/self/followed-by'
 		},
-		scope : {
-			basic : 'basic',
-			friends : 'relationships'
-		},
+
 		wrap : {
 			me : function(o){
 

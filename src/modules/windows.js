@@ -25,26 +25,13 @@ hello.init({
 	windows : {
 		name : 'Windows live',
 
-		uri : {
-			// REF: http://msdn.microsoft.com/en-us/library/hh243641.aspx
-			auth : 'https://login.live.com/oauth20_authorize.srf',
-			base : 'https://apis.live.net/v5.0/',
-
-			// Friends
-			"me/friends" : "me/friends",
-			"me/following" : "me/friends",
-			"me/followers" : "me/friends",
-
-			"me/share" : function(p,callback){
-				// If this is a POST them return
-				callback( p.method==='get' ? "me/feed" : "me/share" );
-			},
-			"me/feed" : function(p,callback){
-				// If this is a POST them return
-				callback( p.method==='get' ? "me/feed" : "me/share" );
-			},
-			"me/files" : 'me/skydrive/files'
+		// REF: http://msdn.microsoft.com/en-us/library/hh243641.aspx
+		oauth : {
+			version : 2,
+			auth : 'https://login.live.com/oauth20_authorize.srf'
 		},
+
+		// Authorization scopes
 		scope : {
 			basic			: 'wl.signin,wl.basic',
 			email			: 'wl.emails',
@@ -61,6 +48,49 @@ hello.init({
 
 			offline_access	: 'wl.offline_access'
 		},
+
+		// API Base URL
+		base : 'https://apis.live.net/v5.0/',
+
+		// Map GET requests
+		get : {
+			// Friends
+			"me"	: "me",
+			"me/friends" : "me/friends",
+			"me/following" : "me/friends",
+			"me/followers" : "me/friends",
+
+			"me/albums"	: 'me/albums',
+
+			// Include the data[id] in the path
+			"me/album"	: '@{id}/files',
+			"me/photo"	: '@{id}',
+
+			// FILES
+			"me/files"	: '@{id|me/skydrive}/files',
+
+			"me/folders" : '@{id|me/skydrive}/files',
+			"me/folder" : '@{id|me/skydrive}/files'
+		},
+
+		// Map POST requests
+		post : {
+			"me/feed" : "me/share",
+			"me/share" : "me/share",
+			"me/albums" : "me/albums",
+			"me/album" : "@{id}/files",
+
+			"me/folders" : '@{id|me/skydrive/}',
+			"me/files" : "@{id|me/skydrive/}/files"
+		},
+
+		// Map DELETE requests
+		del : {
+			// Include the data[id] in the path
+			"me/album"	: '@{id}',
+			"me/files"	: '@{id}'
+		},
+
 		wrap : {
 			me : function(o){
 				formatUser(o);

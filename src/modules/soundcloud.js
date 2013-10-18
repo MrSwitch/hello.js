@@ -16,6 +16,11 @@ hello.init({
 	soundcloud : {
 		name : 'SoundCloud',
 
+		oauth : {
+			version : 2,
+			auth : 'https://soundcloud.com/connect'
+		},
+
 		// AutoRefresh
 		// Signin once token expires?
 		autorefresh : false,
@@ -28,9 +33,8 @@ hello.init({
 			qs['_status_code_map[302]'] = 200;
 		},
 		// Request path translated
-		uri : {
-			auth : 'https://soundcloud.com/connect',
-			base : 'https://api.soundcloud.com/',
+		base : 'https://api.soundcloud.com/',
+		get : {
 			'me' : 'me.json',
 			'me/friends' : 'me/followings.json',
 			'me/followers' : 'me/followers.json',
