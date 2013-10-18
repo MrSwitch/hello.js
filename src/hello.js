@@ -297,16 +297,21 @@ hello.utils.extend( hello, {
 		// Authentication permisions
 		//
 		var scope = p.options.scope;
-		if(scope){
-			// Format
-			if(typeof(scope)!=='string'){
-				scope = scope.join(',');
-			}
+		if(scope && typeof(scope)!=='string'){
+			scope = scope.join(',');
 		}
 		scope = (scope ? scope + ',' : '') + p.qs.scope;
 
+		// Append scopes from a previous session
+		// This helps keep app credentials constant,
+		// Avoiding having to keep tabs on what scopes are authorized
+		var session = this.utils.store(p.network);
+		if(session && "scope" in session){
+			scope += ","+session.scope.join(",");
+		}
+
 		// Save in the State
-		p.qs.state.scope = scope.split(/,\s/);
+		p.qs.state.scope = this.utils.unique( scope.split(/[,\s]+/) );
 
 		// Map replace each scope with the providers default scopes
 		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m){
