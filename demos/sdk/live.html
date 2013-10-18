@@ -6,6 +6,7 @@
 <title>Windows Live demo</title>
 <button onclick="WL.login({scope:'WL.signin'});">Signin</button>
 <button onclick="WL.api('me', function(){console.log(arguments)});">Get Me</button>
+<button onclick="WL.api('me/share', 'post', {message:'boom'}, function(){console.log(arguments)});">Share boom</button>
 
 <script>
 	WL.init({
