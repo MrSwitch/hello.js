@@ -8,7 +8,7 @@ function formatError(o,code){
 	if( (code===401||code===403) ){
 		o.error = {
 			code : "access_denied",
-			message : o.message
+			message : o.message || (o.data?o.data.message:"Could not get response")
 		};
 		delete o.message;
 	}

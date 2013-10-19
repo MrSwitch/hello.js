@@ -18,7 +18,8 @@ module.exports = function (karma) {
 
 // list of files to exclude
         exclude: [
-            'karma.conf.js'
+            'karma.conf.js',
+            '../src/temp/*.js'
         ],
 
 
