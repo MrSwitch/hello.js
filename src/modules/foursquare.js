@@ -13,7 +13,7 @@ function formatError(o){
 }
 
 function formatUser(o){
-	if(o.id){
+	if(o&&o.id){
 		o.thumbnail = o.photo.prefix + '100x100'+ o.photo.suffix;
 		o.name = o.firstName + ' ' + o.lastName;
 		o.first_name = o.firstName;

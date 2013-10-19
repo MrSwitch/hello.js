@@ -11,7 +11,7 @@ describe('Modules all', function(){
 
 		// Loop through all services
 		for(var name in hello.services){
-			var path = hello.services[name].uri.auth||hello.services[name].oauth.auth;
+			var path = hello.services[name].oauth.auth;
 			expect( path ).to.match( /^https?\:\/\// );
 		}
 	});

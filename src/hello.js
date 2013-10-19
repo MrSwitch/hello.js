@@ -1368,7 +1368,9 @@ hello.api = function(){
 	this.emit("notice", "API request "+p.method.toUpperCase()+" '"+p.path+"' (request)",p);
 	
 	var o = this.services[p.network];
-	
+
+	//
+	// INVALID PROVIDER?
 	// Have we got a service
 	if(!o){
 		self.emitAfter("complete error", {error:{
@@ -1379,31 +1381,48 @@ hello.api = function(){
 	}
 
 	//
-	// Callback wrapper?
+	// CALLBACK HANDLER
 	// Change the incoming values so that they are have generic values according to the path that is defined
+	// @ response object
+	// @ statusCode integer if available
 	var callback = function(r,code){
+
+		// FORMAT RESPONSE?
+		// Does this request have a corresponding formatter
 		if( o.wrap && ( (p.path in o.wrap) || ("default" in o.wrap) )){
 			var wrap = (p.path in o.wrap ? p.path : "default");
 			var time = (new Date()).getTime();
-			r = o.wrap[wrap](r,code);
+
+			// FORMAT RESPONSE
+			var b = o.wrap[wrap](r,code);
+
+			// Has the response been utterly overwritten?
+			// Typically this augments the existing object.. but for those rare occassions
+			if(b){
+				r = b;
+			}
+
+			// Emit a notice
 			self.emit("notice", "Processing took" + ((new Date()).getTime() - time));
 		}
+
 		self.emit("notice", "API: "+p.method.toUpperCase()+" '"+p.path+"' (response)", r);
 
-		// Emit the correct event
+		// Emit events which pertain to the formatted response
 		self.emit("complete " + (!r || "error" in r ? 'error' : 'success'), r, code);
 	};
+
+
+
+
 
 	// push out to all networks
 	// as long as the path isn't flagged as unavaiable, e.g. path == false
 	if( !(p.method in o) || !(p.path in o[p.method]) || o[p.method][p.path] !== false ){
 
-		var std_method = {"delete":"del"}[p.method]||p.method,
-			url = ( std_method in o ?
-						( p.path in o[std_method] ?
-							o[std_method][p.path] :
-							o[std_method]['default'] ) :
-						p.path );
+		// Is there a map for the given URL?
+		var actions = o[{"delete":"del"}[p.method]||p.method] || {},
+			url = actions[p.path] || actions['default'] || p.path;
 
 		// if url needs a base
 		// Wrap everything in
@@ -2146,6 +2165,7 @@ hello.utils.extend( hello.utils, {
 
 		// Data has been converted to JSON.
 		p.data = data;
+		return data;
 	},
 
 
