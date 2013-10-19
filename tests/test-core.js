@@ -52,11 +52,26 @@ describe('Hello Core', function(){
 			hello("Facelessbook").api("/").on('error', invalid_network(done));
 
 		});
-		it('should trigger an error when accessed through getAuthResponse', function(done){
+	});
 
+	//
+	// GetAuthResposne
+	//
+	describe("GetAuthResposne", function(){
+
+		it('should trigger an error when accessing an invalid network', function(done){
 			// Make request
 			hello("Facelessbook").on('error', invalid_network(done)).getAuthResponse();
-
+		});
+		it('should return null when accessing an invalid network implicitly', function(){
+			// Make request
+			var r = hello("Facelessbook").getAuthResponse();
+			expect(r).to.be(null);
+		});
+		it('should return null when accessing an invalid network explicitly', function(){
+			// Make request
+			var r = hello.getAuthResponse("Facelessbook");
+			expect(r).to.be(null);
 		});
 	});
 

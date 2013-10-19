@@ -325,7 +325,7 @@ hello.utils.extend( hello, {
 		//
 		// Is the user already signed in
 		//
-		var session = this.getAuthResponse.call(hello, p.network);
+		var session = this.getAuthResponse(p.network);
 		if( session && "access_token" in session && session.access_token && "expires" in session && session.expires > ((new Date()).getTime()/1e3) ){
 			// What is different about the scopes in the session vs the scopes in the new login?
 			var diff = this.utils.diff( session.scope || [], p.qs.state.scope || [] );
@@ -502,15 +502,6 @@ hello.utils.extend( hello, {
 	//
 	getAuthResponse : function(service){
 
-		if(!(this instanceof arguments.callee)){
-			// Invoke as an instance
-			arguments.callee.prototype = this;
-			return new arguments.callee(service);
-		}
-
-		// Create an instance of Events
-		this.utils.Event.call(this);
-
 		// If the service doesn't exist
 		service = service || this.settings.default_service;
 
@@ -522,8 +513,7 @@ hello.utils.extend( hello, {
 			return null;
 		}
 
-
-		return this.utils.store(service);
+		return this.utils.store(service) || null;
 	},
 
 
@@ -1562,7 +1552,7 @@ hello.api = function(){
 	function _sign(network, path, method, data, modifyQueryString, callback){
 
 		// OAUTH SIGNING PROXY
-		var session = new self.getAuthResponse(network),
+		var session = self.getAuthResponse(network),
 			service = self.services[network],
 			token = (session ? session.access_token : null);
 
