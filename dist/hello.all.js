@@ -297,16 +297,21 @@ hello.utils.extend( hello, {
 		// Authentication permisions
 		//
 		var scope = p.options.scope;
-		if(scope){
-			// Format
-			if(typeof(scope)!=='string'){
-				scope = scope.join(',');
-			}
+		if(scope && typeof(scope)!=='string'){
+			scope = scope.join(',');
 		}
 		scope = (scope ? scope + ',' : '') + p.qs.scope;
 
+		// Append scopes from a previous session
+		// This helps keep app credentials constant,
+		// Avoiding having to keep tabs on what scopes are authorized
+		var session = this.utils.store(p.network);
+		if(session && "scope" in session){
+			scope += ","+session.scope.join(",");
+		}
+
 		// Save in the State
-		p.qs.state.scope = scope.split(/,\s/);
+		p.qs.state.scope = this.utils.unique( scope.split(/[,\s]+/) );
 
 		// Map replace each scope with the providers default scopes
 		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m){
@@ -320,7 +325,7 @@ hello.utils.extend( hello, {
 		//
 		// Is the user already signed in
 		//
-		var session = this.getAuthResponse.call(hello, p.network);
+		var session = this.getAuthResponse(p.network);
 		if( session && "access_token" in session && session.access_token && "expires" in session && session.expires > ((new Date()).getTime()/1e3) ){
 			// What is different about the scopes in the session vs the scopes in the new login?
 			var diff = this.utils.diff( session.scope || [], p.qs.state.scope || [] );
@@ -367,12 +372,12 @@ hello.utils.extend( hello, {
 		//
 		// URL
 		//
-		if( provider.oauth && parseInt(provider.oauth.version,10) === 1 ){
+		if( parseInt(provider.oauth.version,10) === 1 ){
 			// Turn the request to the OAuth Proxy for 3-legged auth
 			url = this.utils.qs( p.options.oauth_proxy, p.qs );
 		}
 		else{
-			url = this.utils.qs( provider.uri.auth, p.qs );
+			url = this.utils.qs( provider.oauth.auth, p.qs );
 		}
 
 		this.emit("notice", "Authorization URL " + url );
@@ -497,15 +502,6 @@ hello.utils.extend( hello, {
 	//
 	getAuthResponse : function(service){
 
-		if(!(this instanceof arguments.callee)){
-			// Invoke as an instance
-			arguments.callee.prototype = this;
-			return new arguments.callee(service);
-		}
-
-		// Create an instance of Events
-		this.utils.Event.call(this);
-
 		// If the service doesn't exist
 		service = service || this.settings.default_service;
 
@@ -517,8 +513,7 @@ hello.utils.extend( hello, {
 			return null;
 		}
 
-
-		return this.utils.store(service);
+		return this.utils.store(service) || null;
 	},
 
 
@@ -995,8 +990,11 @@ hello.utils.extend( hello.utils, {
 	// Global Events
 	// Attach the callback to the window object
 	// Return its unique reference
-	globalEvent : function(callback){
-		var guid = "_hellojs_"+parseInt(Math.random()*1e12,10).toString(36);
+	globalEvent : function(callback, guid){
+		// If the guid has not been supplied then create a new one.
+		guid = guid || "_hellojs_"+parseInt(Math.random()*1e12,10).toString(36);
+
+		// Define the callback function
 		window[guid] = function(){
 			// Trigger the callback
 			var bool = callback.apply(this, arguments);
@@ -1039,12 +1037,21 @@ hello.unsubscribe = hello.off;
 (function(hello){
 
 	// Monitor for a change in state and fire
-	var old_session = {}, pending = {};
+	var old_session = {},
+
+		// Hash of expired tokens
+		expired = {};
 
 
 	(function self(){
 
 		var CURRENT_TIME = ((new Date()).getTime()/1e3);
+		var emit = function(event_name){
+			hello.emit("auth."+event_name, {
+				network: name,
+				authResponse: session
+			});
+		};
 
 		// Loop through the services
 		for(var name in hello.services){if(hello.services.hasOwnProperty(name)){
@@ -1058,7 +1065,6 @@ hello.unsubscribe = hello.off;
 			var session = hello.utils.store(name) || {};
 			var provider = hello.services[name];
 			var oldsess = old_session[name] || {};
-			var evt = '';
 
 			//
 			// Listen for globalEvents that did not get triggered from the child
@@ -1083,22 +1089,30 @@ hello.unsubscribe = hello.off;
 			}
 			
 			//
-			// Refresh login
+			// Refresh token
 			//
 			if( session && ("expires" in session) && session.expires < CURRENT_TIME ){
 
 				// If auto refresh is provided then determine if we can refresh based upon its value.
 				var refresh = !("autorefresh" in provider) || provider.autorefresh;
 
-				// Does this provider support refresh
-				if( refresh && (!( name in pending ) || pending[name] < CURRENT_TIME) ) {
+				// Has the refresh been run recently?
+				if( refresh && (!( name in expired ) || expired[name] < CURRENT_TIME ) ){
 					// try to resignin
 					hello.emit("notice", name + " has expired trying to resignin" );
 					hello.login(name,{display:'none'});
 
-					// update pending, every 10 minutes
-					pending[name] = CURRENT_TIME + 600;
+					// update expired, every 10 minutes
+					expired[name] = CURRENT_TIME + 600;
 				}
+
+				// Does this provider not support refresh
+				else if( !refresh && !( name in expired ) ) {
+					// Label the event
+					emit('expired');
+					expired[name] = true;
+				}
+
 				// If session has expired then we dont want to store its value until it can be established that its been updated
 				continue;
 			}
@@ -1109,27 +1123,24 @@ hello.unsubscribe = hello.off;
 			}
 			// Access_token has been removed
 			else if( !session.access_token && oldsess.access_token ){
-				hello.emit('auth.logout', {
-					network: name,
-					authResponse : session
-				});
+				emit('logout');
 			}
 			// Access_token has been created
 			else if( session.access_token && !oldsess.access_token ){
-				hello.emit('auth.login', {
-					network: name,
-					authResponse: session
-				} );
+				emit('login');
 			}
 			// Access_token has been updated
 			else if( session.expires !== oldsess.expires ){
-				hello.emit('auth.update', {
-					network: name,
-					authResponse: session
-				} );
+				emit('update');
 			}
-			
+
+			// Updated stored session
 			old_session[name] = session;
+
+			// Remove the expired flags
+			if(name in expired){
+				delete expired[name];
+			}
 		}}
 
 		// Check error events
@@ -1219,11 +1230,11 @@ hello.unsubscribe = hello.off;
 		if( ("access_token" in p&&p.access_token) && p.network ){
 
 			if(!p.expires_in || parseInt(p.expires_in,10) === 0){
-				// If p.expires_in is unset, 1 hour, otherwise 0 = infinite, aka a month
-				p.expires_in = !p.expires_id ? 3600 : (3600 * 24 * 30);
+				// If p.expires_in is unset, set to 0
+				p.expires_in = 0;
 			}
 			p.expires_in = parseInt(p.expires_in,10);
-			p.expires = ((new Date()).getTime()/1e3) + parseInt(p.expires_in,10);
+			p.expires = ((new Date()).getTime()/1e3) + (p.expires_in || ( 60 * 60 * 24 * 365 ));
 
 			// Make this the default users service
 			hello.service( p.network );
@@ -1347,7 +1358,9 @@ hello.api = function(){
 	this.emit("notice", "API request "+p.method.toUpperCase()+" '"+p.path+"' (request)",p);
 	
 	var o = this.services[p.network];
-	
+
+	//
+	// INVALID PROVIDER?
 	// Have we got a service
 	if(!o){
 		self.emitAfter("complete error", {error:{
@@ -1358,35 +1371,72 @@ hello.api = function(){
 	}
 
 	//
-	// Callback wrapper?
+	// CALLBACK HANDLER
 	// Change the incoming values so that they are have generic values according to the path that is defined
+	// @ response object
+	// @ statusCode integer if available
 	var callback = function(r,code){
+
+		// FORMAT RESPONSE?
+		// Does this request have a corresponding formatter
 		if( o.wrap && ( (p.path in o.wrap) || ("default" in o.wrap) )){
 			var wrap = (p.path in o.wrap ? p.path : "default");
 			var time = (new Date()).getTime();
-			r = o.wrap[wrap](r,code);
+
+			// FORMAT RESPONSE
+			var b = o.wrap[wrap](r,code);
+
+			// Has the response been utterly overwritten?
+			// Typically this augments the existing object.. but for those rare occassions
+			if(b){
+				r = b;
+			}
+
+			// Emit a notice
 			self.emit("notice", "Processing took" + ((new Date()).getTime() - time));
 		}
+
 		self.emit("notice", "API: "+p.method.toUpperCase()+" '"+p.path+"' (response)", r);
 
-		// Emit the correct event
+		// Emit events which pertain to the formatted response
 		self.emit("complete " + (!r || "error" in r ? 'error' : 'success'), r, code);
 	};
 
+
+
+
+
 	// push out to all networks
 	// as long as the path isn't flagged as unavaiable, e.g. path == false
-	if( !(p.path in o.uri) || o.uri[p.path] !== false ){
+	if( !(p.method in o) || !(p.path in o[p.method]) || o[p.method][p.path] !== false ){
 
-		var url = (p.path in o.uri ?
-					o.uri[p.path] :
-					( o.uri['default'] ? o.uri['default'] : p.path));
+		// Is there a map for the given URL?
+		var actions = o[{"delete":"del"}[p.method]||p.method] || {},
+			url = actions[p.path] || actions['default'] || p.path;
 
 		// if url needs a base
 		// Wrap everything in
 		var getPath = function(url){
 
+			// Format the string if it needs it
+			url = url.replace(/\@\{([a-z\_\-]+)(\|.+?)?\}/, function(m,key,defaults){
+				var val = defaults ? defaults.replace(/^\|/,'') : '';
+				if(key in p.data){
+					val = p.data[key];
+					delete p.data[key];
+				}
+				else{
+					self.emitAfter("error", {error:{
+						code : "missing_attribute_"+key,
+						message : "The attribute " + key + " is missing from the request"
+					}});
+				}
+				return val;
+			});
+
+			// Add base
 			if( !url.match(/^https?:\/\//) ){
-				url = o.uri.base + url;
+				url = o.base + url;
 			}
 
 
@@ -1417,9 +1467,9 @@ hello.api = function(){
 			//url += ( url.indexOf('?') > -1 ? "&" : "?" );
 
 			// Format the data
-			if( !self.utils.isEmpty(p.data) && !self.utils.dataToJSON(p) ){
+			if( !self.utils.isEmpty(p.data) && !("FileList" in window) && self.utils.hasBinary(p.data) ){
 				// If we can't format the post then, we are going to run the iFrame hack
-				self.utils.post( format_url, p.data, ("post" in o ? o.post(p) : null), callback );
+				self.utils.post( format_url, p.data, ("form" in o ? o.form(p) : null), callback );
 
 				return self;
 			}
@@ -1428,7 +1478,7 @@ hello.api = function(){
 			if(p.method === 'delete'){
 				var _callback = callback;
 				callback = function(r, code){
-					_callback((!r||self.utils.isEmpty(r))? {response:'deleted'} : r, code);
+					_callback((!r||self.utils.isEmpty(r))? {success:true} : r, code);
 				};
 			}
 
@@ -1444,6 +1494,9 @@ hello.api = function(){
 			}
 			else{
 
+				// Assign a new callbackID
+				p.callbackID = self.utils.globalEvent();
+
 				// Otherwise we're on to the old school, IFRAME hacks and JSONP
 				// Preprocess the parameters
 				// Change the p parameters
@@ -1458,27 +1511,29 @@ hello.api = function(){
 					// We're pretty stuffed if the endpoint doesn't like these
 					//			"suppress_response_codes":true
 					qs.redirect_uri = self.settings.redirect_uri;
-					qs.state = JSON.stringify({callback:'?'});
+					qs.state = JSON.stringify({callback:p.callbackID});
 
-					self.utils.post( format_url, p.data, ("post" in o ? o.post(p) : null), callback, self.settings.timeout );
+					self.utils.post( format_url, p.data, ("form" in o ? o.form(p) : null), callback, p.callbackID, self.settings.timeout );
 				}
 
 				// Make the call
 				else{
 
 					qs = self.utils.merge(qs,p.data);
-					qs.callback = '?';
+					qs.callback = p.callbackID;
 
-					self.utils.jsonp( format_url, callback, self.settings.timeout );
+					self.utils.jsonp( format_url, callback, p.callbackID, self.settings.timeout );
 				}
 			}
 		};
 
 		// Make request
 		if(typeof(url)==='function'){
+			// Does this have its own callback?
 			url(p, getPath);
 		}
 		else{
+			// Else the URL is a string
 			getPath(url);
 		}
 	}
@@ -1497,7 +1552,7 @@ hello.api = function(){
 	function _sign(network, path, method, data, modifyQueryString, callback){
 
 		// OAUTH SIGNING PROXY
-		var session = new self.getAuthResponse(network),
+		var session = self.getAuthResponse(network),
 			service = self.services[network],
 			token = (session ? session.access_token : null);
 
@@ -1678,7 +1733,7 @@ hello.utils.extend( hello.utils, {
 	// @param string/function pathFunc either a string of the URL or a callback function pathFunc(querystringhash, continueFunc);
 	// @param function callback a function to call on completion;
 	//
-	jsonp : function(pathFunc,callback,timeout){
+	jsonp : function(pathFunc,callback,callbackID,timeout){
 
 		var utils = this;
 
@@ -1701,7 +1756,7 @@ hello.utils.extend( hello.utils, {
 		var cb_name = this.globalEvent(function(json){
 			result = json;
 			return true; // mark callback as done
-		});
+		},callbackID);
 
 		// The URL is a function for some cases and as such
 		// Determine its value with a callback containing the new parameters of this function.
@@ -1775,7 +1830,7 @@ hello.utils.extend( hello.utils, {
 	// @param object data, key value data to send
 	// @param function callback, function to execute in response
 	//
-	post : function(pathFunc, data, options, callback, timeout){
+	post : function(pathFunc, data, options, callback, callbackID, timeout){
 
 		var utils = this;
 
@@ -1795,27 +1850,6 @@ hello.utils.extend( hello.utils, {
 			bool = 0,
 			cb = function(r){
 				if( !( bool++ ) ){
-					try{
-						// remove the iframe from the page.
-						//win.parentNode.removeChild(win);
-						// remove the form
-						if(newform){
-							newform.parentNode.removeChild(newform);
-						}
-					}
-					catch(e){
-						try{
-							console.error("HelloJS: could not remove iframe");
-						}
-						catch(ee){}
-					}
-
-					// reenable the disabled form
-					for(var i=0;i<reenableAfterSubmit.length;i++){
-						if(reenableAfterSubmit[i]){
-							reenableAfterSubmit[i].setAttribute('disabled', false);
-						}
-					}
 
 					// fire the callback
 					callback(r);
@@ -1827,7 +1861,7 @@ hello.utils.extend( hello.utils, {
 
 		// What is the name of the callback to contain
 		// We'll also use this to name the iFrame
-		var callbackID = this.globalEvent(cb);
+		this.globalEvent(cb, callbackID);
 
 		// Build the iframe window
 		var win;
@@ -1915,6 +1949,8 @@ hello.utils.extend( hello.utils, {
 				newform = form;
 			}
 
+			var input,i;
+
 			// Add elements to the form if they dont exist
 			for(x in data) if(data.hasOwnProperty(x)){
 
@@ -1925,13 +1961,20 @@ hello.utils.extend( hello.utils, {
 				if( !el || data[x].form !== form ){
 
 					// Does an element have the same name?
-					if(form.elements[x]){
+					var inputs = form.elements[x];
+					if(input){
 						// Remove it.
-						form.elements[x].parentNode.removeChild(form.elements[x]);
+						if(!(inputs instanceof NodeList)){
+							inputs = [inputs];
+						}
+						for(i=0;i<inputs.length;i++){
+							inputs[i].parentNode.removeChild(inputs[i]);
+						}
+
 					}
 
 					// Create an input element
-					var input = document.createElement('input');
+					input = document.createElement('input');
 					input.setAttribute('type', 'hidden');
 					input.setAttribute('name', x);
 
@@ -1955,13 +1998,17 @@ hello.utils.extend( hello.utils, {
 			}
 
 			// Disable elements from within the form if they weren't specified
-			for(i=0;i<form.children.length;i++){
+			for(i=0;i<form.elements.length;i++){
+
+				input = form.elements[i];
+
 				// Does the same name and value exist in the parent
-				if( !( form.children[i].name in data ) && form.children[i].getAttribute('disabled') !== true ) {
+				if( !( input.name in data ) && input.getAttribute('disabled') !== true ) {
 					// disable
-					form.children[i].setAttribute('disabled',true);
+					input.setAttribute('disabled',true);
+
 					// add re-enable to callback
-					reenableAfterSubmit.push(form.children[i]);
+					reenableAfterSubmit.push(input);
 				}
 			}
 		}
@@ -1976,14 +2023,38 @@ hello.utils.extend( hello.utils, {
 		// Call the path
 		pathFunc( {}, function(url){
 
-			// Replace the second '?' with the callback_id
-
-
+			// Update the form URL
 			form.setAttribute('action', url);
 
 			// Submit the form
+			// Some reason this needs to be offset from the current window execution
 			setTimeout(function(){
 				form.submit();
+
+				setTimeout(function(){
+					try{
+						// remove the iframe from the page.
+						//win.parentNode.removeChild(win);
+						// remove the form
+						if(newform){
+							newform.parentNode.removeChild(newform);
+						}
+					}
+					catch(e){
+						try{
+							console.error("HelloJS: could not remove iframe");
+						}
+						catch(ee){}
+					}
+
+					// reenable the disabled form
+					for(var i=0;i<reenableAfterSubmit.length;i++){
+						if(reenableAfterSubmit[i]){
+							reenableAfterSubmit[i].setAttribute('disabled', false);
+							reenableAfterSubmit[i].disabled = false;
+						}
+					}
+				},0);
 			},100);
 		});
 
@@ -2015,7 +2086,7 @@ hello.utils.extend( hello.utils, {
 
 	//
 	// dataToJSON
-	// This takes a FormElement and converts it to a JSON object
+	// This takes a FormElement|NodeList|InputElement|MixedObjects and convers the data object to JSON.
 	//
 	dataToJSON : function (p){
 
@@ -2025,59 +2096,19 @@ hello.utils.extend( hello.utils, {
 
 		// Is data a form object
 		if( this.domInstance('form', data) ){
-			// Get the first FormElement Item if its an type=file
-			var kids = data.elements;
 
-			var json = {};
+			data = this.nodeListToJSON(data.elements);
 
-			// Create a data string
-			for(var i=0;i<kids.length;i++){
-
-				var input = kids[i];
-
-				// If the name of the input is empty or diabled, dont add it.
-				if(input.disabled||!input.name){
-					continue;
-				}
-
-				// Is this a file, does the browser not support 'files' and 'FormData'?
-				if( input.type === 'file' ){
-					// the browser does not XHR2
-					if("FormData" in window){
-						// include the whole element
-						json[input.name] = input;
-						continue;
-					}
-					else if( !("files" in input) ){
-
-						// Cancel this approach the browser does not support the FileAPI
-						return false;
-					}
-				}
-				else{
-					json[ input.name ] = input.value || input.innerHTML;
-				}
-			}
-
-			// Convert to a postable querystring
-			data = json;
 		}
+		else if ( data instanceof NodeList ){
 
-		// Is this a form input element?
-		if( this.domInstance('input', data) ){
-			// Get the Input Element
-			// Do we have a Blob data?
-			if("files" in data){
+			data = this.nodeListToJSON(data);
 
-				var o = {};
-				o[ data.name ] = data.files;
-				// Turn it into a FileList
-				data = o;
-			}
-			else{
-				// This is old school, we have to perform the FORM + IFRAME + HASHTAG hack
-				return false;
-			}
+		}
+		else if( this.domInstance('input', data) ){
+
+			data = this.nodeListToJSON( [ data ] );
+
 		}
 
 		// Is data a blob, File, FileList?
@@ -2106,15 +2137,8 @@ hello.utils.extend( hello.utils, {
 					}
 				}
 				else if( this.domInstance('input', data[x]) && data[x].type === 'file' ){
-
-					if( ( "files" in data[x] ) ){
-						// this supports HTML5
-						// do nothing
-					}
-					else{
-						// this does not support HTML5 forms FileList
-						return false;
-					}
+					// ignore
+					continue;
 				}
 				else if( this.domInstance('input', data[x]) ||
 					this.domInstance('select', data[x]) ||
@@ -2122,6 +2146,7 @@ hello.utils.extend( hello.utils, {
 					){
 					data[x] = data[x].value;
 				}
+				// Else is this another kind of element?
 				else if( this.domInstance(null, data[x]) ){
 					data[x] = data[x].innerHTML || data[x].innerText;
 				}
@@ -2130,8 +2155,37 @@ hello.utils.extend( hello.utils, {
 
 		// Data has been converted to JSON.
 		p.data = data;
+		return data;
+	},
 
-		return true;
+
+	//
+	// NodeListToJSON
+	// Given a list of elements extrapolate their values and return as a json object
+	nodeListToJSON : function(nodelist){
+
+		var json = {};
+
+		// Create a data string
+		for(var i=0;i<nodelist.length;i++){
+
+			var input = nodelist[i];
+
+			// If the name of the input is empty or diabled, dont add it.
+			if(input.disabled||!input.name){
+				continue;
+			}
+
+			// Is this a file, does the browser not support 'files' and 'FormData'?
+			if( input.type === 'file' ){
+				json[ input.name ] = input;
+			}
+			else{
+				json[ input.name ] = input.value || input.innerHTML;
+			}
+		}
+
+		return json;
 	}
 });
 
@@ -2214,35 +2268,44 @@ hello.init({
 		// Signin once token expires?
 		autorefresh : false,
 
-		uri : {
-			//auth	: "https://www.dropbox.com/1/oauth/authorize",
-			base	: "https://api.dropbox.com/1/",
-			me		: 'account/info',
-			"me/files"	: function(p,callback){
-				if(p.method === 'get'){
-					callback('metadata/dropbox');
-					return;
+		// API Base URL
+		base	: "https://api.dropbox.com/1/",
+
+		// Map GET requests
+		get : {
+			"me"		: 'account/info',
+			"me/files"	: "metadata/dropbox",
+			"me/folder"	: "metadata/dropbox/@{id}",
+			"me/folders" : 'metadata/dropbox/',
+			"default" : function(p,callback){
+				if(p.path.match("https://api-content.dropbox.com/1/files/")){
+					// this is a file, return binary data
+					p.method = 'blob';
 				}
-				var path = p.data.dir;
-				delete p.data.dir;
-				callback('https://api-content.dropbox.com/1/files/dropbox/'+path);
+				callback(p.path);
+			}
+		},
+		post : {
+			"me/files" : function(p,callback){
+
+				var path = p.data.id,
+					file_name = p.data.name;
+
+				p.data = {
+					file : p.data.file
+				};
+
+				callback('https://api-content.dropbox.com/1/files_put/dropbox/'+path+"/"+file_name);
 			},
 			"me/folders" : function(p, callback){
+
 				var name = p.data.name;
 				p.data = null;
+
 				callback('fileops/create_folder?'+hello.utils.param({
 					path : name,
 					root : 'dropbox'
 				}));
-			},
-			"default" : function(p,callback){
-				if(p.path.match("https://api-content.dropbox.com/1/files/")){
-					// this is a file, return binary data
-					if(p.method === 'get'){
-						p.method = 'blob';
-					}
-				}
-				callback(p.path);
 			}
 		},
 		wrap : {
@@ -2320,16 +2383,13 @@ hello.init({
 	facebook : {
 		name : 'Facebook',
 
-		uri : {
-			// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
-			auth : 'http://www.facebook.com/dialog/oauth/',
-			base : 'https://graph.facebook.com/',
-			'me/friends' : 'me/friends',
-			'me/following' : 'me/friends',
-			'me/followers' : 'me/friends',
-			'me/share' : 'me/feed',
-			'me/files' : 'me/albums'
+		// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
+		oauth : {
+			version : 2,
+			auth : 'http://www.facebook.com/dialog/oauth/'
 		},
+
+		// Authorization scopes
 		scope : {
 			basic			: '',
 			email			: 'email',
@@ -2346,6 +2406,36 @@ hello.init({
 
 			offline_access : 'offline_access'
 		},
+
+		// API Base URL
+		base : 'https://graph.facebook.com/',
+
+		// Map GET requests
+		get : {
+			'me' : 'me',
+			'me/friends' : 'me/friends',
+			'me/following' : 'me/friends',
+			'me/followers' : 'me/friends',
+			'me/share' : 'me/feed',
+			'me/files' : 'me/albums',
+			'me/albums' : 'me/albums',
+			'me/album' : '@{id}/photos',
+			'me/photos' : 'me/photos',
+			'me/photo' : '@{id}'
+		},
+
+		// Map POST requests
+		post : {
+			'me/share' : 'me/feed',
+			'me/albums' : 'me/albums',
+			'me/album' : '@{id}/photos'
+		},
+
+		// Map DELETE requests
+		del : {
+			//'me/album' : '@{id}'
+		},
+
 		wrap : {
 			me : formatUser,
 			'me/friends' : formatFriends,
@@ -2387,23 +2477,25 @@ hello.init({
 		xhr : function(p,qs){
 			if(p.method==='get'||p.method==='post'){
 				qs.suppress_response_codes = true;
-				return true;
 			}
-			else{
-				return false;
+			else if(p.method === "delete"){
+				qs.method = 'delete';
+				p.method = "post";
 			}
+			return true;
 		},
 
 		// Special requirements for handling JSONP fallback
 		jsonp : function(p){
-			if( p.method.toLowerCase() !== 'get' && !hello.utils.hasBinary(p.data) ){
-				p.data.method = p.method.toLowerCase();
+			var m = p.method.toLowerCase();
+			if( m !== 'get' && !hello.utils.hasBinary(p.data) ){
+				p.data.method = m;
 				p.method = 'get';
 			}
 		},
 
 		// Special requirements for iframe form hack
-		post : function(p){
+		form : function(p){
 			return {
 				// fire the callback onload
 				callbackonload : true
@@ -2432,22 +2524,33 @@ function getApiUrl(method, extra_params, skip_network){
 	return url;
 }
 
+// this is not exactly neat but avoid to call
+// the method 'flickr.test.login' for each api call
+var user_id;
+
 function withUser(cb){
-	if(!flickr_user){
-		hello.api(getApiUrl("flickr.test.login"), function(userJson){
-			flickr_user = {"user_id" : checkResponse(userJson, "user").id};
-			cb();
-		});
+
+	var auth = hello.getAuthResponse("flickr");
+
+	if(auth&&auth.user_nsid){
+		cb(auth.user_nsid);
+	}
+	else if(user_id){
+		cb(user_id);
 	}
 	else{
-		cb();
+		hello.api(getApiUrl("flickr.test.login"), function(userJson){
+			// If the
+			user_id = checkResponse(userJson, "user").id;
+			cb(user_id);
+		});
 	}
 }
 
 function sign(url){
 	return function(p, callback){
-		withUser(function(){
-			callback(getApiUrl(url, flickr_user, true));
+		withUser(function(user_id){
+			callback(getApiUrl(url, {"user_id" : user_id}, true));
 		});
 	};
 }
@@ -2483,7 +2586,7 @@ function formatError(o){
 
 function formatPhotos(o){
 	if (o.photoset || o.photos){
-		var set = (o.photoset) ? 'photoset' : 'photos';
+		var set = ("photoset" in o) ? 'photoset' : 'photos';
 		o = checkResponse(o, set);
 		o.data = o.photo;
 		delete o.photo;
@@ -2495,6 +2598,7 @@ function formatPhotos(o){
 			photo.thumbnail = getPhoto(photo.id, photo.farm, photo.server, photo.secret, 'm');
 		}
 	}
+	return o;
 }
 function checkResponse(o, key){
 
@@ -2526,12 +2630,12 @@ function formatFriends(o){
 }
 
 
-// this is not exactly neat but avoid to call
-// the method 'flickr.test.login' for each api call
-var flickr_user;
 
 hello.init({
 	'flickr' : {
+
+		name : "Flickr",
+
 		// Ensure that you define an oauth_proxy
 		oauth : {
 			version : "1.0a",
@@ -2539,25 +2643,21 @@ hello.init({
 			request : 'http://www.flickr.com/services/oauth/request_token',
 			token	: 'http://www.flickr.com/services/oauth/access_token'
 		},
+
 		logout : function(){
 			// Function is executed when the user logs out.
-			flickr_user = null;
+			user_id = null;
 		},
 
 		// AutoRefresh
 		// Signin once token expires?
 		autorefresh : false,
 
+		// API base URL
+		base		: "http://api.flickr.com/services/rest",
 
-		name : "Flickr",
-		jsonp: function(p,qs){
-			if(p.method.toLowerCase() == "get"){
-				delete qs.callback;
-				qs.jsoncallback = '?';
-			}
-		},
-		uri : {
-			base		: "http://api.flickr.com/services/rest",
+		// Map GET resquests
+		get : {
 			"me"		: sign("flickr.people.getInfo"),
 			"me/friends": sign("flickr.contacts.getList"),
 			"me/following": sign("flickr.contacts.getList"),
@@ -2565,6 +2665,7 @@ hello.init({
 			"me/albums"	: sign("flickr.photosets.getList"),
 			"me/photos" : sign("flickr.people.getPhotos")
 		},
+
 		wrap : {
 			me : function(o){
 				formatError(o);
@@ -2587,7 +2688,7 @@ hello.init({
 			"me/albums" : function(o){
 				formatError(o);
 				o = checkResponse(o, "photosets");
-				if(o.photosets){
+				if(o.photoset){
 					o.data = o.photoset;
 					delete o.photoset;
 					for(var i=0;i<o.data.length;i++){
@@ -2600,19 +2701,22 @@ hello.init({
 			},
 			"me/photos" : function(o){
 				formatError(o);
-				formatPhotos(o);
-
-				return o;
+				return formatPhotos(o);
 			},
 			"default" : function(o){
-
 				formatError(o);
-				formatPhotos(o);
-
-				return o;
+				return formatPhotos(o);
 			}
 		},
-		xhr : false
+
+		xhr : false,
+
+		jsonp: function(p,qs){
+			if(p.method.toLowerCase() == "get"){
+				delete qs.callback;
+				qs.jsoncallback = p.callbackID;
+			}
+		}
 	}
 });
 })();
@@ -2631,7 +2735,7 @@ function formatError(o){
 }
 
 function formatUser(o){
-	if(o.id){
+	if(o&&o.id){
 		o.thumbnail = o.photo.prefix + '100x100'+ o.photo.suffix;
 		o.name = o.firstName + ' ' + o.lastName;
 		o.first_name = o.firstName;
@@ -2647,7 +2751,14 @@ function formatUser(o){
 
 hello.init({
 	foursquare : {
+
 		name : 'FourSquare',
+
+		oauth : {
+			version : 2,
+			auth : 'https://foursquare.com/oauth2/authenticate'
+		},
+
 		// Alter the querystring
 		querystring : function(qs){
 			var token = qs.access_token;
@@ -2655,9 +2766,10 @@ hello.init({
 			qs.oauth_token = token;
 			qs.v = 20121125;
 		},
-		uri : {
-			auth : 'https://foursquare.com/oauth2/authenticate',
-			base : 'https://api.foursquare.com/v2/',
+
+		base : 'https://api.foursquare.com/v2/',
+
+		get : {
 			'me' : 'users/self',
 			'me/friends' : 'users/self/friends',
 			'me/followers' : 'users/self/friends',
@@ -2700,7 +2812,7 @@ function formatError(o,code){
 	if( (code===401||code===403) ){
 		o.error = {
 			code : "access_denied",
-			message : o.message
+			message : o.message || (o.data?o.data.message:"Could not get response")
 		};
 		delete o.message;
 	}
@@ -2719,11 +2831,11 @@ hello.init({
 		name : 'GitHub',
 		oauth : {
 			version : 2,
+			auth : 'https://github.com/login/oauth/authorize',
 			grant : 'https://github.com/login/oauth/access_token'
 		},
-		uri : {
-			auth : 'https://github.com/login/oauth/authorize',
-			base : 'https://api.github.com/',
+		base : 'https://api.github.com/',
+		get : {
 			'me' : 'user',
 			'me/friends' : 'user/following',
 			'me/following' : 'user/following',
@@ -2912,21 +3024,13 @@ hello.init({
 				}
 			},
 
-			uri : {
-				// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
-				auth : "https://accounts.google.com/o/oauth2/auth",
-	//				me	: "plus/v1/people/me?pp=1",
-				me : 'oauth2/v1/userinfo?alt=json',
-				base : "https://www.googleapis.com/",
-				'me/friends' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
-				'me/following' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
-				'me/followers' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
-				'me/share' : 'plus/v1/people/me/activities/public',
-				'me/feed' : 'plus/v1/people/me/activities/public',
-				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json',
-				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=100',
-				"me/files" : 'https://www.googleapis.com/drive/v2/files?q=%22root%22+in+parents'
+			// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
+			oauth : {
+				version : 2,
+				auth : "https://accounts.google.com/o/oauth2/auth"
 			},
+
+			// Authorization scopes
 			scope : {
 				//,
 				basic : "https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
@@ -2945,6 +3049,37 @@ hello.init({
 				offline_access : ''
 			},
 			scope_delim : ' ',
+
+			// API base URI
+			base : "https://www.googleapis.com/",
+
+			// Map GET requests
+			get : {
+				//	me	: "plus/v1/people/me?pp=1",
+				'me' : 'oauth2/v1/userinfo?alt=json',
+				'me/friends' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
+				'me/following' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
+				'me/followers' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
+				'me/share' : 'plus/v1/people/me/activities/public',
+				'me/feed' : 'plus/v1/people/me/activities/public',
+				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json',
+				'me/album' : function(p,callback){
+					var key = p.data.id;
+					delete p.data.id;
+					callback(key.replace("/entry/", "/feed/"));
+				},
+				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=100',
+				'me/files' : 'drive/v2/files?q=%22root%22+in+parents'
+			},
+
+			post : {
+//				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json'
+			},
+
+			// Map DELETE requests
+			del : {
+			},
+
 			wrap : {
 				me : function(o){
 					if(o.id){
@@ -3031,9 +3166,20 @@ hello.init({
 			// Make the display anything but 'popup'
 			p.qs.display = '';
 		},
-		uri : {
-			auth : 'https://instagram.com/oauth/authorize/',
-			base : 'https://api.instagram.com/v1/',
+
+		oauth : {
+			version : 2,
+			auth : 'https://instagram.com/oauth/authorize/'
+		},
+
+		scope : {
+			basic : 'basic',
+			friends : 'relationships'
+		},
+
+		base : 'https://api.instagram.com/v1/',
+
+		get : {
 			'me' : 'users/self',
 			'me/feed' : 'users/self/feed',
 			'me/photos' : 'users/self/media/recent?min_id=0&count=100',
@@ -3041,10 +3187,7 @@ hello.init({
 			'me/following' : 'users/self/follows',
 			'me/followers' : 'users/self/followed-by'
 		},
-		scope : {
-			basic : 'basic',
-			friends : 'relationships'
-		},
+
 		wrap : {
 			me : function(o){
 
@@ -3128,27 +3271,13 @@ hello.init({
 		login: function(p){
 			p.qs.response_type = 'code';
 		},
+
 		oauth : {
 			version : 2,
+			auth	: "https://www.linkedin.com/uas/oauth2/authorization",
 			grant	: "https://www.linkedin.com/uas/oauth2/accessToken"
 		},
-		querystring : function(qs){
-			// Linkedin signs requests with the parameter 'oauth2_access_token'... yeah anotherone who thinks they should be different!
-			qs.oauth2_access_token = qs.access_token;
-			delete qs.access_token;
-		},
-		uri : {
-			auth	: "https://www.linkedin.com/uas/oauth2/authorization",
-			base	: "https://api.linkedin.com/v1/",
-			me		: 'people/~:(picture-url,first-name,last-name,id,formatted-name)',
-			"me/friends"	: 'people/~/connections',
-			"me/followers"	: 'people/~/connections',
-			"me/following"	: 'people/~/connections',
-			"me/share" : function(p, next){
-				// POST unsupported
-				next( p.method === 'get' ? 'people/~/network/updates' : 'people/~/current-status' );
-			}
-		},
+
 		scope : {
 			basic	: 'r_fullprofile',
 			email	: 'r_emailaddress',
@@ -3156,6 +3285,27 @@ hello.init({
 			publish : 'rw_nus'
 		},
 		scope_delim : ' ',
+
+		querystring : function(qs){
+			// Linkedin signs requests with the parameter 'oauth2_access_token'... yeah anotherone who thinks they should be different!
+			qs.oauth2_access_token = qs.access_token;
+			delete qs.access_token;
+		},
+
+		base	: "https://api.linkedin.com/v1/",
+
+		get : {
+			"me"			: 'people/~:(picture-url,first-name,last-name,id,formatted-name)',
+			"me/friends"	: 'people/~/connections',
+			"me/followers"	: 'people/~/connections',
+			"me/following"	: 'people/~/connections',
+			"me/share"		: "people/~/network/updates"
+		},
+
+		post : {
+			//"me/share"		: 'people/~/current-status'
+		},
+
 		wrap : {
 			me : function(o){
 				formatError(o);
@@ -3208,6 +3358,11 @@ hello.init({
 	soundcloud : {
 		name : 'SoundCloud',
 
+		oauth : {
+			version : 2,
+			auth : 'https://soundcloud.com/connect'
+		},
+
 		// AutoRefresh
 		// Signin once token expires?
 		autorefresh : false,
@@ -3220,9 +3375,8 @@ hello.init({
 			qs['_status_code_map[302]'] = 200;
 		},
 		// Request path translated
-		uri : {
-			auth : 'https://soundcloud.com/connect',
-			base : 'https://api.soundcloud.com/',
+		base : 'https://api.soundcloud.com/',
+		get : {
 			'me' : 'me.json',
 			'me/friends' : 'me/followings.json',
 			'me/followers' : 'me/followers.json',
@@ -3334,19 +3488,24 @@ hello.init({
 		// Signin once token expires?
 		autorefresh : false,
 
-		uri : {
-			base	: "https://api.twitter.com/1.1/",
-			me		: 'account/verify_credentials.json',
+		base	: "https://api.twitter.com/1.1/",
+
+		get : {
+			"me"			: 'account/verify_credentials.json',
 			"me/friends"	: 'friends/list.json',
 			"me/following"	: 'friends/list.json',
 			"me/followers"	: 'followers/list.json',
+			"me/share"	: 'statuses/user_timeline.json'
+		},
+
+		post : {
 			'me/share' : function(p,callback){
 				var data = p.data;
 				p.data = null;
-
-				callback( p.method==='post' ? 'statuses/update.json?include_entities=1&status='+data.message : 'statuses/user_timeline.json' );
+				callback( 'statuses/update.json?include_entities=1&status='+data.message );
 			}
 		},
+
 		wrap : {
 			me : function(o){
 				formaterror(o);
@@ -3401,26 +3560,13 @@ hello.init({
 	windows : {
 		name : 'Windows live',
 
-		uri : {
-			// REF: http://msdn.microsoft.com/en-us/library/hh243641.aspx
-			auth : 'https://login.live.com/oauth20_authorize.srf',
-			base : 'https://apis.live.net/v5.0/',
-
-			// Friends
-			"me/friends" : "me/friends",
-			"me/following" : "me/friends",
-			"me/followers" : "me/friends",
-
-			"me/share" : function(p,callback){
-				// If this is a POST them return
-				callback( p.method==='get' ? "me/feed" : "me/share" );
-			},
-			"me/feed" : function(p,callback){
-				// If this is a POST them return
-				callback( p.method==='get' ? "me/feed" : "me/share" );
-			},
-			"me/files" : 'me/skydrive/files'
+		// REF: http://msdn.microsoft.com/en-us/library/hh243641.aspx
+		oauth : {
+			version : 2,
+			auth : 'https://login.live.com/oauth20_authorize.srf'
 		},
+
+		// Authorization scopes
 		scope : {
 			basic			: 'wl.signin,wl.basic',
 			email			: 'wl.emails',
@@ -3437,6 +3583,49 @@ hello.init({
 
 			offline_access	: 'wl.offline_access'
 		},
+
+		// API Base URL
+		base : 'https://apis.live.net/v5.0/',
+
+		// Map GET requests
+		get : {
+			// Friends
+			"me"	: "me",
+			"me/friends" : "me/friends",
+			"me/following" : "me/friends",
+			"me/followers" : "me/friends",
+
+			"me/albums"	: 'me/albums',
+
+			// Include the data[id] in the path
+			"me/album"	: '@{id}/files',
+			"me/photo"	: '@{id}',
+
+			// FILES
+			"me/files"	: '@{id|me/skydrive}/files',
+
+			"me/folders" : '@{id|me/skydrive}/files',
+			"me/folder" : '@{id|me/skydrive}/files'
+		},
+
+		// Map POST requests
+		post : {
+			"me/feed" : "me/share",
+			"me/share" : "me/share",
+			"me/albums" : "me/albums",
+			"me/album" : "@{id}/files",
+
+			"me/folders" : '@{id|me/skydrive/}',
+			"me/files" : "@{id|me/skydrive/}/files"
+		},
+
+		// Map DELETE requests
+		del : {
+			// Include the data[id] in the path
+			"me/album"	: '@{id}',
+			"me/files"	: '@{id}'
+		},
+
 		wrap : {
 			me : function(o){
 				formatUser(o);
@@ -3551,9 +3740,10 @@ hello.init({
 		},
 		*/
 
-		uri : {
-			base	: "https://social.yahooapis.com/v1/",
-			me		: "http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.profile%20where%20guid%3Dme&format=json",
+		base	: "https://social.yahooapis.com/v1/",
+
+		get : {
+			"me"		: "http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.profile%20where%20guid%3Dme&format=json",
 			"me/friends"	: 'http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.contacts%20where%20guid=me&format=json',
 			"me/following"	: 'http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.contacts%20where%20guid=me&format=json'
 		},

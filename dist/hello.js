@@ -297,16 +297,21 @@ hello.utils.extend( hello, {
 		// Authentication permisions
 		//
 		var scope = p.options.scope;
-		if(scope){
-			// Format
-			if(typeof(scope)!=='string'){
-				scope = scope.join(',');
-			}
+		if(scope && typeof(scope)!=='string'){
+			scope = scope.join(',');
 		}
 		scope = (scope ? scope + ',' : '') + p.qs.scope;
 
+		// Append scopes from a previous session
+		// This helps keep app credentials constant,
+		// Avoiding having to keep tabs on what scopes are authorized
+		var session = this.utils.store(p.network);
+		if(session && "scope" in session){
+			scope += ","+session.scope.join(",");
+		}
+
 		// Save in the State
-		p.qs.state.scope = scope.split(/,\s/);
+		p.qs.state.scope = this.utils.unique( scope.split(/[,\s]+/) );
 
 		// Map replace each scope with the providers default scopes
 		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m){
@@ -320,7 +325,7 @@ hello.utils.extend( hello, {
 		//
 		// Is the user already signed in
 		//
-		var session = this.getAuthResponse.call(hello, p.network);
+		var session = this.getAuthResponse(p.network);
 		if( session && "access_token" in session && session.access_token && "expires" in session && session.expires > ((new Date()).getTime()/1e3) ){
 			// What is different about the scopes in the session vs the scopes in the new login?
 			var diff = this.utils.diff( session.scope || [], p.qs.state.scope || [] );
@@ -367,12 +372,12 @@ hello.utils.extend( hello, {
 		//
 		// URL
 		//
-		if( provider.oauth && parseInt(provider.oauth.version,10) === 1 ){
+		if( parseInt(provider.oauth.version,10) === 1 ){
 			// Turn the request to the OAuth Proxy for 3-legged auth
 			url = this.utils.qs( p.options.oauth_proxy, p.qs );
 		}
 		else{
-			url = this.utils.qs( provider.uri.auth, p.qs );
+			url = this.utils.qs( provider.oauth.auth, p.qs );
 		}
 
 		this.emit("notice", "Authorization URL " + url );
@@ -497,15 +502,6 @@ hello.utils.extend( hello, {
 	//
 	getAuthResponse : function(service){
 
-		if(!(this instanceof arguments.callee)){
-			// Invoke as an instance
-			arguments.callee.prototype = this;
-			return new arguments.callee(service);
-		}
-
-		// Create an instance of Events
-		this.utils.Event.call(this);
-
 		// If the service doesn't exist
 		service = service || this.settings.default_service;
 
@@ -517,8 +513,7 @@ hello.utils.extend( hello, {
 			return null;
 		}
 
-
-		return this.utils.store(service);
+		return this.utils.store(service) || null;
 	},
 
 
@@ -995,8 +990,11 @@ hello.utils.extend( hello.utils, {
 	// Global Events
 	// Attach the callback to the window object
 	// Return its unique reference
-	globalEvent : function(callback){
-		var guid = "_hellojs_"+parseInt(Math.random()*1e12,10).toString(36);
+	globalEvent : function(callback, guid){
+		// If the guid has not been supplied then create a new one.
+		guid = guid || "_hellojs_"+parseInt(Math.random()*1e12,10).toString(36);
+
+		// Define the callback function
 		window[guid] = function(){
 			// Trigger the callback
 			var bool = callback.apply(this, arguments);
@@ -1039,12 +1037,21 @@ hello.unsubscribe = hello.off;
 (function(hello){
 
 	// Monitor for a change in state and fire
-	var old_session = {}, pending = {};
+	var old_session = {},
+
+		// Hash of expired tokens
+		expired = {};
 
 
 	(function self(){
 
 		var CURRENT_TIME = ((new Date()).getTime()/1e3);
+		var emit = function(event_name){
+			hello.emit("auth."+event_name, {
+				network: name,
+				authResponse: session
+			});
+		};
 
 		// Loop through the services
 		for(var name in hello.services){if(hello.services.hasOwnProperty(name)){
@@ -1058,7 +1065,6 @@ hello.unsubscribe = hello.off;
 			var session = hello.utils.store(name) || {};
 			var provider = hello.services[name];
 			var oldsess = old_session[name] || {};
-			var evt = '';
 
 			//
 			// Listen for globalEvents that did not get triggered from the child
@@ -1083,22 +1089,30 @@ hello.unsubscribe = hello.off;
 			}
 			
 			//
-			// Refresh login
+			// Refresh token
 			//
 			if( session && ("expires" in session) && session.expires < CURRENT_TIME ){
 
 				// If auto refresh is provided then determine if we can refresh based upon its value.
 				var refresh = !("autorefresh" in provider) || provider.autorefresh;
 
-				// Does this provider support refresh
-				if( refresh && (!( name in pending ) || pending[name] < CURRENT_TIME) ) {
+				// Has the refresh been run recently?
+				if( refresh && (!( name in expired ) || expired[name] < CURRENT_TIME ) ){
 					// try to resignin
 					hello.emit("notice", name + " has expired trying to resignin" );
 					hello.login(name,{display:'none'});
 
-					// update pending, every 10 minutes
-					pending[name] = CURRENT_TIME + 600;
+					// update expired, every 10 minutes
+					expired[name] = CURRENT_TIME + 600;
 				}
+
+				// Does this provider not support refresh
+				else if( !refresh && !( name in expired ) ) {
+					// Label the event
+					emit('expired');
+					expired[name] = true;
+				}
+
 				// If session has expired then we dont want to store its value until it can be established that its been updated
 				continue;
 			}
@@ -1109,27 +1123,24 @@ hello.unsubscribe = hello.off;
 			}
 			// Access_token has been removed
 			else if( !session.access_token && oldsess.access_token ){
-				hello.emit('auth.logout', {
-					network: name,
-					authResponse : session
-				});
+				emit('logout');
 			}
 			// Access_token has been created
 			else if( session.access_token && !oldsess.access_token ){
-				hello.emit('auth.login', {
-					network: name,
-					authResponse: session
-				} );
+				emit('login');
 			}
 			// Access_token has been updated
 			else if( session.expires !== oldsess.expires ){
-				hello.emit('auth.update', {
-					network: name,
-					authResponse: session
-				} );
+				emit('update');
 			}
-			
+
+			// Updated stored session
 			old_session[name] = session;
+
+			// Remove the expired flags
+			if(name in expired){
+				delete expired[name];
+			}
 		}}
 
 		// Check error events
@@ -1219,11 +1230,11 @@ hello.unsubscribe = hello.off;
 		if( ("access_token" in p&&p.access_token) && p.network ){
 
 			if(!p.expires_in || parseInt(p.expires_in,10) === 0){
-				// If p.expires_in is unset, 1 hour, otherwise 0 = infinite, aka a month
-				p.expires_in = !p.expires_id ? 3600 : (3600 * 24 * 30);
+				// If p.expires_in is unset, set to 0
+				p.expires_in = 0;
 			}
 			p.expires_in = parseInt(p.expires_in,10);
-			p.expires = ((new Date()).getTime()/1e3) + parseInt(p.expires_in,10);
+			p.expires = ((new Date()).getTime()/1e3) + (p.expires_in || ( 60 * 60 * 24 * 365 ));
 
 			// Make this the default users service
 			hello.service( p.network );
@@ -1347,7 +1358,9 @@ hello.api = function(){
 	this.emit("notice", "API request "+p.method.toUpperCase()+" '"+p.path+"' (request)",p);
 	
 	var o = this.services[p.network];
-	
+
+	//
+	// INVALID PROVIDER?
 	// Have we got a service
 	if(!o){
 		self.emitAfter("complete error", {error:{
@@ -1358,35 +1371,72 @@ hello.api = function(){
 	}
 
 	//
-	// Callback wrapper?
+	// CALLBACK HANDLER
 	// Change the incoming values so that they are have generic values according to the path that is defined
+	// @ response object
+	// @ statusCode integer if available
 	var callback = function(r,code){
+
+		// FORMAT RESPONSE?
+		// Does this request have a corresponding formatter
 		if( o.wrap && ( (p.path in o.wrap) || ("default" in o.wrap) )){
 			var wrap = (p.path in o.wrap ? p.path : "default");
 			var time = (new Date()).getTime();
-			r = o.wrap[wrap](r,code);
+
+			// FORMAT RESPONSE
+			var b = o.wrap[wrap](r,code);
+
+			// Has the response been utterly overwritten?
+			// Typically this augments the existing object.. but for those rare occassions
+			if(b){
+				r = b;
+			}
+
+			// Emit a notice
 			self.emit("notice", "Processing took" + ((new Date()).getTime() - time));
 		}
+
 		self.emit("notice", "API: "+p.method.toUpperCase()+" '"+p.path+"' (response)", r);
 
-		// Emit the correct event
+		// Emit events which pertain to the formatted response
 		self.emit("complete " + (!r || "error" in r ? 'error' : 'success'), r, code);
 	};
 
+
+
+
+
 	// push out to all networks
 	// as long as the path isn't flagged as unavaiable, e.g. path == false
-	if( !(p.path in o.uri) || o.uri[p.path] !== false ){
+	if( !(p.method in o) || !(p.path in o[p.method]) || o[p.method][p.path] !== false ){
 
-		var url = (p.path in o.uri ?
-					o.uri[p.path] :
-					( o.uri['default'] ? o.uri['default'] : p.path));
+		// Is there a map for the given URL?
+		var actions = o[{"delete":"del"}[p.method]||p.method] || {},
+			url = actions[p.path] || actions['default'] || p.path;
 
 		// if url needs a base
 		// Wrap everything in
 		var getPath = function(url){
 
+			// Format the string if it needs it
+			url = url.replace(/\@\{([a-z\_\-]+)(\|.+?)?\}/, function(m,key,defaults){
+				var val = defaults ? defaults.replace(/^\|/,'') : '';
+				if(key in p.data){
+					val = p.data[key];
+					delete p.data[key];
+				}
+				else{
+					self.emitAfter("error", {error:{
+						code : "missing_attribute_"+key,
+						message : "The attribute " + key + " is missing from the request"
+					}});
+				}
+				return val;
+			});
+
+			// Add base
 			if( !url.match(/^https?:\/\//) ){
-				url = o.uri.base + url;
+				url = o.base + url;
 			}
 
 
@@ -1417,9 +1467,9 @@ hello.api = function(){
 			//url += ( url.indexOf('?') > -1 ? "&" : "?" );
 
 			// Format the data
-			if( !self.utils.isEmpty(p.data) && !self.utils.dataToJSON(p) ){
+			if( !self.utils.isEmpty(p.data) && !("FileList" in window) && self.utils.hasBinary(p.data) ){
 				// If we can't format the post then, we are going to run the iFrame hack
-				self.utils.post( format_url, p.data, ("post" in o ? o.post(p) : null), callback );
+				self.utils.post( format_url, p.data, ("form" in o ? o.form(p) : null), callback );
 
 				return self;
 			}
@@ -1428,7 +1478,7 @@ hello.api = function(){
 			if(p.method === 'delete'){
 				var _callback = callback;
 				callback = function(r, code){
-					_callback((!r||self.utils.isEmpty(r))? {response:'deleted'} : r, code);
+					_callback((!r||self.utils.isEmpty(r))? {success:true} : r, code);
 				};
 			}
 
@@ -1444,6 +1494,9 @@ hello.api = function(){
 			}
 			else{
 
+				// Assign a new callbackID
+				p.callbackID = self.utils.globalEvent();
+
 				// Otherwise we're on to the old school, IFRAME hacks and JSONP
 				// Preprocess the parameters
 				// Change the p parameters
@@ -1458,27 +1511,29 @@ hello.api = function(){
 					// We're pretty stuffed if the endpoint doesn't like these
 					//			"suppress_response_codes":true
 					qs.redirect_uri = self.settings.redirect_uri;
-					qs.state = JSON.stringify({callback:'?'});
+					qs.state = JSON.stringify({callback:p.callbackID});
 
-					self.utils.post( format_url, p.data, ("post" in o ? o.post(p) : null), callback, self.settings.timeout );
+					self.utils.post( format_url, p.data, ("form" in o ? o.form(p) : null), callback, p.callbackID, self.settings.timeout );
 				}
 
 				// Make the call
 				else{
 
 					qs = self.utils.merge(qs,p.data);
-					qs.callback = '?';
+					qs.callback = p.callbackID;
 
-					self.utils.jsonp( format_url, callback, self.settings.timeout );
+					self.utils.jsonp( format_url, callback, p.callbackID, self.settings.timeout );
 				}
 			}
 		};
 
 		// Make request
 		if(typeof(url)==='function'){
+			// Does this have its own callback?
 			url(p, getPath);
 		}
 		else{
+			// Else the URL is a string
 			getPath(url);
 		}
 	}
@@ -1497,7 +1552,7 @@ hello.api = function(){
 	function _sign(network, path, method, data, modifyQueryString, callback){
 
 		// OAUTH SIGNING PROXY
-		var session = new self.getAuthResponse(network),
+		var session = self.getAuthResponse(network),
 			service = self.services[network],
 			token = (session ? session.access_token : null);
 
@@ -1678,7 +1733,7 @@ hello.utils.extend( hello.utils, {
 	// @param string/function pathFunc either a string of the URL or a callback function pathFunc(querystringhash, continueFunc);
 	// @param function callback a function to call on completion;
 	//
-	jsonp : function(pathFunc,callback,timeout){
+	jsonp : function(pathFunc,callback,callbackID,timeout){
 
 		var utils = this;
 
@@ -1701,7 +1756,7 @@ hello.utils.extend( hello.utils, {
 		var cb_name = this.globalEvent(function(json){
 			result = json;
 			return true; // mark callback as done
-		});
+		},callbackID);
 
 		// The URL is a function for some cases and as such
 		// Determine its value with a callback containing the new parameters of this function.
@@ -1775,7 +1830,7 @@ hello.utils.extend( hello.utils, {
 	// @param object data, key value data to send
 	// @param function callback, function to execute in response
 	//
-	post : function(pathFunc, data, options, callback, timeout){
+	post : function(pathFunc, data, options, callback, callbackID, timeout){
 
 		var utils = this;
 
@@ -1795,27 +1850,6 @@ hello.utils.extend( hello.utils, {
 			bool = 0,
 			cb = function(r){
 				if( !( bool++ ) ){
-					try{
-						// remove the iframe from the page.
-						//win.parentNode.removeChild(win);
-						// remove the form
-						if(newform){
-							newform.parentNode.removeChild(newform);
-						}
-					}
-					catch(e){
-						try{
-							console.error("HelloJS: could not remove iframe");
-						}
-						catch(ee){}
-					}
-
-					// reenable the disabled form
-					for(var i=0;i<reenableAfterSubmit.length;i++){
-						if(reenableAfterSubmit[i]){
-							reenableAfterSubmit[i].setAttribute('disabled', false);
-						}
-					}
 
 					// fire the callback
 					callback(r);
@@ -1827,7 +1861,7 @@ hello.utils.extend( hello.utils, {
 
 		// What is the name of the callback to contain
 		// We'll also use this to name the iFrame
-		var callbackID = this.globalEvent(cb);
+		this.globalEvent(cb, callbackID);
 
 		// Build the iframe window
 		var win;
@@ -1915,6 +1949,8 @@ hello.utils.extend( hello.utils, {
 				newform = form;
 			}
 
+			var input,i;
+
 			// Add elements to the form if they dont exist
 			for(x in data) if(data.hasOwnProperty(x)){
 
@@ -1925,13 +1961,20 @@ hello.utils.extend( hello.utils, {
 				if( !el || data[x].form !== form ){
 
 					// Does an element have the same name?
-					if(form.elements[x]){
+					var inputs = form.elements[x];
+					if(input){
 						// Remove it.
-						form.elements[x].parentNode.removeChild(form.elements[x]);
+						if(!(inputs instanceof NodeList)){
+							inputs = [inputs];
+						}
+						for(i=0;i<inputs.length;i++){
+							inputs[i].parentNode.removeChild(inputs[i]);
+						}
+
 					}
 
 					// Create an input element
-					var input = document.createElement('input');
+					input = document.createElement('input');
 					input.setAttribute('type', 'hidden');
 					input.setAttribute('name', x);
 
@@ -1955,13 +1998,17 @@ hello.utils.extend( hello.utils, {
 			}
 
 			// Disable elements from within the form if they weren't specified
-			for(i=0;i<form.children.length;i++){
+			for(i=0;i<form.elements.length;i++){
+
+				input = form.elements[i];
+
 				// Does the same name and value exist in the parent
-				if( !( form.children[i].name in data ) && form.children[i].getAttribute('disabled') !== true ) {
+				if( !( input.name in data ) && input.getAttribute('disabled') !== true ) {
 					// disable
-					form.children[i].setAttribute('disabled',true);
+					input.setAttribute('disabled',true);
+
 					// add re-enable to callback
-					reenableAfterSubmit.push(form.children[i]);
+					reenableAfterSubmit.push(input);
 				}
 			}
 		}
@@ -1976,14 +2023,38 @@ hello.utils.extend( hello.utils, {
 		// Call the path
 		pathFunc( {}, function(url){
 
-			// Replace the second '?' with the callback_id
-
-
+			// Update the form URL
 			form.setAttribute('action', url);
 
 			// Submit the form
+			// Some reason this needs to be offset from the current window execution
 			setTimeout(function(){
 				form.submit();
+
+				setTimeout(function(){
+					try{
+						// remove the iframe from the page.
+						//win.parentNode.removeChild(win);
+						// remove the form
+						if(newform){
+							newform.parentNode.removeChild(newform);
+						}
+					}
+					catch(e){
+						try{
+							console.error("HelloJS: could not remove iframe");
+						}
+						catch(ee){}
+					}
+
+					// reenable the disabled form
+					for(var i=0;i<reenableAfterSubmit.length;i++){
+						if(reenableAfterSubmit[i]){
+							reenableAfterSubmit[i].setAttribute('disabled', false);
+							reenableAfterSubmit[i].disabled = false;
+						}
+					}
+				},0);
 			},100);
 		});
 
@@ -2015,7 +2086,7 @@ hello.utils.extend( hello.utils, {
 
 	//
 	// dataToJSON
-	// This takes a FormElement and converts it to a JSON object
+	// This takes a FormElement|NodeList|InputElement|MixedObjects and convers the data object to JSON.
 	//
 	dataToJSON : function (p){
 
@@ -2025,59 +2096,19 @@ hello.utils.extend( hello.utils, {
 
 		// Is data a form object
 		if( this.domInstance('form', data) ){
-			// Get the first FormElement Item if its an type=file
-			var kids = data.elements;
 
-			var json = {};
+			data = this.nodeListToJSON(data.elements);
 
-			// Create a data string
-			for(var i=0;i<kids.length;i++){
-
-				var input = kids[i];
-
-				// If the name of the input is empty or diabled, dont add it.
-				if(input.disabled||!input.name){
-					continue;
-				}
-
-				// Is this a file, does the browser not support 'files' and 'FormData'?
-				if( input.type === 'file' ){
-					// the browser does not XHR2
-					if("FormData" in window){
-						// include the whole element
-						json[input.name] = input;
-						continue;
-					}
-					else if( !("files" in input) ){
-
-						// Cancel this approach the browser does not support the FileAPI
-						return false;
-					}
-				}
-				else{
-					json[ input.name ] = input.value || input.innerHTML;
-				}
-			}
-
-			// Convert to a postable querystring
-			data = json;
 		}
+		else if ( data instanceof NodeList ){
 
-		// Is this a form input element?
-		if( this.domInstance('input', data) ){
-			// Get the Input Element
-			// Do we have a Blob data?
-			if("files" in data){
+			data = this.nodeListToJSON(data);
 
-				var o = {};
-				o[ data.name ] = data.files;
-				// Turn it into a FileList
-				data = o;
-			}
-			else{
-				// This is old school, we have to perform the FORM + IFRAME + HASHTAG hack
-				return false;
-			}
+		}
+		else if( this.domInstance('input', data) ){
+
+			data = this.nodeListToJSON( [ data ] );
+
 		}
 
 		// Is data a blob, File, FileList?
@@ -2106,15 +2137,8 @@ hello.utils.extend( hello.utils, {
 					}
 				}
 				else if( this.domInstance('input', data[x]) && data[x].type === 'file' ){
-
-					if( ( "files" in data[x] ) ){
-						// this supports HTML5
-						// do nothing
-					}
-					else{
-						// this does not support HTML5 forms FileList
-						return false;
-					}
+					// ignore
+					continue;
 				}
 				else if( this.domInstance('input', data[x]) ||
 					this.domInstance('select', data[x]) ||
@@ -2122,6 +2146,7 @@ hello.utils.extend( hello.utils, {
 					){
 					data[x] = data[x].value;
 				}
+				// Else is this another kind of element?
 				else if( this.domInstance(null, data[x]) ){
 					data[x] = data[x].innerHTML || data[x].innerText;
 				}
@@ -2130,7 +2155,36 @@ hello.utils.extend( hello.utils, {
 
 		// Data has been converted to JSON.
 		p.data = data;
+		return data;
+	},
 
-		return true;
+
+	//
+	// NodeListToJSON
+	// Given a list of elements extrapolate their values and return as a json object
+	nodeListToJSON : function(nodelist){
+
+		var json = {};
+
+		// Create a data string
+		for(var i=0;i<nodelist.length;i++){
+
+			var input = nodelist[i];
+
+			// If the name of the input is empty or diabled, dont add it.
+			if(input.disabled||!input.name){
+				continue;
+			}
+
+			// Is this a file, does the browser not support 'files' and 'FormData'?
+			if( input.type === 'file' ){
+				json[ input.name ] = input;
+			}
+			else{
+				json[ input.name ] = input.value || input.innerHTML;
+			}
+		}
+
+		return json;
 	}
 });
