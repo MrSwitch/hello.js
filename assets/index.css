@@ -1,9 +1,9 @@
+pre{word-break:break-word;word-break:break-all;tab-size:2;}
 header nav{float:right;}header nav a{font-size:1.2em;padding:5px;background-color:#F5F7F5;border:1px solid #CCC;display:inline-block;text-decoration:none;}
 #profile{text-align:center;}#profile img{border-radius:50%;height:100px;display:block;margin:auto;background-color:#ddd;}
 #profile div{display:inline-block;padding:10px;}
 button.zocial img{height:24px;vertical-align:middle;}
 button.zocial span{clear:left;}
-table.testtable pre{word-break:break-word;word-break:break-all;tab-size:2;}
 table.testtable button{cursor:pointer;}
 table.testtable tbody td:first-child{min-width:200px;}
 table.testtable tbody td:nth-child(2){min-width:100px;}
