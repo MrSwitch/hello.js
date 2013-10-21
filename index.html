@@ -23,11 +23,14 @@
 <h2>...I did not understand any of that</h2>
 <p>Dont worry, here's a demo which illustrates what HelloJS can do. Connect a user through a service they belong too, e.g.</p>
 
+
 <div id="profile">
-	<button id="profile_windows" class="zocial windows" onclick="hello.login('windows')">Signin to Windows</button>,
-	<button id="profile_facebook" class="zocial facebook" onclick="hello.login('facebook')">Signin to Facebook</button>
-	<button id="profile_google" class="zocial google" onclick="hello.login('google')">Signin to Google</button>
+<!-- ko foreach:networks -->
+<button data-bind="click:function(){ hello.login(name);}, attr:{'class':'zocial icon ' + name, title:'Signin to '+ displayName}" title="Signin"></button>
+<!-- /ko -->
+<br />
 </div>
+<p id="profile_done" style="text-align:center;display:none;">Hey, we got your details, test done! Choose another service or checkout <a href="#helloapi">what else you can do</a></P>
 
 <!--/NO-MARKDOWN-->
 
@@ -42,7 +45,7 @@
 			<th>Windows</th>
 			<th>FaceBook</th>
 			<th>Google</th>
-			<th><a href="tests/">More..</th>
+			<th><a href="#helloapi">More..</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -118,37 +121,24 @@
 </ul>
 
 
-<!--NO-MARKDOWN-->
-<form id="download_form">
+<h2>Install</h2>
 
-<h2>Download</h2>
+<p>Compiled source, which combines all the modules can be obtained from <a href="https://github.com/MrSwitch/hello.js/tree/master/dist">Github</a>, and source files can be found in <a href="https://github.com/MrSwitch/hello.js/tree/master/src">Source</a>. Otherwise...
 
-<p>Select the services you need, and generate the script to embed</p>
+<pre>bower install hello</pre>
 
-<label><input type="checkbox" value="windows" name="services"/> Windows</label>
-<label><input type="checkbox" value="facebook" name="services"/> Facebook</label>
-<label><input type="checkbox" value="google" name="services"/>Google</label>
-<label><input type="checkbox" value="yahoo" name="services"/> Yahoo </label>
-<label><input type="checkbox" value="twitter" name="services" /> Twitter </label>
-<label><input type="checkbox" value="linkedin" name="services" /> LinkedIn </label>
-<label><input type="checkbox" value="github" name="services" /> Github </label>
-<label><input type="checkbox" value="dropbox" name="services" /> Dropbox </label>
-<br/>
-<input type="hidden" name="all"/>
-<button type="submit" onclick="$('input[name=all]',this.form).val(1);">Download All</button> or <button type="submit" name="submit" value="selected">Download Selected</button>
-<label><input type="checkbox" value="1" name="minify" /> Minify </label>
-</form>
-<!--/NO-MARKDOWN-->
+<p>Includes the aforementioned "src" and "dist" directories and shall let you cherry pick the files for you</p>
 
+<p>Note: Some services can't all be just in the client, as such checkout the <a href="#oauth-proxy">OAuth Proxy</a></p>
 
 <h2>Quick Start</h2>
 <p>Quick start shows you how to go from zero to loading in the name and picture of a user, like in the demo above.</p>
 <ol>
-<li>Register your app domain
-<li>Include hello.js script 
-<li>Create the signin buttons
-<li>Setup listener for login and retrieve user info.
-<li>Initiate the client_ids and all listeners
+<li><a href="#1-register">Register your app domain</a>
+<li><a href="#2-include-hellojs-script-in-your-page">Include hello.js script</a>
+<li><a href="#3-create-the-signin-buttons">Create the signin buttons</a>
+<li><a href="#4-add-listeners-for-the-user-login">Setup listener for login and retrieve user info.</a>
+<li><a href="#5-configure-hellojs-with-your-client_ids-and-initiate-all-listeners">Initiate the client_ids and all listeners</a>
 </ol>
 
 <h3>1. Register</h3>
@@ -173,9 +163,9 @@
 <h3>3. Create the signin buttons</h3>
 <p>Just add onclick events to call hello.login(network). Style your buttons as you like, i've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts</p>
 
-<pre>
-	&lt;button onclick="hello.login('windows')"&gt;windows&lt;/button&gt;
-</pre>
+<script class="pre" type="text/html">
+	<button onclick="hello.login('windows')">windows</button>
+</script>
 
 
 <h3>4. Add listeners for the user login</h3>
@@ -187,13 +177,12 @@
 	hello.on('auth.login', function(auth){
 		
 		// call user information, for the given network
-		hello.api( auth.network + '/me', function(r){
-			if(!r.id || !!document.getElementById(r.id) ){
-				return;
+		hello.api( auth.network + '/me').success(function(r){
+			var $target = $("#profile_"+ auth.network );
+			if($target.length==0){
+				$target = $("<div id='profile_"+auth.network+"'></div>").appendTo("#profile");
 			}
-			var target = document.getElementById("profile_"+ auth.network );
-			target.innerHTML = '<img src="'+ r.picture +'" /> Hey '+r.name;
-
+			$target.html('<img src="'+ r.thumbnail +'" /> Hey '+r.name).attr('title', r.name + " on "+ auth.network);
 		});
 	});
 </script>
@@ -213,14 +202,14 @@
 <p>That's it. The code above actually powers the demo at the start so, no excuses.</p>
 
 
-<h2>Core Methods</h2>
+<h1>Core Methods</h1>
 
-<h3>hello.init()</h3>
+<h2>hello.init()</h2>
 
 <p>Initiate the environment. And add the application credentials</p> 
 
-<h4>hello.init( {facebook: <em>id</em>, windows: <em>id</em>, google: <em>id, 
-....</em> } )</h4>
+<h3>hello.init( {facebook: <em>id</em>, windows: <em>id</em>, google: <em>id, 
+....</em> } )</h3>
 
 <table>
 	<thead>
@@ -249,7 +238,7 @@
 	</tbody>
 </table>
 
-<h4>Example:</h4>
+<h3>Example:</h3>
 
 <pre>
 	hello.init({
@@ -258,11 +247,13 @@
 	});
 </pre>
 
-<h3>hello.login()</h3>
+<h2>hello.login()</h2>
+
+<div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'login' } }"></div>
 
 <p>If a network string is provided: A consent window to authenticate with that network will be initiated. Else if no network is provided a prompt to select one of the networks will open. A callback will be executed if the user authenticates and or cancels the authentication flow.</p>
 
-<h4>hello.login( [network] [,options] [, callback() ] )</h4>
+<h3>hello.login( [network] [,options] [, callback() ] )</h3>
 
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
@@ -283,14 +274,18 @@
 				Comma separated list of scopes</td><td>
 				<em>optional</em></td><td>
 				<em>null</em></td></tr>
-			<tr><td>redirect_uri</td><td><i>string</i></td><td><q>http://domain.com/hello.html</q></td><td>
-				A full URI of a page which includes this script file hello.js</td><td>
+			<tr><td>redirect_uri</td><td><i>string</i></td><td><q><a href="redirect.html" target="_blank">redirect.html</a></q></td><td>
+				A full or relative URI of a page which includes this script file hello.js</td><td>
 				<em>optional</em></td><td>
 				<em>window.location.href</em></td></tr>
 			<tr><td>response_type</td><td><i>string</i></td><td><q>token</q>, <q>code</q></td><td>
-				Mechanism for authentication</td><td>
+				Mechanism for skipping auth flow</td><td>
 				<em>optional</em></td><td>
 				<q>token</q></td></tr>
+			<tr><td>force</td><td><i>Boolean</i></td><td><i>false</i>: return current session else initiate auth flow; <i>true</i>: Always initiate auth flow</td><td>
+				Mechanism for authentication</td><td>
+				<em>optional</em></td><td>
+				<i>true</i></td></tr>
 		</table>
 	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert(&quot;Logged 
 		in!&quot;);}</code></td><td>
@@ -300,7 +295,7 @@
 	</td></tr>
 </table>
 
-<h4>Examples:</h4>
+<h3>Examples:</h3>
 
 <pre class="tryitoffline">
 	hello.login(&#39;facebook&#39;, function(){
@@ -308,11 +303,14 @@
 	});
 </pre>
 
-<h3>hello.logout()</h3>
+
+<h2>hello.logout()</h2>
+
+<div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'logout' } }"></div>
 
 <p>Remove all sessions or individual sessions.</p>
 
-<h4>hello.logout( [network] [, callback() ] )</h4>
+<h3>hello.logout( [network] [, callback() ] )</h3>
 
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
@@ -327,7 +325,7 @@
 		<em>null</em></td></tr>
 </table>
 
-<h4>Example:</h4>
+<h3>Example:</h3>
 
 <pre class="tryit">
 	hello.logout(&#39;facebook&#39;, function(){
@@ -335,11 +333,14 @@
 	});
 </pre>
 
-<h3>hello.getAuthResponse()</h3>
+
+<h2>hello.getAuthResponse()</h2>
+
+<div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'getAuthResponse' } }"></div>
 
 <p>Get the current status of the session, this is an synchronous request and does not validate any session cookies which may have expired.</p>
 
-<h4>hello.getAuthResponse( network );</h4>
+<h3>hello.getAuthResponse( network );</h3>
 
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
@@ -349,18 +350,19 @@
 		<em>current</em></td></tr>
 </table>
 
-<h4>Examples:</h4>
+<h3>Examples:</h3>
 
 <pre class="tryitoffline">
 	alert((hello.getAuthResponse(&#39;facebook&#39;)?&quot;Signed&quot;:&#39;Not signed&#39;) + &#39; into FaceBook, &#39; +( hello.getAuthResponse(&#39;windows&#39;)?&quot;Signed&quot;:&#39;Not signed&#39;)+&quot;into Windows Live&quot;);
 </pre>
 
+<h2>hello.api()</h2>
 
-<h3>hello.api()</h3>
+<div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'api' } }"></div>
 
 <p>Make calls to the API for getting and posting data</p>
 
-<h4>hello.api( [ path ], [ method ], [ data ], [ callback(json) ] )</h4>
+<h3>hello.api( [ path ], [ method ], [ data ], [ callback(json) ] )</h3>
 
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
@@ -370,7 +372,7 @@
 		<em>required</em></td><td>null</td></tr>
 	<tr><td>method</td><td><q>get</q>, <q>post</q>, <q>delete</q>, <q>put</q></td><td>See<em> type</em></td><td>HTTP request method to use. 
 		</td><td><em>optional</em></td><td><q>get</q></td></tr>
-	<tr><td>data</td><td><i>object</i></td><td><code>{name: <q>Hello</q>, descrition: <q>Fandelicious</q>}</td><td>
+	<tr><td>data</td><td><i>object</i></td><td><code>{name: <q>Hello</q>, description: <q>Fandelicious</q>}</td><td>
 		A JSON object of data, FormData, HTMLInputElement, HTMLFormElment to be sent along with a <q>get</q>, <q>post</q> or <q>put</q> request</td><td>
 		<em>optional</em></td><td>
 		<em>null</em></td></tr>
@@ -382,25 +384,23 @@
 </table>
 
 
-<h4>Examples:</h4>
+<h3>Examples:</h3>
 
 <pre class="tryit">
-	hello.api("me", function(json){
-		if(!json||json.error){
-			alert("Whoops!");
-			return;
-		}
+	hello.api("me").success(function(json){
 		alert("Your name is "+ json.name);
+	}).error(function(){
+		alert("Whoops!");
 	});
 </pre>
 
-<h2>Event subscription</h2>
+<h1>Event subscription</h1>
 
-<h3>hello.on()</h3>
+<h2>hello.on()</h2>
 
 <p>Bind a callback to an event. An event maybe triggered by a change in user state or a change in some detail. </p>
 
-<h4>hello.on( event, callback );</h4>
+<h3>hello.on( event, callback );</h3>
 
 
 <table>
@@ -431,7 +431,7 @@
 </table>
 
 
-<h4>Example:</h4>
+<h3>Example:</h3>
 
 <pre class="tryit">
 	var sessionstart =  function(){
@@ -441,161 +441,26 @@
 </pre>
 
 
-<h3>hello.off()</h3>
+<h2>hello.off()</h2>
 
 <p>Remove a callback, both event name and function must exist</p>
 
-<h4>hello.off( event, callback );</h4>
+<h3>hello.off( event, callback );</h3>
 
 <pre class="tryit">
 	hello.off("auth.login",sessionstart);
 </pre>
 
 
-<header>
-<h2>Scope and Permissions</h2>
-<p>Scopes define what services your asking the user to 
-grant your app permission to. As you 
-can gather these can be quite intrusive so only ask permission for scopes which 
-are obvious to your app. You may always 
-request more from the user later.</p>
-</header>
+<h1>Misc</h1>
 
-<form class="setscopes" onsubmit="return false;" style="display:inline-block;">
-
-<h3>Update scope settings</h3>
-
-<p>The table shows how the providers have different scopes, however HelloJS sync's the names, so you only have to ever know what HelloJS calls them.</p> 
-
-<p>Select the scopes you want to use and update the current session.</p> 
-
-<table>
-	<thead>
-		<tr><th><code>scope</code></th><th>Facebook</th><th>Windows Live</th><th>Google</th></tr>
-	</thead>
-	<tbody>
-		<tr>
-			<th colspan="4"></th>
-		</tr>
-		<tr>
-			<th><em>default</em></th><td>&nbsp;</td><td>wl.signin, wl.basic</td><td>https://www.googleapis.com/auth/plus.me</td>
-		</tr>
-		<tr>
-			<th><input type="checkbox" name="scopes" value="email"/><q>email</q></th><td>email</td><td>wl.emails</td><td></td>
-		</tr>
-		<tr>
-			<th><input type="checkbox" name="scopes" value="birthday"/> <q>birthday</q></th><td>user_birthday</td><td>wl.birthday</td><td></td>
-		</tr>
-		<tr>
-			<th><input type="checkbox" name="scopes" value="events"/> <q>events</q></th><td>user_events</td><td>wl.calenders</td><td></td>
-		</tr>
-		<tr>
-			<th><input type="checkbox" name="scopes" value="photos"/> <q>photos</q></br /><input type="checkbox" name="scopes" value="videos"/> <q>videos</q></th><td>user_photos,user_videos</td><td>wl.photos</td><td></td>
-		</tr>
-		<tr>
-			<th><input type="checkbox" name="scopes" value="friends"/> <q>friends</q></th><td></td><td></td><td>https://www.google.com/m8/feeds</td>
-		</tr>
-		<tr>
-			<th colspan="4"></th>
-		</tr>
-		<tr>
-			<th><input type="checkbox" name="scopes" value="publish"/> <q>publish</q></th><td>publish_streams</td><td>wl.share</td><td></td>
-		</tr>
-		<tr>
-			<th><input type="checkbox" name="scopes" value="create_event"/> <q>create_event</q></th><td>create_event</td><td>wl.calendars_update,wl.events_create</td><td></td>
-		</tr>
-		<tr>
-			<th colspan="4"></th>
-		</tr>
-		<tr>
-			<th><input type="checkbox" name="scopes" value="offline_access"/> <q>offline_access</q></th><td>offline_access</td><td>wl.offline_access</td><td></td>
-		</tr>
-	</tbody>
-</table>
-
-<p>
-<button class="zocial google" type="button" onclick="hello.login('google',{scope:$(scopes).serialize().replace(/\&?scopes=/g,',')}, function(){alert('You have signed into google')} );">google</button>
-<button class="zocial facebook" type="button" onclick="hello.login('facebook',{scope:$(scopes).serialize().replace(/\&?scopes=/g,',')}, function(){alert('You have signed into facebook')});">facebook</button>
-<button class="zocial windows" type="button" onclick="hello.login('windows',{scope:$(scopes).serialize().replace(/\&?scopes=/g,',')}, function(){alert('You have signed into windows live')});">windows</button>
-</p>
-
-</form>
-
-
-<h2 id="REST API">REST API</h2>
-
-<h3>Path Translation</h3>
-
-<p>hello.js translates paths if there are common paths across services.</p>
-
-<table>
-	<thead>
-		<tr><th><code>hello.js</code></th><th>Facebook</th><th>Windows Live</th><th>Google</th></tr>
-	</thead>
-	<tbody>
-		<tr>
-			<th><em>OAuth2 endpoint</em></th><td>http://www.facebook.com/dialog/oauth/</td><td>https://oauth.live.com/authorize</td><td>https://accounts.google.com/o/oauth2/auth</td>
-		</tr>
-		<tr>
-			<th><em>REST API base</em></th><td>https://graph.facebook.com/</td><td>https://apis.live.net/v5.0/</td><td>https://www.googleapis.com/</td>
-		</tr>
-		<tr>
-			<th><q>me</q></th><td>me</td><td>me</td><td>plus/v1/people/me?pp=1</td>
-		</tr>
-		<tr>
-			<th><q>me/friends</q></th><td>me/friends</td><td>me/friends</td><td>https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000</td>
-		</tr>
-		<tr>
-			<th><q>me/share</q></th><td>me/feed</td><td>me/share</td><td>n/a</td>
-		</tr>
-		<tr>
-			<th><q>me/albums</q></th><td>me/albums</td><td>me/albums</td><td>n/a</td>
-		</tr>
-	</tbody>
-</table>
-
-
-<h3>Paths</h3>
-<p>These are some of the paths you can use with hello.api( <strong>path</strong>, <em>callback</em> ).</p>
-e.g.
-<pre>hello.api("me", function(json){console.log(json);})</pre>
-<p>Below is a REST playground, clicking the paths on the left will return the results on the right</p>
-
-<form class="rest" id="playground">
-
-<h3>Play Ground</h3>
-
-<button class="windows zocial" type="button" onclick='restTabs("windows:")'>Windows</button>
-<button class="facebook zocial" type="button" onclick='restTabs("facebook:")'>FaceBook</button>
-<button class="google zocial" type="button" onclick='restTabs("google:")'>Google</button>
-
-<input type="text" name="path" placeholder="Select a path and click `Run`" list="restpaths"/>
-
-e.g...
-<ul>
-<li>/me</li>
-<li>/me/friends</li>
-<li>/me/feed</li>
-<li>/me/home</li>
-<li>/me/photos</li>
-<li>/me/albums</li>
-<li>/me/videos</li>
-<li>/me/events</li>
-</ul>
-<br />
-<button type="submit">Run</button><button type="button" onclick="document.getElementById('restoutput').innerHTML = '';">clear</button> <a href="#scope-and-permissions">update your scopes and permissions</a>
-<pre id="restoutput" style="min-height:400px;"></pre>
-
-</form>
-
-
-<h3>Error handling</h3>
+<h2>Error handling</h2>
 
 <p>For hello.api([path], [<em>callback</em>]) the first parameter of <em>callback</em> 
 upon error will be either <i>boolean (false)</i> or be an error <i>object</i> as 
 described below.</p>
 
-<h4>Error Object</h4>
+<h3>Error Object</h3>
 
 <table>
 	<thead>
@@ -688,21 +553,36 @@ used - because of the XD, IFrame+Form+hack.</li>
 <p>Please adopt the continuous integration tests.</p>
 
 <pre>
-	#Using NodeJS on your dev environment, cd into the project root and install dev dependencies 
+	# Using NodeJS on your dev environment
+	# cd into the project root and install dev dependencies 
 	npm install -l
 
 	# run continuous integration tests
 	npm test
-
-	# open a couple of browsers wuth the given URL, e.g. it'll say "Karma v0.9.8 server started at http://localhost:9876/", so open that URL in a couple of browsers.
-	# Save any changes and the tests will be initated
 </pre>
 
+<p>Open a couple of browsers with the given URL (e.g. it'll say "Karma v0.9.8 server started at http://localhost:9876/"). The tests are triggered when the code is modified</p>
 
 
+<script src="/_packages/knockout.js"></script>
 <script src="/_packages/jquery.js"></script>
 <script src="assets/index.js"></script>
-<script src="https://raw.github.com/austincheney/Pretty-Diff/master/lib/fulljsmin.js"></script>
+<script type="text/html" id="tests-template"></script>
 
+<!--NO-MARKDOWN-->
+<script>
+// Initiate the library
+hello.init(CLIENT_IDS_ALL,{redirect_uri: 'redirect.html', oauth_proxy:OAUTH_PROXY_URL});
+
+$('#tests-template').load('assets/test_network.html', function() {
+	//knockout binding goes here
+	ko.applyBindings(model);
+});
+
+hello.on('auth.login', function(){
+	$("#profile_done").show();
+})
+</script>
+<!--/NO-MARKDOWN-->
 </body>
 </html>

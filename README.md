@@ -19,7 +19,7 @@ Looking for more? HelloJS supports a lot more actions than just getting the user
 			<th>Windows</th>
 			<th>FaceBook</th>
 			<th>Google</th>
-			<th><a href="tests/">More..</th>
+			<th><a href="#helloapi">More..</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -95,17 +95,24 @@ Anything not listed i have no knowledge of and would appreciate input.
 
 
 
+## Install
 
+Compiled source, which combines all the modules can be obtained from [Github](https://github.com/MrSwitch/hello.js/tree/master/dist), and source files can be found in [Source](https://github.com/MrSwitch/hello.js/tree/master/src). Otherwise...
 
+bower install hello
+
+Includes the aforementioned "src" and "dist" directories and shall let you cherry pick the files for you
+
+Note: Some services can't all be just in the client, as such checkout the [OAuth Proxy](#oauth-proxy)
 
 ## Quick Start
 Quick start shows you how to go from zero to loading in the name and picture of a user, like in the demo above.
 
-Register your app domain
-Include hello.js script 
-Create the signin buttons
-Setup listener for login and retrieve user info.
-Initiate the client_ids and all listeners
+[Register your app domain](#1-register)
+[Include hello.js script](#2-include-hellojs-script-in-your-page)
+[Create the signin buttons](#3-create-the-signin-buttons)
+[Setup listener for login and retrieve user info.](#4-add-listeners-for-the-user-login)
+[Initiate the client_ids and all listeners](#5-configure-hellojs-with-your-client_ids-and-initiate-all-listeners)
 
 
 ### 1. Register
@@ -131,7 +138,7 @@ Register your application with atleast one of the following networks. Ensure you
 Just add onclick events to call hello.login(network). Style your buttons as you like, i've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts
 
 
-	&lt;button onclick="hello.login('windows')"&gt;windows&lt;/button&gt;
+	<button onclick="hello.login('windows')">windows</button>
 
 
 
@@ -144,13 +151,12 @@ Lets define a simple function, which will load a user profile into the page afte
 	hello.on('auth.login', function(auth){
 		
 		// call user information, for the given network
-		hello.api( auth.network + '/me', function(r){
-			if(!r.id || !!document.getElementById(r.id) ){
-				return;
+		hello.api( auth.network + '/me').success(function(r){
+			var $target = $("#profile_"+ auth.network );
+			if($target.length==0){
+				$target = $("<div id='profile_"+auth.network+"'></div>").appendTo("#profile");
 			}
-			var target = document.getElementById("profile_"+ auth.network );
-			target.innerHTML = '<img src="'+ r.picture +'" /> Hey '+r.name;
-
+			$target.html('<img src="'+ r.thumbnail +'" /> Hey '+r.name).attr('title', r.name + " on "+ auth.network);
 		});
 	});
 
@@ -170,9 +176,9 @@ Now let's wire it up with our registration detail obtained in step 1. By passing
 That's it. The code above actually powers the demo at the start so, no excuses.
 
 
-## Core Methods
+# Core Methods
 
-### hello.init()
+## hello.init()
 
 Initiate the environment. And add the application credentials 
 
@@ -206,7 +212,7 @@ hello.init( {facebook: id, windows: id, google: id,
 	</tbody>
 </table>
 
-#### Example:
+### Example:
 
 
 	hello.init({
@@ -215,11 +221,13 @@ hello.init( {facebook: id, windows: id, google: id,
 	});
 
 
-### hello.login()
+## hello.login()
+
+
 
 If a network string is provided: A consent window to authenticate with that network will be initiated. Else if no network is provided a prompt to select one of the networks will open. A callback will be executed if the user authenticates and or cancels the authentication flow.
 
-#### hello.login( [network] [,options] [, callback() ] )
+### hello.login( [network] [,options] [, callback() ] )
 
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
@@ -240,14 +248,18 @@ If a network string is provided: A consent window to authenticate with that netw
 				Comma separated list of scopes</td><td>
 				<em>optional</em></td><td>
 				<em>null</em></td></tr>
-			<tr><td>redirect_uri</td><td><i>string</i></td><td><q>http://domain.com/hello.html</q></td><td>
-				A full URI of a page which includes this script file hello.js</td><td>
+			<tr><td>redirect_uri</td><td><i>string</i></td><td><q><a href="redirect.html" target="_blank">redirect.html</a></q></td><td>
+				A full or relative URI of a page which includes this script file hello.js</td><td>
 				<em>optional</em></td><td>
 				<em>window.location.href</em></td></tr>
 			<tr><td>response_type</td><td><i>string</i></td><td><q>token</q>, <q>code</q></td><td>
-				Mechanism for authentication</td><td>
+				Mechanism for skipping auth flow</td><td>
 				<em>optional</em></td><td>
 				<q>token</q></td></tr>
+			<tr><td>force</td><td><i>Boolean</i></td><td><i>false</i>: return current session else initiate auth flow; <i>true</i>: Always initiate auth flow</td><td>
+				Mechanism for authentication</td><td>
+				<em>optional</em></td><td>
+				<i>true</i></td></tr>
 		</table>
 	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert(&quot;Logged 
 		in!&quot;);}</code></td><td>
@@ -257,7 +269,7 @@ If a network string is provided: A consent window to authenticate with that netw
 	</td></tr>
 </table>
 
-#### Examples:
+### Examples:
 
 
 	hello.login(&#39;facebook&#39;, function(){
@@ -265,11 +277,14 @@ If a network string is provided: A consent window to authenticate with that netw
 	});
 
 
-### hello.logout()
+
+## hello.logout()
+
+
 
 Remove all sessions or individual sessions.
 
-#### hello.logout( [network] [, callback() ] )
+### hello.logout( [network] [, callback() ] )
 
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
@@ -284,7 +299,7 @@ Remove all sessions or individual sessions.
 		<em>null</em></td></tr>
 </table>
 
-#### Example:
+### Example:
 
 
 	hello.logout(&#39;facebook&#39;, function(){
@@ -292,11 +307,14 @@ Remove all sessions or individual sessions.
 	});
 
 
-### hello.getAuthResponse()
+
+## hello.getAuthResponse()
+
+
 
 Get the current status of the session, this is an synchronous request and does not validate any session cookies which may have expired.
 
-#### hello.getAuthResponse( network );
+### hello.getAuthResponse( network );
 
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
@@ -306,18 +324,19 @@ Get the current status of the session, this is an synchronous request and does n
 		<em>current</em></td></tr>
 </table>
 
-#### Examples:
+### Examples:
 
 
 	alert((hello.getAuthResponse(&#39;facebook&#39;)?&quot;Signed&quot;:&#39;Not signed&#39;) + &#39; into FaceBook, &#39; +( hello.getAuthResponse(&#39;windows&#39;)?&quot;Signed&quot;:&#39;Not signed&#39;)+&quot;into Windows Live&quot;);
 
 
+## hello.api()
 
-### hello.api()
+
 
 Make calls to the API for getting and posting data
 
-#### hello.api( [ path ], [ method ], [ data ], [ callback(json) ] )
+### hello.api( [ path ], [ method ], [ data ], [ callback(json) ] )
 
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
@@ -327,7 +346,7 @@ Make calls to the API for getting and posting data
 		<em>required</em></td><td>null</td></tr>
 	<tr><td>method</td><td><q>get</q>, <q>post</q>, <q>delete</q>, <q>put</q></td><td>See<em> type</em></td><td>HTTP request method to use. 
 		</td><td><em>optional</em></td><td><q>get</q></td></tr>
-	<tr><td>data</td><td><i>object</i></td><td><code>{name: <q>Hello</q>, descrition: <q>Fandelicious</q>}</td><td>
+	<tr><td>data</td><td><i>object</i></td><td><code>{name: <q>Hello</q>, description: <q>Fandelicious</q>}</td><td>
 		A JSON object of data, FormData, HTMLInputElement, HTMLFormElment to be sent along with a <q>get</q>, <q>post</q> or <q>put</q> request</td><td>
 		<em>optional</em></td><td>
 		<em>null</em></td></tr>
@@ -339,25 +358,23 @@ Make calls to the API for getting and posting data
 </table>
 
 
-#### Examples:
+### Examples:
 
 
-	hello.api("me", function(json){
-		if(!json||json.error){
-			alert("Whoops!");
-			return;
-		}
+	hello.api("me").success(function(json){
 		alert("Your name is "+ json.name);
+	}).error(function(){
+		alert("Whoops!");
 	});
 
 
-## Event subscription
+# Event subscription
 
-### hello.on()
+## hello.on()
 
 Bind a callback to an event. An event maybe triggered by a change in user state or a change in some detail. 
 
-#### hello.on( event, callback );
+### hello.on( event, callback );
 
 
 <table>
@@ -388,7 +405,7 @@ Bind a callback to an event. An event maybe triggered by a change in user state 
 </table>
 
 
-#### Example:
+### Example:
 
 
 	var sessionstart =  function(){
@@ -398,161 +415,26 @@ Bind a callback to an event. An event maybe triggered by a change in user state 
 
 
 
-### hello.off()
+## hello.off()
 
 Remove a callback, both event name and function must exist
 
-#### hello.off( event, callback );
+### hello.off( event, callback );
 
 
 	hello.off("auth.login",sessionstart);
 
 
 
+# Misc
 
-## Scope and Permissions
-Scopes define what services your asking the user to 
-grant your app permission to. As you 
-can gather these can be quite intrusive so only ask permission for scopes which 
-are obvious to your app. You may always 
-request more from the user later.
-
-
-
-
-### Update scope settings
-
-The table shows how the providers have different scopes, however HelloJS sync's the names, so you only have to ever know what HelloJS calls them. 
-
-Select the scopes you want to use and update the current session. 
-
-<table>
-	<thead>
-		<tr><th><code>scope</code></th><th>Facebook</th><th>Windows Live</th><th>Google</th></tr>
-	</thead>
-	<tbody>
-		<tr>
-			<th colspan="4"></th>
-		</tr>
-		<tr>
-			<th><em>default</em></th><td>&nbsp;</td><td>wl.signin, wl.basic</td><td>https://www.googleapis.com/auth/plus.me</td>
-		</tr>
-		<tr>
-			<th><input type="checkbox" name="scopes" value="email"/><q>email</q></th><td>email</td><td>wl.emails</td><td></td>
-		</tr>
-		<tr>
-			<th><input type="checkbox" name="scopes" value="birthday"/> <q>birthday</q></th><td>user_birthday</td><td>wl.birthday</td><td></td>
-		</tr>
-		<tr>
-			<th><input type="checkbox" name="scopes" value="events"/> <q>events</q></th><td>user_events</td><td>wl.calenders</td><td></td>
-		</tr>
-		<tr>
-			<th><input type="checkbox" name="scopes" value="photos"/> <q>photos</q></br /><input type="checkbox" name="scopes" value="videos"/> <q>videos</q></th><td>user_photos,user_videos</td><td>wl.photos</td><td></td>
-		</tr>
-		<tr>
-			<th><input type="checkbox" name="scopes" value="friends"/> <q>friends</q></th><td></td><td></td><td>https://www.google.com/m8/feeds</td>
-		</tr>
-		<tr>
-			<th colspan="4"></th>
-		</tr>
-		<tr>
-			<th><input type="checkbox" name="scopes" value="publish"/> <q>publish</q></th><td>publish_streams</td><td>wl.share</td><td></td>
-		</tr>
-		<tr>
-			<th><input type="checkbox" name="scopes" value="create_event"/> <q>create_event</q></th><td>create_event</td><td>wl.calendars_update,wl.events_create</td><td></td>
-		</tr>
-		<tr>
-			<th colspan="4"></th>
-		</tr>
-		<tr>
-			<th><input type="checkbox" name="scopes" value="offline_access"/> <q>offline_access</q></th><td>offline_access</td><td>wl.offline_access</td><td></td>
-		</tr>
-	</tbody>
-</table>
-
-
-google
-facebook
-windows
-
-
-
-
-
-## REST API
-
-### Path Translation
-
-hello.js translates paths if there are common paths across services.
-
-<table>
-	<thead>
-		<tr><th><code>hello.js</code></th><th>Facebook</th><th>Windows Live</th><th>Google</th></tr>
-	</thead>
-	<tbody>
-		<tr>
-			<th><em>OAuth2 endpoint</em></th><td>http://www.facebook.com/dialog/oauth/</td><td>https://oauth.live.com/authorize</td><td>https://accounts.google.com/o/oauth2/auth</td>
-		</tr>
-		<tr>
-			<th><em>REST API base</em></th><td>https://graph.facebook.com/</td><td>https://apis.live.net/v5.0/</td><td>https://www.googleapis.com/</td>
-		</tr>
-		<tr>
-			<th><q>me</q></th><td>me</td><td>me</td><td>plus/v1/people/me?pp=1</td>
-		</tr>
-		<tr>
-			<th><q>me/friends</q></th><td>me/friends</td><td>me/friends</td><td>https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000</td>
-		</tr>
-		<tr>
-			<th><q>me/share</q></th><td>me/feed</td><td>me/share</td><td>n/a</td>
-		</tr>
-		<tr>
-			<th><q>me/albums</q></th><td>me/albums</td><td>me/albums</td><td>n/a</td>
-		</tr>
-	</tbody>
-</table>
-
-
-### Paths
-These are some of the paths you can use with hello.api( path, callback ).
-e.g.
-hello.api("me", function(json){console.log(json);})
-Below is a REST playground, clicking the paths on the left will return the results on the right
-
-
-
-### Play Ground
-
-Windows
-FaceBook
-Google
-
-
-
-e.g...
-
-- /me
-- /me/friends
-- /me/feed
-- /me/home
-- /me/photos
-- /me/albums
-- /me/videos
-- /me/events
-
-
-Runclear [update your scopes and permissions](#scope-and-permissions)
-
-
-
-
-
-### Error handling
+## Error handling
 
 For hello.api([path], [callback]) the first parameter of callback 
 upon error will be either boolean (false) or be an error object as 
 described below.
 
-#### Error Object
+### Error Object
 
 <table>
 	<thead>
@@ -645,14 +527,15 @@ Please contribute! I leave this to the end of the page to say but if you've read
 Please adopt the continuous integration tests.
 
 
-	#Using NodeJS on your dev environment, cd into the project root and install dev dependencies 
+	# Using NodeJS on your dev environment
+	# cd into the project root and install dev dependencies 
 	npm install -l
 
 	# run continuous integration tests
 	npm test
 
-	# open a couple of browsers wuth the given URL, e.g. it'll say "Karma v0.9.8 server started at http://localhost:9876/", so open that URL in a couple of browsers.
-	# Save any changes and the tests will be initated
+
+Open a couple of browsers with the given URL (e.g. it'll say "Karma v0.9.8 server started at http://localhost:9876/"). The tests are triggered when the code is modified
 
 
 

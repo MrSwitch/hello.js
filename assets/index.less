@@ -1,5 +1,28 @@
+
+header nav{
+	float: right;
+	a{
+		font-size:1.2em;
+		padding:5px;
+		background-color:#F5F7F5;
+		border:1px solid #CCC;
+		display: inline-block;
+		text-decoration: none;
+	}
+}
 #profile{
-	min-height:75px;
+	img{
+		border-radius:50%;
+		height: 100px;
+		display: block;
+		margin: auto;
+		background-color:#ddd;
+	}
+	div{
+		display:inline-block;
+		padding: 10px;
+	}
+	text-align:center;
 }
 
 button.zocial{
@@ -14,48 +37,125 @@ button.zocial{
 
 
 
-/**
- * REST EXPOLORER
- */
+table.testtable{
 
-ul.tabs{
-	margin:0;
-	padding:0;
+	pre{
+		word-break: break-word;
+		word-break: break-all;
+		tab-size: 2;
+	}
 
-	li{
-		display: inline-block;
-		border:1px solid #eee;
-		background-color: #f4f4f4;
-		padding:5px 10px;
+	button{
+		cursor: pointer;
+	}
+
+	tbody td:first-child{
+		min-width:200px;
+	}
+	tbody td:nth-child(2){
+		min-width:100px;
+	}
+
+	td.method span{
+		vertical-align:top;
+		color:white;
+		text-transform:uppercase;
+		padding:7px 10px;
+		border-radius:3px;
+		font-size:0.7em;
+		min-width:60px;
+		text-align:center;
+	}
+
+	td.method span.get{
+		background-color:#0F6AB4;
+	}
+	td.method span.post{
+		background-color:#10A54A;
+	}
+	td.method span.put{
+		background-color:#c5862b;
+	}
+	td.method span.delete{
+		background-color:red;
+	}
+
+	td.method span.login, td.method span.logout, td.method span.getAuthResponse{
+		background-color:#FF0;
+		color:#444;
+	}
+
+	td,th{
+		padding: 2px;
+	}
+
+
+	tr.debug{
+		background-color:#E7F6EC;
+	}
+
+	.zocial.icon{
+		vertical-align: top;
+		color:black;
+		border-color: transparent;
+		border-radius:2px;
+		background-color:transparent;
+	}
+
+	pre *{
+		word-break:break-word;
+	}
+	th{
+		font-weight: normal;
+	}
+
+	a:hover{
+		cursor:pointer;
+		text-decoration: underline;
 	}
 }
 
-input[name=path]{
-	display:block;
-	width:100%;
-	padding:5px;
-	box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	font-size:20px;
-	margin:0;
-	border:1px solid #e4e4e4;
-	border-top-width:10px;
-}
 
-#playground > ul{
-	> li{
-		display: inline-block;
-		margin:0;
-		padding:0;
-		&:after{
-			content:", ";
-		}
-		&:hover{
-			background-color: rgba(0,0,0,0.05);
-		}
+
+button{
+	color:black;
+	border: 1px solid #D2D2D2;
+	border-radius:10px;
+	background-color:#fff;
+	&.run:before{
+		content:"\025BA";		
+	}
+	&.working:before{
+		content:"\02589";
+	}
+
+	&.response{
+		color : white;
+		border-color:transparent;
+	}
+	&.response.error{
+		background-color:red;
+	}
+	&.response.passed{
+		background-color:#10A54A;
+	}
+	&.response.exception{
+		background-color:orange;
+	}
+	&.pending{
+		background-color:lime;
+	}
+	&.response.error:after{
+		content: "\02716";
+	}
+	&.response.passed:after{
+		content: "\02714";
+	}
+	&.response.exception:after{
+		content: "?";
 	}
 }
+
 
 
 .method{
@@ -86,18 +186,5 @@ input[name=path]{
 	&.delete:before{
 		content:"DELETE";
 		background-color: red;
-	}
-}
-
-
-header nav{
-	float: right;
-	a{
-		font-size:1.2em;
-		padding:5px;
-		background-color:#F5F7F5;
-		border:1px solid #CCC;
-		display: inline-block;
-		text-decoration: none;
 	}
 }
