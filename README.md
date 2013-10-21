@@ -97,13 +97,21 @@ Anything not listed i have no knowledge of and would appreciate input.
 
 ## Install
 
-Compiled source, which combines all the modules can be obtained from [Github](https://github.com/MrSwitch/hello.js/tree/master/dist), and source files can be found in [Source](https://github.com/MrSwitch/hello.js/tree/master/src). Otherwise...
+Download: [HelloJS](dist/hello.all.js) | [HelloJS (minified)](dist/hello.all.min.js)
+
+Compiled source, which combines all the modules can be obtained from [Github](https://github.com/MrSwitch/hello.js/tree/master/dist), and source files can be found in [Source](https://github.com/MrSwitch/hello.js/tree/master/src).
+
+### Bower Package
 
 
+	# Install the package manager, bower
+	npm install bower
+
+	# Install hello
 	bower install hello
 
 
-The [Bower](http://bower.io/) package shall install the aforementioned "/src" and "/dist" directories. The "/src" directory provides individual modules which you might like to package separately for efficieny.
+The [Bower](http://bower.io/) package shall install the aforementioned "/src" and "/dist" directories. The "/src" directory provides individual modules which can be packaged as desired.
 
 Note: Some services require OAuth1 or server-side OAuth2 authorization. In such case HelloJS communicates with an [OAuth Proxy](#oauth-proxy).
 
