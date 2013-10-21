@@ -99,20 +99,23 @@ Anything not listed i have no knowledge of and would appreciate input.
 
 Compiled source, which combines all the modules can be obtained from [Github](https://github.com/MrSwitch/hello.js/tree/master/dist), and source files can be found in [Source](https://github.com/MrSwitch/hello.js/tree/master/src). Otherwise...
 
-bower install hello
 
-Includes the aforementioned "src" and "dist" directories and shall let you cherry pick the files for you
+	bower install hello
 
-Note: Some services can't all be just in the client, as such checkout the [OAuth Proxy](#oauth-proxy)
+
+The [Bower](http://bower.io/) package shall install the aforementioned "/src" and "/dist" directories. The "/src" directory provides individual modules which you might like to package separately for efficieny.
+
+Note: Some services require OAuth1 or server-side OAuth2 authorization. In such case HelloJS communicates with an [OAuth Proxy](#oauth-proxy).
 
 ## Quick Start
 Quick start shows you how to go from zero to loading in the name and picture of a user, like in the demo above.
 
-[Register your app domain](#1-register)
-[Include hello.js script](#2-include-hellojs-script-in-your-page)
-[Create the signin buttons](#3-create-the-signin-buttons)
-[Setup listener for login and retrieve user info.](#4-add-listeners-for-the-user-login)
-[Initiate the client_ids and all listeners](#5-configure-hellojs-with-your-client_ids-and-initiate-all-listeners)
+
+- [Register your app domain](#1-register)
+- [Include hello.js script](#2-include-hellojs-script-in-your-page)
+- [Create the signin buttons](#3-create-the-signin-buttons)
+- [Setup listener for login and retrieve user info.](#4-add-listeners-for-the-user-login)
+- [Initiate the client_ids and all listeners](#5-configure-hellojs-with-your-client_ids-and-initiate-all-listeners)
 
 
 ### 1. Register
@@ -272,7 +275,7 @@ If a network string is provided: A consent window to authenticate with that netw
 ### Examples:
 
 
-	hello.login(&#39;facebook&#39;, function(){
+	hello.login("facebook", function(){
 		alert("You are signed in to Facebook");
 	});
 

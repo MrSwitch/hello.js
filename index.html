@@ -125,20 +125,23 @@
 
 <p>Compiled source, which combines all the modules can be obtained from <a href="https://github.com/MrSwitch/hello.js/tree/master/dist">Github</a>, and source files can be found in <a href="https://github.com/MrSwitch/hello.js/tree/master/src">Source</a>. Otherwise...
 
-<pre>bower install hello</pre>
+<pre>
+	bower install hello
+</pre>
 
-<p>Includes the aforementioned "src" and "dist" directories and shall let you cherry pick the files for you</p>
+<p>The <a href="http://bower.io/">Bower</a> package shall install the aforementioned "/src" and "/dist" directories. The "/src" directory provides individual modules which you might like to package separately for efficieny.</p>
 
-<p>Note: Some services can't all be just in the client, as such checkout the <a href="#oauth-proxy">OAuth Proxy</a></p>
+<p><b>Note:</b> Some services require OAuth1 or server-side OAuth2 authorization. In such case HelloJS communicates with an <a href="#oauth-proxy">OAuth Proxy</a>.</p>
 
 <h2>Quick Start</h2>
 <p>Quick start shows you how to go from zero to loading in the name and picture of a user, like in the demo above.</p>
+
 <ol>
-<li><a href="#1-register">Register your app domain</a>
-<li><a href="#2-include-hellojs-script-in-your-page">Include hello.js script</a>
-<li><a href="#3-create-the-signin-buttons">Create the signin buttons</a>
-<li><a href="#4-add-listeners-for-the-user-login">Setup listener for login and retrieve user info.</a>
-<li><a href="#5-configure-hellojs-with-your-client_ids-and-initiate-all-listeners">Initiate the client_ids and all listeners</a>
+<li><a href="#1-register">Register your app domain</a></li>
+<li><a href="#2-include-hellojs-script-in-your-page">Include hello.js script</a></li>
+<li><a href="#3-create-the-signin-buttons">Create the signin buttons</a></li>
+<li><a href="#4-add-listeners-for-the-user-login">Setup listener for login and retrieve user info.</a></li>
+<li><a href="#5-configure-hellojs-with-your-client_ids-and-initiate-all-listeners">Initiate the client_ids and all listeners</a></li>
 </ol>
 
 <h3>1. Register</h3>
@@ -298,7 +301,7 @@
 <h3>Examples:</h3>
 
 <pre class="tryitoffline">
-	hello.login(&#39;facebook&#39;, function(){
+	hello.login("facebook", function(){
 		alert("You are signed in to Facebook");
 	});
 </pre>
