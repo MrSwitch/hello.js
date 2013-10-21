@@ -70,8 +70,12 @@ hello.utils.extend( hello, {
 
 		//
 		// Default Network
-		default_service : null
+		default_service : null,
 
+		//
+		// Force signin
+		// When hello.login is fired, ignore current session expiry and continue with login
+		force : true
 	},
 
 
@@ -98,42 +102,24 @@ hello.utils.extend( hello, {
 	//
 	// Use
 	// Define a new instance of the Hello library with a default service
+	//
 	use : function(service){
-		// Create a new
+	
+		// Create self, which inherits from its parent
+		var self = this.utils.objectCreate(this);
 
-		var F = function(){
+		// Inherit the prototype from its parent
+		self.settings = this.utils.objectCreate(this.settings);
 
-			var settings = this.settings;
-
-			// Reassign the settings
-			this.settings = {
-				default_service : service
-			};
-
-			// Delegate the other settings from the original settings object
-			if(Object.setPrototypeOf){
-				Object.setPrototypeOf(this.settings, settings);
-			}
-			else if(this.settings.__proto__){
-				this.settings.__proto__ = settings;
-			}
-			else{
-				// else can't extend its prototype, do the static thing
-				for(var x in settings)if( settings.hasOwnProperty(x) && !( x in this.settings ) ){
-					this.settings[x] = settings[x];
-				}
-			}
+		// Define the default service
+		if(service){
+			self.settings.default_service = service;
 		}
 
-		F.prototype = this;
-
-		// Invoke as an instance
-		var f = new F();
-
 		// Create an instance of Events
-		this.utils.Event.call(f);
+		self.utils.Event.call(self);
 
-		return f;
+		return self;
 	},
 
 
@@ -194,44 +180,40 @@ hello.utils.extend( hello, {
 
 		var p = this.utils.args({network:'s', options:'o', callback:'f'}, arguments);
 
-		if(!(this instanceof arguments.callee)){
-			// Invoke as an instance
-			arguments.callee.prototype = this;
-			return new arguments.callee(p);
-		}
-
-		// Create an instance of Events
-		this.utils.Event.call(this);
+		// Create self
+		// An object which inherits its parent as the prototype.
+		// And constructs a new event chain.
+		var self = this.use();
 
 		// Apply the args
-		this.args = p;
+		self.args = p;
 
 		// Local vars
-		var url, self = this;
+		var url;
 
 		// merge/override options with app defaults
-		p.options = this.utils.merge(this.settings, p.options || {} );
+		p.options = self.utils.merge(self.settings, p.options || {} );
 
 		// Network
-		p.network = this.settings.default_service = p.network || this.settings.default_service;
+		p.network = self.settings.default_service = p.network || self.settings.default_service;
 
 		//
 		// Bind listener
-		this.on('complete', p.callback);
+		self.on('complete', p.callback);
 
 		// Is our service valid?
-		if( typeof(p.network) !== 'string' || !( p.network in this.services ) ){
+		if( typeof(p.network) !== 'string' || !( p.network in self.services ) ){
 			// trigger the default login.
 			// ahh we dont have one.
 			self.emitAfter('error complete', {error:{
 				code : 'invalid_network',
 				message : 'The provided network was not recognized'
 			}});
-			return this;
+			return self;
 		}
 
 		//
-		var provider  = this.services[p.network];
+		var provider  = self.services[p.network];
 
 		//
 		// Callback
@@ -241,7 +223,7 @@ hello.utils.extend( hello, {
 
 		//
 		// Create a global listener to capture events triggered out of scope
-		var callback_id = this.utils.globalEvent(function(obj){
+		var callback_id = self.utils.globalEvent(function(obj){
 
 			//
 			// Cancel the popup close listener
@@ -305,13 +287,13 @@ hello.utils.extend( hello, {
 		// Append scopes from a previous session
 		// This helps keep app credentials constant,
 		// Avoiding having to keep tabs on what scopes are authorized
-		var session = this.utils.store(p.network);
+		var session = self.utils.store(p.network);
 		if(session && "scope" in session){
 			scope += ","+session.scope.join(",");
 		}
 
 		// Save in the State
-		p.qs.state.scope = this.utils.unique( scope.split(/[,\s]+/) );
+		p.qs.state.scope = self.utils.unique( scope.split(/[,\s]+/) );
 
 		// Map replace each scope with the providers default scopes
 		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m){
@@ -319,29 +301,31 @@ hello.utils.extend( hello, {
 		}).replace(/[,\s]+/ig, ',');
 
 		// remove duplication and empty spaces
-		p.qs.scope = this.utils.unique(p.qs.scope.split(/,+/)).join( provider.scope_delim || ',');
+		p.qs.scope = self.utils.unique(p.qs.scope.split(/,+/)).join( provider.scope_delim || ',');
 
 
 		//
 		// Is the user already signed in
 		//
-		var session = this.getAuthResponse(p.network);
-		if( session && "access_token" in session && session.access_token && "expires" in session && session.expires > ((new Date()).getTime()/1e3) ){
-			// What is different about the scopes in the session vs the scopes in the new login?
-			var diff = this.utils.diff( session.scope || [], p.qs.state.scope || [] );
-			if(diff.length===0){
+		if(p.options.force===false){
+			var session = self.getAuthResponse(p.network);
+			if( session && "access_token" in session && session.access_token && "expires" in session && session.expires > ((new Date()).getTime()/1e3) ){
+				// What is different about the scopes in the session vs the scopes in the new login?
+				var diff = self.utils.diff( session.scope || [], p.qs.state.scope || [] );
+				if(diff.length===0){
 
-				// Nothing has changed
-				this.emit("notice", "User already has a valid access_token");
+					// Nothing has changed
+					self.emit("notice", "User already has a valid access_token");
 
-				// Ok trigger the callback
-				this.emitAfter("complete success login", {
-					network : p.network,
-					authResponse : session
-				});
+					// Ok trigger the callback
+					self.emitAfter("complete success login", {
+						network : p.network,
+						authResponse : session
+					});
 
-				// Nothing has changed
-				return this;
+					// Nothing has changed
+					return self;
+				}
 			}
 		}
 
@@ -349,7 +333,7 @@ hello.utils.extend( hello, {
 		// REDIRECT_URI
 		// Is the redirect_uri root?
 		//
-		p.qs.redirect_uri = this.utils.realPath(p.qs.redirect_uri);
+		p.qs.redirect_uri = self.utils.realPath(p.qs.redirect_uri);
 
 		// Add OAuth to state
 		if(provider.oauth){
@@ -374,23 +358,23 @@ hello.utils.extend( hello, {
 		//
 		if( parseInt(provider.oauth.version,10) === 1 ){
 			// Turn the request to the OAuth Proxy for 3-legged auth
-			url = this.utils.qs( p.options.oauth_proxy, p.qs );
+			url = self.utils.qs( p.options.oauth_proxy, p.qs );
 		}
 		else{
-			url = this.utils.qs( provider.oauth.auth, p.qs );
+			url = self.utils.qs( provider.oauth.auth, p.qs );
 		}
 
-		this.emit("notice", "Authorization URL " + url );
+		self.emit("notice", "Authorization URL " + url );
 
 
 		//
 		// Execute
-		// Trigger how we want this displayed
+		// Trigger how we want self displayed
 		// Calling Quietly?
 		//
 		if( p.options.display === 'none' ){
 			// signin in the background, iframe
-			this.utils.append('iframe', { src : url, style : {position:'absolute',left:"-1000px",bottom:0,height:'1px',width:'1px'} }, 'body');
+			self.utils.append('iframe', { src : url, style : {position:'absolute',left:"-1000px",bottom:0,height:'1px',width:'1px'} }, 'body');
 		}
 
 
@@ -423,7 +407,7 @@ hello.utils.extend( hello, {
 			window.location = url;
 		}
 
-		return this;
+		return self;
 	},
 
 
@@ -437,60 +421,54 @@ hello.utils.extend( hello, {
 
 		var p = this.utils.args({name:'s', callback:"f" }, arguments);
 
-		if(!(this instanceof arguments.callee)){
-			// Invoke as an instance
-			arguments.callee.prototype = this;
-			return new arguments.callee(p);
-		}
-
-		// Create an instance of Events
-		this.utils.Event.call(this);
-
-		var self = this;
+		// Create self
+		// An object which inherits its parent as the prototype.
+		// And constructs a new event chain.
+		var self = this.use();
 
 		// Add callback to events
-		this.on('complete', p.callback);
+		self.on('complete', p.callback);
 
 		// Netowrk
-		p.name = p.name || this.settings.default_service;
+		p.name = p.name || self.settings.default_service;
 
-		if( p.name && !( p.name in this.services ) ){
-			this.emitAfter("complete error", {error:{
+		if( p.name && !( p.name in self.services ) ){
+			self.emitAfter("complete error", {error:{
 				code : 'invalid_network',
 				message : 'The network was unrecognized'
 			}});
-			return this;
+			return self;
 		}
-		if(p.name && this.utils.store(p.name)){
+		if(p.name && self.utils.store(p.name)){
 
 			// Trigger a logout callback on the provider
-			if(typeof(this.services[p.name].logout) === 'function'){
-				this.services[p.name].logout(p);
+			if(typeof(self.services[p.name].logout) === 'function'){
+				self.services[p.name].logout(p);
 			}
 
 			// Remove from the store
-			this.utils.store(p.name,'');
+			self.utils.store(p.name,'');
 		}
 		else if(!p.name){
-			for(var x in this.utils.services){if(this.utils.services.hasOwnProperty(x)){
-				this.logout(x);
+			for(var x in self.utils.services){if(self.utils.services.hasOwnProperty(x)){
+				self.logout(x);
 			}}
 			// remove the default
-			this.service(false);
+			self.service(false);
 			// trigger callback
 		}
 		else{
-			this.emitAfter("complete error", {error:{
+			self.emitAfter("complete error", {error:{
 				code : 'invalid_session',
 				message : 'There was no session to remove'
 			}});
-			return this;
+			return self;
 		}
 
 		// Emit events by default
-		this.emitAfter("complete logout success auth.logout auth", true);
+		self.emitAfter("complete logout success auth.logout auth", true);
 
-		return this;
+		return self;
 	},
 
 
@@ -683,17 +661,21 @@ hello.utils.extend( hello.utils, {
 	merge : function(a,b){
 		var x,r = {};
 		if( typeof(a) === 'object' && typeof(b) === 'object' ){
-			for(x in a){if(a.hasOwnProperty(x)){
+			for(x in a){
+				//if(a.hasOwnProperty(x)){
 				r[x] = a[x];
 				if(x in b){
 					r[x] = this.merge( a[x], b[x]);
 				}
-			}}
-			for(x in b){if(b.hasOwnProperty(x)){
+				//}
+			}
+			for(x in b){
+				//if(b.hasOwnProperty(x)){
 				if(!(x in a)){
 					r[x] = b[x];
 				}
-			}}
+				//}
+			}
 		}
 		else{
 			r = b;
@@ -856,17 +838,37 @@ hello.utils.extend( hello.utils, {
 		return true;
 	},
 
-	getPrototypeOf : function(obj){
+	// Shim, Object create
+	// A shim for Object.create(), it adds a prototype to a new object
+	objectCreate : (function(){
+		if (Object.create) {
+			return Object.create;
+		}
+		function F(){}
+		return function(o){
+			if (arguments.length != 1) {
+				throw new Error('Object.create implementation only accepts one parameter.');
+			}
+			F.prototype = o;
+			return new F();
+		};
+	})(),
+
+	getPrototypeOf : (function(){
 		if(Object.getPrototypeOf){
-			return Object.getPrototypeOf(obj);
+			return Object.getPrototypeOf;
 		}
-		else if(obj.__proto__){
-			return obj.__proto__;
+		else if(({}).__proto__){
+			return function(obj){
+				return obj.__proto__;
+			};
 		}
-		else if(obj.prototype && obj !== obj.prototype.constructor){
-			return obj.prototype.constructor;
-		}
-	},
+		return function(obj){
+			if(obj.prototype && obj !== obj.prototype.constructor){
+				return obj.prototype.constructor;
+			}
+		};
+	})(),
 
 	//
 	// Event
@@ -1012,7 +1014,6 @@ hello.utils.extend( hello.utils, {
 });
 
 
-
 //////////////////////////////////
 // Events
 //////////////////////////////////
@@ -1100,7 +1101,7 @@ hello.unsubscribe = hello.off;
 				if( refresh && (!( name in expired ) || expired[name] < CURRENT_TIME ) ){
 					// try to resignin
 					hello.emit("notice", name + " has expired trying to resignin" );
-					hello.login(name,{display:'none'});
+					hello.login(name,{display:'none', force: false});
 
 					// update expired, every 10 minutes
 					expired[name] = CURRENT_TIME + 600;
@@ -1309,20 +1310,13 @@ hello.api = function(){
 	// get arguments
 	var p = this.utils.args({path:'s!', method : "s", data:'o', timeout:'i', callback:"f" }, arguments);
 
-	if(!(this instanceof arguments.callee)){
-		// Invoke as an instance
-		arguments.callee.prototype = this;
-		return new arguments.callee(p);
-	}
-
-	// Create an instance of Events
-	this.utils.Event.call(this);
+	// Create self
+	// An object which inherits its parent as the prototype.
+	// And constructs a new event chain.
+	var self = this.use();
 
 	// Reference arguments
-	this.args = p;
-
-	// Reference instance
-	var self = this;
+	self.args = p;
 
 	// method
 	p.method = (p.method || 'get').toLowerCase();
@@ -1331,33 +1325,36 @@ hello.api = function(){
 	p.data = p.data || {};
 
 	// Extrapolate the data from a form element
-	this.utils.dataToJSON(p);
+	self.utils.dataToJSON(p);
 
 	// Path
+	// Remove the network from path, e.g. facebook:/me/friends
+	// results in { network : facebook, path : me/friends }
 	p.path = p.path.replace(/^\/+/,'');
 	var a = (p.path.split(/[\/\:]/,2)||[])[0].toLowerCase();
 
-	if(a in this.services){
+	if(a in self.services){
 		p.network = a;
 		var reg = new RegExp('^'+a+':?\/?');
 		p.path = p.path.replace(reg,'');
 	}
-
 	// Network
-	p.network = this.settings.default_service = p.network || this.settings.default_service;
+	p.network = self.settings.default_service = p.network || self.settings.default_service;
 
+
+	// Completed event
 	// callback
-	this.on('complete', p.callback);
+	self.on('complete', p.callback);
 	
 	// timeout global setting
 	if(p.timeout){
-		this.settings.timeout = p.timeout;
+		self.settings.timeout = p.timeout;
 	}
 
-	// Log this request
-	this.emit("notice", "API request "+p.method.toUpperCase()+" '"+p.path+"' (request)",p);
+	// Log self request
+	self.emit("notice", "API request "+p.method.toUpperCase()+" '"+p.path+"' (request)",p);
 	
-	var o = this.services[p.network];
+	var o = self.services[p.network];
 
 	//
 	// INVALID PROVIDER?
@@ -1367,7 +1364,7 @@ hello.api = function(){
 			code : "invalid_network",
 			message : "Could not match the service requested: " + p.network
 		}});
-		return this;
+		return self;
 	}
 
 	//
@@ -1378,7 +1375,7 @@ hello.api = function(){
 	var callback = function(r,code){
 
 		// FORMAT RESPONSE?
-		// Does this request have a corresponding formatter
+		// Does self request have a corresponding formatter
 		if( o.wrap && ( (p.path in o.wrap) || ("default" in o.wrap) )){
 			var wrap = (p.path in o.wrap ? p.path : "default");
 			var time = (new Date()).getTime();
@@ -1387,7 +1384,7 @@ hello.api = function(){
 			var b = o.wrap[wrap](r,code);
 
 			// Has the response been utterly overwritten?
-			// Typically this augments the existing object.. but for those rare occassions
+			// Typically self augments the existing object.. but for those rare occassions
 			if(b){
 				r = b;
 			}
@@ -1504,7 +1501,7 @@ hello.api = function(){
 					o.jsonp(p,qs);
 				}
 
-				// Is this still a post?
+				// Is self still a post?
 				if( p.method === 'post' ){
 
 					// Add some additional query parameters to the URL
@@ -1529,7 +1526,7 @@ hello.api = function(){
 
 		// Make request
 		if(typeof(url)==='function'){
-			// Does this have its own callback?
+			// Does self have its own callback?
 			url(p, getPath);
 		}
 		else{
@@ -1538,13 +1535,13 @@ hello.api = function(){
 		}
 	}
 	else{
-		this.emitAfter("complete error", {error:{
+		self.emitAfter("complete error", {error:{
 			code:'invalid_path',
 			message:'The provided path is not available on the selected network'
 		}});
 	}
 
-	return this;
+	return self;
 
 
 	//
@@ -1556,7 +1553,7 @@ hello.api = function(){
 			service = self.services[network],
 			token = (session ? session.access_token : null);
 
-		// Is this an OAuth1 endpoint
+		// Is self an OAuth1 endpoint
 		var proxy = ( service.oauth && parseInt(service.oauth.version,10) === 1 ? self.settings.oauth_proxy : null);
 
 		if(proxy){
