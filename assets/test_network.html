@@ -30,7 +30,7 @@
 			<!-- ko foreach:variants -->
 			<td>
 				<button data-bind="visible: enabled, click:run, css:{ working: status()==='working'}, attr:{ title : 'Execute test for '+network }" class="run" title="Run this test"></button>
-				<button class="response" data-bind="visible: enabled, css: { error : passed() === false, passed : passed() === true, exception:status()==='exception' }, visible:passed()===false||passed()===true, click:function(){var bool = !($parent.debug()&&showResponse()); showResponse(bool);$parent.debug(bool);}"></button>
+				<button class="response" data-bind="visible: enabled, css: { error : passed() === false, passed : passed() === true, exception:status()==='exception' }, visible:passed()===false||passed()===true||response(), click:function(){var bool = !($parent.debug()&&showResponse()); showResponse(bool);$parent.debug(bool);}"></button>
 			</td>
 			<!-- /ko -->
 		</tr>
