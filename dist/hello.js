@@ -11,7 +11,7 @@
  */
 
 // Can't use strict with arguments.callee
-// "use strict";
+//"use strict";
 
 
 //
@@ -104,7 +104,7 @@ hello.utils.extend( hello, {
 	// Define a new instance of the Hello library with a default service
 	//
 	use : function(service){
-	
+
 		// Create self, which inherits from its parent
 		var self = this.utils.objectCreate(this);
 
@@ -132,6 +132,8 @@ hello.utils.extend( hello, {
 	//
 	init : function(services,options){
 
+		var utils = this.utils;
+
 		if(!services){
 			return this.services;
 		}
@@ -146,7 +148,7 @@ hello.utils.extend( hello, {
 
 		//
 		// merge services if there already exists some
-		this.services = this.utils.merge(this.services, services);
+		this.services = utils.merge(this.services, services);
 
 		//
 		// Format the incoming
@@ -157,11 +159,11 @@ hello.utils.extend( hello, {
 		//
 		// Update the default settings with this one.
 		if(options){
-			this.settings = this.utils.merge(this.settings, options);
+			this.settings = utils.merge(this.settings, options);
 
 			// Do this immediatly incase the browser changes the current path.
 			if("redirect_uri" in options){
-				this.settings.redirect_uri = this.utils.realPath(options.redirect_uri);
+				this.settings.redirect_uri = utils.realPath(options.redirect_uri);
 			}
 		}
 
@@ -176,14 +178,16 @@ hello.utils.extend( hello, {
 	// @param options	object		(optional)	{display mode, is either none|popup(default)|page, scope: email,birthday,publish, .. }
 	// @param callback	function	(optional)	fired on signin
 	//
-	login :  function(network, opts, callback){
-
-		var p = this.utils.args({network:'s', options:'o', callback:'f'}, arguments);
+	login :  function(){
 
 		// Create self
 		// An object which inherits its parent as the prototype.
 		// And constructs a new event chain.
-		var self = this.use();
+		var self = this.use(),
+			utils = self.utils;
+
+		// Get parameters
+		var p = utils.args({network:'s', options:'o', callback:'f'}, arguments);
 
 		// Apply the args
 		self.args = p;
@@ -192,7 +196,7 @@ hello.utils.extend( hello, {
 		var url;
 
 		// merge/override options with app defaults
-		p.options = self.utils.merge(self.settings, p.options || {} );
+		var opts = p.options = utils.merge(self.settings, p.options || {} );
 
 		// Network
 		p.network = self.settings.default_service = p.network || self.settings.default_service;
@@ -223,7 +227,7 @@ hello.utils.extend( hello, {
 
 		//
 		// Create a global listener to capture events triggered out of scope
-		var callback_id = self.utils.globalEvent(function(obj){
+		var callback_id = utils.globalEvent(function(obj){
 
 			//
 			// Cancel the popup close listener
@@ -236,7 +240,7 @@ hello.utils.extend( hello, {
 
 				// Save on the parent window the new credentials
 				// This fixes an IE10 bug i think... atleast it does for me.
-				self.utils.store(obj.network,obj);
+				utils.store(obj.network,obj);
 
 				// Trigger local complete events
 				self.emit("complete success login auth.login auth", {
@@ -260,25 +264,30 @@ hello.utils.extend( hello, {
 		//
 		p.qs = {
 			client_id	: provider.id,
-			response_type : p.options.response_type,
-			redirect_uri : p.options.redirect_uri,
-			display		: p.options.display,
+			response_type : opts.response_type,
+			redirect_uri : opts.redirect_uri,
+			display		: opts.display,
 			scope		: 'basic',
 			state		: {
 				client_id	: provider.id,
 				network		: p.network,
-				display		: p.options.display,
+				display		: opts.display,
 				callback	: callback_id,
-				state		: p.options.state,
-				oauth_proxy : p.options.oauth_proxy
+				state		: opts.state,
+				oauth_proxy : opts.oauth_proxy
 			}
 		};
+
+		//
+		// SESSION
+		// Get current session for merging scopes, and for quick auth response
+		var session = utils.store(p.network);
 
 		//
 		// SCOPES
 		// Authentication permisions
 		//
-		var scope = p.options.scope;
+		var scope = opts.scope;
 		if(scope && typeof(scope)!=='string'){
 			scope = scope.join(',');
 		}
@@ -287,13 +296,11 @@ hello.utils.extend( hello, {
 		// Append scopes from a previous session
 		// This helps keep app credentials constant,
 		// Avoiding having to keep tabs on what scopes are authorized
-		var session = self.utils.store(p.network);
 		if(session && "scope" in session){
 			scope += ","+session.scope.join(",");
 		}
-
 		// Save in the State
-		p.qs.state.scope = self.utils.unique( scope.split(/[,\s]+/) );
+		p.qs.state.scope = utils.unique( scope.split(/[,\s]+/) );
 
 		// Map replace each scope with the providers default scopes
 		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m){
@@ -301,17 +308,20 @@ hello.utils.extend( hello, {
 		}).replace(/[,\s]+/ig, ',');
 
 		// remove duplication and empty spaces
-		p.qs.scope = self.utils.unique(p.qs.scope.split(/,+/)).join( provider.scope_delim || ',');
+		p.qs.scope = utils.unique(p.qs.scope.split(/,+/)).join( provider.scope_delim || ',');
+
+
 
 
 		//
-		// Is the user already signed in
+		// FORCE
+		// Is the user already signed in with the appropriate scopes, valid access_token?
 		//
-		if(p.options.force===false){
-			var session = self.getAuthResponse(p.network);
+		if(opts.force===false){
+
 			if( session && "access_token" in session && session.access_token && "expires" in session && session.expires > ((new Date()).getTime()/1e3) ){
 				// What is different about the scopes in the session vs the scopes in the new login?
-				var diff = self.utils.diff( session.scope || [], p.qs.state.scope || [] );
+				var diff = utils.diff( session.scope || [], p.qs.state.scope || [] );
 				if(diff.length===0){
 
 					// Nothing has changed
@@ -333,7 +343,7 @@ hello.utils.extend( hello, {
 		// REDIRECT_URI
 		// Is the redirect_uri root?
 		//
-		p.qs.redirect_uri = self.utils.realPath(p.qs.redirect_uri);
+		p.qs.redirect_uri = utils.realPath(p.qs.redirect_uri);
 
 		// Add OAuth to state
 		if(provider.oauth){
@@ -358,10 +368,10 @@ hello.utils.extend( hello, {
 		//
 		if( parseInt(provider.oauth.version,10) === 1 ){
 			// Turn the request to the OAuth Proxy for 3-legged auth
-			url = self.utils.qs( p.options.oauth_proxy, p.qs );
+			url = utils.qs( opts.oauth_proxy, p.qs );
 		}
 		else{
-			url = self.utils.qs( provider.oauth.auth, p.qs );
+			url = utils.qs( provider.oauth.auth, p.qs );
 		}
 
 		self.emit("notice", "Authorization URL " + url );
@@ -372,17 +382,18 @@ hello.utils.extend( hello, {
 		// Trigger how we want self displayed
 		// Calling Quietly?
 		//
-		if( p.options.display === 'none' ){
+		if( opts.display === 'none' ){
 			// signin in the background, iframe
-			self.utils.append('iframe', { src : url, style : {position:'absolute',left:"-1000px",bottom:0,height:'1px',width:'1px'} }, 'body');
+			utils.append('iframe', { src : url, style : {position:'absolute',left:"-1000px",bottom:0,height:'1px',width:'1px'} }, 'body');
 		}
 
 
 		// Triggering popup?
-		else if( p.options.display === 'popup'){
+		else if( opts.display === 'popup'){
 
-			var windowHeight = p.options.window_height || 550;
-			var windowWidth = p.options.window_width || 500;
+			var windowHeight = opts.window_height || 550;
+			var windowWidth = opts.window_width || 500;
+
 			// Trigger callback
 			var popup = window.open(
 				url,
@@ -450,7 +461,7 @@ hello.utils.extend( hello, {
 			self.utils.store(p.name,'');
 		}
 		else if(!p.name){
-			for(var x in self.utils.services){if(self.utils.services.hasOwnProperty(x)){
+			for(var x in self.services){if(self.services.hasOwnProperty(x)){
 				self.logout(x);
 			}}
 			// remove the default
@@ -736,12 +747,15 @@ hello.utils.extend( hello.utils, {
 	// realPath
 	// Converts relative URL's to fully qualified URL's
 	realPath : function(path){
+
+		var location = window.location;
+
 		if( path.indexOf('/') === 0 ){
-			path = window.location.protocol + '//' + window.location.host + path;
+			path = location.protocol + '//' + location.host + path;
 		}
 		// Is the redirect_uri relative?
 		else if( !path.match(/^https?\:\/\//) ){
-			path = (window.location.href.replace(/#.*/,'').replace(/\/[^\/]+$/,'/') + path).replace(/\/\.\//g,'/');
+			path = (location.href.replace(/#.*/,'').replace(/\/[^\/]+$/,'/') + path).replace(/\/\.\//g,'/');
 		}
 		while( /\/[^\/]+\/\.\.\//g.test(path) ){
 			path = path.replace(/\/[^\/]+\/\.\.\//g, '/');
@@ -854,6 +868,11 @@ hello.utils.extend( hello.utils, {
 		};
 	})(),
 
+	/*
+	//
+	// getProtoTypeOf
+	// Once all browsers catchup we can access the prototype
+	// Currently: manually define prototype object in the `parent` attribute
 	getPrototypeOf : (function(){
 		if(Object.getPrototypeOf){
 			return Object.getPrototypeOf;
@@ -869,7 +888,7 @@ hello.utils.extend( hello.utils, {
 			}
 		};
 	})(),
-
+	*/
 	//
 	// Event
 	// A contructor superclass for adding event menthods, on, off, emit.
@@ -1163,7 +1182,10 @@ hello.unsubscribe = hello.off;
 //
 /////////////////////////////////////
 
-(function(hello){
+(function(hello, window){
+
+	var utils = hello.utils,
+		location = window.location;
 
 	//
 	// AuthCallback
@@ -1172,7 +1194,7 @@ hello.unsubscribe = hello.off;
 	function authCallback(network, obj){
 
 		// Trigger the callback on the parent
-		hello.utils.store(obj.network, obj );
+		utils.store(obj.network, obj );
 
 		// this is a popup so
 		if( !("display" in p) || p.display !== 'page'){
@@ -1195,7 +1217,7 @@ hello.unsubscribe = hello.off;
 				win[cb](obj);
 
 				// Update store
-				hello.utils.store(obj.network,obj);
+				utils.store(obj.network,obj);
 			}
 
 			window.close();
@@ -1212,7 +1234,7 @@ hello.unsubscribe = hello.off;
 	//
 	// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
 	// SoundCloud is the state in the querystring and the token in the hashtag, so we'll mix the two together
-	var p = hello.utils.merge(hello.utils.param(window.location.search||''), hello.utils.param(window.location.hash||''));
+	var p = utils.merge(hello.utils.param(location.search||''), utils.param(location.hash||''));
 
 	
 	// if p.state
@@ -1222,7 +1244,7 @@ hello.unsubscribe = hello.off;
 		// e.g. p.state = 'facebook.page';
 		try{
 			var a = JSON.parse(p.state);
-			p = hello.utils.merge(p, a);
+			p = utils.merge(p, a);
 		}catch(e){
 			hello.emit("error", "Could not decode state parameter");
 		}
@@ -1270,21 +1292,21 @@ hello.unsubscribe = hello.off;
 	}
 
 	// redefine
-	p = hello.utils.param(window.location.search);
+	p = utils.param(location.search);
 
 	// IS THIS AN OAUTH2 SERVER RESPONSE? OR AN OAUTH1 SERVER RESPONSE?
 	if((p.code&&p.state) || (p.oauth_token&&p.proxy_url)){
 		// Add this path as the redirect_uri
-		p.redirect_uri = window.location.href.replace(/[\?\#].*$/,'');
+		p.redirect_uri = location.href.replace(/[\?\#].*$/,'');
 		// JSON decode
 		var state = JSON.parse(p.state);
 		// redirect to the host
-		var path = (state.oauth_proxy || p.proxy_url) + "?" + hello.utils.param(p);
+		var path = (state.oauth_proxy || p.proxy_url) + "?" + utils.param(p);
 
 		window.location = path;
 	}
 
-})(hello);
+})(hello, window);
 
 
 
@@ -1313,7 +1335,8 @@ hello.api = function(){
 	// Create self
 	// An object which inherits its parent as the prototype.
 	// And constructs a new event chain.
-	var self = this.use();
+	var self = this.use(),
+		utils = self.utils;
 
 	// Reference arguments
 	self.args = p;
@@ -1325,7 +1348,7 @@ hello.api = function(){
 	p.data = p.data || {};
 
 	// Extrapolate the data from a form element
-	self.utils.dataToJSON(p);
+	utils.dataToJSON(p);
 
 	// Path
 	// Remove the network from path, e.g. facebook:/me/friends
@@ -1448,11 +1471,11 @@ hello.api = function(){
 						qs_handler(qs);
 					}
 					else{
-						qs = self.utils.merge(qs, qs_handler);
+						qs = utils.merge(qs, qs_handler);
 					}
 				}
 
-				var path = self.utils.qs(url, qs||{} );
+				var path = utils.qs(url, qs||{} );
 
 				self.emit("notice", "Request " + path);
 
@@ -1464,9 +1487,9 @@ hello.api = function(){
 			//url += ( url.indexOf('?') > -1 ? "&" : "?" );
 
 			// Format the data
-			if( !self.utils.isEmpty(p.data) && !("FileList" in window) && self.utils.hasBinary(p.data) ){
+			if( !utils.isEmpty(p.data) && !("FileList" in window) && utils.hasBinary(p.data) ){
 				// If we can't format the post then, we are going to run the iFrame hack
-				self.utils.post( format_url, p.data, ("form" in o ? o.form(p) : null), callback );
+				utils.post( format_url, p.data, ("form" in o ? o.form(p) : null), callback );
 
 				return self;
 			}
@@ -1475,13 +1498,13 @@ hello.api = function(){
 			if(p.method === 'delete'){
 				var _callback = callback;
 				callback = function(r, code){
-					_callback((!r||self.utils.isEmpty(r))? {success:true} : r, code);
+					_callback((!r||utils.isEmpty(r))? {success:true} : r, code);
 				};
 			}
 
 			// Can we use XHR for Cross domain delivery?
 			if( 'withCredentials' in new XMLHttpRequest() && ( !("xhr" in o) || ( o.xhr && o.xhr(p,qs) ) ) ){
-				var x = self.utils.xhr( p.method, format_url, p.headers, p.data, callback );
+				var x = utils.xhr( p.method, format_url, p.headers, p.data, callback );
 				x.onprogress = function(e){
 					self.emit("progress", e);
 				};
@@ -1492,7 +1515,7 @@ hello.api = function(){
 			else{
 
 				// Assign a new callbackID
-				p.callbackID = self.utils.globalEvent();
+				p.callbackID = utils.globalEvent();
 
 				// Otherwise we're on to the old school, IFRAME hacks and JSONP
 				// Preprocess the parameters
@@ -1510,16 +1533,16 @@ hello.api = function(){
 					qs.redirect_uri = self.settings.redirect_uri;
 					qs.state = JSON.stringify({callback:p.callbackID});
 
-					self.utils.post( format_url, p.data, ("form" in o ? o.form(p) : null), callback, p.callbackID, self.settings.timeout );
+					utils.post( format_url, p.data, ("form" in o ? o.form(p) : null), callback, p.callbackID, self.settings.timeout );
 				}
 
 				// Make the call
 				else{
 
-					qs = self.utils.merge(qs,p.data);
+					qs = utils.merge(qs,p.data);
 					qs.callback = p.callbackID;
 
-					self.utils.jsonp( format_url, callback, p.callbackID, self.settings.timeout );
+					utils.jsonp( format_url, callback, p.callbackID, self.settings.timeout );
 				}
 			}
 		};
@@ -1558,7 +1581,7 @@ hello.api = function(){
 
 		if(proxy){
 			// Use the proxy as a path
-			callback( self.utils.qs(proxy, {
+			callback( utils.qs(proxy, {
 				path : path,
 				access_token : token||'',
 				then : (method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
@@ -1574,7 +1597,7 @@ hello.api = function(){
 			modifyQueryString(qs);
 		}
 
-		callback(  self.utils.qs( path, qs) );
+		callback(  utils.qs( path, qs) );
 	}
 
 };
@@ -1672,8 +1695,8 @@ hello.utils.extend( hello.utils, {
 
 		// Should we add the query to the URL?
 		if(method === 'GET'||method === 'DELETE'){
-			if(!this.isEmpty(data)){
-				qs = this.merge(qs, data);
+			if(!utils.isEmpty(data)){
+				qs = utils.merge(qs, data);
 			}
 			data = null;
 		}
@@ -1750,7 +1773,7 @@ hello.utils.extend( hello.utils, {
 			};
 
 		// Add callback to the window object
-		var cb_name = this.globalEvent(function(json){
+		var cb_name = utils.globalEvent(function(json){
 			result = json;
 			return true; // mark callback as done
 		},callbackID);
@@ -1829,7 +1852,8 @@ hello.utils.extend( hello.utils, {
 	//
 	post : function(pathFunc, data, options, callback, callbackID, timeout){
 
-		var utils = this;
+		var utils = this,
+			doc = document;
 
 		// The URL is a function for some cases and as such
 		// Determine its value with a callback containing the new parameters of this function.
@@ -1858,16 +1882,16 @@ hello.utils.extend( hello.utils, {
 
 		// What is the name of the callback to contain
 		// We'll also use this to name the iFrame
-		this.globalEvent(cb, callbackID);
+		utils.globalEvent(cb, callbackID);
 
 		// Build the iframe window
 		var win;
 		try{
 			// IE7 hack, only lets us define the name here, not later.
-			win = document.createElement('<iframe name="'+callbackID+'">');
+			win = doc.createElement('<iframe name="'+callbackID+'">');
 		}
 		catch(e){
-			win = document.createElement('iframe');
+			win = doc.createElement('iframe');
 		}
 
 		win.name = callbackID;
@@ -1896,7 +1920,7 @@ hello.utils.extend( hello.utils, {
 			}, timeout);
 		}
 
-		document.body.appendChild(win);
+		doc.body.appendChild(win);
 
 
 		// if we are just posting a single item
@@ -1941,8 +1965,8 @@ hello.utils.extend( hello.utils, {
 			// Do If there is no defined form element, lets create one.
 			if(!form){
 				// Build form
-				form = document.createElement('form');
-				document.body.appendChild(form);
+				form = doc.createElement('form');
+				doc.body.appendChild(form);
 				newform = form;
 			}
 
@@ -1971,7 +1995,7 @@ hello.utils.extend( hello.utils, {
 					}
 
 					// Create an input element
-					input = document.createElement('input');
+					input = doc.createElement('input');
 					input.setAttribute('type', 'hidden');
 					input.setAttribute('name', x);
 
@@ -2069,11 +2093,12 @@ hello.utils.extend( hello.utils, {
 	// Some of the providers require that only MultiPart is used with non-binary forms.
 	// This function checks whether the form contains binary data
 	hasBinary : function (data){
+		var w = window;
 		for(var x in data ) if(data.hasOwnProperty(x)){
 			if( (this.domInstance('input', data[x]) && data[x].type === 'file')	||
-				("FileList" in window && data[x] instanceof window.FileList) ||
-				("File" in window && data[x] instanceof window.File) ||
-				("Blob" in window && data[x] instanceof window.Blob)
+				("FileList" in w && data[x] instanceof w.FileList) ||
+				("File" in w && data[x] instanceof w.File) ||
+				("Blob" in w && data[x] instanceof w.Blob)
 			){
 				return true;
 			}
@@ -2087,44 +2112,45 @@ hello.utils.extend( hello.utils, {
 	//
 	dataToJSON : function (p){
 
-		var utils = this;
+		var utils = this,
+			w = window;
 
 		var data = p.data;
 
 		// Is data a form object
-		if( this.domInstance('form', data) ){
+		if( utils.domInstance('form', data) ){
 
-			data = this.nodeListToJSON(data.elements);
-
-		}
-		else if ( data instanceof NodeList ){
-
-			data = this.nodeListToJSON(data);
+			data = utils.nodeListToJSON(data.elements);
 
 		}
-		else if( this.domInstance('input', data) ){
+		else if ( "NodeList" in w && data instanceof NodeList ){
 
-			data = this.nodeListToJSON( [ data ] );
+			data = utils.nodeListToJSON(data);
+
+		}
+		else if( utils.domInstance('input', data) ){
+
+			data = utils.nodeListToJSON( [ data ] );
 
 		}
 
 		// Is data a blob, File, FileList?
-		if( ("File" in window && data instanceof window.File) ||
-			("Blob" in window && data instanceof window.Blob) ||
-			("FileList" in window && data instanceof window.FileList) ){
+		if( ("File" in w && data instanceof w.File) ||
+			("Blob" in w && data instanceof w.Blob) ||
+			("FileList" in w && data instanceof w.FileList) ){
 
 			// Convert to a JSON object
 			data = {'file' : data};
 		}
 
 		// Loop through data if its not FormData it must now be a JSON object
-		if( !( "FormData" in window && data instanceof window.FormData ) ){
+		if( !( "FormData" in w && data instanceof w.FormData ) ){
 
 			// Loop through the object
 			for(var x in data) if(data.hasOwnProperty(x)){
 
 				// FileList Object?
-				if("FileList" in window && data[x] instanceof window.FileList){
+				if("FileList" in w && data[x] instanceof w.FileList){
 					// Get first record only
 					if(data[x].length===1){
 						data[x] = data[x][0];
@@ -2133,18 +2159,18 @@ hello.utils.extend( hello.utils, {
 						//("We were expecting the FileList to contain one file");
 					}
 				}
-				else if( this.domInstance('input', data[x]) && data[x].type === 'file' ){
+				else if( utils.domInstance('input', data[x]) && data[x].type === 'file' ){
 					// ignore
 					continue;
 				}
-				else if( this.domInstance('input', data[x]) ||
-					this.domInstance('select', data[x]) ||
-					this.domInstance('textArea', data[x])
+				else if( utils.domInstance('input', data[x]) ||
+					utils.domInstance('select', data[x]) ||
+					utils.domInstance('textArea', data[x])
 					){
 					data[x] = data[x].value;
 				}
 				// Else is this another kind of element?
-				else if( this.domInstance(null, data[x]) ){
+				else if( utils.domInstance(null, data[x]) ){
 					data[x] = data[x].innerHTML || data[x].innerText;
 				}
 			}
