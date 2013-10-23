@@ -146,10 +146,10 @@ Register your application with atleast one of the following networks. Ensure you
 	<script class="pre" src="./dist/hello.all.min.js"></script>
 
 ### 3. Create the signin buttons
-Just add onclick events to call hello.login(network). Style your buttons as you like, i've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts
+Just add onclick events to call hello( network ).login(). Style your buttons as you like, i've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts
 
 
-	<button onclick="hello.login('windows')">windows</button>
+	<button onclick="hello( 'windows' ).login()">windows</button>
 
 
 
@@ -162,7 +162,7 @@ Lets define a simple function, which will load a user profile into the page afte
 	hello.on('auth.login', function(auth){
 		
 		// call user information, for the given network
-		hello.api( auth.network + '/me').success(function(r){
+		hello( auth.network ).api( '/me' ).success(function(r){
 			var $target = $("#profile_"+ auth.network );
 			if($target.length==0){
 				$target = $("<div id='profile_"+auth.network+"'></div>").appendTo("#profile");
@@ -193,8 +193,7 @@ That's it. The code above actually powers the demo at the start so, no excuses.
 
 Initiate the environment. And add the application credentials 
 
-hello.init( {facebook: id, windows: id, google: id, 
-.... } )
+### hello.init( {facebook: id, windows: id, google: id, .... } )
 
 <table>
 	<thead>
@@ -210,7 +209,7 @@ hello.init( {facebook: id, windows: id, google: id,
 		</thead>
 		<tbody>
 		<tr><td>key</td><td><i>string</i></td><td><q>windows</q>, <q>facebook</q> or <q>google</q></td><td>
-			App name&#39;s</td><td><em>required</em></td><td>n/a</td></tr>
+			App name"s</td><td><em>required</em></td><td>n/a</td></tr>
 		<tr><td>value</td><td><i>string</i></td><td>
 			<q>0000000AB1234</q></td><td>ID of the service to connect to</td><td>
 			<em>required</em></td><td>n/a</td></tr>
@@ -272,8 +271,8 @@ If a network string is provided: A consent window to authenticate with that netw
 				<em>optional</em></td><td>
 				<i>true</i></td></tr>
 		</table>
-	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert(&quot;Logged 
-		in!&quot;);}</code></td><td>
+	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert("Logged 
+		in!");}</code></td><td>
 		A callback when the users session has been initiated</td><td>
 		<em>optional</em></td><td>
 		<em>null</em></td></tr>
@@ -283,7 +282,7 @@ If a network string is provided: A consent window to authenticate with that netw
 ### Examples:
 
 
-	hello.login("facebook", function(){
+	hello( "facebook" ).login( function(){
 		alert("You are signed in to Facebook");
 	});
 
@@ -303,8 +302,8 @@ Remove all sessions or individual sessions.
 	<tr><td>network</td><td><i>string</i></td><td><q>windows</q>, <q>facebook</q></td><td>One of our services.</td><td>
 		<em>optional</em></td><td>
 		<em>null</em></td></tr>
-	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert(&quot;Logged 
-		in!&quot;);}</code></td><td>
+	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert("Logged 
+		in!");}</code></td><td>
 		A callback when the users session has been initiated</td><td>
 		<em>optional</em></td><td>
 		<em>null</em></td></tr>
@@ -313,7 +312,7 @@ Remove all sessions or individual sessions.
 ### Example:
 
 
-	hello.logout(&#39;facebook&#39;, function(){
+	hello( "facebook" ).logout(function(){
 		alert("Signed out");
 	});
 
@@ -338,7 +337,15 @@ Get the current status of the session, this is an synchronous request and does n
 ### Examples:
 
 
-	alert((hello.getAuthResponse(&#39;facebook&#39;)?&quot;Signed&quot;:&#39;Not signed&#39;) + &#39; into FaceBook, &#39; +( hello.getAuthResponse(&#39;windows&#39;)?&quot;Signed&quot;:&#39;Not signed&#39;)+&quot;into Windows Live&quot;);
+	var online = function(session){
+		var current_time = (new Date()).getTime() / 1000;
+		return session && session.access_token && session.expires > current_time;
+	};
+
+	var fb = hello( "facebook" ).getAuthResponse();
+	var wl = hello( "windows" ).getAuthResponse();
+
+	alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) ? "Signed":"Not signed")+" into Windows Live");
 
 
 ## hello.api()
@@ -372,7 +379,7 @@ Make calls to the API for getting and posting data
 ### Examples:
 
 
-	hello.api("me").success(function(json){
+	hello( "facebook" ).api("me").success(function(json){
 		alert("Your name is "+ json.name);
 	}).error(function(){
 		alert("Whoops!");
@@ -533,7 +540,14 @@ used - because of the XD, IFrame+Form+hack.
 
 
 ## Contributing
-Please contribute! I leave this to the end of the page to say but if you've read this far you'r obviously dedicated. If you think something could be said better, find something buggy or missing from the code, documentation or demos then please shout back.
+
+"No, It's perfect!".... If you believe that then give it a [star](https://github.com/MrSwitch/hello.js).
+
+Having read this far you have already invested your time, why not contribute!?
+
+HelloJS is constantly evolving, as are the services which it connects too. So if you think something could be said better, find something buggy or missing from either the code, documentation or demos then please put it in, no matter how trivial.
+
+
 ### Changing code?
 Please adopt the continuous integration tests.
 

@@ -26,7 +26,7 @@
 
 <div id="profile">
 <!-- ko foreach:networks -->
-<button data-bind="click:function(){ hello.login(name);}, attr:{'class':'zocial icon ' + name, title:'Signin to '+ displayName}" title="Signin"></button>
+<button data-bind="click:function(){ hello( name ).login();}, attr:{'class':'zocial icon ' + name, title:'Signin to '+ displayName}" title="Signin"></button>
 <!-- /ko -->
 <br />
 </div>
@@ -172,10 +172,10 @@ Download: <a class="button green" href="dist/hello.all.js" download="hello.js" t
 	<script class="pre" src="./dist/hello.all.min.js"></script>
 
 <h3>3. Create the signin buttons</h3>
-<p>Just add onclick events to call hello.login(network). Style your buttons as you like, i've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts</p>
+<p>Just add onclick events to call hello( network ).login(). Style your buttons as you like, i've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts</p>
 
 <script class="pre" type="text/html">
-	<button onclick="hello.login('windows')">windows</button>
+	<button onclick="hello( 'windows' ).login()">windows</button>
 </script>
 
 
@@ -188,7 +188,7 @@ Download: <a class="button green" href="dist/hello.all.js" download="hello.js" t
 	hello.on('auth.login', function(auth){
 		
 		// call user information, for the given network
-		hello.api( auth.network + '/me').success(function(r){
+		hello( auth.network ).api( '/me' ).success(function(r){
 			var $target = $("#profile_"+ auth.network );
 			if($target.length==0){
 				$target = $("<div id='profile_"+auth.network+"'></div>").appendTo("#profile");
@@ -219,8 +219,7 @@ Download: <a class="button green" href="dist/hello.all.js" download="hello.js" t
 
 <p>Initiate the environment. And add the application credentials</p> 
 
-<h3>hello.init( {facebook: <em>id</em>, windows: <em>id</em>, google: <em>id, 
-....</em> } )</h3>
+<h3>hello.init( {facebook: <em>id</em>, windows: <em>id</em>, google: <em>id</em>, .... } )</h3>
 
 <table>
 	<thead>
@@ -236,7 +235,7 @@ Download: <a class="button green" href="dist/hello.all.js" download="hello.js" t
 		</thead>
 		<tbody>
 		<tr><td>key</td><td><i>string</i></td><td><q>windows</q>, <q>facebook</q> or <q>google</q></td><td>
-			App name&#39;s</td><td><em>required</em></td><td>n/a</td></tr>
+			App name"s</td><td><em>required</em></td><td>n/a</td></tr>
 		<tr><td>value</td><td><i>string</i></td><td>
 			<q>0000000AB1234</q></td><td>ID of the service to connect to</td><td>
 			<em>required</em></td><td>n/a</td></tr>
@@ -298,8 +297,8 @@ Download: <a class="button green" href="dist/hello.all.js" download="hello.js" t
 				<em>optional</em></td><td>
 				<i>true</i></td></tr>
 		</table>
-	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert(&quot;Logged 
-		in!&quot;);}</code></td><td>
+	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert("Logged 
+		in!");}</code></td><td>
 		A callback when the users session has been initiated</td><td>
 		<em>optional</em></td><td>
 		<em>null</em></td></tr>
@@ -309,7 +308,7 @@ Download: <a class="button green" href="dist/hello.all.js" download="hello.js" t
 <h3>Examples:</h3>
 
 <pre class="tryitoffline">
-	hello.login("facebook", function(){
+	hello( "facebook" ).login( function(){
 		alert("You are signed in to Facebook");
 	});
 </pre>
@@ -329,8 +328,8 @@ Download: <a class="button green" href="dist/hello.all.js" download="hello.js" t
 	<tr><td>network</td><td><i>string</i></td><td><q>windows</q>, <q>facebook</q></td><td>One of our services.</td><td>
 		<em>optional</em></td><td>
 		<em>null</em></td></tr>
-	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert(&quot;Logged 
-		in!&quot;);}</code></td><td>
+	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert("Logged 
+		in!");}</code></td><td>
 		A callback when the users session has been initiated</td><td>
 		<em>optional</em></td><td>
 		<em>null</em></td></tr>
@@ -339,7 +338,7 @@ Download: <a class="button green" href="dist/hello.all.js" download="hello.js" t
 <h3>Example:</h3>
 
 <pre class="tryit">
-	hello.logout(&#39;facebook&#39;, function(){
+	hello( "facebook" ).logout(function(){
 		alert("Signed out");
 	});
 </pre>
@@ -364,7 +363,15 @@ Download: <a class="button green" href="dist/hello.all.js" download="hello.js" t
 <h3>Examples:</h3>
 
 <pre class="tryitoffline">
-	alert((hello.getAuthResponse(&#39;facebook&#39;)?&quot;Signed&quot;:&#39;Not signed&#39;) + &#39; into FaceBook, &#39; +( hello.getAuthResponse(&#39;windows&#39;)?&quot;Signed&quot;:&#39;Not signed&#39;)+&quot;into Windows Live&quot;);
+	var online = function(session){
+		var current_time = (new Date()).getTime() / 1000;
+		return session && session.access_token && session.expires > current_time;
+	};
+
+	var fb = hello( "facebook" ).getAuthResponse();
+	var wl = hello( "windows" ).getAuthResponse();
+
+	alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) ? "Signed":"Not signed")+" into Windows Live");
 </pre>
 
 <h2>hello.api()</h2>
@@ -398,7 +405,7 @@ Download: <a class="button green" href="dist/hello.all.js" download="hello.js" t
 <h3>Examples:</h3>
 
 <pre class="tryit">
-	hello.api("me").success(function(json){
+	hello( "facebook" ).api("me").success(function(json){
 		alert("Your name is "+ json.name);
 	}).error(function(){
 		alert("Whoops!");
@@ -559,7 +566,14 @@ used - because of the XD, IFrame+Form+hack.</li>
 </ol>
 
 <h2>Contributing</h2>
-<p>Please contribute! I leave this to the end of the page to say but if you've read this far you'r obviously dedicated. If you think something could be said better, find something buggy or missing from the code, documentation or demos then please shout back.</p>
+
+<p><b>"No, It's perfect!"</b>.... If you believe that then give it a <a href="https://github.com/MrSwitch/hello.js">star</a>.</p>
+
+<p>Having read this far you have already invested your time, why not contribute!?</p>
+
+<p>HelloJS is constantly evolving, as are the services which it connects too. So if you think something could be said better, find something buggy or missing from either the code, documentation or demos then please put it in, no matter how trivial.</p>
+
+
 <h3>Changing code?</h3>
 <p>Please adopt the continuous integration tests.</p>
 
