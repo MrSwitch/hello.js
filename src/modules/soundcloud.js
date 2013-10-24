@@ -36,9 +36,14 @@ hello.init({
 		base : 'https://api.soundcloud.com/',
 		get : {
 			'me' : 'me.json',
+
+			// http://developers.soundcloud.com/docs/api/reference#me
 			'me/friends' : 'me/followings.json',
 			'me/followers' : 'me/followers.json',
 			'me/following' : 'me/followings.json',
+
+			// http://developers.soundcloud.com/docs/api/reference#activities
+
 			'default' : function(p, callback){
 				// include ".json at the end of each request"
 				callback(p.path + '.json');

@@ -68,10 +68,12 @@ hello.init({
 
 		get : {
 			"me"			: 'people/~:(picture-url,first-name,last-name,id,formatted-name)',
-			"me/friends"	: 'people/~/connections',
-			"me/followers"	: 'people/~/connections',
-			"me/following"	: 'people/~/connections',
-			"me/share"		: "people/~/network/updates"
+			"me/friends"	: 'people/~/connections?count=@{limit|500}',
+			"me/followers"	: 'people/~/connections?count=@{limit|500}',
+			"me/following"	: 'people/~/connections?count=@{limit|500}',
+
+			// http://developer.linkedin.com/documents/get-network-updates-and-statistics-api
+			"me/share"		: "people/~/network/updates?count=@{limit|250}"
 		},
 
 		post : {

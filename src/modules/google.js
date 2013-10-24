@@ -142,6 +142,10 @@
 	}
 
 	//
+	// URLS
+	var contacts_url = 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=@{limit|1000}';
+
+	//
 	// Embed
 	hello.init({
 		google : {
@@ -188,19 +192,21 @@
 			get : {
 				//	me	: "plus/v1/people/me?pp=1",
 				'me' : 'oauth2/v1/userinfo?alt=json',
-				'me/friends' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
-				'me/following' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
-				'me/followers' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
-				'me/share' : 'plus/v1/people/me/activities/public',
-				'me/feed' : 'plus/v1/people/me/activities/public',
-				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json',
+
+				// https://developers.google.com/+/api/latest/people/list
+				'me/friends' : contacts_url,
+				'me/following' : contacts_url,
+				'me/followers' : contacts_url,
+				'me/share' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
+				'me/feed' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
+				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}',
 				'me/album' : function(p,callback){
 					var key = p.data.id;
 					delete p.data.id;
 					callback(key.replace("/entry/", "/feed/"));
 				},
-				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=100',
-				'me/files' : 'drive/v2/files?q=%22root%22+in+parents'
+				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}',
+				'me/files' : 'drive/v2/files?q=%22root%22+in+parents&max-results=@{limit|100}'
 			},
 
 			post : {

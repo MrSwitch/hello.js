@@ -6,7 +6,11 @@ var reg = {
 	string : /^\S+$/,
 	optional_name : /^[\w\d\s\-]*$/,
 	optional_url : /^(https?\:\/\/|$)/
-}
+};
+
+var query = {
+	limit : [5,1,25,100]
+};
 
 
 var tests = [
@@ -15,7 +19,7 @@ var tests = [
 		api : "login",
 		method : 'login',
 		data : {
-			display : "popup",
+			display : ["popup", "none", "page"],
 			scope : ""
 		},
 		expected : {
@@ -61,6 +65,7 @@ var tests = [
 		api : "api",
 		method : 'get',
 		path : 'me/friends',
+		data : query,
 		scope : ["friends"],
 		expected : {
 			data : [{
@@ -75,6 +80,7 @@ var tests = [
 		api : "api",
 		method : 'get',
 		path : 'me/followers',
+		data : query,
 		scope : ["friends"],
 		expected : {
 			data : [{
@@ -89,6 +95,7 @@ var tests = [
 		api : "api",
 		method : 'get',
 		path : 'me/following',
+		data : query,
 		scope : ["friends"],
 		expected : {
 			data : [{
@@ -103,6 +110,7 @@ var tests = [
 		api : "api",
 		method : 'get',
 		path : 'me/share',
+		data : query,
 		expected : {
 			data : []
 		}
@@ -124,6 +132,7 @@ var tests = [
 		api : "api",
 		method : 'get',
 		path : 'me/albums',
+		data : query,
 		scope : ["photos"],
 		expected : {
 			data : [{
@@ -153,7 +162,7 @@ var tests = [
 				callback("Failed to setup: the user has no albums");
 			}).error(function(){
 				callback("Failed to setup: could not open me/albums");
-			})
+			});
 		},
 		expected : {
 			data : [{
@@ -168,6 +177,7 @@ var tests = [
 		api : "api",
 		method : 'get',
 		path : 'me/photos',
+		data : query,
 		scope : ["photos"],
 		expected : {
 			data : [{
@@ -202,7 +212,7 @@ var tests = [
 							return;
 						}
 						callback("Failed to setup: the user has no images in the album");
-					})
+					});
 				}
 				else{
 					callback("Failed to setup: The user has no albums yet");
@@ -281,6 +291,7 @@ var tests = [
 		api : "api",
 		method : 'get',
 		path : 'me/files',
+		data : query,
 		scope : ["files"],
 		expected : {
 			data : [{
@@ -296,9 +307,8 @@ var tests = [
 		api : "api",
 		method : 'get',
 		path : 'me/folders',
+		data : query,
 		scope : ["files"],
-		data : {
-		},
 		expected : {
 			data : [{
 				id : reg.string,
@@ -377,7 +387,7 @@ var tests = [
 
 //
 // Get the ID of the test album
-// 
+//
 function before_photo_post(test, callback){
 	hello(test.network).api("me/albums").success(function(r){
 		for(var i=0;i<r.data.length;i++){
@@ -677,7 +687,7 @@ if(!Object.keys){
 			a.push(x);
 		}
 		return a;
-	}
+	};
 }
 
 ko.utils.arrayForEach( Object.keys(CLIENT_IDS_ALL), function(network){
@@ -691,7 +701,7 @@ hello.on('auth.login', function(o){
 		if(o.network===network.name){
 			network.online(true);
 		}
-	});	
+	});
 }).on('auth.expired auth.logout', function(o){
 	ko.utils.arrayForEach( model.networks(), function(network){
 		if(o.network===network.name){
@@ -735,6 +745,11 @@ ko.bindingHandlers.beautify = {
 //
 function DictionaryItem(key, value) {
     this.key = ko.observable(key);
+	this.options = [];
+    if(value instanceof Array){
+		this.options = value;
+		value = value[0];
+    }
     this.value = (typeof(value)==='function')? value : ko.observable(value);
 }
 

@@ -45,6 +45,14 @@ function format_file(o){
 //	o.media = "https://api-content.dropbox.com/1/files/" + path;
 }
 
+
+function req(str){
+	return function(p,cb){
+		delete p.data.limit;
+		cb(str);
+	};
+}
+
 hello.init({
 	'dropbox' : {
 
@@ -83,9 +91,12 @@ hello.init({
 		// Map GET requests
 		get : {
 			"me"		: 'account/info',
-			"me/files"	: "metadata/dropbox",
-			"me/folder"	: "metadata/dropbox/@{id}",
-			"me/folders" : 'metadata/dropbox/',
+
+			// https://www.dropbox.com/developers/core/docs#metadata
+			"me/files"	: req("metadata/dropbox"),
+			"me/folder"	: req("metadata/dropbox/@{id}"),
+			"me/folders" : req('metadata/dropbox/'),
+
 			"default" : function(p,callback){
 				if(p.path.match("https://api-content.dropbox.com/1/files/")){
 					// this is a file, return binary data

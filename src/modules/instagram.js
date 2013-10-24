@@ -53,11 +53,11 @@ hello.init({
 
 		get : {
 			'me' : 'users/self',
-			'me/feed' : 'users/self/feed',
-			'me/photos' : 'users/self/media/recent?min_id=0&count=100',
-			'me/friends' : 'users/self/follows',
-			'me/following' : 'users/self/follows',
-			'me/followers' : 'users/self/followed-by'
+			'me/feed' : 'users/self/feed?count=@{limit|100}',
+			'me/photos' : 'users/self/media/recent?min_id=0&count=@{limit|100}',
+			'me/friends' : 'users/self/follows?count=@{limit|100}',
+			'me/following' : 'users/self/follows?count=@{limit|100}',
+			'me/followers' : 'users/self/followed-by?count=@{limit|100}'
 		},
 
 		wrap : {

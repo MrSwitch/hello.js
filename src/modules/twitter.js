@@ -27,7 +27,7 @@ function formatFriends(o){
 	return o;
 }
 
-function formaterror(o){
+function formaterror(o,code,req){
 	if(o.errors){
 		var e = o.errors[0];
 		o.error = {
@@ -82,10 +82,12 @@ hello.init({
 
 		get : {
 			"me"			: 'account/verify_credentials.json',
-			"me/friends"	: 'friends/list.json',
-			"me/following"	: 'friends/list.json',
-			"me/followers"	: 'followers/list.json',
-			"me/share"	: 'statuses/user_timeline.json'
+			"me/friends"	: 'friends/list.json?count=@{limit|200}',
+			"me/following"	: 'friends/list.json?count=@{limit|200}',
+			"me/followers"	: 'followers/list.json?count=@{limit|200}',
+
+			// https://dev.twitter.com/docs/api/1.1/get/statuses/user_timeline
+			"me/share"	: 'statuses/user_timeline.json?count=@{limit|200}'
 		},
 
 		post : {

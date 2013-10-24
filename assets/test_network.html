@@ -49,7 +49,14 @@
 						<tbody data-bind="foreach: data.items">
 						    <tr>
 						        <th><input type="text" size="10" data-bind="value:key"/></th>
-						        <td><input type="text" size="10" data-bind="value:value, visible:key()!=='file', attr:{name:key(), disabled:key()==='file'}"/><input type="file" data-bind="visible:key()==='file',attr:{name:key(), disabled:key()!=='file'}"/></td>
+						        <td>
+						        	<!-- ko if:options.length -->
+						        	<select data-bind="options: options, value: value"></select>
+									<!-- /ko -->
+									<!-- ko if:!options.length -->
+						        	<input type="text" size="10" data-bind="value:value, visible:key()!=='file', attr:{name:key(), disabled:key()==='file'}"/><input type="file" data-bind="visible:key()==='file',attr:{name:key(), disabled:key()!=='file'}"/>
+									<!-- /ko -->
+						       	</td>
 						        <td><a href="javascript:void(0);" data-bind="click: function() { $parent.data.removeItem($data) }">Delete</a></td>
 						    </tr>
 						</tbody>

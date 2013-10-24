@@ -39,10 +39,14 @@ function withUser(cb){
 	}
 }
 
-function sign(url){
+function sign(url, params){
+	if(!params){
+		params = {};
+	}
 	return function(p, callback){
 		withUser(function(user_id){
-			callback(getApiUrl(url, {"user_id" : user_id}, true));
+			params.user_id = user_id;
+			callback(getApiUrl(url, params, true));
 		});
 	};
 }
@@ -151,11 +155,11 @@ hello.init({
 		// Map GET resquests
 		get : {
 			"me"		: sign("flickr.people.getInfo"),
-			"me/friends": sign("flickr.contacts.getList"),
-			"me/following": sign("flickr.contacts.getList"),
-			"me/followers": sign("flickr.contacts.getList"),
-			"me/albums"	: sign("flickr.photosets.getList"),
-			"me/photos" : sign("flickr.people.getPhotos")
+			"me/friends": sign("flickr.contacts.getList", {per_page:"@{limit|50}"}),
+			"me/following": sign("flickr.contacts.getList", {per_page:"@{limit|50}"}),
+			"me/followers": sign("flickr.contacts.getList", {per_page:"@{limit|50}"}),
+			"me/albums"	: sign("flickr.photosets.getList", {per_page:"@{limit|50}"}),
+			"me/photos" : sign("flickr.people.getPhotos", {per_page:"@{limit|50}"})
 		},
 
 		wrap : {

@@ -64,6 +64,9 @@ hello.init({
 			'me/album' : '@{id}/photos',
 			'me/photos' : 'me/photos',
 			'me/photo' : '@{id}'
+
+			// PAGINATION
+			// https://developers.facebook.com/docs/reference/api/pagination/
 		},
 
 		// Map POST requests

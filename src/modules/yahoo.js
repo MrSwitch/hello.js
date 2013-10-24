@@ -19,6 +19,9 @@ function formatFriends(o){
 	if(o.query&&o.query.results&&o.query.results.contact){
 		o.data = o.query.results.contact;
 		delete o.query;
+		if(!(o.data instanceof Array)){
+			o.data = [o.data];
+		}
 		for(var i=0;i<o.data.length;i++){
 			contact = o.data[i];
 			o.data[i].id = null;
@@ -40,6 +43,14 @@ function formatFriends(o){
 	}
 	return o;
 }
+
+var yql = function(q){
+
+	// PAGING
+	// http://developer.yahoo.com/yql/guide/paging.html#local_limits
+
+	return 'http://query.yahooapis.com/v1/yql?q=' + q.replace(" ", '%20') + "&format=json";
+};
 
 hello.init({
 	'yahoo' : {
@@ -75,9 +86,9 @@ hello.init({
 		base	: "https://social.yahooapis.com/v1/",
 
 		get : {
-			"me"		: "http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.profile%20where%20guid%3Dme&format=json",
-			"me/friends"	: 'http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.contacts%20where%20guid=me&format=json',
-			"me/following"	: 'http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.contacts%20where%20guid=me&format=json'
+			"me"		: yql('select * from social.profile where guid=me limit @{limit|100}'),
+			"me/friends"	: yql('select * from social.contacts where guid=me limit @{limit|100}'),
+			"me/following"	: yql('select * from social.contacts where guid=me limit @{limit|100}')
 		},
 		wrap : {
 			me : function(o){
