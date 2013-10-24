@@ -2259,6 +2259,14 @@ function format_file(o){
 //	o.media = "https://api-content.dropbox.com/1/files/" + path;
 }
 
+
+function req(str){
+	return function(p,cb){
+		delete p.data.limit;
+		cb(str);
+	};
+}
+
 hello.init({
 	'dropbox' : {
 
@@ -2297,9 +2305,12 @@ hello.init({
 		// Map GET requests
 		get : {
 			"me"		: 'account/info',
-			"me/files"	: "metadata/dropbox",
-			"me/folder"	: "metadata/dropbox/@{id}",
-			"me/folders" : 'metadata/dropbox/',
+
+			// https://www.dropbox.com/developers/core/docs#metadata
+			"me/files"	: req("metadata/dropbox"),
+			"me/folder"	: req("metadata/dropbox/@{id}"),
+			"me/folders" : req('metadata/dropbox/'),
+
 			"default" : function(p,callback){
 				if(p.path.match("https://api-content.dropbox.com/1/files/")){
 					// this is a file, return binary data
@@ -2445,6 +2456,9 @@ hello.init({
 			'me/album' : '@{id}/photos',
 			'me/photos' : 'me/photos',
 			'me/photo' : '@{id}'
+
+			// PAGINATION
+			// https://developers.facebook.com/docs/reference/api/pagination/
 		},
 
 		// Map POST requests
@@ -2570,10 +2584,14 @@ function withUser(cb){
 	}
 }
 
-function sign(url){
+function sign(url, params){
+	if(!params){
+		params = {};
+	}
 	return function(p, callback){
 		withUser(function(user_id){
-			callback(getApiUrl(url, {"user_id" : user_id}, true));
+			params.user_id = user_id;
+			callback(getApiUrl(url, params, true));
 		});
 	};
 }
@@ -2682,11 +2700,11 @@ hello.init({
 		// Map GET resquests
 		get : {
 			"me"		: sign("flickr.people.getInfo"),
-			"me/friends": sign("flickr.contacts.getList"),
-			"me/following": sign("flickr.contacts.getList"),
-			"me/followers": sign("flickr.contacts.getList"),
-			"me/albums"	: sign("flickr.photosets.getList"),
-			"me/photos" : sign("flickr.people.getPhotos")
+			"me/friends": sign("flickr.contacts.getList", {per_page:"@{limit|50}"}),
+			"me/following": sign("flickr.contacts.getList", {per_page:"@{limit|50}"}),
+			"me/followers": sign("flickr.contacts.getList", {per_page:"@{limit|50}"}),
+			"me/albums"	: sign("flickr.photosets.getList", {per_page:"@{limit|50}"}),
+			"me/photos" : sign("flickr.people.getPhotos", {per_page:"@{limit|50}"})
 		},
 
 		wrap : {
@@ -3034,6 +3052,10 @@ hello.init({
 	}
 
 	//
+	// URLS
+	var contacts_url = 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=@{limit|1000}';
+
+	//
 	// Embed
 	hello.init({
 		google : {
@@ -3080,19 +3102,21 @@ hello.init({
 			get : {
 				//	me	: "plus/v1/people/me?pp=1",
 				'me' : 'oauth2/v1/userinfo?alt=json',
-				'me/friends' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
-				'me/following' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
-				'me/followers' : 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=1000',
-				'me/share' : 'plus/v1/people/me/activities/public',
-				'me/feed' : 'plus/v1/people/me/activities/public',
-				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json',
+
+				// https://developers.google.com/+/api/latest/people/list
+				'me/friends' : contacts_url,
+				'me/following' : contacts_url,
+				'me/followers' : contacts_url,
+				'me/share' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
+				'me/feed' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
+				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}',
 				'me/album' : function(p,callback){
 					var key = p.data.id;
 					delete p.data.id;
 					callback(key.replace("/entry/", "/feed/"));
 				},
-				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=100',
-				'me/files' : 'drive/v2/files?q=%22root%22+in+parents'
+				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}',
+				'me/files' : 'drive/v2/files?q=%22root%22+in+parents&max-results=@{limit|100}'
 			},
 
 			post : {
@@ -3204,11 +3228,11 @@ hello.init({
 
 		get : {
 			'me' : 'users/self',
-			'me/feed' : 'users/self/feed',
-			'me/photos' : 'users/self/media/recent?min_id=0&count=100',
-			'me/friends' : 'users/self/follows',
-			'me/following' : 'users/self/follows',
-			'me/followers' : 'users/self/followed-by'
+			'me/feed' : 'users/self/feed?count=@{limit|100}',
+			'me/photos' : 'users/self/media/recent?min_id=0&count=@{limit|100}',
+			'me/friends' : 'users/self/follows?count=@{limit|100}',
+			'me/following' : 'users/self/follows?count=@{limit|100}',
+			'me/followers' : 'users/self/followed-by?count=@{limit|100}'
 		},
 
 		wrap : {
@@ -3319,10 +3343,12 @@ hello.init({
 
 		get : {
 			"me"			: 'people/~:(picture-url,first-name,last-name,id,formatted-name)',
-			"me/friends"	: 'people/~/connections',
-			"me/followers"	: 'people/~/connections',
-			"me/following"	: 'people/~/connections',
-			"me/share"		: "people/~/network/updates"
+			"me/friends"	: 'people/~/connections?count=@{limit|500}',
+			"me/followers"	: 'people/~/connections?count=@{limit|500}',
+			"me/following"	: 'people/~/connections?count=@{limit|500}',
+
+			// http://developer.linkedin.com/documents/get-network-updates-and-statistics-api
+			"me/share"		: "people/~/network/updates?count=@{limit|250}"
 		},
 
 		post : {
@@ -3401,9 +3427,14 @@ hello.init({
 		base : 'https://api.soundcloud.com/',
 		get : {
 			'me' : 'me.json',
+
+			// http://developers.soundcloud.com/docs/api/reference#me
 			'me/friends' : 'me/followings.json',
 			'me/followers' : 'me/followers.json',
 			'me/following' : 'me/followings.json',
+
+			// http://developers.soundcloud.com/docs/api/reference#activities
+
 			'default' : function(p, callback){
 				// include ".json at the end of each request"
 				callback(p.path + '.json');
@@ -3460,7 +3491,7 @@ function formatFriends(o){
 	return o;
 }
 
-function formaterror(o){
+function formaterror(o,code,req){
 	if(o.errors){
 		var e = o.errors[0];
 		o.error = {
@@ -3515,10 +3546,12 @@ hello.init({
 
 		get : {
 			"me"			: 'account/verify_credentials.json',
-			"me/friends"	: 'friends/list.json',
-			"me/following"	: 'friends/list.json',
-			"me/followers"	: 'followers/list.json',
-			"me/share"	: 'statuses/user_timeline.json'
+			"me/friends"	: 'friends/list.json?count=@{limit|200}',
+			"me/following"	: 'friends/list.json?count=@{limit|200}',
+			"me/followers"	: 'followers/list.json?count=@{limit|200}',
+
+			// https://dev.twitter.com/docs/api/1.1/get/statuses/user_timeline
+			"me/share"	: 'statuses/user_timeline.json?count=@{limit|200}'
 		},
 
 		post : {
@@ -3710,6 +3743,9 @@ function formatFriends(o){
 	if(o.query&&o.query.results&&o.query.results.contact){
 		o.data = o.query.results.contact;
 		delete o.query;
+		if(!(o.data instanceof Array)){
+			o.data = [o.data];
+		}
 		for(var i=0;i<o.data.length;i++){
 			contact = o.data[i];
 			o.data[i].id = null;
@@ -3731,6 +3767,14 @@ function formatFriends(o){
 	}
 	return o;
 }
+
+var yql = function(q){
+
+	// PAGING
+	// http://developer.yahoo.com/yql/guide/paging.html#local_limits
+
+	return 'http://query.yahooapis.com/v1/yql?q=' + q.replace(" ", '%20') + "&format=json";
+};
 
 hello.init({
 	'yahoo' : {
@@ -3766,9 +3810,9 @@ hello.init({
 		base	: "https://social.yahooapis.com/v1/",
 
 		get : {
-			"me"		: "http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.profile%20where%20guid%3Dme&format=json",
-			"me/friends"	: 'http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.contacts%20where%20guid=me&format=json',
-			"me/following"	: 'http://query.yahooapis.com/v1/yql?q=select%20*%20from%20social.contacts%20where%20guid=me&format=json'
+			"me"		: yql('select * from social.profile where guid=me limit @{limit|100}'),
+			"me/friends"	: yql('select * from social.contacts where guid=me limit @{limit|100}'),
+			"me/following"	: yql('select * from social.contacts where guid=me limit @{limit|100}')
 		},
 		wrap : {
 			me : function(o){
