@@ -7,6 +7,7 @@
 	<link rel="stylesheet" href="/_packages/document.css" />
 	<link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon" />
 	<script src="demos/client_ids.js"></script>
+	<script src="/_packages/jquery.js"></script>
 	<script src="/_packages/document.js"></script>
 	<link rel="stylesheet" href="assets/index.css"/>
 </head>
@@ -472,6 +473,25 @@ Download: <a class="button green" href="dist/hello.all.js" download="hello.js" t
 
 <h1>Misc</h1>
 
+<h2>Pagination, Limit and Next Page</h2>
+<p>A convenient function to get the `next` resultset is provided in the second parameter of any <code>GET</code> callback. Calling this function recreates the request with the original parameters and event listeners. Albeit the original path is augmented with the parameters defined in the <code>paging.next</code> property.</p>
+
+<pre class="tryit">
+	hello( "facebook" ).api( "me/friends", {limit: 1} ).success( function( json, next ){
+		if( next ){
+			if( confirm( "Got friend "+ json.data[0].name + ". Get another?" ) ){
+				next();
+			}
+		}
+		else{
+			alert( "Got friend "+ json.data[0].name + ". That's it!" );
+		}
+	}).error( function(){
+		alert("Whoops!");
+	});
+</pre>
+
+
 <h2>Error handling</h2>
 
 <p>For hello.api([path], [<em>callback</em>]) the first parameter of <em>callback</em> 
@@ -590,7 +610,6 @@ used - because of the XD, IFrame+Form+hack.</li>
 
 
 <script src="/_packages/knockout.js"></script>
-<script src="/_packages/jquery.js"></script>
 <script src="assets/index.js"></script>
 <script type="text/html" id="tests-template"></script>
 

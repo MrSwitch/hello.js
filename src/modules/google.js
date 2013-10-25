@@ -3,6 +3,12 @@
 //
 (function(){
 
+	"use strict";
+
+	function int(s){
+		return parseInt(s,10);
+	}
+
 	// Format
 	// Ensure each record contains a name, id etc.
 	function formatItem(o){
@@ -26,6 +32,7 @@
 
 	// Google has a horrible JSON API
 	function gEntry(o){
+		paging(o);
 
 		var entry = function(a){
 
@@ -94,56 +101,79 @@
 			for(i=0;i<o.feed.entry.length;i++){
 				r.push(entry(o.feed.entry[i]));
 			}
-			return {
-				//name : o.feed.title.$t,
-				//updated : o.feed.updated.$t,
-				data : r
-			};
+			o.data = r;
+			delete o.feed;
 		}
 
 		// Old style, picasa, etc...
-		if( "entry" in o ){
+		else if( "entry" in o ){
 			return entry(o.entry);
-		}else if( "items" in o ){
+		}
+		// New Style, Google Drive & Plus
+		else if( "items" in o ){
 			for(var i=0;i<o.items.length;i++){
 				formatItem( o.items[i] );
 			}
-			return {
-				data : o.items
-			};
+			o.data = o.items;
+			delete o.items;
 		}
 		else{
 			formatItem( o );
-			return o;
 		}
+		return o;
 	}
 
 	function formatFriends(o){
+		paging(o);
 		var r = [];
 		if("feed" in o && "entry" in o.feed){
 			for(var i=0;i<o.feed.entry.length;i++){
-				var a = o.feed.entry[i];
+				var a = o.feed.entry[i],
+					pic = (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null;
+
 				r.push({
 					id		: a.id.$t,
 					name	: a.title.$t,
 					email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
 					updated_time : a.updated.$t,
-					picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null,
-					thumbnail : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null
+					picture : pic,
+					thumbnail : pic
 				});
 			}
-			return {
-				//name : o.feed.title.$t,
-				//updated : o.feed.updated.$t,
-				data : r
-			};
+			o.data = r;
+			delete o.feed;
 		}
 		return o;
 	}
 
+
+	//
+	// Paging
+	function paging(res){
+
+		// Contacts V2
+		if("feed" in res && res.feed['openSearch$itemsPerPage']){
+			var limit = int(res.feed['openSearch$itemsPerPage']['$t']),
+				start = int(res.feed['openSearch$startIndex']['$t']),
+				total = int(res.feed['openSearch$totalResults']['$t']);
+
+			if((start+limit)<total){
+				res['paging'] = {
+					next : '?start='+(start+limit)
+				};
+			}
+		}
+		else if ("nextPageToken" in res){
+			res['paging'] = {
+				next : "?pageToken="+res['nextPageToken']
+			};
+		}
+	}
+
+
 	//
 	// URLS
-	var contacts_url = 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=@{limit|1000}';
+	var contacts_url = 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=@{limit|1000}&start-index=@{start|1}';
 
 	//
 	// Embed
@@ -199,14 +229,16 @@
 				'me/followers' : contacts_url,
 				'me/share' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
 				'me/feed' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
-				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}',
+				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}&start-index=@{start|1}',
 				'me/album' : function(p,callback){
 					var key = p.data.id;
 					delete p.data.id;
 					callback(key.replace("/entry/", "/feed/"));
 				},
-				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}',
-				'me/files' : 'drive/v2/files?q=%22root%22+in+parents&max-results=@{limit|100}'
+				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}&start-index=@{start|1}',
+
+				// https://developers.google.com/drive/v2/reference/files/list
+				'me/files' : 'drive/v2/files?q=%22root%22+in+parents&maxResults=@{limit|100}'
 			},
 
 			post : {
@@ -233,6 +265,7 @@
 				'me/followers'	: formatFriends,
 				'me/following'	: formatFriends,
 				'me/share' : function(o){
+					paging(o);
 					o.data = o.items;
 					try{
 						delete o.items;
@@ -242,6 +275,7 @@
 					return o;
 				},
 				'me/feed' : function(o){
+					paging(o);
 					o.data = o.items;
 					try{
 						delete o.items;

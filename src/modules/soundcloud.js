@@ -12,6 +12,16 @@ function formatUser(o){
 	}
 }
 
+// Paging
+// http://developers.soundcloud.com/docs/api/reference#activities
+function paging(res){
+	if("next_href" in res){
+		res['paging'] = {
+			next : res["next_href"]
+		};
+	}
+}
+
 hello.init({
 	soundcloud : {
 		name : 'SoundCloud',
@@ -64,6 +74,7 @@ hello.init({
 						formatUser(o.data[i]);
 					}
 				}
+				paging(o);
 				return o;
 			}
 		}

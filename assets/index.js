@@ -497,6 +497,7 @@ function Test(test,network,parent){
 		return r && !("error" in r);
 	};
 
+	this.next = ko.observable(null);
 	this.passed = ko.observable();
 	this.response = ko.observable();
 	this.request = ko.observable();
@@ -551,9 +552,12 @@ function Test(test,network,parent){
 
 		var action = function(r){
 
-			var cb = function(r){
+			var cb = function(r,next){
 				// update the test
 				var b = test.validate(r);
+
+				// Next enabled
+				test.next(typeof(next)==='function'?next:null);
 
 				// passed?
 				test.passed(b);

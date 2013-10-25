@@ -17,6 +17,7 @@ function formatUser(o){
 
 function formatFriends(o){
 	formaterror(o);
+	paging(o);
 	if(o.users){
 		o.data = o.users;
 		for(var i=0;i<o.data.length;i++){
@@ -27,7 +28,7 @@ function formatFriends(o){
 	return o;
 }
 
-function formaterror(o,code,req){
+function formaterror(o){
 	if(o.errors){
 		var e = o.errors[0];
 		o.error = {
@@ -36,6 +37,21 @@ function formaterror(o,code,req){
 		};
 	}
 }
+
+
+//
+// Paging
+// Take a cursor and add it to the path
+function paging(res){
+	// Does the response include a 'next_cursor_string'
+	if("next_cursor_str" in res){
+		// https://dev.twitter.com/docs/misc/cursoring
+		res['paging'] = {
+			next : "?cursor=" + res.next_cursor_str
+		};
+	}
+}
+
 
 /*
 // THE DOCS SAY TO DEFINE THE USER IN THE REQUEST
@@ -99,21 +115,26 @@ hello.init({
 		},
 
 		wrap : {
-			me : function(o){
-				formaterror(o);
-				formatUser(o);
-				return o;
+			me : function(res){
+				formaterror(res);
+				formatUser(res);
+				return res;
 			},
 			"me/friends" : formatFriends,
 			"me/followers" : formatFriends,
 			"me/following" : formatFriends,
 
-			"me/share" : function(o){
-				formaterror(o);
-				if(!o.error&&"length" in o){
-					return {data : o};
+			"me/share" : function(res){
+				formaterror(res);
+				paging(res);
+				if(!res.error&&"length" in res){
+					return {data : res};
 				}
-				return o;
+				return res;
+			},
+			"default" : function(res){
+				paging(res);
+				return res;
 			}
 		},
 		xhr : function(p){

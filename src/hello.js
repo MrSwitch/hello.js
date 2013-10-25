@@ -1345,10 +1345,16 @@ hello.api = function(){
 	p.method = (p.method || 'get').toLowerCase();
 	
 	// data
-	p.data = p.data || {};
+	var data = p.data = p.data || {};
 
 	// Extrapolate the data from a form element
 	utils.dataToJSON(p);
+
+
+	// Completed event
+	// callback
+	self.on('complete', p.callback);
+	
 
 	// Path
 	// Remove the network from path, e.g. facebook:/me/friends
@@ -1361,27 +1367,15 @@ hello.api = function(){
 		var reg = new RegExp('^'+a+':?\/?');
 		p.path = p.path.replace(reg,'');
 	}
-	// Network
+
+
+	// Network & Provider
+	// Define the network that this request is made for
 	p.network = self.settings.default_service = p.network || self.settings.default_service;
-
-
-	// Completed event
-	// callback
-	self.on('complete', p.callback);
-	
-	// timeout global setting
-	if(p.timeout){
-		self.settings.timeout = p.timeout;
-	}
-
-	// Log self request
-	self.emit("notice", "API request "+p.method.toUpperCase()+" '"+p.path+"' (request)",p);
-	
 	var o = self.services[p.network];
 
-	//
-	// INVALID PROVIDER?
-	// Have we got a service
+	// INVALID?
+	// Is there no service by the given network name?
 	if(!o){
 		self.emitAfter("complete error", {error:{
 			code : "invalid_network",
@@ -1390,12 +1384,22 @@ hello.api = function(){
 		return self;
 	}
 
+
+	// timeout global setting
+	if(p.timeout){
+		self.settings.timeout = p.timeout;
+	}
+
+	// Log self request
+	self.emit("notice", "API request "+p.method.toUpperCase()+" '"+p.path+"' (request)",p);
+	
+
 	//
 	// CALLBACK HANDLER
 	// Change the incoming values so that they are have generic values according to the path that is defined
 	// @ response object
 	// @ statusCode integer if available
-	var callback = function(r,code){
+	var callback = function(r,headers){
 
 		// FORMAT RESPONSE?
 		// Does self request have a corresponding formatter
@@ -1404,7 +1408,7 @@ hello.api = function(){
 			var time = (new Date()).getTime();
 
 			// FORMAT RESPONSE
-			var b = o.wrap[wrap](r,code);
+			var b = o.wrap[wrap](r,headers,p);
 
 			// Has the response been utterly overwritten?
 			// Typically self augments the existing object.. but for those rare occassions
@@ -1418,28 +1422,76 @@ hello.api = function(){
 
 		self.emit("notice", "API: "+p.method.toUpperCase()+" '"+p.path+"' (response)", r);
 
+		//
+		// Next
+		// If the result continues on to other pages
+		// callback = function(results, next){ if(next){ next(); } }
+		var next = null;
+
+		// Is there a next_page defined in the response?
+		if( r && "paging" in r && r.paging.next ){
+			// Repeat the action with a new page path
+			// This benefits from otherwise letting the user follow the next_page URL
+			// In terms of using the same callback handlers etc.
+			next = function(){
+				processPath( (r.paging.next.match(/^\?/)?p.path:'') + r.paging.next );
+			};
+		}
+
+		//
+		// Dispatch to listeners
 		// Emit events which pertain to the formatted response
-		self.emit("complete " + (!r || "error" in r ? 'error' : 'success'), r, code);
+		self.emit("complete " + (!r || "error" in r ? 'error' : 'success'), r, next);
 	};
-
-
 
 
 
 	// push out to all networks
 	// as long as the path isn't flagged as unavaiable, e.g. path == false
-	if( !(p.method in o) || !(p.path in o[p.method]) || o[p.method][p.path] !== false ){
+	if( !( !(p.method in o) || !(p.path in o[p.method]) || o[p.method][p.path] !== false ) ){
+		return self.emitAfter("complete error", {error:{
+			code:'invalid_path',
+			message:'The provided path is not available on the selected network'
+		}});
+	}
 
+	//
+	// Given the path trigger the fix
+	processPath(p.path);
+
+
+	function processPath(path){
+
+		// Clone the data object
+		// Prevent this script overwriting the data of the incoming object.
+		// ensure that everytime we run an iteration the callbacks haven't removed some data
+		p.data = utils.clone(data);
+
+
+		// Extrapolate the QueryString
+		// Provide a clean path
+		// Move the querystring into the data
+		if(p.method==='get'){
+			var reg = /[\?\&]([^=&]+)(=([^&]+))?/ig;
+			while(a = reg.exec(path)){
+				p.data[a[1]] = a[3];
+			}
+			path = path.replace(/\?.*/,'');
+		}
+
+
+		// URL Mapping
 		// Is there a map for the given URL?
 		var actions = o[{"delete":"del"}[p.method]||p.method] || {},
-			url = actions[p.path] || actions['default'] || p.path;
+			url = actions[path] || actions['default'] || path;
+
 
 		// if url needs a base
 		// Wrap everything in
 		var getPath = function(url){
 
 			// Format the string if it needs it
-			url = url.replace(/\@\{([a-z\_\-]+)(\|.+?)?\}/, function(m,key,defaults){
+			url = url.replace(/\@\{([a-z\_\-]+)(\|.+?)?\}/gi, function(m,key,defaults){
 				var val = defaults ? defaults.replace(/^\|/,'') : '';
 				if(key in p.data){
 					val = p.data[key];
@@ -1557,12 +1609,7 @@ hello.api = function(){
 			getPath(url);
 		}
 	}
-	else{
-		self.emitAfter("complete error", {error:{
-			code:'invalid_path',
-			message:'The provided path is not available on the selected network'
-		}});
-	}
+	
 
 	return self;
 
@@ -1638,6 +1685,25 @@ hello.utils.extend( hello.utils, {
 	},
 
 	//
+	// Clone
+	// Create a clone of an object
+	clone : function(obj){
+		if("nodeName" in obj){
+			return obj[x];
+		}
+		var clone = {}, x;
+		for(x in obj){
+			if(typeof(obj[x]) === 'object'){
+				clone[x] = this.clone(obj[x]);
+			}
+			else{
+				clone[x] = obj[x];
+			}
+		}
+		return clone;
+	},
+
+	//
 	// XHR
 	// This uses CORS to make requests
 	xhr : function(method, pathFunc, headers, data, callback){
@@ -1675,9 +1741,10 @@ hello.utils.extend( hello.utils, {
 					};
 				}
 			}
+			var headers = headersToJSON(r.getAllResponseHeaders());
+			headers.statusCode = r.status;
 
-
-			callback( json || ( method!=='DELETE' ? {error:{message:"Could not get resource"}} : {} ), r.status );
+			callback( json || ( method!=='DELETE' ? {error:{message:"Could not get resource"}} : {} ), headers );
 		};
 		r.onerror = function(e){
 			var json = r.responseText;
@@ -1744,6 +1811,19 @@ hello.utils.extend( hello.utils, {
 
 
 		return r;
+
+
+		//
+		// headersToJSON
+		// Headers are returned as a string, which isn't all that great... is it?
+		function headersToJSON(s){
+			var r = {};
+			var reg = /([a-z\-]+):\s?(.*);?/gi;
+			while(a = reg.exec(s)){
+				r[a[1]] = a[2];
+			}
+			return r;
+		}
 	},
 
 

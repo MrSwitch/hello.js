@@ -1345,10 +1345,16 @@ hello.api = function(){
 	p.method = (p.method || 'get').toLowerCase();
 	
 	// data
-	p.data = p.data || {};
+	var data = p.data = p.data || {};
 
 	// Extrapolate the data from a form element
 	utils.dataToJSON(p);
+
+
+	// Completed event
+	// callback
+	self.on('complete', p.callback);
+	
 
 	// Path
 	// Remove the network from path, e.g. facebook:/me/friends
@@ -1361,27 +1367,15 @@ hello.api = function(){
 		var reg = new RegExp('^'+a+':?\/?');
 		p.path = p.path.replace(reg,'');
 	}
-	// Network
+
+
+	// Network & Provider
+	// Define the network that this request is made for
 	p.network = self.settings.default_service = p.network || self.settings.default_service;
-
-
-	// Completed event
-	// callback
-	self.on('complete', p.callback);
-	
-	// timeout global setting
-	if(p.timeout){
-		self.settings.timeout = p.timeout;
-	}
-
-	// Log self request
-	self.emit("notice", "API request "+p.method.toUpperCase()+" '"+p.path+"' (request)",p);
-	
 	var o = self.services[p.network];
 
-	//
-	// INVALID PROVIDER?
-	// Have we got a service
+	// INVALID?
+	// Is there no service by the given network name?
 	if(!o){
 		self.emitAfter("complete error", {error:{
 			code : "invalid_network",
@@ -1390,12 +1384,22 @@ hello.api = function(){
 		return self;
 	}
 
+
+	// timeout global setting
+	if(p.timeout){
+		self.settings.timeout = p.timeout;
+	}
+
+	// Log self request
+	self.emit("notice", "API request "+p.method.toUpperCase()+" '"+p.path+"' (request)",p);
+	
+
 	//
 	// CALLBACK HANDLER
 	// Change the incoming values so that they are have generic values according to the path that is defined
 	// @ response object
 	// @ statusCode integer if available
-	var callback = function(r,code){
+	var callback = function(r,headers){
 
 		// FORMAT RESPONSE?
 		// Does self request have a corresponding formatter
@@ -1404,7 +1408,7 @@ hello.api = function(){
 			var time = (new Date()).getTime();
 
 			// FORMAT RESPONSE
-			var b = o.wrap[wrap](r,code);
+			var b = o.wrap[wrap](r,headers,p);
 
 			// Has the response been utterly overwritten?
 			// Typically self augments the existing object.. but for those rare occassions
@@ -1418,28 +1422,76 @@ hello.api = function(){
 
 		self.emit("notice", "API: "+p.method.toUpperCase()+" '"+p.path+"' (response)", r);
 
+		//
+		// Next
+		// If the result continues on to other pages
+		// callback = function(results, next){ if(next){ next(); } }
+		var next = null;
+
+		// Is there a next_page defined in the response?
+		if( r && "paging" in r && r.paging.next ){
+			// Repeat the action with a new page path
+			// This benefits from otherwise letting the user follow the next_page URL
+			// In terms of using the same callback handlers etc.
+			next = function(){
+				processPath( (r.paging.next.match(/^\?/)?p.path:'') + r.paging.next );
+			};
+		}
+
+		//
+		// Dispatch to listeners
 		// Emit events which pertain to the formatted response
-		self.emit("complete " + (!r || "error" in r ? 'error' : 'success'), r, code);
+		self.emit("complete " + (!r || "error" in r ? 'error' : 'success'), r, next);
 	};
-
-
 
 
 
 	// push out to all networks
 	// as long as the path isn't flagged as unavaiable, e.g. path == false
-	if( !(p.method in o) || !(p.path in o[p.method]) || o[p.method][p.path] !== false ){
+	if( !( !(p.method in o) || !(p.path in o[p.method]) || o[p.method][p.path] !== false ) ){
+		return self.emitAfter("complete error", {error:{
+			code:'invalid_path',
+			message:'The provided path is not available on the selected network'
+		}});
+	}
 
+	//
+	// Given the path trigger the fix
+	processPath(p.path);
+
+
+	function processPath(path){
+
+		// Clone the data object
+		// Prevent this script overwriting the data of the incoming object.
+		// ensure that everytime we run an iteration the callbacks haven't removed some data
+		p.data = utils.clone(data);
+
+
+		// Extrapolate the QueryString
+		// Provide a clean path
+		// Move the querystring into the data
+		if(p.method==='get'){
+			var reg = /[\?\&]([^=&]+)(=([^&]+))?/ig;
+			while(a = reg.exec(path)){
+				p.data[a[1]] = a[3];
+			}
+			path = path.replace(/\?.*/,'');
+		}
+
+
+		// URL Mapping
 		// Is there a map for the given URL?
 		var actions = o[{"delete":"del"}[p.method]||p.method] || {},
-			url = actions[p.path] || actions['default'] || p.path;
+			url = actions[path] || actions['default'] || path;
+
 
 		// if url needs a base
 		// Wrap everything in
 		var getPath = function(url){
 
 			// Format the string if it needs it
-			url = url.replace(/\@\{([a-z\_\-]+)(\|.+?)?\}/, function(m,key,defaults){
+			url = url.replace(/\@\{([a-z\_\-]+)(\|.+?)?\}/gi, function(m,key,defaults){
 				var val = defaults ? defaults.replace(/^\|/,'') : '';
 				if(key in p.data){
 					val = p.data[key];
@@ -1557,12 +1609,7 @@ hello.api = function(){
 			getPath(url);
 		}
 	}
-	else{
-		self.emitAfter("complete error", {error:{
-			code:'invalid_path',
-			message:'The provided path is not available on the selected network'
-		}});
-	}
+	
 
 	return self;
 
@@ -1638,6 +1685,25 @@ hello.utils.extend( hello.utils, {
 	},
 
 	//
+	// Clone
+	// Create a clone of an object
+	clone : function(obj){
+		if("nodeName" in obj){
+			return obj[x];
+		}
+		var clone = {}, x;
+		for(x in obj){
+			if(typeof(obj[x]) === 'object'){
+				clone[x] = this.clone(obj[x]);
+			}
+			else{
+				clone[x] = obj[x];
+			}
+		}
+		return clone;
+	},
+
+	//
 	// XHR
 	// This uses CORS to make requests
 	xhr : function(method, pathFunc, headers, data, callback){
@@ -1675,9 +1741,10 @@ hello.utils.extend( hello.utils, {
 					};
 				}
 			}
+			var headers = headersToJSON(r.getAllResponseHeaders());
+			headers.statusCode = r.status;
 
-
-			callback( json || ( method!=='DELETE' ? {error:{message:"Could not get resource"}} : {} ), r.status );
+			callback( json || ( method!=='DELETE' ? {error:{message:"Could not get resource"}} : {} ), headers );
 		};
 		r.onerror = function(e){
 			var json = r.responseText;
@@ -1744,6 +1811,19 @@ hello.utils.extend( hello.utils, {
 
 
 		return r;
+
+
+		//
+		// headersToJSON
+		// Headers are returned as a string, which isn't all that great... is it?
+		function headersToJSON(s){
+			var r = {};
+			var reg = /([a-z\-]+):\s?(.*);?/gi;
+			while(a = reg.exec(s)){
+				r[a[1]] = a[2];
+			}
+			return r;
+		}
 	},
 
 
@@ -2629,6 +2709,7 @@ function formatPhotos(o){
 	if (o.photoset || o.photos){
 		var set = ("photoset" in o) ? 'photoset' : 'photos';
 		o = checkResponse(o, set);
+		paging(o);
 		o.data = o.photo;
 		delete o.photo;
 		for(var i=0;i<o.data.length;i++){
@@ -2658,8 +2739,10 @@ function checkResponse(o, key){
 function formatFriends(o){
 	formatError(o);
 	if(o.contacts){
-		o.data = o.contacts.contact;
-		delete o.contacts;
+		o = checkResponse(o,'contacts');
+		paging(o);
+		o.data = o.contact;
+		delete o.contact;
 		for(var i=0;i<o.data.length;i++){
 			var item = o.data[i];
 			item.id = item.nsid;
@@ -2670,7 +2753,13 @@ function formatFriends(o){
 	return o;
 }
 
-
+function paging(res){
+	if( res.page && res.pages && res.page !== res.pages){
+		res.paging = {
+			next : "?page=" + (++res.page)
+		};
+	}
+}
 
 hello.init({
 	'flickr' : {
@@ -2729,6 +2818,7 @@ hello.init({
 			"me/albums" : function(o){
 				formatError(o);
 				o = checkResponse(o, "photosets");
+				paging(o);
 				if(o.photoset){
 					o.data = o.photoset;
 					delete o.photoset;
@@ -2787,6 +2877,10 @@ function formatUser(o){
 			}
 		}
 	}
+}
+
+function paging(res){
+	
 }
 
 
@@ -2848,8 +2942,8 @@ hello.init({
 //
 (function(){
 
-function formatError(o,code){
-	code = code || ( o && "meta" in o && "status" in o.meta && o.meta.status );
+function formatError(o,headers){
+	var code = headers ? headers.statusCode : ( o && "meta" in o && "status" in o.meta && o.meta.status );
 	if( (code===401||code===403) ){
 		o.error = {
 			code : "access_denied",
@@ -2867,6 +2961,17 @@ function formatUser(o){
 	}
 }
 
+function paging(res,headers,req){
+	if(res.data&&res.data.length&&headers&&headers.Link){
+		var next = headers.Link.match(/&page=([0-9]+)/);
+		if(next){
+			res.paging = {
+				next : "?page="+ next[1]
+			};
+		}
+	}
+}
+
 hello.init({
 	github : {
 		name : 'GitHub',
@@ -2878,25 +2983,25 @@ hello.init({
 		base : 'https://api.github.com/',
 		get : {
 			'me' : 'user',
-			'me/friends' : 'user/following',
-			'me/following' : 'user/following',
-			'me/followers' : 'user/followers'
+			'me/friends' : 'user/following?per_page=@{limit|100}',
+			'me/following' : 'user/following?per_page=@{limit|100}',
+			'me/followers' : 'user/followers?per_page=@{limit|100}'
 		},
 		wrap : {
-			me : function(o,code){
+			me : function(o,headers){
 
-				formatError(o,code);
+				formatError(o,headers);
 				formatUser(o);
 
 				return o;
 			},
-			"default" : function(o,code){
+			"default" : function(o,headers,req){
 
-				formatError(o,code);
+				formatError(o,headers);
 
 				if(Object.prototype.toString.call(o) === '[object Array]'){
 					o = {data:o};
-
+					paging(o,headers,req);
 					for(var i=0;i<o.data.length;i++){
 						formatUser(o.data[i]);
 					}
@@ -2912,6 +3017,12 @@ hello.init({
 // GOOGLE API
 //
 (function(){
+
+	"use strict";
+
+	function int(s){
+		return parseInt(s,10);
+	}
 
 	// Format
 	// Ensure each record contains a name, id etc.
@@ -2936,6 +3047,7 @@ hello.init({
 
 	// Google has a horrible JSON API
 	function gEntry(o){
+		paging(o);
 
 		var entry = function(a){
 
@@ -3004,56 +3116,79 @@ hello.init({
 			for(i=0;i<o.feed.entry.length;i++){
 				r.push(entry(o.feed.entry[i]));
 			}
-			return {
-				//name : o.feed.title.$t,
-				//updated : o.feed.updated.$t,
-				data : r
-			};
+			o.data = r;
+			delete o.feed;
 		}
 
 		// Old style, picasa, etc...
-		if( "entry" in o ){
+		else if( "entry" in o ){
 			return entry(o.entry);
-		}else if( "items" in o ){
+		}
+		// New Style, Google Drive & Plus
+		else if( "items" in o ){
 			for(var i=0;i<o.items.length;i++){
 				formatItem( o.items[i] );
 			}
-			return {
-				data : o.items
-			};
+			o.data = o.items;
+			delete o.items;
 		}
 		else{
 			formatItem( o );
-			return o;
 		}
+		return o;
 	}
 
 	function formatFriends(o){
+		paging(o);
 		var r = [];
 		if("feed" in o && "entry" in o.feed){
 			for(var i=0;i<o.feed.entry.length;i++){
-				var a = o.feed.entry[i];
+				var a = o.feed.entry[i],
+					pic = (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null;
+
 				r.push({
 					id		: a.id.$t,
 					name	: a.title.$t,
 					email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
 					updated_time : a.updated.$t,
-					picture : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null,
-					thumbnail : (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null
+					picture : pic,
+					thumbnail : pic
 				});
 			}
-			return {
-				//name : o.feed.title.$t,
-				//updated : o.feed.updated.$t,
-				data : r
-			};
+			o.data = r;
+			delete o.feed;
 		}
 		return o;
 	}
 
+
+	//
+	// Paging
+	function paging(res){
+
+		// Contacts V2
+		if("feed" in res && res.feed['openSearch$itemsPerPage']){
+			var limit = int(res.feed['openSearch$itemsPerPage']['$t']),
+				start = int(res.feed['openSearch$startIndex']['$t']),
+				total = int(res.feed['openSearch$totalResults']['$t']);
+
+			if((start+limit)<total){
+				res['paging'] = {
+					next : '?start='+(start+limit)
+				};
+			}
+		}
+		else if ("nextPageToken" in res){
+			res['paging'] = {
+				next : "?pageToken="+res['nextPageToken']
+			};
+		}
+	}
+
+
 	//
 	// URLS
-	var contacts_url = 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=@{limit|1000}';
+	var contacts_url = 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=@{limit|1000}&start-index=@{start|1}';
 
 	//
 	// Embed
@@ -3109,14 +3244,16 @@ hello.init({
 				'me/followers' : contacts_url,
 				'me/share' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
 				'me/feed' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
-				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}',
+				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}&start-index=@{start|1}',
 				'me/album' : function(p,callback){
 					var key = p.data.id;
 					delete p.data.id;
 					callback(key.replace("/entry/", "/feed/"));
 				},
-				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}',
-				'me/files' : 'drive/v2/files?q=%22root%22+in+parents&max-results=@{limit|100}'
+				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}&start-index=@{start|1}',
+
+				// https://developers.google.com/drive/v2/reference/files/list
+				'me/files' : 'drive/v2/files?q=%22root%22+in+parents&maxResults=@{limit|100}'
 			},
 
 			post : {
@@ -3143,6 +3280,7 @@ hello.init({
 				'me/followers'	: formatFriends,
 				'me/following'	: formatFriends,
 				'me/share' : function(o){
+					paging(o);
 					o.data = o.items;
 					try{
 						delete o.items;
@@ -3152,6 +3290,7 @@ hello.init({
 					return o;
 				},
 				'me/feed' : function(o){
+					paging(o);
 					o.data = o.items;
 					try{
 						delete o.items;
@@ -3189,6 +3328,7 @@ function formatError(o){
 
 
 function formatFriends(o){
+	paging(o);
 	if(o && "data" in o ){
 		for(var i=0;i<o.data.length;i++){
 			formatFriend(o.data[i]);
@@ -3204,6 +3344,17 @@ function formatFriend(o){
 	}
 }
 
+
+// Paging
+// http://instagram.com/developer/endpoints/
+function paging(res){
+	if("pagination" in res){
+		res['paging'] = {
+			next : res['pagination']['next_url']
+		};
+		delete res.pagination;
+	}
+}
 
 hello.init({
 	instagram : {
@@ -3253,6 +3404,7 @@ hello.init({
 			"me/photos" : function(o){
 
 				formatError(o);
+				paging(o);
 
 				if("data" in o){
 					for(var i=0;i<o.data.length;i++){
@@ -3265,6 +3417,10 @@ hello.init({
 						o.data[i].name = o.data[i].caption ? o.data[i].caption.text : null;
 					}
 				}
+				return o;
+			},
+			"default" : function(o){
+				paging(o);
 				return o;
 			}
 		},
@@ -3301,6 +3457,7 @@ function formatUser(o){
 
 function formatFriends(o){
 	formatError(o);
+	paging(o);
 	if(o.values){
 		o.data = o.values;
 		for(var i=0;i<o.data.length;i++){
@@ -3311,6 +3468,13 @@ function formatFriends(o){
 	return o;
 }
 
+function paging(res){
+	if( "_count" in res && "_start" in res && (res._count + res._start) < res._total ){
+		res['paging'] = {
+			next : "?start="+(res._start+res._count)+"&count="+res._count
+		};
+	}
+}
 
 hello.init({
 	'linkedin' : {
@@ -3366,6 +3530,7 @@ hello.init({
 			"me/followers" : formatFriends,
 			"me/share" : function(o){
 				formatError(o);
+				paging(o);
 				if(o.values){
 					o.data = o.values;
 					for(var i=0;i<o.data.length;i++){
@@ -3375,6 +3540,10 @@ hello.init({
 					delete o.values;
 				}
 				return o;
+			},
+			"default" : function(o){
+				formatError(o);
+				paging(o);
 			}
 		},
 		jsonp : function(p,qs){
@@ -3400,6 +3569,16 @@ function formatUser(o){
 		o.picture = o.avatar_url;
 		o.thumbnail = o.avatar_url;
 		o.name = o.username || o.full_name;
+	}
+}
+
+// Paging
+// http://developers.soundcloud.com/docs/api/reference#activities
+function paging(res){
+	if("next_href" in res){
+		res['paging'] = {
+			next : res["next_href"]
+		};
 	}
 }
 
@@ -3455,6 +3634,7 @@ hello.init({
 						formatUser(o.data[i]);
 					}
 				}
+				paging(o);
 				return o;
 			}
 		}
@@ -3481,6 +3661,7 @@ function formatUser(o){
 
 function formatFriends(o){
 	formaterror(o);
+	paging(o);
 	if(o.users){
 		o.data = o.users;
 		for(var i=0;i<o.data.length;i++){
@@ -3491,7 +3672,7 @@ function formatFriends(o){
 	return o;
 }
 
-function formaterror(o,code,req){
+function formaterror(o){
 	if(o.errors){
 		var e = o.errors[0];
 		o.error = {
@@ -3500,6 +3681,21 @@ function formaterror(o,code,req){
 		};
 	}
 }
+
+
+//
+// Paging
+// Take a cursor and add it to the path
+function paging(res){
+	// Does the response include a 'next_cursor_string'
+	if("next_cursor_str" in res){
+		// https://dev.twitter.com/docs/misc/cursoring
+		res['paging'] = {
+			next : "?cursor=" + res.next_cursor_str
+		};
+	}
+}
+
 
 /*
 // THE DOCS SAY TO DEFINE THE USER IN THE REQUEST
@@ -3563,21 +3759,26 @@ hello.init({
 		},
 
 		wrap : {
-			me : function(o){
-				formaterror(o);
-				formatUser(o);
-				return o;
+			me : function(res){
+				formaterror(res);
+				formatUser(res);
+				return res;
 			},
 			"me/friends" : formatFriends,
 			"me/followers" : formatFriends,
 			"me/following" : formatFriends,
 
-			"me/share" : function(o){
-				formaterror(o);
-				if(!o.error&&"length" in o){
-					return {data : o};
+			"me/share" : function(res){
+				formaterror(res);
+				paging(res);
+				if(!res.error&&"length" in res){
+					return {data : res};
 				}
-				return o;
+				return res;
+			},
+			"default" : function(res){
+				paging(res);
+				return res;
 			}
 		},
 		xhr : function(p){
@@ -3739,6 +3940,7 @@ function formatError(o){
 
 function formatFriends(o){
 	formatError(o);
+	paging(o);
 	var contact,field;
 	if(o.query&&o.query.results&&o.query.results.contact){
 		o.data = o.query.results.contact;
@@ -3768,12 +3970,19 @@ function formatFriends(o){
 	return o;
 }
 
-var yql = function(q){
+function paging(res){
 
 	// PAGING
 	// http://developer.yahoo.com/yql/guide/paging.html#local_limits
+	if(res.query && res.query.count){
+		res['paging'] = {
+			next : '?start='+res.query.count
+		};
+	}
+}
 
-	return 'http://query.yahooapis.com/v1/yql?q=' + q.replace(" ", '%20') + "&format=json";
+var yql = function(q){
+	return 'http://query.yahooapis.com/v1/yql?q=' + (q + ' limit @{limit|100} offset @{start|0}').replace(" ", '%20') + "&format=json";
 };
 
 hello.init({
@@ -3810,9 +4019,9 @@ hello.init({
 		base	: "https://social.yahooapis.com/v1/",
 
 		get : {
-			"me"		: yql('select * from social.profile where guid=me limit @{limit|100}'),
-			"me/friends"	: yql('select * from social.contacts where guid=me limit @{limit|100}'),
-			"me/following"	: yql('select * from social.contacts where guid=me limit @{limit|100}')
+			"me"		: yql('select * from social.profile where guid=me'),
+			"me/friends"	: yql('select * from social.contacts where guid=me'),
+			"me/following"	: yql('select * from social.contacts where guid=me')
 		},
 		wrap : {
 			me : function(o){
@@ -3831,7 +4040,11 @@ hello.init({
 			// Can't get ID's
 			// It might be better to loop through the social.relationshipd table with has unique ID's of users.
 			"me/friends" : formatFriends,
-			"me/following" : formatFriends
+			"me/following" : formatFriends,
+			"default" : function(res){
+				paging(res);
+				return res;
+			}
 		},
 		xhr : false
 	}

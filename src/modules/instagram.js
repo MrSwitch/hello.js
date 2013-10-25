@@ -14,6 +14,7 @@ function formatError(o){
 
 
 function formatFriends(o){
+	paging(o);
 	if(o && "data" in o ){
 		for(var i=0;i<o.data.length;i++){
 			formatFriend(o.data[i]);
@@ -29,6 +30,17 @@ function formatFriend(o){
 	}
 }
 
+
+// Paging
+// http://instagram.com/developer/endpoints/
+function paging(res){
+	if("pagination" in res){
+		res['paging'] = {
+			next : res['pagination']['next_url']
+		};
+		delete res.pagination;
+	}
+}
 
 hello.init({
 	instagram : {
@@ -78,6 +90,7 @@ hello.init({
 			"me/photos" : function(o){
 
 				formatError(o);
+				paging(o);
 
 				if("data" in o){
 					for(var i=0;i<o.data.length;i++){
@@ -90,6 +103,10 @@ hello.init({
 						o.data[i].name = o.data[i].caption ? o.data[i].caption.text : null;
 					}
 				}
+				return o;
+			},
+			"default" : function(o){
+				paging(o);
 				return o;
 			}
 		},

@@ -75,6 +75,7 @@
 			<td data-bind="attr: {colspan: variants().length}">
 				<!-- ko foreach:variants -->
 				<pre data-bind="visible: showResponse, css: { error : passed() === false, passed : passed() === true }, beautify: response"></pre>
+				<button class="green" data-bind="visible: showResponse() && next(), click:function(){next()();}">Next</button>
 				<!-- /ko -->
 			</td>
 		</tr>

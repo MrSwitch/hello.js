@@ -84,6 +84,7 @@ function formatPhotos(o){
 	if (o.photoset || o.photos){
 		var set = ("photoset" in o) ? 'photoset' : 'photos';
 		o = checkResponse(o, set);
+		paging(o);
 		o.data = o.photo;
 		delete o.photo;
 		for(var i=0;i<o.data.length;i++){
@@ -113,8 +114,10 @@ function checkResponse(o, key){
 function formatFriends(o){
 	formatError(o);
 	if(o.contacts){
-		o.data = o.contacts.contact;
-		delete o.contacts;
+		o = checkResponse(o,'contacts');
+		paging(o);
+		o.data = o.contact;
+		delete o.contact;
 		for(var i=0;i<o.data.length;i++){
 			var item = o.data[i];
 			item.id = item.nsid;
@@ -125,7 +128,13 @@ function formatFriends(o){
 	return o;
 }
 
-
+function paging(res){
+	if( res.page && res.pages && res.page !== res.pages){
+		res.paging = {
+			next : "?page=" + (++res.page)
+		};
+	}
+}
 
 hello.init({
 	'flickr' : {
@@ -184,6 +193,7 @@ hello.init({
 			"me/albums" : function(o){
 				formatError(o);
 				o = checkResponse(o, "photosets");
+				paging(o);
 				if(o.photoset){
 					o.data = o.photoset;
 					delete o.photoset;

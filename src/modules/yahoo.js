@@ -15,6 +15,7 @@ function formatError(o){
 
 function formatFriends(o){
 	formatError(o);
+	paging(o);
 	var contact,field;
 	if(o.query&&o.query.results&&o.query.results.contact){
 		o.data = o.query.results.contact;
@@ -44,12 +45,19 @@ function formatFriends(o){
 	return o;
 }
 
-var yql = function(q){
+function paging(res){
 
 	// PAGING
 	// http://developer.yahoo.com/yql/guide/paging.html#local_limits
+	if(res.query && res.query.count){
+		res['paging'] = {
+			next : '?start='+res.query.count
+		};
+	}
+}
 
-	return 'http://query.yahooapis.com/v1/yql?q=' + q.replace(" ", '%20') + "&format=json";
+var yql = function(q){
+	return 'http://query.yahooapis.com/v1/yql?q=' + (q + ' limit @{limit|100} offset @{start|0}').replace(" ", '%20') + "&format=json";
 };
 
 hello.init({
@@ -86,9 +94,9 @@ hello.init({
 		base	: "https://social.yahooapis.com/v1/",
 
 		get : {
-			"me"		: yql('select * from social.profile where guid=me limit @{limit|100}'),
-			"me/friends"	: yql('select * from social.contacts where guid=me limit @{limit|100}'),
-			"me/following"	: yql('select * from social.contacts where guid=me limit @{limit|100}')
+			"me"		: yql('select * from social.profile where guid=me'),
+			"me/friends"	: yql('select * from social.contacts where guid=me'),
+			"me/following"	: yql('select * from social.contacts where guid=me')
 		},
 		wrap : {
 			me : function(o){
@@ -107,7 +115,11 @@ hello.init({
 			// Can't get ID's
 			// It might be better to loop through the social.relationshipd table with has unique ID's of users.
 			"me/friends" : formatFriends,
-			"me/following" : formatFriends
+			"me/following" : formatFriends,
+			"default" : function(res){
+				paging(res);
+				return res;
+			}
 		},
 		xhr : false
 	}

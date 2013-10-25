@@ -26,6 +26,7 @@ function formatUser(o){
 
 function formatFriends(o){
 	formatError(o);
+	paging(o);
 	if(o.values){
 		o.data = o.values;
 		for(var i=0;i<o.data.length;i++){
@@ -36,6 +37,13 @@ function formatFriends(o){
 	return o;
 }
 
+function paging(res){
+	if( "_count" in res && "_start" in res && (res._count + res._start) < res._total ){
+		res['paging'] = {
+			next : "?start="+(res._start+res._count)+"&count="+res._count
+		};
+	}
+}
 
 hello.init({
 	'linkedin' : {
@@ -91,6 +99,7 @@ hello.init({
 			"me/followers" : formatFriends,
 			"me/share" : function(o){
 				formatError(o);
+				paging(o);
 				if(o.values){
 					o.data = o.values;
 					for(var i=0;i<o.data.length;i++){
@@ -100,6 +109,10 @@ hello.init({
 					delete o.values;
 				}
 				return o;
+			},
+			"default" : function(o){
+				formatError(o);
+				paging(o);
 			}
 		},
 		jsonp : function(p,qs){

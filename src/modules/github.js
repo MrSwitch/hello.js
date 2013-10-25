@@ -3,8 +3,8 @@
 //
 (function(){
 
-function formatError(o,code){
-	code = code || ( o && "meta" in o && "status" in o.meta && o.meta.status );
+function formatError(o,headers){
+	var code = headers ? headers.statusCode : ( o && "meta" in o && "status" in o.meta && o.meta.status );
 	if( (code===401||code===403) ){
 		o.error = {
 			code : "access_denied",
@@ -22,6 +22,17 @@ function formatUser(o){
 	}
 }
 
+function paging(res,headers,req){
+	if(res.data&&res.data.length&&headers&&headers.Link){
+		var next = headers.Link.match(/&page=([0-9]+)/);
+		if(next){
+			res.paging = {
+				next : "?page="+ next[1]
+			};
+		}
+	}
+}
+
 hello.init({
 	github : {
 		name : 'GitHub',
@@ -33,25 +44,25 @@ hello.init({
 		base : 'https://api.github.com/',
 		get : {
 			'me' : 'user',
-			'me/friends' : 'user/following',
-			'me/following' : 'user/following',
-			'me/followers' : 'user/followers'
+			'me/friends' : 'user/following?per_page=@{limit|100}',
+			'me/following' : 'user/following?per_page=@{limit|100}',
+			'me/followers' : 'user/followers?per_page=@{limit|100}'
 		},
 		wrap : {
-			me : function(o,code){
+			me : function(o,headers){
 
-				formatError(o,code);
+				formatError(o,headers);
 				formatUser(o);
 
 				return o;
 			},
-			"default" : function(o,code){
+			"default" : function(o,headers,req){
 
-				formatError(o,code);
+				formatError(o,headers);
 
 				if(Object.prototype.toString.call(o) === '[object Array]'){
 					o = {data:o};
-
+					paging(o,headers,req);
 					for(var i=0;i<o.data.length;i++){
 						formatUser(o.data[i]);
 					}

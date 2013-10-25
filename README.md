@@ -446,6 +446,25 @@ Remove a callback, both event name and function must exist
 
 # Misc
 
+## Pagination, Limit and Next Page
+A convenient function to get the `next` resultset is provided in the second parameter of any GET callback. Calling this function recreates the request with the original parameters and event listeners. Albeit the original path is augmented with the parameters defined in the paging.next property.
+
+
+	hello( "facebook" ).api( "me/friends", {limit: 1} ).success( function( json, next ){
+		if( next ){
+			if( confirm( "Got friend "+ json.data[0].name + ". Get another?" ) ){
+				next();
+			}
+		}
+		else{
+			alert( "Got friend "+ json.data[0].name + ". That's it!" );
+		}
+	}).error( function(){
+		alert("Whoops!");
+	});
+
+
+
 ## Error handling
 
 For hello.api([path], [callback]) the first parameter of callback 
@@ -561,7 +580,6 @@ Please adopt the continuous integration tests.
 
 
 Open a couple of browsers with the given URL (e.g. it'll say "Karma v0.9.8 server started at http://localhost:9876/"). The tests are triggered when the code is modified
-
 
 
 

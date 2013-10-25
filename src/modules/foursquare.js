@@ -26,6 +26,10 @@ function formatUser(o){
 	}
 }
 
+function paging(res){
+	
+}
+
 
 hello.init({
 	foursquare : {
