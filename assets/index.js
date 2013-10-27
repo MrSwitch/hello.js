@@ -321,7 +321,7 @@ var tests = [
 		api : "api",
 		method : 'post',
 		path : 'me/folders',
-		scope : ["files"],
+		scope : ["publish_files"],
 		data : {
 			name : 'TestFolder'
 		},
@@ -352,7 +352,7 @@ var tests = [
 		api : "api",
 		method : 'post',
 		path : 'me/files',
-		scope : ["files"],
+		scope : ["publish_files"],
 		data : {
 			id : 'TestFolder',
 			file : "/hello.js/assets/logo.png",
@@ -369,7 +369,7 @@ var tests = [
 		api : "api",
 		method : 'delete',
 		path : 'me/files',
-		scope : ["files"],
+		scope : ["publish_files"],
 		data : {
 			id : '[FILE_ID]'
 		},
