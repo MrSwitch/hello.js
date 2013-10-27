@@ -34,7 +34,7 @@ var LINKEDIN_CLIENT_ID = 'bixrjszkfk0j'; // 'exgsps7wo5o7'
 
 var YAHOO_CLIENT_ID = {
 	'local.knarly.com' : 'dj0yJmk9TTNoTWV6eE5ObW5NJmQ9WVdrOWVtSmhVbk5pTm1VbWNHbzlNVFUxT0RNeU16UTJNZy0tJnM9Y29uc3VtZXJzZWNyZXQmeD0yZQ--',
-	'adodson.com' : 'dj0yJmk9TWtNN0ppYTBGSW1vJmQ9WVdrOVIxSnhUVVJsTlRJbWNHbzlOamMxT1RVM01UWXkmcz1jb25zdW1lcnNlY3JldCZ4PWNk'
+	'adodson.com' : 'dj0yJmk9S2p6ZGE4VWpNTnNTJmQ9WVdrOVYyNUpORXRXTnpZbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD05NQ--'
 }[window.location.hostname];
 
 var TWITTER_CLIENT_ID = {
