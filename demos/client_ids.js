@@ -27,10 +27,8 @@ var CLIENT_IDS = {
 	facebook : FACEBOOK_CLIENT_ID
 };
 
-var DROPBOX_CLIENT_ID = {
-	'local.knarly.com' : 't5s644xtv7n4oth',
-	'adodson.com' : 't5s644xtv7n4oth'
-}[window.location.hostname];
+// Dropbox full 't5s644xtv7n4oth'... requires production authentication
+var DROPBOX_CLIENT_ID = '1lkagy1bz7h2uhl';
 
 var LINKEDIN_CLIENT_ID = 'bixrjszkfk0j'; // 'exgsps7wo5o7'
 

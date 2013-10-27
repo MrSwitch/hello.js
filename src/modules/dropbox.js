@@ -88,14 +88,20 @@ hello.init({
 		// API Base URL
 		base	: "https://api.dropbox.com/1/",
 
+		// Root
+		// BESPOKE SETTING
+		// This is says whether to use the custom environment of Dropbox or to use their own environment
+		// Because it's notoriously difficult for DropBox too provide access from other webservices, this defaults to Sandbox
+		root : 'sandbox',
+
 		// Map GET requests
 		get : {
 			"me"		: 'account/info',
 
 			// https://www.dropbox.com/developers/core/docs#metadata
-			"me/files"	: req("metadata/dropbox"),
-			"me/folder"	: req("metadata/dropbox/@{id}"),
-			"me/folders" : req('metadata/dropbox/'),
+			"me/files"	: req("metadata/@{root|sandbox}/"),
+			"me/folder"	: req("metadata/@{root|sandbox}/@{id}"),
+			"me/folders" : req('metadata/@{root|sandbox}/'),
 
 			"default" : function(p,callback){
 				if(p.path.match("https://api-content.dropbox.com/1/files/")){
@@ -115,16 +121,15 @@ hello.init({
 					file : p.data.file
 				};
 
-				callback('https://api-content.dropbox.com/1/files_put/dropbox/'+path+"/"+file_name);
+				callback('https://api-content.dropbox.com/1/files_put/@{root|sandbox}/'+path+"/"+file_name);
 			},
 			"me/folders" : function(p, callback){
 
 				var name = p.data.name;
-				p.data = null;
+				p.data = {};
 
-				callback('fileops/create_folder?'+hello.utils.param({
-					path : name,
-					root : 'dropbox'
+				callback('fileops/create_folder?root=@{root|sandbox}&'+hello.utils.param({
+					path : name
 				}));
 			}
 		},
