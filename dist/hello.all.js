@@ -3361,6 +3361,7 @@ hello.init({
 			basic : 'basic',
 			friends : 'relationships'
 		},
+		scope_delim : ' ',
 
 		base : 'https://api.instagram.com/v1/',
 
