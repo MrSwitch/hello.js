@@ -1,7 +1,7 @@
 //
 // FourSquare
 //
-(function(){
+(function(hello){
 
 function formatError(o){
 	if(o.meta&&o.meta.code===400){
@@ -83,4 +83,4 @@ hello.init({
 	}
 });
 
-})();
+})(hello);

@@ -2,13 +2,13 @@
 // Windows
 //
 
-(function(){
+(function(hello){
 
 function formatUser(o){
 	if(o.id){
+		var token = hello.getAuthResponse('windows').access_token;
 		o.email = (o.emails?o.emails.preferred:null);
-		o.picture = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
-		o.thumbnail = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+hello.getAuthResponse('windows').access_token;
+		o.thumbnail = o.picture = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+token;
 	}
 }
 
@@ -102,8 +102,8 @@ hello.init({
 			'me/albums' : function(o){
 				if("data" in o){
 					for(var i=0;i<o.data.length;i++){
-						o.data[i].photos = 'https://apis.live.net/v5.0/'+o.data[i].id+'/photos';
-						o.data[i].files = 'https://apis.live.net/v5.0/'+o.data[i].id+'/photos';
+						var d = o.data[i];
+						d.photos = d.files = 'https://apis.live.net/v5.0/'+d.id+'/photos';
 					}
 				}
 				return o;
@@ -111,8 +111,9 @@ hello.init({
 			'default' : function(o){
 				if("data" in o){
 					for(var i=0;i<o.data.length;i++){
-						if(o.data[i].picture){
-							o.data[i].thumbnail = o.data[i].picture;
+						var d = o.data[i];
+						if(d.picture){
+							d.thumbnail = d.picture;
 						}
 					}
 				}
@@ -130,4 +131,4 @@ hello.init({
 	}
 });
 
-})();
+})(hello);

@@ -1,7 +1,7 @@
 //
 // Linkedin
 //
-(function(){
+(function(hello){
 
 function formatError(o){
 	if(o && "errorCode" in o){
@@ -102,11 +102,12 @@ hello.init({
 				paging(o);
 				if(o.values){
 					o.data = o.values;
-					for(var i=0;i<o.data.length;i++){
-						formatUser(o.data[i]);
-						o.data[i].message = o.data[i].headline;
-					}
 					delete o.values;
+					for(var i=0;i<o.data.length;i++){
+						var d = o.data[i];
+						formatUser(d);
+						d.message = d.headline;
+					}
 				}
 				return o;
 			},
@@ -125,4 +126,4 @@ hello.init({
 	}
 });
 
-})();
+})(hello);

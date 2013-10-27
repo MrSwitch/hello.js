@@ -1,7 +1,7 @@
 //
 // GOOGLE API
 //
-(function(){
+(function(hello){
 
 	"use strict";
 
@@ -53,10 +53,9 @@
 			// Get feed/children
 			if("link" in a){
 				for(i=0;i<a.link.length;i++){
-					if(a.link[i].rel.match(/\#feed$/)){
-						p.photos = a.link[i].href;
-						p.files = a.link[i].href;
-						p.upload_location = a.link[i].href;
+					var d = a.link[i];
+					if(d.rel.match(/\#feed$/)){
+						p.upload_location = p.files = p.photos = d.href;
 						break;
 					}
 				}
@@ -127,9 +126,10 @@
 		paging(o);
 		var r = [];
 		if("feed" in o && "entry" in o.feed){
+			var token = hello.getAuthResponse('google').access_token;
 			for(var i=0;i<o.feed.entry.length;i++){
 				var a = o.feed.entry[i],
-					pic = (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+hello.getAuthResponse('google').access_token:null;
+					pic = (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+token:null;
 
 				r.push({
 					id		: a.id.$t,
@@ -267,21 +267,13 @@
 				'me/share' : function(o){
 					paging(o);
 					o.data = o.items;
-					try{
-						delete o.items;
-					}catch(e){
-						o.items = null;
-					}
+					delete o.items;
 					return o;
 				},
 				'me/feed' : function(o){
 					paging(o);
 					o.data = o.items;
-					try{
-						delete o.items;
-					}catch(e){
-						o.items = null;
-					}
+					delete o.items;
 					return o;
 				},
 				'me/albums' : gEntry,
@@ -296,4 +288,4 @@
 			}
 		}
 	});
-})();
+})(hello);

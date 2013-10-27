@@ -1,7 +1,7 @@
 //
 // Dropbox
 //
-(function(){
+(function(hello){
 
 function formatError(o){
 	if(o&&"error" in o){
@@ -174,4 +174,4 @@ hello.init({
 	}
 });
 
-})();
+})(hello);

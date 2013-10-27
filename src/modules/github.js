@@ -1,7 +1,7 @@
 //
 // GitHub
 //
-(function(){
+(function(hello){
 
 function formatError(o,headers){
 	var code = headers ? headers.statusCode : ( o && "meta" in o && "status" in o.meta && o.meta.status );
@@ -16,8 +16,7 @@ function formatError(o,headers){
 
 function formatUser(o){
 	if(o.id){
-		o.picture = o.avatar_url;
-		o.thumbnail = o.avatar_url;
+		o.thumbnail = o.picture = o.avatar_url;
 		o.name = o.login;
 	}
 }
@@ -73,4 +72,4 @@ hello.init({
 	}
 });
 
-})();
+})(hello);

@@ -1,7 +1,8 @@
 //
 // Instagram
 //
-(function(){
+(function(hello){
+
 
 function formatError(o){
 	if(o && "meta" in o && "error_type" in o.meta){
@@ -94,13 +95,14 @@ hello.init({
 
 				if("data" in o){
 					for(var i=0;i<o.data.length;i++){
-						if(o.data[i].type !== 'image'){
+						var d = o.data[i];
+						if(d.type !== 'image'){
 							delete o.data[i];
 							i--;
 						}
-						o.data[i].thumbnail = o.data[i].images.thumbnail.url;
-						o.data[i].picture = o.data[i].images.standard_resolution.url;
-						o.data[i].name = o.data[i].caption ? o.data[i].caption.text : null;
+						d.thumbnail = d.images.thumbnail.url;
+						d.picture = d.images.standard_resolution.url;
+						d.name = d.caption ? d.caption.text : null;
 					}
 				}
 				return o;
@@ -114,4 +116,4 @@ hello.init({
 		xhr : false
 	}
 });
-})();
+})(hello);

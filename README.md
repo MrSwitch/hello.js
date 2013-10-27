@@ -504,9 +504,11 @@ Services are added to HelloJS as "modules" for more information about creating y
 
 ## OAuth Proxy
 
-OAuth 1.0 and OAuth 1.0a require a server side handshake with the secret key. OAuth 1 does not use the redirect_uri to verify the application, unlike OAuth2. Making HelloJS work with OAuth1 therefore requires a proxy server to sign requests.
+Services which rely on the OAuth 1 authentication method require a server side handshake with the secret key - this is unlike client-side OAuth 2 which doesn't need a secret and verifies the app based on the redirect_uri property.
 
-By default the service uses [http://auth-server.herokuapp.com/](http://auth-server.herokuapp.com/) as its proxy. Developers may add their own network registration AppID/client_id and secret to this service thus supporting OAuth1.0 and OAuth1.0a web services.
+Making HelloJS work with OAuth1 endpoints requires a proxy server to authorize the user and sign subsequent requests. As a shim HelloJS uses a service hosted at [http://auth-server.herokuapp.com/](http://auth-server.herokuapp.com/) developers may add their own network registration AppID/client_id and secret to this service in order to easily get started.
+
+The aforementioned service uses <a href//node-oauth-shim
 
 
 ## Browser Support

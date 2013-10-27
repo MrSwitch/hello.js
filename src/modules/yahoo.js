@@ -2,7 +2,7 @@
 // Yahoo
 //
 // Register Yahoo developer
-(function(){
+(function(hello){
 
 function formatError(o){
 	if(o && "meta" in o && "error_type" in o.meta){
@@ -25,19 +25,19 @@ function formatFriends(o){
 		}
 		for(var i=0;i<o.data.length;i++){
 			contact = o.data[i];
-			o.data[i].id = null;
+			contact.id = null;
 			for(var j=0;j<contact.fields.length;j++){
 				field = contact.fields[j];
 				if(field.type === 'email'){
-					o.data[i].email = field.value;
+					contact.email = field.value;
 				}
 				if(field.type === 'name'){
-					o.data[i].first_name = field.value.givenName;
-					o.data[i].last_name = field.value.familyName;
-					o.data[i].name = field.value.givenName + ' ' + field.value.familyName;
+					contact.first_name = field.value.givenName;
+					contact.last_name = field.value.familyName;
+					contact.name = field.value.givenName + ' ' + field.value.familyName;
 				}
 				if(field.type === 'yahooid'){
-					o.data[i].id = field.value;
+					contact.id = field.value;
 				}
 			}
 		}
@@ -125,4 +125,4 @@ hello.init({
 	}
 });
 
-})();
+})(hello);

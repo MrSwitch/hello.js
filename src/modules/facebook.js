@@ -1,12 +1,11 @@
 //
 // Facebook
 //
-(function(){
+(function(hello){
 
 function formatUser(o){
 	if(o.id){
-		o.picture = 'http://graph.facebook.com/'+o.id+'/picture';
-		o.thumbnail = 'http://graph.facebook.com/'+o.id+'/picture';
+		o.thumbnail = o.picture = 'http://graph.facebook.com/'+o.id+'/picture';
 	}
 	return o;
 }
@@ -20,6 +19,29 @@ function formatFriends(o){
 	return o;
 }
 
+function format(o){
+	if("data" in o){
+		var token = hello.getAuthResponse('facebook').access_token;
+		for(var i=0;i<o.data.length;i++){
+			var d = o.data[i];
+			if(d.picture){
+				d.thumbnail = d.picture;
+			}
+			if(d.cover_photo){
+				d.thumbnail = base + d.cover_photo+'/picture?access_token='+token;
+			}
+			if(d.type==='album'){
+				d.files = d.photos = base + d.id+'/photos';
+			}
+			if(d.can_upload){
+				d.upload_location = base + d.id+'/photos';
+			}
+		}
+	}
+	return o;
+}
+
+var base = 'https://graph.facebook.com/';
 
 hello.init({
 	facebook : {
@@ -86,36 +108,9 @@ hello.init({
 			'me/friends' : formatFriends,
 			'me/following' : formatFriends,
 			'me/followers' : formatFriends,
-			'me/albums' : function(o){
-				if("data" in o){
-					for(var i=0;i<o.data.length;i++){
-						o.data[i].files = 'https://graph.facebook.com/'+o.data[i].id+'/photos';
-						o.data[i].photos = 'https://graph.facebook.com/'+o.data[i].id+'/photos';
-						if(o.data[i].cover_photo){
-							o.data[i].thumbnail = 'https://graph.facebook.com/'+o.data[i].cover_photo+'/picture?access_token='+hello.getAuthResponse('facebook').access_token;
-						}
-						o.data[i].type = "album";
-						if(o.data[i].can_upload){
-							o.data[i].upload_location = 'https://graph.facebook.com/'+o.data[i].id+'/photos';
-						}
-					}
-				}
-				return o;
-			},
-			'me/files' : function(o){return this["me/albums"](o);},
-			'default' : function(o){
-				if("data" in o){
-					for(var i=0;i<o.data.length;i++){
-						if(o.data[i].picture){
-							o.data[i].thumbnail = o.data[i].picture;
-						}
-						if(o.data[i].cover_photo){
-							o.data[i].thumbnail = 'https://graph.facebook.com/'+o.data[i].cover_photo+'/picture?access_token='+hello.getAuthResponse('facebook').access_token;
-						}
-					}
-				}
-				return o;
-			}
+			'me/albums' : format,
+			'me/files' : format,
+			'default' : format
 		},
 
 		// special requirements for handling XHR
@@ -150,4 +145,4 @@ hello.init({
 });
 
 
-})();
+})(hello);

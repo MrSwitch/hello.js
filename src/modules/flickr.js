@@ -1,7 +1,7 @@
 //
 // Flickr
 //
-(function(){
+(function(hello){
 
 
 function getApiUrl(method, extra_params, skip_network){
@@ -225,4 +225,4 @@ hello.init({
 		}
 	}
 });
-})();
+})(hello);
