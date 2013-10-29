@@ -508,7 +508,7 @@ Services which rely on the OAuth 1 authentication method require a server side h
 
 Making HelloJS work with OAuth1 endpoints requires a proxy server to authorize the user and sign subsequent requests. As a shim HelloJS uses a service hosted at [http://auth-server.herokuapp.com/](http://auth-server.herokuapp.com/) developers may add their own network registration AppID/client_id and secret to this service in order to easily get started.
 
-The aforementioned service uses <a href//node-oauth-shim
+The aforementioned service uses [//node-oauth-shim](https://npmjs.org/package/oauth-shim), so go npm install oauth-shim that for your own deployment.
 
 
 ## Browser Support
