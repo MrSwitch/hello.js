@@ -1497,7 +1497,7 @@ hello.api = function(){
 					val = p.data[key];
 					delete p.data[key];
 				}
-				else{
+				else if(typeof(defaults) === 'undefined'){
 					self.emitAfter("error", {error:{
 						code : "missing_attribute_"+key,
 						message : "The attribute " + key + " is missing from the request"
