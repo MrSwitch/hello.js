@@ -1347,10 +1347,6 @@ hello.api = function(){
 	// data
 	var data = p.data = p.data || {};
 
-	// Extrapolate the data from a form element
-	utils.dataToJSON(p);
-
-
 	// Completed event
 	// callback
 	self.on('complete', p.callback);
@@ -2184,8 +2180,25 @@ hello.utils.extend( hello.utils, {
 			}
 		}
 		return false;
-	},
+	}
 
+
+});
+
+
+
+
+
+//
+// EXTRA: Convert FORMElements to JSON for POSTING
+// Wrappers to add additional functionality to existing functions
+//
+(function(hello){
+	// Copy original function
+	var api = hello.api;
+	var utils = hello.utils;
+
+utils.extend(utils, {
 	//
 	// dataToJSON
 	// This takes a FormElement|NodeList|InputElement|MixedObjects and convers the data object to JSON.
@@ -2291,3 +2304,16 @@ hello.utils.extend( hello.utils, {
 		return json;
 	}
 });
+
+
+	// Replace it
+	hello.api = function(){
+		// get arguments
+		var p = utils.args({path:'s!', method : "s", data:'o', timeout:'i', callback:"f" }, arguments);
+		// Change for into a data object
+		utils.dataToJSON(p);
+		// Continue
+		return api.call(this, p);
+	};
+
+})(hello);
