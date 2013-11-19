@@ -1347,10 +1347,6 @@ hello.api = function(){
 	// data
 	var data = p.data = p.data || {};
 
-	// Extrapolate the data from a form element
-	utils.dataToJSON(p);
-
-
 	// Completed event
 	// callback
 	self.on('complete', p.callback);
@@ -1472,9 +1468,10 @@ hello.api = function(){
 		// Provide a clean path
 		// Move the querystring into the data
 		if(p.method==='get'){
-			var reg = /[\?\&]([^=&]+)(=([^&]+))?/ig;
-			while(a = reg.exec(path)){
-				p.data[a[1]] = a[3];
+			var reg = /[\?\&]([^=&]+)(=([^&]+))?/ig,
+				m;
+			while(m = reg.exec(path)){
+				p.data[m[1]] = m[3];
 			}
 			path = path.replace(/\?.*/,'');
 		}
@@ -1818,9 +1815,10 @@ hello.utils.extend( hello.utils, {
 		// Headers are returned as a string, which isn't all that great... is it?
 		function headersToJSON(s){
 			var r = {};
-			var reg = /([a-z\-]+):\s?(.*);?/gi;
-			while(a = reg.exec(s)){
-				r[a[1]] = a[2];
+			var reg = /([a-z\-]+):\s?(.*);?/gi,
+				m;
+			while(m = reg.exec(s)){
+				r[m[1]] = m[2];
 			}
 			return r;
 		}
@@ -2184,8 +2182,25 @@ hello.utils.extend( hello.utils, {
 			}
 		}
 		return false;
-	},
+	}
 
+
+});
+
+
+
+
+
+//
+// EXTRA: Convert FORMElements to JSON for POSTING
+// Wrappers to add additional functionality to existing functions
+//
+(function(hello){
+	// Copy original function
+	var api = hello.api;
+	var utils = hello.utils;
+
+utils.extend(utils, {
 	//
 	// dataToJSON
 	// This takes a FormElement|NodeList|InputElement|MixedObjects and convers the data object to JSON.
@@ -2292,6 +2307,18 @@ hello.utils.extend( hello.utils, {
 	}
 });
 
+
+	// Replace it
+	hello.api = function(){
+		// get arguments
+		var p = utils.args({path:'s!', method : "s", data:'o', timeout:'i', callback:"f" }, arguments);
+		// Change for into a data object
+		utils.dataToJSON(p);
+		// Continue
+		return api.call(this, p);
+	};
+
+})(hello);
 //
 // Dropbox
 //
