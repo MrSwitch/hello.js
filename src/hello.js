@@ -1468,9 +1468,10 @@ hello.api = function(){
 		// Provide a clean path
 		// Move the querystring into the data
 		if(p.method==='get'){
-			var reg = /[\?\&]([^=&]+)(=([^&]+))?/ig;
-			while(a = reg.exec(path)){
-				p.data[a[1]] = a[3];
+			var reg = /[\?\&]([^=&]+)(=([^&]+))?/ig,
+				m;
+			while(m = reg.exec(path)){
+				p.data[m[1]] = m[3];
 			}
 			path = path.replace(/\?.*/,'');
 		}
@@ -1814,9 +1815,10 @@ hello.utils.extend( hello.utils, {
 		// Headers are returned as a string, which isn't all that great... is it?
 		function headersToJSON(s){
 			var r = {};
-			var reg = /([a-z\-]+):\s?(.*);?/gi;
-			while(a = reg.exec(s)){
-				r[a[1]] = a[2];
+			var reg = /([a-z\-]+):\s?(.*);?/gi,
+				m;
+			while(m = reg.exec(s)){
+				r[m[1]] = m[2];
 			}
 			return r;
 		}
