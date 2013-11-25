@@ -2,7 +2,7 @@
   "name": "HelloJS",
   "version": "0.2.0",
   "scripts": {
-    "test": "karma start ./tests/karma.conf.js",
+    "test": "karma start",
     "build": "node _build.js"
   },
   "devDependencies": {
@@ -18,7 +18,7 @@
     "karma": "~0.9.8",
     "karma-junit-reporter": "0.0.2",
     "karma-mocha": "0.0.4",
-    "karma-coverage": "0.0.4",
+    "karma-coverage": "~0.1.2",
     "karma-expect": "~1.0.0",
     "sinon": "~1.7.3"
   }
