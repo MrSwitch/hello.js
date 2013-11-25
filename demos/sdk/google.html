@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/_packages/document.css"></script>
+<script src="/_packages/document.js"></script>
+<script src="/_packages/jquery.js"></script>
+<script src="../client_ids.js"></script>
+<title>Windows Live demo</title>
+
+<script class="pre" src="https://apis.google.com/js/client:plusone.js?onload=render"></script>
+
+<script>
+
+var token;
+
+function signinCallback(authResult) {
+  if (authResult['access_token']) {
+    // Update the app to reflect a signed in user
+    // Hide the sign-in button now that the user is authorized, for example:
+    document.getElementById('customBtn').setAttribute('style', 'display: none');
+    token = authResult['access_token'];
+
+  } else if (authResult['error']) {
+    // Update the app to reflect a signed out user
+    // Possible error values:
+    //   "user_signed_out" - User is signed-out
+    //   "access_denied" - User denied access to your app
+    //   "immediate_failed" - Could not automatically log in the user
+    console.log('Sign-in state: ' + authResult['error']);
+  }
+}
+
+function disconnectUser() {
+  var revokeUrl = 'https://accounts.google.com/o/oauth2/revoke?token=' +
+      token;
+
+  // Perform an asynchronous GET request.
+  $.ajax({
+    type: 'GET',
+    url: revokeUrl,
+    async: false,
+    contentType: "application/json",
+    dataType: 'jsonp',
+    success: function(nullResponse) {
+      // Do something now that user is disconnected
+      // The response is always undefined.
+    },
+    error: function(e) {
+      // Handle the error
+      // console.log(e);
+      // You could point users to manually disconnect if unsuccessful
+      // https://plus.google.com/apps
+    }
+  });
+}
+
+  </script>
+
+<h1>Google SDK</h1>
+
+<p>Signin</p>
+<button id="customBtn">
+  <span class="success">Signin Google</span>
+</button>
+
+<p>Signout: of this app only</p>
+<button onclick="gapi.auth.signOut();">Logout (delete local session)</button> <button onclick=" disconnectUser();">Revoke token</button>

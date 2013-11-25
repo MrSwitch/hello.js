@@ -31,6 +31,10 @@ hello.init({
 			auth : 'https://login.live.com/oauth20_authorize.srf'
 		},
 
+		logout : function(){
+			return 'http://login.live.com/oauth20_logout.srf?ts='+(new Date()).getTime();
+		},
+
 		// Authorization scopes
 		scope : {
 			basic			: 'wl.signin,wl.basic',

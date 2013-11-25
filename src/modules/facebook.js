@@ -53,6 +53,13 @@ hello.init({
 			auth : 'http://www.facebook.com/dialog/oauth/'
 		},
 
+		logout : function(){
+			var domain = window.location.hostname;
+			var token = (hello.utils.store('facebook')||{}).access_token;
+			var id = hello.services.facebook.id;
+			return "https://www.facebook.com/logout.php?access_token="+token+"&app_id="+id+"&channel_url=http%3A%2F%2Fstatic.ak.facebook.com%2Fconnect%2Fxd_arbiter.php%3Fversion%3D28%23cb%3Df1f0c8f8b8%26domain%3D"+domain+"%26origin%3Dhttp%253A%252F%252F"+domain+"%252Ff2931a264%26relation%3Dparent.parent&display=hidden&e2e=%7B%7D&locale=en_US&next=http%3A%2F%2Fstatic.ak.facebook.com%2Fconnect%2Fxd_arbiter.php%3Fversion%3D28%23cb%3Df1b925c374%26domain%3D"+domain+"%26origin%3Dhttp%253A%252F%252F"+domain+"%252Ff2931a264%26relation%3Dparent%26frame%3Df2b703c1d&sdk=joey";
+		},
+
 		// Authorization scopes
 		scope : {
 			basic			: '',

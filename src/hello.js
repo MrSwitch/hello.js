@@ -384,7 +384,7 @@ hello.utils.extend( hello, {
 		//
 		if( opts.display === 'none' ){
 			// signin in the background, iframe
-			utils.append('iframe', { src : url, style : {position:'absolute',left:"-1000px",bottom:0,height:'1px',width:'1px'} }, 'body');
+			utils.iframe(url);
 		}
 
 
@@ -428,9 +428,11 @@ hello.utils.extend( hello, {
 	// @param string name of the service
 	// @param function callback
 	//
-	logout : function(s, callback){
+	logout : function(){
 
-		var p = this.utils.args({name:'s', callback:"f" }, arguments);
+		var utils = self.utils;
+
+		var p = utils.args({name:'s', callback:"f" }, arguments);
 
 		// Create self
 		// An object which inherits its parent as the prototype.
@@ -450,7 +452,7 @@ hello.utils.extend( hello, {
 			}});
 			return self;
 		}
-		if(p.name && self.utils.store(p.name)){
+		if(p.name && utils.store(p.name)){
 
 			// Trigger a logout callback on the provider
 			if(typeof(self.services[p.name].logout) === 'function'){
@@ -476,8 +478,26 @@ hello.utils.extend( hello, {
 			return self;
 		}
 
-		// Emit events by default
-		self.emitAfter("complete logout success auth.logout auth", true);
+		// Define the callback
+		var callback = function(){
+			// Emit events by default
+			self.emitAfter("complete logout success auth.logout auth", true);
+		};
+
+		// Does this endpoint
+		var logout = self.service[p.name]['logout'];
+		if( logout ){
+			// Convert logout to string
+			if(typeof(logout) === 'function' && (logout = logout(callback)) ){
+				return self;
+			}
+			// If logout is a string then assume URL and open in iframe.
+			if(logout){
+				utils.iframe( logout );
+			}
+		}
+
+		callback();
 
 		return self;
 	},
@@ -662,6 +682,15 @@ hello.utils.extend( hello.utils, {
 			document.getElementsByTagName(target)[0].appendChild(n);
 		}
 		return n;
+	},
+
+	//
+	// create IFRAME
+	// An easy way to create a hidden iframe
+	// @param string src
+	//
+	iframe : function(src){
+		this.append('iframe', { src : src, style : {position:'absolute',left:"-1000px",bottom:0,height:'1px',width:'1px'} }, 'body');
 	},
 
 	//
