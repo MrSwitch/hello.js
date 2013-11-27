@@ -12,7 +12,7 @@ describe('Hello API', function(){
 			// Create a form
 			document.body.innerHTML = "<form id='form'>"+
 				["<input name='key' value='value'/>",
-				"<input name='key2' value='value2'/>", 
+				"<input name='key2' value='value2'/>",
 				"<input name='file' type='file'/>"].join()+
 				"</form>";
 
