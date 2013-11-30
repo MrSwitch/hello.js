@@ -1338,6 +1338,7 @@ hello.api = function(){
 	var self = this.use(),
 		utils = self.utils;
 
+
 	// Reference arguments
 	self.args = p;
 
@@ -1450,6 +1451,11 @@ hello.api = function(){
 			message:'The provided path is not available on the selected network'
 		}});
 	}
+
+	//
+	// Get the current session
+	var session = self.getAuthResponse(p.network);
+
 
 	//
 	// Given the path trigger the fix
@@ -1573,7 +1579,12 @@ hello.api = function(){
 					o.jsonp(p,qs);
 				}
 
-				// Is self still a post?
+				// Does this provider have a custom method?
+				if("api" in o && o.api( url, p, {access_token:session.access_token}, callback ) ){
+					return;
+				}
+
+				// Is method still a post?
 				if( p.method === 'post' ){
 
 					// Add some additional query parameters to the URL
@@ -1616,8 +1627,7 @@ hello.api = function(){
 	function _sign(network, path, method, data, modifyQueryString, callback){
 
 		// OAUTH SIGNING PROXY
-		var session = self.getAuthResponse(network),
-			service = self.services[network],
+		var service = self.services[network],
 			token = (session ? session.access_token : null);
 
 		// Is self an OAuth1 endpoint
@@ -1686,7 +1696,7 @@ hello.utils.extend( hello.utils, {
 	// Create a clone of an object
 	clone : function(obj){
 		if("nodeName" in obj){
-			return obj[x];
+			return obj;
 		}
 		var clone = {}, x;
 		for(x in obj){
@@ -1764,7 +1774,7 @@ hello.utils.extend( hello.utils, {
 			}
 			data = null;
 		}
-		else if( data && typeof(data) !== 'string' && !(data instanceof FormData)){
+		else if( data && typeof(data) !== 'string' && !(data instanceof FormData) && !(data instanceof File) && !(data instanceof Blob)){
 			// Loop through and add formData
 			var f = new FormData();
 			for( x in data )if(data.hasOwnProperty(x)){
@@ -2183,8 +2193,6 @@ hello.utils.extend( hello.utils, {
 		}
 		return false;
 	}
-
-
 });
 
 

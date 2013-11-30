@@ -170,6 +170,103 @@
 		}
 	}
 
+	//
+	// Misc
+	var utils = hello.utils;
+
+
+	//
+	// Events
+	//
+	var counter=1;
+
+	var addEvent, removeEvent;
+
+	if(document.removeEventListener){
+		addEvent = function(elm, event_name, callback){
+			elm.addEventListener(event_name, callback);
+		};
+		removeEvent = function(elm, event_name, callback){
+			elm.removeEventListener(event_name, callback);
+		};
+	}
+	else if(document.detachEvent){
+		removeEvent = function (elm, event_name, callback){
+			elm.detachEvent("on"+event_name, callback);
+		};
+		addEvent = function (elm, event_name, callback){
+			elm.attachEvent("on"+event_name, callback);
+		};
+	}
+
+	// Multipart
+	// Construct a multipart message
+
+	function Multipart(){
+		// Internal body
+		var body = [],
+			boundary = (Math.random()*1e10).toString(32),
+			counter = 0,
+			line_break = "\r\n",
+			delim = line_break + "--" + boundary,
+			ready = function(){};
+
+		// Add File
+		function addFile(item){
+			var fr = new FileReader();
+			fr.onload = function(e){
+				//addContent( e.target.result, item.type );
+				addContent( btoa(e.target.result), item.type + line_break + "Content-Transfer-Encoding: base64");
+			};
+			fr.readAsBinaryString(item);
+		}
+
+		// Add content
+		function addContent(content, type){
+			body.push(line_break + 'Content-Type: ' + type + line_break + line_break + content);
+			counter--;
+			ready();
+		}
+
+		// Add new things to the object
+		this.append = function(content, type){
+
+			// Does the content have an array
+			if(typeof(content) === "string" || !('length' in Object(content)) ){
+				// converti to multiples
+				content = [content];
+			}
+
+			for(var i=0;i<content.length;i++){
+
+				counter++;
+
+				var item = content[i];
+
+				// Is this a file?
+				if(item instanceof window.File || item instanceof window.Blob){
+					addFile(item);
+				}
+				else{
+					addContent(item, type);
+				}
+			}
+		};
+
+		this.onready = function(fn){
+			ready = function(){
+				if( counter===0 ){
+					// trigger ready
+					body.unshift('');
+					body.push('--');
+					fn( body.join(delim), boundary);
+					body = [];
+				}
+			};
+			ready();
+		};
+	}
+
 
 	//
 	// URLS
@@ -238,15 +335,38 @@
 				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}&start-index=@{start|1}',
 
 				// https://developers.google.com/drive/v2/reference/files/list
-				'me/files' : 'drive/v2/files?q=%22root%22+in+parents&maxResults=@{limit|100}'
+				'me/files' : 'drive/v2/files?q=%22root%22+in+parents&maxResults=@{limit|100}',
+
+				// https://developers.google.com/drive/v2/reference/files/list
+				'me/folders' : 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+mimeType+=+%22application/vnd.google-apps.folder%22&maxResults=@{limit|100}',
+
+				// https://developers.google.com/drive/v2/reference/files/list
+				'me/folder' : 'drive/v2/files?q=%22@{id|root}%22+in+parents&maxResults=@{limit|100}'
 			},
 
+			// Map post requests
 			post : {
-//				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json'
+				'me/files' : function(p, callback){
+					p.data = {
+						"title": p.data.name,
+						"parents": [{"id":p.data.id||'root'}],
+						"file" : p.data.file
+					};
+					callback('upload/drive/v2/files?uploadType=multipart');
+				},
+				'me/folders' : function(p, callback){
+					p.data = {
+						"title": p.data.name,
+						"parents": [{"id":p.data.parent||'root'}],
+						"mimeType": "application/vnd.google-apps.folder"
+					};
+					callback('drive/v2/files');
+				}
 			},
 
 			// Map DELETE requests
 			del : {
+				'me/files' : 'https://www.googleapis.com/drive/v2/files/@{id}'
 			},
 
 			wrap : {
@@ -282,9 +402,82 @@
 			},
 			xhr : function(p){
 				if(p.method==='post'){
-					return false;
+
+					// Does this contain binary data?
+					if(utils.hasBinary(p.data)){
+						// There is noway, as it appears, to Upload a file along with its meta data
+						// So lets cancel the typical approach and use the override '{ api : function() }' below
+						return false;
+					}
+
+					// Convert the POST into a javascript object
+					p.data = JSON.stringify(p.data);
+					p.headers = {
+						'content-type' : 'application/json'
+					};
 				}
 				return true;
+			},
+
+			//
+			// Custom API handler, overwrites the default fallbacks
+			// Linkedin uses xdrpc (XDomain, Remote Procedure Calls), a convoluted "standard" adopted by oooh a whopping ONE client in the list thus far.
+			// This function performs a postMessage Request
+			//
+			api : function(url,p,qs,callback){
+
+				// Dont use this function for GET requests
+				if(p.method==='get'){
+					return;
+				}
+
+				// Does this request contain binary data?
+				if(utils.hasBinary(p.data) && "file" in p.data && "files" in p.data.file ){
+					// Read the file into a  base64 string... yep a hassle, i know
+					// FormData doesn't let us assign our own Multipart headers and HTTP Content-Type
+					// Alas GoogleApi need these in a particular format
+
+					var file = p.data.file.files;
+					delete p.data.file;
+
+					if(!(file && file.length)){
+						callback({
+							error : {
+								code : 'request_invalid',
+								message : 'There were no files attached with this request to upload'
+							}
+						});
+						return;
+					}
+
+
+//					p.data.mimeType = Object(file[0]).type || 'application/octet-stream';
+
+					var parts = new Multipart();
+					parts.append( JSON.stringify(p.data), 'application/json');
+					if(file){
+						parts.append( file );
+					}
+
+					parts.onready(function(body, boundary){
+						utils.xhr( p.method, utils.qs(url,qs), {
+							'content-type' : 'multipart/related; boundary="'+boundary+'"'
+						}, body, callback );
+					});
+
+					// Yep handled it!
+					return true;
+				}
+
+				// Trigger error
+				callback({
+					error : {
+						code : 'request_invalid',
+						message : 'Could not process request'
+					}
+				});
+
+				return false;
 			}
 		}
 	});

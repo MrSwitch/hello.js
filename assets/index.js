@@ -354,7 +354,7 @@ var tests = [
 		path : 'me/files',
 		scope : ["publish_files"],
 		data : {
-			id : 'TestFolder',
+			id : '[FOLDER_ID]',
 			file : "/hello.js/assets/logo.png",
 			name : "TestFile.png"
 		},
@@ -407,6 +407,13 @@ function before_photo_post(test, callback){
 
 
 function get_test_folder(test, callback){
+
+	if(!("id" in test.data)){
+		callback();
+		return;
+	}
+
+	// If there is no ID, post to root
 	hello(test.network).api("me/folders").success(function(r){
 		for(var i=0;i<r.data.length;i++){
 			var folder = r.data[i];
@@ -415,9 +422,9 @@ function get_test_folder(test, callback){
 				return callback();
 			}
 		}
-		callback("Failed to setup: Create folder 'TestFolder' (there's a test above which does this)");
+		callback("Failed to setup: First create a folder called 'TestFolder' (there's a test above which does this)");
 	}).error(function(){
-		callback("Failed to setup, could not access me/folders");
+		callback("Failed to setup, could not access me/folders, ensure your signed in with the 'files' scope");
 	});
 }
 
@@ -428,7 +435,7 @@ function get_test_file(test, callback){
 			callback(s);
 			return;
 		}
-		hello(test.network).api( "me/files", { id: test.data.id } ).success(function(r){
+		hello(test.network).api( "me/files", { id : test.data.id } ).success(function(r){
 			for(var i=0;i<r.data.length;i++){
 				var file = r.data[i];
 				test.data.id = file.id;
