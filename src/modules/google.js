@@ -335,13 +335,13 @@
 				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}&start-index=@{start|1}',
 
 				// https://developers.google.com/drive/v2/reference/files/list
-				'me/files' : 'drive/v2/files?q=%22root%22+in+parents&maxResults=@{limit|100}',
+				'me/files' : 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}',
 
 				// https://developers.google.com/drive/v2/reference/files/list
-				'me/folders' : 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+mimeType+=+%22application/vnd.google-apps.folder%22&maxResults=@{limit|100}',
+				'me/folders' : 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+mimeType+=+%22application/vnd.google-apps.folder%22+and+trashed=false&maxResults=@{limit|100}',
 
 				// https://developers.google.com/drive/v2/reference/files/list
-				'me/folder' : 'drive/v2/files?q=%22@{id|root}%22+in+parents&maxResults=@{limit|100}'
+				'me/folder' : 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}'
 			},
 
 			// Map post requests
