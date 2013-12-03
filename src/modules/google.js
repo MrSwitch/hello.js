@@ -1,7 +1,7 @@
 //
 // GOOGLE API
 //
-(function(hello){
+(function(hello, window){
 
 	"use strict";
 
@@ -175,30 +175,6 @@
 	var utils = hello.utils;
 
 
-	//
-	// Events
-	//
-	var counter=1;
-
-	var addEvent, removeEvent;
-
-	if(document.removeEventListener){
-		addEvent = function(elm, event_name, callback){
-			elm.addEventListener(event_name, callback);
-		};
-		removeEvent = function(elm, event_name, callback){
-			elm.removeEventListener(event_name, callback);
-		};
-	}
-	else if(document.detachEvent){
-		removeEvent = function (elm, event_name, callback){
-			elm.detachEvent("on"+event_name, callback);
-		};
-		addEvent = function (elm, event_name, callback){
-			elm.attachEvent("on"+event_name, callback);
-		};
-	}
-
 	// Multipart
 	// Construct a multipart message
 
@@ -267,6 +243,152 @@
 		};
 	}
 
+
+	/*
+	//
+	// Events
+	//
+	var addEvent, removeEvent;
+
+	if(document.removeEventListener){
+		addEvent = function(elm, event_name, callback){
+			elm.addEventListener(event_name, callback);
+		};
+		removeEvent = function(elm, event_name, callback){
+			elm.removeEventListener(event_name, callback);
+		};
+	}
+	else if(document.detachEvent){
+		removeEvent = function (elm, event_name, callback){
+			elm.detachEvent("on"+event_name, callback);
+		};
+		addEvent = function (elm, event_name, callback){
+			elm.attachEvent("on"+event_name, callback);
+		};
+	}
+
+	//
+	// postMessage
+	// This is used whereby the browser does not support CORS
+	//
+	var xd_iframe, xd_ready, xd_id, xd_counter, xd_queue=[];
+	function xd(method, url, headers, body, callback){
+
+		// This is the origin of the Domain we're opening
+		var origin = 'https://content.googleapis.com';
+
+		// Is this the first time?
+		if(!xd_iframe){
+			// Create the proxy window
+			xd_iframe = utils.append('iframe', { src : origin + "/static/proxy.html?jsh=m%3B%2F_%2Fscs%2Fapps-static%2F_%2Fjs%2Fk%3Doz.gapi.en.mMZgig4ibk0.O%2Fm%3D__features__%2Fam%3DEQ%2Frt%3Dj%2Fd%3D1%2Frs%3DAItRSTNZBJcXGialq7mfSUkqsE3kvYwkpQ",
+										style : {position:'absolute',left:"-1000px",bottom:0,height:'1px',width:'1px'} }, 'body');
+
+			// Listen for on ready events
+			// Set the window listener to handle responses from this
+			addEvent( window, "message", function CB(e){
+
+				// Try a callback
+				if(e.origin !== origin){
+					return;
+				}
+
+				try{
+
+					var r = JSON.parse(e.data),
+						m = /^ready\:(\d+)$/;
+
+					if(r && r.s && r.s.match(m)){
+						xd_id = r.s.match(m)[1];
+						xd_ready = true;
+						xd_counter = 0;
+
+						for(var i=0;i<xd_queue.length;i++){
+							xd_queue[i]();
+						}
+					}
+				}
+				catch(ee){
+					// This wasn't meant to be
+					return;
+				}
+
+			});
+		}
+
+		//
+		// Action
+		// This is the function to call if/once the proxy has successfully loaded
+		// If makes a call to the IFRAME
+		var action = function(){
+
+			var nav = window.navigation,
+				position = ++xd_counter;
+
+			// The endpoint is ready send the response
+			var message = JSON.stringify({
+				"s":"makeHttpRequests",
+				"f":"..",
+				"c":position,
+				"a":[[{
+					"key":"gapiRequest",
+					"params":{
+						"url":url,
+						"httpMethod":method.toUpperCase(),
+						"body": body,
+						"headers":{
+							"Content-Type":headers['content-type'],
+							"X-Origin":window.location.origin,
+							"X-ClientDetails":"appVersion="+nav.appVersion+"&platform="+nav.platform+"&userAgent="+nav.uaerAgent
+						},
+						/*
+						//urlParams":{
+						//	"uploadType":"multipart"
+						//},
+						"clientName":"google-api-javascript-client",
+						"clientVersion":"1.1.0-beta"
+					}
+				}]],
+				"t":id,
+				"l":false,
+				"g":true,
+				"r":".."
+			});
+
+			addEvent( window, "message", function CB2(e){
+
+				if(e.origin !== origin ){
+					// not the incoming message we're after
+					return;
+				}
+
+				// Decode the string
+				try{
+					var json = JSON.parse(e.data);
+					if( json.t === xd_id && json.a[0] === position ){
+						removeEvent( window, "message", CB2);
+						callback(json.a[1]);
+					}
+				}
+				catch(ee){}
+			});
+
+			// Post a message to iframe once it has loaded
+			iframe.contentWindow.postMessage(message, '*');
+		};
+
+
+		//
+		// Check to see if the proy has loaded,
+		// If it has then action()!
+		// Otherwise, xd_queue until the proxy has loaded
+		if(xd_ready){
+			action();
+		}
+		else{
+			xd_queue.push(action);
+		}
+	}
+	*/
 
 	//
 	// URLS
@@ -346,7 +468,25 @@
 
 			// Map post requests
 			post : {
+				/*
+				// PICASA
+				'me/albums' : function(p, callback){
+					p.data = {
+						"title": p.data.name,
+						"summary": p.data.description,
+						"category": 'http://schemas.google.com/photos/2007#album'
+					};
+					callback('https://picasaweb.google.com/data/feed/api/user/default?alt=json');
+				},
+				*/
+				// DRIVE
 				'me/files' : function(p, callback){
+					if( p.data && p.data instanceof window.HTMLInputElement ){
+						p.data = { file : p.data };
+					}
+					if( !p.data.name && Object(Object(p.data.file).files).length ){
+						p.data.name = p.data.file.files[0].name;
+					}
 					p.data = {
 						"title": p.data.name,
 						"parents": [{"id":p.data.id||'root'}],
@@ -421,8 +561,7 @@
 
 			//
 			// Custom API handler, overwrites the default fallbacks
-			// Linkedin uses xdrpc (XDomain, Remote Procedure Calls), a convoluted "standard" adopted by oooh a whopping ONE client in the list thus far.
-			// This function performs a postMessage Request
+			// Performs a postMessage Request
 			//
 			api : function(url,p,qs,callback){
 
@@ -431,16 +570,29 @@
 					return;
 				}
 
-				// Does this request contain binary data?
-				if(utils.hasBinary(p.data) && "file" in p.data && "files" in p.data.file ){
-					// Read the file into a  base64 string... yep a hassle, i know
-					// FormData doesn't let us assign our own Multipart headers and HTTP Content-Type
-					// Alas GoogleApi need these in a particular format
+				// Contain inaccessible binary data?
+				// If there is no "files" property on an INPUT then we can't get the data
+				if( utils.hasBinary(p.data) && "file" in p.data && !( "files" in p.data.file ) ){
+					callback({
+						error : {
+							code : 'request_invalid',
+							message : "Sorry, can't upload your files to Google Drive in this browser"
+						}
+					});
+				}
 
-					var file = p.data.file.files;
+				// Extract the file, if it exists from the data object
+				// If the File is an INPUT element lets just concern ourselves with the NodeList
+				var file;
+				if( "file" in p.data ){
+					file = p.data.file;
 					delete p.data.file;
 
-					if(!(file && file.length)){
+					if("files" in file){
+						// Assign the NodeList
+						file = file.files;
+					}
+					if(!file || !file.length){
 						callback({
 							error : {
 								code : 'request_invalid',
@@ -449,36 +601,41 @@
 						});
 						return;
 					}
-
-
-//					p.data.mimeType = Object(file[0]).type || 'application/octet-stream';
-
-					var parts = new Multipart();
-					parts.append( JSON.stringify(p.data), 'application/json');
-					if(file){
-						parts.append( file );
-					}
-
-					parts.onready(function(body, boundary){
-						utils.xhr( p.method, utils.qs(url,qs), {
-							'content-type' : 'multipart/related; boundary="'+boundary+'"'
-						}, body, callback );
-					});
-
-					// Yep handled it!
-					return true;
 				}
 
-				// Trigger error
-				callback({
-					error : {
-						code : 'request_invalid',
-						message : 'Could not process request'
-					}
+
+//				p.data.mimeType = Object(file[0]).type || 'application/octet-stream';
+
+				// Construct a multipart message
+				var parts = new Multipart();
+				parts.append( JSON.stringify(p.data), 'application/json');
+
+				// Read the file into a  base64 string... yep a hassle, i know
+				// FormData doesn't let us assign our own Multipart headers and HTTP Content-Type
+				// Alas GoogleApi need these in a particular format
+				if(file){
+					parts.append( file );
+				}
+
+				parts.onready(function(body, boundary){
+
+					// Does this endpoint support CORS?
+					// Then run the XHR function					
+					utils.xhr( p.method, utils.qs(url,qs), {
+						'content-type' : 'multipart/related; boundary="'+boundary+'"'
+					}, body, callback );
+
+
+					/*
+						// Otherwise lets POST the data the good old fashioned way postMessage
+						xd( p.method, utils.qs(url,qs), {
+							'content-type' : 'multipart/related; boundary="'+boundary+'"'
+						}, body, callback );
+					*/
 				});
 
-				return false;
+				return true;
 			}
 		}
 	});
-})(hello);
+})(hello, window);

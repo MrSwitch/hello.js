@@ -1,25 +1,20 @@
 <!DOCTYPE html>
 <link rel="stylesheet" href="/_packages/document.css"></script>
-<script src="/_packages/document.js"></script>
 <script src="../client_ids.js"></script>
 <script>
 // DEBUGGING
 window.addEventListener('message', function(){
-	console.log(arguments);
+	console.debug(arguments[0].origin, arguments[0].data);
 });
 </script>
 
 
 <h1>Upload via Google SDK's</h1>
 
-<form onsubmit="upload()">
-	<button id="google">Login Google</button>
+<button id="google">Login Google</button>
 
-	<hr />
-
-	<input type="file" id="file"/>
-
-	<button type="submit">Upload to Google root</button>
+<form onsubmit="return upload();">
+	<input type="file" id="file" name="file"/><button type="submit">Upload to Google root</button>
 </form>
 
 <p>Include both the SDK's</p>
@@ -108,5 +103,6 @@ function upload(){
 		request.execute(callback);
 		}
 	});
+	return false;
 }
 </script>
