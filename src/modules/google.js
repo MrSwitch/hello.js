@@ -244,7 +244,6 @@
 	}
 
 
-	/*
 	//
 	// Events
 	//
@@ -279,8 +278,12 @@
 
 		// Is this the first time?
 		if(!xd_iframe){
+
+			// ID
+			xd_id = String(parseInt(Math.random()*1e8,10));
+
 			// Create the proxy window
-			xd_iframe = utils.append('iframe', { src : origin + "/static/proxy.html?jsh=m%3B%2F_%2Fscs%2Fapps-static%2F_%2Fjs%2Fk%3Doz.gapi.en.mMZgig4ibk0.O%2Fm%3D__features__%2Fam%3DEQ%2Frt%3Dj%2Fd%3D1%2Frs%3DAItRSTNZBJcXGialq7mfSUkqsE3kvYwkpQ",
+			xd_iframe = utils.append('iframe', { src : origin + "/static/proxy.html?jsh=m%3B%2F_%2Fscs%2Fapps-static%2F_%2Fjs%2Fk%3Doz.gapi.en.mMZgig4ibk0.O%2Fm%3D__features__%2Fam%3DEQ%2Frt%3Dj%2Fd%3D1%2Frs%3DAItRSTNZBJcXGialq7mfSUkqsE3kvYwkpQ#parent="+window.location.origin+"&rpctoken="+xd_id,
 										style : {position:'absolute',left:"-1000px",bottom:0,height:'1px',width:'1px'} }, 'body');
 
 			// Listen for on ready events
@@ -292,26 +295,27 @@
 					return;
 				}
 
+				var json;
+
 				try{
-
-					var r = JSON.parse(e.data),
-						m = /^ready\:(\d+)$/;
-
-					if(r && r.s && r.s.match(m)){
-						xd_id = r.s.match(m)[1];
-						xd_ready = true;
-						xd_counter = 0;
-
-						for(var i=0;i<xd_queue.length;i++){
-							xd_queue[i]();
-						}
-					}
+					json = JSON.parse(e.data);
 				}
 				catch(ee){
 					// This wasn't meant to be
 					return;
 				}
 
+				// Is this the right implementation?
+				if(json && json.s && json.s === "ready:"+xd_id){
+					// Yes, it is.
+					// Lets trigger the pending operations
+					xd_ready = true;
+					xd_counter = 0;
+
+					for(var i=0;i<xd_queue.length;i++){
+						xd_queue[i]();
+					}
+				}
 			});
 		}
 
@@ -321,8 +325,12 @@
 		// If makes a call to the IFRAME
 		var action = function(){
 
-			var nav = window.navigation,
-				position = ++xd_counter;
+			var nav = window.navigator,
+				position = ++xd_counter,
+				qs = utils.param(url.match(/\?.+/)[0]);
+
+			var token = qs.access_token;
+			delete qs.access_token;
 
 			// The endpoint is ready send the response
 			var message = JSON.stringify({
@@ -332,23 +340,21 @@
 				"a":[[{
 					"key":"gapiRequest",
 					"params":{
-						"url":url,
+						"url":url.replace(/(^https?\:\/\/[^\/]+|\?.+$)/,''), // just the pathname
 						"httpMethod":method.toUpperCase(),
 						"body": body,
 						"headers":{
+							"Authorization":":Bearer "+token,
 							"Content-Type":headers['content-type'],
 							"X-Origin":window.location.origin,
-							"X-ClientDetails":"appVersion="+nav.appVersion+"&platform="+nav.platform+"&userAgent="+nav.uaerAgent
+							"X-ClientDetails":"appVersion="+nav.appVersion+"&platform="+nav.platform+"&userAgent="+nav.userAgent
 						},
-						/*
-						//urlParams":{
-						//	"uploadType":"multipart"
-						//},
+						"urlParams": qs,
 						"clientName":"google-api-javascript-client",
 						"clientVersion":"1.1.0-beta"
 					}
 				}]],
-				"t":id,
+				"t":xd_id,
 				"l":false,
 				"g":true,
 				"r":".."
@@ -366,14 +372,21 @@
 					var json = JSON.parse(e.data);
 					if( json.t === xd_id && json.a[0] === position ){
 						removeEvent( window, "message", CB2);
-						callback(json.a[1]);
+						callback(JSON.parse(JSON.parse(json.a[1]).gapiRequest.data.body));
 					}
 				}
-				catch(ee){}
+				catch(ee){
+					callback({
+						error: {
+							code : "request_error",
+							message : "Failed to post to Google"
+						}
+					});
+				}
 			});
 
 			// Post a message to iframe once it has loaded
-			iframe.contentWindow.postMessage(message, '*');
+			xd_iframe.contentWindow.postMessage(message, '*');
 		};
 
 
@@ -388,7 +401,7 @@
 			xd_queue.push(action);
 		}
 	}
-	*/
+	/**/
 
 	//
 	// URLS
@@ -541,10 +554,18 @@
 				'default' : gEntry
 			},
 			xhr : function(p){
+
+				// Post
 				if(p.method==='post'){
 
 					// Does this contain binary data?
-					if(utils.hasBinary(p.data)){
+					if( p.data && utils.hasBinary(p.data) || p.data.file ){
+
+						// There is support for CORS via Access Control headers
+						// ... unless otherwise stated by post/put handlers
+						p.cors_support = p.cors_support || true;
+
+
 						// There is noway, as it appears, to Upload a file along with its meta data
 						// So lets cancel the typical approach and use the override '{ api : function() }' below
 						return false;
@@ -619,19 +640,19 @@
 
 				parts.onready(function(body, boundary){
 
-					// Does this endpoint support CORS?
-					// Then run the XHR function					
-					utils.xhr( p.method, utils.qs(url,qs), {
-						'content-type' : 'multipart/related; boundary="'+boundary+'"'
-					}, body, callback );
-
-
-					/*
+					// Does this userAgent and endpoint support CORS?
+					if( p.cors_support ){
+						// Deliver via 
+						utils.xhr( p.method, utils.qs(url,qs), {
+							'content-type' : 'multipart/related; boundary="'+boundary+'"'
+						}, body, callback );
+					}
+					else{
 						// Otherwise lets POST the data the good old fashioned way postMessage
 						xd( p.method, utils.qs(url,qs), {
 							'content-type' : 'multipart/related; boundary="'+boundary+'"'
 						}, body, callback );
-					*/
+					}
 				});
 
 				return true;
