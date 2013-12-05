@@ -256,6 +256,20 @@ var tests = [
 		}
 	},
 	{
+		title : "Remove an album",
+		api : "api",
+		method : 'delete',
+		path : 'me/album',
+		scope : ["publish_files"],
+		data : {
+			id : '[ALBUM_ID]'
+		},
+		setup : before_photo_post,
+		expected : {
+			success : true
+		}
+	},
+	{
 		title : "Upload image to Album",
 		api : "api",
 		method : 'post',
@@ -287,15 +301,15 @@ var tests = [
 		}
 	},
 	{
-		title : "Remove an album",
+		title : "Remove a Photo from an Album",
 		api : "api",
 		method : 'delete',
-		path : 'me/album',
+		path : 'me/photo',
 		scope : ["publish_files"],
 		data : {
-			id : '[ALBUM_ID]'
+			id : '[PHOTO_ID]'
 		},
-		setup : before_photo_post,
+		setup : get_test_photo,
 		expected : {
 			success : true
 		}
@@ -434,8 +448,25 @@ function before_photo_post(test, callback){
 	});
 }
 
+function get_test_photo(test, callback){
 
-
+	before_photo_post(test, function(s){
+		if(s){
+			callback(s);
+			return;
+		}
+		hello(test.network).api( "me/album", { id : test.data.id } ).success(function(r){
+			for(var i=0;i<r.data.length;i++){
+				var file = r.data[i];
+				test.data.id = file.id;
+				return callback();
+			}
+			callback("Failed to setup: Create file 'TestFile.png' (there's a test above which does this)");
+		}).error(function(){
+			callback("Failed to setup, could not access me/files");
+		});
+	});
+}
 
 function get_test_folder(test, callback){
 

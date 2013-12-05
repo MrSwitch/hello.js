@@ -97,6 +97,7 @@ hello.init({
 		del : {
 			// Include the data[id] in the path
 			"me/album"	: '@{id}',
+			"me/photo"	: '@{id}',
 			"me/files"	: '@{id}'
 		},
 
