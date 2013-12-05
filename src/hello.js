@@ -1783,6 +1783,9 @@ hello.utils.extend( hello.utils, {
 						f.append(x, data[x].files[0]);
 					}
 				}
+				else if(data[x] instanceof Blob){
+					f.append(x, data[x], data.name);
+				}
 				else{
 					f.append(x, data[x]);
 				}

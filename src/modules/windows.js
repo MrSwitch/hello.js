@@ -21,6 +21,17 @@ function formatFriends(o){
 	return o;
 }
 
+function dataURItoBlob(dataURI) {
+	var reg = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
+	var m = dataURI.match(reg);
+	var binary = atob(dataURI.replace(reg,''));
+	var array = [];
+	for(var i = 0; i < binary.length; i++) {
+		array.push(binary.charCodeAt(i));
+	}
+	return new Blob([new Uint8Array(array)], {type: m[1]});
+}
+
 hello.init({
 	windows : {
 		name : 'Windows live',
@@ -75,8 +86,6 @@ hello.init({
 
 		// Map POST requests
 		post : {
-			"me/feed" : "me/share",
-			"me/share" : "me/share",
 			"me/albums" : "me/albums",
 			"me/album" : "@{id}/files",
 
@@ -120,7 +129,21 @@ hello.init({
 				return o;
 			}
 		},
-		xhr : false,
+		xhr : function(p){
+			if( p.method !== 'get' && p.method !== 'delete' && !hello.utils.hasBinary(p.data) ){
+
+				// Does this have a data-uri to upload as a file?
+				if( typeof( p.data.file ) === 'string' ){
+					p.data.file = dataURItoBlob(p.data.file);
+				}else{
+					p.data = JSON.stringify(p.data);
+					p.headers = {
+						'Content-Type' : 'application/json'
+					};
+				}
+			}
+			return true;
+		},
 		jsonp : function(p){
 			if( p.method.toLowerCase() !== 'get' && !hello.utils.hasBinary(p.data) ){
 				//p.data = {data: JSON.stringify(p.data), method: p.method.toLowerCase()};
