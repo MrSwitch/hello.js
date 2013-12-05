@@ -1,4 +1,11 @@
+/**
+ * API endpoint tests
+ * @author Andrew Dodson
+ */
 
+//
+// The following properties pertain to helper objects when defining the tests
+//
 var reg = {
 	url : /^https?\:\/\//,
 	name : /^[\w\d\s\.\-]+$/,
@@ -8,11 +15,18 @@ var reg = {
 	optional_url : /^(https?\:\/\/|$)/
 };
 
+var INPUT_FILE = 'file',
+	DATA_URL = 'data:image/png;base64,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';
+
 var query = {
 	limit : [5,1,25,100]
 };
 
 
+//
+// TESTS Array
+// Each item within the array is a configuration of a test.
+//
 var tests = [
 	{
 		title : "Login to network",
@@ -249,7 +263,7 @@ var tests = [
 		scope : ["publish_files"],
 		data : {
 			id : "[ALBUM_ID]",
-			file : ""
+			file : INPUT_FILE
 		},
 		setup : before_photo_post,
 		expected : {
@@ -355,7 +369,24 @@ var tests = [
 		scope : ["publish_files"],
 		data : {
 			id : '[FOLDER_ID]',
-			file : "/hello.js/assets/logo.png",
+			file : INPUT_FILE,
+			name : "TestFile.png"
+		},
+		setup : get_test_folder,
+		expected : {
+			id : reg.string,
+			name : reg.name
+		}
+	},
+	{
+		title : "Upload a DataURI as a file",
+		api : "api",
+		method : 'post',
+		path : 'me/files',
+		scope : ["publish_files"],
+		data : {
+			id : '[FOLDER_ID]',
+			file : DATA_URL,
 			name : "TestFile.png"
 		},
 		setup : get_test_folder,
@@ -531,7 +562,7 @@ function Test(test,network,parent){
 
 		// If the data contains a file?
 		// Can't grab it from the dictionary so...
-		if("file" in test.data){
+		if("file" in test.data && test.data.file === INPUT_FILE ){
 
 			// lets define the form as the data source
 			test.data = document.getElementById(parent.formId());

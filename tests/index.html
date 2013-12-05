@@ -85,10 +85,12 @@
 // Initiate the library
 hello.init(CLIENT_IDS_ALL,{redirect_uri: '../redirect.html', oauth_proxy:OAUTH_PROXY_URL});
 
-$('#tests-template').load('../assets/test_network.html', function() {
+$('#tests-template').load('../assets/test_network.html', function(){
 	//knockout binding goes here
 	ko.applyBindings(model);
 });
+
+
 </script>
 
 </body>
