@@ -185,7 +185,8 @@
 			counter = 0,
 			line_break = "\r\n",
 			delim = line_break + "--" + boundary,
-			ready = function(){};
+			ready = function(){},
+			data_uri = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
 
 		// Add File
 		function addFile(item){
@@ -220,9 +221,21 @@
 				var item = content[i];
 
 				// Is this a file?
+				// Files can be either Blobs or File types
 				if(item instanceof window.File || item instanceof window.Blob){
+					// Read the file in
 					addFile(item);
 				}
+
+				// Data-URI?
+				// data:[<mime type>][;charset=<charset>][;base64],<encoded data>
+				// /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i
+				else if( typeof( item ) === 'string' && item.match(data_uri) ){
+					var m = item.match(data_uri);
+					addContent(item.replace(data_uri,''), m[1] + line_break + "Content-Transfer-Encoding: base64");
+				}
+
+				// Regular string
 				else{
 					addContent(item, type);
 				}
@@ -593,7 +606,7 @@
 
 				// Contain inaccessible binary data?
 				// If there is no "files" property on an INPUT then we can't get the data
-				if( utils.hasBinary(p.data) && "file" in p.data && !( "files" in p.data.file ) ){
+				if( "file" in p.data && utils.domInstance('input', p.data.file ) && !( "files" in p.data.file ) ){
 					callback({
 						error : {
 							code : 'request_invalid',
@@ -609,7 +622,7 @@
 					file = p.data.file;
 					delete p.data.file;
 
-					if("files" in file){
+					if( typeof(file)==='object' && "files" in file){
 						// Assign the NodeList
 						file = file.files;
 					}
