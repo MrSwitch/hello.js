@@ -98,6 +98,7 @@ hello.init({
 			// Include the data[id] in the path
 			"me/album"	: '@{id}',
 			"me/photo"	: '@{id}',
+			"me/folder"	: '@{id}',
 			"me/files"	: '@{id}'
 		},
 

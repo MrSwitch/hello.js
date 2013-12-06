@@ -376,6 +376,20 @@ var tests = [
 		}
 	},
 	{
+		title : "Delete a folder",
+		api : "api",
+		method : 'delete',
+		path : 'me/folder',
+		scope : ["publish_files"],
+		data : {
+			id : '[FOLDER_ID]'
+		},
+		setup : get_test_folder,
+		expected : {
+			success : true
+		}
+	},
+	{
 		title : "Upload my file",
 		api : "api",
 		method : 'post',

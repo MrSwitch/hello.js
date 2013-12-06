@@ -532,7 +532,8 @@
 
 			// Map DELETE requests
 			del : {
-				'me/files' : 'https://www.googleapis.com/drive/v2/files/@{id}'
+				'me/files' : 'drive/v2/files/@{id}',
+				'me/folder' : 'drive/v2/files/@{id}'
 			},
 
 			wrap : {
