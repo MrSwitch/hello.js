@@ -390,13 +390,30 @@ var tests = [
 		}
 	},
 	{
+		title : "Get files in folder",
+		api : "api",
+		method : 'get',
+		path : 'me/files',
+		scope : ["files"],
+		data : {
+			parent : '[FOLDER_ID]'
+		},
+		setup : get_test_folder,
+		expected : {
+			data : [{
+				id : reg.string,
+				name : reg.name
+			}]
+		}
+	},
+	{
 		title : "Upload my file",
 		api : "api",
 		method : 'post',
 		path : 'me/files',
 		scope : ["publish_files"],
 		data : {
-			id : '[FOLDER_ID]',
+			parent : '[FOLDER_ID]',
 			file : INPUT_FILE,
 			name : "TestFile.png"
 		},
@@ -413,11 +430,44 @@ var tests = [
 		path : 'me/files',
 		scope : ["publish_files"],
 		data : {
-			id : '[FOLDER_ID]',
+			parent : '[FOLDER_ID]',
 			file : DATA_URL,
 			name : "TestFile.png"
 		},
 		setup : get_test_folder,
+		expected : {
+			id : reg.string,
+			name : reg.name
+		}
+	},
+	{
+		title : "Update the file contents",
+		api : "api",
+		method : 'put',
+		path : 'me/files',
+		scope : ["publish_files"],
+		data : {
+			id : '[FILE_ID]',
+			file : DATA_URL,
+			name : "TestFile.png"
+		},
+		setup : get_test_file,
+		expected : {
+			id : reg.string,
+			name : reg.name
+		}
+	},
+	{
+		title : "Move the file location",
+		api : "api",
+		method : 'put',
+		path : 'me/files',
+		scope : ["publish_files"],
+		data : {
+			id : '[FILE_ID]',
+			parent : '[NEW_PARENT_ID]'
+		},
+		setup : get_test_file,
 		expected : {
 			id : reg.string,
 			name : reg.name
@@ -484,7 +534,7 @@ function get_test_photo(test, callback){
 
 function get_test_folder(test, callback){
 
-	if(!("id" in test.data)){
+	if(!("id" in test.data)&&!("parent" in test.data)){
 		callback();
 		return;
 	}
@@ -494,7 +544,12 @@ function get_test_folder(test, callback){
 		for(var i=0;i<r.data.length;i++){
 			var folder = r.data[i];
 			if(folder.name === "TestFolder"){
-				test.data.id = folder.id;
+				if(test.data.id){
+					test.data.id = folder.id;
+				}
+				else if(test.data.parent){
+					test.data.parent = folder.id;
+				}
 				return callback();
 			}
 		}
@@ -511,7 +566,7 @@ function get_test_file(test, callback){
 			callback(s);
 			return;
 		}
-		hello(test.network).api( "me/files", { id : test.data.id } ).success(function(r){
+		hello(test.network).api( "me/files", { parent : test.data.id } ).success(function(r){
 			for(var i=0;i<r.data.length;i++){
 				var file = r.data[i];
 				test.data.id = file.id;

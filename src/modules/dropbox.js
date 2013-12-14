@@ -111,7 +111,7 @@ hello.init({
 			"me"		: 'account/info',
 
 			// https://www.dropbox.com/developers/core/docs#metadata
-			"me/files"	: req("metadata/@{root|sandbox}/@{id}"),
+			"me/files"	: req("metadata/@{root|sandbox}/@{parent}"),
 			"me/folder"	: req("metadata/@{root|sandbox}/@{id}"),
 			"me/folders" : req('metadata/@{root|sandbox}/'),
 
@@ -126,7 +126,7 @@ hello.init({
 		post : {
 			"me/files" : function(p,callback){
 
-				var path = p.data.id,
+				var path = p.data.parent,
 					file_name = p.data.name;
 
 				p.data = {

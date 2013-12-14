@@ -417,6 +417,50 @@
 	/**/
 
 	//
+	// Upload to Drive
+	// If this is PUT then only augment the file uploaded
+	// PUT https://developers.google.com/drive/v2/reference/files/update
+	// POST https://developers.google.com/drive/manage-uploads
+	function uploadDrive(p, callback){
+		
+		var data = {};
+
+		if( p.data && p.data instanceof window.HTMLInputElement ){
+			p.data = { file : p.data };
+		}
+		if( !p.data.name && Object(Object(p.data.file).files).length && p.method === 'post' ){
+			p.data.name = p.data.file.files[0].name;
+		}
+
+		if(p.method==='post'){
+			p.data = {
+				"title": p.data.name,
+				"parents": [{"id":p.data.parent||'root'}],
+				"file" : p.data.file
+			};
+		}
+		else{
+			// Make a reference
+			data = p.data;
+			p.data = {};
+
+			// Add the parts to change as required
+			if( data.parent ){
+				p.data["parents"] =  [{"id":p.data.parent||'root'}];
+			}
+			if( data.file ){
+				p.data.file = data.file;
+			}
+			if( data.name ){
+				p.data.title = data.name;
+			}
+		}
+
+		callback('upload/drive/v2/files'+( data.id ? '/' + data.id : '' )+'?uploadType=multipart');
+	}
+
+
+	//
 	// URLS
 	var contacts_url = 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=@{limit|1000}&start-index=@{start|1}';
 
@@ -483,7 +527,7 @@
 				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}&start-index=@{start|1}',
 
 				// https://developers.google.com/drive/v2/reference/files/list
-				'me/files' : 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}',
+				'me/files' : 'drive/v2/files?q=%22@{parent|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}',
 
 				// https://developers.google.com/drive/v2/reference/files/list
 				'me/folders' : 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+mimeType+=+%22application/vnd.google-apps.folder%22+and+trashed=false&maxResults=@{limit|100}',
@@ -506,20 +550,7 @@
 				},
 				*/
 				// DRIVE
-				'me/files' : function(p, callback){
-					if( p.data && p.data instanceof window.HTMLInputElement ){
-						p.data = { file : p.data };
-					}
-					if( !p.data.name && Object(Object(p.data.file).files).length ){
-						p.data.name = p.data.file.files[0].name;
-					}
-					p.data = {
-						"title": p.data.name,
-						"parents": [{"id":p.data.id||'root'}],
-						"file" : p.data.file
-					};
-					callback('upload/drive/v2/files?uploadType=multipart');
-				},
+				'me/files' : uploadDrive,
 				'me/folders' : function(p, callback){
 					p.data = {
 						"title": p.data.name,
@@ -528,6 +559,11 @@
 					};
 					callback('drive/v2/files');
 				}
+			},
+
+			// Map post requests
+			put : {
+				'me/files' : uploadDrive
 			},
 
 			// Map DELETE requests
@@ -570,7 +606,7 @@
 			xhr : function(p){
 
 				// Post
-				if(p.method==='post'){
+				if(p.method==='post'||p.method==='put'){
 
 					// Does this contain binary data?
 					if( p.data && utils.hasBinary(p.data) || p.data.file ){

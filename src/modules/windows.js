@@ -78,7 +78,7 @@ hello.init({
 			"me/photo"	: '@{id}',
 
 			// FILES
-			"me/files"	: '@{id|me/skydrive}/files',
+			"me/files"	: '@{parent|me/skydrive}/files',
 
 			"me/folders" : '@{id|me/skydrive}/files',
 			"me/folder" : '@{id|me/skydrive}/files'
@@ -90,7 +90,7 @@ hello.init({
 			"me/album" : "@{id}/files",
 
 			"me/folders" : '@{id|me/skydrive/}',
-			"me/files" : "@{id|me/skydrive/}/files"
+			"me/files" : "@{parent|me/skydrive/}/files"
 		},
 
 		// Map DELETE requests
