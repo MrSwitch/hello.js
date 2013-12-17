@@ -4360,7 +4360,7 @@ hello.init({
 			// Friends
 			"me"	: "me",
 			"me/friends" : "me/friends",
-			"me/following" : "me/friends",
+			"me/following" : "me/contacts",
 			"me/followers" : "me/friends",
 
 			"me/albums"	: 'me/albums',
