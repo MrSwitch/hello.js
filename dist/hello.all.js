@@ -557,7 +557,7 @@ hello.utils.extend( hello.utils, {
 			m = s.replace(/^[\#\?]/,'').match(/([^=\/\&]+)=([^\&]+)/g);
 			if(m){
 				for(var i=0;i<m.length;i++){
-					b = m[i].match(/([^=\/\&]+)=([^\&]+)/);
+					b = m[i].match(/([^=]+)=(.*)/);
 					a[b[1]] = decodeURIComponent( b[2] );
 				}
 			}
@@ -4545,9 +4545,9 @@ hello.init({
 		base	: "https://social.yahooapis.com/v1/",
 
 		get : {
-			"me"		: yql('select * from social.profile where guid=me'),
-			"me/friends"	: yql('select * from social.contacts where guid=me'),
-			"me/following"	: yql('select * from social.contacts where guid=me')
+			"me"		: yql('select * from social.profile(0) where guid=me'),
+			"me/friends"	: yql('select * from social.contacts(0) where guid=me'),
+			"me/following"	: yql('select * from social.contacts(0) where guid=me')
 		},
 		wrap : {
 			me : function(o){

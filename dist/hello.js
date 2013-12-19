@@ -557,7 +557,7 @@ hello.utils.extend( hello.utils, {
 			m = s.replace(/^[\#\?]/,'').match(/([^=\/\&]+)=([^\&]+)/g);
 			if(m){
 				for(var i=0;i<m.length;i++){
-					b = m[i].match(/([^=\/\&]+)=([^\&]+)/);
+					b = m[i].match(/([^=]+)=(.*)/);
 					a[b[1]] = decodeURIComponent( b[2] );
 				}
 			}
