@@ -557,8 +557,8 @@ hello.utils.extend( hello.utils, {
 			m = s.replace(/^[\#\?]/,'').match(/([^=\/\&]+)=([^\&]+)/g);
 			if(m){
 				for(var i=0;i<m.length;i++){
-					b = m[i].split('=');
-					a[b[0]] = decodeURIComponent( b[1] );
+					b = m[i].match(/([^=]+)=(.*)/);
+					a[b[1]] = decodeURIComponent( b[2] );
 				}
 			}
 			return a;
@@ -1234,7 +1234,7 @@ hello.unsubscribe = hello.off;
 	//
 	// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
 	// SoundCloud is the state in the querystring and the token in the hashtag, so we'll mix the two together
-	var p = utils.merge(hello.utils.param(location.search||''), utils.param(location.hash||''));
+	var p = utils.merge(utils.param(location.search||''), utils.param(location.hash||''));
 
 	
 	// if p.state
