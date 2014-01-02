@@ -50,7 +50,7 @@ hello.init({
 			events			: 'wl.calendars',
 			photos			: 'wl.photos',
 			videos			: 'wl.photos',
-			friends			: '',
+			friends			: 'wl.contacts_emails',
 			files			: 'wl.skydrive',
 			
 			publish			: 'wl.share',
@@ -68,7 +68,7 @@ hello.init({
 			// Friends
 			"me"	: "me",
 			"me/friends" : "me/friends",
-			"me/following" : "me/friends",
+			"me/following" : "me/contacts",
 			"me/followers" : "me/friends",
 
 			"me/albums"	: 'me/albums',

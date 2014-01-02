@@ -4342,7 +4342,7 @@ hello.init({
 			events			: 'wl.calendars',
 			photos			: 'wl.photos',
 			videos			: 'wl.photos',
-			friends			: '',
+			friends			: 'wl.contacts_emails',
 			files			: 'wl.skydrive',
 			
 			publish			: 'wl.share',
@@ -4360,7 +4360,7 @@ hello.init({
 			// Friends
 			"me"	: "me",
 			"me/friends" : "me/friends",
-			"me/following" : "me/friends",
+			"me/following" : "me/contacts",
 			"me/followers" : "me/friends",
 
 			"me/albums"	: 'me/albums',
@@ -4508,7 +4508,7 @@ function paging(res){
 }
 
 var yql = function(q){
-	return 'http://query.yahooapis.com/v1/yql?q=' + (q + ' limit @{limit|100} offset @{start|0}').replace(" ", '%20') + "&format=json";
+	return 'https://query.yahooapis.com/v1/yql?q=' + (q + ' limit @{limit|100} offset @{start|0}').replace(" ", '%20') + "&format=json";
 };
 
 hello.init({
