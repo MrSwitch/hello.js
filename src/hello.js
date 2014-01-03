@@ -1188,7 +1188,7 @@ hello.unsubscribe = hello.off;
 		location = window.location;
 
 	var debug = function(msg,e){
-		utils.append("p", {text:msg}, document.body);
+		utils.append("p", {text:msg}, document.documentElement);
 		if(e){
 			console.log(e);
 		}
