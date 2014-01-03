@@ -1187,6 +1187,13 @@ hello.unsubscribe = hello.off;
 	var utils = hello.utils,
 		location = window.location;
 
+	var debug = function(msg,e){
+		utils.append("p", {text:msg}, document.body);
+		if(e){
+			console.log(e);
+		}
+	};
+
 	//
 	// AuthCallback
 	// Trigger a callback to authenticate
@@ -1213,15 +1220,38 @@ hello.unsubscribe = hello.off;
 					delete obj.callback;
 				}catch(e){}
 
-				// Call the globalEvent function on the parent
-				win[cb](obj);
-
 				// Update store
 				utils.store(obj.network,obj);
+
+				// Call the globalEvent function on the parent
+				if(cb in win){
+					try{
+						win[cb](obj);
+					}
+					catch(e){
+						debug("Error thrown whilst executing parent callback", e);
+						return;
+					}
+				}
+				else{
+					debug("Error: Callback missing from parent window, snap!");
+					return;
+				}
+
 			}
 
-			window.close();
-			hello.emit("notice",'Trying to close window');
+			// Close this current window
+			try{
+				window.close();
+			}
+			catch(e){}
+
+			// IOS bug wont let us clos it if still loading
+			window.addEventListener('load', function(){
+				window.close();
+			});
+
+			debug("Trying to close window");
 
 			// Dont execute any more
 			return;
@@ -1246,7 +1276,7 @@ hello.unsubscribe = hello.off;
 			var a = JSON.parse(p.state);
 			p = utils.merge(p, a);
 		}catch(e){
-			hello.emit("error", "Could not decode state parameter");
+			debug("Could not decode state parameter");
 		}
 
 		// access_token?
