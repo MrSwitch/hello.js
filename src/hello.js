@@ -396,7 +396,11 @@ hello.utils.extend( hello, {
 
 			// Trigger callback
 			var popup = window.open(
-				url,
+				//
+				// OAuth redirect, fixes URI fragments from being lost in Safari
+				// (URI Fragments within 302 Location URI are lost over HTTPS)
+				// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
+				p.qs.redirect_uri + "#oauth_redirect=" + encodeURIComponent(url),
 				'Authentication',
 				"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left="+((window.innerWidth-windowWidth)/2)+",top="+((window.innerHeight-windowHeight)/2)
 			);
@@ -1319,6 +1323,14 @@ hello.unsubscribe = hello.off;
 				window.parent[p.callback](JSON.parse(p.result));
 			}
 		}
+	}
+	//
+	// OAuth redirect, fixes URI fragments from being lost in Safari
+	// (URI Fragments within 302 Location URI are lost over HTTPS)
+	// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
+	else if("oauth_redirect" in p){
+		window.location = p.oauth_redirect;
+		return;
 	}
 
 	// redefine
