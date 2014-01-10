@@ -50,7 +50,7 @@ hello.init({
 		// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
 		oauth : {
 			version : 2,
-			auth : 'http://www.facebook.com/dialog/oauth/'
+			auth : 'https://www.facebook.com/dialog/oauth/'
 		},
 
 		// Authorization scopes
