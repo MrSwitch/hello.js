@@ -400,7 +400,11 @@ hello.utils.extend( hello, {
 				// OAuth redirect, fixes URI fragments from being lost in Safari
 				// (URI Fragments within 302 Location URI are lost over HTTPS)
 				// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
-				p.qs.redirect_uri + "#oauth_redirect=" + encodeURIComponent(url),
+				// 
+				// FIREFOX, decodes URL fragments when calling location.hash. 
+				//  - This is bad if the value contains break points which are escaped
+				//  - Hence the url must be encoded twice as it contains breakpoints.
+				p.qs.redirect_uri + "#oauth_redirect=" + encodeURIComponent(encodeURIComponent(url)),
 				'Authentication',
 				"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left="+((window.innerWidth-windowWidth)/2)+",top="+((window.innerHeight-windowHeight)/2)
 			);
@@ -1268,6 +1272,7 @@ hello.unsubscribe = hello.off;
 	//
 	// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
 	// SoundCloud is the state in the querystring and the token in the hashtag, so we'll mix the two together
+	
 	var p = utils.merge(utils.param(location.search||''), utils.param(location.hash||''));
 
 	
@@ -1329,7 +1334,7 @@ hello.unsubscribe = hello.off;
 	// (URI Fragments within 302 Location URI are lost over HTTPS)
 	// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
 	else if("oauth_redirect" in p){
-		window.location = p.oauth_redirect;
+		window.location = decodeURIComponent(p.oauth_redirect);
 		return;
 	}
 
