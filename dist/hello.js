@@ -716,6 +716,7 @@ hello.utils.extend( hello.utils, {
 			x = null;
 		
 		// define x
+		// x is the first key in the list of object parameters
 		for(x in o){if(o.hasOwnProperty(x)){
 			break;
 		}}
@@ -723,8 +724,17 @@ hello.utils.extend( hello.utils, {
 		// Passing in hash object of arguments?
 		// Where the first argument can't be an object
 		if((args.length===1)&&(typeof(args[0])==='object')&&o[x]!='o!'){
-			// return same hash.
-			return args[0];
+
+			// Could this object still belong to a property?
+			// Check the object keys if they match any of the property keys
+			for(x in args[0]){if(o.hasOwnProperty(x)){
+				// Does this key exist in the property list?
+				if( x in o ){
+					// Yes this key does exist so its most likely this function has been invoked with an object parameter
+					// return first argument as the hash of all arguments
+					return args[0];
+				}
+			}}
 		}
 
 		// else loop through and account for the missing ones.
