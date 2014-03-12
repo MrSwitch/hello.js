@@ -255,7 +255,7 @@ If a network string is provided: A consent window to authenticate with that netw
 				<em>optional</em></td><td>
 				<q>popup</q></td></tr>
 			<tr><td>scope</td><td><i>string</i></td><td><q>email</q>, <q>publish</q> or <q>photos</q></td><td>
-				Comma separated list of scopes</td><td>
+				Comma separated list of <a href="#scope">scopes</a></td><td>
 				<em>optional</em></td><td>
 				<em>null</em></td></tr>
 			<tr><td>redirect_uri</td><td><i>string</i></td><td><q><a href="redirect.html" target="_blank">redirect.html</a></q></td><td>
@@ -463,6 +463,55 @@ A convenient function to get the `next` resultset is provided in the second para
 		alert("Whoops!");
 	});
 
+
+
+## Scope
+The scope property defines which privileges an app requires from a network provider. The scope can be defined globally for a session through hello.init(object, {scope:'string'}), or at the point of triggering the auth flow e.g. hello('network').login({scope:'string'});
+An app can specify multiple scopes, seperated by commas - as in the example below.
+
+
+	hello( "facebook" ).login( {scope: "friends,photos,publish" } );
+
+
+Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the [hello.api reference table](http://adodson.com/hello.js/#helloapi).
+
+The table below illustrates some of the default scopes HelloJS exposes. Additional scopes may be added which are proprietary to a service, but take careful not to mix proprietary scopes with other services which dont know how to handle them.
+<table>
+	<thead>
+	<tr>
+		<th>Scope</th>
+		<th>Description</th>
+	</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<th><i>default</i></th>
+			<td>Read basic profile</td>
+		</tr>
+		<tr>
+			<th><q>friends</q></th>
+			<td>Read friends profiles</td>
+		</tr>
+		<tr>
+			<th><q>photos</q></th>
+			<td>Read users albums and photos</td>
+		</tr>
+		<tr>
+			<th><q>files</q></th>
+			<td>Read users files</td>
+		</tr>
+		<tr>
+			<th><q>publish</q></th>
+			<td>Publish status updates</td>
+		</tr>
+		<tr>
+			<th><q>publish_files</q></th>
+			<td>Publish photos and files</td>
+		</tr>
+	</tbody>
+</table>
+
+Its good practice to limit the use of scopes and also to make users aware of why your app needs certain privilieges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend; Include a button which the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorisation.
 
 
 ## Error handling
