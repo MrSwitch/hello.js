@@ -589,34 +589,77 @@ hello.utils.extend( hello.utils, {
 
 	//
 	// Local Storage Facade
-	store : function (name,value,days) {
+	store : (function(localStorage){
 
-		// Local storage
-		var json = JSON.parse(localStorage.getItem('hello')) || {};
+		//
+		// LocalStorage
+		var a = [localStorage,window.sessionStorage],
+			i=0;
 
-		if(name && typeof(value) === 'undefined'){
-			return json[name];
-		}
-		else if(name && value === ''){
+		// Set LocalStorage
+		localStorage = a[i++];
+
+		while(localStorage){
 			try{
-				delete json[name];
+				localStorage.setItem(i,i);
+				localStorage.removeItem(i);
+				break;
 			}
 			catch(e){
-				json[name]=null;
+				localStorage = a[i++];
 			}
 		}
-		else if(name){
-			json[name] = value;
+
+		if(!localStorage){
+			localStorage = {
+				getItem : function(prop){
+					prop = prop +'=';
+					var m = document.cookie.split(";");
+					for(var i=0;i<m.length;i++){
+						var _m = m[i].replace(/(^\s+|\s+$)/,'');
+						if(_m && _m.indexOf(prop)===0){
+							return _m.substr(prop.length);
+						}
+					}
+					return null;
+				},
+				setItem : function(prop, value){
+					document.cookie = prop + '=' + value;
+				}
+			};
 		}
-		else {
+
+		// Does this browser support localStorage?
+
+		return function (name,value,days) {
+
+			// Local storage
+			var json = JSON.parse(localStorage.getItem('hello')) || {};
+
+			if(name && typeof(value) === 'undefined'){
+				return json[name];
+			}
+			else if(name && value === ''){
+				try{
+					delete json[name];
+				}
+				catch(e){
+					json[name]=null;
+				}
+			}
+			else if(name){
+				json[name] = value;
+			}
+			else {
+				return json;
+			}
+
+			localStorage.setItem('hello', JSON.stringify(json));
+
 			return json;
-		}
+		};
 
-		localStorage.setItem('hello', JSON.stringify(json));
-
-		return json;
-	},
-
+	})(window.localStorage),
 
 	//
 	// Create and Append new Dom elements

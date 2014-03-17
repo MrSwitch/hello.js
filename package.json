@@ -1,6 +1,6 @@
 {
   "name": "HelloJS",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "scripts": {
     "test": "karma start",
     "build": "node _build.js"
