@@ -394,23 +394,93 @@ hello.utils.extend( hello, {
 			var windowHeight = opts.window_height || 550;
 			var windowWidth = opts.window_width || 500;
 
-			// Trigger callback
-			var popup = window.open(
-				//
-				// OAuth redirect, fixes URI fragments from being lost in Safari
-				// (URI Fragments within 302 Location URI are lost over HTTPS)
-				// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
-				// 
-				// FIREFOX, decodes URL fragments when calling location.hash. 
-				//  - This is bad if the value contains break points which are escaped
-				//  - Hence the url must be encoded twice as it contains breakpoints.
-				p.qs.redirect_uri + "#oauth_redirect=" + encodeURIComponent(encodeURIComponent(url)),
-				'Authentication',
-				"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left="+((window.innerWidth-windowWidth)/2)+",top="+((window.innerHeight-windowHeight)/2)
-			);
+			// Create a function for reopening the popup, and assigning events to the new popup object
+			// This is a fix whereby triggering the
+			function open(url){
+
+				// Trigger callback
+				var popup = window.open(
+					url,
+					'Authentication',
+					"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left="+((window.innerWidth-windowWidth)/2)+",top="+((window.innerHeight-windowHeight)/2)
+				);
+
+				// PhoneGap support
+				// Add an event listener to listen to the change in the popup windows URL
+				// This must appear before popup.focus();
+				popup.addEventListener('loadstart', function(e){
+
+					var url = e.url;
+
+					//alert('changing location:'+url);
+
+					// Is this the path, as given by the redirect_uri?
+					if(url.indexOf(opts.redirect_uri)===0){
+
+						// We dont have window operations on the popup so lets create some
+						// The location can be augmented in to a location object like so...
+						var a = document.createElement('a');
+						a.href = url;
+
+						var _popup = {
+							location : {
+								// Change the location of the popup
+								assign : function(location){
+									
+									// open a new one
+									popup.addEventListener('exit', function(){
+										setTimeout(function(){
+											open(location);
+										},1000);
+									});
+
+									// kill the previous popup
+									_popup.close();
+								},
+								search : a.search,
+								hash : a.hash,
+								href : url
+							},
+							close : function(){
+								//alert('closing location:'+url);
+								if(popup.close){
+									popup.close();
+								}
+							}
+						};
+
+						// Then this URL contains information which HelloJS must process via hello.initQuery
+						// URL string
+						// Window - any action such as window relocation goes here
+						// Opener - the parent window which opened this, aka this script
+						hello.onPageLoad( _popup, window );
+					}
+				});
+
+				return popup;
+			}
+
+			//
+			// Call the open() function with the initial path
+			//
+			// OAuth redirect, fixes URI fragments from being lost in Safari
+			// (URI Fragments within 302 Location URI are lost over HTTPS)
+			// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
+			// 
+			// FIREFOX, decodes URL fragments when calling location.hash. 
+			//  - This is bad if the value contains break points which are escaped
+			//  - Hence the url must be encoded twice as it contains breakpoints.
+			if (navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1) {
+				url = p.qs.redirect_uri + "#oauth_redirect=" + encodeURIComponent(encodeURIComponent(url));
+			}
+
+			var popup = open( url );
+
 
 			// Ensure popup window has focus upon reload, Fix for FF.
-			popup.focus();
+			if(popup.focus){
+				popup.focus();
+			}
 
 			var timer = setInterval(function(){
 				if(popup.closed){
@@ -1079,14 +1149,17 @@ hello.utils.extend( hello.utils, {
 		// Define the callback function
 		window[guid] = function(){
 			// Trigger the callback
-			var bool = callback.apply(this, arguments);
+			var self = this,
+				args = arguments;
+			
+			setTimeout(function(){
+				var bool = callback.apply(self, args);
 
-			if(bool){
-				// Remove this handler reference
-				try{
+				if(bool){
+					// Remove this handler reference
 					delete window[guid];
-				}catch(e){}
-			}
+				}
+			});
 		};
 		return guid;
 	}
@@ -1243,9 +1316,27 @@ hello.unsubscribe = hello.off;
 //
 /////////////////////////////////////
 
-(function(hello, window){
 
-	var utils = hello.utils,
+//
+// Process the path
+// This looks at the page variables and decides how to proceed
+// Initially this is triggered at runtime, when hello.js is called from the redirect_uri page.
+hello.onPageLoad = function( window, parent ){
+	//
+	// Add a helper for relocating, instead of window.location  = url;
+	//
+	function relocate(path){
+		if(location.assign){
+			location.assign(path);
+		}
+		else{
+			window.location = path;
+		}
+	}
+
+
+	var hello = this,
+		utils = hello.utils,
 		location = window.location;
 
 	var debug = function(msg,e){
@@ -1254,6 +1345,8 @@ hello.unsubscribe = hello.off;
 			console.log(e);
 		}
 	};
+
+
 
 	//
 	// AuthCallback
@@ -1267,10 +1360,7 @@ hello.unsubscribe = hello.off;
 		// this is a popup so
 		if( !("display" in p) || p.display !== 'page'){
 
-			// trigger window.opener
-			var win = (window.opener||window.parent);
-
-			if(win){
+			if(parent){
 				// Call the generic listeners
 //				win.hello.emit(network+":auth."+(obj.error?'failed':'login'), obj);
 				// Call the inline listeners
@@ -1285,9 +1375,9 @@ hello.unsubscribe = hello.off;
 				utils.store(obj.network,obj);
 
 				// Call the globalEvent function on the parent
-				if(cb in win){
+				if(cb in parent){
 					try{
-						win[cb](obj);
+						parent[cb](obj);
 					}
 					catch(e){
 						debug("Error thrown whilst executing parent callback", e);
@@ -1377,8 +1467,8 @@ hello.unsubscribe = hello.off;
 		// Result is serialized JSON string.
 		if(p&&p.callback&&"result" in p && p.result ){
 			// trigger a function in the parent
-			if(p.callback in window.parent){
-				window.parent[p.callback](JSON.parse(p.result));
+			if(p.callback in parent){
+				parent[p.callback](JSON.parse(p.result));
 			}
 		}
 	}
@@ -1387,7 +1477,8 @@ hello.unsubscribe = hello.off;
 	// (URI Fragments within 302 Location URI are lost over HTTPS)
 	// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
 	else if("oauth_redirect" in p){
-		window.location = decodeURIComponent(p.oauth_redirect);
+
+		relocate( decodeURIComponent(p.oauth_redirect) );
 		return;
 	}
 
@@ -1403,10 +1494,19 @@ hello.unsubscribe = hello.off;
 		// redirect to the host
 		var path = (state.oauth_proxy || p.proxy_url) + "?" + utils.param(p);
 
-		window.location = path;
+		relocate( path );
 	}
 
-})(hello, window);
+};
+
+
+//
+// Intitiate Query reading
+// This is processed at runtime when the script is included in the page
+// Typically this lets parent->popup communicate
+// It will be run when hello.js is provisioned on the redirect_uri page, e.g. redirect.html
+//
+hello.onPageLoad( window, window.parent || window.opener );
 
 
 
