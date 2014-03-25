@@ -122,6 +122,12 @@
 		return o;
 	}
 
+	function formatPerson(o){
+		o.name = o.displayName || o.name;
+		o.picture = o.picture || ( o.image ? o.image.url : null);
+		o.thumbnail = o.picture;
+	}
+
 	function formatFriends(o){
 		paging(o);
 		var r = [];
@@ -493,7 +499,7 @@
 				events			: '',
 				photos			: 'https://picasaweb.google.com/data/',
 				videos			: 'http://gdata.youtube.com',
-				friends			: 'https://www.google.com/m8/feeds',
+				friends			: 'https://www.google.com/m8/feeds, https://www.googleapis.com/auth/plus.login',
 				files			: 'https://www.googleapis.com/auth/drive.readonly',
 				
 				publish			: '',
@@ -513,9 +519,10 @@
 				'me' : 'oauth2/v1/userinfo?alt=json',
 
 				// https://developers.google.com/+/api/latest/people/list
-				'me/friends' : contacts_url,
+				'me/friends' : '/plus/v1/people/me/people/visible?maxResults=@{limit|100}',
 				'me/following' : contacts_url,
 				'me/followers' : contacts_url,
+				'me/contacts' : contacts_url,
 				'me/share' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
 				'me/feed' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
 				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}&start-index=@{start|1}',
@@ -578,13 +585,21 @@
 						o.last_name = o.family_name || (o.name? o.name.familyName : null);
 						o.first_name = o.given_name || (o.name? o.name.givenName : null);
 	//						o.name = o.first_name + ' ' + o.last_name;
-						o.picture = o.picture || ( o.image ? o.image.url : null);
-						o.thumbnail = o.picture;
-						o.name = o.displayName || o.name;
+
+						formatPerson(o);
 					}
 					return o;
 				},
-				'me/friends'	: formatFriends,
+				'me/friends'	: function(o){
+					paging(o);
+					o.data = o.items;
+					delete o.items;
+					for(var i=0;i<o.data.length;i++){
+						formatPerson(o.data[i]);
+					}
+					return o;
+				},
+				'me/contacts'	: formatFriends,
 				'me/followers'	: formatFriends,
 				'me/following'	: formatFriends,
 				'me/share' : function(o){
