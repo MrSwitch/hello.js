@@ -223,39 +223,50 @@ hello.utils.extend( hello, {
 		// Callback
 		// Save the callback until state comes back.
 		//
-		var responded = false;
+		var resolved = false;
+
+
+		//
+		// Resolve this request for login
+		//
+		function resolve(obj){
+
+			var event_name;
+
+			if(!resolved){
+
+				resolved = true;
+
+				//
+				// Handle these response using the local
+				// Trigger on the parent
+				if(!obj.error){
+
+					//
+					event_name = "complete success login auth.login auth";
+
+					// Save on the parent window the new credentials
+					// This fixes an IE10 bug i think... atleast it does for me.
+					utils.store(obj.network,obj);
+
+					// Trigger local complete events
+					obj = {
+						network : obj.network,
+						authResponse : obj
+					};
+				}
+				else{
+					event_name = "complete error failed auth.failed";
+				}
+
+				self.emit(event_name, obj);
+			}
+		}
+
 
 		//
 		// Create a global listener to capture events triggered out of scope
-		var callback_id = utils.globalEvent(function(obj){
-
-			//
-			// Cancel the popup close listener
-			responded = true;
-
-			//
-			// Handle these response using the local
-			// Trigger on the parent
-			if(!obj.error){
-
-				// Save on the parent window the new credentials
-				// This fixes an IE10 bug i think... atleast it does for me.
-				utils.store(obj.network,obj);
-
-				// Trigger local complete events
-				self.emit("complete success login auth.login auth", {
-					network : obj.network,
-					authResponse : obj
-				});
-			}
-			else{
-				// Trigger local complete events
-				self.emit("complete error failed auth.failed", {
-					error : obj.error
-				});
-			}
-		});
-
+		var callback_id = utils.globalEvent(resolve);
 
 
 		//
@@ -427,8 +438,12 @@ hello.utils.extend( hello, {
 								// Change the location of the popup
 								assign : function(location){
 									
-									// open a new one
+									// Unfouurtunatly an app is unable to change the location of a WebView window.
+									// Soweopen a new one
 									popup.addEventListener('exit', function(){
+										//
+										// For some reason its failing to close the window if we open a new one two soon
+										// 
 										setTimeout(function(){
 											open(location);
 										},1000);
@@ -449,7 +464,7 @@ hello.utils.extend( hello, {
 							}
 						};
 
-						// Then this URL contains information which HelloJS must process via hello.initQuery
+						// Then this URL contains information which HelloJS must process via hello.onPageLoad
 						// URL string
 						// Window - any action such as window relocation goes here
 						// Opener - the parent window which opened this, aka this script
@@ -459,6 +474,7 @@ hello.utils.extend( hello, {
 
 				return popup;
 			}
+
 
 			//
 			// Call the open() function with the initial path
@@ -485,9 +501,7 @@ hello.utils.extend( hello, {
 			var timer = setInterval(function(){
 				if(popup.closed){
 					clearInterval(timer);
-					if(!responded){
-						self.emit("complete failed error", {error:{code:"cancelled", message:"Login has been cancelled"}, network:p.network });
-					}
+					resolve({error:{code:"cancelled", message:"Login has been cancelled"}});
 				}
 			}, 100);
 		}
