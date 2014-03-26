@@ -7,7 +7,9 @@
 function formatUser(o){
 	if(o.id){
 		var token = hello.getAuthResponse('windows').access_token;
-		o.email = (o.emails?o.emails.preferred:null);
+		if(o.emails){
+			o.email =  o.emails.preferred;
+		}
 		o.thumbnail = o.picture = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+token;
 	}
 }
@@ -70,6 +72,7 @@ hello.init({
 			"me/friends" : "me/friends",
 			"me/following" : "me/contacts",
 			"me/followers" : "me/friends",
+			"me/contacts" : "me/contacts",
 
 			"me/albums"	: 'me/albums',
 
@@ -108,6 +111,7 @@ hello.init({
 				return o;
 			},
 			'me/friends' : formatFriends,
+			'me/contacts' : formatFriends,
 			'me/followers' : formatFriends,
 			'me/following' : formatFriends,
 			'me/albums' : function(o){

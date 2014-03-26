@@ -75,10 +75,25 @@ var tests = [
 		}
 	},
 	{
-		title : "List my friends",
+		title : "List my network friends",
 		api : "api",
 		method : 'get',
 		path : 'me/friends',
+		data : query,
+		scope : ["friends"],
+		expected : {
+			data : [{
+				id : reg.id,
+				name : reg.name,
+				thumbnail : reg.url
+			}]
+		}
+	},
+	{
+		title : "List my contacts",
+		api : "api",
+		method : 'get',
+		path : 'me/contacts',
 		data : query,
 		scope : ["friends"],
 		expected : {
