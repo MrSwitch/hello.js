@@ -519,7 +519,7 @@
 				'me' : 'oauth2/v1/userinfo?alt=json',
 
 				// https://developers.google.com/+/api/latest/people/list
-				'me/friends' : '/plus/v1/people/me/people/visible?maxResults=@{limit|100}',
+				'me/friends' : 'plus/v1/people/me/people/visible?maxResults=@{limit|100}',
 				'me/following' : contacts_url,
 				'me/followers' : contacts_url,
 				'me/contacts' : contacts_url,
@@ -591,11 +591,13 @@
 					return o;
 				},
 				'me/friends'	: function(o){
-					paging(o);
-					o.data = o.items;
-					delete o.items;
-					for(var i=0;i<o.data.length;i++){
-						formatPerson(o.data[i]);
+					if(o.items){
+						paging(o);
+						o.data = o.items;
+						delete o.items;
+						for(var i=0;i<o.data.length;i++){
+							formatPerson(o.data[i]);
+						}
 					}
 					return o;
 				},
