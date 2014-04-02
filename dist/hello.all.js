@@ -3320,6 +3320,12 @@ hello.init({
 		return o;
 	}
 
+	function formatPerson(o){
+		o.name = o.displayName || o.name;
+		o.picture = o.picture || ( o.image ? o.image.url : null);
+		o.thumbnail = o.picture;
+	}
+
 	function formatFriends(o){
 		paging(o);
 		var r = [];
@@ -3691,7 +3697,7 @@ hello.init({
 				events			: '',
 				photos			: 'https://picasaweb.google.com/data/',
 				videos			: 'http://gdata.youtube.com',
-				friends			: 'https://www.google.com/m8/feeds',
+				friends			: 'https://www.google.com/m8/feeds, https://www.googleapis.com/auth/plus.login',
 				files			: 'https://www.googleapis.com/auth/drive.readonly',
 				
 				publish			: '',
@@ -3711,9 +3717,10 @@ hello.init({
 				'me' : 'oauth2/v1/userinfo?alt=json',
 
 				// https://developers.google.com/+/api/latest/people/list
-				'me/friends' : contacts_url,
+				'me/friends' : 'plus/v1/people/me/people/visible?maxResults=@{limit|100}',
 				'me/following' : contacts_url,
 				'me/followers' : contacts_url,
+				'me/contacts' : contacts_url,
 				'me/share' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
 				'me/feed' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
 				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}&start-index=@{start|1}',
@@ -3776,13 +3783,23 @@ hello.init({
 						o.last_name = o.family_name || (o.name? o.name.familyName : null);
 						o.first_name = o.given_name || (o.name? o.name.givenName : null);
 	//						o.name = o.first_name + ' ' + o.last_name;
-						o.picture = o.picture || ( o.image ? o.image.url : null);
-						o.thumbnail = o.picture;
-						o.name = o.displayName || o.name;
+
+						formatPerson(o);
 					}
 					return o;
 				},
-				'me/friends'	: formatFriends,
+				'me/friends'	: function(o){
+					if(o.items){
+						paging(o);
+						o.data = o.items;
+						delete o.items;
+						for(var i=0;i<o.data.length;i++){
+							formatPerson(o.data[i]);
+						}
+					}
+					return o;
+				},
+				'me/contacts'	: formatFriends,
 				'me/followers'	: formatFriends,
 				'me/following'	: formatFriends,
 				'me/share' : function(o){
@@ -4399,8 +4416,15 @@ hello.init({
 function formatUser(o){
 	if(o.id){
 		var token = hello.getAuthResponse('windows').access_token;
-		o.email = (o.emails?o.emails.preferred:null);
-		o.thumbnail = o.picture = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+token;
+		if(o.emails){
+			o.email =  o.emails.preferred;
+		}
+		// If this is not an non-network friend
+		if(o.is_friend!==false){
+			// Use the id of the user_id if available
+			var id = (o.user_id||o.id);
+			o.thumbnail = o.picture = 'https://apis.live.net/v5.0/'+id+'/picture?access_token='+token;
+		}
 	}
 }
 
@@ -4462,6 +4486,7 @@ hello.init({
 			"me/friends" : "me/friends",
 			"me/following" : "me/contacts",
 			"me/followers" : "me/friends",
+			"me/contacts" : "me/contacts",
 
 			"me/albums"	: 'me/albums',
 
@@ -4500,6 +4525,7 @@ hello.init({
 				return o;
 			},
 			'me/friends' : formatFriends,
+			'me/contacts' : formatFriends,
 			'me/followers' : formatFriends,
 			'me/following' : formatFriends,
 			'me/albums' : function(o){
