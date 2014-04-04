@@ -48,7 +48,7 @@ hello.init({
 		name : 'Facebook',
 
 		login : function(p){
-			// The dropbox login window is a different size.
+			// The facebook login window is a different size.
 			p.options.window_width = 580;
 			p.options.window_height = 400;
 		},
