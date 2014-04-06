@@ -1,6 +1,24 @@
 {
-  "name": "HelloJS",
+  "name": "hellojs",
   "version": "0.1.5",
+  "description": "A clientside Javascript library for standardizing requests to OAuth2 web services (and OAuth1 - with a shim)",
+  "main": "dist/hello.all.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com/MrSwitch/hello.js"
+  },
+  "keywords": [
+    "oauth",
+    "oauth1.0",
+    "oauth2",
+    "api",
+    "facebooks","google","windows","linkedin","twitter"
+  ],
+  "author": "Andrew Dodson <andrewjdodson@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MrSwitch/hello.js/issues"
+  },
   "scripts": {
     "test": "karma start"
   },
