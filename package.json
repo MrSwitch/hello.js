@@ -1,6 +1,6 @@
 {
   "name": "hellojs",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A clientside Javascript library for standardizing requests to OAuth2 web services (and OAuth1 - with a shim)",
   "main": "dist/hello.all.js",
   "repository": {
@@ -12,7 +12,11 @@
     "oauth1.0",
     "oauth2",
     "api",
-    "facebooks","google","windows","linkedin","twitter"
+    "facebooks",
+    "google",
+    "windows",
+    "linkedin",
+    "twitter"
   ],
   "author": "Andrew Dodson <andrewjdodson@gmail.com>",
   "license": "MIT",
