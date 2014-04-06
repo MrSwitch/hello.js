@@ -47,6 +47,12 @@ hello.init({
 	facebook : {
 		name : 'Facebook',
 
+		login : function(p){
+			// The facebook login window is a different size.
+			p.options.window_width = 580;
+			p.options.window_height = 400;
+		},
+
 		// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
 		oauth : {
 			version : 2,
