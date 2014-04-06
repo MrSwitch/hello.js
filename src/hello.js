@@ -394,17 +394,21 @@ hello.utils.extend( hello, {
 			var windowHeight = opts.window_height || 550;
 			var windowWidth = opts.window_width || 500;
 
+			// Help the minifier
+			var documentElement = document.documentElement;
+			var screen = window.screen;
+
 			// Multi Screen Popup Positioning (http://stackoverflow.com/a/16861050)
 			//   Credit: http://www.xtf.dk/2011/08/center-new-popup-window-even-on.html
 			// Fixes dual-screen position                         Most browsers      Firefox
-			var dualScreenLeft = window.screenLeft != undefined ? window.screenLeft : screen.left;
-			var dualScreenTop = window.screenTop != undefined ? window.screenTop : screen.top;
+			var dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
+			var dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
 
-			var width = window.innerWidth ? window.innerWidth : document.documentElement.clientWidth ? document.documentElement.clientWidth : screen.width;
-			var height = window.innerHeight ? window.innerHeight : document.documentElement.clientHeight ? document.documentElement.clientHeight : screen.height;
+			var width = window.innerWidth || documentElement.clientWidth || screen.width;
+			var height = window.innerHeight || documentElement.clientHeight || screen.height;
 
-			var left = ((width / 2) - (windowWidth / 2)) + dualScreenLeft;
-			var top = ((height / 2) - (windowHeight / 2)) + dualScreenTop;
+			var left = ((width - windowWidth) / 2) + dualScreenLeft;
+			var top  = ((height - windowHeight) / 2) + dualScreenTop;
 
 			// Trigger callback
 			var popup = window.open(
