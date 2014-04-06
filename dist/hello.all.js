@@ -394,6 +394,22 @@ hello.utils.extend( hello, {
 			var windowHeight = opts.window_height || 550;
 			var windowWidth = opts.window_width || 500;
 
+			// Help the minifier
+			var documentElement = document.documentElement;
+			var screen = window.screen;
+
+			// Multi Screen Popup Positioning (http://stackoverflow.com/a/16861050)
+			//   Credit: http://www.xtf.dk/2011/08/center-new-popup-window-even-on.html
+			// Fixes dual-screen position                         Most browsers      Firefox
+			var dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
+			var dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
+
+			var width = window.innerWidth || documentElement.clientWidth || screen.width;
+			var height = window.innerHeight || documentElement.clientHeight || screen.height;
+
+			var left = ((width - windowWidth) / 2) + dualScreenLeft;
+			var top  = ((height - windowHeight) / 2) + dualScreenTop;
+
 			// Trigger callback
 			var popup = window.open(
 				//
@@ -406,7 +422,7 @@ hello.utils.extend( hello, {
 				//  - Hence the url must be encoded twice as it contains breakpoints.
 				p.qs.redirect_uri + "#oauth_redirect=" + encodeURIComponent(encodeURIComponent(url)),
 				'Authentication',
-				"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left="+((window.innerWidth-windowWidth)/2)+",top="+((window.innerHeight-windowHeight)/2)
+				"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left=" + left + ",top="  + top
 			);
 
 			// Ensure popup window has focus upon reload, Fix for FF.
@@ -2687,6 +2703,12 @@ var base = 'https://graph.facebook.com/';
 hello.init({
 	facebook : {
 		name : 'Facebook',
+
+		login : function(p){
+			// The facebook login window is a different size.
+			p.options.window_width = 580;
+			p.options.window_height = 400;
+		},
 
 		// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
 		oauth : {
