@@ -27,7 +27,7 @@
     "test": "karma start"
   },
   "devDependencies": {
-    "shunt": "^0.1.0",
+    "shunt": "^0.1.2",
     "karma-firefox-launcher": "~0.1.0",
     "karma-script-launcher": "~0.1.0",
     "karma-chrome-launcher": "~0.1.0",
