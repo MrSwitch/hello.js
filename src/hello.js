@@ -501,7 +501,7 @@ hello.utils.extend( hello, {
 		}
 
 		// Emit events by default
-		self.emitAfter("complete logout success auth.logout auth", true);
+		self.emitAfter("complete logout success auth.logout auth", {network:p.name});
 
 		return self;
 	},
@@ -1123,6 +1123,16 @@ hello.unsubscribe = hello.off;
 
 		// Hash of expired tokens
 		expired = {};
+
+	//
+	// Listen to other triggers to Auth events, use these to update this
+	//
+	hello.on('auth.login, auth.logout', function(auth){
+		if(auth&&typeof(auth)==='object'&&auth.network){
+			old_session[auth.network] = hello.utils.store(auth.network) || {};
+		}
+	});
+	
 
 
 	(function self(){
