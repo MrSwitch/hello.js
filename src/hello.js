@@ -454,14 +454,16 @@ hello.utils.extend( hello, {
 	//
 	logout : function(){
 
-		var utils = self.utils;
-
-		var p = utils.args({name:'s', options: 'o', callback:"f" }, arguments);
-
 		// Create self
 		// An object which inherits its parent as the prototype.
 		// And constructs a new event chain.
 		var self = this.use();
+
+		var utils = self.utils;
+
+		var p = utils.args({name:'s', options: 'o', callback:"f" }, arguments);
+
+		p.options = p.options || {};
 
 		// Add callback to events
 		self.on('complete', p.callback);
@@ -469,22 +471,50 @@ hello.utils.extend( hello, {
 		// Netowrk
 		p.name = p.name || self.settings.default_service;
 
+
 		if( p.name && !( p.name in self.services ) ){
 			self.emitAfter("complete error", {error:{
 				code : 'invalid_network',
 				message : 'The network was unrecognized'
 			}});
-			return self;
 		}
-		if(p.name && utils.store(p.name)){
+		else if(p.name && utils.store(p.name)){
 
-			// Trigger a logout callback on the provider
-			if(typeof(self.services[p.name].logout) === 'function'){
-				self.services[p.name].logout(p);
+			// Define the callback
+			var callback = function(){
+
+				// Remove from the store
+				self.utils.store(p.name,'');
+
+				// Emit events by default
+				self.emitAfter("complete logout success auth.logout auth", {network:p.name});
+			};
+
+			//
+			// Run an async operation to remove the users session
+			// 
+			if(p.options.force){
+				var logout = self.services[p.name].logout;
+				if( logout ){
+					// Convert logout to URL string,
+					// If no string is returned, then this function will handle the logout async style
+					if(typeof(logout) === 'function' ){
+						logout = logout(callback);
+					}
+					// If logout is a string then assume URL and open in iframe.
+					if(typeof(logout)==='string'){
+						utils.iframe( logout );
+					}
+					else if(logout === null){
+						// the callback function will handle the response.
+						return self;
+					}
+				}
 			}
 
-			// Remove from the store
-			self.utils.store(p.name,'');
+			//
+			// Remove local credentials
+			callback();
 		}
 		else if(!p.name){
 			for(var x in self.services){if(self.services.hasOwnProperty(x)){
@@ -499,29 +529,7 @@ hello.utils.extend( hello, {
 				code : 'invalid_session',
 				message : 'There was no session to remove'
 			}});
-			return self;
 		}
-
-		// Define the callback
-		var callback = function(){
-			// Emit events by default
-			self.emitAfter("complete logout success auth.logout auth", {network:p.name});
-		};
-
-		// Does this endpoint
-		var logout = self.service[p.name]['logout'];
-		if( logout ){
-			// Convert logout to string
-			if(typeof(logout) === 'function' && (logout = logout(callback)) ){
-				return self;
-			}
-			// If logout is a string then assume URL and open in iframe.
-			if(logout){
-				utils.iframe( logout );
-			}
-		}
-
-		callback();
 
 		return self;
 	},

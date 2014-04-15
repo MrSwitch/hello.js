@@ -45,10 +45,22 @@ var tests = [
 		}
 	},
 	{
-		title : "Logout",
+		title : "Logout from app",
 		api : "logout",
 		method : 'logout',
 		expected : {
+			network : reg.string
+		}
+	},
+	{
+		title : "Logout from app & network",
+		api : "logout",
+		method : 'logout',
+		data : {
+			force : true
+		},
+		expected : {
+			network : reg.string
 		}
 	},
 	{
@@ -640,6 +652,11 @@ function Test(test,network,parent){
 	else {
 		var action = {'delete':'del'}[this.method] || this.method;
 		this.enabled = {login:1,logout:1,getAuthResponse:1}[this.method] || (action in hello.services[network] && test.path in hello.services[network][action] );
+
+		// Test logout force?
+		if( action === 'logout' && Object(test.data).force ){
+			this.enabled = (action in hello.services[network]);
+		}
 	}
 
 	this.expected = test.expected;
@@ -729,7 +746,7 @@ function Test(test,network,parent){
 				test.request( hello.login(network,test.data,cb) );
 			}
 			else if(test.method === 'logout'){
-				test.request( hello.logout(network,cb) );
+				test.request( hello.logout(network,test.data,cb) );
 			}
 			else if(test.method === 'getAuthResponse'){
 				test.request({});
