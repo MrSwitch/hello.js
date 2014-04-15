@@ -481,18 +481,19 @@ hello.utils.extend( hello, {
 		else if(p.name && utils.store(p.name)){
 
 			// Define the callback
-			var callback = function(){
+			var callback = function(opts){
 
 				// Remove from the store
 				self.utils.store(p.name,'');
 
 				// Emit events by default
-				self.emitAfter("complete logout success auth.logout auth", {network:p.name});
+				self.emitAfter("complete logout success auth.logout auth", hello.utils.merge( {network:p.name}, opts || {} ) );
 			};
 
 			//
 			// Run an async operation to remove the users session
 			// 
+			var _opts = {};
 			if(p.options.force){
 				var logout = self.services[p.name].logout;
 				if( logout ){
@@ -504,8 +505,10 @@ hello.utils.extend( hello, {
 					// If logout is a string then assume URL and open in iframe.
 					if(typeof(logout)==='string'){
 						utils.iframe( logout );
+						_opts.force = null;
+						_opts.message = "Logout success on providers site was indeterminate";
 					}
-					else if(logout === null){
+					else if(logout === undefined){
 						// the callback function will handle the response.
 						return self;
 					}
@@ -514,7 +517,7 @@ hello.utils.extend( hello, {
 
 			//
 			// Remove local credentials
-			callback();
+			callback(_opts);
 		}
 		else if(!p.name){
 			for(var x in self.services){if(self.services.hasOwnProperty(x)){
