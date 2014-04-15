@@ -394,11 +394,35 @@ hello.utils.extend( hello, {
 			var windowHeight = opts.window_height || 550;
 			var windowWidth = opts.window_width || 500;
 
+			// Help the minifier
+			var documentElement = document.documentElement;
+			var screen = window.screen;
+
+			// Multi Screen Popup Positioning (http://stackoverflow.com/a/16861050)
+			//   Credit: http://www.xtf.dk/2011/08/center-new-popup-window-even-on.html
+			// Fixes dual-screen position                         Most browsers      Firefox
+			var dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
+			var dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
+
+			var width = window.innerWidth || documentElement.clientWidth || screen.width;
+			var height = window.innerHeight || documentElement.clientHeight || screen.height;
+
+			var left = ((width - windowWidth) / 2) + dualScreenLeft;
+			var top  = ((height - windowHeight) / 2) + dualScreenTop;
+
 			// Trigger callback
 			var popup = window.open(
-				url,
+				//
+				// OAuth redirect, fixes URI fragments from being lost in Safari
+				// (URI Fragments within 302 Location URI are lost over HTTPS)
+				// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
+				// 
+				// FIREFOX, decodes URL fragments when calling location.hash. 
+				//  - This is bad if the value contains break points which are escaped
+				//  - Hence the url must be encoded twice as it contains breakpoints.
+				p.qs.redirect_uri + "#oauth_redirect=" + encodeURIComponent(encodeURIComponent(url)),
 				'Authentication',
-				"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left="+((window.innerWidth-windowWidth)/2)+",top="+((window.innerHeight-windowHeight)/2)
+				"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left=" + left + ",top="  + top
 			);
 
 			// Ensure popup window has focus upon reload, Fix for FF.
@@ -477,7 +501,7 @@ hello.utils.extend( hello, {
 		}
 
 		// Emit events by default
-		self.emitAfter("complete logout success auth.logout auth", true);
+		self.emitAfter("complete logout success auth.logout auth", {network:p.name});
 
 		return self;
 	},
@@ -557,8 +581,8 @@ hello.utils.extend( hello.utils, {
 			m = s.replace(/^[\#\?]/,'').match(/([^=\/\&]+)=([^\&]+)/g);
 			if(m){
 				for(var i=0;i<m.length;i++){
-					b = m[i].split('=');
-					a[b[0]] = decodeURIComponent( b[1] );
+					b = m[i].match(/([^=]+)=(.*)/);
+					a[b[1]] = decodeURIComponent( b[2] );
 				}
 			}
 			return a;
@@ -581,34 +605,77 @@ hello.utils.extend( hello.utils, {
 
 	//
 	// Local Storage Facade
-	store : function (name,value,days) {
+	store : (function(localStorage){
 
-		// Local storage
-		var json = JSON.parse(localStorage.getItem('hello')) || {};
+		//
+		// LocalStorage
+		var a = [localStorage,window.sessionStorage],
+			i=0;
 
-		if(name && typeof(value) === 'undefined'){
-			return json[name];
-		}
-		else if(name && value === ''){
+		// Set LocalStorage
+		localStorage = a[i++];
+
+		while(localStorage){
 			try{
-				delete json[name];
+				localStorage.setItem(i,i);
+				localStorage.removeItem(i);
+				break;
 			}
 			catch(e){
-				json[name]=null;
+				localStorage = a[i++];
 			}
 		}
-		else if(name){
-			json[name] = value;
+
+		if(!localStorage){
+			localStorage = {
+				getItem : function(prop){
+					prop = prop +'=';
+					var m = document.cookie.split(";");
+					for(var i=0;i<m.length;i++){
+						var _m = m[i].replace(/(^\s+|\s+$)/,'');
+						if(_m && _m.indexOf(prop)===0){
+							return _m.substr(prop.length);
+						}
+					}
+					return null;
+				},
+				setItem : function(prop, value){
+					document.cookie = prop + '=' + value;
+				}
+			};
 		}
-		else {
+
+		// Does this browser support localStorage?
+
+		return function (name,value,days) {
+
+			// Local storage
+			var json = JSON.parse(localStorage.getItem('hello')) || {};
+
+			if(name && typeof(value) === 'undefined'){
+				return json[name];
+			}
+			else if(name && value === ''){
+				try{
+					delete json[name];
+				}
+				catch(e){
+					json[name]=null;
+				}
+			}
+			else if(name){
+				json[name] = value;
+			}
+			else {
+				return json;
+			}
+
+			localStorage.setItem('hello', JSON.stringify(json));
+
 			return json;
-		}
+		};
 
-		localStorage.setItem('hello', JSON.stringify(json));
-
-		return json;
-	},
-
+	})(window.localStorage),
 
 	//
 	// Create and Append new Dom elements
@@ -708,6 +775,7 @@ hello.utils.extend( hello.utils, {
 			x = null;
 		
 		// define x
+		// x is the first key in the list of object parameters
 		for(x in o){if(o.hasOwnProperty(x)){
 			break;
 		}}
@@ -715,8 +783,17 @@ hello.utils.extend( hello.utils, {
 		// Passing in hash object of arguments?
 		// Where the first argument can't be an object
 		if((args.length===1)&&(typeof(args[0])==='object')&&o[x]!='o!'){
-			// return same hash.
-			return args[0];
+
+			// Could this object still belong to a property?
+			// Check the object keys if they match any of the property keys
+			for(x in args[0]){if(o.hasOwnProperty(x)){
+				// Does this key exist in the property list?
+				if( x in o ){
+					// Yes this key does exist so its most likely this function has been invoked with an object parameter
+					// return first argument as the hash of all arguments
+					return args[0];
+				}
+			}}
 		}
 
 		// else loop through and account for the missing ones.
@@ -814,24 +891,6 @@ hello.utils.extend( hello.utils, {
 	},
 
 
-	//
-	// Log
-	// [@param,..]
-	//
-	log : function(){
-
-		if(typeof arguments[0] === 'string'){
-			arguments[0] = "HelloJS-" + arguments[0];
-		}
-		if (typeof(console) === 'undefined'||typeof(console.log) === 'undefined'){ return; }
-		if (typeof console.log === 'function') {
-			console.log.apply(console, arguments); // FF, CHROME, Webkit
-		}
-		else{
-			console.log(Array.prototype.slice.call(arguments)); // IE
-		}
-	},
-
 	// isEmpty
 	isEmpty : function (obj){
 		// scalar?
@@ -923,7 +982,7 @@ hello.utils.extend( hello.utils, {
 			}
 
 			return this;
-		},
+		};
 
 
 		//
@@ -940,28 +999,31 @@ hello.utils.extend( hello.utils, {
 			});
 
 			return this;
-		},
-		
+		};
+
 		//
 		// Emit
 		// Triggers any subscribed events
 		//
-		this.emit =function(evt, data){
+		this.emit = function(evt, data){
 
 			// Get arguments as an Array, knock off the first one
 			var args = Array.prototype.slice.call(arguments, 1);
 			args.push(evt);
 
+			// Handler
+			var handler = function(name, index){
+				// Replace the last property with the event name
+				args[args.length-1] = name;
+
+				// Trigger
+				this.events[name][index].apply(this, args);
+			};
+
 			// Find the callbacks which match the condition and call
 			var proto = this;
 			while( proto && proto.findEvents ){
-				proto.findEvents(evt, function(name, index){
-					// Replace the last property with the event name
-					args[args.length-1] = name;
-
-					// Trigger
-					this.events[name][index].apply(this, args);
-				});
+				proto.findEvents(evt, handler);
 
 				// proto = this.utils.getPrototypeOf(proto);
 				proto = proto.parent;
@@ -1061,6 +1123,16 @@ hello.unsubscribe = hello.off;
 
 		// Hash of expired tokens
 		expired = {};
+
+	//
+	// Listen to other triggers to Auth events, use these to update this
+	//
+	hello.on('auth.login, auth.logout', function(auth){
+		if(auth&&typeof(auth)==='object'&&auth.network){
+			old_session[auth.network] = hello.utils.store(auth.network) || {};
+		}
+	});
+	
 
 
 	(function self(){
@@ -1187,6 +1259,13 @@ hello.unsubscribe = hello.off;
 	var utils = hello.utils,
 		location = window.location;
 
+	var debug = function(msg,e){
+		utils.append("p", {text:msg}, document.documentElement);
+		if(e){
+			console.log(e);
+		}
+	};
+
 	//
 	// AuthCallback
 	// Trigger a callback to authenticate
@@ -1213,15 +1292,38 @@ hello.unsubscribe = hello.off;
 					delete obj.callback;
 				}catch(e){}
 
-				// Call the globalEvent function on the parent
-				win[cb](obj);
-
 				// Update store
 				utils.store(obj.network,obj);
+
+				// Call the globalEvent function on the parent
+				if(cb in win){
+					try{
+						win[cb](obj);
+					}
+					catch(e){
+						debug("Error thrown whilst executing parent callback", e);
+						return;
+					}
+				}
+				else{
+					debug("Error: Callback missing from parent window, snap!");
+					return;
+				}
+
 			}
 
-			window.close();
-			hello.emit("notice",'Trying to close window');
+			// Close this current window
+			try{
+				window.close();
+			}
+			catch(e){}
+
+			// IOS bug wont let us clos it if still loading
+			window.addEventListener('load', function(){
+				window.close();
+			});
+
+			debug("Trying to close window");
 
 			// Dont execute any more
 			return;
@@ -1234,7 +1336,8 @@ hello.unsubscribe = hello.off;
 	//
 	// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
 	// SoundCloud is the state in the querystring and the token in the hashtag, so we'll mix the two together
-	var p = utils.merge(hello.utils.param(location.search||''), utils.param(location.hash||''));
+	
+	var p = utils.merge(utils.param(location.search||''), utils.param(location.hash||''));
 
 	
 	// if p.state
@@ -1246,7 +1349,7 @@ hello.unsubscribe = hello.off;
 			var a = JSON.parse(p.state);
 			p = utils.merge(p, a);
 		}catch(e){
-			hello.emit("error", "Could not decode state parameter");
+			debug("Could not decode state parameter");
 		}
 
 		// access_token?
@@ -1289,6 +1392,14 @@ hello.unsubscribe = hello.off;
 				window.parent[p.callback](JSON.parse(p.result));
 			}
 		}
+	}
+	//
+	// OAuth redirect, fixes URI fragments from being lost in Safari
+	// (URI Fragments within 302 Location URI are lost over HTTPS)
+	// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
+	else if("oauth_redirect" in p){
+		window.location = decodeURIComponent(p.oauth_redirect);
+		return;
 	}
 
 	// redefine
@@ -1337,6 +1448,7 @@ hello.api = function(){
 	// And constructs a new event chain.
 	var self = this.use(),
 		utils = self.utils;
+
 
 	// Reference arguments
 	self.args = p;
@@ -1452,6 +1564,11 @@ hello.api = function(){
 	}
 
 	//
+	// Get the current session
+	var session = self.getAuthResponse(p.network);
+
+
+	//
 	// Given the path trigger the fix
 	processPath(p.path);
 
@@ -1470,7 +1587,7 @@ hello.api = function(){
 		if(p.method==='get'){
 			var reg = /[\?\&]([^=&]+)(=([^&]+))?/ig,
 				m;
-			while(m = reg.exec(path)){
+			while((m = reg.exec(path))){
 				p.data[m[1]] = m[3];
 			}
 			path = path.replace(/\?.*/,'');
@@ -1573,7 +1690,12 @@ hello.api = function(){
 					o.jsonp(p,qs);
 				}
 
-				// Is self still a post?
+				// Does this provider have a custom method?
+				if("api" in o && o.api( url, p, {access_token:session.access_token}, callback ) ){
+					return;
+				}
+
+				// Is method still a post?
 				if( p.method === 'post' ){
 
 					// Add some additional query parameters to the URL
@@ -1616,8 +1738,7 @@ hello.api = function(){
 	function _sign(network, path, method, data, modifyQueryString, callback){
 
 		// OAUTH SIGNING PROXY
-		var session = self.getAuthResponse(network),
-			service = self.services[network],
+		var service = self.services[network],
 			token = (session ? session.access_token : null);
 
 		// Is self an OAuth1 endpoint
@@ -1686,7 +1807,7 @@ hello.utils.extend( hello.utils, {
 	// Create a clone of an object
 	clone : function(obj){
 		if("nodeName" in obj){
-			return obj[x];
+			return obj;
 		}
 		var clone = {}, x;
 		for(x in obj){
@@ -1764,7 +1885,7 @@ hello.utils.extend( hello.utils, {
 			}
 			data = null;
 		}
-		else if( data && typeof(data) !== 'string' && !(data instanceof FormData)){
+		else if( data && typeof(data) !== 'string' && !(data instanceof FormData) && !(data instanceof File) && !(data instanceof Blob)){
 			// Loop through and add formData
 			var f = new FormData();
 			for( x in data )if(data.hasOwnProperty(x)){
@@ -1772,6 +1893,9 @@ hello.utils.extend( hello.utils, {
 					if( "files" in data[x] && data[x].files.length > 0){
 						f.append(x, data[x].files[0]);
 					}
+				}
+				else if(data[x] instanceof Blob){
+					f.append(x, data[x], data.name);
 				}
 				else{
 					f.append(x, data[x]);
@@ -1817,7 +1941,7 @@ hello.utils.extend( hello.utils, {
 			var r = {};
 			var reg = /([a-z\-]+):\s?(.*);?/gi,
 				m;
-			while(m = reg.exec(s)){
+			while((m = reg.exec(s))){
 				r[m[1]] = m[2];
 			}
 			return r;
@@ -2048,7 +2172,7 @@ hello.utils.extend( hello.utils, {
 				newform = form;
 			}
 
-			var input,i;
+			var input;
 
 			// Add elements to the form if they dont exist
 			for(x in data) if(data.hasOwnProperty(x)){
@@ -2183,8 +2307,6 @@ hello.utils.extend( hello.utils, {
 		}
 		return false;
 	}
-
-
 });
 
 
@@ -2361,7 +2483,7 @@ function format_file(o){
 		o.file = 'https://api-content.dropbox.com/1/files/'+ path;
 	}
 	if(!o.id){
-		o.id = o.name;
+		o.id = o.path.replace(/^\//,'');
 	}
 //	o.media = "https://api-content.dropbox.com/1/files/" + path;
 }
@@ -2373,6 +2495,18 @@ function req(str){
 		cb(str);
 	};
 }
+
+function dataURItoBlob(dataURI) {
+	var reg = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
+	var m = dataURI.match(reg);
+	var binary = atob(dataURI.replace(reg,''));
+	var array = [];
+	for(var i = 0; i < binary.length; i++) {
+		array.push(binary.charCodeAt(i));
+	}
+	return new Blob([new Uint8Array(array)], {type: m[1]});
+}
+
 
 hello.init({
 	'dropbox' : {
@@ -2420,7 +2554,7 @@ hello.init({
 			"me"		: 'account/info',
 
 			// https://www.dropbox.com/developers/core/docs#metadata
-			"me/files"	: req("metadata/@{root|sandbox}/"),
+			"me/files"	: req("metadata/@{root|sandbox}/@{parent}"),
 			"me/folder"	: req("metadata/@{root|sandbox}/@{id}"),
 			"me/folders" : req('metadata/@{root|sandbox}/'),
 
@@ -2435,12 +2569,17 @@ hello.init({
 		post : {
 			"me/files" : function(p,callback){
 
-				var path = p.data.id,
+				var path = p.data.parent,
 					file_name = p.data.name;
 
 				p.data = {
 					file : p.data.file
 				};
+
+				// Does this have a data-uri to upload as a file?
+				if( typeof( p.data.file ) === 'string' ){
+					p.data.file = dataURItoBlob(p.data.file);
+				}
 
 				callback('https://api-content.dropbox.com/1/files_put/@{root|sandbox}/'+path+"/"+file_name);
 			},
@@ -2454,6 +2593,14 @@ hello.init({
 				}));
 			}
 		},
+
+		// Map DELETE requests 
+		del : {
+			"me/files" : "fileops/delete?root=@{root|sandbox}&path=@{id}",
+			"me/folder" : "fileops/delete?root=@{root|sandbox}&path=@{id}"
+		},
+
+
 		wrap : {
 			me : function(o){
 				formatError(o);
@@ -2482,18 +2629,34 @@ hello.init({
 
 				format_file(o);
 
+				if(o.is_deleted){
+					o.success = true;
+				}
+
 				return o;
 			}
 		},
+
 		// doesn't return the CORS headers
 		xhr : function(p){
-			// forgetting content DropBox supports the allow-cross-origin-resource
-			if(p.path.match("https://api-content.dropbox.com/")){
-				//p.data = p.data.file.files[0];
-				return false;
+
+			// the proxy supports allow-cross-origin-resource
+			// alas that's the only thing we're using. 
+			if( p.data && p.data.file ){
+				var file = p.data.file;
+				if( file ){
+					if(file.files){
+						p.data = file.files[0];
+					}
+					else{
+						p.data = file;
+					}
+				}
 			}
-			else if(p.path.match("me/files")&&p.method==='post'){
-				return true;
+			if(p.method==='delete'){
+				// Post delete operations
+				p.method = 'post';
+
 			}
 			return true;
 		}
@@ -2551,10 +2714,16 @@ hello.init({
 	facebook : {
 		name : 'Facebook',
 
+		login : function(p){
+			// The facebook login window is a different size.
+			p.options.window_width = 580;
+			p.options.window_height = 400;
+		},
+
 		// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
 		oauth : {
 			version : 2,
-			auth : 'http://www.facebook.com/dialog/oauth/'
+			auth : 'https://www.facebook.com/dialog/oauth/'
 		},
 
 		// Authorization scopes
@@ -2604,7 +2773,12 @@ hello.init({
 
 		// Map DELETE requests
 		del : {
-			//'me/album' : '@{id}'
+			/*
+			// Can't delete an album
+			// http://stackoverflow.com/questions/8747181/how-to-delete-an-album
+			'me/album' : '@{id}'
+			*/
+			'me/photo' : '@{id}'
 		},
 
 		wrap : {
@@ -2622,19 +2796,19 @@ hello.init({
 			if(p.method==='get'||p.method==='post'){
 				qs.suppress_response_codes = true;
 			}
-			else if(p.method === "delete"){
-				qs.method = 'delete';
-				p.method = "post";
-			}
 			return true;
 		},
 
 		// Special requirements for handling JSONP fallback
-		jsonp : function(p){
+		jsonp : function(p,qs){
 			var m = p.method.toLowerCase();
 			if( m !== 'get' && !hello.utils.hasBinary(p.data) ){
 				p.data.method = m;
 				p.method = 'get';
+			}
+			else if(p.method === "delete"){
+				qs.method = 'delete';
+				p.method = "post";
 			}
 		},
 
@@ -3042,7 +3216,7 @@ hello.init({
 //
 // GOOGLE API
 //
-(function(hello){
+(function(hello, window){
 
 	"use strict";
 
@@ -3163,6 +3337,12 @@ hello.init({
 		return o;
 	}
 
+	function formatPerson(o){
+		o.name = o.displayName || o.name;
+		o.picture = o.picture || ( o.image ? o.image.url : null);
+		o.thumbnail = o.picture;
+	}
+
 	function formatFriends(o){
 		paging(o);
 		var r = [];
@@ -3211,6 +3391,295 @@ hello.init({
 		}
 	}
 
+	//
+	// Misc
+	var utils = hello.utils;
+
+
+	// Multipart
+	// Construct a multipart message
+
+	function Multipart(){
+		// Internal body
+		var body = [],
+			boundary = (Math.random()*1e10).toString(32),
+			counter = 0,
+			line_break = "\r\n",
+			delim = line_break + "--" + boundary,
+			ready = function(){},
+			data_uri = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
+
+		// Add File
+		function addFile(item){
+			var fr = new FileReader();
+			fr.onload = function(e){
+				//addContent( e.target.result, item.type );
+				addContent( btoa(e.target.result), item.type + line_break + "Content-Transfer-Encoding: base64");
+			};
+			fr.readAsBinaryString(item);
+		}
+
+		// Add content
+		function addContent(content, type){
+			body.push(line_break + 'Content-Type: ' + type + line_break + line_break + content);
+			counter--;
+			ready();
+		}
+
+		// Add new things to the object
+		this.append = function(content, type){
+
+			// Does the content have an array
+			if(typeof(content) === "string" || !('length' in Object(content)) ){
+				// converti to multiples
+				content = [content];
+			}
+
+			for(var i=0;i<content.length;i++){
+
+				counter++;
+
+				var item = content[i];
+
+				// Is this a file?
+				// Files can be either Blobs or File types
+				if(item instanceof window.File || item instanceof window.Blob){
+					// Read the file in
+					addFile(item);
+				}
+
+				// Data-URI?
+				// data:[<mime type>][;charset=<charset>][;base64],<encoded data>
+				// /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i
+				else if( typeof( item ) === 'string' && item.match(data_uri) ){
+					var m = item.match(data_uri);
+					addContent(item.replace(data_uri,''), m[1] + line_break + "Content-Transfer-Encoding: base64");
+				}
+
+				// Regular string
+				else{
+					addContent(item, type);
+				}
+			}
+		};
+
+		this.onready = function(fn){
+			ready = function(){
+				if( counter===0 ){
+					// trigger ready
+					body.unshift('');
+					body.push('--');
+					fn( body.join(delim), boundary);
+					body = [];
+				}
+			};
+			ready();
+		};
+	}
+
+
+	//
+	// Events
+	//
+	var addEvent, removeEvent;
+
+	if(document.removeEventListener){
+		addEvent = function(elm, event_name, callback){
+			elm.addEventListener(event_name, callback);
+		};
+		removeEvent = function(elm, event_name, callback){
+			elm.removeEventListener(event_name, callback);
+		};
+	}
+	else if(document.detachEvent){
+		removeEvent = function (elm, event_name, callback){
+			elm.detachEvent("on"+event_name, callback);
+		};
+		addEvent = function (elm, event_name, callback){
+			elm.attachEvent("on"+event_name, callback);
+		};
+	}
+
+	//
+	// postMessage
+	// This is used whereby the browser does not support CORS
+	//
+	var xd_iframe, xd_ready, xd_id, xd_counter, xd_queue=[];
+	function xd(method, url, headers, body, callback){
+
+		// This is the origin of the Domain we're opening
+		var origin = 'https://content.googleapis.com';
+
+		// Is this the first time?
+		if(!xd_iframe){
+
+			// ID
+			xd_id = String(parseInt(Math.random()*1e8,10));
+
+			// Create the proxy window
+			xd_iframe = utils.append('iframe', { src : origin + "/static/proxy.html?jsh=m%3B%2F_%2Fscs%2Fapps-static%2F_%2Fjs%2Fk%3Doz.gapi.en.mMZgig4ibk0.O%2Fm%3D__features__%2Fam%3DEQ%2Frt%3Dj%2Fd%3D1%2Frs%3DAItRSTNZBJcXGialq7mfSUkqsE3kvYwkpQ#parent="+window.location.origin+"&rpctoken="+xd_id,
+										style : {position:'absolute',left:"-1000px",bottom:0,height:'1px',width:'1px'} }, 'body');
+
+			// Listen for on ready events
+			// Set the window listener to handle responses from this
+			addEvent( window, "message", function CB(e){
+
+				// Try a callback
+				if(e.origin !== origin){
+					return;
+				}
+
+				var json;
+
+				try{
+					json = JSON.parse(e.data);
+				}
+				catch(ee){
+					// This wasn't meant to be
+					return;
+				}
+
+				// Is this the right implementation?
+				if(json && json.s && json.s === "ready:"+xd_id){
+					// Yes, it is.
+					// Lets trigger the pending operations
+					xd_ready = true;
+					xd_counter = 0;
+
+					for(var i=0;i<xd_queue.length;i++){
+						xd_queue[i]();
+					}
+				}
+			});
+		}
+
+		//
+		// Action
+		// This is the function to call if/once the proxy has successfully loaded
+		// If makes a call to the IFRAME
+		var action = function(){
+
+			var nav = window.navigator,
+				position = ++xd_counter,
+				qs = utils.param(url.match(/\?.+/)[0]);
+
+			var token = qs.access_token;
+			delete qs.access_token;
+
+			// The endpoint is ready send the response
+			var message = JSON.stringify({
+				"s":"makeHttpRequests",
+				"f":"..",
+				"c":position,
+				"a":[[{
+					"key":"gapiRequest",
+					"params":{
+						"url":url.replace(/(^https?\:\/\/[^\/]+|\?.+$)/,''), // just the pathname
+						"httpMethod":method.toUpperCase(),
+						"body": body,
+						"headers":{
+							"Authorization":":Bearer "+token,
+							"Content-Type":headers['content-type'],
+							"X-Origin":window.location.origin,
+							"X-ClientDetails":"appVersion="+nav.appVersion+"&platform="+nav.platform+"&userAgent="+nav.userAgent
+						},
+						"urlParams": qs,
+						"clientName":"google-api-javascript-client",
+						"clientVersion":"1.1.0-beta"
+					}
+				}]],
+				"t":xd_id,
+				"l":false,
+				"g":true,
+				"r":".."
+			});
+
+			addEvent( window, "message", function CB2(e){
+
+				if(e.origin !== origin ){
+					// not the incoming message we're after
+					return;
+				}
+
+				// Decode the string
+				try{
+					var json = JSON.parse(e.data);
+					if( json.t === xd_id && json.a[0] === position ){
+						removeEvent( window, "message", CB2);
+						callback(JSON.parse(JSON.parse(json.a[1]).gapiRequest.data.body));
+					}
+				}
+				catch(ee){
+					callback({
+						error: {
+							code : "request_error",
+							message : "Failed to post to Google"
+						}
+					});
+				}
+			});
+
+			// Post a message to iframe once it has loaded
+			xd_iframe.contentWindow.postMessage(message, '*');
+		};
+
+
+		//
+		// Check to see if the proy has loaded,
+		// If it has then action()!
+		// Otherwise, xd_queue until the proxy has loaded
+		if(xd_ready){
+			action();
+		}
+		else{
+			xd_queue.push(action);
+		}
+	}
+	/**/
+
+	//
+	// Upload to Drive
+	// If this is PUT then only augment the file uploaded
+	// PUT https://developers.google.com/drive/v2/reference/files/update
+	// POST https://developers.google.com/drive/manage-uploads
+	function uploadDrive(p, callback){
+		
+		var data = {};
+
+		if( p.data && p.data instanceof window.HTMLInputElement ){
+			p.data = { file : p.data };
+		}
+		if( !p.data.name && Object(Object(p.data.file).files).length && p.method === 'post' ){
+			p.data.name = p.data.file.files[0].name;
+		}
+
+		if(p.method==='post'){
+			p.data = {
+				"title": p.data.name,
+				"parents": [{"id":p.data.parent||'root'}],
+				"file" : p.data.file
+			};
+		}
+		else{
+			// Make a reference
+			data = p.data;
+			p.data = {};
+
+			// Add the parts to change as required
+			if( data.parent ){
+				p.data["parents"] =  [{"id":p.data.parent||'root'}];
+			}
+			if( data.file ){
+				p.data.file = data.file;
+			}
+			if( data.name ){
+				p.data.title = data.name;
+			}
+		}
+
+		callback('upload/drive/v2/files'+( data.id ? '/' + data.id : '' )+'?uploadType=multipart');
+	}
+
 
 	//
 	// URLS
@@ -3245,7 +3714,7 @@ hello.init({
 				events			: '',
 				photos			: 'https://picasaweb.google.com/data/',
 				videos			: 'http://gdata.youtube.com',
-				friends			: 'https://www.google.com/m8/feeds',
+				friends			: 'https://www.google.com/m8/feeds, https://www.googleapis.com/auth/plus.login',
 				files			: 'https://www.googleapis.com/auth/drive.readonly',
 				
 				publish			: '',
@@ -3265,9 +3734,10 @@ hello.init({
 				'me' : 'oauth2/v1/userinfo?alt=json',
 
 				// https://developers.google.com/+/api/latest/people/list
-				'me/friends' : contacts_url,
+				'me/friends' : 'plus/v1/people/me/people/visible?maxResults=@{limit|100}',
 				'me/following' : contacts_url,
 				'me/followers' : contacts_url,
+				'me/contacts' : contacts_url,
 				'me/share' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
 				'me/feed' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
 				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}&start-index=@{start|1}',
@@ -3279,15 +3749,49 @@ hello.init({
 				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}&start-index=@{start|1}',
 
 				// https://developers.google.com/drive/v2/reference/files/list
-				'me/files' : 'drive/v2/files?q=%22root%22+in+parents&maxResults=@{limit|100}'
+				'me/files' : 'drive/v2/files?q=%22@{parent|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}',
+
+				// https://developers.google.com/drive/v2/reference/files/list
+				'me/folders' : 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+mimeType+=+%22application/vnd.google-apps.folder%22+and+trashed=false&maxResults=@{limit|100}',
+
+				// https://developers.google.com/drive/v2/reference/files/list
+				'me/folder' : 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}'
 			},
 
+			// Map post requests
 			post : {
-//				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json'
+				/*
+				// PICASA
+				'me/albums' : function(p, callback){
+					p.data = {
+						"title": p.data.name,
+						"summary": p.data.description,
+						"category": 'http://schemas.google.com/photos/2007#album'
+					};
+					callback('https://picasaweb.google.com/data/feed/api/user/default?alt=json');
+				},
+				*/
+				// DRIVE
+				'me/files' : uploadDrive,
+				'me/folders' : function(p, callback){
+					p.data = {
+						"title": p.data.name,
+						"parents": [{"id":p.data.parent||'root'}],
+						"mimeType": "application/vnd.google-apps.folder"
+					};
+					callback('drive/v2/files');
+				}
+			},
+
+			// Map post requests
+			put : {
+				'me/files' : uploadDrive
 			},
 
 			// Map DELETE requests
 			del : {
+				'me/files' : 'drive/v2/files/@{id}',
+				'me/folder' : 'drive/v2/files/@{id}'
 			},
 
 			wrap : {
@@ -3296,13 +3800,23 @@ hello.init({
 						o.last_name = o.family_name || (o.name? o.name.familyName : null);
 						o.first_name = o.given_name || (o.name? o.name.givenName : null);
 	//						o.name = o.first_name + ' ' + o.last_name;
-						o.picture = o.picture || ( o.image ? o.image.url : null);
-						o.thumbnail = o.picture;
-						o.name = o.displayName || o.name;
+
+						formatPerson(o);
 					}
 					return o;
 				},
-				'me/friends'	: formatFriends,
+				'me/friends'	: function(o){
+					if(o.items){
+						paging(o);
+						o.data = o.items;
+						delete o.items;
+						for(var i=0;i<o.data.length;i++){
+							formatPerson(o.data[i]);
+						}
+					}
+					return o;
+				},
+				'me/contacts'	: formatFriends,
 				'me/followers'	: formatFriends,
 				'me/following'	: formatFriends,
 				'me/share' : function(o){
@@ -3322,14 +3836,112 @@ hello.init({
 				'default' : gEntry
 			},
 			xhr : function(p){
-				if(p.method==='post'){
-					return false;
+
+				// Post
+				if(p.method==='post'||p.method==='put'){
+
+					// Does this contain binary data?
+					if( p.data && utils.hasBinary(p.data) || p.data.file ){
+
+						// There is support for CORS via Access Control headers
+						// ... unless otherwise stated by post/put handlers
+						p.cors_support = p.cors_support || true;
+
+
+						// There is noway, as it appears, to Upload a file along with its meta data
+						// So lets cancel the typical approach and use the override '{ api : function() }' below
+						return false;
+					}
+
+					// Convert the POST into a javascript object
+					p.data = JSON.stringify(p.data);
+					p.headers = {
+						'content-type' : 'application/json'
+					};
 				}
+				return true;
+			},
+
+			//
+			// Custom API handler, overwrites the default fallbacks
+			// Performs a postMessage Request
+			//
+			api : function(url,p,qs,callback){
+
+				// Dont use this function for GET requests
+				if(p.method==='get'){
+					return;
+				}
+
+				// Contain inaccessible binary data?
+				// If there is no "files" property on an INPUT then we can't get the data
+				if( "file" in p.data && utils.domInstance('input', p.data.file ) && !( "files" in p.data.file ) ){
+					callback({
+						error : {
+							code : 'request_invalid',
+							message : "Sorry, can't upload your files to Google Drive in this browser"
+						}
+					});
+				}
+
+				// Extract the file, if it exists from the data object
+				// If the File is an INPUT element lets just concern ourselves with the NodeList
+				var file;
+				if( "file" in p.data ){
+					file = p.data.file;
+					delete p.data.file;
+
+					if( typeof(file)==='object' && "files" in file){
+						// Assign the NodeList
+						file = file.files;
+					}
+					if(!file || !file.length){
+						callback({
+							error : {
+								code : 'request_invalid',
+								message : 'There were no files attached with this request to upload'
+							}
+						});
+						return;
+					}
+				}
+
+
+//				p.data.mimeType = Object(file[0]).type || 'application/octet-stream';
+
+				// Construct a multipart message
+				var parts = new Multipart();
+				parts.append( JSON.stringify(p.data), 'application/json');
+
+				// Read the file into a  base64 string... yep a hassle, i know
+				// FormData doesn't let us assign our own Multipart headers and HTTP Content-Type
+				// Alas GoogleApi need these in a particular format
+				if(file){
+					parts.append( file );
+				}
+
+				parts.onready(function(body, boundary){
+
+					// Does this userAgent and endpoint support CORS?
+					if( p.cors_support ){
+						// Deliver via 
+						utils.xhr( p.method, utils.qs(url,qs), {
+							'content-type' : 'multipart/related; boundary="'+boundary+'"'
+						}, body, callback );
+					}
+					else{
+						// Otherwise lets POST the data the good old fashioned way postMessage
+						xd( p.method, utils.qs(url,qs), {
+							'content-type' : 'multipart/related; boundary="'+boundary+'"'
+						}, body, callback );
+					}
+				});
+
 				return true;
 			}
 		}
 	});
-})(hello);
+})(hello, window);
 //
 // Instagram
 //
@@ -3821,8 +4433,15 @@ hello.init({
 function formatUser(o){
 	if(o.id){
 		var token = hello.getAuthResponse('windows').access_token;
-		o.email = (o.emails?o.emails.preferred:null);
-		o.thumbnail = o.picture = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+token;
+		if(o.emails){
+			o.email =  o.emails.preferred;
+		}
+		// If this is not an non-network friend
+		if(o.is_friend!==false){
+			// Use the id of the user_id if available
+			var id = (o.user_id||o.id);
+			o.thumbnail = o.picture = 'https://apis.live.net/v5.0/'+id+'/picture?access_token='+token;
+		}
 	}
 }
 
@@ -3833,6 +4452,17 @@ function formatFriends(o){
 		}
 	}
 	return o;
+}
+
+function dataURItoBlob(dataURI) {
+	var reg = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
+	var m = dataURI.match(reg);
+	var binary = atob(dataURI.replace(reg,''));
+	var array = [];
+	for(var i = 0; i < binary.length; i++) {
+		array.push(binary.charCodeAt(i));
+	}
+	return new Blob([new Uint8Array(array)], {type: m[1]});
 }
 
 hello.init({
@@ -3853,7 +4483,7 @@ hello.init({
 			events			: 'wl.calendars',
 			photos			: 'wl.photos',
 			videos			: 'wl.photos',
-			friends			: '',
+			friends			: 'wl.contacts_emails',
 			files			: 'wl.skydrive',
 			
 			publish			: 'wl.share',
@@ -3871,8 +4501,9 @@ hello.init({
 			// Friends
 			"me"	: "me",
 			"me/friends" : "me/friends",
-			"me/following" : "me/friends",
+			"me/following" : "me/contacts",
 			"me/followers" : "me/friends",
+			"me/contacts" : "me/contacts",
 
 			"me/albums"	: 'me/albums',
 
@@ -3881,7 +4512,7 @@ hello.init({
 			"me/photo"	: '@{id}',
 
 			// FILES
-			"me/files"	: '@{id|me/skydrive}/files',
+			"me/files"	: '@{parent|me/skydrive}/files',
 
 			"me/folders" : '@{id|me/skydrive}/files',
 			"me/folder" : '@{id|me/skydrive}/files'
@@ -3889,19 +4520,19 @@ hello.init({
 
 		// Map POST requests
 		post : {
-			"me/feed" : "me/share",
-			"me/share" : "me/share",
 			"me/albums" : "me/albums",
 			"me/album" : "@{id}/files",
 
 			"me/folders" : '@{id|me/skydrive/}',
-			"me/files" : "@{id|me/skydrive/}/files"
+			"me/files" : "@{parent|me/skydrive/}/files"
 		},
 
 		// Map DELETE requests
 		del : {
 			// Include the data[id] in the path
 			"me/album"	: '@{id}',
+			"me/photo"	: '@{id}',
+			"me/folder"	: '@{id}',
 			"me/files"	: '@{id}'
 		},
 
@@ -3911,6 +4542,7 @@ hello.init({
 				return o;
 			},
 			'me/friends' : formatFriends,
+			'me/contacts' : formatFriends,
 			'me/followers' : formatFriends,
 			'me/following' : formatFriends,
 			'me/albums' : function(o){
@@ -3934,7 +4566,21 @@ hello.init({
 				return o;
 			}
 		},
-		xhr : false,
+		xhr : function(p){
+			if( p.method !== 'get' && p.method !== 'delete' && !hello.utils.hasBinary(p.data) ){
+
+				// Does this have a data-uri to upload as a file?
+				if( typeof( p.data.file ) === 'string' ){
+					p.data.file = dataURItoBlob(p.data.file);
+				}else{
+					p.data = JSON.stringify(p.data);
+					p.headers = {
+						'Content-Type' : 'application/json'
+					};
+				}
+			}
+			return true;
+		},
 		jsonp : function(p){
 			if( p.method.toLowerCase() !== 'get' && !hello.utils.hasBinary(p.data) ){
 				//p.data = {data: JSON.stringify(p.data), method: p.method.toLowerCase()};
@@ -4005,7 +4651,7 @@ function paging(res){
 }
 
 var yql = function(q){
-	return 'http://query.yahooapis.com/v1/yql?q=' + (q + ' limit @{limit|100} offset @{start|0}').replace(" ", '%20') + "&format=json";
+	return 'https://query.yahooapis.com/v1/yql?q=' + (q + ' limit @{limit|100} offset @{start|0}').replace(/\s/g, '%20') + "&format=json";
 };
 
 hello.init({
@@ -4042,9 +4688,9 @@ hello.init({
 		base	: "https://social.yahooapis.com/v1/",
 
 		get : {
-			"me"		: yql('select * from social.profile where guid=me'),
-			"me/friends"	: yql('select * from social.contacts where guid=me'),
-			"me/following"	: yql('select * from social.contacts where guid=me')
+			"me"		: yql('select * from social.profile(0) where guid=me'),
+			"me/friends"	: yql('select * from social.contacts(0) where guid=me'),
+			"me/following"	: yql('select * from social.contacts(0) where guid=me')
 		},
 		wrap : {
 			me : function(o){
@@ -4074,3 +4720,13 @@ hello.init({
 });
 
 })(hello);
+
+//
+// AMD shim
+//
+if (typeof define === 'function' && define.amd) {
+	// AMD. Register as an anonymous module.
+	define(function(){
+		return hello;
+	});
+}

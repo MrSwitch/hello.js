@@ -40,7 +40,7 @@ function format_file(o){
 		o.file = 'https://api-content.dropbox.com/1/files/'+ path;
 	}
 	if(!o.id){
-		o.id = o.name;
+		o.id = o.path.replace(/^\//,'');
 	}
 //	o.media = "https://api-content.dropbox.com/1/files/" + path;
 }
@@ -52,6 +52,18 @@ function req(str){
 		cb(str);
 	};
 }
+
+function dataURItoBlob(dataURI) {
+	var reg = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
+	var m = dataURI.match(reg);
+	var binary = atob(dataURI.replace(reg,''));
+	var array = [];
+	for(var i = 0; i < binary.length; i++) {
+		array.push(binary.charCodeAt(i));
+	}
+	return new Blob([new Uint8Array(array)], {type: m[1]});
+}
+
 
 hello.init({
 	'dropbox' : {
@@ -99,7 +111,7 @@ hello.init({
 			"me"		: 'account/info',
 
 			// https://www.dropbox.com/developers/core/docs#metadata
-			"me/files"	: req("metadata/@{root|sandbox}/"),
+			"me/files"	: req("metadata/@{root|sandbox}/@{parent}"),
 			"me/folder"	: req("metadata/@{root|sandbox}/@{id}"),
 			"me/folders" : req('metadata/@{root|sandbox}/'),
 
@@ -114,12 +126,17 @@ hello.init({
 		post : {
 			"me/files" : function(p,callback){
 
-				var path = p.data.id,
+				var path = p.data.parent,
 					file_name = p.data.name;
 
 				p.data = {
 					file : p.data.file
 				};
+
+				// Does this have a data-uri to upload as a file?
+				if( typeof( p.data.file ) === 'string' ){
+					p.data.file = dataURItoBlob(p.data.file);
+				}
 
 				callback('https://api-content.dropbox.com/1/files_put/@{root|sandbox}/'+path+"/"+file_name);
 			},
@@ -133,6 +150,14 @@ hello.init({
 				}));
 			}
 		},
+
+		// Map DELETE requests 
+		del : {
+			"me/files" : "fileops/delete?root=@{root|sandbox}&path=@{id}",
+			"me/folder" : "fileops/delete?root=@{root|sandbox}&path=@{id}"
+		},
+
+
 		wrap : {
 			me : function(o){
 				formatError(o);
@@ -161,18 +186,34 @@ hello.init({
 
 				format_file(o);
 
+				if(o.is_deleted){
+					o.success = true;
+				}
+
 				return o;
 			}
 		},
+
 		// doesn't return the CORS headers
 		xhr : function(p){
-			// forgetting content DropBox supports the allow-cross-origin-resource
-			if(p.path.match("https://api-content.dropbox.com/")){
-				//p.data = p.data.file.files[0];
-				return false;
+
+			// the proxy supports allow-cross-origin-resource
+			// alas that's the only thing we're using. 
+			if( p.data && p.data.file ){
+				var file = p.data.file;
+				if( file ){
+					if(file.files){
+						p.data = file.files[0];
+					}
+					else{
+						p.data = file;
+					}
+				}
 			}
-			else if(p.path.match("me/files")&&p.method==='post'){
-				return true;
+			if(p.method==='delete'){
+				// Post delete operations
+				p.method = 'post';
+
 			}
 			return true;
 		}

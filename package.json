@@ -1,12 +1,33 @@
 {
-  "name": "HelloJS",
-  "version": "0.2.0",
+  "name": "hellojs",
+  "version": "0.2.1",
+  "description": "A clientside Javascript library for standardizing requests to OAuth2 web services (and OAuth1 - with a shim)",
+  "main": "dist/hello.all.js",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com/MrSwitch/hello.js"
+  },
+  "keywords": [
+    "oauth",
+    "oauth1.0",
+    "oauth2",
+    "api",
+    "facebooks",
+    "google",
+    "windows",
+    "linkedin",
+    "twitter"
+  ],
+  "author": "Andrew Dodson <andrewjdodson@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MrSwitch/hello.js/issues"
+  },
   "scripts": {
-    "test": "karma start",
-    "build": "node _build.js"
+    "test": "karma start"
   },
   "devDependencies": {
-    "shunt": "*",
+    "shunt": "^0.1.2",
     "karma-firefox-launcher": "~0.1.0",
     "karma-script-launcher": "~0.1.0",
     "karma-chrome-launcher": "~0.1.0",
@@ -20,6 +41,9 @@
     "karma-mocha": "0.0.4",
     "karma-coverage": "~0.1.2",
     "karma-expect": "~1.0.0",
-    "sinon": "~1.7.3"
+    "sinon": "~1.7.3",
+    "grunt": "^0.4.4",
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-watch": "^0.6.1"
   }
 }

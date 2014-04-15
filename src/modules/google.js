@@ -1,7 +1,7 @@
 //
 // GOOGLE API
 //
-(function(hello){
+(function(hello, window){
 
 	"use strict";
 
@@ -122,6 +122,12 @@
 		return o;
 	}
 
+	function formatPerson(o){
+		o.name = o.displayName || o.name;
+		o.picture = o.picture || ( o.image ? o.image.url : null);
+		o.thumbnail = o.picture;
+	}
+
 	function formatFriends(o){
 		paging(o);
 		var r = [];
@@ -170,6 +176,295 @@
 		}
 	}
 
+	//
+	// Misc
+	var utils = hello.utils;
+
+
+	// Multipart
+	// Construct a multipart message
+
+	function Multipart(){
+		// Internal body
+		var body = [],
+			boundary = (Math.random()*1e10).toString(32),
+			counter = 0,
+			line_break = "\r\n",
+			delim = line_break + "--" + boundary,
+			ready = function(){},
+			data_uri = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
+
+		// Add File
+		function addFile(item){
+			var fr = new FileReader();
+			fr.onload = function(e){
+				//addContent( e.target.result, item.type );
+				addContent( btoa(e.target.result), item.type + line_break + "Content-Transfer-Encoding: base64");
+			};
+			fr.readAsBinaryString(item);
+		}
+
+		// Add content
+		function addContent(content, type){
+			body.push(line_break + 'Content-Type: ' + type + line_break + line_break + content);
+			counter--;
+			ready();
+		}
+
+		// Add new things to the object
+		this.append = function(content, type){
+
+			// Does the content have an array
+			if(typeof(content) === "string" || !('length' in Object(content)) ){
+				// converti to multiples
+				content = [content];
+			}
+
+			for(var i=0;i<content.length;i++){
+
+				counter++;
+
+				var item = content[i];
+
+				// Is this a file?
+				// Files can be either Blobs or File types
+				if(item instanceof window.File || item instanceof window.Blob){
+					// Read the file in
+					addFile(item);
+				}
+
+				// Data-URI?
+				// data:[<mime type>][;charset=<charset>][;base64],<encoded data>
+				// /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i
+				else if( typeof( item ) === 'string' && item.match(data_uri) ){
+					var m = item.match(data_uri);
+					addContent(item.replace(data_uri,''), m[1] + line_break + "Content-Transfer-Encoding: base64");
+				}
+
+				// Regular string
+				else{
+					addContent(item, type);
+				}
+			}
+		};
+
+		this.onready = function(fn){
+			ready = function(){
+				if( counter===0 ){
+					// trigger ready
+					body.unshift('');
+					body.push('--');
+					fn( body.join(delim), boundary);
+					body = [];
+				}
+			};
+			ready();
+		};
+	}
+
+
+	//
+	// Events
+	//
+	var addEvent, removeEvent;
+
+	if(document.removeEventListener){
+		addEvent = function(elm, event_name, callback){
+			elm.addEventListener(event_name, callback);
+		};
+		removeEvent = function(elm, event_name, callback){
+			elm.removeEventListener(event_name, callback);
+		};
+	}
+	else if(document.detachEvent){
+		removeEvent = function (elm, event_name, callback){
+			elm.detachEvent("on"+event_name, callback);
+		};
+		addEvent = function (elm, event_name, callback){
+			elm.attachEvent("on"+event_name, callback);
+		};
+	}
+
+	//
+	// postMessage
+	// This is used whereby the browser does not support CORS
+	//
+	var xd_iframe, xd_ready, xd_id, xd_counter, xd_queue=[];
+	function xd(method, url, headers, body, callback){
+
+		// This is the origin of the Domain we're opening
+		var origin = 'https://content.googleapis.com';
+
+		// Is this the first time?
+		if(!xd_iframe){
+
+			// ID
+			xd_id = String(parseInt(Math.random()*1e8,10));
+
+			// Create the proxy window
+			xd_iframe = utils.append('iframe', { src : origin + "/static/proxy.html?jsh=m%3B%2F_%2Fscs%2Fapps-static%2F_%2Fjs%2Fk%3Doz.gapi.en.mMZgig4ibk0.O%2Fm%3D__features__%2Fam%3DEQ%2Frt%3Dj%2Fd%3D1%2Frs%3DAItRSTNZBJcXGialq7mfSUkqsE3kvYwkpQ#parent="+window.location.origin+"&rpctoken="+xd_id,
+										style : {position:'absolute',left:"-1000px",bottom:0,height:'1px',width:'1px'} }, 'body');
+
+			// Listen for on ready events
+			// Set the window listener to handle responses from this
+			addEvent( window, "message", function CB(e){
+
+				// Try a callback
+				if(e.origin !== origin){
+					return;
+				}
+
+				var json;
+
+				try{
+					json = JSON.parse(e.data);
+				}
+				catch(ee){
+					// This wasn't meant to be
+					return;
+				}
+
+				// Is this the right implementation?
+				if(json && json.s && json.s === "ready:"+xd_id){
+					// Yes, it is.
+					// Lets trigger the pending operations
+					xd_ready = true;
+					xd_counter = 0;
+
+					for(var i=0;i<xd_queue.length;i++){
+						xd_queue[i]();
+					}
+				}
+			});
+		}
+
+		//
+		// Action
+		// This is the function to call if/once the proxy has successfully loaded
+		// If makes a call to the IFRAME
+		var action = function(){
+
+			var nav = window.navigator,
+				position = ++xd_counter,
+				qs = utils.param(url.match(/\?.+/)[0]);
+
+			var token = qs.access_token;
+			delete qs.access_token;
+
+			// The endpoint is ready send the response
+			var message = JSON.stringify({
+				"s":"makeHttpRequests",
+				"f":"..",
+				"c":position,
+				"a":[[{
+					"key":"gapiRequest",
+					"params":{
+						"url":url.replace(/(^https?\:\/\/[^\/]+|\?.+$)/,''), // just the pathname
+						"httpMethod":method.toUpperCase(),
+						"body": body,
+						"headers":{
+							"Authorization":":Bearer "+token,
+							"Content-Type":headers['content-type'],
+							"X-Origin":window.location.origin,
+							"X-ClientDetails":"appVersion="+nav.appVersion+"&platform="+nav.platform+"&userAgent="+nav.userAgent
+						},
+						"urlParams": qs,
+						"clientName":"google-api-javascript-client",
+						"clientVersion":"1.1.0-beta"
+					}
+				}]],
+				"t":xd_id,
+				"l":false,
+				"g":true,
+				"r":".."
+			});
+
+			addEvent( window, "message", function CB2(e){
+
+				if(e.origin !== origin ){
+					// not the incoming message we're after
+					return;
+				}
+
+				// Decode the string
+				try{
+					var json = JSON.parse(e.data);
+					if( json.t === xd_id && json.a[0] === position ){
+						removeEvent( window, "message", CB2);
+						callback(JSON.parse(JSON.parse(json.a[1]).gapiRequest.data.body));
+					}
+				}
+				catch(ee){
+					callback({
+						error: {
+							code : "request_error",
+							message : "Failed to post to Google"
+						}
+					});
+				}
+			});
+
+			// Post a message to iframe once it has loaded
+			xd_iframe.contentWindow.postMessage(message, '*');
+		};
+
+
+		//
+		// Check to see if the proy has loaded,
+		// If it has then action()!
+		// Otherwise, xd_queue until the proxy has loaded
+		if(xd_ready){
+			action();
+		}
+		else{
+			xd_queue.push(action);
+		}
+	}
+	/**/
+
+	//
+	// Upload to Drive
+	// If this is PUT then only augment the file uploaded
+	// PUT https://developers.google.com/drive/v2/reference/files/update
+	// POST https://developers.google.com/drive/manage-uploads
+	function uploadDrive(p, callback){
+		
+		var data = {};
+
+		if( p.data && p.data instanceof window.HTMLInputElement ){
+			p.data = { file : p.data };
+		}
+		if( !p.data.name && Object(Object(p.data.file).files).length && p.method === 'post' ){
+			p.data.name = p.data.file.files[0].name;
+		}
+
+		if(p.method==='post'){
+			p.data = {
+				"title": p.data.name,
+				"parents": [{"id":p.data.parent||'root'}],
+				"file" : p.data.file
+			};
+		}
+		else{
+			// Make a reference
+			data = p.data;
+			p.data = {};
+
+			// Add the parts to change as required
+			if( data.parent ){
+				p.data["parents"] =  [{"id":p.data.parent||'root'}];
+			}
+			if( data.file ){
+				p.data.file = data.file;
+			}
+			if( data.name ){
+				p.data.title = data.name;
+			}
+		}
+
+		callback('upload/drive/v2/files'+( data.id ? '/' + data.id : '' )+'?uploadType=multipart');
+	}
+
 
 	//
 	// URLS
@@ -204,7 +499,7 @@
 				events			: '',
 				photos			: 'https://picasaweb.google.com/data/',
 				videos			: 'http://gdata.youtube.com',
-				friends			: 'https://www.google.com/m8/feeds',
+				friends			: 'https://www.google.com/m8/feeds, https://www.googleapis.com/auth/plus.login',
 				files			: 'https://www.googleapis.com/auth/drive.readonly',
 				
 				publish			: '',
@@ -224,9 +519,10 @@
 				'me' : 'oauth2/v1/userinfo?alt=json',
 
 				// https://developers.google.com/+/api/latest/people/list
-				'me/friends' : contacts_url,
+				'me/friends' : 'plus/v1/people/me/people/visible?maxResults=@{limit|100}',
 				'me/following' : contacts_url,
 				'me/followers' : contacts_url,
+				'me/contacts' : contacts_url,
 				'me/share' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
 				'me/feed' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
 				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}&start-index=@{start|1}',
@@ -238,15 +534,49 @@
 				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}&start-index=@{start|1}',
 
 				// https://developers.google.com/drive/v2/reference/files/list
-				'me/files' : 'drive/v2/files?q=%22root%22+in+parents&maxResults=@{limit|100}'
+				'me/files' : 'drive/v2/files?q=%22@{parent|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}',
+
+				// https://developers.google.com/drive/v2/reference/files/list
+				'me/folders' : 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+mimeType+=+%22application/vnd.google-apps.folder%22+and+trashed=false&maxResults=@{limit|100}',
+
+				// https://developers.google.com/drive/v2/reference/files/list
+				'me/folder' : 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}'
 			},
 
+			// Map post requests
 			post : {
-//				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json'
+				/*
+				// PICASA
+				'me/albums' : function(p, callback){
+					p.data = {
+						"title": p.data.name,
+						"summary": p.data.description,
+						"category": 'http://schemas.google.com/photos/2007#album'
+					};
+					callback('https://picasaweb.google.com/data/feed/api/user/default?alt=json');
+				},
+				*/
+				// DRIVE
+				'me/files' : uploadDrive,
+				'me/folders' : function(p, callback){
+					p.data = {
+						"title": p.data.name,
+						"parents": [{"id":p.data.parent||'root'}],
+						"mimeType": "application/vnd.google-apps.folder"
+					};
+					callback('drive/v2/files');
+				}
+			},
+
+			// Map post requests
+			put : {
+				'me/files' : uploadDrive
 			},
 
 			// Map DELETE requests
 			del : {
+				'me/files' : 'drive/v2/files/@{id}',
+				'me/folder' : 'drive/v2/files/@{id}'
 			},
 
 			wrap : {
@@ -255,13 +585,23 @@
 						o.last_name = o.family_name || (o.name? o.name.familyName : null);
 						o.first_name = o.given_name || (o.name? o.name.givenName : null);
 	//						o.name = o.first_name + ' ' + o.last_name;
-						o.picture = o.picture || ( o.image ? o.image.url : null);
-						o.thumbnail = o.picture;
-						o.name = o.displayName || o.name;
+
+						formatPerson(o);
 					}
 					return o;
 				},
-				'me/friends'	: formatFriends,
+				'me/friends'	: function(o){
+					if(o.items){
+						paging(o);
+						o.data = o.items;
+						delete o.items;
+						for(var i=0;i<o.data.length;i++){
+							formatPerson(o.data[i]);
+						}
+					}
+					return o;
+				},
+				'me/contacts'	: formatFriends,
 				'me/followers'	: formatFriends,
 				'me/following'	: formatFriends,
 				'me/share' : function(o){
@@ -281,11 +621,109 @@
 				'default' : gEntry
 			},
 			xhr : function(p){
-				if(p.method==='post'){
-					return false;
+
+				// Post
+				if(p.method==='post'||p.method==='put'){
+
+					// Does this contain binary data?
+					if( p.data && utils.hasBinary(p.data) || p.data.file ){
+
+						// There is support for CORS via Access Control headers
+						// ... unless otherwise stated by post/put handlers
+						p.cors_support = p.cors_support || true;
+
+
+						// There is noway, as it appears, to Upload a file along with its meta data
+						// So lets cancel the typical approach and use the override '{ api : function() }' below
+						return false;
+					}
+
+					// Convert the POST into a javascript object
+					p.data = JSON.stringify(p.data);
+					p.headers = {
+						'content-type' : 'application/json'
+					};
 				}
+				return true;
+			},
+
+			//
+			// Custom API handler, overwrites the default fallbacks
+			// Performs a postMessage Request
+			//
+			api : function(url,p,qs,callback){
+
+				// Dont use this function for GET requests
+				if(p.method==='get'){
+					return;
+				}
+
+				// Contain inaccessible binary data?
+				// If there is no "files" property on an INPUT then we can't get the data
+				if( "file" in p.data && utils.domInstance('input', p.data.file ) && !( "files" in p.data.file ) ){
+					callback({
+						error : {
+							code : 'request_invalid',
+							message : "Sorry, can't upload your files to Google Drive in this browser"
+						}
+					});
+				}
+
+				// Extract the file, if it exists from the data object
+				// If the File is an INPUT element lets just concern ourselves with the NodeList
+				var file;
+				if( "file" in p.data ){
+					file = p.data.file;
+					delete p.data.file;
+
+					if( typeof(file)==='object' && "files" in file){
+						// Assign the NodeList
+						file = file.files;
+					}
+					if(!file || !file.length){
+						callback({
+							error : {
+								code : 'request_invalid',
+								message : 'There were no files attached with this request to upload'
+							}
+						});
+						return;
+					}
+				}
+
+
+//				p.data.mimeType = Object(file[0]).type || 'application/octet-stream';
+
+				// Construct a multipart message
+				var parts = new Multipart();
+				parts.append( JSON.stringify(p.data), 'application/json');
+
+				// Read the file into a  base64 string... yep a hassle, i know
+				// FormData doesn't let us assign our own Multipart headers and HTTP Content-Type
+				// Alas GoogleApi need these in a particular format
+				if(file){
+					parts.append( file );
+				}
+
+				parts.onready(function(body, boundary){
+
+					// Does this userAgent and endpoint support CORS?
+					if( p.cors_support ){
+						// Deliver via 
+						utils.xhr( p.method, utils.qs(url,qs), {
+							'content-type' : 'multipart/related; boundary="'+boundary+'"'
+						}, body, callback );
+					}
+					else{
+						// Otherwise lets POST the data the good old fashioned way postMessage
+						xd( p.method, utils.qs(url,qs), {
+							'content-type' : 'multipart/related; boundary="'+boundary+'"'
+						}, body, callback );
+					}
+				});
+
 				return true;
 			}
 		}
 	});
-})(hello);
+})(hello, window);

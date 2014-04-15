@@ -3,7 +3,7 @@
 
 # hello.js
 
-A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and OAuth1 with a [oauth proxy](#oauth-proxy)) web services and querying their REST API's. HelloJS Standardizes paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. Its modular so that list is [growing](modules.html). No more spaghetti code! 
+A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST API's. HelloJS standardizes paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. Its **modular** so that list is [growing](modules.html). No more spaghetti code! 
 
 
 
@@ -113,7 +113,7 @@ Compiled source, which combines all the modules can be obtained from [Github](ht
 
 The [Bower](http://bower.io/) package shall install the aforementioned "/src" and "/dist" directories. The "/src" directory provides individual modules which can be packaged as desired.
 
-Note: Some services require OAuth1 or server-side OAuth2 authorization. In such case HelloJS communicates with an [OAuth Proxy](#oauth-proxy).
+**Note:** Some services require OAuth1 or server-side OAuth2 authorization. In such case HelloJS communicates with an [OAuth Proxy](#oauth-proxy).
 
 ## Quick Start
 Quick start shows you how to go from zero to loading in the name and picture of a user, like in the demo above.
@@ -174,7 +174,7 @@ Lets define a simple function, which will load a user profile into the page afte
 
 ### 5. Configure hello.js with your client_id's and initiate all listeners
 
-Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the hello.init function. e.g....
+Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the `hello.init` function. e.g....
 
 
 	hello.init({ 
@@ -193,7 +193,7 @@ That's it. The code above actually powers the demo at the start so, no excuses.
 
 Initiate the environment. And add the application credentials 
 
-### hello.init( {facebook: id, windows: id, google: id, .... } )
+### hello.init( {facebook: *id*, windows: *id*, google: *id*, .... } )
 
 <table>
 	<thead>
@@ -255,7 +255,7 @@ If a network string is provided: A consent window to authenticate with that netw
 				<em>optional</em></td><td>
 				<q>popup</q></td></tr>
 			<tr><td>scope</td><td><i>string</i></td><td><q>email</q>, <q>publish</q> or <q>photos</q></td><td>
-				Comma separated list of scopes</td><td>
+				Comma separated list of <a href="#scope">scopes</a></td><td>
 				<em>optional</em></td><td>
 				<em>null</em></td></tr>
 			<tr><td>redirect_uri</td><td><i>string</i></td><td><q><a href="redirect.html" target="_blank">redirect.html</a></q></td><td>
@@ -447,7 +447,7 @@ Remove a callback, both event name and function must exist
 # Misc
 
 ## Pagination, Limit and Next Page
-A convenient function to get the `next` resultset is provided in the second parameter of any GET callback. Calling this function recreates the request with the original parameters and event listeners. Albeit the original path is augmented with the parameters defined in the paging.next property.
+A convenient function to get the `next` resultset is provided in the second parameter of any `GET` callback. Calling this function recreates the request with the original parameters and event listeners. Albeit the original path is augmented with the parameters defined in the `paging.next` property.
 
 
 	hello( "facebook" ).api( "me/friends", {limit: 1} ).success( function( json, next ){
@@ -465,10 +465,59 @@ A convenient function to get the `next` resultset is provided in the second para
 
 
 
+## Scope
+The scope property defines which privileges an app requires from a network provider. The scope can be defined globally for a session through `hello.init(object, {scope:'string'})`, or at the point of triggering the auth flow e.g. `hello('network').login({scope:'string'});`
+An app can specify multiple scopes, seperated by commas - as in the example below.
+
+
+	hello( "facebook" ).login( {scope: "friends,photos,publish" } );
+
+
+Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the [hello.api reference table](http://adodson.com/hello.js/#helloapi).
+
+The table below illustrates some of the default scopes HelloJS exposes. Additional scopes may be added which are proprietary to a service, but take careful not to mix proprietary scopes with other services which dont know how to handle them.
+<table>
+	<thead>
+	<tr>
+		<th>Scope</th>
+		<th>Description</th>
+	</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<th><i>default</i></th>
+			<td>Read basic profile</td>
+		</tr>
+		<tr>
+			<th><q>friends</q></th>
+			<td>Read friends profiles</td>
+		</tr>
+		<tr>
+			<th><q>photos</q></th>
+			<td>Read users albums and photos</td>
+		</tr>
+		<tr>
+			<th><q>files</q></th>
+			<td>Read users files</td>
+		</tr>
+		<tr>
+			<th><q>publish</q></th>
+			<td>Publish status updates</td>
+		</tr>
+		<tr>
+			<th><q>publish_files</q></th>
+			<td>Publish photos and files</td>
+		</tr>
+	</tbody>
+</table>
+
+Its good practice to limit the use of scopes and also to make users aware of why your app needs certain privilieges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend; Include a button which the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorisation.
+
+
 ## Error handling
 
-For hello.api([path], [callback]) the first parameter of callback 
-upon error will be either boolean (false) or be an error object as 
+For hello.api([path], [*callback*]) the first parameter of *callback* 
+upon error will be either *boolean (false)* or be an error *object* as 
 described below.
 
 ### Error Object
@@ -508,7 +557,7 @@ Services which rely on the OAuth 1 authentication method require a server side h
 
 Making HelloJS work with OAuth1 endpoints requires a proxy server to authorize the user and sign subsequent requests. As a shim HelloJS uses a service hosted at [http://auth-server.herokuapp.com/](http://auth-server.herokuapp.com/) developers may add their own network registration AppID/client_id and secret to this service in order to easily get started.
 
-The aforementioned service uses [//node-oauth-shim](https://npmjs.org/package/oauth-shim), so go npm install oauth-shim that for your own deployment.
+The aforementioned service uses [//node-oauth-shim](https://npmjs.org/package/oauth-shim), so go `npm install oauth-shim` that for your own deployment.
 
 
 ## Browser Support
@@ -562,7 +611,7 @@ used - because of the XD, IFrame+Form+hack.
 
 ## Contributing
 
-"No, It's perfect!".... If you believe that then give it a [star](https://github.com/MrSwitch/hello.js).
+**"No, It's perfect!"**.... If you believe that then give it a [star](https://github.com/MrSwitch/hello.js).
 
 Having read this far you have already invested your time, why not contribute!?
 

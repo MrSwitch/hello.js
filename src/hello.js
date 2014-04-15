@@ -394,11 +394,35 @@ hello.utils.extend( hello, {
 			var windowHeight = opts.window_height || 550;
 			var windowWidth = opts.window_width || 500;
 
+			// Help the minifier
+			var documentElement = document.documentElement;
+			var screen = window.screen;
+
+			// Multi Screen Popup Positioning (http://stackoverflow.com/a/16861050)
+			//   Credit: http://www.xtf.dk/2011/08/center-new-popup-window-even-on.html
+			// Fixes dual-screen position                         Most browsers      Firefox
+			var dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
+			var dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
+
+			var width = window.innerWidth || documentElement.clientWidth || screen.width;
+			var height = window.innerHeight || documentElement.clientHeight || screen.height;
+
+			var left = ((width - windowWidth) / 2) + dualScreenLeft;
+			var top  = ((height - windowHeight) / 2) + dualScreenTop;
+
 			// Trigger callback
 			var popup = window.open(
-				url,
+				//
+				// OAuth redirect, fixes URI fragments from being lost in Safari
+				// (URI Fragments within 302 Location URI are lost over HTTPS)
+				// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
+				// 
+				// FIREFOX, decodes URL fragments when calling location.hash. 
+				//  - This is bad if the value contains break points which are escaped
+				//  - Hence the url must be encoded twice as it contains breakpoints.
+				p.qs.redirect_uri + "#oauth_redirect=" + encodeURIComponent(encodeURIComponent(url)),
 				'Authentication',
-				"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left="+((window.innerWidth-windowWidth)/2)+",top="+((window.innerHeight-windowHeight)/2)
+				"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left=" + left + ",top="  + top
 			);
 
 			// Ensure popup window has focus upon reload, Fix for FF.
@@ -432,7 +456,7 @@ hello.utils.extend( hello, {
 
 		var utils = self.utils;
 
-		var p = utils.args({name:'s', callback:"f" }, arguments);
+		var p = utils.args({name:'s', options: 'o', callback:"f" }, arguments);
 
 		// Create self
 		// An object which inherits its parent as the prototype.
@@ -481,7 +505,7 @@ hello.utils.extend( hello, {
 		// Define the callback
 		var callback = function(){
 			// Emit events by default
-			self.emitAfter("complete logout success auth.logout auth", true);
+			self.emitAfter("complete logout success auth.logout auth", {network:p.name});
 		};
 
 		// Does this endpoint
@@ -577,8 +601,8 @@ hello.utils.extend( hello.utils, {
 			m = s.replace(/^[\#\?]/,'').match(/([^=\/\&]+)=([^\&]+)/g);
 			if(m){
 				for(var i=0;i<m.length;i++){
-					b = m[i].split('=');
-					a[b[0]] = decodeURIComponent( b[1] );
+					b = m[i].match(/([^=]+)=(.*)/);
+					a[b[1]] = decodeURIComponent( b[2] );
 				}
 			}
 			return a;
@@ -601,34 +625,77 @@ hello.utils.extend( hello.utils, {
 
 	//
 	// Local Storage Facade
-	store : function (name,value,days) {
+	store : (function(localStorage){
 
-		// Local storage
-		var json = JSON.parse(localStorage.getItem('hello')) || {};
+		//
+		// LocalStorage
+		var a = [localStorage,window.sessionStorage],
+			i=0;
 
-		if(name && typeof(value) === 'undefined'){
-			return json[name];
-		}
-		else if(name && value === ''){
+		// Set LocalStorage
+		localStorage = a[i++];
+
+		while(localStorage){
 			try{
-				delete json[name];
+				localStorage.setItem(i,i);
+				localStorage.removeItem(i);
+				break;
 			}
 			catch(e){
-				json[name]=null;
+				localStorage = a[i++];
 			}
 		}
-		else if(name){
-			json[name] = value;
+
+		if(!localStorage){
+			localStorage = {
+				getItem : function(prop){
+					prop = prop +'=';
+					var m = document.cookie.split(";");
+					for(var i=0;i<m.length;i++){
+						var _m = m[i].replace(/(^\s+|\s+$)/,'');
+						if(_m && _m.indexOf(prop)===0){
+							return _m.substr(prop.length);
+						}
+					}
+					return null;
+				},
+				setItem : function(prop, value){
+					document.cookie = prop + '=' + value;
+				}
+			};
 		}
-		else {
+
+		// Does this browser support localStorage?
+
+		return function (name,value,days) {
+
+			// Local storage
+			var json = JSON.parse(localStorage.getItem('hello')) || {};
+
+			if(name && typeof(value) === 'undefined'){
+				return json[name];
+			}
+			else if(name && value === ''){
+				try{
+					delete json[name];
+				}
+				catch(e){
+					json[name]=null;
+				}
+			}
+			else if(name){
+				json[name] = value;
+			}
+			else {
+				return json;
+			}
+
+			localStorage.setItem('hello', JSON.stringify(json));
+
 			return json;
-		}
+		};
 
-		localStorage.setItem('hello', JSON.stringify(json));
-
-		return json;
-	},
-
+	})(window.localStorage),
 
 	//
 	// Create and Append new Dom elements
@@ -737,6 +804,7 @@ hello.utils.extend( hello.utils, {
 			x = null;
 		
 		// define x
+		// x is the first key in the list of object parameters
 		for(x in o){if(o.hasOwnProperty(x)){
 			break;
 		}}
@@ -744,8 +812,17 @@ hello.utils.extend( hello.utils, {
 		// Passing in hash object of arguments?
 		// Where the first argument can't be an object
 		if((args.length===1)&&(typeof(args[0])==='object')&&o[x]!='o!'){
-			// return same hash.
-			return args[0];
+
+			// Could this object still belong to a property?
+			// Check the object keys if they match any of the property keys
+			for(x in args[0]){if(o.hasOwnProperty(x)){
+				// Does this key exist in the property list?
+				if( x in o ){
+					// Yes this key does exist so its most likely this function has been invoked with an object parameter
+					// return first argument as the hash of all arguments
+					return args[0];
+				}
+			}}
 		}
 
 		// else loop through and account for the missing ones.
@@ -843,24 +920,6 @@ hello.utils.extend( hello.utils, {
 	},
 
 
-	//
-	// Log
-	// [@param,..]
-	//
-	log : function(){
-
-		if(typeof arguments[0] === 'string'){
-			arguments[0] = "HelloJS-" + arguments[0];
-		}
-		if (typeof(console) === 'undefined'||typeof(console.log) === 'undefined'){ return; }
-		if (typeof console.log === 'function') {
-			console.log.apply(console, arguments); // FF, CHROME, Webkit
-		}
-		else{
-			console.log(Array.prototype.slice.call(arguments)); // IE
-		}
-	},
-
 	// isEmpty
 	isEmpty : function (obj){
 		// scalar?
@@ -952,7 +1011,7 @@ hello.utils.extend( hello.utils, {
 			}
 
 			return this;
-		},
+		};
 
 
 		//
@@ -969,28 +1028,31 @@ hello.utils.extend( hello.utils, {
 			});
 
 			return this;
-		},
-		
+		};
+
 		//
 		// Emit
 		// Triggers any subscribed events
 		//
-		this.emit =function(evt, data){
+		this.emit = function(evt, data){
 
 			// Get arguments as an Array, knock off the first one
 			var args = Array.prototype.slice.call(arguments, 1);
 			args.push(evt);
 
+			// Handler
+			var handler = function(name, index){
+				// Replace the last property with the event name
+				args[args.length-1] = name;
+
+				// Trigger
+				this.events[name][index].apply(this, args);
+			};
+
 			// Find the callbacks which match the condition and call
 			var proto = this;
 			while( proto && proto.findEvents ){
-				proto.findEvents(evt, function(name, index){
-					// Replace the last property with the event name
-					args[args.length-1] = name;
-
-					// Trigger
-					this.events[name][index].apply(this, args);
-				});
+				proto.findEvents(evt, handler);
 
 				// proto = this.utils.getPrototypeOf(proto);
 				proto = proto.parent;
@@ -1090,6 +1152,16 @@ hello.unsubscribe = hello.off;
 
 		// Hash of expired tokens
 		expired = {};
+
+	//
+	// Listen to other triggers to Auth events, use these to update this
+	//
+	hello.on('auth.login, auth.logout', function(auth){
+		if(auth&&typeof(auth)==='object'&&auth.network){
+			old_session[auth.network] = hello.utils.store(auth.network) || {};
+		}
+	});
+	
 
 
 	(function self(){
@@ -1216,6 +1288,13 @@ hello.unsubscribe = hello.off;
 	var utils = hello.utils,
 		location = window.location;
 
+	var debug = function(msg,e){
+		utils.append("p", {text:msg}, document.documentElement);
+		if(e){
+			console.log(e);
+		}
+	};
+
 	//
 	// AuthCallback
 	// Trigger a callback to authenticate
@@ -1242,15 +1321,38 @@ hello.unsubscribe = hello.off;
 					delete obj.callback;
 				}catch(e){}
 
-				// Call the globalEvent function on the parent
-				win[cb](obj);
-
 				// Update store
 				utils.store(obj.network,obj);
+
+				// Call the globalEvent function on the parent
+				if(cb in win){
+					try{
+						win[cb](obj);
+					}
+					catch(e){
+						debug("Error thrown whilst executing parent callback", e);
+						return;
+					}
+				}
+				else{
+					debug("Error: Callback missing from parent window, snap!");
+					return;
+				}
+
 			}
 
-			window.close();
-			hello.emit("notice",'Trying to close window');
+			// Close this current window
+			try{
+				window.close();
+			}
+			catch(e){}
+
+			// IOS bug wont let us clos it if still loading
+			window.addEventListener('load', function(){
+				window.close();
+			});
+
+			debug("Trying to close window");
 
 			// Dont execute any more
 			return;
@@ -1263,7 +1365,8 @@ hello.unsubscribe = hello.off;
 	//
 	// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
 	// SoundCloud is the state in the querystring and the token in the hashtag, so we'll mix the two together
-	var p = utils.merge(hello.utils.param(location.search||''), utils.param(location.hash||''));
+	
+	var p = utils.merge(utils.param(location.search||''), utils.param(location.hash||''));
 
 	
 	// if p.state
@@ -1275,7 +1378,7 @@ hello.unsubscribe = hello.off;
 			var a = JSON.parse(p.state);
 			p = utils.merge(p, a);
 		}catch(e){
-			hello.emit("error", "Could not decode state parameter");
+			debug("Could not decode state parameter");
 		}
 
 		// access_token?
@@ -1318,6 +1421,14 @@ hello.unsubscribe = hello.off;
 				window.parent[p.callback](JSON.parse(p.result));
 			}
 		}
+	}
+	//
+	// OAuth redirect, fixes URI fragments from being lost in Safari
+	// (URI Fragments within 302 Location URI are lost over HTTPS)
+	// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
+	else if("oauth_redirect" in p){
+		window.location = decodeURIComponent(p.oauth_redirect);
+		return;
 	}
 
 	// redefine
@@ -1366,6 +1477,7 @@ hello.api = function(){
 	// And constructs a new event chain.
 	var self = this.use(),
 		utils = self.utils;
+
 
 	// Reference arguments
 	self.args = p;
@@ -1481,6 +1593,11 @@ hello.api = function(){
 	}
 
 	//
+	// Get the current session
+	var session = self.getAuthResponse(p.network);
+
+
+	//
 	// Given the path trigger the fix
 	processPath(p.path);
 
@@ -1499,7 +1616,7 @@ hello.api = function(){
 		if(p.method==='get'){
 			var reg = /[\?\&]([^=&]+)(=([^&]+))?/ig,
 				m;
-			while(m = reg.exec(path)){
+			while((m = reg.exec(path))){
 				p.data[m[1]] = m[3];
 			}
 			path = path.replace(/\?.*/,'');
@@ -1602,7 +1719,12 @@ hello.api = function(){
 					o.jsonp(p,qs);
 				}
 
-				// Is self still a post?
+				// Does this provider have a custom method?
+				if("api" in o && o.api( url, p, {access_token:session.access_token}, callback ) ){
+					return;
+				}
+
+				// Is method still a post?
 				if( p.method === 'post' ){
 
 					// Add some additional query parameters to the URL
@@ -1645,8 +1767,7 @@ hello.api = function(){
 	function _sign(network, path, method, data, modifyQueryString, callback){
 
 		// OAUTH SIGNING PROXY
-		var session = self.getAuthResponse(network),
-			service = self.services[network],
+		var service = self.services[network],
 			token = (session ? session.access_token : null);
 
 		// Is self an OAuth1 endpoint
@@ -1715,7 +1836,7 @@ hello.utils.extend( hello.utils, {
 	// Create a clone of an object
 	clone : function(obj){
 		if("nodeName" in obj){
-			return obj[x];
+			return obj;
 		}
 		var clone = {}, x;
 		for(x in obj){
@@ -1793,7 +1914,7 @@ hello.utils.extend( hello.utils, {
 			}
 			data = null;
 		}
-		else if( data && typeof(data) !== 'string' && !(data instanceof FormData)){
+		else if( data && typeof(data) !== 'string' && !(data instanceof FormData) && !(data instanceof File) && !(data instanceof Blob)){
 			// Loop through and add formData
 			var f = new FormData();
 			for( x in data )if(data.hasOwnProperty(x)){
@@ -1801,6 +1922,9 @@ hello.utils.extend( hello.utils, {
 					if( "files" in data[x] && data[x].files.length > 0){
 						f.append(x, data[x].files[0]);
 					}
+				}
+				else if(data[x] instanceof Blob){
+					f.append(x, data[x], data.name);
 				}
 				else{
 					f.append(x, data[x]);
@@ -1846,7 +1970,7 @@ hello.utils.extend( hello.utils, {
 			var r = {};
 			var reg = /([a-z\-]+):\s?(.*);?/gi,
 				m;
-			while(m = reg.exec(s)){
+			while((m = reg.exec(s))){
 				r[m[1]] = m[2];
 			}
 			return r;
@@ -2077,7 +2201,7 @@ hello.utils.extend( hello.utils, {
 				newform = form;
 			}
 
-			var input,i;
+			var input;
 
 			// Add elements to the form if they dont exist
 			for(x in data) if(data.hasOwnProperty(x)){
@@ -2212,8 +2336,6 @@ hello.utils.extend( hello.utils, {
 		}
 		return false;
 	}
-
-
 });
 
 

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/_packages/document.css"></script>
+<script src="/_packages/document.js"></script>
+
+<h1>Demo loading helloJS via RequireJS</h1>
+<button id='google' onclick="hello.login('google');">google</button>
+<button id='facebook' onclick="hello.login('facebook');">facebook</button>
+<button id='windows' onclick="hello.login('windows');">windows</button>
+
+
+<script class="pre" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.11/require.min.js"></script>
+
+<script class="pre">
+	require( ["../dist/hello.all", "./client_ids"], function(hello){
+
+		hello.on('auth.login', function(r){
+			// Get Profile
+			hello( r.network ).api( '/me' ).success( function(p){
+				document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
+			});
+		});
+
+		hello.init( 
+			CLIENT_IDS,
+			{
+				redirect_uri:'../redirect.html'
+			}
+		);
+	});
+</script>

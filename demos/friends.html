@@ -12,13 +12,17 @@
 	<h1>hello.js - me/friends</h1>
 
 
-	<button onclick="getFriends('google')">Get friends from Google</button>
-	<button onclick="getFriends('facebook')">Get friends from Facebook</button>
-	<button onclick="getFriends('windows')">Get friends from Windows</button>
-	<button onclick="getFriends('yahoo')">Get friends from Yahoo</button>
+	<button onclick="getFriends('google', 'me/friends')">Get Google me/friends</button>
+	<button onclick="getFriends('facebook', 'me/friends')">Get Facebook me/friends</button>
+	<button onclick="getFriends('windows', 'me/friends')">Get Windows me/friends</button>
+	<button onclick="getFriends('yahoo', 'me/friends')">Get Yahoo me/friends</button>
+	<button onclick="getFriends('google', 'me/contacts')">Get Google me/contacts</button>
+	<button onclick="getFriends('windows', 'me/contacts')">Get Windows me/contacs</button>
 
 	<h2>Friends list</h2>
 	<ul id="list"></ul>
+	<button id="more" style="display:none;"></button>
+
 
 <h2>Include hello.js and the modules</h2>
 <p>One should merge these for performance.</p>
@@ -30,25 +34,48 @@
 
 <h2>Initiate</h2>
 <script class="pre">
-hello.init( CLIENT_IDS_ALL, {redirect_uri:'../redirect.html', oauth_proxy : OAUTH_PROXY_URL, scope:"friends" } );
+hello.init( {
+		windows : CLIENT_IDS_ALL.windows,
+		google : CLIENT_IDS_ALL.google,
+		facebook : CLIENT_IDS_ALL.facebook,
+		yahoo : CLIENT_IDS_ALL.yahoo
+	}
+	, {
+		redirect_uri:'../redirect.html', 
+		oauth_proxy : OAUTH_PROXY_URL, 
+		scope:"friends"
+	}
+);
 </script>
 
 <h2>Build Button events</h2>
 <script class="pre">
-function getFriends(network){
+function getFriends(network, path){
+
+	var list = document.getElementById('list');
+	list.innerHTML = '';
+	var btn_more = document.getElementById('more');
+	btn_more.style.display = 'none';
+
+	// login
 	hello.login( network, {scope:'friends'}, function(auth){
 		if(!auth||auth.error){
 			console.log("Signin aborted");
 			return;
 		}
 		// Get the friends
-		hello.api( network +':/me/friends', function(r){
+		// using path, me/friends or me/contacts
+		hello( network ).api( path , {limit:10}, function(r, next){
 			for(var i=0;i<r.data.length;i++){
 				var o = r.data[i];
 				var li = document.createElement('li');
-				li.innerHTML = o.name + (o.thumbnail?" <a href="+o.thumbnail+" target='_blank'>picture</a>":'');
-				document.getElementById('list').appendChild(li);
+				li.innerHTML = o.name + (o.thumbnail?" <img src="+o.thumbnail+" />":'');
+				list.appendChild(li);
 			};
+
+			btn_more.onclick = next;
+			btn_more.innerHTML = "Next from "+network;
+			btn_more.style.display = 'block';
 		});
 	});
 }

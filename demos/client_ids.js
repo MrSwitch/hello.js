@@ -94,6 +94,5 @@ var CLIENT_IDS_ALL = {
 // OAUTH PROXY
 //
 var OAUTH_PROXY_URL = {
-	'adodson.com' : 'https://auth-server.herokuapp.com/proxy',
 	'local.knarly.com' : 'http://local.knarly.com:5500/proxy'
-}[window.location.hostname];
+}[window.location.hostname] || 'https://auth-server.herokuapp.com/proxy';

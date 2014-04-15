@@ -7,8 +7,15 @@
 function formatUser(o){
 	if(o.id){
 		var token = hello.getAuthResponse('windows').access_token;
-		o.email = (o.emails?o.emails.preferred:null);
-		o.thumbnail = o.picture = 'https://apis.live.net/v5.0/'+o.id+'/picture?access_token='+token;
+		if(o.emails){
+			o.email =  o.emails.preferred;
+		}
+		// If this is not an non-network friend
+		if(o.is_friend!==false){
+			// Use the id of the user_id if available
+			var id = (o.user_id||o.id);
+			o.thumbnail = o.picture = 'https://apis.live.net/v5.0/'+id+'/picture?access_token='+token;
+		}
 	}
 }
 
@@ -19,6 +26,17 @@ function formatFriends(o){
 		}
 	}
 	return o;
+}
+
+function dataURItoBlob(dataURI) {
+	var reg = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
+	var m = dataURI.match(reg);
+	var binary = atob(dataURI.replace(reg,''));
+	var array = [];
+	for(var i = 0; i < binary.length; i++) {
+		array.push(binary.charCodeAt(i));
+	}
+	return new Blob([new Uint8Array(array)], {type: m[1]});
 }
 
 hello.init({
@@ -43,7 +61,7 @@ hello.init({
 			events			: 'wl.calendars',
 			photos			: 'wl.photos',
 			videos			: 'wl.photos',
-			friends			: '',
+			friends			: 'wl.contacts_emails',
 			files			: 'wl.skydrive',
 			
 			publish			: 'wl.share',
@@ -61,8 +79,9 @@ hello.init({
 			// Friends
 			"me"	: "me",
 			"me/friends" : "me/friends",
-			"me/following" : "me/friends",
+			"me/following" : "me/contacts",
 			"me/followers" : "me/friends",
+			"me/contacts" : "me/contacts",
 
 			"me/albums"	: 'me/albums',
 
@@ -71,7 +90,7 @@ hello.init({
 			"me/photo"	: '@{id}',
 
 			// FILES
-			"me/files"	: '@{id|me/skydrive}/files',
+			"me/files"	: '@{parent|me/skydrive}/files',
 
 			"me/folders" : '@{id|me/skydrive}/files',
 			"me/folder" : '@{id|me/skydrive}/files'
@@ -79,19 +98,19 @@ hello.init({
 
 		// Map POST requests
 		post : {
-			"me/feed" : "me/share",
-			"me/share" : "me/share",
 			"me/albums" : "me/albums",
 			"me/album" : "@{id}/files",
 
 			"me/folders" : '@{id|me/skydrive/}',
-			"me/files" : "@{id|me/skydrive/}/files"
+			"me/files" : "@{parent|me/skydrive/}/files"
 		},
 
 		// Map DELETE requests
 		del : {
 			// Include the data[id] in the path
 			"me/album"	: '@{id}',
+			"me/photo"	: '@{id}',
+			"me/folder"	: '@{id}',
 			"me/files"	: '@{id}'
 		},
 
@@ -101,6 +120,7 @@ hello.init({
 				return o;
 			},
 			'me/friends' : formatFriends,
+			'me/contacts' : formatFriends,
 			'me/followers' : formatFriends,
 			'me/following' : formatFriends,
 			'me/albums' : function(o){
@@ -124,7 +144,21 @@ hello.init({
 				return o;
 			}
 		},
-		xhr : false,
+		xhr : function(p){
+			if( p.method !== 'get' && p.method !== 'delete' && !hello.utils.hasBinary(p.data) ){
+
+				// Does this have a data-uri to upload as a file?
+				if( typeof( p.data.file ) === 'string' ){
+					p.data.file = dataURItoBlob(p.data.file);
+				}else{
+					p.data = JSON.stringify(p.data);
+					p.headers = {
+						'Content-Type' : 'application/json'
+					};
+				}
+			}
+			return true;
+		},
 		jsonp : function(p){
 			if( p.method.toLowerCase() !== 'get' && !hello.utils.hasBinary(p.data) ){
 				//p.data = {data: JSON.stringify(p.data), method: p.method.toLowerCase()};

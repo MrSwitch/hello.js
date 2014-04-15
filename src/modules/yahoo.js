@@ -57,7 +57,7 @@ function paging(res){
 }
 
 var yql = function(q){
-	return 'http://query.yahooapis.com/v1/yql?q=' + (q + ' limit @{limit|100} offset @{start|0}').replace(" ", '%20') + "&format=json";
+	return 'https://query.yahooapis.com/v1/yql?q=' + (q + ' limit @{limit|100} offset @{start|0}').replace(/\s/g, '%20') + "&format=json";
 };
 
 hello.init({
@@ -94,9 +94,9 @@ hello.init({
 		base	: "https://social.yahooapis.com/v1/",
 
 		get : {
-			"me"		: yql('select * from social.profile where guid=me'),
-			"me/friends"	: yql('select * from social.contacts where guid=me'),
-			"me/following"	: yql('select * from social.contacts where guid=me')
+			"me"		: yql('select * from social.profile(0) where guid=me'),
+			"me/friends"	: yql('select * from social.contacts(0) where guid=me'),
+			"me/following"	: yql('select * from social.contacts(0) where guid=me')
 		},
 		wrap : {
 			me : function(o){

@@ -47,10 +47,16 @@ hello.init({
 	facebook : {
 		name : 'Facebook',
 
+		login : function(p){
+			// The facebook login window is a different size.
+			p.options.window_width = 580;
+			p.options.window_height = 400;
+		},
+
 		// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
 		oauth : {
 			version : 2,
-			auth : 'http://www.facebook.com/dialog/oauth/'
+			auth : 'https://www.facebook.com/dialog/oauth/'
 		},
 
 		logout : function(){
@@ -107,7 +113,12 @@ hello.init({
 
 		// Map DELETE requests
 		del : {
-			//'me/album' : '@{id}'
+			/*
+			// Can't delete an album
+			// http://stackoverflow.com/questions/8747181/how-to-delete-an-album
+			'me/album' : '@{id}'
+			*/
+			'me/photo' : '@{id}'
 		},
 
 		wrap : {
@@ -125,19 +136,19 @@ hello.init({
 			if(p.method==='get'||p.method==='post'){
 				qs.suppress_response_codes = true;
 			}
-			else if(p.method === "delete"){
-				qs.method = 'delete';
-				p.method = "post";
-			}
 			return true;
 		},
 
 		// Special requirements for handling JSONP fallback
-		jsonp : function(p){
+		jsonp : function(p,qs){
 			var m = p.method.toLowerCase();
 			if( m !== 'get' && !hello.utils.hasBinary(p.data) ){
 				p.data.method = m;
 				p.method = 'get';
+			}
+			else if(p.method === "delete"){
+				qs.method = 'delete';
+				p.method = "post";
 			}
 		},
 
