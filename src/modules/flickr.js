@@ -18,7 +18,6 @@ function getApiUrl(method, extra_params, skip_network){
 
 // this is not exactly neat but avoid to call
 // the method 'flickr.test.login' for each api call
-var user_id;
 
 function withUser(cb){
 
@@ -27,14 +26,10 @@ function withUser(cb){
 	if(auth&&auth.user_nsid){
 		cb(auth.user_nsid);
 	}
-	else if(user_id){
-		cb(user_id);
-	}
 	else{
 		hello.api(getApiUrl("flickr.test.login"), function(userJson){
 			// If the
-			user_id = checkResponse(userJson, "user").id;
-			cb(user_id);
+			cb( checkResponse(userJson, "user").id );
 		});
 	}
 }
@@ -147,11 +142,6 @@ hello.init({
 			auth	: "http://www.flickr.com/services/oauth/authorize?perms=read",
 			request : 'http://www.flickr.com/services/oauth/request_token',
 			token	: 'http://www.flickr.com/services/oauth/access_token'
-		},
-
-		logout : function(){
-			// Function is executed when the user logs out.
-			user_id = null;
 		},
 
 		// AutoRefresh
