@@ -384,7 +384,7 @@ hello.utils.extend( hello, {
 		//
 		if( opts.display === 'none' ){
 			// signin in the background, iframe
-			utils.append('iframe', { src : url, style : {position:'absolute',left:"-1000px",bottom:0,height:'1px',width:'1px'} }, 'body');
+			utils.iframe(url);
 		}
 
 
@@ -452,14 +452,18 @@ hello.utils.extend( hello, {
 	// @param string name of the service
 	// @param function callback
 	//
-	logout : function(s, callback){
-
-		var p = this.utils.args({name:'s', callback:"f" }, arguments);
+	logout : function(){
 
 		// Create self
 		// An object which inherits its parent as the prototype.
 		// And constructs a new event chain.
 		var self = this.use();
+
+		var utils = self.utils;
+
+		var p = utils.args({name:'s', options: 'o', callback:"f" }, arguments);
+
+		p.options = p.options || {};
 
 		// Add callback to events
 		self.on('complete', p.callback);
@@ -467,22 +471,53 @@ hello.utils.extend( hello, {
 		// Netowrk
 		p.name = p.name || self.settings.default_service;
 
+
 		if( p.name && !( p.name in self.services ) ){
 			self.emitAfter("complete error", {error:{
 				code : 'invalid_network',
 				message : 'The network was unrecognized'
 			}});
-			return self;
 		}
-		if(p.name && self.utils.store(p.name)){
+		else if(p.name && utils.store(p.name)){
 
-			// Trigger a logout callback on the provider
-			if(typeof(self.services[p.name].logout) === 'function'){
-				self.services[p.name].logout(p);
+			// Define the callback
+			var callback = function(opts){
+
+				// Remove from the store
+				self.utils.store(p.name,'');
+
+				// Emit events by default
+				self.emitAfter("complete logout success auth.logout auth", hello.utils.merge( {network:p.name}, opts || {} ) );
+			};
+
+			//
+			// Run an async operation to remove the users session
+			// 
+			var _opts = {};
+			if(p.options.force){
+				var logout = self.services[p.name].logout;
+				if( logout ){
+					// Convert logout to URL string,
+					// If no string is returned, then this function will handle the logout async style
+					if(typeof(logout) === 'function' ){
+						logout = logout(callback);
+					}
+					// If logout is a string then assume URL and open in iframe.
+					if(typeof(logout)==='string'){
+						utils.iframe( logout );
+						_opts.force = null;
+						_opts.message = "Logout success on providers site was indeterminate";
+					}
+					else if(logout === undefined){
+						// the callback function will handle the response.
+						return self;
+					}
+				}
 			}
 
-			// Remove from the store
-			self.utils.store(p.name,'');
+			//
+			// Remove local credentials
+			callback(_opts);
 		}
 		else if(!p.name){
 			for(var x in self.services){if(self.services.hasOwnProperty(x)){
@@ -497,11 +532,7 @@ hello.utils.extend( hello, {
 				code : 'invalid_session',
 				message : 'There was no session to remove'
 			}});
-			return self;
 		}
-
-		// Emit events by default
-		self.emitAfter("complete logout success auth.logout auth", {network:p.name});
 
 		return self;
 	},
@@ -729,6 +760,15 @@ hello.utils.extend( hello.utils, {
 			document.getElementsByTagName(target)[0].appendChild(n);
 		}
 		return n;
+	},
+
+	//
+	// create IFRAME
+	// An easy way to create a hidden iframe
+	// @param string src
+	//
+	iframe : function(src){
+		this.append('iframe', { src : src, style : {position:'absolute',left:"-1000px",bottom:0,height:'1px',width:'1px'} }, 'body');
 	},
 
 	//
@@ -2726,6 +2766,25 @@ hello.init({
 			auth : 'https://www.facebook.com/dialog/oauth/'
 		},
 
+		logout : function(callback){
+			// Assign callback to a global handler
+			var callbackID = hello.utils.globalEvent( callback );
+			var redirect = encodeURIComponent( hello.settings.redirect_uri + "?" + hello.utils.param( { callback:callbackID, result : JSON.stringify({force:true}), state : '{}' } ) );
+			var token = (hello.utils.store('facebook')||{}).access_token;
+			hello.utils.iframe( 'https://www.facebook.com/logout.php?next='+ redirect +'&access_token='+ token );
+
+			// Possible responses
+			// String URL	- hello.logout should handle the logout
+			// undefined	- this function will handle the callback
+			// true			- throw a success, this callback isn't handling the callback
+			// false		- throw a error
+			
+			if(!token){
+				// if there isn't a token, the above wont return a response, so lets trigger a response
+				return false;
+			}
+		},
+
 		// Authorization scopes
 		scope : {
 			basic			: '',
@@ -2844,7 +2903,6 @@ function getApiUrl(method, extra_params, skip_network){
 
 // this is not exactly neat but avoid to call
 // the method 'flickr.test.login' for each api call
-var user_id;
 
 function withUser(cb){
 
@@ -2853,14 +2911,10 @@ function withUser(cb){
 	if(auth&&auth.user_nsid){
 		cb(auth.user_nsid);
 	}
-	else if(user_id){
-		cb(user_id);
-	}
 	else{
 		hello.api(getApiUrl("flickr.test.login"), function(userJson){
 			// If the
-			user_id = checkResponse(userJson, "user").id;
-			cb(user_id);
+			cb( checkResponse(userJson, "user").id );
 		});
 	}
 }
@@ -2973,11 +3027,6 @@ hello.init({
 			auth	: "http://www.flickr.com/services/oauth/authorize?perms=read",
 			request : 'http://www.flickr.com/services/oauth/request_token',
 			token	: 'http://www.flickr.com/services/oauth/access_token'
-		},
-
-		logout : function(){
-			// Function is executed when the user logs out.
-			user_id = null;
 		},
 
 		// AutoRefresh
@@ -4473,6 +4522,10 @@ hello.init({
 		oauth : {
 			version : 2,
 			auth : 'https://login.live.com/oauth20_authorize.srf'
+		},
+
+		logout : function(){
+			return 'http://login.live.com/oauth20_logout.srf?ts='+(new Date()).getTime();
 		},
 
 		// Authorization scopes

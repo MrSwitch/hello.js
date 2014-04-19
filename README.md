@@ -294,7 +294,7 @@ If a network string is provided: A consent window to authenticate with that netw
 
 Remove all sessions or individual sessions.
 
-### hello.logout( [network] [, callback() ] )
+### hello.logout( [network] [, options ] [, callback() ] )
 
 <table>
 	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
@@ -302,6 +302,24 @@ Remove all sessions or individual sessions.
 	<tr><td>network</td><td><i>string</i></td><td><q>windows</q>, <q>facebook</q></td><td>One of our services.</td><td>
 		<em>optional</em></td><td>
 		<em>null</em></td></tr>
+	<tr>
+
+		<td>options</td><td colspan="5"><i>object</i>
+
+		<table>
+			<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
+				argument</th><th>default</th></tr>
+			<tr>
+				<td>force</td>
+				<td><i>boolean</i></td>
+				<td><i>true</i></td>
+				<td>If set to true, the user will be logged out of the providers site as well as the local application. By default the user will still be signed into the providers site.</td>
+				<td><em>optional</em></td>
+				<td><i>false</i></td>
+			</tr>
+		</table>
+
+	</td></tr>
 	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert("Logged 
 		in!");}</code></td><td>
 		A callback when the users session has been initiated</td><td>
