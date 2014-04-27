@@ -296,11 +296,13 @@ hello.utils.extend( hello, {
 		// Append scopes from a previous session
 		// This helps keep app credentials constant,
 		// Avoiding having to keep tabs on what scopes are authorized
-		if(session && "scope" in session){
-			scope += ","+session.scope.join(",");
+		if(session && "scope" in session && session.scope instanceof String){
+			scope += ","+ session.scope;
 		}
+
 		// Save in the State
-		p.qs.state.scope = utils.unique( scope.split(/[,\s]+/) );
+		// Convert to a string because IE, has a problem moving Arrays between windows
+		p.qs.state.scope = unique( scope.split(/[,\s]+/) ).join(',');
 
 		// Map replace each scope with the providers default scopes
 		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m){
@@ -429,7 +431,7 @@ hello.utils.extend( hello, {
 			popup.focus();
 
 			var timer = setInterval(function(){
-				if(popup.closed){
+				if(popup&&popup.closed){
 					clearInterval(timer);
 					if(!responded){
 						self.emit("complete failed error", {error:{code:"cancelled", message:"Login has been cancelled"}, network:p.network });
