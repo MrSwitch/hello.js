@@ -808,11 +808,11 @@ described below.</p>
 
 <h2>OAuth Proxy</h2>
 
-<p>Services which rely on the OAuth 1 authentication method require a server side handshake with the secret key - this is unlike client-side OAuth 2 which doesn't need a secret and verifies the app based on the redirect_uri property.</p>
+<p>Services which rely on the OAuth 1 or OAuth2 token exchange authentication methods require a server side handshake with the secret key. This is unlike client-side OAuth 2 which doesn't need a secret and verifies the app based on the redirect_uri property.</p>
 
-<p>Making HelloJS work with OAuth1 endpoints requires a proxy server to authorize the user and sign subsequent requests. As a shim HelloJS uses a service hosted at <a href="http://auth-server.herokuapp.com/">http://auth-server.herokuapp.com/</a> developers may add their own network registration AppID/client_id and secret to this service in order to easily get started.</p>
+<p>Making HelloJS work with secret keys requires a web services where the secret key is used to authorize the user and sign subsequent API requests in the case of OAuth1. As a shim HelloJS uses a service hosted at <a href="http://auth-server.herokuapp.com/">http://auth-server.herokuapp.com/</a>. Developers may add their own network registration AppID/client_id and secret to this service in order to get up and running.</p>
 
-<p>The aforementioned service uses <a href="https://npmjs.org/package/oauth-shim">//node-oauth-shim</a>, so go <code>npm install oauth-shim</code> that for your own deployment.</p>
+<p>The aforementioned service uses <a href="https://npmjs.org/package/oauth-shim">//node-oauth-shim</a>, so if you want to roll your own please look there for installation instructions and usage. Override the default path for this service in HelloJS at the point of calling hello.init, e.g. `hello.init(credentials, {oauth_proxy:'//path/to/oauth-shim-proxy'})`.</p>
 
 
 <h2>Browser Support</h2>
@@ -864,6 +864,12 @@ used - because of the XD, IFrame+Form+hack.</li>
 
 </ol>
 
+
+<h2>Phonegap Support</h2>
+
+<p>HelloJS can also be run on phonegap applications. Checkout the demo <a href="https://github.com/MrSwitch/hellojs-phonegap-demo">hellojs-phonegap-demo</a></p>
+
+
 <h2>Contributing</h2>
 
 <p><b>"No, It's perfect!"</b>.... If you believe that then give it a <a href="https://github.com/MrSwitch/hello.js">star</a>.</p>
@@ -883,6 +889,7 @@ used - because of the XD, IFrame+Form+hack.</li>
 
 	# run continuous integration tests
 	npm test
+
 </pre>
 
 <p>Open a couple of browsers with the given URL (e.g. it'll say "Karma v0.9.8 server started at http://localhost:9876/"). The tests are triggered when the code is modified</p>

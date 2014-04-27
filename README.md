@@ -197,28 +197,53 @@ Initiate the environment. And add the application credentials
 
 <table>
 	<thead>
-	<tr><th>name</th><th>type</th></tr>
+		<tr>
+			<th>name</th>
+			<th>type</th>
+		</tr>
 	</thead>
 	<tbody>
-		<tr><td>credentials</td><td>
-	<i>object( key =&gt; value, ...&nbsp; )</i>
-	<table>
-		<thead>
-		<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
-			argument</th><th>default</th></tr>
-		</thead>
-		<tbody>
-		<tr><td>key</td><td><i>string</i></td><td><q>windows</q>, <q>facebook</q> or <q>google</q></td><td>
-			App name"s</td><td><em>required</em></td><td>n/a</td></tr>
-		<tr><td>value</td><td><i>string</i></td><td>
-			<q>0000000AB1234</q></td><td>ID of the service to connect to</td><td>
-			<em>required</em></td><td>n/a</td></tr>
-		</tbody>
-	</table>
-	</td></tr>
-	<tr><td>options</td><td>
-	set's default <i>options</i>, as in hello.login()</i>
-	</td></tr>
+		<tr>
+			<td>credentials</td>
+			<td><i>object( key =&gt; value, ...&nbsp; )</i>
+
+				<table>
+					<thead>
+						<tr>
+							<th>name</th>
+							<th>type</th>
+							<th>example</th>
+							<th>description</th>
+							<th>argument</th>
+							<th>default</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>key</td>
+							<td><i>string</i></td>
+							<td><q>windows</q>, <q>facebook</q> or <q>google</q></td>
+							<td>App name"s</td>
+							<td><em>required</em></td>
+							<td>n/a</td>
+						</tr>
+						<tr>
+							<td>value</td>
+							<td><i>string</i></td>
+							<td><q>0000000AB1234</q></td>
+							<td>ID of the service to connect to</td>
+							<td><em>required</em></td>
+							<td>n/a</td>
+						</tr>
+					</tbody>
+				</table>
+
+			</td>
+		</tr>
+		<tr>
+			<td>options</td>
+			<td>set's default <i>options</i>, as in hello.login()</i></td>
+		</tr>
 	</tbody>
 </table>
 
@@ -240,43 +265,89 @@ If a network string is provided: A consent window to authenticate with that netw
 ### hello.login( [network] [,options] [, callback() ] )
 
 <table>
-	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
-		argument</th><th>default</th></tr>
-	<tr><td>network</td><td><i>string</i></td><td><q>windows</q>, <q>facebook</q></td><td>One of our services.</td><td>
-		<em>required</em></td><td>
-		<em>null</em></td></tr>
-	<tr><td>options</td><td colspan="5">
-		<i>object</i>
-		<table>
-			<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
-				argument</th><th>default</th></tr>
-			<tr><td>display</td><td><i>string</i></td><td><q>popup</q>, <q>page</q> or <q>none</q></td><td>
-				How the signin flow should work, "none" is used to refresh the access_token in the background</td><td>
-				<em>optional</em></td><td>
-				<q>popup</q></td></tr>
-			<tr><td>scope</td><td><i>string</i></td><td><q>email</q>, <q>publish</q> or <q>photos</q></td><td>
-				Comma separated list of <a href="#scope">scopes</a></td><td>
-				<em>optional</em></td><td>
-				<em>null</em></td></tr>
-			<tr><td>redirect_uri</td><td><i>string</i></td><td><q><a href="redirect.html" target="_blank">redirect.html</a></q></td><td>
-				A full or relative URI of a page which includes this script file hello.js</td><td>
-				<em>optional</em></td><td>
-				<em>window.location.href</em></td></tr>
-			<tr><td>response_type</td><td><i>string</i></td><td><q>token</q>, <q>code</q></td><td>
-				Mechanism for skipping auth flow</td><td>
-				<em>optional</em></td><td>
-				<q>token</q></td></tr>
-			<tr><td>force</td><td><i>Boolean</i></td><td><i>false</i>: return current session else initiate auth flow; <i>true</i>: Always initiate auth flow</td><td>
-				Mechanism for authentication</td><td>
-				<em>optional</em></td><td>
-				<i>true</i></td></tr>
-		</table>
-	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert("Logged 
-		in!");}</code></td><td>
-		A callback when the users session has been initiated</td><td>
-		<em>optional</em></td><td>
-		<em>null</em></td></tr>
-	</td></tr>
+	<tr>
+		<th>name</th>
+		<th>type</th>
+		<th>example</th>
+		<th>description</th>
+		<th>argument</th>
+		<th>default</th>
+	</tr>
+	<tr>
+		<td>network</td>
+		<td><i>string</i></td>
+		<td><q>windows</q>, <q>facebook</q></td>
+		<td>One of our services.</td>
+		<td><em>required</em></td>
+		<td><em>null</em></td>
+	</tr>
+	<tr>
+		<td>options</td>
+		<td colspan="5"><i>object</i>
+
+			<table>
+				<tr>
+					<th>name</th>
+					<th>type</th>
+					<th>example</th>
+					<th>description</th>
+					<th>argument</th>
+					<th>default</th>
+				</tr>
+				<tr>
+					<td>display</td>
+					<td><i>string</i></td>
+					<td><q>popup</q>, <q>page</q> or <q>none</q></td>
+					<td>How the signin flow should work, "none" is used to refresh the access_token in the background</td>
+					<td><em>optional</em></td>
+					<td><q>popup</q></td>
+				</tr>
+				<tr>
+					<td>scope</td>
+					<td><i>string</i></td>
+					<td><q>email</q>, <q>publish</q> or <q>photos</q></td>
+					<td>Comma separated list of <a href="#scope">scopes</a></td>
+					<td><em>optional</em></td>
+					<td><em>null</em></td></tr>
+				<tr>
+					<td>redirect_uri</td>
+					<td><i>string</i></td>
+					<td><q><a href="redirect.html" target="_blank">redirect.html</a></q></td>
+					<td>
+					A full or relative URI of a page which includes this script file hello.js</td>
+					<td>
+					<em>optional</em></td>
+					<td>
+					<em>window.location.href</em></td>
+				</tr>
+				<tr>
+					<td>response_type</td>
+					<td><i>string</i></td>
+					<td><q>token</q>, <q>code</q></td>
+					<td>Mechanism for skipping auth flow</td>
+					<td><em>optional</em></td>
+					<td><q>token</q></td>
+				</tr>
+				<tr>
+					<td>force</td>
+					<td><i>Boolean</i></td>
+					<td><i>false</i>: return current session else initiate auth flow; <i>true</i>: Always initiate auth flow</td>
+					<td>Mechanism for authentication</td>
+					<td><em>optional</em></td>
+					<td><i>true</i></td>
+				</tr>
+			</table>
+
+		</td>
+	</tr>
+	<tr>
+		<td>callback</td>
+		<td><i>function</i></td>
+		<td><code>function(){alert("Logged in!");}</code></td>
+		<td>A callback when the users session has been initiated</td>
+		<td><em>optional</em></td>
+		<td><em>null</em></td>
+	</tr>
 </table>
 
 ### Examples:
@@ -297,34 +368,73 @@ Remove all sessions or individual sessions.
 ### hello.logout( [network] [, options ] [, callback() ] )
 
 <table>
-	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
-		argument</th><th>default</th></tr>
-	<tr><td>network</td><td><i>string</i></td><td><q>windows</q>, <q>facebook</q></td><td>One of our services.</td><td>
-		<em>optional</em></td><td>
-		<em>null</em></td></tr>
 	<tr>
+		<th>name</th>
+		<th>type</th>
+		<th>example</th>
+		<th>description</th>
+		<th>argument</th>
+		<th>default</th>
 
-		<td>options</td><td colspan="5"><i>object</i>
+	</tr>
+	<tr>
+		<td>network</td>
+		<td><i>string</i></td>
+		<td>
+			<q>windows</q>,
+			<q>facebook</q>
+		</td>
+		<td>One of our services.</td>
+		<td>
+			<em>optional</em>
+		</td>
+		<td>
+			<em>null</em>
+		</td>
+	</tr>
+	<tr>
+		<td>options</td>
+		<td colspan="5"><i>object</i>
 
-		<table>
-			<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
-				argument</th><th>default</th></tr>
-			<tr>
-				<td>force</td>
-				<td><i>boolean</i></td>
-				<td><i>true</i></td>
-				<td>If set to true, the user will be logged out of the providers site as well as the local application. By default the user will still be signed into the providers site.</td>
-				<td><em>optional</em></td>
-				<td><i>false</i></td>
-			</tr>
-		</table>
+			<table>
+				<tr>
+					<th>name</th>
+					<th>type</th>
+					<th>example</th>
+					<th>description</th>
+					<th>argument</th>
+					<th>default</th>
+				</tr>
+				<tr>
+					<td>force</td>
+					<td><i>boolean</i></td>
+					<td><i>true</i></td>
+					<td>If set to true, the user will be logged out of the providers site as well as the local application. By default the user will still be signed into the providers site.</td>
+					<td>
+						<em>optional</em>
+					</td>
+					<td><i>false</i></td>
+				</tr>
+			</table>
 
-	</td></tr>
-	<tr><td>callback</td><td><i>function</i></td><td><code>function(){alert("Logged 
-		in!");}</code></td><td>
-		A callback when the users session has been initiated</td><td>
-		<em>optional</em></td><td>
-		<em>null</em></td></tr>
+		</td>
+	</tr>
+	<tr>
+		<td>callback</td>
+		<td><i>function</i></td>
+		<td>
+			<code>function(){alert("Logged in!");}
+			</code>
+		</td>
+		<td>
+			A callback when the users session has been initiated</td>
+		<td>
+			<em>optional</em>
+		</td>
+		<td>
+			<em>null</em>
+		</td>
+	</tr>
 </table>
 
 ### Example:
@@ -345,11 +455,22 @@ Get the current status of the session, this is an synchronous request and does n
 ### hello.getAuthResponse( network );
 
 <table>
-	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
-		argument</th><th>default</th></tr>
-	<tr><td>network</td><td><i>string</i></td><td><q>windows</q>, <q>facebook</q></td><td>One of our services.</td><td>
-		<em>optional</em></td><td>
-		<em>current</em></td></tr>
+	<tr>
+		<th>name</th>
+		<th>type</th>
+		<th>example</th>
+		<th>description</th>
+		<th>argument</th>
+		<th>default</th>
+	</tr>
+	<tr>
+		<td>network</td>
+		<td><i>string</i></td>
+		<td><q>windows</q>, <q>facebook</q></td>
+		<td>One of our services.</td>
+		<td><em>optional</em></td>
+		<td><em>current</em></td>
+	</tr>
 </table>
 
 ### Examples:
@@ -375,22 +496,81 @@ Make calls to the API for getting and posting data
 ### hello.api( [ path ], [ method ], [ data ], [ callback(json) ] )
 
 <table>
-	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
-		argument</th><th>default</th></tr>
-	<tr><td>path</td><td><i>string</i></td><td><q>/me</q>, <q>/me/friends</q></td><td>Path or URI of the resource. See <a href="#REST API">REST API</a>, 
-		Can be prefixed with the name of the service</td><td>
-		<em>required</em></td><td>null</td></tr>
-	<tr><td>method</td><td><q>get</q>, <q>post</q>, <q>delete</q>, <q>put</q></td><td>See<em> type</em></td><td>HTTP request method to use. 
-		</td><td><em>optional</em></td><td><q>get</q></td></tr>
-	<tr><td>data</td><td><i>object</i></td><td><code>{name: <q>Hello</q>, description: <q>Fandelicious</q>}</td><td>
-		A JSON object of data, FormData, HTMLInputElement, HTMLFormElment to be sent along with a <q>get</q>, <q>post</q> or <q>put</q> request</td><td>
-		<em>optional</em></td><td>
-		<em>null</em></td></tr>
-	<tr><td>callback</td><td><i>function</i></td><td><code>function(json){console.log(json);}</code></td><td>
-		A function to call with the body of the response returned in the first 
-		parameter as an object, else boolean false</td><td>
-		<em>optional</em></td><td>
-		<em>null</em></td></tr>
+	<tr>
+		<th>name</th>
+		<th>type</th>
+		<th>example</th>
+		<th>description</th>
+		<th>argument</th>
+		<th>default</th>
+	</tr>
+	<tr>
+		<td>path</td>
+		<td><i>string</i></td>
+		<td>
+			<q>/me</q>,
+			<q>/me/friends</q>
+		</td>
+		<td>Path or URI of the resource. See <a href="#REST API">REST API</a>, Can be prefixed with the name of the service</td>
+		<td>
+			<em>required</em>
+		</td>
+		<td>null</td>
+	</tr>
+	<tr>
+		<td>method</td>
+		<td>
+			<q>get</q>,
+			<q>post</q>,
+			<q>delete</q>,
+			<q>put</q>
+		</td>
+		<td>See
+			<em>type</em>
+		</td>
+		<td>HTTP request method to use.</td>
+		<td>
+			<em>optional</em>
+		</td>
+		<td>
+			<q>get</q>
+		</td>
+	</tr>
+	<tr>
+		<td>data</td>
+		<td><i>object</i></td>
+		<td>
+			<code>{name:<q>Hello</q>, description:<q>Fandelicious</q>}</code>
+		</td>
+		<td>
+			A JSON object of data, FormData, HTMLInputElement, HTMLFormElment to be sent along with a
+			<q>get</q>,
+			<q>post</q>or
+			<q>put</q>request
+		</td>
+		<td>
+			<em>optional</em>
+		</td>
+		<td>
+			<em>null</em>
+		</td>
+	</tr>
+	<tr>
+		<td>callback</td>
+		<td><i>function</i></td>
+		<td>
+			<code>function(json){console.log(json);}</code>
+		</td>
+		<td>
+			A function to call with the body of the response returned in the first parameter as an object, else boolean false
+		</td>
+		<td>
+			<em>optional</em>
+		</td>
+		<td>
+			<em>null</em>
+		</td>
+	</tr>
 </table>
 
 
@@ -542,28 +722,58 @@ described below.
 
 <table>
 	<thead>
-		<tr><th>name</th><th>type</th></tr>
+		<tr>
+			<th>name</th>
+			<th>type</th>
+		</tr>
 	</thead>
 	<tbody>
-	<tr><td>error</td><td><i>object</i>
-<table>
-	<thead>
-	<tr><th>name</th><th>type</th><th>example</th><th>description</th><th>
-		argument</th><th>default</th></tr>
-	</thead>
-	<tbody>
-	<tr><td>code</td><td><i>string</i></td><td>
-		<q>request_token_unauthorized</q></td><td>Code</td><td>
-		<em>required</em></td><td>n/a</td></tr>
-	<tr><td>message</td><td><i>string</i></td><td class="auto-style2">The 
-		provided access token....</td><td>
-		Error message</td><td><em>required</em></td><td>n/a</td></tr>
+		<tr>
+			<td>error</td>
+			<td><i>object</i>
+				<table>
+					<thead>
+						<tr>
+							<th>name</th>
+							<th>type</th>
+							<th>example</th>
+							<th>description</th>
+							<th>argument</th>
+							<th>default</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>code</td>
+							<td><i>string</i></td>
+							<td>
+								<q>request_token_unauthorized</q>
+							</td>
+							<td>Code</td>
+							<td>
+								<em>required</em>
+							</td>
+							<td>n/a</td>
+						</tr>
+						<tr>
+							<td>message</td>
+							<td><i>string</i></td>
+							<td class="auto-style2">The provided access token....</td>
+							<td>
+								Error message</td>
+							<td>
+								<em>required</em>
+							</td>
+							<td>n/a</td>
+						</tr>
+					</tbody>
+				</table>
+
+			</td>
+		</tr>
 	</tbody>
 </table>
 
-
-
-</table>
 
 
 ## Extending the services
@@ -571,11 +781,11 @@ Services are added to HelloJS as "modules" for more information about creating y
 
 ## OAuth Proxy
 
-Services which rely on the OAuth 1 authentication method require a server side handshake with the secret key - this is unlike client-side OAuth 2 which doesn't need a secret and verifies the app based on the redirect_uri property.
+Services which rely on the OAuth 1 or OAuth2 token exchange authentication methods require a server side handshake with the secret key. This is unlike client-side OAuth 2 which doesn't need a secret and verifies the app based on the redirect_uri property.
 
-Making HelloJS work with OAuth1 endpoints requires a proxy server to authorize the user and sign subsequent requests. As a shim HelloJS uses a service hosted at [http://auth-server.herokuapp.com/](http://auth-server.herokuapp.com/) developers may add their own network registration AppID/client_id and secret to this service in order to easily get started.
+Making HelloJS work with secret keys requires a web services where the secret key is used to authorize the user and sign subsequent API requests in the case of OAuth1. As a shim HelloJS uses a service hosted at [http://auth-server.herokuapp.com/](http://auth-server.herokuapp.com/). Developers may add their own network registration AppID/client_id and secret to this service in order to get up and running.
 
-The aforementioned service uses [//node-oauth-shim](https://npmjs.org/package/oauth-shim), so go `npm install oauth-shim` that for your own deployment.
+The aforementioned service uses [//node-oauth-shim](https://npmjs.org/package/oauth-shim), so if you want to roll your own please look there for installation instructions and usage. Override the default path for this service in HelloJS at the point of calling hello.init, e.g. `hello.init(credentials, {oauth_proxy:'//path/to/oauth-shim-proxy'})`.
 
 
 ## Browser Support
@@ -627,6 +837,12 @@ used - because of the XD, IFrame+Form+hack.
 
 
 
+
+## Phonegap Support
+
+HelloJS can also be run on phonegap applications. Checkout the demo [hellojs-phonegap-demo](https://github.com/MrSwitch/hellojs-phonegap-demo)
+
+
 ## Contributing
 
 **"No, It's perfect!"**.... If you believe that then give it a [star](https://github.com/MrSwitch/hello.js).
@@ -637,18 +853,21 @@ HelloJS is constantly evolving, as are the services which it connects too. So if
 
 
 ### Changing code?
-Please adopt the continuous integration tests.
+Please adopt the tests.
+
 
 
 	# Using NodeJS on your dev environment
 	# cd into the project root and install dev dependencies 
 	npm install -l
 
-	# run continuous integration tests
-	npm test
+	# run tests in phantomjs
+	grunt test
 
 
-Open a couple of browsers with the given URL (e.g. it'll say "Karma v0.9.8 server started at http://localhost:9876/"). The tests are triggered when the code is modified
+~~Open a couple of browsers with the given URL (e.g. it'll say "Karma v0.9.8 server started at http://localhost:9876/"). The tests are triggered when the code is modified~~
+
+
 
 
 
