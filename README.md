@@ -137,7 +137,7 @@ Register your application with atleast one of the following networks. Ensure you
 - [FaceBook](http://developers.facebook.com/docs/reference/dialogs/oauth/)
 -->
 - [FaceBook](https://developers.facebook.com/apps)
-- [Windows Live](https://manage.dev.live.com/)
+- [Windows Live](http://dev.live.com/) (click on dashboard)
 - [Google +](https://code.google.com/apis/console/b/0/#:access)
 
 
