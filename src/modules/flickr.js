@@ -48,7 +48,7 @@ function sign(url, params){
 
 
 function getBuddyIcon(profile, size){
-	var url="http://www.flickr.com/images/buddyicon.gif";
+	var url="https://www.flickr.com/images/buddyicon.gif";
 	if (profile.nsid && profile.iconserver && profile.iconfarm){
 		url="https://farm" + profile.iconfarm + ".staticflickr.com/" +
 			profile.iconserver + "/" +

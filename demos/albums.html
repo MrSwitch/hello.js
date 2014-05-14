@@ -4,12 +4,13 @@
 <script src="client_ids.js"></script>
 <style>
 img{
-	position: fixed;
-	top:0;
-	left:50%;
-	width:200px;
+	width:50%;
 	border:1px solid #ccc;
-	padding:10px;
+	padding:1%;
+	display: inline-block;
+	float:left;
+	vertical-align: top;
+	background-color: white;
 }
 img:nth-child(2n){
 	-webkit-transform:rotate(10deg);
@@ -23,36 +24,56 @@ img:nth-child(3n){
 	-ms-transform:rotate(-10deg);
 	transform:rotate(-10deg);
 }
+
+.demo{
+	max-height:500px;
+}
+.column{
+	display:inline-block;
+	width:33%;
+	padding:0.3%;
+}
+div.column{
+	height:300px;
+	overflow: auto;
+	background-color: #eee;
+	border: 2px solid white;
+}
+.column button{
+	width:100%;
+}
+
 </style>
 
 <h1>Load album photos with Hello.js</h1>
 
-<blockquote>
+<h2>Demo</h2>
 
-	<h2>Signin</h2>
+<div class="demo">
 
-	<button id="windows" onclick="hello.login('windows');">Login Windows</button>
-	<button id="facebook" onclick="hello.login('facebook');">Login Facebook</button>
-	<button id="google" onclick="hello.login('google');">Login Google</button>
+	<b class="column">Provider</b>
+	<b class="column">Albums</b>
+	<b class="column">Photos</b>
+	<br />
+	<div class="column">
+		<button id="windows" onclick="getAlbums('windows')">Get Albums from Windows</button>
+		<button id="facebook" onclick="getAlbums('facebook')">Get Albums from Facebook</button>
+		<button id="google" onclick="getAlbums('google')">Get Albums from Google</button>
+	</div><div class="column" id="albums">
+	</div><div class="column" id="photos">
+	</div>
+</div>
 
-	<h2>Select an album to load</h2>
 
-	<select id="albums"></select>
+<h2>Source</h2>
 
-	<button type="button" onclick="getPhotos()">Get Photos</button>
-	<div id="result"></div>
-</blockquote>
+<p>Include helloJS in a script tag</p>
+<script src="../dist/hello.all.js" class="pre"></script>
 
-<p>Include hello.js + modules</p>
-<script class="pre" src="../src/hello.js"></script>
-<script class="pre" src="../src/modules/windows.js"></script>
-<script class="pre" src="../src/modules/facebook.js"></script>
-<script class="pre" src="../src/modules/google.js"></script>
-
-<p>Listener: On login authenticated. Request users profile + Albums. </p>
+<p>Setup a listener</p>
 
 <script class="pre">
-// Windows Live
+// Get User
 hello.on('auth.login', function(auth){
 
 	// Get Profile
@@ -60,59 +81,15 @@ hello.on('auth.login', function(auth){
 		if(!r||r.error){
 			return;
 		}
-		document.getElementById(auth.network).innerHTML = "Connected to "+auth.network+" as " + r.name;
-	});
-
-	// Get albums
-	hello.api(auth.network+':me/albums', function(r){
-
-		if(!r||r.error){
-			console.error("Could not open albums from "+auth.network+", try resigning in");
-			return;
-		}
-
-		var grp = document.createElement('optgroup');
-		grp.label = auth.network;
-		document.getElementById('albums').appendChild(grp);
-
-		for(var i=0;i<r.data.length;i++){
-			var o = document.createElement('option');
-			o.value = auth.network+":"+ ( r.data[i].photos || r.data[i].id );
-			o.innerHTML = r.data[i].name;
-			grp.appendChild(o);
-		}
-
+		document.getElementById(auth.network).innerHTML = "Get Albums from " + r.name + " at "+auth.network+"";
 	});
 });
 </script>
 
-<p>On album selected: Load photos</p>
 
-<script class="pre">
-function getPhotos(){
-	if(!document.getElementById('albums').value){
-		alert("Please signin and wait for an album content to load");
-	}
-	hello.api(document.getElementById('albums').value, function(r){
-		if(r.error){
-			alert(r.error.message);
-			return;
-		}
-		// Create a new image in the DOM, give it some randomness and insert it into the dom.
-		for(var i=0;i<r.data.length;i++){
-			var obj = r.data[i];
-			var img = document.createElement('img');
-			img.src = obj.thumbnail;
-			img.style.top = (parseInt(Math.random()*85,10))+'%';
-			img.style.left = (50+parseInt(Math.random()*50,10))+'%';
-			document.body.appendChild(img);
-		}		
-	});
-}
-</script>
+<h3>Initiate HelloJS</h3>
+<p>Plug the app keys (client_id')</p>
 
-
-<p>Plug the app keys (client_id') and voila</p>
 <script class="pre">
 
 // Initiate hellojs
@@ -121,3 +98,124 @@ hello.init( CLIENT_IDS, {
 	redirect_uri : "../redirect.html"
 });
 </script>
+
+
+
+<h3>Get Albums</h3>
+
+<script class="pre">
+
+function getAlbums(network){
+
+	// Target where to put the list of albums
+	var list = document.getElementById('albums');
+	list.innerHTML = ''; // flush its content
+
+	//
+	// Setting force:false means we'll only trigger auth flow if the user is not already signed in with the correct credentials
+	hello( network ).login({
+		force:false
+	},function(auth){
+
+		// Get albums
+		hello.api( network+':me/albums', function(r){
+
+			if(!r||r.error){
+				message(list, "Could not open albums from "+network+", try resigning in");
+				return;
+			}
+			else if(!r.data||r.data.length===0){
+				message(list, "There are no albums in the users account");
+				return
+			}
+
+			// Build buttons with the albums
+			for(var i=0;i<r.data.length;i++){
+				buildAlbumBtn( r.data[i], network );
+			}
+		});
+	});
+
+}
+</script>
+
+<h3>Album button control</h3>
+
+<script class="pre">
+
+
+// Create a button selecting the album
+function buildAlbumBtn(item, network){
+
+	// Target where to put the list of albums
+	var list = document.getElementById('albums');
+
+	// construct the button
+	var o = document.createElement('button');
+	o.innerHTML = item.name;
+
+	// Add the controls
+	o.onclick = function(){
+		// Trigger get 
+		getPhotos( network, item.id );
+	};
+
+	// Append to the list
+	list.appendChild(o);
+}
+</script>
+
+<h3>Get Photos</h3>
+
+<script class="pre">
+function getPhotos(network, id){
+
+	var list = document.getElementById('photos');
+	list.innerHTML = ''; // flush its content
+
+
+	hello( network ).api('me/album', {
+		id: id,
+		limit:10
+	}, function(r){
+		if(r.error){
+			message(list, r.error.message);
+			return;
+		}
+		else if(!r.data||r.data.length===0){
+			message(list, "There are no photos in this album");
+			return
+		}
+
+		// Create a new image in the DOM, give it some randomness and insert it into the dom.
+		for(var i=0;i<r.data.length;i++){
+			buildPhotoThumnail( r.data[i] );
+		}		
+	});
+}
+</script>
+
+<h3>Create photo thumbnail</h3>
+
+<script class="pre">
+function buildPhotoThumnail(item){
+
+	var list = document.getElementById('photos');
+
+	var o = document.createElement('img');
+	o.src = item.thumbnail;
+	o.title = item.name;
+
+	// Append to the list
+	list.appendChild(o);
+}
+
+</script>
+
+<script>
+// Report any notifications to the containing element
+function message(target, str){
+	target.appendChild(document.createTextNode(str));
+}
+</script>
+
