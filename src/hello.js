@@ -287,10 +287,10 @@ hello.utils.extend( hello, {
 		// SCOPES
 		// Authentication permisions
 		//
-		var scope = opts.scope;
-		if(scope && typeof(scope)!=='string'){
-			scope = scope.join(',');
-		}
+		
+		// convert any array, or falsy value to a string.
+		var scope = (opts.scope||'').toString();
+
 		scope = (scope ? scope + ',' : '') + p.qs.scope;
 
 		// Append scopes from a previous session
@@ -302,7 +302,7 @@ hello.utils.extend( hello, {
 
 		// Save in the State
 		// Convert to a string because IE, has a problem moving Arrays between windows
-		p.qs.state.scope = unique( scope.split(/[,\s]+/) ).join(',');
+		p.qs.state.scope = hello.utils.unique( scope.split(/[,\s]+/) ).join(',');
 
 		// Map replace each scope with the providers default scopes
 		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m){
@@ -1733,7 +1733,7 @@ hello.api = function(){
 				}
 
 				// Does this provider have a custom method?
-				if("api" in o && o.api( url, p, {access_token:session.access_token}, callback ) ){
+				if("api" in o && o.api( url, p, (session && session.access_token ? {access_token:session.access_token} : {}), callback ) ){
 					return;
 				}
 
