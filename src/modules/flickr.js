@@ -50,7 +50,7 @@ function sign(url, params){
 function getBuddyIcon(profile, size){
 	var url="http://www.flickr.com/images/buddyicon.gif";
 	if (profile.nsid && profile.iconserver && profile.iconfarm){
-		url="http://farm" + profile.iconfarm + ".staticflickr.com/" +
+		url="https://farm" + profile.iconfarm + ".staticflickr.com/" +
 			profile.iconserver + "/" +
 			"buddyicons/" + profile.nsid +
 			((size) ? "_"+size : "") + ".jpg";
@@ -60,7 +60,7 @@ function getBuddyIcon(profile, size){
 
 function getPhoto(id, farm, server, secret, size){
 	size = (size) ? "_"+size : '';
-	return "http://farm"+farm+".staticflickr.com/"+server+"/"+id+"_"+secret+size+".jpg";
+	return "https://farm"+farm+".staticflickr.com/"+server+"/"+id+"_"+secret+size+".jpg";
 }
 
 function formatUser(o){
@@ -139,9 +139,9 @@ hello.init({
 		// Ensure that you define an oauth_proxy
 		oauth : {
 			version : "1.0a",
-			auth	: "http://www.flickr.com/services/oauth/authorize?perms=read",
-			request : 'http://www.flickr.com/services/oauth/request_token',
-			token	: 'http://www.flickr.com/services/oauth/access_token'
+			auth	: "https://www.flickr.com/services/oauth/authorize?perms=read",
+			request : 'https://www.flickr.com/services/oauth/request_token',
+			token	: 'https://www.flickr.com/services/oauth/access_token'
 		},
 
 		// AutoRefresh
@@ -149,7 +149,7 @@ hello.init({
 		autorefresh : false,
 
 		// API base URL
-		base		: "http://api.flickr.com/services/rest",
+		base		: "https://api.flickr.com/services/rest",
 
 		// Map GET resquests
 		get : {
@@ -190,7 +190,7 @@ hello.init({
 					for(var i=0;i<o.data.length;i++){
 						var item = o.data[i];
 						item.name = item.title._content;
-						item.photos = "http://api.flickr.com/services/rest" + getApiUrl("flickr.photosets.getPhotos", {photoset_id: item.id}, true);
+						item.photos = "https://api.flickr.com/services/rest" + getApiUrl("flickr.photosets.getPhotos", {photoset_id: item.id}, true);
 					}
 				}
 				return o;
