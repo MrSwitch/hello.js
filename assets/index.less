@@ -122,10 +122,12 @@ table.testtable{
 
 
 button{
-	color:black;
-	border: 1px solid #D2D2D2;
-	border-radius:10px;
-	background-color:#fff;
+	&.run, &.working, &.response, &.pending{
+		color:black;
+		border: 1px solid #D2D2D2;
+		border-radius:10px;
+		background-color:#fff;
+	}
 	&.run:before{
 		content:"\025BA";		
 	}
