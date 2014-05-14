@@ -287,20 +287,22 @@ hello.utils.extend( hello, {
 		// SCOPES
 		// Authentication permisions
 		//
-		var scope = opts.scope;
-		if(scope && typeof(scope)!=='string'){
-			scope = scope.join(',');
-		}
+		
+		// convert any array, or falsy value to a string.
+		var scope = (opts.scope||'').toString();
+
 		scope = (scope ? scope + ',' : '') + p.qs.scope;
 
 		// Append scopes from a previous session
 		// This helps keep app credentials constant,
 		// Avoiding having to keep tabs on what scopes are authorized
-		if(session && "scope" in session){
-			scope += ","+session.scope.join(",");
+		if(session && "scope" in session && session.scope instanceof String){
+			scope += ","+ session.scope;
 		}
+
 		// Save in the State
-		p.qs.state.scope = utils.unique( scope.split(/[,\s]+/) );
+		// Convert to a string because IE, has a problem moving Arrays between windows
+		p.qs.state.scope = hello.utils.unique( scope.split(/[,\s]+/) ).join(',');
 
 		// Map replace each scope with the providers default scopes
 		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m){
@@ -429,7 +431,7 @@ hello.utils.extend( hello, {
 			popup.focus();
 
 			var timer = setInterval(function(){
-				if(popup.closed){
+				if(popup&&popup.closed){
 					clearInterval(timer);
 					if(!responded){
 						self.emit("complete failed error", {error:{code:"cancelled", message:"Login has been cancelled"}, network:p.network });
@@ -1731,7 +1733,7 @@ hello.api = function(){
 				}
 
 				// Does this provider have a custom method?
-				if("api" in o && o.api( url, p, {access_token:session.access_token}, callback ) ){
+				if("api" in o && o.api( url, p, (session && session.access_token ? {access_token:session.access_token} : {}), callback ) ){
 					return;
 				}
 
@@ -2481,6 +2483,7 @@ utils.extend(utils, {
 	};
 
 })(hello);
+
 //
 // AMD shim
 //

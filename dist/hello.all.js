@@ -287,20 +287,22 @@ hello.utils.extend( hello, {
 		// SCOPES
 		// Authentication permisions
 		//
-		var scope = opts.scope;
-		if(scope && typeof(scope)!=='string'){
-			scope = scope.join(',');
-		}
+		
+		// convert any array, or falsy value to a string.
+		var scope = (opts.scope||'').toString();
+
 		scope = (scope ? scope + ',' : '') + p.qs.scope;
 
 		// Append scopes from a previous session
 		// This helps keep app credentials constant,
 		// Avoiding having to keep tabs on what scopes are authorized
-		if(session && "scope" in session){
-			scope += ","+session.scope.join(",");
+		if(session && "scope" in session && session.scope instanceof String){
+			scope += ","+ session.scope;
 		}
+
 		// Save in the State
-		p.qs.state.scope = utils.unique( scope.split(/[,\s]+/) );
+		// Convert to a string because IE, has a problem moving Arrays between windows
+		p.qs.state.scope = hello.utils.unique( scope.split(/[,\s]+/) ).join(',');
 
 		// Map replace each scope with the providers default scopes
 		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m){
@@ -429,7 +431,7 @@ hello.utils.extend( hello, {
 			popup.focus();
 
 			var timer = setInterval(function(){
-				if(popup.closed){
+				if(popup&&popup.closed){
 					clearInterval(timer);
 					if(!responded){
 						self.emit("complete failed error", {error:{code:"cancelled", message:"Login has been cancelled"}, network:p.network });
@@ -1731,7 +1733,7 @@ hello.api = function(){
 				}
 
 				// Does this provider have a custom method?
-				if("api" in o && o.api( url, p, {access_token:session.access_token}, callback ) ){
+				if("api" in o && o.api( url, p, (session && session.access_token ? {access_token:session.access_token} : {}), callback ) ){
 					return;
 				}
 
@@ -2481,6 +2483,7 @@ utils.extend(utils, {
 	};
 
 })(hello);
+
 //
 // Dropbox
 //
@@ -2933,9 +2936,9 @@ function sign(url, params){
 
 
 function getBuddyIcon(profile, size){
-	var url="http://www.flickr.com/images/buddyicon.gif";
+	var url="https://www.flickr.com/images/buddyicon.gif";
 	if (profile.nsid && profile.iconserver && profile.iconfarm){
-		url="http://farm" + profile.iconfarm + ".staticflickr.com/" +
+		url="https://farm" + profile.iconfarm + ".staticflickr.com/" +
 			profile.iconserver + "/" +
 			"buddyicons/" + profile.nsid +
 			((size) ? "_"+size : "") + ".jpg";
@@ -2945,7 +2948,7 @@ function getBuddyIcon(profile, size){
 
 function getPhoto(id, farm, server, secret, size){
 	size = (size) ? "_"+size : '';
-	return "http://farm"+farm+".staticflickr.com/"+server+"/"+id+"_"+secret+size+".jpg";
+	return "https://farm"+farm+".staticflickr.com/"+server+"/"+id+"_"+secret+size+".jpg";
 }
 
 function formatUser(o){
@@ -3024,9 +3027,9 @@ hello.init({
 		// Ensure that you define an oauth_proxy
 		oauth : {
 			version : "1.0a",
-			auth	: "http://www.flickr.com/services/oauth/authorize?perms=read",
-			request : 'http://www.flickr.com/services/oauth/request_token',
-			token	: 'http://www.flickr.com/services/oauth/access_token'
+			auth	: "https://www.flickr.com/services/oauth/authorize?perms=read",
+			request : 'https://www.flickr.com/services/oauth/request_token',
+			token	: 'https://www.flickr.com/services/oauth/access_token'
 		},
 
 		// AutoRefresh
@@ -3034,7 +3037,7 @@ hello.init({
 		autorefresh : false,
 
 		// API base URL
-		base		: "http://api.flickr.com/services/rest",
+		base		: "https://api.flickr.com/services/rest",
 
 		// Map GET resquests
 		get : {
@@ -3075,7 +3078,7 @@ hello.init({
 					for(var i=0;i<o.data.length;i++){
 						var item = o.data[i];
 						item.name = item.title._content;
-						item.photos = "http://api.flickr.com/services/rest" + getApiUrl("flickr.photosets.getPhotos", {photoset_id: item.id}, true);
+						item.photos = "https://api.flickr.com/services/rest" + getApiUrl("flickr.photosets.getPhotos", {photoset_id: item.id}, true);
 					}
 				}
 				return o;
