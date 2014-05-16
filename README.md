@@ -206,7 +206,6 @@ Initiate the environment. And add the application credentials
 		<tr>
 			<td>credentials</td>
 			<td><i>object( key =&gt; value, ...&nbsp; )</i>
-
 				<table>
 					<thead>
 						<tr>
@@ -237,7 +236,6 @@ Initiate the environment. And add the application credentials
 						</tr>
 					</tbody>
 				</table>
-
 			</td>
 		</tr>
 		<tr>
@@ -284,7 +282,6 @@ If a network string is provided: A consent window to authenticate with that netw
 	<tr>
 		<td>options</td>
 		<td colspan="5"><i>object</i>
-
 			<table>
 				<tr>
 					<th>name</th>
@@ -337,7 +334,6 @@ If a network string is provided: A consent window to authenticate with that netw
 					<td><i>true</i></td>
 				</tr>
 			</table>
-
 		</td>
 	</tr>
 	<tr>
@@ -375,7 +371,6 @@ Remove all sessions or individual sessions.
 		<th>description</th>
 		<th>argument</th>
 		<th>default</th>
-
 	</tr>
 	<tr>
 		<td>network</td>
@@ -395,7 +390,6 @@ Remove all sessions or individual sessions.
 	<tr>
 		<td>options</td>
 		<td colspan="5"><i>object</i>
-
 			<table>
 				<tr>
 					<th>name</th>
@@ -416,7 +410,6 @@ Remove all sessions or individual sessions.
 					<td><i>false</i></td>
 				</tr>
 			</table>
-
 		</td>
 	</tr>
 	<tr>
@@ -768,7 +761,6 @@ described below.
 						</tr>
 					</tbody>
 				</table>
-
 			</td>
 		</tr>
 	</tbody>
@@ -853,21 +845,19 @@ HelloJS is constantly evolving, as are the services which it connects too. So if
 
 
 ### Changing code?
-Please adopt the tests.
-
+Please adopt the continuous integration tests.
 
 
 	# Using NodeJS on your dev environment
 	# cd into the project root and install dev dependencies 
 	npm install -l
 
-	# run tests in phantomjs
-	grunt test
+	# run continuous integration tests
+	npm test
 
 
-~~Open a couple of browsers with the given URL (e.g. it'll say "Karma v0.9.8 server started at http://localhost:9876/"). The tests are triggered when the code is modified~~
 
-
+Open a couple of browsers with the given URL (e.g. it'll say "Karma v0.9.8 server started at http://localhost:9876/"). The tests are triggered when the code is modified
 
 
 
