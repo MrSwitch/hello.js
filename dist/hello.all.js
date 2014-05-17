@@ -651,10 +651,10 @@ hello.utils.extend( hello.utils, {
 			// Local storage
 			var json = JSON.parse(localStorage.getItem('hello')) || {};
 
-			if(name && typeof(value) === 'undefined'){
-				return json[name];
+			if(name && value === undefined){
+				return json[name] || null;
 			}
-			else if(name && value === ''){
+			else if(name && value === null){
 				try{
 					delete json[name];
 				}
@@ -671,7 +671,7 @@ hello.utils.extend( hello.utils, {
 
 			localStorage.setItem('hello', JSON.stringify(json));
 
-			return json;
+			return json || null;
 		};
 
 	})(window.localStorage),
@@ -835,8 +835,11 @@ hello.utils.extend( hello.utils, {
 
 		var location = window.location;
 
+		if(!path){
+			return location.href;
+		}
 		if( path.indexOf('/') === 0 ){
-			path = location.protocol + '//' + location.host + path;
+			path = location.protocol + ( path.indexOf('//') === 0 ? path : '//' + location.host + path );
 		}
 		// Is the redirect_uri relative?
 		else if( !path.match(/^https?\:\/\//) ){
@@ -962,6 +965,8 @@ hello.utils.extend( hello.utils, {
 	//
 	Event : function(){
 
+		var separator = /[\s\,]+/;
+
 		// If this doesn't support getProtoType then we can't get prototype.events of the parent
 		// So lets get the current instance events, and add those to a parent property
 		this.parent = {
@@ -973,6 +978,7 @@ hello.utils.extend( hello.utils, {
 
 		this.events = {};
 
+
 		//
 		// On, Subscribe to events
 		// @param evt		string
@@ -981,7 +987,7 @@ hello.utils.extend( hello.utils, {
 		this.on = function(evt, callback){
 
 			if(callback&&typeof(callback)==='function'){
-				var a = evt.split(/[\s\,]+/);
+				var a = evt.split(separator);
 				for(var i=0;i<a.length;i++){
 
 					// Has this event already been fired on this instance?
@@ -1001,8 +1007,8 @@ hello.utils.extend( hello.utils, {
 		this.off = function(evt, callback){
 
 			this.findEvents(evt, function(name, index){
-				if(!callback || this.events[name][index] === callback){
-					this.events[name].splice(index,1);
+				if( !callback || this.events[name][index] === callback){
+					this.events[name][index] = null;
 				}
 			});
 
@@ -1022,7 +1028,7 @@ hello.utils.extend( hello.utils, {
 			// Handler
 			var handler = function(name, index){
 				// Replace the last property with the event name
-				args[args.length-1] = name;
+				args[args.length-1] = (name === '*'? evt.split(separator)[0] : name);
 
 				// Trigger
 				this.events[name][index].apply(this, args);
@@ -1031,7 +1037,9 @@ hello.utils.extend( hello.utils, {
 			// Find the callbacks which match the condition and call
 			var proto = this;
 			while( proto && proto.findEvents ){
-				proto.findEvents(evt, handler);
+
+				// Find events which match
+				proto.findEvents(evt + ',*', handler);
 
 				// proto = this.utils.getPrototypeOf(proto);
 				proto = proto.parent;
@@ -1063,17 +1071,24 @@ hello.utils.extend( hello.utils, {
 
 		this.findEvents = function(evt, callback){
 
-			var a = evt.split(/[\s\,]+/);
+			var a = evt.split(separator);
 
 			for(var name in this.events){if(this.events.hasOwnProperty(name)){
+
 				if( this.utils.indexOf(a,name) > -1 ){
+
 					for(var i=0;i<this.events[name].length;i++){
-						// Emit on the local instance of this
-						callback.call(this, name, i);
+
+						// Does the event handler exist?
+						if(this.events[name][i]){
+							// Emit on the local instance of this
+							callback.call(this, name, i);
+						}
 					}
 				}
 			}}
 		};
+
 	},
 
 

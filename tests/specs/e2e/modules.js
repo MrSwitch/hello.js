@@ -1,5 +1,16 @@
 define([
-//	'../../../dist/hello.all'
+	'../../../src/modules/facebook',
+	'../../../src/modules/flickr',
+	'../../../src/modules/google',
+	'../../../src/modules/windows',
+	'../../../src/modules/dropbox',
+	'../../../src/modules/twitter',
+	'../../../src/modules/yahoo',
+	'../../../src/modules/instagram',
+	'../../../src/modules/linkedin',
+	'../../../src/modules/foursquare',
+	'../../../src/modules/github',
+	'../../../src/modules/soundcloud'
 ], function(
 //	hello
 ){

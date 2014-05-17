@@ -12,8 +12,10 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/1.18.2/mocha.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/expect.js/0.2.0/expect.min.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/sinon.js/1.7.3/sinon-min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.11/require.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/json2/20130526/json2.min.js"></script>
 
-		<script src="http://adodson.com/require-sync.js/require-sync.js"></script>
+		<script src="../../src/hello.js"></script>
 
 		<script>
 
@@ -22,23 +24,6 @@
 			});
 
 			mocha.ui('bdd');
-
-			// Load HelloJS src
-			require([
-				'../../src/hello',
-				'../../src/modules/facebook',
-				'../../src/modules/flickr',
-				'../../src/modules/google',
-				'../../src/modules/windows',
-				'../../src/modules/dropbox',
-				'../../src/modules/twitter',
-				'../../src/modules/yahoo',
-				'../../src/modules/instagram',
-				'../../src/modules/linkedin',
-				'../../src/modules/foursquare',
-				'../../src/modules/github',
-				'../../src/modules/soundcloud'
-			], function(){});
 
 		</script>
 

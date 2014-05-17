@@ -2590,7 +2590,9 @@ utils.extend(utils, {
 		// get arguments
 		var p = utils.args({path:'s!', method : "s", data:'o', timeout:'i', callback:"f" }, arguments);
 		// Change for into a data object
-		utils.dataToJSON(p);
+		if(p.data){
+			utils.dataToJSON(p);
+		}
 		// Continue
 		return api.call(this, p);
 	};
