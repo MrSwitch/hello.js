@@ -24,7 +24,7 @@
     "url": "https://github.com/MrSwitch/hello.js/issues"
   },
   "scripts": {
-    "test": "karma start"
+    "test": "grunt test"
   },
   "devDependencies": {
     "shunt": "^0.1.2",
@@ -41,9 +41,12 @@
     "karma-mocha": "0.0.4",
     "karma-coverage": "~0.1.2",
     "karma-expect": "~1.0.0",
-    "sinon": "~1.7.3",
+
     "grunt": "^0.4.4",
+    "grunt-mocha-phantomjs": "~0.4.3",
     "grunt-contrib-jshint": "^0.10.0",
-    "grunt-contrib-watch": "^0.6.1"
+    "grunt-contrib-watch": "^0.6.1",
+    "mocha": "^1.18.2",
+    "sinon": "~1.7.3"
   }
 }

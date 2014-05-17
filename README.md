@@ -845,7 +845,7 @@ HelloJS is constantly evolving, as are the services which it connects too. So if
 
 
 ### Changing code?
-Please adopt the continuous integration tests.
+Ensure you setup and test your code on a variety of browsers.
 
 
 	# Using NodeJS on your dev environment
@@ -853,11 +853,8 @@ Please adopt the continuous integration tests.
 	npm install -l
 
 	# run continuous integration tests
-	npm test
+	grunt test
 
-
-
-Open a couple of browsers with the given URL (e.g. it'll say "Karma v0.9.8 server started at http://localhost:9876/"). The tests are triggered when the code is modified
 
 
 

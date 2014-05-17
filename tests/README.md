@@ -1,23 +1,16 @@
 # Run Tests
 
-Install dependencies
+With PhantomJS
 
-
+```bash
 	# Go to project root
-
-	cd ./
-
 	# Install packages listed in package.json [devDependencies]
 
 	npm install -l
 
+	# run tests
 
-Install Karma as a global install
+	grunt test
+```
 
-	npm install -g karma
-
-Run the persistent tester
-
-	npm test
-
-Edit files to see the tests run
+Or in a browser navigate too [tests/specs/](http://adodson.com/hello.js/tests/specs/)

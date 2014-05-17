@@ -1,8 +1,14 @@
-
+define([
+//	'../../../dist/hello.all'
+], function(
+//	hello
+){
 
 //
 // Modules are of the following formats
 //
+
+describe( 'Modules', function(){
 
 // Loop through all services
 for(var name in hello.services){
@@ -11,7 +17,7 @@ for(var name in hello.services){
 
 function setup_module_tests(module, name){
 
-	describe( module.name || name + ' Module', function(){
+	describe( name , function(){
 
 		var MATCH_URL = /^https?\:\/\//;
 
@@ -64,3 +70,5 @@ function setup_module_tests(module, name){
 
 	});
 }
+});
+});

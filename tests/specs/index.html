@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<title>tests</title>
+		<link href="https://cdnjs.cloudflare.com/ajax/libs/mocha/1.18.2/mocha.min.css" media="screen" rel="stylesheet" type="text/css" />
+	</head>
+	<body>
+		<!-- Required for browser reporter -->
+		<div id="mocha"></div>
+		<div id="test"></div>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mocha/1.18.2/mocha.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/expect.js/0.2.0/expect.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/sinon.js/1.7.3/sinon-min.js"></script>
+
+		<script src="http://adodson.com/require-sync.js/require-sync.js"></script>
+
+		<script>
+
+			require.config({
+				urlArgs: '_=' + ( new Date() )
+			});
+
+			mocha.ui('bdd');
+
+			// Load HelloJS src
+			require([
+				'../../src/hello',
+				'../../src/modules/facebook',
+				'../../src/modules/flickr',
+				'../../src/modules/google',
+				'../../src/modules/windows',
+				'../../src/modules/dropbox',
+				'../../src/modules/twitter',
+				'../../src/modules/yahoo',
+				'../../src/modules/instagram',
+				'../../src/modules/linkedin',
+				'../../src/modules/foursquare',
+				'../../src/modules/github',
+				'../../src/modules/soundcloud'
+			], function(){});
+
+		</script>
+
+		<script>
+
+			// Load
+			require([
+				// UTILS
+				'./unit/utils/dataToJSON',
+				'./unit/utils/events',
+				'./unit/utils/realPath',
+				'./unit/utils/diff',
+				'./unit/utils/domInstance',
+				'./unit/utils/store',
+				'./unit/utils/extend',
+
+				// E2E
+				'./e2e/core',
+				'./e2e/modules'
+
+			], function(){
+				if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
+				else { mocha.run(); }
+			});
+		</script>      
+	</body>
+</html>

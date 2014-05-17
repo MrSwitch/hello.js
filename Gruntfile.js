@@ -6,7 +6,7 @@ module.exports = function(grunt) {
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		jshint: {
-			files: ['Gruntfile.js', 'src/**/*.js'],//, 'test/**/*.js'],
+			files: ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js'],
 			options: {
 				// options here to override JSHint defaults
 				globals: {
@@ -22,7 +22,19 @@ module.exports = function(grunt) {
 			files: ['<%= jshint.files %>'],
 			tasks: ['jshint']
 		},
-
+		karma : {
+			unit: {
+				configFile: 'tests/karma.conf.js'
+//				autoWatch: true
+			}
+		},
+		mocha_phantomjs: {
+			options: {
+				//'reporter': 'xunit',
+				//'output': 'test/results/mocha.xml'
+			},
+			all: ['tests/specs/index.html'],
+		},
 		// Shunt files around
 		shunt : {
 			// Shunt the documents of our project
@@ -43,9 +55,11 @@ module.exports = function(grunt) {
 
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
+	grunt.loadNpmTasks('grunt-mocha-phantomjs');
+	grunt.loadNpmTasks('grunt-karma');
 	grunt.loadNpmTasks('shunt');
 
-	grunt.registerTask('test', ['jshint']);
-	grunt.registerTask('default', ['jshint', 'shunt:build', 'shunt:minify']);
+	grunt.registerTask('test', ['jshint', 'mocha_phantomjs']);
+	grunt.registerTask('default', ['test', 'shunt:build', 'shunt:minify']);
 
 };

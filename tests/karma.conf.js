@@ -2,24 +2,31 @@ module.exports = function (karma) {
 	karma.set({
 
 // base path, that will be used to resolve files and exclude
-		basePath: './',
+		basePath: '../',
 
-		frameworks: ['mocha', 'expect'],
+		frameworks: ['mocha', 'expect', 'requirejs'],
 
 // list of files / patterns to load in the browser
 		files: [
+			'node_modules/karma-requirejs/lib/adapter.js',
+			'tests/testing.js',
 //            {pattern: '../node_modules/chai/chai.js', include: true},
-			{ pattern: 'node_modules/sinon/pkg/sinon.js', watched: false, include: true },
-			'src/*.js',
-			'src/*/*.js',
-			'tests/*.js'
+			{ pattern: 'node_modules/sinon/pkg/sinon.js', watched: false, included: true },
+			{ pattern: 'src/*/*.js', included: false },
+			{ pattern: 'src/*.js', included: false },
+			{ pattern: 'tests/specs/e2e/*/*.js', included: false },
+			{ pattern: 'tests/specs/e2e/*.js', included: false },
+			{ pattern: 'tests/specs/unit/*/*.js', included: false },
+			{ pattern: 'tests/specs/unit/*.js', included: false }
 		],
 
 
 // list of files to exclude
 		exclude: [
-			'karma.conf.js',
-			'src/temp/*.js'
+//			'karma.conf.js',
+			'src/temp/*',
+			'src/hello.amd.js',
+			'src/server/*'
 		],
 
 
@@ -32,7 +39,7 @@ module.exports = function (karma) {
 		reporters: ['progress', 'coverage'],
 
 		preprocessors: {
-			'src/**/*.js': 'coverage'
+//			'src/**/*.js': 'coverage'
 		},
 
 //Code Coverage options. report type available:
@@ -72,7 +79,7 @@ module.exports = function (karma) {
 
 
 // enable / disable watching file and executing tests whenever any file changes
-		autoWatch: true,
+//		autoWatch: true,
 
 
 // Start these browsers, currently available:
@@ -98,8 +105,9 @@ module.exports = function (karma) {
 
 		plugins: [
 			'karma-phantomjs-launcher',
-			'karma-coverage',
+//			'karma-coverage',
 			'karma-expect',
+			'karma-requirejs',
 			'karma-mocha'
 			//,
 //            'karma-jasmine'
@@ -107,4 +115,4 @@ module.exports = function (karma) {
    //         'karma-coverage'
 		]
 	});
-}
+};

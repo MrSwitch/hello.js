@@ -1,16 +1,24 @@
+define([
+//	'../../../../src/utils/dataToJSON'
+], function(
+//	dataToJSON
+){
 
-
-describe('Hello API', function(){
+	var utils = hello.utils;
+	//
+	// Test
+	//
+	var test = document.getElementById('test');
 
 	//
 	// Are errors thrown if an invalid network is provided
 	//
-	describe('dataToJSON', function(){
+	describe('utils / dataToJSON', function(){
 
 		it('should extrapolate the data in a form', function(){
 
 			// Create a form
-			document.body.innerHTML = "<form id='form'>"+
+			test.innerHTML = "<form id='form'>"+
 				["<input name='key' value='value'/>",
 				"<input name='key2' value='value2'/>",
 				"<input name='file' type='file'/>"].join()+
@@ -21,7 +29,7 @@ describe('Hello API', function(){
 				data : document.getElementById('form')
 			};
 
-			var bool = hello.utils.dataToJSON(obj);
+			var bool = utils.dataToJSON(obj);
 
 			if(bool){
 				// This has been altered to a JSON object
@@ -36,5 +44,6 @@ describe('Hello API', function(){
 			}
 		});
 	});
+
 
 });
