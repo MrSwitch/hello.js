@@ -34,7 +34,6 @@ describe('utils / extend', function(){
 	});
 
 
-	/*
 	it('should merge child objects', function(){
 
 		var a = {
@@ -55,7 +54,6 @@ describe('utils / extend', function(){
 		expect( a ).to.not.eql( b );
 
 	});
-	*/
 
 });
 

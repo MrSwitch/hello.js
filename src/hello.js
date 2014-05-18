@@ -26,11 +26,26 @@ var hello = function(name){
 hello.utils = {
 	//
 	// Extend the first object with the properties and methods of the second
-	extend : function(a,b){
-		for(var x in b){
-			a[x] = b[x];
+	extend : (function extend(r /*, a[, b[, ...]] */){
+
+		// Get the arguments as an array but ommit the initial item
+		var args = Array.prototype.slice.call(arguments,1);
+
+		for(var i=0;i<args.length;i++){
+			var a = args[i];
+			if( r instanceof Object && a instanceof Object && r !== a ){
+				for(var x in a){
+					//if(a.hasOwnProperty(x)){
+					r[x] = extend( r[x], a[x] );
+					//}
+				}
+			}
+			else{
+				r = a;
+			}
 		}
-	}
+		return r;
+	})
 };
 
 
@@ -148,7 +163,7 @@ hello.utils.extend( hello, {
 
 		//
 		// merge services if there already exists some
-		this.services = utils.merge(this.services, services);
+		utils.extend(this.services, services);
 
 		//
 		// Format the incoming
@@ -159,7 +174,7 @@ hello.utils.extend( hello, {
 		//
 		// Update the default settings with this one.
 		if(options){
-			this.settings = utils.merge(this.settings, options);
+			utils.extend(this.settings, options);
 
 			// Do this immediatly incase the browser changes the current path.
 			if("redirect_uri" in options){
@@ -744,29 +759,10 @@ hello.utils.extend( hello.utils, {
 	// recursive merge two objects into one, second parameter overides the first
 	// @param a array
 	//
-	merge : function(a,b){
-		var x,r = {};
-		if( typeof(a) === 'object' && typeof(b) === 'object' ){
-			for(x in a){
-				//if(a.hasOwnProperty(x)){
-				r[x] = a[x];
-				if(x in b){
-					r[x] = this.merge( a[x], b[x]);
-				}
-				//}
-			}
-			for(x in b){
-				//if(b.hasOwnProperty(x)){
-				if(!(x in a)){
-					r[x] = b[x];
-				}
-				//}
-			}
-		}
-		else{
-			r = b;
-		}
-		return r;
+	merge : function(/*a,b,c,..n*/){
+		var args = Array.prototype.slice.call(arguments);
+		args.unshift({});
+		return this.extend.apply(null, args);
 	},
 
 	//
@@ -1792,7 +1788,7 @@ hello.api = function(){
 						qs_handler(qs);
 					}
 					else{
-						qs = utils.merge(qs, qs_handler);
+						utils.extend(qs, qs_handler);
 					}
 				}
 
@@ -1865,7 +1861,8 @@ hello.api = function(){
 				// Make the call
 				else{
 
-					qs = utils.merge(qs,p.data);
+					utils.extend( qs, p.data );
+
 					qs.callback = p.callbackID;
 
 					utils.jsonp( format_url, callback, p.callbackID, self.settings.timeout );
@@ -2036,7 +2033,7 @@ hello.utils.extend( hello.utils, {
 		// Should we add the query to the URL?
 		if(method === 'GET'||method === 'DELETE'){
 			if(!utils.isEmpty(data)){
-				qs = utils.merge(qs, data);
+				utils.extend(qs, data);
 			}
 			data = null;
 		}
