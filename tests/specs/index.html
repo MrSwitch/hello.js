@@ -21,7 +21,7 @@
 		<script>
 
 			require.config({
-				urlArgs: '_=' + ( new Date() )
+//				urlArgs: '_=' + ( new Date() )
 			});
 
 			mocha.ui('bdd');
@@ -33,6 +33,7 @@
 			// Load
 			require([
 				// UTILS
+				'./unit/utils/args',
 				'./unit/utils/dataToJSON',
 				'./unit/utils/events',
 				'./unit/utils/realPath',
