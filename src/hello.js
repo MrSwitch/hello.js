@@ -412,10 +412,23 @@ hello.utils.extend( hello, {
 			var popup = hello.utils.popup( url, p.qs.redirect_uri, opts.window_width || 500, opts.window_height || 550 );
 
 			var timer = setInterval(function(){
-				if(popup&&popup.closed){
+				if(!popup||popup.closed){
 					clearInterval(timer);
 					if(!responded){
-						self.emit("complete failed error", {error:{code:"cancelled", message:"Login has been cancelled"}, network:p.network });
+
+						var error = {
+							code:"cancelled",
+							message:"Login has been cancelled"
+						};
+
+						if(!popup){
+							error = {
+								code:'blocked',
+								message :'Popup was blocked'
+							};
+						}
+
+						self.emit("complete failed error", {error:error, network:p.network });
 					}
 				}
 			}, 100);
@@ -1146,7 +1159,7 @@ hello.utils.extend( hello.utils, {
 			// PhoneGap support
 			// Add an event listener to listen to the change in the popup windows URL
 			// This must appear before popup.focus();
-			if( popup.addEventListener ){
+			if( popup && popup.addEventListener ){
 				popup.addEventListener('loadstart', function(e){
 
 					var url = e.url;
