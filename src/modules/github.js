@@ -40,6 +40,10 @@ hello.init({
 			auth : 'https://github.com/login/oauth/authorize',
 			grant : 'https://github.com/login/oauth/access_token'
 		},
+		scope : {
+			basic           : '',
+			email           : 'user:email'
+		},
 		base : 'https://api.github.com/',
 		get : {
 			'me' : 'user',
