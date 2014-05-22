@@ -802,7 +802,7 @@ described below.</p>
 
 <p>Services which rely on the OAuth 1 or OAuth2 token exchange authentication methods require a server side handshake with the secret key. This is unlike client-side OAuth 2 which doesn't need a secret and verifies the app based on the redirect_uri property.</p>
 
-<p>Making HelloJS work with secret keys requires a web services where the secret key is used to authorize the user and sign subsequent API requests in the case of OAuth1. As a shim HelloJS uses a service hosted at <a href="http://auth-server.herokuapp.com/">http://auth-server.herokuapp.com/</a>. Developers may add their own network registration AppID/client_id and secret to this service in order to get up and running.</p>
+<p>Making HelloJS work with secret keys requires a web services where the secret key is used to authorize the user and sign subsequent API requests in the case of OAuth1. As a shim HelloJS uses a service hosted at <a href="https://auth-server.herokuapp.com/">https://auth-server.herokuapp.com/</a>. Developers may add their own network registration AppID/client_id and secret to this service in order to get up and running.</p>
 
 <p>The aforementioned service uses <a href="https://npmjs.org/package/oauth-shim">//node-oauth-shim</a>, so if you want to roll your own please look there for installation instructions and usage. Override the default path for this service in HelloJS at the point of calling hello.init, e.g. `hello.init(credentials, {oauth_proxy:'//path/to/oauth-shim-proxy'})`.</p>
 
