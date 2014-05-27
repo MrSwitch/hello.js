@@ -102,13 +102,13 @@ Compiled source, which combines all the modules can be obtained from [Github](ht
 
 ### Bower Package
 
-```
+```bash
 
-	# Install the package manager, bower
-	npm install bower
+# Install the package manager, bower
+npm install bower
 
-	# Install hello
-	bower install hello
+# Install hello
+bower install hello
 
 ```
 
@@ -151,10 +151,8 @@ Register your application with atleast one of the following networks. Ensure you
 ### 3. Create the signin buttons
 Just add onclick events to call hello( network ).login(). Style your buttons as you like, i've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts
 
-```text/html
-
-	<button onclick="hello( 'windows' ).login()">windows</button>
-
+```html
+<button onclick="hello( 'windows' ).login()">windows</button>
 ```
 
 
@@ -164,19 +162,17 @@ Lets define a simple function, which will load a user profile into the page afte
 
 
 ```javascript
-
-	hello.on('auth.login', function(auth){
-		
-		// call user information, for the given network
-		hello( auth.network ).api( '/me' ).success(function(r){
-			var $target = $("#profile_"+ auth.network );
-			if($target.length==0){
-				$target = $("<div id='profile_"+auth.network+"'></div>").appendTo("#profile");
-			}
-			$target.html('<img src="'+ r.thumbnail +'" /> Hey '+r.name).attr('title', r.name + " on "+ auth.network);
-		});
+hello.on('auth.login', function(auth){
+	
+	// call user information, for the given network
+	hello( auth.network ).api( '/me' ).success(function(r){
+		var $target = $("#profile_"+ auth.network );
+		if($target.length==0){
+			$target = $("<div id='profile_"+auth.network+"'></div>").appendTo("#profile");
+		}
+		$target.html('<img src="'+ r.thumbnail +'" /> Hey '+r.name).attr('title', r.name + " on "+ auth.network);
 	});
-
+});
 ```
 
 ### 5. Configure hello.js with your client_id's and initiate all listeners
@@ -184,13 +180,11 @@ Lets define a simple function, which will load a user profile into the page afte
 Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the `hello.init` function. e.g....
 
 ```javascript
-
-	hello.init({ 
-		facebook : FACEBOOK_CLIENT_ID,
-		windows  : WINDOWS_CLIENT_ID,
-		google   : GOOGLE_CLIENT_ID
-	},{redirect_uri:'redirect.html'});
-
+hello.init({ 
+	facebook : FACEBOOK_CLIENT_ID,
+	windows  : WINDOWS_CLIENT_ID,
+	google   : GOOGLE_CLIENT_ID
+},{redirect_uri:'redirect.html'});
 ```
 
 That's it. The code above actually powers the demo at the start so, no excuses.
@@ -256,13 +250,11 @@ Initiate the environment. And add the application credentials
 
 ### Example:
 
-```
-
-	hello.init({
-		facebook : '359288236870',
-		windows : '000000004403AD10'
-	});
-
+```js
+hello.init({
+	facebook : '359288236870',
+	windows : '000000004403AD10'
+});
 ```
 
 ## hello.login()
@@ -359,12 +351,10 @@ If a network string is provided: A consent window to authenticate with that netw
 
 ### Examples:
 
-```
-
-	hello( "facebook" ).login( function(){
-		alert("You are signed in to Facebook");
-	});
-
+```js
+hello( "facebook" ).login( function(){
+	alert("You are signed in to Facebook");
+});
 ```
 
 
@@ -445,12 +435,10 @@ Remove all sessions or individual sessions.
 
 ### Example:
 
-```
-
-	hello( "facebook" ).logout(function(){
-		alert("Signed out");
-	});
-
+```js
+hello( "facebook" ).logout(function(){
+	alert("Signed out");
+});
 ```
 
 
@@ -483,18 +471,16 @@ Get the current status of the session, this is an synchronous request and does n
 
 ### Examples:
 
-```
+```js
+var online = function(session){
+	var current_time = (new Date()).getTime() / 1000;
+	return session && session.access_token && session.expires > current_time;
+};
 
-	var online = function(session){
-		var current_time = (new Date()).getTime() / 1000;
-		return session && session.access_token && session.expires > current_time;
-	};
+var fb = hello( "facebook" ).getAuthResponse();
+var wl = hello( "windows" ).getAuthResponse();
 
-	var fb = hello( "facebook" ).getAuthResponse();
-	var wl = hello( "windows" ).getAuthResponse();
-
-	alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) ? "Signed":"Not signed")+" into Windows Live");
-
+alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) ? "Signed":"Not signed")+" into Windows Live");
 ```
 
 ## hello.api()
@@ -586,14 +572,12 @@ Make calls to the API for getting and posting data
 
 ### Examples:
 
-```
-
-	hello( "facebook" ).api("me").success(function(json){
-		alert("Your name is "+ json.name);
-	}).error(function(){
-		alert("Whoops!");
-	});
-
+```js
+hello( "facebook" ).api("me").success(function(json){
+	alert("Your name is "+ json.name);
+}).error(function(){
+	alert("Whoops!");
+});
 ```
 
 # Event subscription
@@ -635,13 +619,11 @@ Bind a callback to an event. An event maybe triggered by a change in user state 
 
 ### Example:
 
-```
-
-	var sessionstart =  function(){
-		alert("Session has started");
-	};
-	hello.on("auth.login",sessionstart);
-
+```js
+var sessionstart =  function(){
+	alert("Session has started");
+};
+hello.on("auth.login",sessionstart);
 ```
 
 
@@ -651,10 +633,8 @@ Remove a callback, both event name and function must exist
 
 ### hello.off( event, callback );
 
-```
-
-	hello.off("auth.login",sessionstart);
-
+```js
+hello.off("auth.login",sessionstart);
 ```
 
 
@@ -663,21 +643,19 @@ Remove a callback, both event name and function must exist
 ## Pagination, Limit and Next Page
 A convenient function to get the `next` resultset is provided in the second parameter of any `GET` callback. Calling this function recreates the request with the original parameters and event listeners. Albeit the original path is augmented with the parameters defined in the `paging.next` property.
 
-```
-
-	hello( "facebook" ).api( "me/friends", {limit: 1} ).success( function( json, next ){
-		if( next ){
-			if( confirm( "Got friend "+ json.data[0].name + ". Get another?" ) ){
-				next();
-			}
+```js
+hello( "facebook" ).api( "me/friends", {limit: 1} ).success( function( json, next ){
+	if( next ){
+		if( confirm( "Got friend "+ json.data[0].name + ". Get another?" ) ){
+			next();
 		}
-		else{
-			alert( "Got friend "+ json.data[0].name + ". That's it!" );
-		}
-	}).error( function(){
-		alert("Whoops!");
-	});
-
+	}
+	else{
+		alert( "Got friend "+ json.data[0].name + ". That's it!" );
+	}
+}).error( function(){
+	alert("Whoops!");
+});
 ```
 
 
@@ -685,10 +663,8 @@ A convenient function to get the `next` resultset is provided in the second para
 The scope property defines which privileges an app requires from a network provider. The scope can be defined globally for a session through `hello.init(object, {scope:'string'})`, or at the point of triggering the auth flow e.g. `hello('network').login({scope:'string'});`
 An app can specify multiple scopes, seperated by commas - as in the example below.
 
-```
-
-	hello( "facebook" ).login( {scope: "friends,photos,publish" } );
-
+```js
+hello( "facebook" ).login( {scope: "friends,photos,publish" } );
 ```
 
 Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the [hello.api reference table](http://adodson.com/hello.js/#helloapi).
@@ -875,14 +851,12 @@ HelloJS is constantly evolving, as are the services which it connects too. So if
 Ensure you setup and test your code on a variety of browsers.
 
 ```bash
+# Using NodeJS on your dev environment
+# cd into the project root and install dev dependencies 
+npm install -l
 
-	# Using NodeJS on your dev environment
-	# cd into the project root and install dev dependencies 
-	npm install -l
-
-	# run continuous integration tests
-	grunt test
-
+# run continuous integration tests
+grunt test
 ```
 
 
