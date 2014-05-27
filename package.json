@@ -27,7 +27,7 @@
     "test": "grunt test"
   },
   "devDependencies": {
-    "shunt": "^0.1.2",
+    "shunt": "^0.1.3",
     "karma-firefox-launcher": "~0.1.0",
     "karma-script-launcher": "~0.1.0",
     "karma-chrome-launcher": "~0.1.0",

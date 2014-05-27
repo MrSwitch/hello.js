@@ -7,7 +7,6 @@ A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.
 
 
 
-
 ## Features
 
 Looking for more? HelloJS supports a lot more actions than just getting the users profile. Like, matching users with a users social friends list, sharing events with the users social streams, accessing and playing around with a users photos. Lets see if these whet your appetite ...
@@ -88,10 +87,10 @@ Looking for more? HelloJS supports a lot more actions than just getting the user
 
 
 
-Items marked with a &#10003; are fully working and can be [tested here](./tests/). 
-Items marked with a &#10007; aren't provided by the provider at this time. 
-Blank items are work in progress, but there is good evidence that they can be done.
-Anything not listed i have no knowledge of and would appreciate input.
+- Items marked with a &#10003; are fully working and can be [tested here](./tests/). 
+- Items marked with a &#10007; aren't provided by the provider at this time. 
+- Blank items are work in progress, but there is good evidence that they can be done.
+- Anything not listed i have no knowledge of and would appreciate input.
 
 
 
@@ -103,6 +102,7 @@ Compiled source, which combines all the modules can be obtained from [Github](ht
 
 ### Bower Package
 
+```
 
 	# Install the package manager, bower
 	npm install bower
@@ -110,6 +110,7 @@ Compiled source, which combines all the modules can be obtained from [Github](ht
 	# Install hello
 	bower install hello
 
+```
 
 The [Bower](http://bower.io/) package shall install the aforementioned "/src" and "/dist" directories. The "/src" directory provides individual modules which can be packaged as desired.
 
@@ -143,14 +144,18 @@ Register your application with atleast one of the following networks. Ensure you
 
 ### 2. Include Hello.js script in your page
 
-	<script class="pre" src="./dist/hello.all.min.js"></script>
+```html
+<script class="pre" src="./dist/hello.all.min.js"></script>
+```
 
 ### 3. Create the signin buttons
 Just add onclick events to call hello( network ).login(). Style your buttons as you like, i've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts
 
+```text/html
 
 	<button onclick="hello( 'windows' ).login()">windows</button>
 
+```
 
 
 ### 4. Add listeners for the user login
@@ -158,6 +163,7 @@ Just add onclick events to call hello( network ).login(). Style your buttons as 
 Lets define a simple function, which will load a user profile into the page after they signin and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.
 
 
+```javascript
 
 	hello.on('auth.login', function(auth){
 		
@@ -171,11 +177,13 @@ Lets define a simple function, which will load a user profile into the page afte
 		});
 	});
 
+```
 
 ### 5. Configure hello.js with your client_id's and initiate all listeners
 
 Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the `hello.init` function. e.g....
 
+```javascript
 
 	hello.init({ 
 		facebook : FACEBOOK_CLIENT_ID,
@@ -183,6 +191,7 @@ Now let's wire it up with our registration detail obtained in step 1. By passing
 		google   : GOOGLE_CLIENT_ID
 	},{redirect_uri:'redirect.html'});
 
+```
 
 That's it. The code above actually powers the demo at the start so, no excuses.
 
@@ -247,12 +256,14 @@ Initiate the environment. And add the application credentials
 
 ### Example:
 
+```
 
 	hello.init({
 		facebook : '359288236870',
 		windows : '000000004403AD10'
 	});
 
+```
 
 ## hello.login()
 
@@ -348,11 +359,13 @@ If a network string is provided: A consent window to authenticate with that netw
 
 ### Examples:
 
+```
 
 	hello( "facebook" ).login( function(){
 		alert("You are signed in to Facebook");
 	});
 
+```
 
 
 ## hello.logout()
@@ -432,11 +445,13 @@ Remove all sessions or individual sessions.
 
 ### Example:
 
+```
 
 	hello( "facebook" ).logout(function(){
 		alert("Signed out");
 	});
 
+```
 
 
 ## hello.getAuthResponse()
@@ -468,6 +483,7 @@ Get the current status of the session, this is an synchronous request and does n
 
 ### Examples:
 
+```
 
 	var online = function(session){
 		var current_time = (new Date()).getTime() / 1000;
@@ -479,6 +495,7 @@ Get the current status of the session, this is an synchronous request and does n
 
 	alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) ? "Signed":"Not signed")+" into Windows Live");
 
+```
 
 ## hello.api()
 
@@ -569,6 +586,7 @@ Make calls to the API for getting and posting data
 
 ### Examples:
 
+```
 
 	hello( "facebook" ).api("me").success(function(json){
 		alert("Your name is "+ json.name);
@@ -576,6 +594,7 @@ Make calls to the API for getting and posting data
 		alert("Whoops!");
 	});
 
+```
 
 # Event subscription
 
@@ -616,12 +635,14 @@ Bind a callback to an event. An event maybe triggered by a change in user state 
 
 ### Example:
 
+```
 
 	var sessionstart =  function(){
 		alert("Session has started");
 	};
 	hello.on("auth.login",sessionstart);
 
+```
 
 
 ## hello.off()
@@ -630,9 +651,11 @@ Remove a callback, both event name and function must exist
 
 ### hello.off( event, callback );
 
+```
 
 	hello.off("auth.login",sessionstart);
 
+```
 
 
 # Misc
@@ -640,6 +663,7 @@ Remove a callback, both event name and function must exist
 ## Pagination, Limit and Next Page
 A convenient function to get the `next` resultset is provided in the second parameter of any `GET` callback. Calling this function recreates the request with the original parameters and event listeners. Albeit the original path is augmented with the parameters defined in the `paging.next` property.
 
+```
 
 	hello( "facebook" ).api( "me/friends", {limit: 1} ).success( function( json, next ){
 		if( next ){
@@ -654,15 +678,18 @@ A convenient function to get the `next` resultset is provided in the second para
 		alert("Whoops!");
 	});
 
+```
 
 
 ## Scope
 The scope property defines which privileges an app requires from a network provider. The scope can be defined globally for a session through `hello.init(object, {scope:'string'})`, or at the point of triggering the auth flow e.g. `hello('network').login({scope:'string'});`
 An app can specify multiple scopes, seperated by commas - as in the example below.
 
+```
 
 	hello( "facebook" ).login( {scope: "friends,photos,publish" } );
 
+```
 
 Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the [hello.api reference table](http://adodson.com/hello.js/#helloapi).
 
@@ -821,8 +848,8 @@ The aforementioned service uses [//node-oauth-shim](https://npmjs.org/package/oa
 
 
 
-IE7: Makes beeping sounds whenever the POST, PUT or DELETE methods are 
-used - because of the XD, IFrame+Form+hack.
+- IE7: Makes beeping sounds whenever the POST, PUT or DELETE methods are 
+used - because of the XD, IFrame+Form+hack.- 
 - IE7: Requires JSON.js and localStorage shims
 - Opera Mini: Supports inline consent only, i.e. reloads original page.
 - WP7: Supports inline consent only, i.e. reloads original page.
@@ -847,6 +874,7 @@ HelloJS is constantly evolving, as are the services which it connects too. So if
 ### Changing code?
 Ensure you setup and test your code on a variety of browsers.
 
+```bash
 
 	# Using NodeJS on your dev environment
 	# cd into the project root and install dev dependencies 
@@ -855,11 +883,7 @@ Ensure you setup and test your code on a variety of browsers.
 	# run continuous integration tests
 	grunt test
 
-
-
-
-
-
+```
 
 
 
