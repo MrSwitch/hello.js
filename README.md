@@ -103,13 +103,11 @@ Compiled source, which combines all the modules can be obtained from [Github](ht
 ### Bower Package
 
 ```bash
-
 # Install the package manager, bower
 npm install bower
 
 # Install hello
 bower install hello
-
 ```
 
 The [Bower](http://bower.io/) package shall install the aforementioned "/src" and "/dist" directories. The "/src" directory provides individual modules which can be packaged as desired.
