@@ -9,6 +9,34 @@ define([
 describe('Hello Core', function(){
 
 
+	// //////////////////////////////
+	// Create a dummy network
+	// //////////////////////////////
+
+	before(function(){
+		//
+		// Add a default network
+		hello.init({
+			testable : {
+				oauth : {
+					auth : 'https://testdemo/access',
+					version : 2
+				},
+				scope : {
+					'basic' : 'basic_scope'
+				}
+			}
+		});
+
+	});
+
+	// destroy it
+	after(function(){
+		delete hello.services.testable;
+	});
+
+
+
 	var invalid_network = function(done, event_name){
 		event_name = event_name || 'error';
 		return function(data, type){
@@ -63,7 +91,7 @@ describe('Hello Core', function(){
 	//
 	// GetAuthResposne
 	//
-	describe("GetAuthResposne", function(){
+	describe("GetAuthResponse", function(){
 
 		it('should trigger an error when accessing an invalid network', function(done){
 			// Make request
@@ -85,20 +113,106 @@ describe('Hello Core', function(){
 	//
 	// Login
 	//
-	describe('Login', function(){
+	describe('hello.login( [network] [,options] [,callback])', function(){
+
+		var _open;
+
+		before(function(){
+			_open = window.open;
+		});
+
+		after(function(){
+			window.open = _open;
+		});
+
+
+		function safari_hack(url){
+			var m = url.match(/\#oauth_redirect\=(.+)$/i);
+			if(m){
+				url = decodeURIComponent(decodeURIComponent(m[1]));
+			}
+			return url;
+		}
+
 
 		it('should assign a complete event', function(){
-			var instance = hello.login('test', function(){});
+			var instance = hello.login('invalidname', function(){});
 			expect( instance.events ).to.have.property( 'complete' );
 		});
 
-		it('should throw a completed event if network name is wrong', function(done){
-			hello.login('test', invalid_network(done, "complete") );
+		it('should throw a completed and error event if network name is wrong', function(done){
+			hello.login('invalidname', invalid_network(done, "complete") );
 		});
+
 		it('should throw a error event if network name is wrong', function(done){
-			var instance = hello.login('test');
+			var instance = hello.login('invalidname');
 			instance.on('error', invalid_network(done));
 		});
+
+		it('should by default, trigger window.open request', function(done){
+
+			var spy = sinon.spy(function(){done();});
+
+			window.open = spy;
+
+			hello.login('testable');
+		});
+
+		it('should by default, include the basic scope defined by the module', function(done){
+
+			var spy = sinon.spy(function(url, name, optins){
+
+				url = safari_hack(url);
+
+				expect(url).to.contain('scope='+hello.services.testable.scope.basic);
+
+				done();
+			});
+
+			window.open = spy;
+
+			hello.login('testable');
+		});
+
+		describe('options', function(){
+
+			it('should apply `options.redirect_uri`', function(done){
+
+				var REDIRECT_URI ='http://dummydomain.com/';
+
+				var spy = sinon.spy(function(url, name, optins){
+
+					url = safari_hack(url);
+
+					expect(url).to.contain('redirect_uri=' + encodeURIComponent(REDIRECT_URI) );
+					done();
+				});
+
+				window.open = spy;
+
+				hello.login('testable', {redirect_uri:REDIRECT_URI});
+			});
+
+			it('should apply `options.scope`', function(done){
+
+				var REDIRECT_URI ='http://dummydomain.com/';
+
+				var spy = sinon.spy(function(url, name, optins){
+
+					url = safari_hack(url);
+
+					expect(url).to.contain('redirect_uri=' + encodeURIComponent(REDIRECT_URI) );
+					done();
+				});
+
+				window.open = spy;
+
+				hello.login('testable', {redirect_uri:REDIRECT_URI});
+			});
+
+		});
+
+
 	});
 
 	//
