@@ -118,7 +118,7 @@ The [Bower](http://bower.io/) package shall install the aforementioned "/src" an
 
 
 - [GitHub](https://github.com/MrSwitch/hello.js/issues) for reporting bugs and feature requests.
-- [Stackoverflow](https://github.com/MrSwitch/hello.js/issues) to reach out for help.
+- [Stackoverflow](http://stackoverflow.com/questions/tagged/hello.js) to reach out for help.
 
 
 
