@@ -114,6 +114,14 @@ The [Bower](http://bower.io/) package shall install the aforementioned "/src" an
 
 **Note:** Some services require OAuth1 or server-side OAuth2 authorization. In such case HelloJS communicates with an [OAuth Proxy](#oauth-proxy).
 
+## Help &amp; Support
+
+
+- [GitHub](https://github.com/MrSwitch/hello.js/issues) for reporting bugs and feature requests.
+- [Stackoverflow](https://github.com/MrSwitch/hello.js/issues) to reach out for help.
+
+
+
 ## Quick Start
 Quick start shows you how to go from zero to loading in the name and picture of a user, like in the demo above.
 
