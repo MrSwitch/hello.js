@@ -1958,6 +1958,9 @@ hello.utils.extend( hello.utils, {
 	// return the type of DOM object
 	domInstance : function(type,data){
 		var test = "HTML" + (type||'').replace(/^[a-z]/,function(m){return m.toUpperCase();}) + "Element";
+		if( !data ){
+			return false;
+		}
 		if(window[test]){
 			return data instanceof window[test];
 		}else if(window.Element){
