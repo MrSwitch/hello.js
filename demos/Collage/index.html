@@ -77,10 +77,10 @@ function update(){
 // Register with Hello
 function loadImages(network){
 
-	hello.login(network, function(){
+	hello(network).login(function(){
 
 		// Does it have siblings?
-		hello.api(network+':me/albums', function(r){
+		hello(network).api('me/albums', function(r){
 
 			if(!r||r.error){
 				alert(r.error.message);
@@ -90,7 +90,7 @@ function loadImages(network){
 			// Loop through and add photos to the canvas
 			for(var i=0;i<r.data.length;i++){
 
-				hello.api(network+':'+r.data[i].photos, function(r){
+				hello(network).api('me/album', {id : r.data[i].id}, function(r){
 
 					if(!r||r.error){
 						alert(r.error.message);

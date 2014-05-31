@@ -1989,9 +1989,11 @@ hello.utils.extend( hello.utils, {
 	// Clone
 	// Create a clone of an object
 	clone : function(obj){
-		if("nodeName" in obj){
+		// Does not clone Dom elements, nor Binary data, e.g. Blobs, Filelists
+		if("nodeName" in obj || this.isBinary( obj ) ){
 			return obj;
 		}
+		// But does clone everything else.
 		var clone = {}, x;
 		for(x in obj){
 			if(typeof(obj[x]) === 'object'){
@@ -2478,17 +2480,21 @@ hello.utils.extend( hello.utils, {
 	// Some of the providers require that only MultiPart is used with non-binary forms.
 	// This function checks whether the form contains binary data
 	hasBinary : function (data){
-		var w = window;
 		for(var x in data ) if(data.hasOwnProperty(x)){
-			if( (this.domInstance('input', data[x]) && data[x].type === 'file')	||
-				("FileList" in w && data[x] instanceof w.FileList) ||
-				("File" in w && data[x] instanceof w.File) ||
-				("Blob" in w && data[x] instanceof w.Blob)
-			){
+			if( this.isBinary(data[x]) ){
 				return true;
 			}
 		}
 		return false;
+	},
+
+	isBinary : function(data){
+
+		return (this.domInstance('input', data) && data.type === 'file') ||
+				("FileList" in window && data instanceof window.FileList) ||
+				("File" in window && data instanceof window.File) ||
+				("Blob" in window && data instanceof window.Blob);
+
 	}
 });
 
