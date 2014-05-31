@@ -42,6 +42,18 @@ describe('utils / domInstance', function(){
 
 	});
 
+	it('should return false, if second parameter is ommited or null', function(){
+
+		expect( domInstance('input') ).to.equal( false );
+
+		expect( domInstance('input', false) ).to.equal( false );
+
+		expect( domInstance('input', true) ).to.equal( false );
+
+		expect( domInstance('input', null) ).to.equal( false );
+
+	});
+
 });
 
 	
