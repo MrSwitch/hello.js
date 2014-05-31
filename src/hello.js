@@ -26,7 +26,7 @@ var hello = function(name){
 hello.utils = {
 	//
 	// Extend the first object with the properties and methods of the second
-	extend : (function extend(r /*, a[, b[, ...]] */){
+	extend : function(r /*, a[, b[, ...]] */){
 
 		// Get the arguments as an array but ommit the initial item
 		var args = Array.prototype.slice.call(arguments,1);
@@ -36,7 +36,7 @@ hello.utils = {
 			if( r instanceof Object && a instanceof Object && r !== a ){
 				for(var x in a){
 					//if(a.hasOwnProperty(x)){
-					r[x] = extend( r[x], a[x] );
+					r[x] = hello.utils.extend( r[x], a[x] );
 					//}
 				}
 			}
@@ -45,7 +45,7 @@ hello.utils = {
 			}
 		}
 		return r;
-	})
+	}
 };
 
 
