@@ -25,6 +25,15 @@ describe('Hello Core', function(){
 				scope : {
 					'basic' : 'basic_scope'
 				}
+			},
+			second : {
+				oauth : {
+					auth : 'https://testdemo/access',
+					version : 2
+				},
+				scope : {
+					'common_scope' : 'common_scope'
+				}
 			}
 		});
 
@@ -184,7 +193,10 @@ describe('Hello Core', function(){
 
 					url = safari_hack(url);
 
-					expect(url).to.contain('redirect_uri=' + encodeURIComponent(REDIRECT_URI) );
+					var params = hello.utils.param(url.split('?')[1]);
+
+					expect(params.redirect_uri).to.equal(REDIRECT_URI);
+
 					done();
 				});
 
@@ -193,21 +205,43 @@ describe('Hello Core', function(){
 				hello.login('testable', {redirect_uri:REDIRECT_URI});
 			});
 
-			it('should apply `options.scope`', function(done){
+			it('should permit custom scope in `options.scope` which are unique to this service', function(done){
 
-				var REDIRECT_URI ='http://dummydomain.com/';
+				var custom_scope = 'custom_scope';
 
 				var spy = sinon.spy(function(url, name, optins){
 
 					url = safari_hack(url);
 
-					expect(url).to.contain('redirect_uri=' + encodeURIComponent(REDIRECT_URI) );
+					var params = hello.utils.param(url.split('?')[1]);
+
+					expect(params.scope).to.contain(custom_scope);
+
 					done();
 				});
 
 				window.open = spy;
 
-				hello.login('testable', {redirect_uri:REDIRECT_URI});
+				hello.login('testable', {scope:custom_scope});
+			});
+			it('should discard common scope, aka scopes undefined by this module but defined by other services', function(done){
+
+				var common_scope = 'common_scope';
+
+				var spy = sinon.spy(function(url, name, optins){
+
+					url = safari_hack(url);
+
+					// Parse parameters
+					var params = hello.utils.param(url.split('?')[1]);
+
+					expect(params.scope).to.not.contain(common_scope);
+					done();
+				});
+
+				window.open = spy;
+
+				hello.login('testable', {scope:common_scope});
 			});
 
 		});

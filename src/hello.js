@@ -321,7 +321,22 @@ hello.utils.extend( hello, {
 
 		// Map replace each scope with the providers default scopes
 		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m){
-			return (m in provider.scope) ? provider.scope[m] : '';
+			// Does this have a mapping?
+			if (m in provider.scope){
+				return provider.scope[m];
+			}else{
+				// Loop through all services and determine whether the scope is generic
+				for(var x in self.services){
+					var _scopes = self.services[x].scope;
+					if(_scopes && m in _scopes){
+						// found an instance of this scope, so lets not assume its special
+						return '';
+					}
+				}
+				// this is a unique scope to this service so lets in it.
+				return m;
+			}
+
 		}).replace(/[,\s]+/ig, ',');
 
 		// remove duplication and empty spaces
