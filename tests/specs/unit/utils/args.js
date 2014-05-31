@@ -41,11 +41,15 @@ describe('utils / args', function(){
 
 		var value = args({str:'s', obj: 'o', func : 'f'}, [function(){}]);
 
-		expect( value ).to.be.an( 'object' );
 
-		expect( value ).to.not.have.property('str');
+		expect( value )
 
-		expect( value ).to.not.have.property('obj');
+			.to.be.an( 'object' )
+
+			.and.to.not.have.property('str')
+
+			.and.to.not.have.property('obj');
+
 
 		expect( value.func ).to.be.a( 'function' );
 
@@ -57,11 +61,14 @@ describe('utils / args', function(){
 			func : function(){}
 		}]);
 
-		expect( value ).to.be.an( 'object' );
+		expect( value )
 
-		expect( value ).to.not.have.property('str');
+			.to.be.an( 'object' )
 
-		expect( value ).to.not.have.property('obj');
+			.and.to.not.have.property('str')
+
+			.and.to.not.have.property('obj');
+
 
 		expect( value.func ).to.be.a( 'function' );
 

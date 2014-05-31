@@ -5,15 +5,27 @@ define([
 ){
 
 	var utils = hello.utils;
-	//
-	// Test
-	//
-	var test = document.getElementById('test');
 
 	//
 	// Are errors thrown if an invalid network is provided
 	//
 	describe('utils / dataToJSON', function(){
+
+		var test;
+
+		beforeEach(function(){
+
+			test = document.createElement('div');
+			document.body.appendChild(test);
+
+		});
+
+		afterEach(function(){
+
+			test.parentNode.removeChild(test);
+
+		});
+
 
 		it('should extrapolate the data in a form', function(){
 
@@ -42,6 +54,7 @@ define([
 				// The data object can't be altered
 				expect( obj.data.tagName.toUpperCase() ).to.be( "FORM" );
 			}
+
 		});
 	});
 
