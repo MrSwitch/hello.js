@@ -26,7 +26,7 @@ var hello = function(name){
 hello.utils = {
 	//
 	// Extend the first object with the properties and methods of the second
-	extend : (function extend(r /*, a[, b[, ...]] */){
+	extend : function(r /*, a[, b[, ...]] */){
 
 		// Get the arguments as an array but ommit the initial item
 		var args = Array.prototype.slice.call(arguments,1);
@@ -36,7 +36,7 @@ hello.utils = {
 			if( r instanceof Object && a instanceof Object && r !== a ){
 				for(var x in a){
 					//if(a.hasOwnProperty(x)){
-					r[x] = extend( r[x], a[x] );
+					r[x] = hello.utils.extend( r[x], a[x] );
 					//}
 				}
 			}
@@ -45,7 +45,7 @@ hello.utils = {
 			}
 		}
 		return r;
-	})
+	}
 };
 
 
@@ -321,7 +321,22 @@ hello.utils.extend( hello, {
 
 		// Map replace each scope with the providers default scopes
 		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m){
-			return (m in provider.scope) ? provider.scope[m] : '';
+			// Does this have a mapping?
+			if (m in provider.scope){
+				return provider.scope[m];
+			}else{
+				// Loop through all services and determine whether the scope is generic
+				for(var x in self.services){
+					var _scopes = self.services[x].scope;
+					if(_scopes && m in _scopes){
+						// found an instance of this scope, so lets not assume its special
+						return '';
+					}
+				}
+				// this is a unique scope to this service so lets in it.
+				return m;
+			}
+
 		}).replace(/[,\s]+/ig, ',');
 
 		// remove duplication and empty spaces
@@ -1958,6 +1973,9 @@ hello.utils.extend( hello.utils, {
 	// return the type of DOM object
 	domInstance : function(type,data){
 		var test = "HTML" + (type||'').replace(/^[a-z]/,function(m){return m.toUpperCase();}) + "Element";
+		if( !data ){
+			return false;
+		}
 		if(window[test]){
 			return data instanceof window[test];
 		}else if(window.Element){
@@ -1971,9 +1989,11 @@ hello.utils.extend( hello.utils, {
 	// Clone
 	// Create a clone of an object
 	clone : function(obj){
-		if("nodeName" in obj){
+		// Does not clone Dom elements, nor Binary data, e.g. Blobs, Filelists
+		if("nodeName" in obj || this.isBinary( obj ) ){
 			return obj;
 		}
+		// But does clone everything else.
 		var clone = {}, x;
 		for(x in obj){
 			if(typeof(obj[x]) === 'object'){
@@ -2460,18 +2480,45 @@ hello.utils.extend( hello.utils, {
 	// Some of the providers require that only MultiPart is used with non-binary forms.
 	// This function checks whether the form contains binary data
 	hasBinary : function (data){
-		var w = window;
 		for(var x in data ) if(data.hasOwnProperty(x)){
-			if( (this.domInstance('input', data[x]) && data[x].type === 'file')	||
-				("FileList" in w && data[x] instanceof w.FileList) ||
-				("File" in w && data[x] instanceof w.File) ||
-				("Blob" in w && data[x] instanceof w.Blob)
-			){
+			if( this.isBinary(data[x]) ){
 				return true;
 			}
 		}
 		return false;
+	},
+
+
+	// Determines if a variable Either Is or like a FormInput has the value of a Blob
+
+	isBinary : function(data){
+
+		return data instanceof Object && (
+				(this.domInstance('input', data) && data.type === 'file') ||
+				("FileList" in window && data instanceof window.FileList) ||
+				("File" in window && data instanceof window.File) ||
+				("Blob" in window && data instanceof window.Blob));
+
+	},
+
+
+	// DataURI to Blob
+	// Converts a Data-URI to a Blob string
+	
+	toBlob : function(dataURI){
+		var reg = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
+		var m = dataURI.match(reg);
+		if(!m){
+			return dataURI;
+		}
+		var binary = atob(dataURI.replace(reg,''));
+		var array = [];
+		for(var i = 0; i < binary.length; i++) {
+			array.push(binary.charCodeAt(i));
+		}
+		return new Blob([new Uint8Array(array)], {type: m[1]});
 	}
+
 });
 
 
