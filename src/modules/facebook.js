@@ -148,6 +148,11 @@ hello.init({
 			if(p.method==='get'||p.method==='post'){
 				qs.suppress_response_codes = true;
 			}
+			// Is this a post with a data-uri?
+			if( p.method==='post' && p.data && typeof(p.data.file) === 'string'){
+				// Convert the Data-URI to a Blob
+				p.data.file = hello.utils.toBlob(p.data.file);
+			}
 			return true;
 		},
 

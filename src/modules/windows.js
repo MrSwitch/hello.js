@@ -28,16 +28,6 @@ function formatFriends(o){
 	return o;
 }
 
-function dataURItoBlob(dataURI) {
-	var reg = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
-	var m = dataURI.match(reg);
-	var binary = atob(dataURI.replace(reg,''));
-	var array = [];
-	for(var i = 0; i < binary.length; i++) {
-		array.push(binary.charCodeAt(i));
-	}
-	return new Blob([new Uint8Array(array)], {type: m[1]});
-}
 
 hello.init({
 	windows : {
@@ -99,7 +89,7 @@ hello.init({
 		// Map POST requests
 		post : {
 			"me/albums" : "me/albums",
-			"me/album" : "@{id}/files",
+			"me/album" : "@{id}/files/",
 
 			"me/folders" : '@{id|me/skydrive/}',
 			"me/files" : "@{parent|me/skydrive/}/files"
@@ -149,7 +139,7 @@ hello.init({
 
 				// Does this have a data-uri to upload as a file?
 				if( typeof( p.data.file ) === 'string' ){
-					p.data.file = dataURItoBlob(p.data.file);
+					p.data.file = hello.utils.toBlob(p.data.file);
 				}else{
 					p.data = JSON.stringify(p.data);
 					p.headers = {

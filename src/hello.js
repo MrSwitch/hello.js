@@ -2488,14 +2488,37 @@ hello.utils.extend( hello.utils, {
 		return false;
 	},
 
+
+	// Determines if a variable Either Is or like a FormInput has the value of a Blob
+
 	isBinary : function(data){
 
-		return (this.domInstance('input', data) && data.type === 'file') ||
+		return data instanceof Object && (
+				(this.domInstance('input', data) && data.type === 'file') ||
 				("FileList" in window && data instanceof window.FileList) ||
 				("File" in window && data instanceof window.File) ||
-				("Blob" in window && data instanceof window.Blob);
+				("Blob" in window && data instanceof window.Blob));
 
+	},
+
+
+	// DataURI to Blob
+	// Converts a Data-URI to a Blob string
+	
+	toBlob : function(dataURI){
+		var reg = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
+		var m = dataURI.match(reg);
+		if(!m){
+			return dataURI;
+		}
+		var binary = atob(dataURI.replace(reg,''));
+		var array = [];
+		for(var i = 0; i < binary.length; i++) {
+			array.push(binary.charCodeAt(i));
+		}
+		return new Blob([new Uint8Array(array)], {type: m[1]});
 	}
+
 });
 
 
