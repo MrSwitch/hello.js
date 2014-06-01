@@ -6,7 +6,6 @@
 	<script src="/_packages/document.js"></script>
 
 	<script src="client_ids.js"></script>
-	<style>ul:empty:after{content:'empty';font-weight:bold;color:#aaa;}</style>
 </head>
 <body>
 	<h1>hello.js - Login Events</h1>
@@ -14,23 +13,25 @@
 	<button onclick="login('facebook')">Login Facebook</button>
 	<button onclick="login('windows')">Login Windows</button>
 
+<button style="float:right;" onclick="this.nextElementSibling.innerHTML='';">Clear</button>
+<pre class="response"></pre>
+
+
 <script class="pre" src="../src/hello.js"></script>
 <script src="../src/modules/windows.js"></script>
 <script src="../src/modules/facebook.js"></script>
 <script src="../src/modules/google.js"></script>
 
-<textarea id="log" style="width:100%;height:100px;"></textarea>
 
 <script class="pre">
-var log = document.getElementById('log');
 hello.on( "auth", function(e){
-	log.value = "AUTH:" + JSON.stringify( e ) + "\n" + log.value;
+	log( "auth", e );
 });
 hello.on( "auth.failed", function(e){
-	log.value = "AUTH.FAILED:" + JSON.stringify( e ) + "\n" + log.value;
+	log( "auth.failed", e );
 });
 hello.on( "auth.login", function(e){
-	log.value = "AUTH.LOGIN:" + JSON.stringify( e ) + "\n" + log.value;
+	log( "auth.login", e );
 });
 hello.init( CLIENT_IDS, {redirect_uri:'../redirect.html'} );
 </script>
@@ -39,10 +40,16 @@ hello.init( CLIENT_IDS, {redirect_uri:'../redirect.html'} );
 // Signin button click handler
 function login(network){
 	hello.login( network, {scope:'friends'}, function(e){
-		log.value = "CALLBACK:" + JSON.stringify( e ) + "\n" + log.value;
+		log("callback",e);
 	});
 }
 
+</script>
+
+<script>
+function log(name,obj){
+	document.querySelector('.response').appendChild(document.createTextNode(name + ':' + JSON.stringify(obj,true,2)));	
+}
 </script>
 
 
