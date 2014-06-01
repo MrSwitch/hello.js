@@ -24,20 +24,22 @@ define([
 
 		});
 
-		it('should not clone Blob values', function(){
+		if(window.Blob){
+			it('should not clone Blob values', function(){
 
-			var blob = new Blob();
+				var blob = new Blob();
 
-			var test = {
-				prop : blob
-			};
+				var test = {
+					prop : blob
+				};
 
-			var value = utils.clone(test);
+				var value = utils.clone(test);
 
-			// Assert that its the same but different.
-			expect( value.prop ).to.be.a( Blob ).and.to.be.equal( blob );
+				// Assert that its the same but different.
+				expect( value.prop ).to.be.a( Blob ).and.to.be.equal( blob );
 
-		});
+			});
+		}
 
 		it('should not clone DOM element', function(){
 
@@ -50,7 +52,7 @@ define([
 			var value = utils.clone(test);
 
 			// Assert that its the same but different.
-			expect( value.prop ).to.be.a( HTMLElement ).and.to.be.equal( node );
+			expect( value.prop ).to.be.a( window.Element || window.HTMLElement ).and.to.be.equal( node );
 
 		});
 
