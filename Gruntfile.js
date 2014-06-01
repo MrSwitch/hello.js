@@ -8,6 +8,9 @@ module.exports = function(grunt) {
 		jshint: {
 			files: ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js'],
 			options: {
+
+				ignores: ['tests/specs/libs/*.js'],
+
 				// options here to override JSHint defaults
 				globals: {
 					console: true,
