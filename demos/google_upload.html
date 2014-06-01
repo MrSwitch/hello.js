@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <link rel="stylesheet" href="/_packages/document.css"></script>
+<script src="/_packages/document.js"></script>
 <script src="client_ids.js"></script>
 <script>
 // DEBUGGING
@@ -10,11 +11,12 @@ window.addEventListener('message', function(){
 
 
 <h1>Upload to Google Drive</h1>
-<button id="user" onclick="hello('google').login()">Login Google</button>
 
-<form onsubmit="return upload();">
+<form onsubmit="return upload('google');">
 	<input type="file" id="file"/> <button type="submit">Upload to Google root</button>
 </form>
+
+<pre class="response"></pre>
 
 <p>Include the SDK's</p>
 <script src="../src/hello.js" class="pre"></script>
@@ -23,31 +25,34 @@ window.addEventListener('message', function(){
 <p>Add event listeners for the login completed event and make a request for the users profile. Once that's loaded push it to the page. </p>
 
 <script class="pre">
-hello.on('auth.login', function(){
-	hello("google").api("me").success(function(data){
-		document.getElementById('user').innerHTML = data.name;
-	});
-})
-
 hello.init({
 	google : GOOGLE_CLIENT_ID
 },	{
 	redirect_uri:'../redirect.html',
-	scopes : [
-		'publish_files'
-	]
+	scope : 'publish_files'
 });
 </script>
 
 <p>The function called when the above form is submitted</p>
 
 <script class="pre">
-function upload(){
-	hello("google").api('me/files', 'post', {
-		file : document.getElementById('file')
-	}).complete(function(){
-		console.log(arguments);
+function upload(network){
+
+	hello(network).login(function(){
+
+		hello("google").api('me/files', 'post', {
+			file : document.getElementById('file')
+		}).complete(function(response){
+			log(response);
+		});
+
 	});
 	return false;
+}
+</script>
+
+<script>
+function log(s){
+	document.body.querySelector('.response').appendChild(document.createTextNode(JSON.stringify(s, true, 2)));
 }
 </script>
