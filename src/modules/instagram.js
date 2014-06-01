@@ -59,7 +59,8 @@ hello.init({
 
 		scope : {
 			basic : 'basic',
-			friends : 'relationships'
+			friends : 'relationships',
+			photos : ''
 		},
 		scope_delim : ' ',
 
