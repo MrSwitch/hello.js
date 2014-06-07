@@ -1427,10 +1427,12 @@ hello.utils.extend( hello.utils, {
 			catch(e){}
 
 			// IOS bug wont let us close a popup if still loading
-			window.addEventListener('load', function(){
-				window.close();
-			});
-			console.log("Trying to close window");
+			if(window.addEventListener){
+				window.addEventListener('load', function(){
+					window.close();
+				});
+			}
+			//console.log("Trying to close window");
 		}
 
 	}
