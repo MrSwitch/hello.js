@@ -88,6 +88,9 @@ var tests = [
 	},
 	{
 		title : "List my network friends",
+		info : {
+			facebook : 'For applications registered after April 2014 only friends who have used the same app appear in resultset. See https://developers.facebook.com/docs/apps/changelog'
+		},
 		api : "api",
 		method : 'get',
 		path : 'me/friends',
@@ -650,6 +653,9 @@ function Test(test,network,parent){
 		}
 	}
 	else {
+
+		this.info = test.info && test.info[network];
+
 		var action = {'delete':'del'}[this.method] || this.method;
 		this.enabled = {login:1,logout:1,getAuthResponse:1}[this.method] || (action in hello.services[network] && test.path in hello.services[network][action] );
 

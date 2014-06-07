@@ -194,3 +194,37 @@ button{
 		background-color: red;
 	}
 }
+
+
+.tooltip{
+
+	@color:#444;
+	display: inline-block;
+	position:absolute;
+
+	&:before{
+		background: @color;
+		border-radius: 50%;
+		color: #FFF;
+		content: '?';
+		display: inline-block;
+		line-height: 1;
+		text-align: center;
+		width: 1em;
+		vertical-align: top;
+	}
+
+	&>span{
+		background:white;
+		border:1px solid @color;
+		display:none;
+		padding:10px;
+		position: absolute;
+		min-width:200px;
+	}
+	&:hover{
+		& > span{
+			display: inline-block;
+		}
+	}
+}
