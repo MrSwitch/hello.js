@@ -80,13 +80,13 @@ hello.init({
 
 		// Authorization scopes
 		scope : {
-			basic			: '',
+			basic			: 'public_profile',
 			email			: 'email',
 			birthday		: 'user_birthday',
 			events			: 'user_events',
 			photos			: 'user_photos,user_videos',
 			videos			: 'user_photos,user_videos',
-			friends			: '',
+			friends			: 'user_friends',
 			files			: 'user_photos,user_videos',
 			
 			publish_files	: 'user_photos,user_videos,publish_stream',
