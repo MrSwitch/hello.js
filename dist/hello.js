@@ -1127,7 +1127,13 @@ hello.utils.extend( hello.utils, {
 		// Define the callback function
 		window[guid] = function(){
 			// Trigger the callback
-			var bool = callback.apply(this, arguments);
+			var bool;
+			try{
+				bool = callback.apply(this, arguments);
+			}
+			catch(e){
+				console.error(e);
+			}
 
 			if(bool){
 				// Remove this handler reference
@@ -1405,13 +1411,11 @@ hello.utils.extend( hello.utils, {
 						parent[cb](obj);
 					}
 					catch(e){
-						console.error("Error thrown whilst executing parent callback, "+cb, e);
-						return;
+						// "Error thrown whilst executing parent callback"
 					}
 				}
 				else{
-					console.error("Error: Callback missing from parent window, snap!");
-					return;
+					// "Error: Callback missing from parent window, snap!"
 				}
 
 			}
@@ -1423,10 +1427,12 @@ hello.utils.extend( hello.utils, {
 			catch(e){}
 
 			// IOS bug wont let us close a popup if still loading
-			window.addEventListener('load', function(){
-				window.close();
-			});
-			console.log("Trying to close window");
+			if(window.addEventListener){
+				window.addEventListener('load', function(){
+					window.close();
+				});
+			}
+			//console.log("Trying to close window");
 		}
 
 	}
