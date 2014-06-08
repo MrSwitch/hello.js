@@ -783,7 +783,7 @@ Services are added to HelloJS as "modules" for more information about creating y
 ## OAuth Proxy
 
 
-A list of the service providers OAuth* mechanisms is available at [OAuth Proxy](http://adodson.com/hello.js/#oauth_proxy)
+A list of the service providers OAuth* mechanisms is available at [Provider OAuth Mechanisms](http://adodson.com/hello.js/#oauth-proxy)
 
 
 
