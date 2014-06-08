@@ -787,9 +787,9 @@ A list of the service providers OAuth* mechanisms is available at [Provider OAut
 
 
 
-For providers which support only OAuth1 and OAuth2 + Authorisation Code flows. HelloJS directs the the authentication flow via a webservice to exchange temporary tokens for an access token. In the case of OAuth1, the webservice also signs subsequent API requests.
+For providers which support only OAuth1 and OAuth2 with Authorization Code flows. HelloJS directs the the authentication flow via a webservice to exchange temporary tokens for an access token. In the case of OAuth1, the webservice also signs subsequent API requests.
 
-**Quick start** Register your app ID's at the beta service, [//auth-server for OAuth1 and OAuth2 + Autorization Code](https://auth-server.herokuapp.com/)
+**Quick start** Register your app ID's at the beta service, [//auth-server for OAuth1 and OAuth2 (with Authorization Code)](https://auth-server.herokuapp.com/)
 
 
 As a shim HelloJS uses a service hosted at [https://auth-server.herokuapp.com/](https://auth-server.herokuapp.com/). Developers may add their own network registration AppID/client_id and secret to this service in order to get up and running.

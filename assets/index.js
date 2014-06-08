@@ -67,27 +67,27 @@ var tests = [
 		}
 	},
 	{
-		title : "OAuth2 services which do not require server side authorization",
+		title : "OAuth2: Implicit Grant, services which do not require server side authorization",
 		api : "oauth",
-		method : "OAuth2 + Implicit Grant",
+		method : "OAuth2: Implicit Grant",
 		filter : function(test){
 			var oauth = hello.services[test.network].oauth;
 			return oauth.version === 2 && oauth.response_type !== 'code';
 		}
 	},
 	{
-		title : "OAuth2 services which require server side authorzation",
+		title : "OAuth2: Authorization Code, services which require oauth_proxy",
 		api : "oauth",
-		method : "OAuth2 + Authorization code",
+		method : "OAuth2: Authorization code",
 		filter : function(test){
 			var oauth = hello.services[test.network].oauth;
 			return oauth.version === 2 && oauth.response_type === 'code';
 		}
 	},
 	{
-		title : "OAuth 1 + 1a services which require server side authorzation",
+		title : "OAuth 1 + 1a, services which require oauth_proxy",
 		api : "oauth",
-		method : "oauth1",
+		method : "oauth1 & 1a",
 		filter : function(test){
 			return hello.services[test.network].oauth.version !== 2;
 		}
