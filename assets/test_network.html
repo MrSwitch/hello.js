@@ -29,9 +29,14 @@
 			</td>
 			<!-- ko foreach:variants -->
 			<td>
+				<!-- ko if:expected -->
 				<button data-bind="visible: enabled, click:run, css:{ working: status()==='working'}, attr:{ title : 'Execute test for '+network }" class="run" title="Run this test"></button>
 				<button class="response" data-bind="visible: enabled, css: { error : passed() === false, passed : passed() === true, exception:status()==='exception' }, visible:passed()===false||passed()===true||response(), click:function(){var bool = !($parent.debug()&&showResponse()); showResponse(bool);$parent.debug(bool);}"></button>
 				<span class="tooltip" data-bind="visible:info"><span data-bind="beautify:info"></span></span>
+				<!-- /ko -->
+				<!-- ko if:!expected -->
+				<button data-bind="visible:enabled" class="response passed"></button>
+				<!-- /ko -->
 			</td>
 			<!-- /ko -->
 		</tr>

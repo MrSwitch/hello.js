@@ -38,7 +38,8 @@ hello.init({
 		oauth : {
 			version : 2,
 			auth : 'https://github.com/login/oauth/authorize',
-			grant : 'https://github.com/login/oauth/access_token'
+			grant : 'https://github.com/login/oauth/access_token',
+			response_type : 'code'
 		},
 		scope : {
 			basic           : '',

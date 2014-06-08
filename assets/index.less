@@ -71,22 +71,31 @@ table.testtable{
 		text-align:center;
 	}
 
-	td.method span.get{
-		background-color:#0F6AB4;
-	}
-	td.method span.post{
-		background-color:#10A54A;
-	}
-	td.method span.put{
-		background-color:#c5862b;
-	}
-	td.method span.delete{
-		background-color:red;
-	}
+	td.method{
+		span{
+			background-color:#4E5160;
+			color:white;
 
-	td.method span.login, td.method span.logout, td.method span.getAuthResponse{
-		background-color:#FF0;
-		color:#444;
+			&.get,
+			&.post,
+			&.put,
+			&.delete{
+			}
+
+			&.get{
+				background-color:#0F6AB4;
+			}
+			&.post{
+				background-color:#10A54A;
+			}
+			&.put{
+				background-color:#c5862b;
+			}
+			&.delete{
+				background-color:red;
+			}
+
+		}
 	}
 
 	td,th{

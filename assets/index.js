@@ -59,8 +59,37 @@ var tests = [
 		data : {
 			force : true
 		},
+		filter : function(test){
+			return "logout" in hello.services[test.network];
+		},
 		expected : {
 			network : reg.string
+		}
+	},
+	{
+		title : "OAuth2 services which do not require server side authorization",
+		api : "oauth",
+		method : "OAuth2 + Implicit Grant",
+		filter : function(test){
+			var oauth = hello.services[test.network].oauth;
+			return oauth.version === 2 && oauth.response_type !== 'code';
+		}
+	},
+	{
+		title : "OAuth2 services which require server side authorzation",
+		api : "oauth",
+		method : "OAuth2 + Authorization code",
+		filter : function(test){
+			var oauth = hello.services[test.network].oauth;
+			return oauth.version === 2 && oauth.response_type === 'code';
+		}
+	},
+	{
+		title : "OAuth 1 + 1a services which require server side authorzation",
+		api : "oauth",
+		method : "oauth1",
+		filter : function(test){
+			return hello.services[test.network].oauth.version !== 2;
 		}
 	},
 	{
@@ -169,7 +198,8 @@ var tests = [
 			message : "Running the tests",
 			link : window.location.href,
 			picture : "http://adodson.com/hello.js/assets/logo.png"
-		}
+		},
+		expected : {}
 	},
 	{
 		title : "List my albums",
@@ -659,9 +689,9 @@ function Test(test,network,parent){
 		var action = {'delete':'del'}[this.method] || this.method;
 		this.enabled = {login:1,logout:1,getAuthResponse:1}[this.method] || (action in hello.services[network] && test.path in hello.services[network][action] );
 
-		// Test logout force?
-		if( action === 'logout' && Object(test.data).force ){
-			this.enabled = (action in hello.services[network]);
+		// Test filter
+		if( test.filter ){
+			this.enabled = test.filter(this);
 		}
 	}
 

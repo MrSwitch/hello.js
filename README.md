@@ -782,11 +782,28 @@ Services are added to HelloJS as "modules" for more information about creating y
 
 ## OAuth Proxy
 
-Services which rely on the OAuth 1 or OAuth2 token exchange authentication methods require a server side handshake with the secret key. This is unlike client-side OAuth 2 which doesn't need a secret and verifies the app based on the redirect_uri property.
 
-Making HelloJS work with secret keys requires a web services where the secret key is used to authorize the user and sign subsequent API requests in the case of OAuth1. As a shim HelloJS uses a service hosted at [https://auth-server.herokuapp.com/](https://auth-server.herokuapp.com/). Developers may add their own network registration AppID/client_id and secret to this service in order to get up and running.
+A list of the service providers OAuth* mechanisms is available at [OAuth Proxy](http://adodson.com/hello.js/#oauth_proxy)
 
-The aforementioned service uses [//node-oauth-shim](https://npmjs.org/package/oauth-shim), so if you want to roll your own please look there for installation instructions and usage. Override the default path for this service in HelloJS at the point of calling hello.init, e.g. `hello.init(credentials, {oauth_proxy:'//path/to/oauth-shim-proxy'})`.
+
+
+For providers which support only OAuth1 and OAuth2 + Authorisation Code flows. HelloJS directs the the authentication flow via a webservice to exchange temporary tokens for an access token. In the case of OAuth1, the webservice also signs subsequent API requests.
+
+**Quick start** Register your app ID's at the beta service, [//auth-server for OAuth1 and OAuth2 + Autorization Code](https://auth-server.herokuapp.com/)
+
+
+As a shim HelloJS uses a service hosted at [https://auth-server.herokuapp.com/](https://auth-server.herokuapp.com/). Developers may add their own network registration AppID/client_id and secret to this service in order to get up and running.
+
+Alternatively the aforementioned service uses [//node-oauth-shim](https://npmjs.org/package/oauth-shim), so if you want to roll your own please look there for installation instructions and usage. Override the default path for this service in HelloJS at the point of calling hello.init, like so...
+
+```javascript
+hello.init(
+	CLIENT_IDS,
+	{
+		oauth_proxy : 'https://auth-server.herokuapp.com/proxy'
+	}
+)
+```
 
 
 ## Browser Support

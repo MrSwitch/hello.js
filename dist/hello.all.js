@@ -279,7 +279,7 @@ hello.utils.extend( hello, {
 		//
 		p.qs = {
 			client_id	: provider.id,
-			response_type : opts.response_type,
+			response_type : provider.oauth.response_type || opts.response_type,
 			redirect_uri : opts.redirect_uri,
 			display		: opts.display,
 			scope		: 'basic',
@@ -377,10 +377,10 @@ hello.utils.extend( hello, {
 		//
 		p.qs.redirect_uri = utils.realPath(p.qs.redirect_uri);
 
+
 		// Add OAuth to state
-		if(provider.oauth){
-			p.qs.state.oauth = provider.oauth;
-		}
+		p.qs.state.oauth = provider.oauth;
+
 
 		// Convert state to a string
 		p.qs.state = JSON.stringify(p.qs.state);
@@ -2968,7 +2968,9 @@ hello.init({
 			
 			publish_files	: 'user_photos,user_videos,publish_stream',
 			publish			: 'publish_stream',
-			create_event	: 'create_event',
+
+			// Deprecated in v2.0
+			// create_event	: 'create_event',
 
 			offline_access : 'offline_access'
 		},
@@ -3402,7 +3404,8 @@ hello.init({
 		oauth : {
 			version : 2,
 			auth : 'https://github.com/login/oauth/authorize',
-			grant : 'https://github.com/login/oauth/access_token'
+			grant : 'https://github.com/login/oauth/access_token',
+			response_type : 'code'
 		},
 		scope : {
 			basic           : '',
