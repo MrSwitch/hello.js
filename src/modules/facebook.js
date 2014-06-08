@@ -91,7 +91,9 @@ hello.init({
 			
 			publish_files	: 'user_photos,user_videos,publish_stream',
 			publish			: 'publish_stream',
-			create_event	: 'create_event',
+
+			// Deprecated in v2.0
+			// create_event	: 'create_event',
 
 			offline_access : 'offline_access'
 		},
