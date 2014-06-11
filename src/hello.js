@@ -242,7 +242,12 @@ hello.utils.extend( hello, {
 
 		//
 		// Create a global listener to capture events triggered out of scope
-		var callback_id = utils.globalEvent(function(obj){
+		var callback_id = utils.globalEvent(function(str){
+
+			// Save this locally
+			// responseHandler returns a string, lets save this locally
+			var obj = JSON.parse(str);
+			hello.utils.store(obj.network, obj);
 
 			//
 			// Cancel the popup close listener
@@ -1127,7 +1132,6 @@ hello.utils.extend( hello.utils, {
 		// Define the callback function
 		window[guid] = function(){
 			// Trigger the callback
-			var bool;
 			try{
 				bool = callback.apply(this, arguments);
 			}
@@ -1343,7 +1347,7 @@ hello.utils.extend( hello.utils, {
 			// API Calls
 			// IFRAME HACK
 			// Result is serialized JSON string.
-			if(p&&p.callback&&"result" in p && p.result ){
+			else if(p&&p.callback&&"result" in p && p.result ){
 				// trigger a function in the parent
 				if(p.callback in parent){
 					parent[p.callback](JSON.parse(p.result));
@@ -1407,8 +1411,13 @@ hello.utils.extend( hello.utils, {
 
 				// Call the globalEvent function on the parent
 				if(cb in parent){
+
+					// its safer to pass back a string to the parent, rather than an object/array
+					// Better for IE8
+					var str = JSON.stringify(obj);
+
 					try{
-						parent[cb](obj);
+						parent[cb](str);
 					}
 					catch(e){
 						// "Error thrown whilst executing parent callback"
