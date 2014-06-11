@@ -99,8 +99,9 @@ hello.init({
 					for(var i=0;i<o.data.length;i++){
 						var d = o.data[i];
 						if(d.type !== 'image'){
-							delete o.data[i];
+							o.data.splice(i,1);
 							i--;
+							continue;
 						}
 						d.thumbnail = d.images.thumbnail.url;
 						d.picture = d.images.standard_resolution.url;
