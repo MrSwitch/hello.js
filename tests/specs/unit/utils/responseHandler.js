@@ -95,6 +95,10 @@ describe('utils / responseHandler', function(){
 			expect( spy2.calledOnce ).to.be.ok();
 
 			var response = spy2.args[0][0];
+
+			expect( response ).to.be.a('string' );
+			response = JSON.parse(response);
+
 			expect( response ).to.have.property('network', _state.network );
 			expect( response ).to.have.property('access_token', _access_token );
 
@@ -117,6 +121,10 @@ describe('utils / responseHandler', function(){
 			expect( spy2.calledOnce ).to.be.ok();
 
 			var response = spy2.args[0][0];
+
+			expect( response ).to.be.a('string' );
+			response = JSON.parse(response);
+
 			expect( response ).to.have.property('network', _state.network );
 			expect( response ).to.have.property('access_token', _access_token );
 
@@ -137,6 +145,10 @@ describe('utils / responseHandler', function(){
 			expect( spy2.calledOnce ).to.be.ok();
 
 			var response = spy2.args[0][0];
+
+			expect( response ).to.be.a('string' );
+			response = JSON.parse(response);
+
 			expect( response ).to.have.property('error');
 			expect( response.error ).to.have.property('code', 'error' )
 									.and.to.have.property('message', 'description' );
