@@ -147,27 +147,27 @@ button{
 	&.response{
 		color : white;
 		border-color:transparent;
-	}
-	&.response.error{
-		background-color:red;
-	}
-	&.response.passed{
-		background-color:#10A54A;
-	}
-	&.response.exception{
-		background-color:orange;
+		&.error{
+			background-color:red;
+			&:after{
+				content: "\02716";
+			}
+		}
+		&.passed{
+			background-color:#10A54A;
+			&:after{
+				content: "\02714";
+			}
+		}
+		&.exception{
+			background-color:orange;
+			&:after{
+				content: "?";
+			}
+		}
 	}
 	&.pending{
 		background-color:lime;
-	}
-	&.response.error:after{
-		content: "\02716";
-	}
-	&.response.passed:after{
-		content: "\02714";
-	}
-	&.response.exception:after{
-		content: "?";
 	}
 }
 
