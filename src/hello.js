@@ -404,12 +404,27 @@ hello.utils.extend( hello, {
 		// URL
 		//
 		if( parseInt(provider.oauth.version,10) === 1 ){
+
 			// Turn the request to the OAuth Proxy for 3-legged auth
 			url = utils.qs( opts.oauth_proxy, p.qs );
 		}
+
+		// Refresh token
+		else if( opts.display === 'none' && provider.oauth.grant && session.refresh_token ){
+
+			// Add the refresh_token to the request
+			p.qs.refresh_token = session.refresh_token;
+
+			// Define the request path
+			url = utils.qs( opts.oauth_proxy, p.qs );
+		}
+
+		// 
 		else{
+
 			url = utils.qs( provider.oauth.auth, p.qs );
 		}
+
 
 		self.emit("notice", "Authorization URL " + url );
 

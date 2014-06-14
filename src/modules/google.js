@@ -478,16 +478,22 @@
 
 			// Login
 			login : function(p){
-				// Google doesn't like display=none
 				if(p.qs.display==='none'){
+					// Google doesn't like display=none
 					p.qs.display = '';
+				}
+				if(p.qs.response_type==='code'){
+
+					// Lets set this to an offline access to return a refresh_token
+					p.qs.access_type = 'offline';
 				}
 			},
 
 			// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
 			oauth : {
 				version : 2,
-				auth : "https://accounts.google.com/o/oauth2/auth"
+				auth : "https://accounts.google.com/o/oauth2/auth",
+				grant : "https://accounts.google.com/o/oauth2/token"
 			},
 
 			// Authorization scopes
