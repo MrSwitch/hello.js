@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/_packages/document.css"></script>
+<script src="/_packages/document.js"></script>
+<script src="client_ids.js"></script>
+
+<h1>HelloJS and Google</h1>
+<p>Login to google using request_type = code</p>
+
+<button onclick="login('google');">Login Google</button>
+
+<pre class="response"></pre>
+
+<script src="../src/hello.js" class="pre"></script>
+<script src="../src/modules/google.js" class="pre"></script>
+
+<script class="pre">
+function login(network){
+
+	// By defining response type to code, the OAuth flow that will return a refresh token to be used to refresh the access token
+	// However this will require the oauth_proxy server
+
+	hello(network).login( { response_type:'code', oauth_proxy : 'http://localhost:5500/proxy' }, log );
+}
+</script>
+
+<p>Initiate the library</p>
+
+<script class="pre">
+hello.init({
+	google : GOOGLE_CLIENT_ID
+},{
+	redirect_uri:'../redirect.html',
+	scope : 'friends'
+});
+</script>
+
+<script>
+function log(s){
+	document.body.querySelector('.response').appendChild(document.createTextNode(JSON.stringify(s, true, 2)));
+}
+</script>
