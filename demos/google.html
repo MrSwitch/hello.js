@@ -19,7 +19,7 @@ function login(network){
 	// By defining response type to code, the OAuth flow that will return a refresh token to be used to refresh the access token
 	// However this will require the oauth_proxy server
 
-	hello(network).login( { response_type:'code', oauth_proxy : 'http://localhost:5500/proxy' }, log );
+	hello(network).login( { response_type:'code' }, log );
 }
 </script>
 
