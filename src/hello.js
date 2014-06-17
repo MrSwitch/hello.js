@@ -410,7 +410,7 @@ hello.utils.extend( hello, {
 		}
 
 		// Refresh token
-		else if( opts.display === 'none' && provider.oauth.grant && session.refresh_token ){
+		else if( opts.display === 'none' && provider.oauth.grant && session && session.refresh_token ){
 
 			// Add the refresh_token to the request
 			p.qs.refresh_token = session.refresh_token;
