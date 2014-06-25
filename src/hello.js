@@ -1200,12 +1200,27 @@ hello.utils.extend( hello.utils, {
 			// Add an event listener to listen to the change in the popup windows URL
 			// This must appear before popup.focus();
 			if( popup && popup.addEventListener ){
+
+				// Get the origin of the redirect URI
+
+				var a = document.createElement('a');
+				a.href = redirect_uri;
+
+				var redirect_uri_origin = a.origin || (a.protocol + "//" + a.hostname);
+
+
+				// Listen to changes in the InAppBrowser window
+
 				popup.addEventListener('loadstart', function(e){
 
 					var url = e.url;
 
 					// Is this the path, as given by the redirect_uri?
-					if(url.indexOf(redirect_uri)!==0){
+					// Check the new URL agains the redirect_uri_origin.
+					// According to #63 a user could click 'cancel' in some dialog boxes ....
+					// The popup redirects to another page with the same origin, yet we still wish it to close.
+
+					if(url.indexOf(redirect_uri_origin)!==0){
 						return;
 					}
 
@@ -1222,19 +1237,17 @@ hello.utils.extend( hello.utils, {
 							// Change the location of the popup
 							assign : function(location){
 								
-								// Unfouurtunatly an app is unable to change the location of a WebView window.
-								// Soweopen a new one
+								// Unfourtunatly an app is may not change the location of a InAppBrowser window.
+								// So to shim this, just open a new one.
+
 								popup.addEventListener('exit', function(){
-									//
-									// For some reason its failing to close the window if we open a new one two soon
-									// 
+
+									// For some reason its failing to close the window if a new window opens too soon.
+
 									setTimeout(function(){
 										open(location);
 									},1000);
 								});
-
-								// kill the previous popup
-								_popup.close();
 							},
 							search : a.search,
 							hash : a.hash,
@@ -1252,7 +1265,15 @@ hello.utils.extend( hello.utils, {
 					// URL string
 					// Window - any action such as window relocation goes here
 					// Opener - the parent window which opened this, aka this script
+
 					hello.utils.responseHandler( _popup, window );
+
+
+					// Always close the popup reguardless of whether the hello.utils.responseHandler detects a state parameter or not in the querystring.
+					// Such situations might arise such as those in #63
+
+					_popup.close();
+
 				});
 			}
 
