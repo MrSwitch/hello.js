@@ -178,7 +178,7 @@ hello.utils.extend( hello, {
 
 			// Do this immediatly incase the browser changes the current path.
 			if("redirect_uri" in options){
-				this.settings.redirect_uri = utils.realPath(options.redirect_uri);
+				this.settings.redirect_uri = utils.url(options.redirect_uri).href;
 			}
 		}
 
@@ -380,7 +380,7 @@ hello.utils.extend( hello, {
 		// REDIRECT_URI
 		// Is the redirect_uri root?
 		//
-		p.qs.redirect_uri = utils.realPath(p.qs.redirect_uri);
+		p.qs.redirect_uri = utils.url(p.qs.redirect_uri).href;
 
 
 		// Add OAuth to state
@@ -873,26 +873,25 @@ hello.utils.extend( hello.utils, {
 	},
 
 	//
-	// realPath
-	// Converts relative URL's to fully qualified URL's
-	realPath : function(path){
+	// URL
+	// Returns a URL instance
+	//
+	url : function(path){
 
-		var location = window.location;
-
+		// If the path is empty
 		if(!path){
-			return location.href;
+			return window.location;
 		}
-		if( path.indexOf('/') === 0 ){
-			path = location.protocol + ( path.indexOf('//') === 0 ? path : '//' + location.host + path );
+		// Chrome and FireFox support new URL() to extract URL objects
+		else if( window.URL && URL instanceof Function ){
+			return new URL(path, window.location);
 		}
-		// Is the redirect_uri relative?
-		else if( !path.match(/^https?\:\/\//) ){
-			path = (location.href.replace(/#.*/,'').replace(/\/[^\/]+$/,'/') + path).replace(/\/\.\//g,'/');
+		else{
+			// ugly shim, it works!
+			var a = document.createElement('a');
+			a.href = path;
+			return a;
 		}
-		while( /\/[^\/]+\/\.\.\//g.test(path) ){
-			path = path.replace(/\/[^\/]+\/\.\.\//g, '/');
-		}
-		return path;
 	},
 
 	//
@@ -1203,9 +1202,7 @@ hello.utils.extend( hello.utils, {
 
 				// Get the origin of the redirect URI
 
-				var a = document.createElement('a');
-				a.href = redirect_uri;
-
+				var a = hello.utils.url(redirect_uri);
 				var redirect_uri_origin = a.origin || (a.protocol + "//" + a.hostname);
 
 
@@ -1225,8 +1222,7 @@ hello.utils.extend( hello.utils, {
 					}
 
 					// Split appart the URL
-					var a = document.createElement('a');
-					a.href = url;
+					var a = hello.utils.url(url);
 
 
 					// We dont have window operations on the popup so lets create some
@@ -1251,7 +1247,7 @@ hello.utils.extend( hello.utils, {
 							},
 							search : a.search,
 							hash : a.hash,
-							href : url
+							href : a.href
 						},
 						close : function(){
 							//alert('closing location:'+url);
