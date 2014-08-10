@@ -1900,9 +1900,14 @@ hello.api = function(){
 				x.onprogress = function(e){
 					self.emit("progress", e);
 				};
-				x.upload.onprogress = function(e){
-					self.emit("uploadprogress", e);
-				};
+
+				// Windows Phone does not support xhr.upload, see #74
+				// Feaure detect it...
+				if(x.upload){
+					x.upload.onprogress = function(e){
+						self.emit("uploadprogress", e);
+					};
+				}
 			}
 			else{
 
