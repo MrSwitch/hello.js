@@ -246,8 +246,20 @@ hello.utils.extend( hello, {
 
 			// Save this locally
 			// responseHandler returns a string, lets save this locally
-			var obj = JSON.parse(str);
-			hello.utils.store(obj.network, obj);
+			var obj;
+
+			if ( str ){
+				obj = JSON.parse(str);
+				hello.utils.store(obj.network, obj);
+			}
+			else {
+				obj = {
+					error : {
+						code : 'cancelled',
+						message : 'The authentication was not completed'
+					}
+				};
+			}
 
 			//
 			// Cancel the popup close listener
@@ -1309,7 +1321,7 @@ hello.utils.extend( hello.utils, {
 	//
 	responseHandler : function( window, parent ){
 
-		var utils = this;
+		var utils = this, p;
 
 		//
 		var location = window.location;
@@ -1327,13 +1339,32 @@ hello.utils.extend( hello.utils, {
 		};
 
 		//
+		// Is this an auth relay message which needs to call the proxy?
+		// 
+
+		p = utils.param(location.search);
+
+		// IS THIS AN OAUTH2 SERVER RESPONSE? OR AN OAUTH1 SERVER RESPONSE?
+		if( p  && ( (p.code&&p.state) || (p.oauth_token&&p.proxy_url) ) ){
+			// Add this path as the redirect_uri
+			p.redirect_uri = location.href.replace(/[\?\#].*$/,'');
+			// JSON decode
+			var state = JSON.parse(p.state);
+			// redirect to the host
+			var path = (state.oauth_proxy || p.proxy_url) + "?" + utils.param(p);
+
+			relocate( path );
+			return;
+		}
+
+		//
 		// Save session, from redirected authentication
 		// #access_token has come in?
 		//
 		// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
 		// SoundCloud is the state in the querystring and the token in the hashtag, so we'll mix the two together
 		
-		var p = utils.merge(utils.param(location.search||''), utils.param(location.hash||''));
+		p = utils.merge(utils.param(location.search||''), utils.param(location.hash||''));
 
 		
 		// if p.state
@@ -1376,14 +1407,18 @@ hello.utils.extend( hello.utils, {
 				authCallback( p, window, parent );
 			}
 
-			// API Calls
-			// IFRAME HACK
+			// API Call, or a Cancelled login
 			// Result is serialized JSON string.
-			else if(p&&p.callback&&"result" in p && p.result ){
+			else if( p.callback && p.callback in parent ){
+
 				// trigger a function in the parent
-				if(p.callback in parent){
-					parent[p.callback](JSON.parse(p.result));
-				}
+				var res = "result" in p && p.result ? JSON.parse(p.result) : false;
+
+				// Trigger the callback on the parent
+				parent[p.callback]( res );
+
+				// Close this window
+				closeWindow();
 			}
 		}
 		//
@@ -1396,20 +1431,6 @@ hello.utils.extend( hello.utils, {
 			return;
 		}
 
-		// redefine
-		p = utils.param(location.search);
-
-		// IS THIS AN OAUTH2 SERVER RESPONSE? OR AN OAUTH1 SERVER RESPONSE?
-		if((p.code&&p.state) || (p.oauth_token&&p.proxy_url)){
-			// Add this path as the redirect_uri
-			p.redirect_uri = location.href.replace(/[\?\#].*$/,'');
-			// JSON decode
-			var state = JSON.parse(p.state);
-			// redirect to the host
-			var path = (state.oauth_proxy || p.proxy_url) + "?" + utils.param(p);
-
-			relocate( path );
-		}
 
 
 		//
@@ -1460,6 +1481,13 @@ hello.utils.extend( hello.utils, {
 				}
 
 			}
+			//console.log("Trying to close window");
+
+			closeWindow();
+		}
+
+
+		function closeWindow(){
 
 			// Close this current window
 			try{
@@ -1473,7 +1501,7 @@ hello.utils.extend( hello.utils, {
 					window.close();
 				});
 			}
-			//console.log("Trying to close window");
+
 		}
 
 	}
