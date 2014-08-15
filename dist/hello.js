@@ -178,7 +178,7 @@ hello.utils.extend( hello, {
 
 			// Do this immediatly incase the browser changes the current path.
 			if("redirect_uri" in options){
-				this.settings.redirect_uri = utils.realPath(options.redirect_uri);
+				this.settings.redirect_uri = utils.url(options.redirect_uri).href;
 			}
 		}
 
@@ -246,8 +246,20 @@ hello.utils.extend( hello, {
 
 			// Save this locally
 			// responseHandler returns a string, lets save this locally
-			var obj = JSON.parse(str);
-			hello.utils.store(obj.network, obj);
+			var obj;
+
+			if ( str ){
+				obj = JSON.parse(str);
+				hello.utils.store(obj.network, obj);
+			}
+			else {
+				obj = {
+					error : {
+						code : 'cancelled',
+						message : 'The authentication was not completed'
+					}
+				};
+			}
 
 			//
 			// Cancel the popup close listener
@@ -380,7 +392,7 @@ hello.utils.extend( hello, {
 		// REDIRECT_URI
 		// Is the redirect_uri root?
 		//
-		p.qs.redirect_uri = utils.realPath(p.qs.redirect_uri);
+		p.qs.redirect_uri = utils.url(p.qs.redirect_uri).href;
 
 
 		// Add OAuth to state
@@ -410,7 +422,7 @@ hello.utils.extend( hello, {
 		}
 
 		// Refresh token
-		else if( opts.display === 'none' && provider.oauth.grant && session.refresh_token ){
+		else if( opts.display === 'none' && provider.oauth.grant && session && session.refresh_token ){
 
 			// Add the refresh_token to the request
 			p.qs.refresh_token = session.refresh_token;
@@ -873,26 +885,25 @@ hello.utils.extend( hello.utils, {
 	},
 
 	//
-	// realPath
-	// Converts relative URL's to fully qualified URL's
-	realPath : function(path){
+	// URL
+	// Returns a URL instance
+	//
+	url : function(path){
 
-		var location = window.location;
-
+		// If the path is empty
 		if(!path){
-			return location.href;
+			return window.location;
 		}
-		if( path.indexOf('/') === 0 ){
-			path = location.protocol + ( path.indexOf('//') === 0 ? path : '//' + location.host + path );
+		// Chrome and FireFox support new URL() to extract URL objects
+		else if( window.URL && URL instanceof Function ){
+			return new URL(path, window.location);
 		}
-		// Is the redirect_uri relative?
-		else if( !path.match(/^https?\:\/\//) ){
-			path = (location.href.replace(/#.*/,'').replace(/\/[^\/]+$/,'/') + path).replace(/\/\.\//g,'/');
+		else{
+			// ugly shim, it works!
+			var a = document.createElement('a');
+			a.href = path;
+			return a;
 		}
-		while( /\/[^\/]+\/\.\.\//g.test(path) ){
-			path = path.replace(/\/[^\/]+\/\.\.\//g, '/');
-		}
-		return path;
 	},
 
 	//
@@ -1200,18 +1211,30 @@ hello.utils.extend( hello.utils, {
 			// Add an event listener to listen to the change in the popup windows URL
 			// This must appear before popup.focus();
 			if( popup && popup.addEventListener ){
+
+				// Get the origin of the redirect URI
+
+				var a = hello.utils.url(redirect_uri);
+				var redirect_uri_origin = a.origin || (a.protocol + "//" + a.hostname);
+
+
+				// Listen to changes in the InAppBrowser window
+
 				popup.addEventListener('loadstart', function(e){
 
 					var url = e.url;
 
 					// Is this the path, as given by the redirect_uri?
-					if(url.indexOf(redirect_uri)!==0){
+					// Check the new URL agains the redirect_uri_origin.
+					// According to #63 a user could click 'cancel' in some dialog boxes ....
+					// The popup redirects to another page with the same origin, yet we still wish it to close.
+
+					if(url.indexOf(redirect_uri_origin)!==0){
 						return;
 					}
 
 					// Split appart the URL
-					var a = document.createElement('a');
-					a.href = url;
+					var a = hello.utils.url(url);
 
 
 					// We dont have window operations on the popup so lets create some
@@ -1222,23 +1245,21 @@ hello.utils.extend( hello.utils, {
 							// Change the location of the popup
 							assign : function(location){
 								
-								// Unfouurtunatly an app is unable to change the location of a WebView window.
-								// Soweopen a new one
+								// Unfourtunatly an app is may not change the location of a InAppBrowser window.
+								// So to shim this, just open a new one.
+
 								popup.addEventListener('exit', function(){
-									//
-									// For some reason its failing to close the window if we open a new one two soon
-									// 
+
+									// For some reason its failing to close the window if a new window opens too soon.
+
 									setTimeout(function(){
 										open(location);
 									},1000);
 								});
-
-								// kill the previous popup
-								_popup.close();
 							},
 							search : a.search,
 							hash : a.hash,
-							href : url
+							href : a.href
 						},
 						close : function(){
 							//alert('closing location:'+url);
@@ -1252,7 +1273,15 @@ hello.utils.extend( hello.utils, {
 					// URL string
 					// Window - any action such as window relocation goes here
 					// Opener - the parent window which opened this, aka this script
+
 					hello.utils.responseHandler( _popup, window );
+
+
+					// Always close the popup reguardless of whether the hello.utils.responseHandler detects a state parameter or not in the querystring.
+					// Such situations might arise such as those in #63
+
+					_popup.close();
+
 				});
 			}
 
@@ -1292,7 +1321,7 @@ hello.utils.extend( hello.utils, {
 	//
 	responseHandler : function( window, parent ){
 
-		var utils = this;
+		var utils = this, p;
 
 		//
 		var location = window.location;
@@ -1310,13 +1339,32 @@ hello.utils.extend( hello.utils, {
 		};
 
 		//
+		// Is this an auth relay message which needs to call the proxy?
+		// 
+
+		p = utils.param(location.search);
+
+		// IS THIS AN OAUTH2 SERVER RESPONSE? OR AN OAUTH1 SERVER RESPONSE?
+		if( p  && ( (p.code&&p.state) || (p.oauth_token&&p.proxy_url) ) ){
+			// Add this path as the redirect_uri
+			p.redirect_uri = location.href.replace(/[\?\#].*$/,'');
+			// JSON decode
+			var state = JSON.parse(p.state);
+			// redirect to the host
+			var path = (state.oauth_proxy || p.proxy_url) + "?" + utils.param(p);
+
+			relocate( path );
+			return;
+		}
+
+		//
 		// Save session, from redirected authentication
 		// #access_token has come in?
 		//
 		// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
 		// SoundCloud is the state in the querystring and the token in the hashtag, so we'll mix the two together
 		
-		var p = utils.merge(utils.param(location.search||''), utils.param(location.hash||''));
+		p = utils.merge(utils.param(location.search||''), utils.param(location.hash||''));
 
 		
 		// if p.state
@@ -1359,14 +1407,18 @@ hello.utils.extend( hello.utils, {
 				authCallback( p, window, parent );
 			}
 
-			// API Calls
-			// IFRAME HACK
+			// API Call, or a Cancelled login
 			// Result is serialized JSON string.
-			else if(p&&p.callback&&"result" in p && p.result ){
+			else if( p.callback && p.callback in parent ){
+
 				// trigger a function in the parent
-				if(p.callback in parent){
-					parent[p.callback](JSON.parse(p.result));
-				}
+				var res = "result" in p && p.result ? JSON.parse(p.result) : false;
+
+				// Trigger the callback on the parent
+				parent[p.callback]( res );
+
+				// Close this window
+				closeWindow();
 			}
 		}
 		//
@@ -1379,20 +1431,6 @@ hello.utils.extend( hello.utils, {
 			return;
 		}
 
-		// redefine
-		p = utils.param(location.search);
-
-		// IS THIS AN OAUTH2 SERVER RESPONSE? OR AN OAUTH1 SERVER RESPONSE?
-		if((p.code&&p.state) || (p.oauth_token&&p.proxy_url)){
-			// Add this path as the redirect_uri
-			p.redirect_uri = location.href.replace(/[\?\#].*$/,'');
-			// JSON decode
-			var state = JSON.parse(p.state);
-			// redirect to the host
-			var path = (state.oauth_proxy || p.proxy_url) + "?" + utils.param(p);
-
-			relocate( path );
-		}
 
 
 		//
@@ -1443,6 +1481,13 @@ hello.utils.extend( hello.utils, {
 				}
 
 			}
+			//console.log("Trying to close window");
+
+			closeWindow();
+		}
+
+
+		function closeWindow(){
 
 			// Close this current window
 			try{
@@ -1456,7 +1501,7 @@ hello.utils.extend( hello.utils, {
 					window.close();
 				});
 			}
-			//console.log("Trying to close window");
+
 		}
 
 	}
@@ -1883,9 +1928,14 @@ hello.api = function(){
 				x.onprogress = function(e){
 					self.emit("progress", e);
 				};
-				x.upload.onprogress = function(e){
-					self.emit("uploadprogress", e);
-				};
+
+				// Windows Phone does not support xhr.upload, see #74
+				// Feaure detect it...
+				if(x.upload){
+					x.upload.onprogress = function(e){
+						self.emit("uploadprogress", e);
+					};
+				}
 			}
 			else{
 
