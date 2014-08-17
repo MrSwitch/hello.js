@@ -499,8 +499,8 @@
 			// Authorization scopes
 			scope : {
 				//,
-				basic : "https://www.googleapis.com/auth/plus.me https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
-				email			: '',
+				basic : "https://www.googleapis.com/auth/plus.me profile",
+				email			: 'email',
 				birthday		: '',
 				events			: '',
 				photos			: 'https://picasaweb.google.com/data/',
@@ -521,8 +521,9 @@
 
 			// Map GET requests
 			get : {
-				//	me	: "plus/v1/people/me?pp=1",
-				'me' : 'oauth2/v1/userinfo?alt=json',
+				'me'	: "plus/v1/people/me",
+				// deprecated Sept 1, 2014
+				//'me' : 'oauth2/v1/userinfo?alt=json',
 
 				// https://developers.google.com/+/api/latest/people/list
 				'me/friends' : 'plus/v1/people/me/people/visible?maxResults=@{limit|100}',
@@ -590,7 +591,10 @@
 					if(o.id){
 						o.last_name = o.family_name || (o.name? o.name.familyName : null);
 						o.first_name = o.given_name || (o.name? o.name.givenName : null);
-	//						o.name = o.first_name + ' ' + o.last_name;
+
+						if( o.emails && o.emails.length ){
+							o.email = o.emails[0].value;
+						}
 
 						formatPerson(o);
 					}
