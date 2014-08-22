@@ -895,7 +895,7 @@ hello.utils.extend( hello.utils, {
 			return window.location;
 		}
 		// Chrome and FireFox support new URL() to extract URL objects
-		else if( window.URL && URL instanceof Function ){
+		else if( window.URL && URL instanceof Function && URL.length !== 0){
 			return new URL(path, window.location);
 		}
 		else{
