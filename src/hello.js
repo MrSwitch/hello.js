@@ -1130,7 +1130,7 @@ hello.utils.extend( hello.utils, {
 
 			for(var name in this.events){if(this.events.hasOwnProperty(name)){
 
-				if( this.utils.indexOf(a,name) > -1 ){
+				if( hello.utils.indexOf(a,name) > -1 ){
 
 					for(var i=0;i<this.events[name].length;i++){
 
@@ -1143,6 +1143,8 @@ hello.utils.extend( hello.utils, {
 				}
 			}}
 		};
+
+		return this;
 
 	},
 
