@@ -22,23 +22,32 @@ hello.ui.filePicker = function(options, callback){
 
 	var main_el = create('div', {'class':prefix + "main"});
 		var head_el = create('div', {'class':prefix + "head"}, main_el);
-			var nav_el = create('div', {'class':prefix + "nav"}, head_el);
 			var path_el = create('div', {'class':prefix + "path"}, head_el);
 				var upload_btn = create('button', {'class':prefix + "upload_btn", "text":'Upload'}, path_el);
-		var body_el = create('div', {'class':prefix + "body"}, main_el);
-			var select_el = create('ul', {'class':prefix + "local", id:prefix + "local"}, body_el);
-			var camera_el = create('div', {'class':prefix + "camera",id:prefix + "camera"}, body_el);
-				var video_el = create('video', {'autoplay':true}, camera_el);
-				var snap_btn = create('button', {}, camera_el);
+		var center_el = create('div', {'class':prefix + "center"}, main_el );
+			var nav_el = create('div', {'class':prefix + "nav"}, center_el);
+			var body_el = create('div', {'class':prefix + "body"}, center_el);
+				var select_el = create('ul', {'class':prefix + "local", id:prefix + "local"}, body_el);
+				var camera_el = create('div', {'class':prefix + "camera",id:prefix + "camera"}, body_el);
+					var video_el = create('video', {'autoplay':true}, camera_el);
+					var snap_btn = create('button', {}, camera_el);
 		var footer_el = create('div', {'class':prefix + "footer"}, main_el);
 			var info_el = create('span', {'class':prefix + "info", 'text':'none'}, footer_el);
 			var done_el = create('button', {'class':prefix + "button", 'text':'Done'}, footer_el);
 			var cancel_el = create('button', {'class':prefix + "cancel", 'text':'Cancel'}, footer_el);
 
+
+	var frame_el;
+
 	// Container
 	if(!options.element){
-		main_el.className = main_el.className + " " + prefix + 'noframe';
-		options.element = document.body;
+
+		frame_el = options.element = create('div', {'class':prefix+"container"}, document.body);
+		addEvent( options.element, 'click', function(e){
+			if(e.target===options.element){
+				close();
+			}
+		});
 	}
 
 	options.element.appendChild(main_el);
@@ -54,7 +63,7 @@ hello.ui.filePicker = function(options, callback){
 
 	// Add Provider buttons
 	var services = {
-		"local" : "Pick a file"
+		"local" : "Local Computer"
 	};
 
 	var networks = hello.init();
@@ -68,9 +77,7 @@ hello.ui.filePicker = function(options, callback){
 				services[x + ":/me/files"] = "SkyDrive";
 			break;
 			default:
-				services[x + ":/me/files"] = x.replace(/^\w/, function(m){
-					return m.toUpperCase();
-				});
+				services[x + ":/me/files"] = x.replace(/^\w/, ucword );
 		}
 	}
 
@@ -87,18 +94,20 @@ hello.ui.filePicker = function(options, callback){
 	}
 
 	if(window.URL && win.navigator.getUserMedia){
-		services["camera"] = "Take a Photo";
+		services["camera"] = "Camera";
 	}
 
 	for(x in services){if(services.hasOwnProperty(x)){
-		var btn = doc.createElement('button');
-		btn.innerHTML = services[x];
+
+		var btn = create('button', {
+			'data-path' : x,
+			'name' : x.match(/:/) ? services[x] : '',
+			'html' : services[x],
+		}, nav_el);
+
 		if(x.indexOf(":")>-1){
-			btn.className = x.replace(/\:.*$/,'') + ' zocial';
+			btn.className = x.replace(/\:.*$/,'');
 		}
-		btn.setAttribute('data-path', x);
-		btn.setAttribute('name', x.match(/:/) ? services[x] : '');
-		nav_el.appendChild(btn);
 	}}
 
 	// Add Control to all buttons
@@ -138,7 +147,7 @@ hello.ui.filePicker = function(options, callback){
 	};
 
 	// Trigger upload into the current path
-	upload_btn.onclick = function(){
+	addEvent(upload_btn, 'click', function(){
 
 		// insert a form control and trigger the native picker
 		if(!upl){
@@ -178,7 +187,7 @@ hello.ui.filePicker = function(options, callback){
 		// Lets ensure we are focussed on the element for which we are triggering the click event
 		upl.focus();
 		upl.dispatchEvent(clickEvent);
-	};
+	});
 
 	// Click
 	cancel_el.onclick = function(){
@@ -215,22 +224,23 @@ hello.ui.filePicker = function(options, callback){
 	if(camera_el){
 		var video_el = camera_el.getElementsByTagName('video')[0],
 			snap_el = video_el.nextSibling;
-		video_el.onclick = function(){
+		addEvent( video_el, 'click', function(){
 			win.navigator.getUserMedia({video:true}, function(stream){
 				// Create Object
 				video_el.src = win.URL ? win.URL.createObjectURL(stream) : stream;
 			}, function(e){
 				console.log(e);
 			});
-		};
-		snap_el.onclick = function(){
+		});
+
+		addEvent(snap_el, 'click', function(){
 			var blob = elementToBlob(video_el, "snapshot.png");
 			// Create a new fileRef
 			var pointer = new fileRef({
 				name : "snapshot.png",
 				type : blob.type,
 				file : blob
-			}, current_network, snaps_el, true);
+			}, current_network, snap_el, true);
 //			}, current_network, current_bucket, true);
 
 			ref.push( pointer );
@@ -243,7 +253,7 @@ hello.ui.filePicker = function(options, callback){
 					thumbnail : dataURL
 				});
 			});
-		};
+		});
 	}
 
 	//
@@ -627,9 +637,11 @@ hello.ui.filePicker = function(options, callback){
 		// is this a popup?
 		win.close();
 
+		var container = frame_el || main_el;
+
 		// Hide the DOM element
-		if(main_el&&main_el.parentNode){
-			main_el.parentNode.removeChild(main_el);
+		if(container&&container.parentNode){
+			container.parentNode.removeChild(container);
 		}
 	}
 
@@ -651,7 +663,7 @@ hello.ui.filePicker = function(options, callback){
 	function create(type,attr,parent){
 		var el = doc.createElement(type);
 		for(var x in attr){
-			if(x==='text'){
+			if(x==='text'||x==='html'){
 				el.innerHTML = attr[x];
 			}
 			else{
@@ -662,6 +674,10 @@ hello.ui.filePicker = function(options, callback){
 			parent.appendChild(el);
 		}
 		return el;
+	}
+
+	function ucword(m){
+		return m.toUpperCase();
 	}
 
 	addEvent(doc, "keydown", function self(e){
