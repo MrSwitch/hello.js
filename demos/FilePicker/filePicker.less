@@ -19,6 +19,7 @@
 	background-color: white;
 	font-family:verdana;
 	margin:0;
+	z-index:10000;
 
 	&, *{
 		box-sizing:border-box;
@@ -150,7 +151,7 @@
 
 
 .fp-local:empty{
-	background: data-url(upload.png) no-repeat right top, data-url(pickfromweb.png) no-repeat left top, data-url(draganddrop.png) no-repeat center bottom;
+	background: data-url('./upload.png') no-repeat right top, data-url('./pickfromweb.png') no-repeat left top, data-url('./draganddrop.png') no-repeat center bottom;
 	min-height:180px;
 	height:50%;
 }
@@ -160,7 +161,7 @@
 
 	video{
 		max-width:300px;
-		background:data-url(webcam.png) no-repeat center center;
+		background:data-url('webcam.png') no-repeat center center;
 		background-size: 100%;
 		max-height:100%;
 		
@@ -278,15 +279,16 @@
 	}
 
 	@-webkit-keyframes bounce{
-		anim();
+		.anim();
 	}
 	@-moz-keyframes bounce{
-		anim();
+		.anim();
 	}
 	@-ms-keyframes bounce{
-		anim();
+		.anim();
 	}
 	@keyframes bounce{
-		anim();
+		.anim();
 	}
+
 }
