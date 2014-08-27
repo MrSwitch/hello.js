@@ -3,14 +3,16 @@
 <link rel="stylesheet" href="/_packages/document.css"></script>
 <script src="/_packages/document.js"></script>
 
-<h1>Demo loading helloJS via RequireJS</h1>
+<h1>hello.js via AMD</h1>
 <button id='google' onclick="hello.login('google');">google</button>
 <button id='facebook' onclick="hello.login('facebook');">facebook</button>
 <button id='windows' onclick="hello.login('windows');">windows</button>
 
 
+<p>Using an AMD script, such as this one...</p>
 <script class="pre" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.11/require.min.js"></script>
 
+<p>Load hello.js asynchronously and get a reference to it.</p>
 <script class="pre">
 	require( ["../dist/hello.all", "./client_ids"], function(hello){
 

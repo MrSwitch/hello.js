@@ -12,20 +12,23 @@
 		height:24px;
 	}
 </style>
-<title>HelloJS and Dropbox</title>
-<h1>HelloJS and Dropbox</h1>
+<title>hello( dropbox )</title>
+<h1>hello( dropbox )</h1>
 
-<button id='dropbox' onclick="hello.login('dropbox');">Dropbox</button>
+<button id='dropbox' onclick="hello('dropbox').login();">Dropbox</button>
 <div id="result"></div>
 <script class="pre">
 
 hello.on('auth.login', function(r){
+
+	var dropbox = hello( r.network );
+
 	// Get Profile
-	hello.api(r.network+':/me', function(p){
+	dropbox.api('/me', function(p){
 		document.getElementById(r.network).innerHTML = "Connected to "+ r.network+" as " + p.name;
 	});
 	// Get Files
-	hello.api(r.network+':/me/files', function getfile(p, target){
+	dropbox.api('/me/files', function getfile(p, target){
 		if(p.error){
 			alert(p.error.message?p.error.message:p.error);
 			return;

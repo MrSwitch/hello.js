@@ -10,7 +10,7 @@
 <script src="../src/modules/twitter.js"></script>
 
 
-<h1>HelloJS using OAuth 1.0/1.0a Providers</h1>
+<h1>HelloJS w/ OAuth 1.0&amp;1.0a</h1>
 
 <button id='yahoo' onclick="hello.login('yahoo');">yahoo</button>
 <button id='dropbox' onclick="hello.login('dropbox');">dropbox</button>
@@ -33,6 +33,11 @@ hello.init({
 	yahoo : YAHOO_CLIENT_ID,
 	twitter : TWITTER_CLIENT_ID,
 	dropbox : DROPBOX_CLIENT_ID
-}, {redirect_uri:'../redirect.html'});
+}, {
+	// defines the proxy service able to sign the OAuth1 requests
+	oauth_proxy: OAUTH_PROXY_URL,
+
+	redirect_uri:'../redirect.html'
+});
 
 </script>

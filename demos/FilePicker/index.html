@@ -52,7 +52,11 @@ document.getElementById("demo1").onclick = function(){
 
 <li>And HelloJS must be initiated like with the "files", "publish_files" and "photos" scope, like so...
 <script class="pre">
-hello.init( CLIENT_IDS, {scope:"files, publish_files, photos", redirect_uri:'../../redirect.html', oauth_proxy : OAUTH_PROXY_URL } );
+hello.init( CLIENT_IDS, {
+	scope:"files, publish_files, photos", 
+	redirect_uri:'../../redirect.html',
+	oauth_proxy : OAUTH_PROXY_URL
+});
 </script>
 </ol>
 

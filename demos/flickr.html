@@ -4,24 +4,24 @@
 
 <script src="client_ids.js"></script>
 <script src="../src/hello.js"></script>
-<script src="../src/modules/yahoo.js"></script>
+<script src="../src/modules/flickr.js"></script>
 
-<title>hello( yahoo )</title>
-<h1>hello( yahoo )</h1>
+<title>hello( flickr )</title>
+<h1>hello( flickr )</h1>
 
-<button id='login' onclick="hello.login('yahoo');">Yahoo</button>
+<button id='login' onclick="hello.login('flickr');">Flickr</button>
 <div id="result"></div>
 <script class="pre">
 
 hello.on('auth.login', function(r){
 	// Get Profile
-	hello.api(r.network+':/me', function(p){
+	hello(r.network).api('/me', function(p){
 		document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
 	});
 });
 
 hello.init({
-	'yahoo' : YAHOO_CLIENT_ID
+	'flickr' : FLICKR_CLIENT_ID
 },
 {
 	redirect_uri:'../redirect.html',
