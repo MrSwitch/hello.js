@@ -1,7 +1,7 @@
 
-
-
 # hello.js
+
+
 
 A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST API's. HelloJS standardizes paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. Its **modular** so that list is [growing](modules.html). No more spaghetti code! 
 
@@ -119,7 +119,7 @@ The [Bower](http://bower.io/) package shall install the aforementioned "/src" an
 
 - [GitHub](https://github.com/MrSwitch/hello.js/issues) for reporting bugs and feature requests.
 - [Gitter](https://gitter.im/MrSwitch/hello.js) to reach out for help.
-- [Stackoverflow](http://stackoverflow.com/questions/tagged/hello.js) to reach out for help.- 
+- [Stackoverflow](http://stackoverflow.com/questions/tagged/hello.js) use tag **hello.js**
 
 
 
@@ -152,7 +152,7 @@ Register your application with atleast one of the following networks. Ensure you
 ### 2. Include Hello.js script in your page
 
 ```html
-<script class="pre" src="./dist/hello.all.min.js"></script>
+<script class="pre" src="./dist/hello.all.js"></script>
 ```
 
 ### 3. Create the signin buttons
@@ -172,12 +172,15 @@ Lets define a simple function, which will load a user profile into the page afte
 hello.on('auth.login', function(auth){
 	
 	// call user information, for the given network
-	hello( auth.network ).api( '/me' ).success(function(r){
-		var $target = $("#profile_"+ auth.network );
-		if($target.length==0){
-			$target = $("<div id='profile_"+auth.network+"'></div>").appendTo("#profile");
+	hello( auth.network ).api( '/me' ).then( function(r){
+		// Inject it into the container
+		var label = document.getElementById( "profile_"+ auth.network );
+		if(!label){
+			label = document.createElement('div');
+			label.id = "profile_"+auth.network;
+			document.getElementById('profile').appendChild(label);
 		}
-		$target.html('<img src="'+ r.thumbnail +'" /> Hey '+r.name).attr('title', r.name + " on "+ auth.network);
+		label.innerHTML = '<img src="'+ r.thumbnail +'" /> Hey '+r.name;
 	});
 });
 ```
@@ -359,7 +362,7 @@ If a network string is provided: A consent window to authenticate with that netw
 ### Examples:
 
 ```js
-hello( "facebook" ).login( function(){
+hello( "facebook" ).login().then( function(){
 	alert("You are signed in to Facebook");
 });
 ```
@@ -443,7 +446,7 @@ Remove all sessions or individual sessions.
 ### Example:
 
 ```js
-hello( "facebook" ).logout(function(){
+hello( "facebook" ).logout().then( function(){
 	alert("Signed out");
 });
 ```
@@ -580,7 +583,7 @@ Make calls to the API for getting and posting data
 ### Examples:
 
 ```js
-hello( "facebook" ).api("me").success(function(json){
+hello( "facebook" ).api("me").then(function(json){
 	alert("Your name is "+ json.name);
 }).error(function(){
 	alert("Whoops!");
@@ -651,7 +654,7 @@ hello.off("auth.login",sessionstart);
 A convenient function to get the `next` resultset is provided in the second parameter of any `GET` callback. Calling this function recreates the request with the original parameters and event listeners. Albeit the original path is augmented with the parameters defined in the `paging.next` property.
 
 ```js
-hello( "facebook" ).api( "me/friends", {limit: 1} ).success( function( json, next ){
+hello( "facebook" ).api( "me/friends", {limit: 1} ).on( 'success', function( json, next ){
 	if( next ){
 		if( confirm( "Got friend "+ json.data[0].name + ". Get another?" ) ){
 			next();
@@ -660,7 +663,7 @@ hello( "facebook" ).api( "me/friends", {limit: 1} ).success( function( json, nex
 	else{
 		alert( "Got friend "+ json.data[0].name + ". That's it!" );
 	}
-}).error( function(){
+}).on('error', function(){
 	alert("Whoops!");
 });
 ```
@@ -882,6 +885,7 @@ npm install -l
 # run continuous integration tests
 grunt test
 ```
+
 
 
 

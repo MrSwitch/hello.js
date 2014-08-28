@@ -1074,7 +1074,7 @@ hello.utils.extend( hello.utils, {
 		// Emit
 		// Triggers any subscribed events
 		//
-		this.emit = function(evt, data){
+		this.emit = function(evt /*, data, ... */){
 
 			// Get arguments as an Array, knock off the first one
 			var args = Array.prototype.slice.call(arguments, 1);
@@ -1082,8 +1082,9 @@ hello.utils.extend( hello.utils, {
 
 			// Handler
 			var handler = function(name, index){
+
 				// Replace the last property with the event name
-				args[args.length-1] = (name === '*'? evt.split(separator)[0] : name);
+				args[args.length-1] = (name === '*'? evt : name);
 
 				// Trigger
 				this.events[name][index].apply(this, args);

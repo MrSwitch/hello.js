@@ -185,13 +185,15 @@ function thenify(method){
 	return function(){
 		var api = method.apply(this, arguments);
 
-		var promise = Thenable(function(resolve, fulfill){
-			api.on('error', fulfill).on('success', resolve).on('*', function(){
-				var args = Array.prototype.slice.call(arguments);
-				// put the last argument (the event_name) to the front
-				args.unshift(args.pop());
-				melge.emit.apply(promise.proxy, args);
-			});
+		var promise = Thenable(function(fullfill, reject){
+			api.on('success', fullfill)
+				.on('error', reject)
+				.on('*', function(){
+					var args = Array.prototype.slice.call(arguments);
+					// put the last argument (the event_name) to the front
+					args.unshift(args.pop());
+					melge.emit.apply(melge, args);
+				});
 		});
 
 		var melge = hello.utils.Event.call(promise.proxy);
@@ -206,4 +208,4 @@ hello.api = thenify(hello.api);
 hello.logout = thenify(hello.logout);
 
 
-})();
+})(hello);

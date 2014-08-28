@@ -179,7 +179,7 @@ bower install hello
 
 <h3>2. Include Hello.js script in your page</h3>
 
-<script class="pre" src="./dist/hello.all.min.js"></script>
+<script class="pre" src="./dist/hello.all.js"></script>
 
 <h3>3. Create the signin buttons</h3>
 <p>Just add onclick events to call hello( network ).login(). Style your buttons as you like, i've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts</p>
@@ -198,12 +198,15 @@ bower install hello
 hello.on('auth.login', function(auth){
 	
 	// call user information, for the given network
-	hello( auth.network ).api( '/me' ).success(function(r){
-		var $target = $("#profile_"+ auth.network );
-		if($target.length==0){
-			$target = $("<div id='profile_"+auth.network+"'></div>").appendTo("#profile");
+	hello( auth.network ).api( '/me' ).then( function(r){
+		// Inject it into the container
+		var label = document.getElementById( "profile_"+ auth.network );
+		if(!label){
+			label = document.createElement('div');
+			label.id = "profile_"+auth.network;
+			document.getElementById('profile').appendChild(label);
 		}
-		$target.html('<img src="'+ r.thumbnail +'" /> Hey '+r.name).attr('title', r.name + " on "+ auth.network);
+		label.innerHTML = '<img src="'+ r.thumbnail +'" /> Hey '+r.name;
 	});
 });
 </script>
@@ -385,8 +388,10 @@ hello.init({
 <h3>Examples:</h3>
 
 <pre class="tryitoffline" type="js">
-hello( "facebook" ).login( function(){
+hello( "facebook" ).login().then( function(){
 	alert("You are signed in to Facebook");
+}, function( e ){
+	alert("Signin error: " + e.error.message );
 });
 </pre>
 
@@ -469,8 +474,10 @@ hello( "facebook" ).login( function(){
 <h3>Example:</h3>
 
 <pre class="tryit" type="js">
-hello( "facebook" ).logout(function(){
+hello( "facebook" ).logout().then( function(){
 	alert("Signed out");
+}, function(e){
+	alert( "Signed out error:" + e.error.message );
 });
 </pre>
 
@@ -606,10 +613,10 @@ alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) 
 <h3>Examples:</h3>
 
 <pre class="tryit" type="js">
-hello( "facebook" ).api("me").success(function(json){
+hello( "facebook" ).api("me").then(function(json){
 	alert("Your name is "+ json.name);
-}).error(function(){
-	alert("Whoops!");
+}, function(e){
+	alert("Whoops! " + e.error.message );
 });
 </pre>
 
@@ -677,7 +684,7 @@ hello.off("auth.login",sessionstart);
 <p>A convenient function to get the `next` resultset is provided in the second parameter of any <code>GET</code> callback. Calling this function recreates the request with the original parameters and event listeners. Albeit the original path is augmented with the parameters defined in the <code>paging.next</code> property.</p>
 
 <pre class="tryit" type="js">
-hello( "facebook" ).api( "me/friends", {limit: 1} ).success( function( json, next ){
+hello( "facebook" ).api( "me/friends", {limit: 1} ).on( 'success', function( json, next ){
 	if( next ){
 		if( confirm( "Got friend "+ json.data[0].name + ". Get another?" ) ){
 			next();
@@ -686,7 +693,7 @@ hello( "facebook" ).api( "me/friends", {limit: 1} ).success( function( json, nex
 	else{
 		alert( "Got friend "+ json.data[0].name + ". That's it!" );
 	}
-}).error( function(){
+}).on('error', function(){
 	alert("Whoops!");
 });
 </pre>

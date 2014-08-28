@@ -6,10 +6,10 @@
 <script src="client_ids.js"></script>
 <script src="../src/hello.js"></script>
 <script src="../src/hello.then.js"></script>
-<script src="../src/modules/google.js"></script>
+<script src="../src/modules/windows.js"></script>
 
 <h1>Demo hello.then, promises</h1>
-<button id='google' onclick="login('google');">google</button>
+<button id='google' onclick="login('windows');">windows</button>
 
 <script class="pre">
 
@@ -26,5 +26,14 @@ function login(network){
 
 }
 
-hello.init( CLIENT_IDS,	{redirect_uri:'../redirect.html'});
+</script>
+
+<p>Initiate app</p>
+<script class="pre">
+hello.init( {
+	windows : CLIENT_IDS.windows
+},
+{
+	redirect_uri : '../redirect.html'
+});
 </script>
