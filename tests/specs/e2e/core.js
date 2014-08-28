@@ -144,9 +144,22 @@ describe('Hello Core', function(){
 		}
 
 
-		it('should assign a complete event', function(){
-			var instance = hello.login('invalidname', function(){});
-			expect( instance.events ).to.have.property( 'complete' );
+		it('should assign a complete event', function(done){
+
+			var spy = sinon.spy(function(){done();});
+
+			var popup = {
+				closed : false
+			};
+
+			window.open = function(){
+				return popup;
+			};
+
+			hello.login('testable', spy);
+
+			popup.closed = true;
+
 		});
 
 		it('should throw a completed and error event if network name is wrong', function(done){
@@ -254,9 +267,8 @@ describe('Hello Core', function(){
 	//
 	describe('Logout', function(){
 
-		it('should assign a complete event', function(){
-			var instance = hello.logout('test', function(){});
-			expect( instance.events ).to.have.property( 'complete' );
+		it('should assign a complete event', function(done){
+			hello.logout('test', function(){done();});
 		});
 
 		it('should throw a completed event if network name is wrong', function(done){
@@ -280,9 +292,8 @@ describe('Hello Core', function(){
 	//
 	describe('API', function(){
 
-		it('should assign a complete event', function(){
-			var instance = hello('test').api('/', function(){});
-			expect( instance.events ).to.have.property( 'complete' );
+		it('should assign a complete event', function(done){
+			hello('test').api('/', function(){done();});
 		});
 
 		it('should throw a completed event if network name is wrong', function(done){
