@@ -1114,16 +1114,6 @@ hello.utils.extend( hello.utils, {
 			},0);
 			return this;
 		};
-		this.success = function(callback){
-			return this.on("success",callback);
-		};
-		this.error = function(callback){
-			return this.on("error",callback);
-		};
-		this.complete = function(callback){
-			return this.on("complete",callback);
-		};
-
 
 		this.findEvents = function(evt, callback){
 

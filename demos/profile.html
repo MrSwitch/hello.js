@@ -5,21 +5,36 @@
 
 <script src="client_ids.js"></script>
 <script src="../src/hello.js"></script>
+<script src="../src/hello.then.js"></script>
 <script src="../src/modules/windows.js"></script>
 <script src="../src/modules/facebook.js"></script>
 <script src="../src/modules/google.js"></script>
 
-<h1>Demo hello.api('/me')</h1>
+<h1>hello.api( me )</h1>
 <button id='google' onclick="hello.login('google');">google</button>
 <button id='facebook' onclick="hello.login('facebook');">facebook</button>
 <button id='windows' onclick="hello.login('windows');">windows</button>
 
+<p>Listen to the event "auth.login", and call <code>hello( network ).api( 'me' ).then( handler )</code></p>
+
 <script class="pre">
 hello.on('auth.login', function(r){
 	// Get Profile
-	hello( r.network ).api( '/me' ).success( function(p){
-		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
+	hello( r.network ).api( '/me' ).then( function(p){
+		var label = document.getElementById(r.network)
+		label.innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
 	});
 });
-hello.init( CLIENT_IDS,	{redirect_uri:'../redirect.html'});
+</script>
+
+<p>Intiate App credentials</p>
+
+<script class="pre">
+hello.init({
+	google : CLIENT_IDS.google,
+	windows : CLIENT_IDS.windows,
+	facebook : CLIENT_IDS.facebook
+},{
+	redirect_uri:'../redirect.html'
+});
 </script>
