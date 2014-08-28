@@ -4,6 +4,28 @@
 
 (function(){
 
+// MDN
+// Polyfill IE8, does not support native Function.bind
+
+if (!Function.prototype.bind) {
+	Function.prototype.bind=function(b){
+		if(typeof this!=="function"){
+			throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
+		}
+		function c(){}
+		var a=[].slice,
+			f=a.call(arguments,1),
+			e=this,
+			d=function(){
+				return e.apply(this instanceof c?this:b||window,f.concat(a.call(arguments)));
+			};
+			c.prototype=this.prototype;
+			d.prototype=new c();
+		return d;
+	};
+}
+	
+
 /*!
 **  Thenable -- Embeddable Minimum Strictly-Compliant Promises/A+ 1.1.1 Thenable
 **  Copyright (c) 2013-2014 Ralf S. Engelschall <http://engelschall.com>
