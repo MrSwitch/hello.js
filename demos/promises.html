@@ -5,19 +5,25 @@
 
 <script src="client_ids.js"></script>
 <script src="../src/hello.js"></script>
-<script src="../src/hello.then.js"></script>
-<script src="../src/modules/windows.js"></script>
+<script src="../src/modules/google.js"></script>
 
-<h1>Demo hello.then, promises</h1>
-<button id='google' onclick="login('windows');">windows</button>
+<h1>hello, then</h1>
+
+<p><a href="http://promisesaplus.com/">Promises/A+ 1.1.1</a> interoperability is included in dist/* files, otherwise can be optionally included from src by referencing the following script...</p>
+
+<script class="pre" src="../src/hello.then.js"></script>
+
+<h2>Example</h2>
+<p>This example shows how to use Promises to act on the response from hello.login and hello.api calls.</p>
+
+<button id='google' onclick="login('google');">google</button>
 
 <script class="pre">
-
 function login(network){
-
-	// Make a login call using promise
+	// Make a login call and handle the response using promises
 	hello.login(network).then(function(){
 		console.log('fullfilled', 'making api call');
+		// Reurn another promise to get the users profile.
 		return 	hello( network ).api( '/me' );
 	}).then(function(p){
 		console.log('then fullfilled', p);
@@ -25,13 +31,12 @@ function login(network){
 	});
 
 }
-
 </script>
 
 <p>Initiate app</p>
 <script class="pre">
 hello.init( {
-	windows : CLIENT_IDS.windows
+	google : CLIENT_IDS.google
 },
 {
 	redirect_uri : '../redirect.html'
