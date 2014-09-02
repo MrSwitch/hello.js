@@ -364,6 +364,8 @@ If a network string is provided: A consent window to authenticate with that netw
 ```js
 hello( "facebook" ).login().then( function(){
 	alert("You are signed in to Facebook");
+}, function( e ){
+	alert("Signin error: " + e.error.message );
 });
 ```
 
@@ -448,6 +450,8 @@ Remove all sessions or individual sessions.
 ```js
 hello( "facebook" ).logout().then( function(){
 	alert("Signed out");
+}, function(e){
+	alert( "Signed out error:" + e.error.message );
 });
 ```
 
@@ -585,8 +589,8 @@ Make calls to the API for getting and posting data
 ```js
 hello( "facebook" ).api("me").then(function(json){
 	alert("Your name is "+ json.name);
-}).error(function(){
-	alert("Whoops!");
+}, function(e){
+	alert("Whoops! " + e.error.message );
 });
 ```
 
@@ -808,6 +812,12 @@ hello.init(
 	}
 )
 ```
+
+## Promises A+
+
+The response from the async methods `hello.login`, `hello.logout` and `hello.api` return a thenable method which is Promise A+ compatible.
+
+For a demo or if your bundling up the library from `src/*` files, then please checkout [Promises](demos/promises.html)
 
 
 ## Browser Support
