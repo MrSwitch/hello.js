@@ -7,7 +7,6 @@
 	<link rel="stylesheet" href="/_packages/document.css" />
 	<link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon" />
 	<script src="demos/client_ids.js"></script>
-	<script src="/_packages/jquery.js"></script>
 	<script src="/_packages/document.js"></script>
 	<link rel="stylesheet" href="assets/index.css"/>
 </head>
@@ -924,17 +923,25 @@ grunt test
 <script type="text/html" id="tests-template"></script>
 
 <script>
-// Initiate the library
-hello.init(CLIENT_IDS_ALL,{redirect_uri: 'redirect.html', oauth_proxy:OAUTH_PROXY_URL});
 
-$('#tests-template').load('assets/test_network.html', function() {
+// Initiate the library
+hello.init(CLIENT_IDS_ALL,{
+	redirect_uri: 'redirect.html',
+	oauth_proxy:OAUTH_PROXY_URL
+});
+
+
+getText('assets/test_network.html', function(response){
+	document.getElementById('tests-template').text = response;
 	//knockout binding goes here
 	ko.applyBindings(model);
 });
 
+
 hello.on('auth.login', function(){
-	$("#profile_done").show();
+	document.getElementById("profile_done").style.display='block';
 });
+
 
 </script>
 <!--/NO-MARKDOWN-->

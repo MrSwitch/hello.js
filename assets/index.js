@@ -1039,3 +1039,21 @@ function _indexOf(a,s){
 	}
 	return -1;
 }
+
+
+
+function getText(path, callback){
+	// Load in the templates for API calls
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function(){
+		if (xhr.readyState === 4){
+			xhr.onload();
+		}
+	};
+	xhr.onload = function(){
+		callback(xhr.responseText);
+		xhr.onload = function(){};
+	};
+	xhr.open("GET",path, true);
+	xhr.send();
+}

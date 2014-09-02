@@ -10,7 +10,6 @@
 <!--- Oh IE7 -->
 <script src="http://ajax.cdnjs.com/ajax/libs/json2/20110223/json2.js"></script>
 
-<script src="/_packages/jquery.js"></script>
 <script src="/_packages/knockout.js"></script>
 <script src="/_packages/document.js"></script>
 
@@ -83,9 +82,14 @@
 <script type="text/javascript">
 
 // Initiate the library
-hello.init(CLIENT_IDS_ALL,{redirect_uri: '../redirect.html', oauth_proxy:OAUTH_PROXY_URL});
+hello.init(CLIENT_IDS_ALL,{
+	redirect_uri: '../redirect.html',
+	oauth_proxy: OAUTH_PROXY_URL
+});
 
-$('#tests-template').load('../assets/test_network.html', function(){
+// GetText
+getText('../assets/test_network.html', function(response){
+	document.getElementById('tests-template').text = response;
 	//knockout binding goes here
 	ko.applyBindings(model);
 });
