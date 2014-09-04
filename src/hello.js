@@ -291,13 +291,20 @@ hello.utils.extend( hello, {
 
 
 		//
+		// REDIRECT_URI
+		// Is the redirect_uri root?
+		//
+		var redirect_uri = utils.url(opts.redirect_uri).href;
+
+
+		//
 		// QUERY STRING
 		// querystring parameters, we may pass our own arguments to form the querystring
 		//
 		p.qs = {
 			client_id	: provider.id,
 			response_type : provider.oauth.response_type || opts.response_type,
-			redirect_uri : opts.redirect_uri,
+			redirect_uri : redirect_uri,
 			display		: opts.display,
 			scope		: 'basic',
 			state		: {
@@ -306,6 +313,7 @@ hello.utils.extend( hello, {
 				display		: opts.display,
 				callback	: callback_id,
 				state		: opts.state,
+				redirect_uri: redirect_uri,
 				oauth_proxy : opts.oauth_proxy
 			}
 		};
@@ -388,12 +396,6 @@ hello.utils.extend( hello, {
 			}
 		}
 
-		//
-		// REDIRECT_URI
-		// Is the redirect_uri root?
-		//
-		p.qs.redirect_uri = utils.url(p.qs.redirect_uri).href;
-
 
 		// Add OAuth to state
 		p.qs.state.oauth = provider.oauth;
@@ -456,7 +458,7 @@ hello.utils.extend( hello, {
 		else if( opts.display === 'popup'){
 
 
-			var popup = hello.utils.popup( url, p.qs.redirect_uri, opts.window_width || 500, opts.window_height || 550 );
+			var popup = hello.utils.popup( url, redirect_uri, opts.window_width || 500, opts.window_height || 550 );
 
 			var timer = setInterval(function(){
 				if(!popup||popup.closed){
@@ -1339,10 +1341,10 @@ hello.utils.extend( hello.utils, {
 
 		// IS THIS AN OAUTH2 SERVER RESPONSE? OR AN OAUTH1 SERVER RESPONSE?
 		if( p  && ( (p.code&&p.state) || (p.oauth_token&&p.proxy_url) ) ){
-			// Add this path as the redirect_uri
-			p.redirect_uri = location.href.replace(/[\?\#].*$/,'');
 			// JSON decode
 			var state = JSON.parse(p.state);
+			// Add this path as the redirect_uri
+			p.redirect_uri = state.redirect_uri || location.href.replace(/[\?\#].*$/,'');
 			// redirect to the host
 			var path = (state.oauth_proxy || p.proxy_url) + "?" + utils.param(p);
 
