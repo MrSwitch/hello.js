@@ -4658,12 +4658,9 @@ function paging(res){
 hello.init({
 	'linkedin' : {
 
-		login: function(p){
-			p.qs.response_type = 'code';
-		},
-
 		oauth : {
 			version : 2,
+			response_type : 'code',
 			auth	: "https://www.linkedin.com/uas/oauth2/authorization",
 			grant	: "https://www.linkedin.com/uas/oauth2/accessToken"
 		},
