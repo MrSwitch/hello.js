@@ -144,10 +144,6 @@ hello.init({
 			token	: 'https://www.flickr.com/services/oauth/access_token'
 		},
 
-		// AutoRefresh
-		// Signin once token expires?
-		autorefresh : false,
-
 		// API base URL
 		base		: "https://api.flickr.com/services/rest",
 

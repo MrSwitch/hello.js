@@ -41,6 +41,9 @@ hello.init({
 			auth : 'https://foursquare.com/oauth2/authenticate'
 		},
 
+		// Refresh the access_token once expired
+		refresh : true,
+
 		// Alter the querystring
 		querystring : function(qs){
 			var token = qs.access_token;

@@ -55,6 +55,9 @@ hello.init({
 			grant	: "https://www.linkedin.com/uas/oauth2/accessToken"
 		},
 
+		// Refresh the access_token once expired
+		refresh : true,
+
 		scope : {
 			basic	: 'r_fullprofile',
 			email	: 'r_emailaddress',

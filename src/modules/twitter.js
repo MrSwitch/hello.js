@@ -90,10 +90,6 @@ hello.init({
 			token	: 'https://twitter.com/oauth/access_token'
 		},
 
-		// AutoRefresh
-		// Signin once token expires?
-		autorefresh : false,
-
 		base	: "https://api.twitter.com/1.1/",
 
 		get : {

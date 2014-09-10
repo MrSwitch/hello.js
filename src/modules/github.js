@@ -41,6 +41,7 @@ hello.init({
 			grant : 'https://github.com/login/oauth/access_token',
 			response_type : 'code'
 		},
+
 		scope : {
 			basic           : '',
 			email           : 'user:email'

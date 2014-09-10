@@ -31,10 +31,6 @@ hello.init({
 			auth : 'https://soundcloud.com/connect'
 		},
 
-		// AutoRefresh
-		// Signin once token expires?
-		autorefresh : false,
-
 		// Alter the querystring
 		querystring : function(qs){
 			var token = qs.access_token;

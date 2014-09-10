@@ -93,6 +93,14 @@ var tests = [
 		}
 	},
 	{
+		title : "Refresh access token, using display=none",
+		api : "refresh",
+		method : "implicit grant",
+		filter : function(test){
+			return hello.services[test.network].refresh;
+		}
+	},
+	{
 		title : "Get current credentials",
 		api : "getAuthResponse",
 		method : 'getAuthResponse',

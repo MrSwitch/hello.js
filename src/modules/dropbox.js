@@ -82,10 +82,6 @@ hello.init({
 			token	: 'https://api.dropbox.com/1/oauth/access_token'
 		},
 
-		// AutoRefresh
-		// Signin once token expires?
-		autorefresh : false,
-
 		// API Base URL
 		base	: "https://api.dropbox.com/1/",
 

@@ -1606,8 +1606,9 @@ hello.utils.responseHandler( window, window.opener || window.parent );
 			//
 			if( session && ("expires" in session) && session.expires < CURRENT_TIME ){
 
-				// If auto refresh is provided then determine if we can refresh based upon its value.
-				var refresh = !("autorefresh" in provider) || provider.autorefresh;
+				// If auto refresh is possible
+				// Either the browser supports 
+				var refresh = provider.refresh || session.refresh_token;
 
 				// Has the refresh been run recently?
 				if( refresh && (!( name in expired ) || expired[name] < CURRENT_TIME ) ){

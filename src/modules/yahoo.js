@@ -70,10 +70,6 @@ hello.init({
 			token	: 'https://api.login.yahoo.com/oauth/v2/get_token'
 		},
 
-		// AutoRefresh
-		// Signin once token expires?
-		autorefresh : false,
-
 		// Login handler
 		login : function(p){
 			// Change the default popup window to be atleast 560

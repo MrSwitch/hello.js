@@ -57,6 +57,9 @@ hello.init({
 			auth : 'https://instagram.com/oauth/authorize/'
 		},
 
+		// Refresh the access_token once expired
+		refresh : true,
+
 		scope : {
 			basic : 'basic',
 			friends : 'relationships',

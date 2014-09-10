@@ -39,6 +39,9 @@ hello.init({
 			auth : 'https://login.live.com/oauth20_authorize.srf'
 		},
 
+		// Refresh the access_token once expired
+		refresh : true,
+
 		logout : function(){
 			return 'http://login.live.com/oauth20_logout.srf?ts='+(new Date()).getTime();
 		},

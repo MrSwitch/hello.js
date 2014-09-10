@@ -59,6 +59,9 @@ hello.init({
 			auth : 'https://www.facebook.com/dialog/oauth/'
 		},
 
+		// Refresh the access_token
+		refresh : true,
+
 		logout : function(callback){
 			// Assign callback to a global handler
 			var callbackID = hello.utils.globalEvent( callback );

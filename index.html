@@ -838,6 +838,25 @@ hello.init(
 )
 </pre>
 
+<h2>Refresh Access Token</h2>
+<p>Access tokens provided by services are generally short lived - typically 1 hour. Some providers allow for the token to be refreshed in the background after expiry.</p>
+<div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'refresh' } }">A list of services which enable silent authentication after the Implicit Grant signin <a href="http://adodson.com/hello.js/#refresh-access-token">Refresh access_token</a>
+</div>
+<p>Following an explicit grant HelloJS honours the OAuth2 refresh_token, and will also request a new access_token once it has expired.</p>
+
+<h3>Bullet proof requests</h3>
+<p>A good way to design your app is to trigger requests through a user action, you can then test for a valid access token prior to making the api request with a potentially expired token.</p>
+
+<pre type="javascipt">
+var google = hello('google');
+// Set force to false, to avoid triggering the OAuth flow if there is an unexpired access_token available.
+google.login({force:false}).then(function(){
+	google.api('me').then(handler);
+});;
+</pre>
+
+
+
 <h2>Promises A+</h2>
 
 <p>The response from the async methods <code>hello.login</code>, <code>hello.logout</code> and <code>hello.api</code> return a thenable method which is Promise A+ compatible.</p>
