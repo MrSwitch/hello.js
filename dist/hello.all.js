@@ -1606,8 +1606,9 @@ hello.utils.responseHandler( window, window.opener || window.parent );
 			//
 			if( session && ("expires" in session) && session.expires < CURRENT_TIME ){
 
-				// If auto refresh is provided then determine if we can refresh based upon its value.
-				var refresh = !("autorefresh" in provider) || provider.autorefresh;
+				// If auto refresh is possible
+				// Either the browser supports 
+				var refresh = provider.refresh || session.refresh_token;
 
 				// Has the refresh been run recently?
 				if( refresh && (!( name in expired ) || expired[name] < CURRENT_TIME ) ){
@@ -3048,10 +3049,6 @@ hello.init({
 			token	: 'https://api.dropbox.com/1/oauth/access_token'
 		},
 
-		// AutoRefresh
-		// Signin once token expires?
-		autorefresh : false,
-
 		// API Base URL
 		base	: "https://api.dropbox.com/1/",
 
@@ -3237,6 +3234,9 @@ hello.init({
 			version : 2,
 			auth : 'https://www.facebook.com/dialog/oauth/'
 		},
+
+		// Refresh the access_token
+		refresh : true,
 
 		logout : function(callback){
 			// Assign callback to a global handler
@@ -3508,10 +3508,6 @@ hello.init({
 			token	: 'https://www.flickr.com/services/oauth/access_token'
 		},
 
-		// AutoRefresh
-		// Signin once token expires?
-		autorefresh : false,
-
 		// API base URL
 		base		: "https://api.flickr.com/services/rest",
 
@@ -3623,6 +3619,9 @@ hello.init({
 			auth : 'https://foursquare.com/oauth2/authenticate'
 		},
 
+		// Refresh the access_token once expired
+		refresh : true,
+
 		// Alter the querystring
 		querystring : function(qs){
 			var token = qs.access_token;
@@ -3709,6 +3708,7 @@ hello.init({
 			grant : 'https://github.com/login/oauth/access_token',
 			response_type : 'code'
 		},
+
 		scope : {
 			basic           : '',
 			email           : 'user:email'
@@ -4545,6 +4545,9 @@ hello.init({
 			auth : 'https://instagram.com/oauth/authorize/'
 		},
 
+		// Refresh the access_token once expired
+		refresh : true,
+
 		scope : {
 			basic : 'basic',
 			friends : 'relationships',
@@ -4665,6 +4668,9 @@ hello.init({
 			grant	: "https://www.linkedin.com/uas/oauth2/accessToken"
 		},
 
+		// Refresh the access_token once expired
+		refresh : true,
+
 		scope : {
 			basic	: 'r_fullprofile',
 			email	: 'r_emailaddress',
@@ -4767,10 +4773,6 @@ hello.init({
 			version : 2,
 			auth : 'https://soundcloud.com/connect'
 		},
-
-		// AutoRefresh
-		// Signin once token expires?
-		autorefresh : false,
 
 		// Alter the querystring
 		querystring : function(qs){
@@ -4911,10 +4913,6 @@ hello.init({
 			token	: 'https://twitter.com/oauth/access_token'
 		},
 
-		// AutoRefresh
-		// Signin once token expires?
-		autorefresh : false,
-
 		base	: "https://api.twitter.com/1.1/",
 
 		get : {
@@ -5007,6 +5005,9 @@ hello.init({
 			version : 2,
 			auth : 'https://login.live.com/oauth20_authorize.srf'
 		},
+
+		// Refresh the access_token once expired
+		refresh : true,
 
 		logout : function(){
 			return 'http://login.live.com/oauth20_logout.srf?ts='+(new Date()).getTime();
@@ -5200,10 +5201,6 @@ hello.init({
 			request : 'https://api.login.yahoo.com/oauth/v2/get_request_token',
 			token	: 'https://api.login.yahoo.com/oauth/v2/get_token'
 		},
-
-		// AutoRefresh
-		// Signin once token expires?
-		autorefresh : false,
 
 		// Login handler
 		login : function(p){
