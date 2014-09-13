@@ -3268,8 +3268,8 @@ hello.init({
 			friends			: 'user_friends',
 			files			: 'user_photos,user_videos',
 			
-			publish_files	: 'user_photos,user_videos,publish_stream',
-			publish			: 'publish_stream',
+			publish_files	: 'user_photos,user_videos,publish_actions',
+			publish			: 'publish_actions',
 
 			// Deprecated in v2.0
 			// create_event	: 'create_event',
