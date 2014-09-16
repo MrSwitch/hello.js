@@ -38,6 +38,8 @@ module.exports = function(grunt) {
 			},
 			all: ['tests/specs/index.html'],
 		},
+		// Bump
+		bumpup: ['package.json', 'bower.json'],
 		// Shunt files around
 		shunt : {
 			// Shunt the documents of our project
@@ -56,6 +58,7 @@ module.exports = function(grunt) {
 		}
 	});
 
+	grunt.loadNpmTasks('grunt-bumpup');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-mocha-phantomjs');
