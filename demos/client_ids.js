@@ -33,7 +33,7 @@ var DROPBOX_CLIENT_ID = '1lkagy1bz7h2uhl';
 var LINKEDIN_CLIENT_ID = 'bixrjszkfk0j'; // 'exgsps7wo5o7'
 
 var YAHOO_CLIENT_ID = {
-	'local.knarly.com' : 'dj0yJmk9TTNoTWV6eE5ObW5NJmQ9WVdrOWVtSmhVbk5pTm1VbWNHbzlNVFUxT0RNeU16UTJNZy0tJnM9Y29uc3VtZXJzZWNyZXQmeD0yZQ--',
+	'local.knarly.com' : 'dj0yJmk9cjVDdHlDaGtrbldJJmQ9WVdrOVYyZFhSWE4yTm04bWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD1jOA--',
 	'adodson.com' : 'dj0yJmk9dkVoREN1R3BLTThhJmQ9WVdrOVYyNUpORXRXTnpZbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD1mNw--'
 }[window.location.hostname];
 
@@ -94,5 +94,5 @@ var CLIENT_IDS_ALL = {
 // OAUTH PROXY
 //
 var OAUTH_PROXY_URL = {
-//	'local.knarly.com' : 'http://local.knarly.com:5500/proxy'
+	'local.knarly.com' : 'http://local.knarly.com:5500/proxy'
 }[window.location.hostname] || 'https://auth-server.herokuapp.com/proxy';
