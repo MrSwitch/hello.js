@@ -106,9 +106,16 @@ hello.init({
 				if(o.query&&o.query.results&&o.query.results.profile){
 					o = o.query.results.profile;
 					o.id = o.guid;
-					o.name = o.givenName + ' ' +o.familyName;
 					o.last_name = o.familyName;
-					o.first_name = o.givenName;
+					o.first_name = o.givenName || o.nickname;
+					var a = [];
+					if(o.first_name){
+						a.push(o.first_name);
+					}
+					if(o.last_name){
+						a.push(o.last_name);
+					}
+					o.name = a.join(' ');
 					o.email = o.emails?o.emails.handle:null;
 					o.thumbnail = o.image?o.image.imageUrl:null;
 				}
