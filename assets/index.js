@@ -76,12 +76,12 @@ var tests = [
 		}
 	},
 	{
-		title : "OAuth2: Authorization Code, services which require oauth_proxy",
+		title : "OAuth2: Authorization code, service requires oauth_proxy",
 		api : "oauth",
-		method : "OAuth2: Authorization code",
+		method : "OAuth2: Explicit Grant",
 		filter : function(test){
 			var oauth = hello.services[test.network].oauth;
-			return oauth.version === 2 && oauth.response_type === 'code';
+			return oauth.version === 2 && oauth.grant;
 		}
 	},
 	{
