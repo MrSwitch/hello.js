@@ -9,14 +9,14 @@ A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.
 
 ## Features
 
-Looking for more? HelloJS supports a lot more actions than just getting the users profile. Like, matching users with a users social friends list, sharing events with the users social streams, accessing and playing around with a users photos. Lets see if these whet your appetite ...
+Here's some more demos...
 
 <table>
 	<thead>
 		<tr>
 			<th></th>
 			<th>Windows</th>
-			<th>FaceBook</th>
+			<th>Facebook</th>
 			<th>Google</th>
 			<th><a href="#helloapi">More..</th>
 		</tr>
@@ -308,7 +308,7 @@ If a network string is provided: A consent window to authenticate with that netw
 					<td>display</td>
 					<td><i>string</i></td>
 					<td><q>popup</q>, <q>page</q> or <q>none</q></td>
-					<td>How the signin flow should work, "none" is used to refresh the access_token in the background</td>
+					<td>"popup" - as the name suggests, "page" - navigates the whole page, "none" - refresh the access_token in the background</td>
 					<td><em>optional</em></td>
 					<td><q>popup</q></td>
 				</tr>
@@ -334,15 +334,15 @@ If a network string is provided: A consent window to authenticate with that netw
 					<td>response_type</td>
 					<td><i>string</i></td>
 					<td><q>token</q>, <q>code</q></td>
-					<td>Mechanism for skipping auth flow</td>
+					<td>Implicit (token) or Explicit (code) Grant flow</td>
 					<td><em>optional</em></td>
 					<td><q>token</q></td>
 				</tr>
 				<tr>
 					<td>force</td>
 					<td><i>Boolean</i></td>
-					<td><i>false</i>: return current session else initiate auth flow; <i>true</i>: Always initiate auth flow</td>
-					<td>Mechanism for authentication</td>
+					<td><i>true</i> or <i>false</i></td>
+					<td>Always initiate auth flow, despite current valid token.</td>
 					<td><em>optional</em></td>
 					<td><i>true</i></td>
 				</tr>
@@ -724,11 +724,13 @@ Its good practice to limit the use of scopes and also to make users aware of why
 
 ## Error handling
 
-For hello.api([path], [*callback*]) the first parameter of *callback* 
-upon error will be either *boolean (false)* or be an error *object* as 
-described below.
+Errors can be returned in listeners to 'error' event, i.e. `hello.api([path]).on('error', [*errorhandler*])` or the 'complete' event, `hello.api([path]).on('complete', [*completehandler*])` - which may also be written as `hello.api([path], [*completehandler*])`.
+
+The [Promise](#promises-a) response standardizes the binding of errorHandlers
 
 ### Error Object
+
+The first parameter of a failed request to the *errorHandler* may be either *boolean (false)* or be an **Error Object**...
 
 <table>
 	<thead>
@@ -795,14 +797,14 @@ A list of the service providers OAuth* mechanisms is available at [Provider OAut
 
 
 
-For providers which support only OAuth1 and OAuth2 with Authorization Code flows. HelloJS directs the the authentication flow via a webservice to exchange temporary tokens for an access token. In the case of OAuth1, the webservice also signs subsequent API requests.
-
-**Quick start** Register your app ID's at the beta service, [//auth-server for OAuth1 and OAuth2 (with Authorization Code)](https://auth-server.herokuapp.com/)
+For providers which support only OAuth1 or OAuth2 with Explicit Grant, the authentication flow needs to be signed with a secret key that may not be exposed in the browser. HelloJS gets round this problem by the use of an intermediary webservice defined by `oauth_proxy`, this service looks up the secret from a database and performs the handshake required to provision an `access_token`. In the case of OAuth1, the webservice also signs subsequent API requests.
 
 
-As a shim HelloJS uses a service hosted at [https://auth-server.herokuapp.com/](https://auth-server.herokuapp.com/). Developers may add their own network registration AppID/client_id and secret to this service in order to get up and running.
+**Quick start:** Register your client_id + client_secret at the OAuth Proxy service, [Register your App](https://auth-server.herokuapp.com/)
 
-Alternatively the aforementioned service uses [//node-oauth-shim](https://npmjs.org/package/oauth-shim), so if you want to roll your own please look there for installation instructions and usage. Override the default path for this service in HelloJS at the point of calling hello.init, like so...
+
+The default proxy service is [https://auth-server.herokuapp.com/](https://auth-server.herokuapp.com/). Developers may add their own network registration AppID/client_id and secret to this service in order to get up and running.
+Alternatively recreate this service with [node-oauth-shim](https://npmjs.org/package/oauth-shim). Then override the default `oauth_proxy` in HelloJS client script in `hello.init`, like so...
 
 ```javascript
 hello.init(
@@ -812,6 +814,34 @@ hello.init(
 	}
 )
 ```
+
+### Enforce Explicit Grant
+Enforcing the OAuth2 Explicit Grant is done by setting `response_type=code` in [hello.login](#hellologin) options - or globally in [hello.init](#helloinit) options. E.g...
+
+```javascript
+hello( network ).login({
+	response_type : 'code'
+});
+```
+
+## Refresh Access Token
+Access tokens provided by services are generally short lived - typically 1 hour. Some providers allow for the token to be refreshed in the background after expiry.
+A list of services which enable silent authentication after the Implicit Grant signin [Refresh access_token](http://adodson.com/hello.js/#refresh-access-token)
+
+Unlike Implicit grant; Explicit grant may return the `refresh_token`. HelloJS honours the OAuth2 refresh_token, and will also request a new access_token once it has expired.
+
+### Bullet proof requests
+A good way to design your app is to trigger requests through a user action, you can then test for a valid access token prior to making the api request with a potentially expired token.
+
+```javascipt
+var google = hello('google');
+// Set force to false, to avoid triggering the OAuth flow if there is an unexpired access_token available.
+google.login({force:false}).then(function(){
+	google.api('me').then(handler);
+});;
+```
+
+
 
 ## Promises A+
 
