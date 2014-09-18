@@ -848,6 +848,14 @@ hello.init(
 )
 </pre>
 
+<h3>Enforce Explicit Grant</h3>
+<p>Enforcing the OAuth2 Explicit Grant is done by setting <code>response_type=code</code> in <a href="#hellologin">hello.login</a> options - or globally in <a href="#helloinit">hello.init</a> options. E.g...</p>
+
+<pre type="javascript">
+hello( network ).login({
+	response_type : 'code'
+});
+</pre>
 
 <h2>Refresh Access Token</h2>
 <p>Access tokens provided by services are generally short lived - typically 1 hour. Some providers allow for the token to be refreshed in the background after expiry.</p>

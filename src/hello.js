@@ -297,12 +297,23 @@ hello.utils.extend( hello, {
 
 
 		//
+		// Response Type
+		//
+		var response_type = provider.oauth.response_type || opts.response_type;
+
+		// Fallback to token if the module hasn't defined a grant url
+		if( response_type === 'code' && !provider.oauth.grant ){
+			response_type = 'token';
+		}
+
+
+		//
 		// QUERY STRING
 		// querystring parameters, we may pass our own arguments to form the querystring
 		//
 		p.qs = {
 			client_id	: provider.id,
-			response_type : provider.oauth.response_type || opts.response_type,
+			response_type : response_type,
 			redirect_uri : redirect_uri,
 			display		: opts.display,
 			scope		: 'basic',
