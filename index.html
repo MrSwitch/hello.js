@@ -29,7 +29,7 @@
 
 <!--NO-MARKDOWN-->
 <h2>...I did not understand any of that</h2>
-<p>Dont worry, here's a demo that illustrates what HelloJS can do. Connect a user through a service they belong to, e.g.</p>
+<p>Fear not. Here's tiny demo illustrating a basic request: Connect a user through a service they belong to, e.g.</p>
 
 
 <div id="profile">
@@ -44,7 +44,7 @@
 
 <h2>Features</h2>
 
-<p>Looking for more? HelloJS supports a lot more actions than just getting the users profile. Like, matching users with a users social friends list, sharing events with the users social streams, accessing and playing around with a users photos. Lets see if these whet your appetite ...</p>
+<p>Here's some more demos...</p>
 
 <table>
 	<thead>
@@ -341,7 +341,7 @@ hello.init({
 					<td>display</td>
 					<td><i>string</i></td>
 					<td><q>popup</q>, <q>page</q> or <q>none</q></td>
-					<td>How the signin flow should work, "none" is used to refresh the access_token in the background</td>
+					<td>"popup" - as the name suggests, "page" - navigates the whole page, "none" - refresh the access_token in the background</td>
 					<td><em>optional</em></td>
 					<td><q>popup</q></td>
 				</tr>
@@ -367,15 +367,15 @@ hello.init({
 					<td>response_type</td>
 					<td><i>string</i></td>
 					<td><q>token</q>, <q>code</q></td>
-					<td>Mechanism for skipping auth flow</td>
+					<td>Implicit (token) or Explicit (code) Grant flow</td>
 					<td><em>optional</em></td>
 					<td><q>token</q></td>
 				</tr>
 				<tr>
 					<td>force</td>
 					<td><i>Boolean</i></td>
-					<td><i>false</i>: return current session else initiate auth flow; <i>true</i>: Always initiate auth flow</td>
-					<td>Mechanism for authentication</td>
+					<td><i>true</i> or <i>false</i></td>
+					<td>Always initiate auth flow, despite current valid token.</td>
 					<td><em>optional</em></td>
 					<td><i>true</i></td>
 				</tr>
@@ -757,11 +757,13 @@ hello( "facebook" ).login( {scope: "friends,photos,publish" } );
 
 <h2>Error handling</h2>
 
-<p>For hello.api([path], [<em>callback</em>]) the first parameter of <em>callback</em> 
-upon error will be either <i>boolean (false)</i> or be an error <i>object</i> as 
-described below.</p>
+<p>Errors can be returned in listeners to 'error' event, i.e. <code>hello.api([path]).on('error', [<em>errorhandler</em>])</code> or the 'complete' event, <code>hello.api([path]).on('complete', [<em>completehandler</em>])</code> - which may also be written as <code>hello.api([path], [<em>completehandler</em>])</code>.</p>
+
+<p>The <a href="#promises-a">Promise</a> response standardizes the binding of errorHandlers</p>
 
 <h3>Error Object</h3>
+
+<p>The first parameter of a failed request to the <em>errorHandler</em> may be either <i>boolean (false)</i> or be an <b>Error Object</b>...</p>
 
 <table>
 	<thead>
@@ -828,14 +830,14 @@ A list of the service providers OAuth* mechanisms is available at <a href="http:
 </div>
 
 
-<p>For providers which support only OAuth1 and OAuth2 with Authorization Code flows. HelloJS directs the the authentication flow via a webservice to exchange temporary tokens for an access token. In the case of OAuth1, the webservice also signs subsequent API requests.</p>
+<p>For providers which support only OAuth1 or OAuth2 with Explicit Grant, the authentication flow needs to be signed with a secret key that may not be exposed in the browser. HelloJS gets round this problem by the use of an intermediary webservice defined by <code>oauth_proxy</code>, this service looks up the secret from a database and performs the handshake required to provision an <code>access_token</code>. In the case of OAuth1, the webservice also signs subsequent API requests.</p>
 
-<b>Quick start</b> Register your app ID's at the beta service, <a class="green button" href="https://auth-server.herokuapp.com/">//auth-server for OAuth1 and OAuth2 (with Authorization Code)</a>
+<blockquote>
+<b>Quick start:</b> Register your client_id + client_secret at the OAuth Proxy service, <a class="green button" href="https://auth-server.herokuapp.com/">Register your App</a>
+</blockquote>
 
-
-<p>As a shim HelloJS uses a service hosted at <a href="https://auth-server.herokuapp.com/">https://auth-server.herokuapp.com/</a>. Developers may add their own network registration AppID/client_id and secret to this service in order to get up and running.</p>
-
-<p>Alternatively the aforementioned service uses <a href="https://npmjs.org/package/oauth-shim">//node-oauth-shim</a>, so if you want to roll your own please look there for installation instructions and usage. Override the default path for this service in HelloJS at the point of calling hello.init, like so...</p>
+<p>The default proxy service is <a href="https://auth-server.herokuapp.com/">https://auth-server.herokuapp.com/</a>. Developers may add their own network registration AppID/client_id and secret to this service in order to get up and running.</p>
+<p>Alternatively recreate this service with <a href="https://npmjs.org/package/oauth-shim">node-oauth-shim</a>. Then override the default <code>oauth_proxy</code> in HelloJS client script in <code>hello.init</code>, like so...</p>
 
 <pre type="javascript">
 hello.init(
@@ -846,11 +848,12 @@ hello.init(
 )
 </pre>
 
+
 <h2>Refresh Access Token</h2>
 <p>Access tokens provided by services are generally short lived - typically 1 hour. Some providers allow for the token to be refreshed in the background after expiry.</p>
 <div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'refresh' } }">A list of services which enable silent authentication after the Implicit Grant signin <a href="http://adodson.com/hello.js/#refresh-access-token">Refresh access_token</a>
 </div>
-<p>Following an explicit grant HelloJS honours the OAuth2 refresh_token, and will also request a new access_token once it has expired.</p>
+<p>Unlike Implicit grant; Explicit grant may return the <code>refresh_token</code>. HelloJS honours the OAuth2 refresh_token, and will also request a new access_token once it has expired.</p>
 
 <h3>Bullet proof requests</h3>
 <p>A good way to design your app is to trigger requests through a user action, you can then test for a valid access token prior to making the api request with a potentially expired token.</p>
