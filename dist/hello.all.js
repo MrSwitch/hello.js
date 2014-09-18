@@ -250,7 +250,6 @@ hello.utils.extend( hello, {
 
 			if ( str ){
 				obj = JSON.parse(str);
-				hello.utils.store(obj.network, obj);
 			}
 			else {
 				obj = {
@@ -298,12 +297,23 @@ hello.utils.extend( hello, {
 
 
 		//
+		// Response Type
+		//
+		var response_type = provider.oauth.response_type || opts.response_type;
+
+		// Fallback to token if the module hasn't defined a grant url
+		if( response_type === 'code' && !provider.oauth.grant ){
+			response_type = 'token';
+		}
+
+
+		//
 		// QUERY STRING
 		// querystring parameters, we may pass our own arguments to form the querystring
 		//
 		p.qs = {
 			client_id	: provider.id,
-			response_type : provider.oauth.response_type || opts.response_type,
+			response_type : response_type,
 			redirect_uri : redirect_uri,
 			display		: opts.display,
 			scope		: 'basic',
@@ -342,7 +352,7 @@ hello.utils.extend( hello, {
 
 		// Save in the State
 		// Convert to a string because IE, has a problem moving Arrays between windows
-		p.qs.state.scope = hello.utils.unique( scope.split(/[,\s]+/) ).join(',');
+		p.qs.state.scope = utils.unique( scope.split(/[,\s]+/) ).join(',');
 
 		// Map replace each scope with the providers default scopes
 		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m){
@@ -381,11 +391,9 @@ hello.utils.extend( hello, {
 				var diff = utils.diff( session.scope || [], p.qs.state.scope || [] );
 				if(diff.length===0){
 
-					// Nothing has changed
-					self.emit("notice", "User already has a valid access_token");
-
 					// Ok trigger the callback
 					self.emitAfter("complete success login", {
+						unchanged : true,
 						network : p.network,
 						authResponse : session
 					});
@@ -458,7 +466,7 @@ hello.utils.extend( hello, {
 		else if( opts.display === 'popup'){
 
 
-			var popup = hello.utils.popup( url, redirect_uri, opts.window_width || 500, opts.window_height || 550 );
+			var popup = utils.popup( url, redirect_uri, opts.window_width || 500, opts.window_height || 550 );
 
 			var timer = setInterval(function(){
 				if(!popup||popup.closed){
@@ -3229,10 +3237,11 @@ hello.init({
 			p.options.window_height = 400;
 		},
 
-		// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
+		// https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/v2.1
 		oauth : {
 			version : 2,
-			auth : 'https://www.facebook.com/dialog/oauth/'
+			auth : 'https://www.facebook.com/dialog/oauth/',
+			grant : 'https://graph.facebook.com/oauth/access_token'
 		},
 
 		// Refresh the access_token
@@ -3362,6 +3371,7 @@ hello.init({
 
 
 })(hello);
+
 //
 // Flickr
 //
@@ -3615,8 +3625,10 @@ hello.init({
 		name : 'FourSquare',
 
 		oauth : {
+			// https://developer.foursquare.com/overview/auth
 			version : 2,
-			auth : 'https://foursquare.com/oauth2/authenticate'
+			auth : 'https://foursquare.com/oauth2/authenticate',
+			grant : 'https://foursquare.com/oauth2/access_token'
 		},
 
 		// Refresh the access_token once expired
@@ -4541,8 +4553,10 @@ hello.init({
 		},
 
 		oauth : {
+			// http://instagram.com/developer/authentication/
 			version : 2,
-			auth : 'https://instagram.com/oauth/authorize/'
+			auth : 'https://instagram.com/oauth/authorize/',
+			grant : 'https://api.instagram.com/oauth/access_token'
 		},
 
 		// Refresh the access_token once expired
@@ -4743,7 +4757,7 @@ hello.init({
 
 //
 // SoundCloud
-//
+// https://developers.soundcloud.com/docs/api/reference
 (function(hello){
 
 
@@ -4771,7 +4785,8 @@ hello.init({
 
 		oauth : {
 			version : 2,
-			auth : 'https://soundcloud.com/connect'
+			auth : 'https://soundcloud.com/connect',
+			grant : 'https://soundcloud.com/oauth2/token'
 		},
 
 		// Alter the querystring
@@ -5003,7 +5018,8 @@ hello.init({
 		// REF: http://msdn.microsoft.com/en-us/library/hh243641.aspx
 		oauth : {
 			version : 2,
-			auth : 'https://login.live.com/oauth20_authorize.srf'
+			auth : 'https://login.live.com/oauth20_authorize.srf',
+			grant : 'https://login.live.com/oauth20_token.srf'
 		},
 
 		// Refresh the access_token once expired
