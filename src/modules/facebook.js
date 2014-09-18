@@ -53,10 +53,11 @@ hello.init({
 			p.options.window_height = 400;
 		},
 
-		// REF: http://developers.facebook.com/docs/reference/dialogs/oauth/
+		// https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/v2.1
 		oauth : {
 			version : 2,
-			auth : 'https://www.facebook.com/dialog/oauth/'
+			auth : 'https://www.facebook.com/dialog/oauth/',
+			grant : 'https://graph.facebook.com/oauth/access_token'
 		},
 
 		// Refresh the access_token

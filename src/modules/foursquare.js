@@ -37,8 +37,10 @@ hello.init({
 		name : 'FourSquare',
 
 		oauth : {
+			// https://developer.foursquare.com/overview/auth
 			version : 2,
-			auth : 'https://foursquare.com/oauth2/authenticate'
+			auth : 'https://foursquare.com/oauth2/authenticate',
+			grant : 'https://foursquare.com/oauth2/access_token'
 		},
 
 		// Refresh the access_token once expired

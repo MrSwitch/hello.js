@@ -1,6 +1,6 @@
 //
 // SoundCloud
-//
+// https://developers.soundcloud.com/docs/api/reference
 (function(hello){
 
 
@@ -28,7 +28,8 @@ hello.init({
 
 		oauth : {
 			version : 2,
-			auth : 'https://soundcloud.com/connect'
+			auth : 'https://soundcloud.com/connect',
+			grant : 'https://soundcloud.com/oauth2/token'
 		},
 
 		// Alter the querystring

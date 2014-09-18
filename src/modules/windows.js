@@ -36,7 +36,8 @@ hello.init({
 		// REF: http://msdn.microsoft.com/en-us/library/hh243641.aspx
 		oauth : {
 			version : 2,
-			auth : 'https://login.live.com/oauth20_authorize.srf'
+			auth : 'https://login.live.com/oauth20_authorize.srf',
+			grant : 'https://login.live.com/oauth20_token.srf'
 		},
 
 		// Refresh the access_token once expired
