@@ -44,7 +44,7 @@
 
 <h2>Features</h2>
 
-<p>cases, some more demos...</p>
+<p>Here are some more demos...</p>
 
 <table>
 	<thead>
@@ -237,7 +237,7 @@ hello.init({
 
 <h2>hello.init()</h2>
 
-<p>Initiate the environment. And add the application credentials</p> 
+<p>Initiate the environment. And add the application credentials.</p> 
 
 <h3>hello.init( {facebook: <em>id</em>, windows: <em>id</em>, google: <em>id</em>, .... } )</h3>
 
@@ -534,7 +534,7 @@ alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) 
 
 <div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'api' } }"></div>
 
-<p>Make calls to the API for getting and posting data</p>
+<p>Make calls to the API for getting and posting data.</p>
 
 <h3>hello.api( [ path ], [ method ], [ data ], [ callback(json) ] )</h3>
 
@@ -554,7 +554,7 @@ alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) 
 			<q>/me</q>,
 			<q>/me/friends</q>
 		</td>
-		<td>Path or URI of the resource. See <a href="#REST API">REST API</a>, Can be prefixed with the name of the service</td>
+		<td>Path or URI of the resource. See <a href="#REST API">REST API</a>, Can be prefixed with the name of the service.</td>
 		<td>
 			<em>required</em>
 		</td>
@@ -605,7 +605,7 @@ alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) 
 			<code>function(json){console.log(json);}</code>
 		</td>
 		<td>
-			A function to call with the body of the response returned in the first parameter as an object, else boolean false
+			A function to call with the body of the response returned in the first parameter as an object, else boolean false.
 		</td>
 		<td>
 			<em>optional</em>
@@ -631,7 +631,7 @@ hello( "facebook" ).api("me").then(function(json){
 
 <h2>hello.on()</h2>
 
-<p>Bind a callback to an event. An event may be triggered by a change in user state or a change in some detail. </p>
+<p>Bind a callback to an event. An event may be triggered by a change in user state or a change in some detail.</p>
 
 <h3>hello.on( event, callback );</h3>
 
@@ -676,7 +676,7 @@ hello.on("auth.login",sessionstart);
 
 <h2>hello.off()</h2>
 
-<p>Remove a callback. Both event name and function must exist</p>
+<p>Remove a callback. Both event name and function must exist.</p>
 
 <h3>hello.off( event, callback );</h3>
 
