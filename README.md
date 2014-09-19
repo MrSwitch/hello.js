@@ -9,7 +9,7 @@ A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.
 
 ## Features
 
-Here's some more demos...
+Here are some more demos...
 
 <table>
 	<thead>
@@ -112,7 +112,7 @@ bower install hello
 
 The [Bower](http://bower.io/) package shall install the aforementioned "/src" and "/dist" directories. The "/src" directory provides individual modules which can be packaged as desired.
 
-**Note:** Some services require OAuth1 or server-side OAuth2 authorization. In such case HelloJS communicates with an [OAuth Proxy](#oauth-proxy).
+**Note:** Some services require OAuth1 or server-side OAuth2 authorization. In such cases, HelloJS communicates with an [OAuth Proxy](#oauth-proxy).
 
 ## Help &amp; Support
 
