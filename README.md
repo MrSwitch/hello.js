@@ -3,7 +3,7 @@
 
 
 
-A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST API's. HelloJS standardizes paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. Its **modular** so that list is [growing](modules.html). No more spaghetti code! 
+A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST API's. HelloJS standardizes paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. It's **modular**, so that list is [growing](modules.html). No more spaghetti code! 
 
 
 
@@ -89,8 +89,8 @@ Here's some more demos...
 
 - Items marked with a &#10003; are fully working and can be [tested here](./tests/). 
 - Items marked with a &#10007; aren't provided by the provider at this time. 
-- Blank items are work in progress, but there is good evidence that they can be done.
-- Anything not listed i have no knowledge of and would appreciate input.
+- Blank items are a work in progress, but there is good evidence that they can be done.
+- Anything not listed I have no knowledge of and would appreciate input.
 
 
 
@@ -98,7 +98,7 @@ Here's some more demos...
 
 Download: [HelloJS](dist/hello.all.js) | [HelloJS (minified)](dist/hello.all.min.js)
 
-Compiled source, which combines all the modules can be obtained from [Github](https://github.com/MrSwitch/hello.js/tree/master/dist), and source files can be found in [Source](https://github.com/MrSwitch/hello.js/tree/master/src).
+Compiled source, which combines all the modules, can be obtained from [Github](https://github.com/MrSwitch/hello.js/tree/master/dist), and source files can be found in [Source](https://github.com/MrSwitch/hello.js/tree/master/src).
 
 ### Bower Package
 
@@ -136,7 +136,7 @@ Quick start shows you how to go from zero to loading in the name and picture of 
 
 ### 1. Register
 
-Register your application with atleast one of the following networks. Ensure you register the correct domain as they can be quite picky
+Register your application with at least one of the following networks. Ensure you register the correct domain as they can be quite picky
 
 
 <!-- 
@@ -156,7 +156,7 @@ Register your application with atleast one of the following networks. Ensure you
 ```
 
 ### 3. Create the signin buttons
-Just add onclick events to call hello( network ).login(). Style your buttons as you like, i've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts
+Just add onclick events to call hello( network ).login(). Style your buttons as you like, I've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts
 
 ```html
 <button onclick="hello( 'windows' ).login()">windows</button>
@@ -165,7 +165,7 @@ Just add onclick events to call hello( network ).login(). Style your buttons as 
 
 ### 4. Add listeners for the user login
 
-Lets define a simple function, which will load a user profile into the page after they signin and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.
+Let's define a simple function, which will load a user profile into the page after they sign in and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.
 
 
 ```javascript
@@ -460,7 +460,7 @@ hello( "facebook" ).logout().then( function(){
 
 
 
-Get the current status of the session, this is an synchronous request and does not validate any session cookies which may have expired.
+Get the current status of the session. This is an synchronous request and does not validate any session cookies which may have expired.
 
 ### hello.getAuthResponse( network );
 
@@ -598,7 +598,7 @@ hello( "facebook" ).api("me").then(function(json){
 
 ## hello.on()
 
-Bind a callback to an event. An event maybe triggered by a change in user state or a change in some detail. 
+Bind a callback to an event. An event may be triggered by a change in user state or a change in some detail. 
 
 ### hello.on( event, callback );
 
@@ -643,7 +643,7 @@ hello.on("auth.login",sessionstart);
 
 ## hello.off()
 
-Remove a callback, both event name and function must exist
+Remove a callback. Both event name and function must exist
 
 ### hello.off( event, callback );
 
@@ -683,7 +683,7 @@ hello( "facebook" ).login( {scope: "friends,photos,publish" } );
 
 Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the [hello.api reference table](http://adodson.com/hello.js/#helloapi).
 
-The table below illustrates some of the default scopes HelloJS exposes. Additional scopes may be added which are proprietary to a service, but take careful not to mix proprietary scopes with other services which dont know how to handle them.
+The table below illustrates some of the default scopes HelloJS exposes. Additional scopes may be added which are proprietary to a service, but be careful not to mix proprietary scopes with other services which don't know how to handle them.
 <table>
 	<thead>
 	<tr>
@@ -719,7 +719,7 @@ The table below illustrates some of the default scopes HelloJS exposes. Addition
 	</tbody>
 </table>
 
-Its good practice to limit the use of scopes and also to make users aware of why your app needs certain privilieges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend; Include a button which the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorisation.
+It's good practice to limit the use of scopes and also to make users aware of why your app needs certain privilieges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend, include a button that the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorisation.
 
 
 ## Error handling
@@ -797,7 +797,7 @@ A list of the service providers OAuth* mechanisms is available at [Provider OAut
 
 
 
-For providers which support only OAuth1 or OAuth2 with Explicit Grant, the authentication flow needs to be signed with a secret key that may not be exposed in the browser. HelloJS gets round this problem by the use of an intermediary webservice defined by `oauth_proxy`, this service looks up the secret from a database and performs the handshake required to provision an `access_token`. In the case of OAuth1, the webservice also signs subsequent API requests.
+For providers which support only OAuth1 or OAuth2 with Explicit Grant, the authentication flow needs to be signed with a secret key that may not be exposed in the browser. HelloJS gets round this problem by the use of an intermediary webservice defined by `oauth_proxy`. This service looks up the secret from a database and performs the handshake required to provision an `access_token`. In the case of OAuth1, the webservice also signs subsequent API requests.
 
 
 **Quick start:** Register your client_id + client_secret at the OAuth Proxy service, [Register your App](https://auth-server.herokuapp.com/)
@@ -847,7 +847,7 @@ google.login({force:false}).then(function(){
 
 The response from the async methods `hello.login`, `hello.logout` and `hello.api` return a thenable method which is Promise A+ compatible.
 
-For a demo or if your bundling up the library from `src/*` files, then please checkout [Promises](demos/promises.html)
+For a demo, or, if you're bundling up the library from `src/*` files, then please checkout [Promises](demos/promises.html)
 
 
 ## Browser Support
