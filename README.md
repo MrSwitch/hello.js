@@ -156,7 +156,7 @@ Register your application with at least one of the following networks. Ensure yo
 ```
 
 ### 3. Create the signin buttons
-Just add onclick events to call hello( network ).login(). Style your buttons as you like, i've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts
+Just add onclick events to call hello( network ).login(). Style your buttons as you like, I've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts
 
 ```html
 <button onclick="hello( 'windows' ).login()">windows</button>
@@ -165,7 +165,7 @@ Just add onclick events to call hello( network ).login(). Style your buttons as 
 
 ### 4. Add listeners for the user login
 
-Lets define a simple function, which will load a user profile into the page after they signin and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.
+Let's define a simple function, which will load a user profile into the page after they signin and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.
 
 
 ```javascript
@@ -204,7 +204,7 @@ That's it. The code above actually powers the demo at the start so, no excuses.
 
 ## hello.init()
 
-Initiate the environment. And add the application credentials 
+Initiate the environment and add the application credentials 
 
 ### hello.init( {facebook: *id*, windows: *id*, google: *id*, .... } )
 
