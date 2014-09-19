@@ -9,7 +9,7 @@ A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.
 
 ## Features
 
-Here are some more demos...
+Here's some more demos...
 
 <table>
 	<thead>
@@ -112,7 +112,7 @@ bower install hello
 
 The [Bower](http://bower.io/) package shall install the aforementioned "/src" and "/dist" directories. The "/src" directory provides individual modules which can be packaged as desired.
 
-**Note:** Some services require OAuth1 or server-side OAuth2 authorization. In such cases, HelloJS communicates with an [OAuth Proxy](#oauth-proxy).
+**Note:** Some services require OAuth1 or server-side OAuth2 authorization. In such case HelloJS communicates with an [OAuth Proxy](#oauth-proxy).
 
 ## Help &amp; Support
 
@@ -156,7 +156,7 @@ Register your application with at least one of the following networks. Ensure yo
 ```
 
 ### 3. Create the signin buttons
-Just add onclick events to call hello( network ).login(). Style your buttons as you like, I've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts
+Just add onclick events to call hello( network ).login(). Style your buttons as you like; I've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts
 
 ```html
 <button onclick="hello( 'windows' ).login()">windows</button>
@@ -165,7 +165,7 @@ Just add onclick events to call hello( network ).login(). Style your buttons as 
 
 ### 4. Add listeners for the user login
 
-Let's define a simple function, which will load a user profile into the page after they signin and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.
+Lets define a simple function, which will load a user profile into the page after they signin and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.
 
 
 ```javascript
@@ -204,7 +204,7 @@ That's it. The code above actually powers the demo at the start so, no excuses.
 
 ## hello.init()
 
-Initiate the environment and add the application credentials 
+Initiate the environment. And add the application credentials 
 
 ### hello.init( {facebook: *id*, windows: *id*, google: *id*, .... } )
 
@@ -435,7 +435,7 @@ Remove all sessions or individual sessions.
 			</code>
 		</td>
 		<td>
-			A callback when the users session has been initiated</td>
+			A callback when the user's session has been initiated</td>
 		<td>
 			<em>optional</em>
 		</td>
@@ -460,7 +460,7 @@ hello( "facebook" ).logout().then( function(){
 
 
 
-Get the current status of the session, this is an synchronous request and does not validate any session cookies which may have expired.
+Get the current status of the session, this is a synchronous request and does not validate any session cookies which may have expired.
 
 ### hello.getAuthResponse( network );
 
@@ -598,7 +598,7 @@ hello( "facebook" ).api("me").then(function(json){
 
 ## hello.on()
 
-Bind a callback to an event. An event maybe triggered by a change in user state or a change in some detail. 
+Bind a callback to an event. An event may be triggered by a change in user state or a change in some detail. 
 
 ### hello.on( event, callback );
 
@@ -683,7 +683,7 @@ hello( "facebook" ).login( {scope: "friends,photos,publish" } );
 
 Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the [hello.api reference table](http://adodson.com/hello.js/#helloapi).
 
-The table below illustrates some of the default scopes HelloJS exposes. Additional scopes may be added which are proprietary to a service, but take careful not to mix proprietary scopes with other services which don't know how to handle them.
+The table below illustrates some of the default scopes HelloJS exposes. Additional scopes may be added which are proprietary to a service, but be careful not to mix proprietary scopes with other services which don't know how to handle them.
 <table>
 	<thead>
 	<tr>
