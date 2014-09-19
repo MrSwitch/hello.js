@@ -3,7 +3,7 @@
 
 
 
-A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST API's. HelloJS standardizes paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. Its **modular** so that list is [growing](modules.html). No more spaghetti code! 
+A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST API's. HelloJS standardizes paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. It's **modular**, so that list is [growing](modules.html). No more spaghetti code! 
 
 
 
@@ -89,8 +89,8 @@ Here's some more demos...
 
 - Items marked with a &#10003; are fully working and can be [tested here](./tests/). 
 - Items marked with a &#10007; aren't provided by the provider at this time. 
-- Blank items are work in progress, but there is good evidence that they can be done.
-- Anything not listed I have no knowledge of and would appreciate input.
+- Blank items are a work in progress, but there is good evidence that they can be done.
+- I have no knowledge of anything unlisted and would appreciate input.
 
 
 
@@ -98,7 +98,7 @@ Here's some more demos...
 
 Download: [HelloJS](dist/hello.all.js) | [HelloJS (minified)](dist/hello.all.min.js)
 
-Compiled source, which combines all the modules can be obtained from [Github](https://github.com/MrSwitch/hello.js/tree/master/dist), and source files can be found in [Source](https://github.com/MrSwitch/hello.js/tree/master/src).
+Compiled source, which combines all of the modules can be obtained from [Github](https://github.com/MrSwitch/hello.js/tree/master/dist), and source files can be found in [Source](https://github.com/MrSwitch/hello.js/tree/master/src).
 
 ### Bower Package
 
