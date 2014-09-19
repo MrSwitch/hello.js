@@ -136,7 +136,7 @@ Quick start shows you how to go from zero to loading in the name and picture of 
 
 ### 1. Register
 
-Register your application with atleast one of the following networks. Ensure you register the correct domain as they can be quite picky
+Register your application with at least one of the following networks. Ensure you register the correct domain as they can be quite picky
 
 
 <!-- 
