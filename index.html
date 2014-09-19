@@ -237,7 +237,7 @@ hello.init({
 
 <h2>hello.init()</h2>
 
-<p>Initiate the environment. And add the application credentials</p> 
+<p>Initiate the environment and add the application credentials.</p> 
 
 <h3>hello.init( {facebook: <em>id</em>, windows: <em>id</em>, google: <em>id</em>, .... } )</h3>
 
@@ -554,7 +554,7 @@ alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) 
 			<q>/me</q>,
 			<q>/me/friends</q>
 		</td>
-		<td>Path or URI of the resource. See <a href="#REST API">REST API</a>, Can be prefixed with the name of the service</td>
+		<td>Path or URI of the resource. See <a href="#REST API">REST API</a>, Can be prefixed with the name of the service.</td>
 		<td>
 			<em>required</em>
 		</td>
@@ -605,7 +605,7 @@ alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) 
 			<code>function(json){console.log(json);}</code>
 		</td>
 		<td>
-			A function to call with the body of the response returned in the first parameter as an object, else boolean false
+			A function to call with the body of the response returned in the first parameter as an object, else boolean false.
 		</td>
 		<td>
 			<em>optional</em>
@@ -631,7 +631,7 @@ hello( "facebook" ).api("me").then(function(json){
 
 <h2>hello.on()</h2>
 
-<p>Bind a callback to an event. An event maybe triggered by a change in user state or a change in some detail. </p>
+<p>Bind a callback to an event. An event maybe triggered by a change in user state or a change in some detail.</p>
 
 <h3>hello.on( event, callback );</h3>
 
