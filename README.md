@@ -3,13 +3,13 @@
 
 
 
-A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST API's. HelloJS standardizes paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. Its **modular** so that list is [growing](modules.html). No more spaghetti code! 
+A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST API's. HelloJS standardizes paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. It's **modular** so that list is [growing](modules.html). No more spaghetti code! 
 
 
 
 ## Features
 
-Here's some more demos...
+Here are some more demos...
 
 <table>
 	<thead>
@@ -90,7 +90,7 @@ Here's some more demos...
 - Items marked with a &#10003; are fully working and can be [tested here](./tests/). 
 - Items marked with a &#10007; aren't provided by the provider at this time. 
 - Blank items are work in progress, but there is good evidence that they can be done.
-- Anything not listed i have no knowledge of and would appreciate input.
+- I don't have knowledge of anything that isn't listed and would appreciate input.
 
 
 
@@ -156,7 +156,7 @@ Register your application with atleast one of the following networks. Ensure you
 ```
 
 ### 3. Create the signin buttons
-Just add onclick events to call hello( network ).login(). Style your buttons as you like, i've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts
+Just add onclick events to call hello( network ).login(). Style your buttons as you like, I've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts
 
 ```html
 <button onclick="hello( 'windows' ).login()">windows</button>
@@ -165,7 +165,7 @@ Just add onclick events to call hello( network ).login(). Style your buttons as 
 
 ### 4. Add listeners for the user login
 
-Lets define a simple function, which will load a user profile into the page after they signin and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.
+Let's define a simple function, which will load a user profile into the page after they signin and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.
 
 
 ```javascript
@@ -501,7 +501,7 @@ alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) 
 
 
 
-Make calls to the API for getting and posting data
+Make calls to the API for getting and posting data.
 
 ### hello.api( [ path ], [ method ], [ data ], [ callback(json) ] )
 
@@ -643,7 +643,7 @@ hello.on("auth.login",sessionstart);
 
 ## hello.off()
 
-Remove a callback, both event name and function must exist
+Remove a callback, both event name and function must exist.
 
 ### hello.off( event, callback );
 
@@ -719,7 +719,7 @@ The table below illustrates some of the default scopes HelloJS exposes. Addition
 	</tbody>
 </table>
 
-Its good practice to limit the use of scopes and also to make users aware of why your app needs certain privilieges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend; Include a button which the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorisation.
+It's good practice to limit the use of scopes and also to make users aware of why your app needs certain privilieges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend; Include a button which the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorization.
 
 
 ## Error handling
