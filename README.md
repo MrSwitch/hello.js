@@ -90,7 +90,7 @@ Here's some more demos...
 - Items marked with a &#10003; are fully working and can be [tested here](./tests/). 
 - Items marked with a &#10007; aren't provided by the provider at this time. 
 - Blank items are work in progress, but there is good evidence that they can be done.
-- Anything not listed i have no knowledge of and would appreciate input.
+- Anything not listed I have no knowledge of and would appreciate input.
 
 
 
@@ -136,7 +136,7 @@ Quick start shows you how to go from zero to loading in the name and picture of 
 
 ### 1. Register
 
-Register your application with atleast one of the following networks. Ensure you register the correct domain as they can be quite picky
+Register your application with at least one of the following networks. Ensure you register the correct domain as they can be quite picky
 
 
 <!-- 
@@ -655,7 +655,7 @@ hello.off("auth.login",sessionstart);
 # Misc
 
 ## Pagination, Limit and Next Page
-A convenient function to get the `next` resultset is provided in the second parameter of any `GET` callback. Calling this function recreates the request with the original parameters and event listeners. Albeit the original path is augmented with the parameters defined in the `paging.next` property.
+A convenient function to get the `next` result set is provided in the second parameter of any `GET` callback. Calling this function recreates the request with the original parameters and event listeners. Albeit the original path is augmented with the parameters defined in the `paging.next` property.
 
 ```js
 hello( "facebook" ).api( "me/friends", {limit: 1} ).on( 'success', function( json, next ){
@@ -675,7 +675,7 @@ hello( "facebook" ).api( "me/friends", {limit: 1} ).on( 'success', function( jso
 
 ## Scope
 The scope property defines which privileges an app requires from a network provider. The scope can be defined globally for a session through `hello.init(object, {scope:'string'})`, or at the point of triggering the auth flow e.g. `hello('network').login({scope:'string'});`
-An app can specify multiple scopes, seperated by commas - as in the example below.
+An app can specify multiple scopes, separated by commas - as in the example below.
 
 ```js
 hello( "facebook" ).login( {scope: "friends,photos,publish" } );
@@ -683,7 +683,7 @@ hello( "facebook" ).login( {scope: "friends,photos,publish" } );
 
 Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the [hello.api reference table](http://adodson.com/hello.js/#helloapi).
 
-The table below illustrates some of the default scopes HelloJS exposes. Additional scopes may be added which are proprietary to a service, but take careful not to mix proprietary scopes with other services which dont know how to handle them.
+The table below illustrates some of the default scopes HelloJS exposes. Additional scopes may be added which are proprietary to a service, but take careful not to mix proprietary scopes with other services which don't know how to handle them.
 <table>
 	<thead>
 	<tr>
@@ -719,7 +719,7 @@ The table below illustrates some of the default scopes HelloJS exposes. Addition
 	</tbody>
 </table>
 
-Its good practice to limit the use of scopes and also to make users aware of why your app needs certain privilieges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend; Include a button which the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorisation.
+Its good practice to limit the use of scopes and also to make users aware of why your app needs certain privileges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend; Include a button which the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorization.
 
 
 ## Error handling
@@ -828,12 +828,12 @@ hello( network ).login({
 Access tokens provided by services are generally short lived - typically 1 hour. Some providers allow for the token to be refreshed in the background after expiry.
 A list of services which enable silent authentication after the Implicit Grant signin [Refresh access_token](http://adodson.com/hello.js/#refresh-access-token)
 
-Unlike Implicit grant; Explicit grant may return the `refresh_token`. HelloJS honours the OAuth2 refresh_token, and will also request a new access_token once it has expired.
+Unlike Implicit grant; Explicit grant may return the `refresh_token`. HelloJS honors the OAuth2 refresh_token, and will also request a new access_token once it has expired.
 
 ### Bullet proof requests
 A good way to design your app is to trigger requests through a user action, you can then test for a valid access token prior to making the api request with a potentially expired token.
 
-```javascipt
+```javascript
 var google = hello('google');
 // Set force to false, to avoid triggering the OAuth flow if there is an unexpired access_token available.
 google.login({force:false}).then(function(){
