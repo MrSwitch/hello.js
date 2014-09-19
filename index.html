@@ -29,7 +29,7 @@
 
 <!--NO-MARKDOWN-->
 <h2>...I did not understand any of that</h2>
-<p>Fear not. Here is a tiny demo illustrating a basic request: Connect a user through a service they belong to, e.g.</p>
+<p>Fear not. Here's tiny demo illustrating a basic request: Connect a user through a service they belong to, e.g.</p>
 
 
 <div id="profile">
@@ -147,7 +147,7 @@ bower install hello
 
 <p>The <a href="http://bower.io/">Bower</a> package shall install the aforementioned "/src" and "/dist" directories. The "/src" directory provides individual modules which can be packaged as desired.</p>
 
-<p><b>Note:</b> Some services require OAuth1 or server-side OAuth2 authorization. In such cases, HelloJS communicates with an <a href="#oauth-proxy">OAuth Proxy</a>.</p>
+<p><b>Note:</b> Some services require OAuth1 or server-side OAuth2 authorization. In such case HelloJS communicates with an <a href="#oauth-proxy">OAuth Proxy</a>.</p>
 
 <h2>Help &amp; Support</h2>
 
@@ -171,7 +171,7 @@ bower install hello
 
 <h3>1. Register</h3>
 
-<p>Register your application with at least one of the following networks. Ensure you register the correct domain as they can be quite picky</p>
+<p>Register your application with atleast one of the following networks. Ensure you register the correct domain as they can be quite picky.</p>
 
 <ul>
 <!-- 
@@ -189,7 +189,7 @@ bower install hello
 <script class="pre" src="./dist/hello.all.js"></script>
 
 <h3>3. Create the signin buttons</h3>
-<p>Just add onclick events to call hello( network ).login(). Style your buttons as you like, I've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts</p>
+<p>Just add onclick events to call hello( network ).login(). Style your buttons as you like, I've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts.</p>
 
 <script class="pre" type="html">
 <button onclick="hello( 'windows' ).login()">windows</button>
@@ -237,7 +237,7 @@ hello.init({
 
 <h2>hello.init()</h2>
 
-<p>Initiate the environment. And add the application credentials</p> 
+<p>Initiate the environment and add the application credentials.</p> 
 
 <h3>hello.init( {facebook: <em>id</em>, windows: <em>id</em>, google: <em>id</em>, .... } )</h3>
 
@@ -534,7 +534,7 @@ alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) 
 
 <div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'api' } }"></div>
 
-<p>Make calls to the API for getting and posting data</p>
+<p>Make calls to the API for getting and posting data.</p>
 
 <h3>hello.api( [ path ], [ method ], [ data ], [ callback(json) ] )</h3>
 
@@ -554,7 +554,7 @@ alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) 
 			<q>/me</q>,
 			<q>/me/friends</q>
 		</td>
-		<td>Path or URI of the resource. See <a href="#REST API">REST API</a>, Can be prefixed with the name of the service</td>
+		<td>Path or URI of the resource. See <a href="#REST API">REST API</a>, Can be prefixed with the name of the service.</td>
 		<td>
 			<em>required</em>
 		</td>
@@ -605,7 +605,7 @@ alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) 
 			<code>function(json){console.log(json);}</code>
 		</td>
 		<td>
-			A function to call with the body of the response returned in the first parameter as an object, else boolean false
+			A function to call with the body of the response returned in the first parameter as an object, else boolean false.
 		</td>
 		<td>
 			<em>optional</em>
@@ -631,7 +631,7 @@ hello( "facebook" ).api("me").then(function(json){
 
 <h2>hello.on()</h2>
 
-<p>Bind a callback to an event. An event maybe triggered by a change in user state or a change in some detail. </p>
+<p>Bind a callback to an event. An event maybe triggered by a change in user state or a change in some detail.</p>
 
 <h3>hello.on( event, callback );</h3>
 
@@ -676,7 +676,7 @@ hello.on("auth.login",sessionstart);
 
 <h2>hello.off()</h2>
 
-<p>Remove a callback, both event name and function must exist</p>
+<p>Remove a callback, both event name and function must exist.</p>
 
 <h3>hello.off( event, callback );</h3>
 
@@ -688,7 +688,7 @@ hello.off("auth.login",sessionstart);
 <h1>Misc</h1>
 
 <h2>Pagination, Limit and Next Page</h2>
-<p>A convenient function to get the `next` result set is provided in the second parameter of any <code>GET</code> callback. Calling this function recreates the request with the original parameters and event listeners. Albeit the original path is augmented with the parameters defined in the <code>paging.next</code> property.</p>
+<p>A convenient function to get the `next` resultset is provided in the second parameter of any <code>GET</code> callback. Calling this function recreates the request with the original parameters and event listeners. Albeit the original path is augmented with the parameters defined in the <code>paging.next</code> property.</p>
 
 <pre class="tryit" type="js">
 hello( "facebook" ).api( "me/friends", {limit: 1} ).on( 'success', function( json, next ){
@@ -708,7 +708,7 @@ hello( "facebook" ).api( "me/friends", {limit: 1} ).on( 'success', function( jso
 
 <h2>Scope</h2>
 <p>The scope property defines which privileges an app requires from a network provider. The scope can be defined globally for a session through <code>hello.init(object, {scope:'string'})</code>, or at the point of triggering the auth flow e.g. <code>hello('network').login({scope:'string'});</code></p>
-<p>An app can specify multiple scopes, separated by commas - as in the example below.</p>
+<p>An app can specify multiple scopes, seperated by commas - as in the example below.</p>
 
 <pre class="tryit" type="js">
 hello( "facebook" ).login( {scope: "friends,photos,publish" } );
@@ -716,7 +716,7 @@ hello( "facebook" ).login( {scope: "friends,photos,publish" } );
 
 <p>Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the <a href="http://adodson.com/hello.js/#helloapi">hello.api reference table</a>.</p>
 
-<p>The table below illustrates some of the default scopes HelloJS exposes. Additional scopes may be added which are proprietary to a service, but take careful not to mix proprietary scopes with other services which don't know how to handle them.</p>
+<p>The table below illustrates some of the default scopes HelloJS exposes. Additional scopes may be added which are proprietary to a service, but take careful not to mix proprietary scopes with other services which dont know how to handle them.</p>
 <table>
 	<thead>
 	<tr>
@@ -752,7 +752,7 @@ hello( "facebook" ).login( {scope: "friends,photos,publish" } );
 	</tbody>
 </table>
 
-<p>It's good practice to limit the use of scopes and also to make users aware of why your app needs certain privileges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend; Include a button which the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorization.</p>
+<p>It's good practice to limit the use of scopes and also to make users aware of why your app needs certain privilieges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend; Include a button which the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorisation.</p>
 
 
 <h2>Error handling</h2>
@@ -861,12 +861,12 @@ hello( network ).login({
 <p>Access tokens provided by services are generally short lived - typically 1 hour. Some providers allow for the token to be refreshed in the background after expiry.</p>
 <div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'refresh' } }">A list of services which enable silent authentication after the Implicit Grant signin <a href="http://adodson.com/hello.js/#refresh-access-token">Refresh access_token</a>
 </div>
-<p>Unlike Implicit grant; Explicit grant may return the <code>refresh_token</code>. HelloJS honors the OAuth2 refresh_token, and will also request a new access_token once it has expired.</p>
+<p>Unlike Implicit grant; Explicit grant may return the <code>refresh_token</code>. HelloJS honours the OAuth2 refresh_token, and will also request a new access_token once it has expired.</p>
 
 <h3>Bullet proof requests</h3>
 <p>A good way to design your app is to trigger requests through a user action, you can then test for a valid access token prior to making the api request with a potentially expired token.</p>
 
-<pre type="javascript">
+<pre type="javascipt">
 var google = hello('google');
 // Set force to false, to avoid triggering the OAuth flow if there is an unexpired access_token available.
 google.login({force:false}).then(function(){
