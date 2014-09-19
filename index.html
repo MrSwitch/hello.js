@@ -125,7 +125,7 @@
 <li>Items marked with a <span>&check;</span> are fully working and can be <a href="./tests/">tested here</a>. 
 <li>Items marked with a <span>&cross;</span> aren't provided by the provider at this time. 
 <li>Blank items are work in progress, but there is good evidence that they can be done.
-<li>Anything not listed i have no knowledge of and would appreciate input.
+<li>Anything not listed I have no knowledge of and would appreciate input.
 </ul>
 
 
@@ -171,7 +171,7 @@ bower install hello
 
 <h3>1. Register</h3>
 
-<p>Register your application with atleast one of the following networks. Ensure you register the correct domain as they can be quite picky</p>
+<p>Register your application with at least one of the following networks. Ensure you register the correct domain as they can be quite picky</p>
 
 <ul>
 <!-- 
@@ -688,7 +688,7 @@ hello.off("auth.login",sessionstart);
 <h1>Misc</h1>
 
 <h2>Pagination, Limit and Next Page</h2>
-<p>A convenient function to get the `next` resultset is provided in the second parameter of any <code>GET</code> callback. Calling this function recreates the request with the original parameters and event listeners. Albeit the original path is augmented with the parameters defined in the <code>paging.next</code> property.</p>
+<p>A convenient function to get the `next` result set is provided in the second parameter of any <code>GET</code> callback. Calling this function recreates the request with the original parameters and event listeners. Albeit the original path is augmented with the parameters defined in the <code>paging.next</code> property.</p>
 
 <pre class="tryit" type="js">
 hello( "facebook" ).api( "me/friends", {limit: 1} ).on( 'success', function( json, next ){
@@ -708,7 +708,7 @@ hello( "facebook" ).api( "me/friends", {limit: 1} ).on( 'success', function( jso
 
 <h2>Scope</h2>
 <p>The scope property defines which privileges an app requires from a network provider. The scope can be defined globally for a session through <code>hello.init(object, {scope:'string'})</code>, or at the point of triggering the auth flow e.g. <code>hello('network').login({scope:'string'});</code></p>
-<p>An app can specify multiple scopes, seperated by commas - as in the example below.</p>
+<p>An app can specify multiple scopes, separated by commas - as in the example below.</p>
 
 <pre class="tryit" type="js">
 hello( "facebook" ).login( {scope: "friends,photos,publish" } );
@@ -716,7 +716,7 @@ hello( "facebook" ).login( {scope: "friends,photos,publish" } );
 
 <p>Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the <a href="http://adodson.com/hello.js/#helloapi">hello.api reference table</a>.</p>
 
-<p>The table below illustrates some of the default scopes HelloJS exposes. Additional scopes may be added which are proprietary to a service, but take careful not to mix proprietary scopes with other services which dont know how to handle them.</p>
+<p>The table below illustrates some of the default scopes HelloJS exposes. Additional scopes may be added which are proprietary to a service, but take careful not to mix proprietary scopes with other services which don't know how to handle them.</p>
 <table>
 	<thead>
 	<tr>
@@ -752,7 +752,7 @@ hello( "facebook" ).login( {scope: "friends,photos,publish" } );
 	</tbody>
 </table>
 
-<p>Its good practice to limit the use of scopes and also to make users aware of why your app needs certain privilieges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend; Include a button which the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorisation.</p>
+<p>Its good practice to limit the use of scopes and also to make users aware of why your app needs certain privileges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend; Include a button which the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorization.</p>
 
 
 <h2>Error handling</h2>
@@ -861,12 +861,12 @@ hello( network ).login({
 <p>Access tokens provided by services are generally short lived - typically 1 hour. Some providers allow for the token to be refreshed in the background after expiry.</p>
 <div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'refresh' } }">A list of services which enable silent authentication after the Implicit Grant signin <a href="http://adodson.com/hello.js/#refresh-access-token">Refresh access_token</a>
 </div>
-<p>Unlike Implicit grant; Explicit grant may return the <code>refresh_token</code>. HelloJS honours the OAuth2 refresh_token, and will also request a new access_token once it has expired.</p>
+<p>Unlike Implicit grant; Explicit grant may return the <code>refresh_token</code>. HelloJS honors the OAuth2 refresh_token, and will also request a new access_token once it has expired.</p>
 
 <h3>Bullet proof requests</h3>
 <p>A good way to design your app is to trigger requests through a user action, you can then test for a valid access token prior to making the api request with a potentially expired token.</p>
 
-<pre type="javascipt">
+<pre type="javascript">
 var google = hello('google');
 // Set force to false, to avoid triggering the OAuth flow if there is an unexpired access_token available.
 google.login({force:false}).then(function(){
