@@ -24,7 +24,7 @@
 
 <nav class="toc"></nav>
 
-<blockquote><p>A client-side Javascript SDK for authenticating with <a href="http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf" target="_blank">OAuth2</a> (and <b>OAuth1</b> with a <a href="#oauth-proxy">oauth proxy</a>) web services and querying their REST API's. HelloJS standardizes paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. Its <b>modular</b> so that list is <a href="modules.html">growing</a>. No more spaghetti code! 
+<blockquote><p>A client-side Javascript SDK for authenticating with <a href="http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf" target="_blank">OAuth2</a> (and <b>OAuth1</b> with a <a href="#oauth-proxy">oauth proxy</a>) web services and querying their REST API's. HelloJS standardizes paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. It's <b>modular</b> so that list is <a href="modules.html">growing</a>. No more spaghetti code! 
 </blockquote>
 
 <!--NO-MARKDOWN-->
@@ -44,7 +44,7 @@
 
 <h2>Features</h2>
 
-<p>Here's some more demos...</p>
+<p>Here are some more demos...</p>
 
 <table>
 	<thead>
@@ -125,7 +125,7 @@
 <li>Items marked with a <span>&check;</span> are fully working and can be <a href="./tests/">tested here</a>. 
 <li>Items marked with a <span>&cross;</span> aren't provided by the provider at this time. 
 <li>Blank items are work in progress, but there is good evidence that they can be done.
-<li>Anything not listed i have no knowledge of and would appreciate input.
+<li>I don't have knowledge of anything that isn't listed and would appreciate input.
 </ul>
 
 
@@ -189,7 +189,7 @@ bower install hello
 <script class="pre" src="./dist/hello.all.js"></script>
 
 <h3>3. Create the signin buttons</h3>
-<p>Just add onclick events to call hello( network ).login(). Style your buttons as you like, i've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts</p>
+<p>Just add onclick events to call hello( network ).login(). Style your buttons as you like, I've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts</p>
 
 <script class="pre" type="html">
 <button onclick="hello( 'windows' ).login()">windows</button>
@@ -198,7 +198,7 @@ bower install hello
 
 <h3>4. Add listeners for the user login</h3>
 
-<p>Lets define a simple function, which will load a user profile into the page after they signin and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.</p>
+<p>Let's define a simple function, which will load a user profile into the page after they signin and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.</p>
 
 
 <script class="pre">
@@ -534,7 +534,7 @@ alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) 
 
 <div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'api' } }"></div>
 
-<p>Make calls to the API for getting and posting data</p>
+<p>Make calls to the API for getting and posting data.</p>
 
 <h3>hello.api( [ path ], [ method ], [ data ], [ callback(json) ] )</h3>
 
@@ -676,7 +676,7 @@ hello.on("auth.login",sessionstart);
 
 <h2>hello.off()</h2>
 
-<p>Remove a callback, both event name and function must exist</p>
+<p>Remove a callback, both event name and function must exist.</p>
 
 <h3>hello.off( event, callback );</h3>
 
@@ -752,7 +752,7 @@ hello( "facebook" ).login( {scope: "friends,photos,publish" } );
 	</tbody>
 </table>
 
-<p>Its good practice to limit the use of scopes and also to make users aware of why your app needs certain privilieges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend; Include a button which the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorisation.</p>
+<p>It's good practice to limit the use of scopes and also to make users aware of why your app needs certain privilieges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend; Include a button which the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorisation.</p>
 
 
 <h2>Error handling</h2>
