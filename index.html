@@ -44,7 +44,7 @@
 
 <h2>Features</h2>
 
-<p>Here are some more demos...</p>
+<p>cases, some more demos...</p>
 
 <table>
 	<thead>
@@ -189,7 +189,7 @@ bower install hello
 <script class="pre" src="./dist/hello.all.js"></script>
 
 <h3>3. Create the signin buttons</h3>
-<p>Just add onclick events to call hello( network ).login(). Style your buttons as you like, I've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts</p>
+<p>Just add onclick events to call hello( network ).login(). Style your buttons as you like; I've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts</p>
 
 <script class="pre" type="html">
 <button onclick="hello( 'windows' ).login()">windows</button>
@@ -493,7 +493,7 @@ hello( "facebook" ).logout().then( function(){
 
 <div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'getAuthResponse' } }"></div>
 
-<p>Get the current status of the session, this is an synchronous request and does not validate any session cookies which may have expired.</p>
+<p>Get the current status of the session, this is a synchronous request and does not validate any session cookies which may have expired.</p>
 
 <h3>hello.getAuthResponse( network );</h3>
 
@@ -631,7 +631,7 @@ hello( "facebook" ).api("me").then(function(json){
 
 <h2>hello.on()</h2>
 
-<p>Bind a callback to an event. An event maybe triggered by a change in user state or a change in some detail. </p>
+<p>Bind a callback to an event. An event may be triggered by a change in user state or a change in some detail. </p>
 
 <h3>hello.on( event, callback );</h3>
 
@@ -716,7 +716,7 @@ hello( "facebook" ).login( {scope: "friends,photos,publish" } );
 
 <p>Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the <a href="http://adodson.com/hello.js/#helloapi">hello.api reference table</a>.</p>
 
-<p>The table below illustrates some of the default scopes HelloJS exposes. Additional scopes may be added which are proprietary to a service, but take careful not to mix proprietary scopes with other services which don't know how to handle them.</p>
+<p>The table below illustrates some of the default scopes HelloJS exposes. Additional scopes may be added which are proprietary to a service, but be careful not to mix proprietary scopes with other services which don't know how to handle them.</p>
 <table>
 	<thead>
 	<tr>
