@@ -12,15 +12,34 @@ This page is used for authentication as well as POST using the Iframe+form+hash 
 <html>
 <head>
 	<title>Hello, redirecting...</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+	<link href="./assets/redirect.css" rel="stylesheet" />
 </head>
 <body>
-	<script src="./src/hello.js"></script>
 
+	<div class="loading"><span>&bull;</span><span>&bull;</span><span>&bull;</span></div>
+
+	<h2>Please close this window to continue.</h2>
 	<script>
 		// DEBUG
-		// The sign in has failed, if the window is not returned, probably because the hash is wrong
-		// Add the hash to the window for debugging purposes.
-		document.body.appendChild(document.createTextNode("Failed to recognize URL query: "+window.location.href));
+		if(window.navigator.userAgent.match(/iPad|iPhone/)&&window.navigator.userAgent.match('Version/8.0')){
+			p("Wait one pesky minute: Your on iOS8 aren't you? [eye-roll] it can't automatically close tabs.");
+		}
+		else{
+			p("Hmmm, something is awry. It should have closed automatically by now.");
+			p(window.location.href, 'overflow');
+		}
+		p("~ #HelloJS ~");
+
+		function p(str,className){
+			var a = document.createElement('p');
+			if(className){
+				a.className=className;
+			}
+			a.appendChild(document.createTextNode(str));
+			document.body.appendChild(a);
+		}
 	</script>
+	<script src="./src/hello.js"></script>
 </body>
 </html>
