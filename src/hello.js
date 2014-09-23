@@ -324,7 +324,6 @@ hello.utils.extend( hello, {
 				callback	: callback_id,
 				state		: opts.state,
 				redirect_uri: redirect_uri,
-				oauth_proxy : opts.oauth_proxy
 			}
 		};
 
@@ -405,20 +404,32 @@ hello.utils.extend( hello, {
 		}
 
 
-		// Add OAuth to state
-		p.qs.state.oauth = provider.oauth;
-
-
-		// Convert state to a string
-		p.qs.state = JSON.stringify(p.qs.state);
-
-
 		// Bespoke
 		// Override login querystrings from auth_options
 		if("login" in provider && typeof(provider.login) === 'function'){
 			// Format the paramaters according to the providers formatting function
 			provider.login(p);
 		}
+
+
+
+		// Add OAuth to state
+		// Where the service is going to take advantage of the oauth_proxy
+		if( response_type !== "token" ||
+			parseInt(provider.oauth.version,10) < 2 ||
+			( opts.display === 'none' && provider.oauth.grant && session && session.refresh_token ) ){
+
+			// Add the oauth endpoints
+			p.qs.state.oauth = provider.oauth;
+
+			// Add the proxy url
+			p.qs.state.oauth_proxy = opts.oauth_proxy;
+
+		}
+
+
+		// Convert state to a string
+		p.qs.state = JSON.stringify(p.qs.state);
 
 
 
