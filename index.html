@@ -171,7 +171,7 @@ bower install hello
 
 <h3>1. Register</h3>
 
-<p>Register your application with at least one of the following networks. Ensure you register the correct domain as they can be quite picky</p>
+<p>Register your application with at least one of the following networks. Ensure you register the correct domain as they can be quite picky.</p>
 
 <ul>
 <!-- 
@@ -184,12 +184,12 @@ bower install hello
 <li><a target="_blank" href="https://code.google.com/apis/console/b/0/#:access">Google +</a></li>
 </ul>
 
-<h3>2. Include Hello.js script in your page</h3>
+<h3>2. Include Hello.js script in your page.</h3>
 
 <script class="pre" src="./dist/hello.all.js"></script>
 
 <h3>3. Create the signin buttons</h3>
-<p>Just add onclick events to call hello( network ).login(). Style your buttons as you like; I've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts</p>
+<p>Just add onclick events to call hello( network ).login(). Style your buttons as you like; I've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts.</p>
 
 <script class="pre" type="html">
 <button onclick="hello( 'windows' ).login()">windows</button>
@@ -218,7 +218,7 @@ hello.on('auth.login', function(auth){
 });
 </script>
 
-<h3>5. Configure hello.js with your client_id's and initiate all listeners</h3>
+<h3>5. Configure hello.js with your client_id's and initiate all listeners.</h3>
 
 <p>Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the <code>hello.init</code> function. e.g....</p>
 
@@ -759,7 +759,7 @@ hello( "facebook" ).login( {scope: "friends,photos,publish" } );
 
 <p>Errors can be returned in listeners to 'error' event, i.e. <code>hello.api([path]).on('error', [<em>errorhandler</em>])</code> or the 'complete' event, <code>hello.api([path]).on('complete', [<em>completehandler</em>])</code> - which may also be written as <code>hello.api([path], [<em>completehandler</em>])</code>.</p>
 
-<p>The <a href="#promises-a">Promise</a> response standardizes the binding of errorHandlers</p>
+<p>The <a href="#promises-a">Promise</a> response standardizes the binding of errorHandlers.</p>
 
 <h3>Error Object</h3>
 
@@ -926,7 +926,7 @@ google.login({force:false}).then(function(){
 
 <li><span>IE7</span>: Makes beeping sounds whenever the POST, PUT or DELETE methods are 
 used - because of the XD, IFrame+Form+hack.</li>
-<li><span>IE7</span>: Requires JSON.js and localStorage shims</li>
+<li><span>IE7</span>: Requires JSON.js and localStorage shims.</li>
 <li><span>Opera Mini</span>: Supports inline consent only, i.e. reloads original page.</li>
 <li><span>WP7</span>: Supports inline consent only, i.e. reloads original page.</li>
 
