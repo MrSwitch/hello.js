@@ -136,7 +136,7 @@ Quick start shows you how to go from zero to loading in the name and picture of 
 
 ### 1. Register
 
-Register your application with at least one of the following networks. Ensure you register the correct domain as they can be quite picky
+Register your application with at least one of the following networks. Ensure you register the correct domain as they can be quite picky.
 
 
 <!-- 
@@ -149,14 +149,14 @@ Register your application with at least one of the following networks. Ensure yo
 - [Google +](https://code.google.com/apis/console/b/0/#:access)
 
 
-### 2. Include Hello.js script in your page
+### 2. Include Hello.js script in your page.
 
 ```html
 <script class="pre" src="./dist/hello.all.js"></script>
 ```
 
 ### 3. Create the signin buttons
-Just add onclick events to call hello( network ).login(). Style your buttons as you like; I've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts
+Just add onclick events to call hello( network ).login(). Style your buttons as you like; I've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts.
 
 ```html
 <button onclick="hello( 'windows' ).login()">windows</button>
@@ -185,7 +185,7 @@ hello.on('auth.login', function(auth){
 });
 ```
 
-### 5. Configure hello.js with your client_id's and initiate all listeners
+### 5. Configure hello.js with your client_id's and initiate all listeners.
 
 Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the `hello.init` function. e.g....
 
@@ -726,7 +726,7 @@ It's good practice to limit the use of scopes and also to make users aware of wh
 
 Errors can be returned in listeners to 'error' event, i.e. `hello.api([path]).on('error', [*errorhandler*])` or the 'complete' event, `hello.api([path]).on('complete', [*completehandler*])` - which may also be written as `hello.api([path], [*completehandler*])`.
 
-The [Promise](#promises-a) response standardizes the binding of errorHandlers
+The [Promise](#promises-a) response standardizes the binding of errorHandlers.
 
 ### Error Object
 
@@ -893,7 +893,7 @@ For a demo, or, if you're bundling up the library from `src/*` files, then pleas
 
 - IE7: Makes beeping sounds whenever the POST, PUT or DELETE methods are 
 used - because of the XD, IFrame+Form+hack.- 
-- IE7: Requires JSON.js and localStorage shims
+- IE7: Requires JSON.js and localStorage shims.
 - Opera Mini: Supports inline consent only, i.e. reloads original page.
 - WP7: Supports inline consent only, i.e. reloads original page.
 
