@@ -740,12 +740,26 @@ hello.utils.extend( hello.utils, {
 			};
 		}
 
+
+		function get(){
+			var json = {};
+			try{
+				json = JSON.parse(localStorage.getItem('hello')) || {};
+			}catch(e){}
+			return json;
+		}
+
+		function set(json){
+			localStorage.setItem('hello', JSON.stringify(json));
+		}
+
+
 		// Does this browser support localStorage?
 
 		return function (name,value,days) {
 
 			// Local storage
-			var json = JSON.parse(localStorage.getItem('hello')) || {};
+			var json = get();
 
 			if(name && value === undefined){
 				return json[name] || null;
@@ -765,7 +779,7 @@ hello.utils.extend( hello.utils, {
 				return json;
 			}
 
-			localStorage.setItem('hello', JSON.stringify(json));
+			set(json);
 
 			return json || null;
 		};
