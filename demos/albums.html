@@ -3,7 +3,8 @@
 <script src="/adorn/adorn.js" async></script>
 <script src="client_ids.js"></script>
 <style>
-img{
+
+img.picture{
 	width:50%;
 	border:1px solid #ccc;
 	padding:1%;
@@ -12,19 +13,18 @@ img{
 	vertical-align: top;
 	background-color: white;
 }
-img:nth-child(2n){
+img.picture:nth-child(2n){
 	-webkit-transform:rotate(10deg);
 	-moz-transform:rotate(10deg);
 	-ms-transform:rotate(10deg);
 	transform:rotate(10deg);
 }
-img:nth-child(3n){
+img.picture:nth-child(3n){
 	-webkit-transform:rotate(-10deg);
 	-moz-transform:rotate(-10deg);
 	-ms-transform:rotate(-10deg);
 	transform:rotate(-10deg);
 }
-
 .demo{
 	max-height:500px;
 }
@@ -206,6 +206,7 @@ function buildPhotoThumnail(item){
 	var list = document.getElementById('photos');
 
 	var o = document.createElement('img');
+	o.className='picture';
 	o.src = item.thumbnail;
 	o.title = item.name;
 
