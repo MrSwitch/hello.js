@@ -1910,13 +1910,14 @@ hello.api = function(){
 		}
 
 
+		// Store the data as options
+		// This is used to populate the request object before the data is augmented by the prewrap handlers.
+		p.options = utils.clone(p.data);
+
+
 		// if url needs a base
 		// Wrap everything in
 		var getPath = function(url){
-
-			// Store the data as options
-			// This is used to populate the request object before the data is augmented by the prewrap handlers.
-			p.options = utils.clone(p.data);
 
 
 			// Format the string if it needs it
