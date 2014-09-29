@@ -24,10 +24,17 @@ function login(network){
 	hello.login(network).then(function(){
 		console.log('fullfilled', 'making api call');
 		// Reurn another promise to get the users profile.
-		return 	hello( network ).api( '/me' );
+		return 	hello( network ).api( 'me' );
 	}).then(function(p){
-		console.log('then fullfilled', p);
+		// Print it to console.
+		console.log('hello.api(me) was fullfilled', p);
+		return p;
+	}).then(function(p){
+		// Insert it into thumbnail
 		document.getElementById(network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network+" as " + p.name;
+	}).then(null, function(e){
+		// Uh oh
+		console.error(e);
 	});
 
 }
