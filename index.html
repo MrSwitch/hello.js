@@ -693,21 +693,27 @@ hello.off("auth.login",sessionstart);
 <h1>Misc</h1>
 
 <h2>Pagination, Limit and Next Page</h2>
-<p>A convenient function to get the `next` result set is provided in the second parameter of any <code>GET</code> callback. Calling this function recreates the request with the original parameters and event listeners. Albeit the original path is augmented with the parameters defined in the <code>paging.next</code> property.</p>
+<p>Responses which are a subset of the total results should provide a <code>response.paging.next</code> property. This can be plugged back into <code>hello.api</code> in order to get the next page of results.</p>
+
+<p>In the example below the function <code>paginationExample()</code> is initially called with <code><q>me/friends</q></code>. Subsequent calls take the path from <code>resp.paging.next</code>.</p>
 
 <pre class="tryit" type="js">
-hello( "facebook" ).api( "me/friends", {limit: 1} ).on( 'success', function( json, next ){
-	if( next ){
-		if( confirm( "Got friend "+ json.data[0].name + ". Get another?" ) ){
-			next();
+function paginationExample(path){
+	hello( "facebook" ).api( path, {limit: 1} ).on( 'success', function callback( resp ){
+		if( resp.paging && resp.paging.next ){
+			if( confirm( "Got friend "+ resp.data[0].name + ". Get another?" ) ){
+				// Call the api again but with the 'resp.paging.next` path
+				paginationExample( resp.paging.next );
+			}
 		}
-	}
-	else{
-		alert( "Got friend "+ json.data[0].name + ". That's it!" );
-	}
-}).on('error', function(){
-	alert("Whoops!");
-});
+		else{
+			alert( "Got friend "+ resp.data[0].name + ". That's it!" );
+		}
+	}).on('error', function(){
+		alert("Whoops!");
+	});
+}
+paginationExample( "me/friends" );
 </pre>
 
 

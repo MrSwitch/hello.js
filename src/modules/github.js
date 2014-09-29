@@ -23,10 +23,10 @@ function formatUser(o){
 
 function paging(res,headers,req){
 	if(res.data&&res.data.length&&headers&&headers.Link){
-		var next = headers.Link.match(/&page=([0-9]+)/);
+		var next = headers.Link.match(/<(.*?)>;\s*rel=\"next\"/);
 		if(next){
 			res.paging = {
-				next : "?page="+ next[1]
+				next : next[1]
 			};
 		}
 	}

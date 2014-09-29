@@ -65,7 +65,7 @@ function getFriends(network, path){
 		}
 		// Get the friends
 		// using path, me/friends or me/contacts
-		hello( network ).api( path , {limit:10}, function(r, next){
+		hello( network ).api( path , {limit:10}, function responseHandler(r){
 			for(var i=0;i<r.data.length;i++){
 				var o = r.data[i];
 				var li = document.createElement('li');
@@ -73,7 +73,10 @@ function getFriends(network, path){
 				list.appendChild(li);
 			};
 
-			btn_more.onclick = next;
+			btn_more.onclick = function(){
+				// Make another request and handle is in the same way
+				hello( network ).api( r.paging.next, {limit:10}, responseHandler );
+			};
 			btn_more.innerHTML = "Next from "+network;
 			btn_more.style.display = 'block';
 		});

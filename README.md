@@ -1,8 +1,6 @@
 
 # hello.js
 
-
-
 A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST API's. HelloJS standardizes paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. It's **modular**, so that list is [growing](modules.html). No more spaghetti code! 
 
 
@@ -655,21 +653,27 @@ hello.off("auth.login",sessionstart);
 # Misc
 
 ## Pagination, Limit and Next Page
-A convenient function to get the `next` result set is provided in the second parameter of any `GET` callback. Calling this function recreates the request with the original parameters and event listeners. Albeit the original path is augmented with the parameters defined in the `paging.next` property.
+Responses which are a subset of the total results should provide a `response.paging.next` property. This can be plugged back into `hello.api` in order to get the next page of results.
+
+In the example below the function `paginationExample()` is initially called with `me/friends`. Subsequent calls take the path from `resp.paging.next`.
 
 ```js
-hello( "facebook" ).api( "me/friends", {limit: 1} ).on( 'success', function( json, next ){
-	if( next ){
-		if( confirm( "Got friend "+ json.data[0].name + ". Get another?" ) ){
-			next();
+function paginationExample(path){
+	hello( "facebook" ).api( path, {limit: 1} ).on( 'success', function callback( resp ){
+		if( resp.paging && resp.paging.next ){
+			if( confirm( "Got friend "+ resp.data[0].name + ". Get another?" ) ){
+				// Call the api again but with the 'resp.paging.next` path
+				paginationExample( resp.paging.next );
+			}
 		}
-	}
-	else{
-		alert( "Got friend "+ json.data[0].name + ". That's it!" );
-	}
-}).on('error', function(){
-	alert("Whoops!");
-});
+		else{
+			alert( "Got friend "+ resp.data[0].name + ". That's it!" );
+		}
+	}).on('error', function(){
+		alert("Whoops!");
+	});
+}
+paginationExample( "me/friends" );
 ```
 
 

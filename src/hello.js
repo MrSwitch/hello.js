@@ -1821,11 +1821,22 @@ hello.api = function(){
 
 		// Is there a next_page defined in the response?
 		if( r && "paging" in r && r.paging.next ){
+
+			// Add the relative path if it is missing from the paging/next path
+			if( r.paging.next[0] === '?' ){
+				r.paging.next = p.path + r.paging.next;
+			}
+			// The relative path has been defined, lets markup the handler in the HashFragment
+			else{
+				r.paging.next += '#' + p.path;
+			}
+
+
 			// Repeat the action with a new page path
 			// This benefits from otherwise letting the user follow the next_page URL
 			// In terms of using the same callback handlers etc.
 			next = function(){
-				processPath( (r.paging.next.match(/^\?/)?p.path:'') + r.paging.next );
+				processPath( r.paging.next );
 			};
 		}
 
@@ -1856,7 +1867,9 @@ hello.api = function(){
 	processPath(p.path);
 
 
-	function processPath(path){
+	function processPath(url){
+
+		var m;
 
 		// Clone the data object
 		// Prevent this script overwriting the data of the incoming object.
@@ -1864,28 +1877,47 @@ hello.api = function(){
 		p.data = utils.clone(data);
 
 
+		// URL Mapping
+		// Is there a map for the given URL?
+		var actions = o[{"delete":"del"}[p.method]||p.method] || {};
+
+
 		// Extrapolate the QueryString
 		// Provide a clean path
 		// Move the querystring into the data
 		if(p.method==='get'){
-			var reg = /[\?\&]([^=&]+)(=([^&]+))?/ig,
-				m;
-			while((m = reg.exec(path))){
-				p.data[m[1]] = m[3];
+
+			var query = url.split(/[\?#]/)[1];
+			if(query){
+				utils.extend( p.data, utils.param( query ));
+				// Remove the query part from the URL
+				url = url.replace(/\?.*?(#|$)/,'$1');
 			}
-			path = path.replace(/\?.*/,'');
 		}
 
 
-		// URL Mapping
-		// Is there a map for the given URL?
-		var actions = o[{"delete":"del"}[p.method]||p.method] || {},
-			url = actions[path] || actions['default'] || path;
+		// is the hash fragment defined
+		if( ( m = url.match(/#(.+)/,'') ) ){
+			url = url.split('#')[0];
+			p.path = m[1];
+		}
+		else if( url in actions ){
+			p.path = url;
+			url = actions[ url ];
+		}
+		else if( 'default' in actions ){
+			url = actions['default'];
+		}
 
 
 		// if url needs a base
 		// Wrap everything in
 		var getPath = function(url){
+
+			// Store the data as options
+			// This is used to populate the request object before the data is augmented by the prewrap handlers.
+			p.options = utils.clone(p.data);
+
 
 			// Format the string if it needs it
 			url = url.replace(/\@\{([a-z\_\-]+)(\|.+?)?\}/gi, function(m,key,defaults){
@@ -1908,6 +1940,8 @@ hello.api = function(){
 				url = o.base + url;
 			}
 
+			// Store this in the request object
+			p.url = url;
 
 			var qs = {};
 
