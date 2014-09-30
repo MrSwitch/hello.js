@@ -230,6 +230,21 @@ var tests = [
 		expected : {}
 	},
 	{
+		title : "Post a status and upload a media file",
+		api : "api",
+		method : 'post',
+		path : 'me/share',
+		scope : ["publish"],
+		filter: function(p){
+			return p.enabled && p.network !== 'facebook';
+		},
+		data : {
+			message : "Uploading image",
+			file : INPUT_FILE
+		},
+		expected : {}
+	},
+	{
 		title : "List my albums",
 		api : "api",
 		method : 'get',
