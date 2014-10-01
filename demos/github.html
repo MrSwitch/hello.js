@@ -10,29 +10,34 @@
 <title>hello( github )</title>
 <h1>hello( github )</h1>
 
-<button id='github' onclick="hello.login('github');">github</button>
-<div id="result"></div>
+<button id='github' onclick="login('github');">github</button>
+<pre id="result">Signin to get a list of repos</pre>
 <script class="pre">
-hello.on('auth.login', function(r){
-	// Get Profile
-	console.log("auth.login");
-	hello.api(r.network+':/me', function(p){
-		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
-	});
-	hello.api(r.network+':/user/repos', function(r){
-		console.log(r);
-		for(var i=0;i<r.length;i++){
-			var li = document.createElement('li');
-			var a = document.createElement('a');
-			a.innerHTML = r[i].full_name;
-			a.href=r[i].html_url;
-			li.appendChild(a);
-			document.getElementById('result').appendChild(li);
-		}
-	});
-});
+function login(network){
 
+	var github = hello(network);
+
+	github.login( function(){
+
+		// get user profile data
+		github.api( '/me', function(p){
+			document.getElementById( network ).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network +" as " + p.name;
+		});
+
+		// Get a bespoke endpoint from github
+		github.api( '/user/repos', function(r){
+			document.getElementById('result').innerHTML = JSON.stringify(r,null,2);
+		});
+
+	});
+}
+</script>
+
+<script class="pre">
 hello.init({
 	github : GITHUB_CLIENT_ID
-},	{redirect_uri:'../redirect.html', oauth_proxy:OAUTH_PROXY_URL});
+},{
+	redirect_uri : '../redirect.html',
+	oauth_proxy : OAUTH_PROXY_URL
+});
 </script>
