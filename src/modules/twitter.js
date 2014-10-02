@@ -80,17 +80,19 @@ function sign(url){
 }
 */
 
+var base = "https://api.twitter.com/";
+
 hello.init({
 	'twitter' : {
 		// Ensure that you define an oauth_proxy
 		oauth : {
 			version : "1.0a",
-			auth	: "https://twitter.com/oauth/authorize",
-			request : 'https://twitter.com/oauth/request_token',
-			token	: 'https://twitter.com/oauth/access_token'
+			auth	: base + "oauth/authenticate",
+			request : base + "oauth/request_token",
+			token	: base + "oauth/access_token"
 		},
 
-		base	: "https://api.twitter.com/1.1/",
+		base	: base + "1.1/",
 
 		get : {
 			"me"			: 'account/verify_credentials.json',
