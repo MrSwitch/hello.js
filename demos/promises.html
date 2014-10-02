@@ -40,8 +40,16 @@ function login(network){
 </script>
 
 
-<h2>Example Promise.all</h2>
+<h2>Promise.all</h2>
 
+<p><code>Promise.all</code> is not native in IE yet so here's a shim</p>
+<script src="http://s3.amazonaws.com/es6-promises/promise-1.0.0.min.js" class="pre"></script>
+
+
+<h3>Example Promise.all</h3>
+
+
+<p>
 <button id='google' onclick="friendsAndContacts('google');">google friends and contacts</button>
 
 <pre id="friends" placeholder="Please click the button above to get friends and contacts here."></pre>
