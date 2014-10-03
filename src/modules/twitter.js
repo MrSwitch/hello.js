@@ -108,17 +108,23 @@ hello.init({
 			'me/share' : function(p,callback){
 
 				var data = p.data;
+				p.data = null;
 
-				if( !data.file ){
-					p.data = null;
-					callback( 'statuses/update.json?include_entities=1&status='+data.message );
-				}
-				else{
+				// TWEET MEDIA
+				if( data.file ){
 					p.data = {
 						status : data.message,
 						"media[]" : data.file
 					};
 					callback('statuses/update_with_media.json');
+				}
+				// RETWEET?
+				else if( data.id ){
+					callback('statuses/retweet/'+data.id+'.json');
+				}
+				// TWEET
+				else{
+					callback( 'statuses/update.json?include_entities=1&status='+data.message );
 				}
 			}
 		},

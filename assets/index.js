@@ -236,11 +236,25 @@ var tests = [
 		path : 'me/share',
 		scope : ["publish"],
 		filter: function(p){
-			return p.enabled && p.network !== 'facebook';
+			return p.enabled && p.network === 'twitter';
 		},
 		data : {
 			message : "Uploading image",
 			file : INPUT_FILE
+		},
+		expected : {}
+	},
+	{
+		title : "Reshare an existing message",
+		api : "api",
+		method : 'post',
+		path : 'me/share',
+		scope : ["publish"],
+		filter: function(p){
+			return p.enabled && p.network === 'twitter';
+		},
+		data : {
+			id : 0
 		},
 		expected : {}
 	},
