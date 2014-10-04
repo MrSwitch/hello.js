@@ -3813,6 +3813,19 @@ hello.init({
 				}
 				return o;
 			}
+		},
+		xhr : function(p){
+
+			if( p.method !== 'get' && p.data ){
+				// Serialize payload as JSON
+				p.headers = p.headers || {};
+				p.headers['Content-Type'] = 'application/json';
+				if (typeof(p.data) === 'object'){
+					p.data = JSON.stringify(p.data);
+				}
+			}
+
+			return true;
 		}
 	}
 });
@@ -4978,17 +4991,19 @@ function sign(url){
 }
 */
 
+var base = "https://api.twitter.com/";
+
 hello.init({
 	'twitter' : {
 		// Ensure that you define an oauth_proxy
 		oauth : {
 			version : "1.0a",
-			auth	: "https://twitter.com/oauth/authorize",
-			request : 'https://twitter.com/oauth/request_token',
-			token	: 'https://twitter.com/oauth/access_token'
+			auth	: base + "oauth/authenticate",
+			request : base + "oauth/request_token",
+			token	: base + "oauth/access_token"
 		},
 
-		base	: "https://api.twitter.com/1.1/",
+		base	: base + "1.1/",
 
 		get : {
 			"me"			: 'account/verify_credentials.json',
@@ -5004,17 +5019,23 @@ hello.init({
 			'me/share' : function(p,callback){
 
 				var data = p.data;
+				p.data = null;
 
-				if( !data.file ){
-					p.data = null;
-					callback( 'statuses/update.json?include_entities=1&status='+data.message );
-				}
-				else{
+				// TWEET MEDIA
+				if( data.file ){
 					p.data = {
 						status : data.message,
 						"media[]" : data.file
 					};
 					callback('statuses/update_with_media.json');
+				}
+				// RETWEET?
+				else if( data.id ){
+					callback('statuses/retweet/'+data.id+'.json');
+				}
+				// TWEET
+				else{
+					callback( 'statuses/update.json?include_entities=1&status='+data.message );
 				}
 			}
 		},
