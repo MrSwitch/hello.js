@@ -13,14 +13,14 @@ define([
 
 		it('should clone a simple object', function(){
 
-			var test = {
+			var orig = {
 				prop : 'prop'
 			};
 
-			var value = utils.clone(test);
+			var clone = utils.clone(orig);
 
 			// Assert that its the same but different.
-			expect( value ).to.be.eql( test ).and.not.to.be.equal( test );
+			expect( clone ).to.be.eql( orig ).and.not.to.be.equal( orig );
 
 		});
 
@@ -29,30 +29,79 @@ define([
 
 				var blob = new Blob();
 
-				var test = {
+				var orig = {
 					prop : blob
 				};
 
-				var value = utils.clone(test);
+				var clone = utils.clone(orig);
 
 				// Assert that its the same but different.
-				expect( value.prop ).to.be.a( Blob ).and.to.be.equal( blob );
+				expect( clone.prop ).to.be.a( Blob ).and.to.be.equal( orig.prop );
 
 			});
 		}
 
 		it('should not clone DOM element', function(){
 
-			var node = document.createElement('input');
-
-			var test = {
-				prop : node
+			var orig = {
+				prop : document.createElement('input')
 			};
 
-			var value = utils.clone(test);
+			var clone = utils.clone(orig);
 
 			// Assert that its the same but different.
-			expect( value.prop ).to.be.a( window.Element || window.HTMLElement ).and.to.be.equal( node );
+			expect( clone.prop ).to.be.a( window.Element || window.HTMLElement ).and.to.be.equal( orig.prop );
+
+		});
+
+		it('should clone arrays', function(){
+
+			var orig = [1,2,3];
+			var clone = utils.clone(orig);
+
+			// Assert that its the same but different.
+			expect( clone ).to.be.eql( orig ).and.to.not.be.equal( orig );
+
+		});
+
+		it('should return primitive value (Number)', function(){
+
+			var orig = 1;
+			var clone = utils.clone(orig);
+
+			// Assert that its the same but different.
+			expect( clone ).to.be.eql( orig );
+
+		});
+
+		it('should return primitive value (null)', function(){
+
+			var orig = null;
+			var clone = utils.clone(orig);
+
+			// Assert that its the same but different.
+			expect( clone ).to.be.eql( orig );
+
+		});
+
+		it('should return primitive value (String)', function(){
+
+			var orig = 'string';
+			var clone = utils.clone(orig);
+
+			// Assert that its the same but different.
+			expect( clone ).to.be.eql( orig );
+
+		});
+
+
+		it('should clone Date objects', function(){
+
+			var orig = (new Date());
+			var clone = utils.clone(orig);
+
+			// Assert that its the same but different.
+			expect( clone ).to.be.eql( orig );
 
 		});
 

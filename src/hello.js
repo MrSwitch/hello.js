@@ -2134,18 +2134,22 @@ hello.utils.extend( hello.utils, {
 	// Create a clone of an object
 	clone : function(obj){
 		// Does not clone Dom elements, nor Binary data, e.g. Blobs, Filelists
-		if("nodeName" in obj || this.isBinary( obj ) ){
+		if( obj === null || typeof( obj ) !== 'object' || obj instanceof Date || "nodeName" in obj || this.isBinary( obj ) ){
 			return obj;
 		}
+		var clone;
+		if(this.isArray(obj)){
+			clone = [];
+			for(var i=0;i<obj.length;i++){
+				clone.push(this.clone(obj[i]));
+			}
+			return clone;
+		}
+
 		// But does clone everything else.
-		var clone = {}, x;
-		for(x in obj){
-			if(typeof(obj[x]) === 'object'){
-				clone[x] = this.clone(obj[x]);
-			}
-			else{
-				clone[x] = obj[x];
-			}
+		clone = {};
+		for(var x in obj){
+			clone[x] = this.clone(obj[x]);
 		}
 		return clone;
 	},
