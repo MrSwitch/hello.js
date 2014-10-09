@@ -89,6 +89,10 @@ var CLIENT_IDS_ALL = {
 	flickr: FLICKR_CLIENT_ID
 };
 
+var TUMBLR_CLIENT_ID = {
+	'local.knarly.com' : '1odTR4hLo2oAoPlIoGN8O60d1tUw0CsZGdysFFPikX7APlcXlN',
+	'adodson.com' : 'BHKkYCvKt33lL34iM1yWUhkYRw1lqwifbKKTfgh5FAX5uBzzxn'
+}[window.location.hostname];
 
 //
 // OAUTH PROXY
