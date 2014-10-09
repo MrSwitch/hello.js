@@ -477,7 +477,7 @@ hello.utils.extend( hello, {
 		else if( opts.display === 'popup'){
 
 
-			var popup = utils.popup( url, redirect_uri, opts.window_width || 500, opts.window_height || 550 );
+			var popup = utils.popup( url, redirect_uri, opts.window_width || 500, opts.window_height || 550, opts.window_hidden || false );
 
 			var timer = setInterval(function(){
 				if(!popup||popup.closed){
@@ -1208,7 +1208,7 @@ hello.utils.extend( hello.utils, {
 	// Trigger a clientside Popup
 	// This has been augmented to support PhoneGap
 	//
-	popup : function(url, redirect_uri, windowWidth, windowHeight){
+	popup : function(url, redirect_uri, windowWidth, windowHeight, windowHidden){
 
 		var documentElement = document.documentElement;
 
@@ -1232,7 +1232,7 @@ hello.utils.extend( hello.utils, {
 			var popup = window.open(
 				url,
 				'_blank',
-				"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left=" + left + ",top="  + top
+				"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left=" + left + ",top="  + top + ",hidden=" + windowHidden
 			);
 
 			// PhoneGap support
