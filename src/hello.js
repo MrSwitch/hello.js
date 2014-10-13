@@ -462,6 +462,23 @@ hello.utils.extend( hello, {
 		self.emit("notice", "Authorization URL " + url );
 
 
+
+		// REFRESH
+		// This is a refresh operation, can be signed in automaticlly
+
+
+		if( opts.display === 'none' ){
+			// If the module supports hidden popups, aka is PhoneGap
+			// And the provider refresh is set to popup, aka the provider also supports the hidden popup approach
+			if( provider.refresh === 'popup' ){
+				// Set this to a popup with
+				opts.display = 'popup';
+				opts.window_hidden = true;
+			}
+		}
+
+
+
 		//
 		// Execute
 		// Trigger how we want self displayed
@@ -474,7 +491,7 @@ hello.utils.extend( hello, {
 
 
 		// Triggering popup?
-		else if( opts.display === 'popup'){
+		else if( opts.display === 'popup' ){
 
 
 			var popup = utils.popup( url, redirect_uri, opts.window_width || 500, opts.window_height || 550, opts.window_hidden || false );
