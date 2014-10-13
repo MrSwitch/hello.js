@@ -477,7 +477,7 @@ hello.utils.extend( hello, {
 		else if( opts.display === 'popup'){
 
 
-			var popup = utils.popup( url, redirect_uri, opts.window_width || 500, opts.window_height || 550 );
+			var popup = utils.popup( url, redirect_uri, opts.window_width || 500, opts.window_height || 550, opts.window_hidden || false );
 
 			var timer = setInterval(function(){
 				if(!popup||popup.closed){
@@ -1208,7 +1208,7 @@ hello.utils.extend( hello.utils, {
 	// Trigger a clientside Popup
 	// This has been augmented to support PhoneGap
 	//
-	popup : function(url, redirect_uri, windowWidth, windowHeight){
+	popup : function(url, redirect_uri, windowWidth, windowHeight, windowHidden){
 
 		var documentElement = document.documentElement;
 
@@ -1232,8 +1232,12 @@ hello.utils.extend( hello.utils, {
 			var popup = window.open(
 				url,
 				'_blank',
-				"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left=" + left + ",top="  + top
+				"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left=" + left + ",top="  + top + ",hidden=" + (windowHidden ? 'yes' : 'no')
 			);
+			// hidden=yes works in Amazon Fire OS, Android, iOS and Blackberry: http://cordova.apache.org/docs/en/3.3.0/cordova_inappbrowser_inappbrowser.md.html#show
+			// it will allow to refresh tokens for OAUTH1 providers like Twitter. Even with "Log in with Twitter" enabled, every 24 hours the token needs to be refreshed using /authenticate
+			// by hiding the browser, the user won't notice it.
+			
 
 			// PhoneGap support
 			// Add an event listener to listen to the change in the popup windows URL
