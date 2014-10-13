@@ -874,8 +874,10 @@ hello( network ).login({
 </div>
 <p>Unlike Implicit grant; Explicit grant may return the <code>refresh_token</code>. HelloJS honors the OAuth2 refresh_token, and will also request a new access_token once it has expired.</p>
 
+
 <h3>Bullet proof requests</h3>
 <p>A good way to design your app is to trigger requests through a user action, you can then test for a valid access token prior to making the api request with a potentially expired token.</p>
+
 
 <pre type="javascript">
 var google = hello('google');
@@ -885,6 +887,21 @@ google.login({force:false}).then(function(){
 });;
 </pre>
 
+
+<h3>Refreshing implictly in Phonegap/Cordova</h3>
+<p>Some services can still have their tokens refreshed through a popup window. This technique works with Phonegap/Cordova very well because InAppBrowser does not enforce popup blocking and can open popups in the background too - launching a popup through a non-user-initiated event on a regular browser will be blocked by default.</p>
+
+<p>To enable popup token refreshing for a given service simply set <code>refresh='popup'</code> as follows...</p>
+<pre>
+hello.init({
+   <i>servicename</i> : {
+   		id : CLIENT_ID,
+    	refresh : <q>popup</q>
+   }
+});
+</pre>
+
+<blockquote><p><b>Detect support:</b> if the second call to <code>hello.login</code> closes silently, then good to go &check;.</p></blockquote>
 
 
 <h2>Promises A+</h2>
@@ -947,6 +964,7 @@ used - because of the XD, IFrame+Form+hack.</li>
 <h2>Phonegap Support</h2>
 
 <p>HelloJS can also be run on phonegap applications. Checkout the demo <a href="https://github.com/MrSwitch/hellojs-phonegap-demo">hellojs-phonegap-demo</a></p>
+
 
 
 <h2>Contributing</h2>

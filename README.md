@@ -834,18 +834,10 @@ A list of services which enable silent authentication after the Implicit Grant s
 
 Unlike Implicit grant; Explicit grant may return the `refresh_token`. HelloJS honors the OAuth2 refresh_token, and will also request a new access_token once it has expired.
 
-## Refresh Access token with OAuth1 and Phonegap / Cordova
-OAuth1 does not support refresh tokens. However, e.g. Twitter allows to enable "Log in with Twitter", such that the user does not have to enter his credentials every request. The token however needs to be
-refreshed every day by calling login. By specifying 'window_hidden' : 'true' as a parameter, the user will not notice it. This will only work in a Phonegap / Cordova application.
-```javascript
-hello( network ).login({
-	display : 'popup',
-	window_hidden: true
-});
-```
 
 ### Bullet proof requests
 A good way to design your app is to trigger requests through a user action, you can then test for a valid access token prior to making the api request with a potentially expired token.
+
 
 ```javascript
 var google = hello('google');
@@ -855,6 +847,21 @@ google.login({force:false}).then(function(){
 });;
 ```
 
+
+### Refreshing implictly in Phonegap/Cordova
+Some services can still have their tokens refreshed through a popup window. This technique works with Phonegap/Cordova very well because InAppBrowser does not enforce popup blocking and can open popups in the background too - launching a popup through a non-user-initiated event on a regular browser will be blocked by default.
+
+To enable popup token refreshing for a given service simply set `refresh='popup'` as follows...
+```
+hello.init({
+   <i>servicename</i> : {
+   		id : CLIENT_ID,
+    	refresh : <q>popup</q>
+   }
+});
+```
+
+**Detect support:** if the second call to `hello.login` closes silently, then good to go &#10003;.
 
 
 ## Promises A+
@@ -917,6 +924,7 @@ used - because of the XD, IFrame+Form+hack.-
 ## Phonegap Support
 
 HelloJS can also be run on phonegap applications. Checkout the demo [hellojs-phonegap-demo](https://github.com/MrSwitch/hellojs-phonegap-demo)
+
 
 
 ## Contributing
