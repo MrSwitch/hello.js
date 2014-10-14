@@ -74,7 +74,7 @@ hello.init({
 		login : function(p){
 			// Change the default popup window to be atleast 560
 			// Yahoo does dynamically change it on the fly for the signin screen (only, what if your already signed in)
-			p.options.window_width = 560;
+			p.options.window.width = 560;
 		},
 		/*
 		// AUTO REFRESH FIX: Bug in Yahoo can't get this to work with node-oauth-shim

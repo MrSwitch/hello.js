@@ -49,8 +49,8 @@ hello.init({
 
 		login : function(p){
 			// The facebook login window is a different size.
-			p.options.window_width = 580;
-			p.options.window_height = 400;
+			p.options.window.width = 580;
+			p.options.window.height = 400;
 		},
 
 		// https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/v2.1

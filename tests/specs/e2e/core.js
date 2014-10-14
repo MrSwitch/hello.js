@@ -257,6 +257,36 @@ describe('Hello Core', function(){
 				hello.login('testable', {scope:common_scope});
 			});
 
+			it('should pass through options.window to window.open\'s arguments', function(done){
+
+				var spy = sinon.spy(function(url, name, options){
+					expect( options ).to.contain('width=20').and.to.contain('height=20').and.to.contain('hidden=1');
+					done();
+				});
+
+				window.open = spy;
+
+				hello.login('testable', {window:{width:20,height:20,hidden:true}});
+			});
+
+			it('should, when `option.display=none`, and `provider.refresh=popup` trigger a popup with the hidden flag', function(done){
+
+				var spy = sinon.spy(function(url, name, options){
+					expect( options ).to.contain('hidden=1');
+					done();
+				});
+
+				window.open = spy;
+
+				hello.init({
+					testable : {
+						refresh : 'popup'
+					}
+				});
+
+				hello( 'testable' ).login( { display:'none' } );
+			});
+
 		});
 
 

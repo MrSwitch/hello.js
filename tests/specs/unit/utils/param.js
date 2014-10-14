@@ -69,6 +69,16 @@ describe('utils / param', function(){
 
 	});
 
+	it('should use the custom delimiter, separator and transformer', function(){
+
+		// convert there and back
+		
+		var str = util({a:1,b:2,c:null}, ',', '=', function(a){return a === true ? 1 : (a || 0);});
+
+		expect( str ).to.equal( 'a=1,b=2,c=0' );
+
+	});
+
 });
 
 	

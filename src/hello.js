@@ -213,6 +213,14 @@ hello.utils.extend( hello, {
 		// merge/override options with app defaults
 		var opts = p.options = utils.merge(self.settings, p.options || {} );
 
+		// Set default window opts
+		opts.window = utils.merge({
+			width : 500,
+			height : 550,
+			hidden : 0
+		}, opts.window || {} );
+
+
 		// Network
 		p.network = self.settings.default_service = p.network || self.settings.default_service;
 
@@ -473,7 +481,7 @@ hello.utils.extend( hello, {
 			if( provider.refresh === 'popup' ){
 				// Set this to a popup with
 				opts.display = 'popup';
-				opts.window_hidden = true;
+				opts.window.hidden = true;
 			}
 		}
 
@@ -494,7 +502,7 @@ hello.utils.extend( hello, {
 		else if( opts.display === 'popup' ){
 
 
-			var popup = utils.popup( url, redirect_uri, opts.window_width || 500, opts.window_height || 550, opts.window_hidden || false );
+			var popup = utils.popup( url, redirect_uri, opts.window );
 
 			var timer = setInterval(function(){
 				if(!popup||popup.closed){
@@ -682,35 +690,44 @@ hello.utils.extend( hello.utils, {
 	// Param
 	// Explode/Encode the parameters of an URL string/object
 	// @param string s, String to decode
+	// @param string delim, String to delimit between the items
+	// @param string separator, String between the key/values
+	// @param function to transform the value before assigning it.
 	//
-	param : function(s){
+	param : function(s,delim,separator,transformer){
 		var b,
 			a = {},
 			m;
+
+		separator = separator || '=';
 		
 		if(typeof(s)==='string'){
+
+			transformer = transformer || decodeURIComponent;
 
 			m = s.replace(/^[\#\?]/,'').match(/([^=\/\&]+)=([^\&]+)/g);
 			if(m){
 				for(var i=0;i<m.length;i++){
 					b = m[i].match(/([^=]+)=(.*)/);
-					a[b[1]] = decodeURIComponent( b[2] );
+					a[b[1]] = transformer( b[2] );
 				}
 			}
 			return a;
 		}
 		else {
 			var o = s;
+
+			transformer = transformer || encodeURIComponent;
 		
 			a = [];
 
 			for( var x in o ){if(o.hasOwnProperty(x)){
 				if( o.hasOwnProperty(x) ){
-					a.push( [x, o[x] === '?' ? '?' : encodeURIComponent(o[x]) ].join('=') );
+					a.push( [x, o[x] === '?' ? '?' : transformer(o[x]) ].join(separator) );
 				}
 			}}
 
-			return a.join('&');
+			return a.join(delim || '&');
 		}
 	},
 	
@@ -1225,7 +1242,7 @@ hello.utils.extend( hello.utils, {
 	// Trigger a clientside Popup
 	// This has been augmented to support PhoneGap
 	//
-	popup : function(url, redirect_uri, windowWidth, windowHeight, windowHidden){
+	popup : function(url, redirect_uri, _window){
 
 		var documentElement = document.documentElement;
 
@@ -1234,12 +1251,18 @@ hello.utils.extend( hello.utils, {
 		// Fixes dual-screen position                         Most browsers      Firefox
 		var dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
 		var dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
-
 		var width = window.innerWidth || documentElement.clientWidth || screen.width;
 		var height = window.innerHeight || documentElement.clientHeight || screen.height;
 
-		var left = ((width - windowWidth) / 2) + dualScreenLeft;
-		var top  = ((height - windowHeight) / 2) + dualScreenTop;
+		_window.left = ((width - _window.width) / 2) + dualScreenLeft;
+		_window.top  = ((height - _window.height) / 2) + dualScreenTop;
+
+		// Make resizeable
+		_window.resizeable = 1;
+
+		// If the window property values are Boolean or falsy then return '1' or '0'
+		var windowFeatures = hello.utils.param(_window,',','=', function(a){return a === true ? 1 : (a || 0);});
+
 
 		// Create a function for reopening the popup, and assigning events to the new popup object
 		// This is a fix whereby triggering the
@@ -1249,7 +1272,7 @@ hello.utils.extend( hello.utils, {
 			var popup = window.open(
 				url,
 				'_blank',
-				"resizeable=true,height=" + windowHeight + ",width=" + windowWidth + ",left=" + left + ",top="  + top + ",hidden=" + (windowHidden ? 'yes' : 'no')
+				windowFeatures
 			);
 			// hidden=yes works in Amazon Fire OS, Android, iOS and Blackberry: http://cordova.apache.org/docs/en/3.3.0/cordova_inappbrowser_inappbrowser.md.html#show
 			// it will allow to refresh tokens for OAUTH1 providers like Twitter. Even with "Log in with Twitter" enabled, every 24 hours the token needs to be refreshed using /authenticate

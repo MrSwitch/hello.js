@@ -5,8 +5,8 @@ hello.init({
 	'tumblr' : {
 		// Set default window height
 		login : function(p){
-			p.options.window_width = 600;
-			p.options.window_height = 510;
+			p.options.window.width = 600;
+			p.options.window.height = 510;
 		},
 
 		// Ensure that you define an oauth_proxy
