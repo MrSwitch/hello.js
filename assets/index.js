@@ -226,8 +226,7 @@ var tests = [
 			message : "Running the tests",
 			link : window.location.href,
 			picture : "http://adodson.com/hello.js/assets/logo.png"
-		},
-		expected : {}
+		}
 	},
 	{
 		title : "Post a status and upload a media file",
