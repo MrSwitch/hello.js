@@ -1,6 +1,8 @@
 define([
-//	'../../../src/hello'
+	'../libs/safari_hack'
+	//	'../../../src/hello'
 ], function(
+	safari_hack
 //	hello
 ){
 
@@ -133,15 +135,6 @@ describe('Hello Core', function(){
 		after(function(){
 			window.open = _open;
 		});
-
-
-		function safari_hack(url){
-			var m = url.match(/\#oauth_redirect\=(.+)$/i);
-			if(m){
-				url = decodeURIComponent(decodeURIComponent(m[1]));
-			}
-			return url;
-		}
 
 
 		it('should assign a complete event', function(done){

@@ -1,6 +1,8 @@
 define([
+	'../../libs/safari_hack'
 //	'../../../../src/utils/diff'
 ], function(
+	safari_hack
 //	diff
 ){
 
@@ -26,6 +28,7 @@ describe('utils / popup', function(){
 	it('should accept a url, redirect_uri, and window arguments', function(done){
 
 		window.open = function( path, name, args ){
+			path = safari_hack(path);
 			expect( path ).to.equal( url );
 			expect( name ).to.equal( '_blank' );
 			expect( args ).to.contain( 'width=20' ).and.to.contain( 'height=20' ).and.to.contain( 'hidden=1' );
