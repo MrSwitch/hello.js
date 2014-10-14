@@ -1738,6 +1738,9 @@ hello.api = function(){
 
 	// method
 	p.method = (p.method || 'get').toLowerCase();
+
+	// headers
+	p.headers = p.headers || {};
 	
 	// data
 	var data = p.data = p.data || {};
@@ -1774,6 +1777,11 @@ hello.api = function(){
 		}});
 		return self;
 	}
+
+
+	// Proxy?
+	// OAuth1 calls always need a proxy
+	p.proxy = o.oauth && parseInt(o.oauth.version,10) === 1;
 
 
 	// timeout global setting
@@ -1963,7 +1971,7 @@ hello.api = function(){
 
 				self.emit("notice", "Request " + path);
 
-				_sign(p.network, path, p.method, p.data, o.querystring, callback);
+				_sign(p.proxy, path, p.method, p.data, o.querystring, callback);
 			};
 
 
@@ -2059,34 +2067,39 @@ hello.api = function(){
 
 	//
 	// Add authentication to the URL
-	function _sign(network, path, method, data, modifyQueryString, callback){
+	function _sign(proxy, path, method, data, modifyQueryString, callback){
 
 		// OAUTH SIGNING PROXY
-		var service = self.services[network],
-			token = (session ? session.access_token : null);
+		var token = (session ? session.access_token : null);
 
-		// Is self an OAuth1 endpoint
-		var proxy = ( service.oauth && parseInt(service.oauth.version,10) === 1 ? self.settings.oauth_proxy : null);
+		// OAuth2
+		if(!(o.oauth && parseInt(o.oauth.version,10) === 1)){
 
+			// We can process the accces_token in the path
+			var qs = { 'access_token' : token||'' };
+
+			if(modifyQueryString){
+				modifyQueryString(qs);
+			}
+
+			token = '';
+
+			path = utils.qs( path, qs );
+		}
+
+		// If this request requires a proxy OAuth1 or OAuth2 but no Access-Controls
 		if(proxy){
 			// Use the proxy as a path
-			callback( utils.qs(proxy, {
+			path = utils.qs( self.settings.oauth_proxy, {
 				path : path,
 				access_token : token||'',
 				then : (method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
 				method : method,
 				suppress_response_codes : true
-			}));
-			return;
+			});
 		}
 
-		var qs = { 'access_token' : token||'' };
-
-		if(modifyQueryString){
-			modifyQueryString(qs);
-		}
-
-		callback(  utils.qs( path, qs) );
+		callback( path );
 	}
 
 };

@@ -85,7 +85,20 @@ hello.init({
 		},
 
 		post : {
-			//"me/share"		: 'people/~/current-status'
+			"me/share"		: function(p, callback){
+				p.data = JSON.stringify({
+					"comment": p.data.message,
+					"content": {
+						"submitted-url": p.data.link,
+						"submitted-image-url": p.data.picture
+					},
+					"visibility": {
+						"code": "anyone"
+					}
+				});
+
+				callback('people/~/shares?format=json');
+			}
 		},
 
 		wrap : {
@@ -122,7 +135,14 @@ hello.init({
 				qs['error-callback'] = '?';
 			}
 		},
-		xhr : false
+		xhr : function(p,qs){
+			if(p.method !== 'get'){
+				p.headers['Content-Type'] = 'application/json';
+				p.proxy = true;
+				return true;
+			}
+			return false;
+		}
 	}
 });
 
