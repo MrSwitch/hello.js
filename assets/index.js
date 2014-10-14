@@ -754,10 +754,7 @@ function Test(test,network,parent){
 
 	this.expected = test.expected;
 	this.validate = test.validate || function(r){
-		if(this.expected){
-			return testExpected(this.expected,r);
-		}
-		return r && !("error" in r);
+		return r && !("error" in r) && (!this.expected || testExpected(this.expected,r));
 	};
 
 	this.next = ko.observable(null);
