@@ -134,19 +134,33 @@
 		if("feed" in o && "entry" in o.feed){
 			var token = hello.getAuthResponse('google').access_token;
 			for(var i=0;i<o.feed.entry.length;i++){
-				var a = o.feed.entry[i],
-					pic = (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+token:null;
+				var a = o.feed.entry[i];
 
-				r.push({
-					id		: a.id.$t,
-					name	: a.title.$t,
-					email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
-					updated_time : a.updated.$t,
-					picture : pic,
-					thumbnail : pic
-				});
+				a.id	= a.id.$t;
+				a.name	= a.title.$t;
+				delete a.title;
+				if(a.gd$email){
+					a.email	= (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null;
+					a.emails = a.gd$email;
+					delete a.gd$email;
+				}
+				if(a.updated){
+					a.updated = a.updated.$t;
+				}
+
+				if(a.link){
+					var pic = (a.link.length>0)?a.link[0].href+'?access_token='+token:null;
+					if(pic){
+						a.picture = pic;
+						a.thumbnail = pic;
+					}
+					delete a.link;
+				}
+				if(a.category){
+					delete a.category;
+				}
 			}
-			o.data = r;
+			o.data = o.feed.entry;
 			delete o.feed;
 		}
 		return o;
