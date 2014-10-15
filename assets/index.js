@@ -134,6 +134,7 @@ var tests = [
 		api : "api",
 		method : 'get',
 		path : 'me',
+		scope : ['email'],
 		expected : {
 			name : reg.name,
 			id : reg.id,
