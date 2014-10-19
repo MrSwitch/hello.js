@@ -129,8 +129,7 @@ hello.init({
 				paging(res);
 				return res;
 			}
-		},
-		xhr : false
+		}
 	}
 });
 

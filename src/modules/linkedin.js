@@ -66,12 +66,6 @@ hello.init({
 		},
 		scope_delim : ' ',
 
-		querystring : function(qs){
-			// Linkedin signs requests with the parameter 'oauth2_access_token'... yeah anotherone who thinks they should be different!
-			qs.oauth2_access_token = qs.access_token;
-			delete qs.access_token;
-		},
-
 		base	: "https://api.linkedin.com/v1/",
 
 		get : {
@@ -130,13 +124,15 @@ hello.init({
 			}
 		},
 		jsonp : function(p,qs){
-			qs.format = 'jsonp';
+			formatQuery(qs);
 			if(p.method==='get'){
-				qs['error-callback'] = '?';
+				qs.format = 'jsonp';
+				qs['error-callback'] = p.callbackID;
 			}
 		},
 		xhr : function(p,qs){
 			if(p.method !== 'get'){
+				formatQuery(qs);
 				p.headers['Content-Type'] = 'application/json';
 				p.proxy = true;
 				return true;
@@ -145,5 +141,12 @@ hello.init({
 		}
 	}
 });
+
+
+function formatQuery(qs){
+	// Linkedin signs requests with the parameter 'oauth2_access_token'... yeah anotherone who thinks they should be different!
+	qs.oauth2_access_token = qs.access_token;
+	delete qs.access_token;
+}
 
 })(hello);

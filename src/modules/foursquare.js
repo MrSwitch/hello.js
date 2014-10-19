@@ -46,14 +46,6 @@ hello.init({
 		// Refresh the access_token once expired
 		refresh : true,
 
-		// Alter the querystring
-		querystring : function(qs){
-			var token = qs.access_token;
-			delete qs.access_token;
-			qs.oauth_token = token;
-			qs.v = 20121125;
-		},
-
 		base : 'https://api.foursquare.com/v2/',
 
 		get : {
@@ -84,8 +76,21 @@ hello.init({
 				}
 				return o;
 			}
-		}
+		},
+
+		xhr : formatRequest,
+		jsonp : formatRequest
 	}
 });
+
+
+function formatRequest(p,qs){
+	var token = qs.access_token;
+	delete qs.access_token;
+	qs.oauth_token = token;
+	qs.v = 20121125;
+	return true;
+}
+
 
 })(hello);

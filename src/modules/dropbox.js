@@ -48,7 +48,7 @@ function format_file(o){
 
 function req(str){
 	return function(p,cb){
-		delete p.data.limit;
+		delete p.query.limit;
 		cb(str);
 	};
 }
@@ -201,6 +201,11 @@ hello.init({
 
 			}
 			return true;
+		},
+
+		form : function(p,qs){
+			delete qs.state;
+			delete qs.redirect_uri;
 		}
 	}
 });

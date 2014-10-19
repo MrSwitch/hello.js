@@ -204,7 +204,7 @@ hello.init({
 		xhr : false,
 
 		jsonp: function(p,qs){
-			if(p.method.toLowerCase() == "get"){
+			if(p.method == "get"){
 				delete qs.callback;
 				qs.jsoncallback = p.callbackID;
 			}

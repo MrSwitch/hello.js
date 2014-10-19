@@ -164,7 +164,7 @@ hello.init({
 
 		// Special requirements for handling JSONP fallback
 		jsonp : function(p,qs){
-			var m = p.method.toLowerCase();
+			var m = p.method;
 			if( m !== 'get' && !hello.utils.hasBinary(p.data) ){
 				p.data.method = m;
 				p.method = 'get';

@@ -154,9 +154,9 @@ hello.init({
 			return true;
 		},
 		jsonp : function(p){
-			if( p.method.toLowerCase() !== 'get' && !hello.utils.hasBinary(p.data) ){
+			if( p.method !== 'get' && !hello.utils.hasBinary(p.data) ){
 				//p.data = {data: JSON.stringify(p.data), method: p.method.toLowerCase()};
-				p.data.method = p.method.toLowerCase();
+				p.data.method = p.method;
 				p.method = 'get';
 			}
 		}

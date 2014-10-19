@@ -277,164 +277,6 @@
 	}
 
 
-	//
-	// Events
-	//
-	var addEvent, removeEvent;
-
-	if(document.removeEventListener){
-		addEvent = function(elm, event_name, callback){
-			elm.addEventListener(event_name, callback);
-		};
-		removeEvent = function(elm, event_name, callback){
-			elm.removeEventListener(event_name, callback);
-		};
-	}
-	else if(document.detachEvent){
-		removeEvent = function (elm, event_name, callback){
-			elm.detachEvent("on"+event_name, callback);
-		};
-		addEvent = function (elm, event_name, callback){
-			elm.attachEvent("on"+event_name, callback);
-		};
-	}
-
-	//
-	// postMessage
-	// This is used whereby the browser does not support CORS
-	//
-	var xd_iframe, xd_ready, xd_id, xd_counter, xd_queue=[];
-	function xd(method, url, headers, body, callback){
-
-		// This is the origin of the Domain we're opening
-		var origin = 'https://content.googleapis.com';
-
-		// Is this the first time?
-		if(!xd_iframe){
-
-			// ID
-			xd_id = String(parseInt(Math.random()*1e8,10));
-
-			// Create the proxy window
-			xd_iframe = utils.append('iframe', { src : origin + "/static/proxy.html?jsh=m%3B%2F_%2Fscs%2Fapps-static%2F_%2Fjs%2Fk%3Doz.gapi.en.mMZgig4ibk0.O%2Fm%3D__features__%2Fam%3DEQ%2Frt%3Dj%2Fd%3D1%2Frs%3DAItRSTNZBJcXGialq7mfSUkqsE3kvYwkpQ#parent="+window.location.origin+"&rpctoken="+xd_id,
-										style : {position:'absolute',left:"-1000px",bottom:0,height:'1px',width:'1px'} }, 'body');
-
-			// Listen for on ready events
-			// Set the window listener to handle responses from this
-			addEvent( window, "message", function CB(e){
-
-				// Try a callback
-				if(e.origin !== origin){
-					return;
-				}
-
-				var json;
-
-				try{
-					json = JSON.parse(e.data);
-				}
-				catch(ee){
-					// This wasn't meant to be
-					return;
-				}
-
-				// Is this the right implementation?
-				if(json && json.s && json.s === "ready:"+xd_id){
-					// Yes, it is.
-					// Lets trigger the pending operations
-					xd_ready = true;
-					xd_counter = 0;
-
-					for(var i=0;i<xd_queue.length;i++){
-						xd_queue[i]();
-					}
-				}
-			});
-		}
-
-		//
-		// Action
-		// This is the function to call if/once the proxy has successfully loaded
-		// If makes a call to the IFRAME
-		var action = function(){
-
-			var nav = window.navigator,
-				position = ++xd_counter,
-				qs = utils.param(url.match(/\?.+/)[0]);
-
-			var token = qs.access_token;
-			delete qs.access_token;
-
-			// The endpoint is ready send the response
-			var message = JSON.stringify({
-				"s":"makeHttpRequests",
-				"f":"..",
-				"c":position,
-				"a":[[{
-					"key":"gapiRequest",
-					"params":{
-						"url":url.replace(/(^https?\:\/\/[^\/]+|\?.+$)/,''), // just the pathname
-						"httpMethod":method.toUpperCase(),
-						"body": body,
-						"headers":{
-							"Authorization":":Bearer "+token,
-							"Content-Type":headers['content-type'],
-							"X-Origin":window.location.origin,
-							"X-ClientDetails":"appVersion="+nav.appVersion+"&platform="+nav.platform+"&userAgent="+nav.userAgent
-						},
-						"urlParams": qs,
-						"clientName":"google-api-javascript-client",
-						"clientVersion":"1.1.0-beta"
-					}
-				}]],
-				"t":xd_id,
-				"l":false,
-				"g":true,
-				"r":".."
-			});
-
-			addEvent( window, "message", function CB2(e){
-
-				if(e.origin !== origin ){
-					// not the incoming message we're after
-					return;
-				}
-
-				// Decode the string
-				try{
-					var json = JSON.parse(e.data);
-					if( json.t === xd_id && json.a[0] === position ){
-						removeEvent( window, "message", CB2);
-						callback(JSON.parse(JSON.parse(json.a[1]).gapiRequest.data.body));
-					}
-				}
-				catch(ee){
-					callback({
-						error: {
-							code : "request_error",
-							message : "Failed to post to Google"
-						}
-					});
-				}
-			});
-
-			// Post a message to iframe once it has loaded
-			xd_iframe.contentWindow.postMessage(message, '*');
-		};
-
-
-		//
-		// Check to see if the proy has loaded,
-		// If it has then action()!
-		// Otherwise, xd_queue until the proxy has loaded
-		if(xd_ready){
-			action();
-		}
-		else{
-			xd_queue.push(action);
-		}
-	}
-	/**/
 
 	//
 	// Upload to Drive
@@ -476,7 +318,51 @@
 			}
 		}
 
-		callback('upload/drive/v2/files'+( data.id ? '/' + data.id : '' )+'?uploadType=multipart');
+
+		// Extract the file, if it exists from the data object
+		// If the File is an INPUT element lets just concern ourselves with the NodeList
+		var file;
+		if( "file" in p.data ){
+			file = p.data.file;
+			delete p.data.file;
+
+			if( typeof(file)==='object' && "files" in file){
+				// Assign the NodeList
+				file = file.files;
+			}
+			if(!file || !file.length){
+				callback({
+					error : {
+						code : 'request_invalid',
+						message : 'There were no files attached with this request to upload'
+					}
+				});
+				return;
+			}
+		}
+
+
+//		p.data.mimeType = Object(file[0]).type || 'application/octet-stream';
+
+		// Construct a multipart message
+		var parts = new Multipart();
+		parts.append( JSON.stringify(p.data), 'application/json');
+
+		// Read the file into a  base64 string... yep a hassle, i know
+		// FormData doesn't let us assign our own Multipart headers and HTTP Content-Type
+		// Alas GoogleApi need these in a particular format
+		if(file){
+			parts.append( file );
+		}
+
+		parts.onready(function(body, boundary){
+
+			p.headers['content-type'] = 'multipart/related; boundary="'+boundary+'"';
+			p.data = body;
+
+			callback('upload/drive/v2/files'+( data.id ? '/' + data.id : '' )+'?uploadType=multipart');
+		});
+
 	}
 
 
@@ -548,8 +434,8 @@
 				'me/feed' : 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
 				'me/albums' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}&start-index=@{start|1}',
 				'me/album' : function(p,callback){
-					var key = p.data.id;
-					delete p.data.id;
+					var key = p.query.id;
+					delete p.query.id;
 					callback(key.replace("/entry/", "/feed/"));
 				},
 				'me/photos' : 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}&start-index=@{start|1}',
@@ -645,109 +531,30 @@
 				'default' : gEntry
 			},
 			xhr : function(p){
-
 				// Post
 				if(p.method==='post'||p.method==='put'){
-
-					// Does this contain binary data?
-					if( p.data && utils.hasBinary(p.data) || p.data.file ){
-
-						// There is support for CORS via Access Control headers
-						// ... unless otherwise stated by post/put handlers
-						p.cors_support = p.cors_support || true;
-
-
-						// There is noway, as it appears, to Upload a file along with its meta data
-						// So lets cancel the typical approach and use the override '{ api : function() }' below
-						return false;
-					}
-
-					// Convert the POST into a javascript object
-					p.data = JSON.stringify(p.data);
-					p.headers = {
-						'content-type' : 'application/json'
-					};
+					toJSON(p);
 				}
 				return true;
 			},
 
-			//
-			// Custom API handler, overwrites the default fallbacks
-			// Performs a postMessage Request
-			//
-			api : function(url,p,qs,callback){
-
-				// Dont use this function for GET requests
-				if(p.method==='get'){
-					return;
-				}
-
-				// Contain inaccessible binary data?
-				// If there is no "files" property on an INPUT then we can't get the data
-				if( "file" in p.data && utils.domInstance('input', p.data.file ) && !( "files" in p.data.file ) ){
-					callback({
-						error : {
-							code : 'request_invalid',
-							message : "Sorry, can't upload your files to Google Drive in this browser"
-						}
-					});
-				}
-
-				// Extract the file, if it exists from the data object
-				// If the File is an INPUT element lets just concern ourselves with the NodeList
-				var file;
-				if( "file" in p.data ){
-					file = p.data.file;
-					delete p.data.file;
-
-					if( typeof(file)==='object' && "files" in file){
-						// Assign the NodeList
-						file = file.files;
-					}
-					if(!file || !file.length){
-						callback({
-							error : {
-								code : 'request_invalid',
-								message : 'There were no files attached with this request to upload'
-							}
-						});
-						return;
-					}
-				}
-
-
-//				p.data.mimeType = Object(file[0]).type || 'application/octet-stream';
-
-				// Construct a multipart message
-				var parts = new Multipart();
-				parts.append( JSON.stringify(p.data), 'application/json');
-
-				// Read the file into a  base64 string... yep a hassle, i know
-				// FormData doesn't let us assign our own Multipart headers and HTTP Content-Type
-				// Alas GoogleApi need these in a particular format
-				if(file){
-					parts.append( file );
-				}
-
-				parts.onready(function(body, boundary){
-
-					// Does this userAgent and endpoint support CORS?
-					if( p.cors_support ){
-						// Deliver via 
-						utils.xhr( p.method, utils.qs(url,qs), {
-							'content-type' : 'multipart/related; boundary="'+boundary+'"'
-						}, body, callback );
-					}
-					else{
-						// Otherwise lets POST the data the good old fashioned way postMessage
-						xd( p.method, utils.qs(url,qs), {
-							'content-type' : 'multipart/related; boundary="'+boundary+'"'
-						}, body, callback );
-					}
-				});
-
-				return true;
-			}
+			// Dont even try submitting via form.
+			// This means no post operations in <=IE9
+			form : false
 		}
 	});
+
+	
+	function toJSON(p){
+		if( typeof(p.data) === 'object' ){
+			// Convert the POST into a javascript object
+			try{
+				p.data = JSON.stringify(p.data);
+				p.headers['content-type'] = 'application/json';
+			}
+			catch(e){}
+		}
+	}
+
+
 })(hello, window);

@@ -1716,6 +1716,7 @@ hello.utils.responseHandler( window, window.opener || window.parent );
 /////////////////////////////////////////
 // API
 // @param path		string
+// @param query		object (optional)
 // @param method	string (optional)
 // @param data		object (optional)
 // @param timeout	integer (optional)
@@ -1724,7 +1725,7 @@ hello.utils.responseHandler( window, window.opener || window.parent );
 hello.api = function(){
 
 	// get arguments
-	var p = this.utils.args({path:'s!', method : "s", data:'o', timeout:'i', callback:"f" }, arguments);
+	var p = this.utils.args({path:'s!', query : "o", method : "s", data:'o', timeout:'i', callback:"f" }, arguments);
 
 	// Create self
 	// An object which inherits its parent as the prototype.
@@ -1741,7 +1742,16 @@ hello.api = function(){
 
 	// headers
 	p.headers = p.headers || {};
-	
+
+	// query
+	p.query = p.query || {};
+
+	// If get, put all parameters into query
+	if( p.method === 'get' || p.method === 'delete' ){
+		utils.extend( p.query, p.data );
+		p.data = {};
+	}
+
 	// data
 	var data = p.data = p.data || {};
 
@@ -1753,6 +1763,9 @@ hello.api = function(){
 	// Path
 	// Remove the network from path, e.g. facebook:/me/friends
 	// results in { network : facebook, path : me/friends }
+	if(!p.path){
+		return sendError('invalid_path', 'Missing the path parameter from the request');
+	}
 	p.path = p.path.replace(/^\/+/,'');
 	var a = (p.path.split(/[\/\:]/,2)||[])[0].toLowerCase();
 
@@ -1768,342 +1781,242 @@ hello.api = function(){
 	p.network = self.settings.default_service = p.network || self.settings.default_service;
 	var o = self.services[p.network];
 
-	// INVALID?
+
+	// INVALID
 	// Is there no service by the given network name?
 	if(!o){
-		self.emitAfter("complete error", {error:{
-			code : "invalid_network",
-			message : "Could not match the service requested: " + p.network
-		}});
-		return self;
+		return sendError("invalid_network", "Could not match the service requested: " + p.network);
+	}
+
+	// PATH
+	// as long as the path isn't flagged as unavaiable, e.g. path == false
+
+	if( !( !(p.method in o) || !(p.path in o[p.method]) || o[p.method][p.path] !== false ) ){
+		return sendError('invalid_path', 'The provided path is not available on the selected network');
 	}
 
 
-	// Proxy?
+
+	// PROXY
 	// OAuth1 calls always need a proxy
-	p.proxy = o.oauth && parseInt(o.oauth.version,10) === 1;
 
-
-	// timeout global setting
-	if(p.timeout){
-		self.settings.timeout = p.timeout;
+	if(!p.oauth_proxy){
+		p.oauth_proxy = self.settings.oauth_proxy;
 	}
-
-	// Log self request
-	self.emit("notice", "API request "+p.method.toUpperCase()+" '"+p.path+"' (request)",p);
+	if(!("proxy" in p)){
+		p.proxy = p.oauth_proxy && o.oauth && parseInt(o.oauth.version,10) === 1;
+	}
 	
 
-	//
-	// CALLBACK HANDLER
-	// Change the incoming values so that they are have generic values according to the path that is defined
-	// @ response object
-	// @ statusCode integer if available
-	var callback = function(r,headers){
 
-		// FORMAT RESPONSE?
-		// Does self request have a corresponding formatter
-		if( o.wrap && ( (p.path in o.wrap) || ("default" in o.wrap) )){
-			var wrap = (p.path in o.wrap ? p.path : "default");
-			var time = (new Date()).getTime();
+	// TIMEOUT
+	// Adopt timeout from global settings by default
 
-			// FORMAT RESPONSE
-			var b = o.wrap[wrap](r,headers,p);
-
-			// Has the response been utterly overwritten?
-			// Typically self augments the existing object.. but for those rare occassions
-			if(b){
-				r = b;
-			}
-
-			// Emit a notice
-			self.emit("notice", "Processing took" + ((new Date()).getTime() - time));
-		}
-
-		self.emit("notice", "API: "+p.method.toUpperCase()+" '"+p.path+"' (response)", r);
-
-		//
-		// Next
-		// If the result continues on to other pages
-		// callback = function(results, next){ if(next){ next(); } }
-		var next = null;
-
-		// Is there a next_page defined in the response?
-		if( r && "paging" in r && r.paging.next ){
-
-			// Add the relative path if it is missing from the paging/next path
-			if( r.paging.next[0] === '?' ){
-				r.paging.next = p.path + r.paging.next;
-			}
-			// The relative path has been defined, lets markup the handler in the HashFragment
-			else{
-				r.paging.next += '#' + p.path;
-			}
-
-
-			// Repeat the action with a new page path
-			// This benefits from otherwise letting the user follow the next_page URL
-			// In terms of using the same callback handlers etc.
-			next = function(){
-				processPath( r.paging.next );
-			};
-		}
-
-		//
-		// Dispatch to listeners
-		// Emit events which pertain to the formatted response
-		self.emit("complete " + (!r || "error" in r ? 'error' : 'success'), r, next);
-	};
-
-
-
-	// push out to all networks
-	// as long as the path isn't flagged as unavaiable, e.g. path == false
-	if( !( !(p.method in o) || !(p.path in o[p.method]) || o[p.method][p.path] !== false ) ){
-		return self.emitAfter("complete error", {error:{
-			code:'invalid_path',
-			message:'The provided path is not available on the selected network'
-		}});
+	if(!("timeout" in p)){
+		p.timeout = self.settings.timeout;
 	}
+
+
+
+	// PROGRESS
+	// Listen to upload and download progress events on XHR events
+
+	if(!("onuploadprogress" in p)){
+		// Default it to pump it out as...
+		p.onuploadprogress = function(e){
+			self.emit("uploadprogress", e);
+		};
+	}
+	if(!("onprogress" in p)){
+		// Default it to pump it out as...
+		p.onprogress = function(e){
+			self.emit("progress", e);
+		};
+	}
+
+
 
 	//
 	// Get the current session
+	// Append the access_token to the query
 	var session = self.getAuthResponse(p.network);
+	if(session&&session.access_token){
+		p.query.access_token = session.access_token;
+	}
 
 
-	//
-	// Given the path trigger the fix
-	processPath(p.path);
+
+	var url = p.path, m;
 
 
-	function processPath(url){
-
-		var m;
-
-		// Clone the data object
-		// Prevent this script overwriting the data of the incoming object.
-		// ensure that everytime we run an iteration the callbacks haven't removed some data
-		p.data = utils.clone(data);
+	// Store the query as options
+	// This is used to populate the request object before the data is augmented by the prewrap handlers.
+	p.options = utils.clone(p.query);
 
 
-		// URL Mapping
-		// Is there a map for the given URL?
-		var actions = o[{"delete":"del"}[p.method]||p.method] || {};
+	// Clone the data object
+	// Prevent this script overwriting the data of the incoming object.
+	// ensure that everytime we run an iteration the callbacks haven't removed some data
+	p.data = utils.clone(data);
 
 
-		// Extrapolate the QueryString
-		// Provide a clean path
-		// Move the querystring into the data
-		if(p.method==='get'){
+	// URL Mapping
+	// Is there a map for the given URL?
+	var actions = o[{"delete":"del"}[p.method]||p.method] || {};
 
-			var query = url.split(/[\?#]/)[1];
-			if(query){
-				utils.extend( p.data, utils.param( query ));
-				// Remove the query part from the URL
-				url = url.replace(/\?.*?(#|$)/,'$1');
-			}
+
+	// Extrapolate the QueryString
+	// Provide a clean path
+	// Move the querystring into the data
+	if(p.method==='get'){
+
+		var query = url.split(/[\?#]/)[1];
+		if(query){
+			utils.extend( p.query, utils.param( query ));
+			// Remove the query part from the URL
+			url = url.replace(/\?.*?(#|$)/,'$1');
 		}
+	}
 
 
-		// is the hash fragment defined
-		if( ( m = url.match(/#(.+)/,'') ) ){
-			url = url.split('#')[0];
-			p.path = m[1];
-		}
-		else if( url in actions ){
-			p.path = url;
-			url = actions[ url ];
-		}
-		else if( 'default' in actions ){
-			url = actions['default'];
-		}
+	// is the hash fragment defined
+	if( ( m = url.match(/#(.+)/,'') ) ){
+		url = url.split('#')[0];
+		p.path = m[1];
+	}
+	else if( url in actions ){
+		p.path = url;
+		url = actions[ url ];
+	}
+	else if( 'default' in actions ){
+		url = actions['default'];
+	}
 
 
-		// Store the data as options
-		// This is used to populate the request object before the data is augmented by the prewrap handlers.
-		p.options = utils.clone(p.data);
+
+	// Redirect Handler
+	// This defines for the Form+Iframe+Hash hack where to return the results too.
+	p.redirect_uri = self.settings.redirect_uri;
 
 
-		// if url needs a base
-		// Wrap everything in
-		var getPath = function(url){
+	// Set OAuth settings
+	p.oauth = o.oauth;
 
 
-			// Format the string if it needs it
-			url = url.replace(/\@\{([a-z\_\-]+)(\|.+?)?\}/gi, function(m,key,defaults){
-				var val = defaults ? defaults.replace(/^\|/,'') : '';
-				if(key in p.data){
-					val = p.data[key];
-					delete p.data[key];
-				}
-				else if(typeof(defaults) === 'undefined'){
-					self.emitAfter("error", {error:{
-						code : "missing_attribute_"+key,
-						message : "The attribute " + key + " is missing from the request"
-					}});
-				}
-				return val;
-			});
-
-			// Add base
-			if( !url.match(/^https?:\/\//) ){
-				url = o.base + url;
-			}
-
-			// Store this in the request object
-			p.url = url;
-
-			var qs = {};
-
-			// Format URL
-			var format_url = function( qs_handler, callback ){
-
-				// Execute the qs_handler for any additional parameters
-				if(qs_handler){
-					if(typeof(qs_handler)==='function'){
-						qs_handler(qs);
-					}
-					else{
-						utils.extend(qs, qs_handler);
-					}
-				}
-
-				var path = utils.qs(url, qs||{} );
-
-				self.emit("notice", "Request " + path);
-
-				_sign(p.proxy, path, p.method, p.data, o.querystring, callback);
-			};
+	// Define FormatHandler
+	// The request can be procesed in a multitude of ways
+	// Here's the options - depending on the browser and endpoint
+	p.xhr = o.xhr;
+	p.jsonp = o.jsonp;
+	p.form = o.form;
 
 
-			// Update the resource_uri
-			//url += ( url.indexOf('?') > -1 ? "&" : "?" );
-
-			// Format the data
-			if( !utils.isEmpty(p.data) && !("FileList" in window) && utils.hasBinary(p.data) ){
-				// If we can't format the post then, we are going to run the iFrame hack
-				utils.post( format_url, p.data, ("form" in o ? o.form(p) : null), callback );
-
-				return self;
-			}
-
-			// the delete callback needs a better response
-			if(p.method === 'delete'){
-				var _callback = callback;
-				callback = function(r, code){
-					_callback((!r||utils.isEmpty(r))? {success:true} : r, code);
-				};
-			}
-
-			// Can we use XHR for Cross domain delivery?
-			if( 'withCredentials' in new XMLHttpRequest() && ( !("xhr" in o) || ( o.xhr && o.xhr(p,qs) ) ) ){
-				var x = utils.xhr( p.method, format_url, p.headers, p.data, callback );
-				x.onprogress = function(e){
-					self.emit("progress", e);
-				};
-
-				// Windows Phone does not support xhr.upload, see #74
-				// Feaure detect it...
-				if(x.upload){
-					x.upload.onprogress = function(e){
-						self.emit("uploadprogress", e);
-					};
-				}
-			}
-			else{
-
-				// Assign a new callbackID
-				p.callbackID = utils.globalEvent();
-
-				// Otherwise we're on to the old school, IFRAME hacks and JSONP
-				// Preprocess the parameters
-				// Change the p parameters
-				if("jsonp" in o){
-					o.jsonp(p,qs);
-				}
-
-				// Does this provider have a custom method?
-				if("api" in o && o.api( url, p, (session && session.access_token ? {access_token:session.access_token} : {}), callback ) ){
-					return;
-				}
-
-				// Is method still a post?
-				if( p.method === 'post' ){
-
-					// Add some additional query parameters to the URL
-					// We're pretty stuffed if the endpoint doesn't like these
-					//			"suppress_response_codes":true
-					qs.redirect_uri = self.settings.redirect_uri;
-					qs.state = JSON.stringify({callback:p.callbackID});
-
-					utils.post( format_url, p.data, ("form" in o ? o.form(p) : null), callback, p.callbackID, self.settings.timeout );
-				}
-
-				// Make the call
-				else{
-
-					utils.extend( qs, p.data );
-
-					qs.callback = p.callbackID;
-
-					utils.jsonp( format_url, callback, p.callbackID, self.settings.timeout );
-				}
-			}
-		};
-
-		// Make request
-		if(typeof(url)==='function'){
-			// Does self have its own callback?
-			url(p, getPath);
-		}
-		else{
-			// Else the URL is a string
-			getPath(url);
-		}
+	// Make request
+	if( typeof(url) === 'function' ){
+		// Does self have its own callback?
+		url(p, getPath);
+	}
+	else{
+		// Else the URL is a string
+		getPath(url);
 	}
 	
 
 	return self;
 
 
-	//
-	// Add authentication to the URL
-	function _sign(proxy, path, method, data, modifyQueryString, callback){
+	// if url needs a base
+	// Wrap everything in
+	function getPath(url){
 
-		// OAUTH SIGNING PROXY
-		var token = (session ? session.access_token : null);
+		// Format the string if it needs it
+		url = url.replace(/\@\{([a-z\_\-]+)(\|.+?)?\}/gi, function(m,key,defaults){
+			var val = defaults ? defaults.replace(/^\|/,'') : '';
+			if(key in p.query){
+				val = p.query[key];
+				delete p.query[key];
+			}
+			else if(typeof(defaults) === 'undefined'){
+				// This doesn't cancel the request
+				// Perhaps it should
+				sendError( "missing_attribute", "The attribute " + key + " is missing from the request");
+			}
+			return val;
+		});
 
-		// OAuth2
-		if(!(o.oauth && parseInt(o.oauth.version,10) === 1)){
 
-			// We can process the accces_token in the path
-			var qs = { 'access_token' : token||'' };
+		// Add base
+		if( !url.match(/^https?:\/\//) ){
+			url = o.base + url;
+		}
 
-			if(modifyQueryString){
-				modifyQueryString(qs);
+		// Define the request URL
+		p.url = url;
+
+
+		//
+		// Make the HTTP request with the curated request object
+		// CALLBACK HANDLER
+		// @ response object
+		// @ statusCode integer if available
+		utils.request( p, function(r,headers){
+
+
+			// the delete callback needs a better response
+			if( p.method === 'delete' ){
+				r = (!r||utils.isEmpty(r)) ? {success:true} : r;
 			}
 
-			token = '';
 
-			path = utils.qs( path, qs );
-		}
+			// FORMAT RESPONSE?
+			// Does self request have a corresponding formatter
+			if( o.wrap && ( (p.path in o.wrap) || ("default" in o.wrap) )){
+				var wrap = (p.path in o.wrap ? p.path : "default");
+				var time = (new Date()).getTime();
 
-		// If this request requires a proxy OAuth1 or OAuth2 but no Access-Controls
-		if(proxy){
-			// Use the proxy as a path
-			path = utils.qs( self.settings.oauth_proxy, {
-				path : path,
-				access_token : token||'',
-				then : (method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
-				method : method,
-				suppress_response_codes : true
-			});
-		}
+				// FORMAT RESPONSE
+				var b = o.wrap[wrap](r,headers,p);
 
-		callback( path );
+				// Has the response been utterly overwritten?
+				// Typically self augments the existing object.. but for those rare occassions
+				if(b){
+					r = b;
+				}
+			}
+
+
+			// Is there a next_page defined in the response?
+			if( r && "paging" in r && r.paging.next ){
+
+				// Add the relative path if it is missing from the paging/next path
+				if( r.paging.next[0] === '?' ){
+					r.paging.next = p.path + r.paging.next;
+				}
+				// The relative path has been defined, lets markup the handler in the HashFragment
+				else{
+					r.paging.next += '#' + p.path;
+				}
+			}
+
+			//
+			// Dispatch to listeners
+			// Emit events which pertain to the formatted response
+			self.emit("complete " + (!r || "error" in r ? 'error' : 'success'), r);
+		});
+	}
+
+
+	// Error handling
+	function sendError(code,message){
+		return self.emitAfter("complete error", {
+			error:{
+				code:code,
+				message:message
+			}
+		});
 	}
 
 };
-
 
 
 
@@ -2118,6 +2031,206 @@ hello.api = function(){
 ///////////////////////////////////
 
 hello.utils.extend( hello.utils, {
+
+
+	//
+	// Make an HTTP request
+	// 
+	request : function( p, callback ){
+
+		var utils = this;
+
+
+		// This has too go through a POST request
+		if( !utils.isEmpty( p.data ) && !("FileList" in window) && utils.hasBinary( p.data ) ){
+
+			// Disable XHR and JSONP
+			p.xhr = false;
+			p.jsonp = false;
+
+		}
+
+
+		// XHR
+		// Can we use XHR for Cross domain delivery?
+
+		if(
+			// Browser supports CORS
+			'withCredentials' in new XMLHttpRequest() &&
+
+			// ... now does the service support CORS?
+			// p.xhr is undefined, true or a function which returns true
+			( !("xhr" in p) || ( p.xhr && ( typeof(p.xhr)!=='function' || p.xhr( p, p.query ) ) ) )
+
+			){
+
+
+			// Format the URL and return it...
+
+			formatUrl( p, function(url){
+
+				var x = utils.xhr( p.method, url, p.headers, p.data, callback );
+
+				// Set handlers
+				x.onprogress = p.onprogress || null;
+
+				// Windows Phone does not support xhr.upload, see #74
+				// Feaure detect it...
+				if( x.upload && p.onuploadprogress ){
+					x.upload.onprogress = p.onuploadprogress;
+				}
+
+			});
+
+			return;
+		}
+
+
+		// Clone the query object
+		// Each request modifies the query object.
+		// ... and needs to be tared after each one.
+		var _query = p.query;
+
+		p.query = utils.clone( p.query );
+
+
+		// CALLBACK
+		// Assign a new callbackID
+		p.callbackID = utils.globalEvent();
+
+
+		// JSONP
+
+		if( p.jsonp !== false ){
+
+			// Clone the query object
+			p.query.callback = p.callbackID;
+
+			// If the JSONP is a function then run it
+			if( typeof( p.jsonp ) === 'function' ){
+
+				p.jsonp( p, p.query );
+			}
+
+			// Lets use JSONP if the method is 'get'
+			if( p.method === 'get' ){
+
+				formatUrl( p, function( url ){
+
+					utils.jsonp( url, callback, p.callbackID, p.timeout );
+
+				});
+
+				return;
+
+			}
+			else{
+				// Its not compatible reset query
+				p.query = _query;
+			}
+
+		}
+
+
+
+		// Otherwise we're on to the old school, IFRAME hacks and JSONP
+
+		if( p.form !== false ){
+
+			// Add some additional query parameters to the URL
+			// We're pretty stuffed if the endpoint doesn't like these
+
+			p.query.redirect_uri = p.redirect_uri;
+			p.query.state = JSON.stringify({callback:p.callbackID});
+
+			var opts;
+
+			if( typeof( p.form ) === 'function' ){
+
+				// Format the request
+				opts = p.form( p, p.query );
+			}
+
+			if( p.method === 'post' && opts !== false ){
+
+				formatUrl( p, function( url ){
+
+					utils.post( url, p.data, opts, callback, p.callbackID, p.timeout );
+
+				});
+
+				return;
+			}
+		}
+
+		// None of the methods were successful throw an error
+		callback({
+			error:{
+				code : 'invalid_request',
+				message : 'There was no mechanism for handling this request'
+			}
+		});
+
+		return;
+
+
+		//
+		// Format URL
+		// Constructs the request URL, optionally wraps the URL through a call to a proxy server
+		// Returns the formatted URL
+		// 
+		function formatUrl( p, callback ){
+
+			// Are we signing the request?
+			var sign;
+
+			// OAuth1
+			// Remove the token from the query before signing
+			if( p.oauth && parseInt(p.oauth.version,10) === 1 ){
+
+				// OAUTH SIGNING PROXY
+				sign = p.query.access_token;
+
+				// Remove the access_token
+				delete p.query.access_token;
+
+				// Enfore use of Proxy
+				p.proxy = true;
+			}
+
+
+			// POST BODY to QueryString
+			if( p.data && ( p.method === 'get' || p.method === 'delete' ) ){
+				// Attach the p.data to the querystring.
+				utils.extend( p.query, p.data );
+				p.data = null;
+			}
+
+
+			// Construct the path
+			var path = utils.qs( p.url, p.query );
+
+
+			// Proxy the request through a server
+			// Used for signing OAuth1
+			// And circumventing services without Access-Control Headers
+			if( p.proxy ){
+				// Use the proxy as a path
+				path = utils.qs( p.oauth_proxy, {
+					path : path,
+					access_token : sign||'', // This will prompt the request to be signed as though it is OAuth1
+					then : (p.method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
+					method : p.method.toLowerCase(),
+					suppress_response_codes : true
+				});
+			}
+
+			callback( path );
+		}
+	},
+
+
+
 
 	//
 	// isArray
@@ -2170,14 +2283,9 @@ hello.utils.extend( hello.utils, {
 	//
 	// XHR
 	// This uses CORS to make requests
-	xhr : function(method, pathFunc, headers, data, callback){
+	xhr : function(method, url, headers, data, callback){
 
 		var utils = this;
-
-		if(typeof(pathFunc)!=='function'){
-			var path = pathFunc;
-			pathFunc = function(qs, callback){callback(utils.qs( path, qs ));};
-		}
 
 		var r = new XMLHttpRequest();
 
@@ -2222,13 +2330,10 @@ hello.utils.extend( hello.utils, {
 			}});
 		};
 
-		var qs = {}, x;
+		var x;
 
 		// Should we add the query to the URL?
 		if(method === 'GET'||method === 'DELETE'){
-			if(!utils.isEmpty(data)){
-				utils.extend(qs, data);
-			}
 			data = null;
 		}
 		else if( data && typeof(data) !== 'string' && !(data instanceof FormData) && !(data instanceof File) && !(data instanceof Blob)){
@@ -2250,31 +2355,27 @@ hello.utils.extend( hello.utils, {
 			data = f;
 		}
 
-		// Create url
 
-		pathFunc(qs, function(url){
+		// Open the path, async
+		r.open( method, url, true );
 
-			// Open the path, async
-			r.open( method, url, true );
-
-			if(binary){
-				if("responseType" in r){
-					r.responseType = binary;
-				}
-				else{
-					r.overrideMimeType("text/plain; charset=x-user-defined");
-				}
+		if(binary){
+			if("responseType" in r){
+				r.responseType = binary;
 			}
-
-			// Set any bespoke headers
-			if(headers){
-				for(var x in headers){
-					r.setRequestHeader(x, headers[x]);
-				}
+			else{
+				r.overrideMimeType("text/plain; charset=x-user-defined");
 			}
+		}
 
-			r.send( data );
-		});
+		// Set any bespoke headers
+		if(headers){
+			for( x in headers){
+				r.setRequestHeader( x, headers[x]);
+			}
+		}
+
+		r.send( data );
 
 
 		return r;
@@ -2301,7 +2402,7 @@ hello.utils.extend( hello.utils, {
 	// @param string/function pathFunc either a string of the URL or a callback function pathFunc(querystringhash, continueFunc);
 	// @param function callback a function to call on completion;
 	//
-	jsonp : function(pathFunc,callback,callbackID,timeout){
+	jsonp : function(url,callback,callbackID,timeout){
 
 		var utils = this;
 
@@ -2321,73 +2422,61 @@ hello.utils.extend( hello.utils, {
 			};
 
 		// Add callback to the window object
-		var cb_name = utils.globalEvent(function(json){
+		callbackID = utils.globalEvent(function(json){
 			result = json;
 			return true; // mark callback as done
 		},callbackID);
 
 		// The URL is a function for some cases and as such
 		// Determine its value with a callback containing the new parameters of this function.
-		if(typeof(pathFunc)!=='function'){
-			var path = pathFunc;
-			path = path.replace(new RegExp("=\\?(&|$)"),'='+cb_name+'$1');
-			pathFunc = function(qs, callback){ callback(utils.qs(path, qs));};
+		url = url.replace(new RegExp("=\\?(&|$)"),'='+callbackID+'$1');
+
+
+		// Build script tag
+		script = utils.append('script',{
+			id:callbackID,
+			name:callbackID,
+			src: url,
+			async:true,
+			onload:cb,
+			onerror:cb,
+			onreadystatechange : function(){
+				if(/loaded|complete/i.test(this.readyState)){
+					cb();
+				}
+			}
+		});
+
+		// Opera fix error
+		// Problem: If an error occurs with script loading Opera fails to trigger the script.onerror handler we specified
+		// Fix:
+		// By setting the request to synchronous we can trigger the error handler when all else fails.
+		// This action will be ignored if we've already called the callback handler "cb" with a successful onload event
+		if( window.navigator.userAgent.toLowerCase().indexOf('opera') > -1 ){
+			operafix = utils.append('script',{
+				text:"document.getElementById('"+cb_name+"').onerror();"
+			});
+			script.async = false;
 		}
 
+		// Add timeout
+		if(timeout){
+			window.setTimeout(function(){
+				result = {error:{message:'timeout',code:'timeout'}};
+				cb();
+			}, timeout);
+		}
 
-		pathFunc(function(qs){
-				for(var x in qs){ if(qs.hasOwnProperty(x)){
-					if (qs[x] === '?') qs[x] = cb_name;
-				}}
-			}, function(url){
-
-			// Build script tag
-			script = utils.append('script',{
-				id:cb_name,
-				name:cb_name,
-				src: url,
-				async:true,
-				onload:cb,
-				onerror:cb,
-				onreadystatechange : function(){
-					if(/loaded|complete/i.test(this.readyState)){
-						cb();
-					}
-				}
-			});
-
-			// Opera fix error
-			// Problem: If an error occurs with script loading Opera fails to trigger the script.onerror handler we specified
-			// Fix:
-			// By setting the request to synchronous we can trigger the error handler when all else fails.
-			// This action will be ignored if we've already called the callback handler "cb" with a successful onload event
-			if( window.navigator.userAgent.toLowerCase().indexOf('opera') > -1 ){
-				operafix = utils.append('script',{
-					text:"document.getElementById('"+cb_name+"').onerror();"
-				});
-				script.async = false;
-			}
-
-			// Add timeout
-			if(timeout){
-				window.setTimeout(function(){
-					result = {error:{message:'timeout',code:'timeout'}};
-					cb();
-				}, timeout);
-			}
-
-			// Todo:
-			// Add fix for msie,
-			// However: unable recreate the bug of firing off the onreadystatechange before the script content has been executed and the value of "result" has been defined.
-			// Inject script tag into the head element
-			head.appendChild(script);
-			
-			// Append Opera Fix to run after our script
-			if(operafix){
-				head.appendChild(operafix);
-			}
-
-		});
+		// Todo:
+		// Add fix for msie,
+		// However: unable recreate the bug of firing off the onreadystatechange before the script content has been executed and the value of "result" has been defined.
+		// Inject script tag into the head element
+		head.appendChild(script);
+		
+		// Append Opera Fix to run after our script
+		if(operafix){
+			head.appendChild(operafix);
+		}
 	},
 
 
@@ -2398,17 +2487,11 @@ hello.utils.extend( hello.utils, {
 	// @param object data, key value data to send
 	// @param function callback, function to execute in response
 	//
-	post : function(pathFunc, data, options, callback, callbackID, timeout){
+	post : function(url, data, options, callback, callbackID, timeout){
 
 		var utils = this,
 			doc = document;
 
-		// The URL is a function for some cases and as such
-		// Determine its value with a callback containing the new parameters of this function.
-		if(typeof(pathFunc)!=='function'){
-			var path = pathFunc;
-			pathFunc = function(qs, callback){ callback(utils.qs(path, qs));};
-		}
 
 		// This hack needs a form
 		var form = null,
@@ -2589,43 +2672,40 @@ hello.utils.extend( hello.utils, {
 		form.target = callbackID;
 
 
-		// Call the path
-		pathFunc( {}, function(url){
 
-			// Update the form URL
-			form.setAttribute('action', url);
+		// Update the form URL
+		form.setAttribute('action', url);
 
-			// Submit the form
-			// Some reason this needs to be offset from the current window execution
+		// Submit the form
+		// Some reason this needs to be offset from the current window execution
+		setTimeout(function(){
+			form.submit();
+
 			setTimeout(function(){
-				form.submit();
-
-				setTimeout(function(){
+				try{
+					// remove the iframe from the page.
+					//win.parentNode.removeChild(win);
+					// remove the form
+					if(newform){
+						newform.parentNode.removeChild(newform);
+					}
+				}
+				catch(e){
 					try{
-						// remove the iframe from the page.
-						//win.parentNode.removeChild(win);
-						// remove the form
-						if(newform){
-							newform.parentNode.removeChild(newform);
-						}
+						console.error("HelloJS: could not remove iframe");
 					}
-					catch(e){
-						try{
-							console.error("HelloJS: could not remove iframe");
-						}
-						catch(ee){}
-					}
+					catch(ee){}
+				}
 
-					// reenable the disabled form
-					for(var i=0;i<reenableAfterSubmit.length;i++){
-						if(reenableAfterSubmit[i]){
-							reenableAfterSubmit[i].setAttribute('disabled', false);
-							reenableAfterSubmit[i].disabled = false;
-						}
+				// reenable the disabled form
+				for(var i=0;i<reenableAfterSubmit.length;i++){
+					if(reenableAfterSubmit[i]){
+						reenableAfterSubmit[i].setAttribute('disabled', false);
+						reenableAfterSubmit[i].disabled = false;
 					}
-				},0);
-			},100);
-		});
+				}
+			},0);
+		},100);
 
 		// Build an iFrame and inject it into the DOM
 		//var ifm = _append('iframe',{id:'_'+Math.round(Math.random()*1e9), style:shy});
