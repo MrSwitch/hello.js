@@ -1738,6 +1738,9 @@ hello.api = function(){
 
 	// method
 	p.method = (p.method || 'get').toLowerCase();
+
+	// headers
+	p.headers = p.headers || {};
 	
 	// data
 	var data = p.data = p.data || {};
@@ -1774,6 +1777,11 @@ hello.api = function(){
 		}});
 		return self;
 	}
+
+
+	// Proxy?
+	// OAuth1 calls always need a proxy
+	p.proxy = o.oauth && parseInt(o.oauth.version,10) === 1;
 
 
 	// timeout global setting
@@ -1963,7 +1971,7 @@ hello.api = function(){
 
 				self.emit("notice", "Request " + path);
 
-				_sign(p.network, path, p.method, p.data, o.querystring, callback);
+				_sign(p.proxy, path, p.method, p.data, o.querystring, callback);
 			};
 
 
@@ -2059,34 +2067,39 @@ hello.api = function(){
 
 	//
 	// Add authentication to the URL
-	function _sign(network, path, method, data, modifyQueryString, callback){
+	function _sign(proxy, path, method, data, modifyQueryString, callback){
 
 		// OAUTH SIGNING PROXY
-		var service = self.services[network],
-			token = (session ? session.access_token : null);
+		var token = (session ? session.access_token : null);
 
-		// Is self an OAuth1 endpoint
-		var proxy = ( service.oauth && parseInt(service.oauth.version,10) === 1 ? self.settings.oauth_proxy : null);
+		// OAuth2
+		if(!(o.oauth && parseInt(o.oauth.version,10) === 1)){
 
+			// We can process the accces_token in the path
+			var qs = { 'access_token' : token||'' };
+
+			if(modifyQueryString){
+				modifyQueryString(qs);
+			}
+
+			token = '';
+
+			path = utils.qs( path, qs );
+		}
+
+		// If this request requires a proxy OAuth1 or OAuth2 but no Access-Controls
 		if(proxy){
 			// Use the proxy as a path
-			callback( utils.qs(proxy, {
+			path = utils.qs( self.settings.oauth_proxy, {
 				path : path,
 				access_token : token||'',
 				then : (method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
 				method : method,
 				suppress_response_codes : true
-			}));
-			return;
+			});
 		}
 
-		var qs = { 'access_token' : token||'' };
-
-		if(modifyQueryString){
-			modifyQueryString(qs);
-		}
-
-		callback(  utils.qs( path, qs) );
+		callback( path );
 	}
 
 };
@@ -2134,18 +2147,22 @@ hello.utils.extend( hello.utils, {
 	// Create a clone of an object
 	clone : function(obj){
 		// Does not clone Dom elements, nor Binary data, e.g. Blobs, Filelists
-		if("nodeName" in obj || this.isBinary( obj ) ){
+		if( obj === null || typeof( obj ) !== 'object' || obj instanceof Date || "nodeName" in obj || this.isBinary( obj ) ){
 			return obj;
 		}
+		var clone;
+		if(this.isArray(obj)){
+			clone = [];
+			for(var i=0;i<obj.length;i++){
+				clone.push(this.clone(obj[i]));
+			}
+			return clone;
+		}
+
 		// But does clone everything else.
-		var clone = {}, x;
-		for(x in obj){
-			if(typeof(obj[x]) === 'object'){
-				clone[x] = this.clone(obj[x]);
-			}
-			else{
-				clone[x] = obj[x];
-			}
+		clone = {};
+		for(var x in obj){
+			clone[x] = this.clone(obj[x]);
 		}
 		return clone;
 	},
@@ -3968,19 +3985,33 @@ hello.init({
 		if("feed" in o && "entry" in o.feed){
 			var token = hello.getAuthResponse('google').access_token;
 			for(var i=0;i<o.feed.entry.length;i++){
-				var a = o.feed.entry[i],
-					pic = (a.link&&a.link.length>0)?a.link[0].href+'?access_token='+token:null;
+				var a = o.feed.entry[i];
 
-				r.push({
-					id		: a.id.$t,
-					name	: a.title.$t,
-					email	: (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null,
-					updated_time : a.updated.$t,
-					picture : pic,
-					thumbnail : pic
-				});
+				a.id	= a.id.$t;
+				a.name	= a.title.$t;
+				delete a.title;
+				if(a.gd$email){
+					a.email	= (a.gd$email&&a.gd$email.length>0)?a.gd$email[0].address:null;
+					a.emails = a.gd$email;
+					delete a.gd$email;
+				}
+				if(a.updated){
+					a.updated = a.updated.$t;
+				}
+
+				if(a.link){
+					var pic = (a.link.length>0)?a.link[0].href+'?access_token='+token:null;
+					if(pic){
+						a.picture = pic;
+						a.thumbnail = pic;
+					}
+					delete a.link;
+				}
+				if(a.category){
+					delete a.category;
+				}
 			}
-			o.data = r;
+			o.data = o.feed.entry;
 			delete o.feed;
 		}
 		return o;
@@ -4785,7 +4816,20 @@ hello.init({
 		},
 
 		post : {
-			//"me/share"		: 'people/~/current-status'
+			"me/share"		: function(p, callback){
+				p.data = JSON.stringify({
+					"comment": p.data.message,
+					"content": {
+						"submitted-url": p.data.link,
+						"submitted-image-url": p.data.picture
+					},
+					"visibility": {
+						"code": "anyone"
+					}
+				});
+
+				callback('people/~/shares?format=json');
+			}
 		},
 
 		wrap : {
@@ -4822,7 +4866,14 @@ hello.init({
 				qs['error-callback'] = '?';
 			}
 		},
-		xhr : false
+		xhr : function(p,qs){
+			if(p.method !== 'get'){
+				p.headers['Content-Type'] = 'application/json';
+				p.proxy = true;
+				return true;
+			}
+			return false;
+		}
 	}
 });
 
@@ -4909,6 +4960,43 @@ hello.init({
 });
 
 })(hello);
+//
+// Twitter
+//
+hello.init({
+	'tumblr' : {
+		// Set default window height
+		login : function(p){
+			p.options.window_width = 600;
+			p.options.window_height = 510;
+		},
+
+		// Ensure that you define an oauth_proxy
+		oauth : {
+			version : "1.0a",
+			auth	: "https://www.tumblr.com/oauth/authorize",
+			request : 'https://www.tumblr.com/oauth/request_token',
+			token	: 'https://www.tumblr.com/oauth/access_token'
+		},
+
+		base	: "https://api.tumblr.com/v2/",
+
+		get : {
+			me		: 'user/info'
+		},
+
+		wrap : {
+			me : function(o){
+				if(o&&o.response&&o.response.user){
+					o = o.response.user;
+				}
+				return o;
+			}
+		},
+
+		xhr : false
+	}
+});
 //
 // Twitter
 //
