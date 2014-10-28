@@ -1,4 +1,5 @@
 define([
+	'../libs/error_response',
 	'../../../src/modules/facebook',
 	'../../../src/modules/flickr',
 	'../../../src/modules/google',
@@ -13,6 +14,7 @@ define([
 	'../../../src/modules/soundcloud'
 ], function(
 //	hello
+	error_response
 ){
 
 //
@@ -60,16 +62,10 @@ function setup_module_tests(module, name){
 
 			this.timeout(60000);
 
-			var cb = function(data){
-				expect(data).to.be.a("object");
-				expect(data).to.have.property("error");
-				expect(data.error).to.have.property("code");
-				expect(data.error).to.have.property("message");
-				expect(data.error.code).to.not.be.an("object");
-				expect(data.error.message).to.not.be.an("object");
+			var cb = error_response(null, function(){
 				if(++i===3)
 					done();
-			};
+			});
 
 			// ensure user is signed out
 			hello.logout(name);
