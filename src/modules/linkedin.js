@@ -45,6 +45,13 @@ function paging(res){
 	}
 }
 
+
+function empty(o,headers){
+	if(JSON.stringify(o) === '{}'&&headers.statusCode === 200){
+		o.success = true;
+	}
+}
+
 hello.init({
 	'linkedin' : {
 
@@ -112,6 +119,14 @@ hello.init({
 				p.data = JSON.stringify(data);
 
 				callback('people/~/shares?format=json');
+			},
+
+			"me/like" : function(p, callback){
+				p.method = 'put';
+				p.headers["x-li-format"] = "json";
+				var url = 'people/~/network/updates/key=' + p.data.id + '/is-liked';
+				p.data = 'true';
+				callback(url);
 			}
 		},
 
@@ -138,8 +153,9 @@ hello.init({
 				}
 				return o;
 			},
-			"default" : function(o){
+			"default" : function(o,headers){
 				formatError(o);
+				empty(o,headers);
 				paging(o);
 			}
 		},
@@ -152,6 +168,8 @@ hello.init({
 		xhr : function(p,qs){
 			if(p.method !== 'get'){
 				p.headers['Content-Type'] = 'application/json';
+				// x-li-format ensures error responses are not returned in XML
+				p.headers['x-li-format'] = 'json';
 				p.proxy = true;
 				return true;
 			}

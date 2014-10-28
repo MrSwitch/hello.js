@@ -260,6 +260,17 @@ var tests = [
 		expected : {}
 	},
 	{
+		title : "Like, favourite or star something",
+		api : "api",
+		method : 'post',
+		path : 'me/like',
+		scope : ["publish"],
+		data : {
+			id : 0
+		},
+		expected : {}
+	},
+	{
 		title : "List my albums",
 		api : "api",
 		method : 'get',
