@@ -2208,7 +2208,7 @@ hello.utils.extend( hello.utils, {
 			var headers = headersToJSON(r.getAllResponseHeaders());
 			headers.statusCode = r.status;
 
-			callback( json || ( method!=='DELETE' ? {error:{message:"Could not get resource"}} : {} ), headers );
+			callback( json || ( method==='GET' ? {error:{code:"empty_response",message:"Could not get resource"}} : {} ), headers );
 		};
 		r.onerror = function(e){
 			var json = r.responseText;
@@ -4779,6 +4779,13 @@ function paging(res){
 	}
 }
 
+
+function empty(o,headers){
+	if(JSON.stringify(o) === '{}'&&headers.statusCode === 200){
+		o.success = true;
+	}
+}
+
 hello.init({
 	'linkedin' : {
 
@@ -4820,18 +4827,40 @@ hello.init({
 
 		post : {
 			"me/share"		: function(p, callback){
-				p.data = JSON.stringify({
-					"comment": p.data.message,
-					"content": {
-						"submitted-url": p.data.link,
-						"submitted-image-url": p.data.picture
-					},
+				var data =  {
 					"visibility": {
 						"code": "anyone"
 					}
-				});
+				};
+
+				if(p.data.id){
+					
+					data["attribution"] = {
+						"share": {
+							"id": p.data.id
+						}
+					};
+
+				}
+				else{
+					data["comment"] = p.data.message;
+					data["content"] = {
+						"submitted-url": p.data.link,
+						"submitted-image-url": p.data.picture
+					};
+				}
+
+				p.data = JSON.stringify(data);
 
 				callback('people/~/shares?format=json');
+			},
+
+			"me/like" : function(p, callback){
+				p.method = 'put';
+				p.headers["x-li-format"] = "json";
+				var url = 'people/~/network/updates/key=' + p.data.id + '/is-liked';
+				p.data = 'true';
+				callback(url);
 			}
 		},
 
@@ -4858,8 +4887,9 @@ hello.init({
 				}
 				return o;
 			},
-			"default" : function(o){
+			"default" : function(o,headers){
 				formatError(o);
+				empty(o,headers);
 				paging(o);
 			}
 		},
@@ -4872,6 +4902,8 @@ hello.init({
 		xhr : function(p,qs){
 			if(p.method !== 'get'){
 				p.headers['Content-Type'] = 'application/json';
+				// x-li-format ensures error responses are not returned in XML
+				p.headers['x-li-format'] = 'json';
 				p.proxy = true;
 				return true;
 			}
