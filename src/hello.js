@@ -1936,7 +1936,7 @@ hello.api = function(){
 				val = p.query[key];
 				delete p.query[key];
 			}
-			else if(typeof(defaults) === 'undefined'){
+			else if(!defaults){
 				// This doesn't cancel the request
 				// Perhaps it should
 				sendError( "missing_attribute", "The attribute " + key + " is missing from the request");

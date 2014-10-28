@@ -186,9 +186,9 @@ describe('hello.api', function(){
 		it('should process req object through the modules.get.default function if req.path not in module.get', function(done){
 
 			testable.get = testable.get || {};
-			testable.get.default = function( p ){
+			testable.get['default'] = function( p ){
 				expect( p ).to.have.property('path','unhandled');
-				delete testable.get.default;
+				delete testable.get['default'];
 				done();
 			};
 
@@ -265,8 +265,8 @@ describe('hello.api', function(){
 		it('should trigger the wrap.default function if none exists', function(done){
 
 			testable.wrap = testable.wrap || {};
-			testable.wrap.default = function(req){
-				delete testable.wrap.default;
+			testable.wrap['default'] = function(req){
+				delete testable.wrap['default'];
 				done();
 			};
 
@@ -290,9 +290,9 @@ describe('hello.api', function(){
 		it('should append the req.path to the hash of the response.paging.next', function(done){
 
 			testable.wrap = testable.wrap || {};
-			testable.wrap.default = function(req){
+			testable.wrap['default'] = function(req){
 				req.paging = {next:'next?page=2'};
-				delete testable.wrap.default;
+				delete testable.wrap['default'];
 			};
 
 			hello('testable').api("/unhandled", function(res){
