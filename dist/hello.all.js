@@ -3281,7 +3281,10 @@ function formatFriends(o){
 }
 
 function format(o){
-	if("data" in o){
+	if (typeof o === 'boolean') {
+		o = {success: o};
+	}
+	if(o && "data" in o){
 		var token = hello.getAuthResponse('facebook').access_token;
 		for(var i=0;i<o.data.length;i++){
 			var d = o.data[i];
