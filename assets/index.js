@@ -252,7 +252,7 @@ var tests = [
 		path : 'me/share',
 		scope : ["publish"],
 		filter: function(p){
-			return p.enabled && p.network === 'twitter';
+			return p.enabled && 'twitter,linkedin'.indexOf(p.network) !== -1;
 		},
 		data : {
 			id : 0

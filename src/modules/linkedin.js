@@ -86,16 +86,30 @@ hello.init({
 
 		post : {
 			"me/share"		: function(p, callback){
-				p.data = JSON.stringify({
-					"comment": p.data.message,
-					"content": {
-						"submitted-url": p.data.link,
-						"submitted-image-url": p.data.picture
-					},
+				var data =  {
 					"visibility": {
 						"code": "anyone"
 					}
-				});
+				};
+
+				if(p.data.id){
+					
+					data["attribution"] = {
+						"share": {
+							"id": p.data.id
+						}
+					};
+
+				}
+				else{
+					data["comment"] = p.data.message;
+					data["content"] = {
+						"submitted-url": p.data.link,
+						"submitted-image-url": p.data.picture
+					};
+				}
+
+				p.data = JSON.stringify(data);
 
 				callback('people/~/shares?format=json');
 			}
