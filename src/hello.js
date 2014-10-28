@@ -1961,6 +1961,14 @@ hello.api = function(){
 		// @ statusCode integer if available
 		utils.request( p, function(r,headers){
 
+			// Should this be an object
+			if(r===true){
+				r = {success:true};
+			}
+			else if(!r){
+				r = {};
+			}
+
 
 			// the delete callback needs a better response
 			if( p.method === 'delete' ){
