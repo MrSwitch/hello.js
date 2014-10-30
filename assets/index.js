@@ -271,6 +271,17 @@ var tests = [
 		expected : {}
 	},
 	{
+		title : "Uunlike, unfavourite or unstar something",
+		api : "api",
+		method : 'delete',
+		path : 'me/like',
+		scope : ["publish"],
+		data : {
+			id : 0
+		},
+		expected : {}
+	},
+	{
 		title : "List my albums",
 		api : "api",
 		method : 'get',
