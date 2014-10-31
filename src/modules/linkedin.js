@@ -181,9 +181,10 @@ hello.init({
 
 function like(p, callback){
 	p.headers["x-li-format"] = "json";
+	var id = p.data.id;
 	p.data = (p.method !== 'delete').toString();
 	p.method = 'put';
-	callback('people/~/network/updates/key=' + p.data.id + '/is-liked');
+	callback('people/~/network/updates/key=' + id + '/is-liked');
 }
 
 })(hello);
