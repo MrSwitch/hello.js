@@ -130,12 +130,20 @@ hello.init({
 		// Map POST requests
 		post : {
 			'me/share' : 'me/feed',
+			//	https://developers.facebook.com/docs/graph-api/reference/v2.2/object/likes/
+			//	'me/like' : function(p, callback){
+			//		var id = p.data.id;
+			//		p.data = null;
+			//		callback(id + '/likes');
+			//	},
 			'me/albums' : 'me/albums',
 			'me/album' : '@{id}/photos'
 		},
 
 		// Map DELETE requests
 		del : {
+			// https://developers.facebook.com/docs/graph-api/reference/v2.2/object/likes/
+			// 'me/like' : '@{id}/likes',
 			/*
 			// Can't delete an album
 			// http://stackoverflow.com/questions/8747181/how-to-delete-an-album
