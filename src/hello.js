@@ -2324,7 +2324,7 @@ hello.utils.extend( hello.utils, {
 			var headers = headersToJSON(r.getAllResponseHeaders());
 			headers.statusCode = r.status;
 
-			callback( json || ( method!=='DELETE' ? {error:{message:"Could not get resource"}} : {} ), headers );
+			callback( json || ( method==='GET' ? {error:{code:"empty_response",message:"Could not get resource"}} : {} ), headers );
 		};
 		r.onerror = function(e){
 			var json = r.responseText;

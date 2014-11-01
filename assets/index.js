@@ -252,8 +252,30 @@ var tests = [
 		path : 'me/share',
 		scope : ["publish"],
 		filter: function(p){
-			return p.enabled && p.network === 'twitter';
+			return p.enabled && 'twitter,linkedin'.indexOf(p.network) !== -1;
 		},
+		data : {
+			id : 0
+		},
+		expected : {}
+	},
+	{
+		title : "Like, favourite or star something",
+		api : "api",
+		method : 'post',
+		path : 'me/like',
+		scope : ["publish"],
+		data : {
+			id : 0
+		},
+		expected : {}
+	},
+	{
+		title : "Uunlike, unfavourite or unstar something",
+		api : "api",
+		method : 'delete',
+		path : 'me/like',
+		scope : ["publish"],
 		data : {
 			id : 0
 		},

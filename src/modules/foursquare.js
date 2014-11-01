@@ -4,7 +4,7 @@
 (function(hello){
 
 function formatError(o){
-	if(o.meta&&o.meta.code===400||o.meta.code===401){
+	if(o.meta&&(o.meta.code===400||o.meta.code===401)){
 		o.error = {
 			code : "access_denied",
 			message : o.meta.errorDetail
