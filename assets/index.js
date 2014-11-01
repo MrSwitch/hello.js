@@ -260,6 +260,16 @@ var tests = [
 		expected : {}
 	},
 	{
+		title : "Get a list of items i've liked, favourited or starred",
+		api : "api",
+		method : 'get',
+		path : 'me/like',
+		data : query,
+		expected : {
+			data : []
+		}
+	},
+	{
 		title : "Like, favourite or star something",
 		api : "api",
 		method : 'post',
@@ -271,7 +281,7 @@ var tests = [
 		expected : {}
 	},
 	{
-		title : "Uunlike, unfavourite or unstar something",
+		title : "Unlike, unfavourite or unstar something",
 		api : "api",
 		method : 'delete',
 		path : 'me/like',

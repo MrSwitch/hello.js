@@ -51,8 +51,25 @@ hello.init({
 			'me' : 'user',
 			'me/friends' : 'user/following?per_page=@{limit|100}',
 			'me/following' : 'user/following?per_page=@{limit|100}',
-			'me/followers' : 'user/followers?per_page=@{limit|100}'
+			'me/followers' : 'user/followers?per_page=@{limit|100}',
+			'me/like' : 'user/starred?per_page=@{limit|100}'
 		},
+		// post : {
+
+		//		// https://developer.github.com/v3/activity/starring/#star-a-repository
+		//		'me/like' : function(p,callback){
+		//			p.method = 'put';
+		//			p.headers['Content-Length'] = 0;
+		//			var id = p.data.id;
+		//			p.data = null;
+		//			callback("user/starred/"+id);
+		//		}
+		//	},
+		//	del : {
+
+		//		// https://developer.github.com/v3/activity/starring/#unstar-a-repository
+		//		'me/like' : "user/starred/@{id}"
+		//	},
 		wrap : {
 			me : function(o,headers){
 

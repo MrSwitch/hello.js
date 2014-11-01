@@ -86,6 +86,8 @@ hello.init({
 		},
 
 		post : {
+
+			// https://developer.linkedin.com/documents/api-requests-json
 			"me/share"		: function(p, callback){
 				var data =  {
 					"visibility": {

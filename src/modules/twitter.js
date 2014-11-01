@@ -101,7 +101,10 @@ hello.init({
 			"me/followers"	: 'followers/list.json?count=@{limit|200}',
 
 			// https://dev.twitter.com/docs/api/1.1/get/statuses/user_timeline
-			"me/share"	: 'statuses/user_timeline.json?count=@{limit|200}'
+			"me/share"	: 'statuses/user_timeline.json?count=@{limit|200}',
+
+			// https://dev.twitter.com/rest/reference/get/favorites/list
+			"me/like" : 'favorites/list.json?count=@{limit|200}'
 		},
 
 		post : {
@@ -126,6 +129,23 @@ hello.init({
 				else{
 					callback( 'statuses/update.json?include_entities=1&status='+data.message );
 				}
+			},
+
+			// https://dev.twitter.com/rest/reference/post/favorites/create
+			'me/like' : function(p,callback){
+				var id = p.data.id;
+				p.data = null;
+				callback("favorites/create.json?id="+id);
+			}
+		},
+
+		del : {
+			// https://dev.twitter.com/rest/reference/post/favorites/destroy
+			'me/like' : function(){
+				p.method = 'post';
+				var id = p.data.id;
+				p.data = null;
+				callback("favorites/destroy.json?id="+id);
 			}
 		},
 
@@ -148,6 +168,7 @@ hello.init({
 				return res;
 			},
 			"default" : function(res){
+				res = arrayToDataResponse(res);
 				paging(res);
 				return res;
 			}
@@ -158,5 +179,13 @@ hello.init({
 		}
 	}
 });
+
+
+function arrayToDataResponse(res){
+
+	return hello.utils.isArray( res ) ? { data : res } : res;
+
+}
+
 
 })(hello);

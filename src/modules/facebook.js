@@ -115,6 +115,8 @@ hello.init({
 			'me/following' : 'me/friends',
 			'me/followers' : 'me/friends',
 			'me/share' : 'me/feed',
+			'me/like' : 'me/likes',
+
 			'me/files' : 'me/albums',
 			'me/albums' : 'me/albums',
 			'me/album' : '@{id}/photos',
