@@ -3469,6 +3469,8 @@ hello.init({
 			'me/following' : 'me/friends',
 			'me/followers' : 'me/friends',
 			'me/share' : 'me/feed',
+			'me/like' : 'me/likes',
+
 			'me/files' : 'me/albums',
 			'me/albums' : 'me/albums',
 			'me/album' : '@{id}/photos',
@@ -3482,12 +3484,20 @@ hello.init({
 		// Map POST requests
 		post : {
 			'me/share' : 'me/feed',
+			//	https://developers.facebook.com/docs/graph-api/reference/v2.2/object/likes/
+			//	'me/like' : function(p, callback){
+			//		var id = p.data.id;
+			//		p.data = null;
+			//		callback(id + '/likes');
+			//	},
 			'me/albums' : 'me/albums',
 			'me/album' : '@{id}/photos'
 		},
 
 		// Map DELETE requests
 		del : {
+			// https://developers.facebook.com/docs/graph-api/reference/v2.2/object/likes/
+			// 'me/like' : '@{id}/likes',
 			/*
 			// Can't delete an album
 			// http://stackoverflow.com/questions/8747181/how-to-delete-an-album
@@ -3908,8 +3918,25 @@ hello.init({
 			'me' : 'user',
 			'me/friends' : 'user/following?per_page=@{limit|100}',
 			'me/following' : 'user/following?per_page=@{limit|100}',
-			'me/followers' : 'user/followers?per_page=@{limit|100}'
+			'me/followers' : 'user/followers?per_page=@{limit|100}',
+			'me/like' : 'user/starred?per_page=@{limit|100}'
 		},
+		// post : {
+
+		//		// https://developer.github.com/v3/activity/starring/#star-a-repository
+		//		'me/like' : function(p,callback){
+		//			p.method = 'put';
+		//			p.headers['Content-Length'] = 0;
+		//			var id = p.data.id;
+		//			p.data = null;
+		//			callback("user/starred/"+id);
+		//		}
+		//	},
+		//	del : {
+
+		//		// https://developer.github.com/v3/activity/starring/#unstar-a-repository
+		//		'me/like' : "user/starred/@{id}"
+		//	},
 		wrap : {
 			me : function(o,headers){
 
@@ -4725,6 +4752,8 @@ hello.init({
 		},
 
 		post : {
+
+			// https://developer.linkedin.com/documents/api-requests-json
 			"me/share"		: function(p, callback){
 				var data =  {
 					"visibility": {
@@ -5060,7 +5089,10 @@ hello.init({
 			"me/followers"	: 'followers/list.json?count=@{limit|200}',
 
 			// https://dev.twitter.com/docs/api/1.1/get/statuses/user_timeline
-			"me/share"	: 'statuses/user_timeline.json?count=@{limit|200}'
+			"me/share"	: 'statuses/user_timeline.json?count=@{limit|200}',
+
+			// https://dev.twitter.com/rest/reference/get/favorites/list
+			"me/like" : 'favorites/list.json?count=@{limit|200}'
 		},
 
 		post : {
@@ -5085,6 +5117,23 @@ hello.init({
 				else{
 					callback( 'statuses/update.json?include_entities=1&status='+data.message );
 				}
+			},
+
+			// https://dev.twitter.com/rest/reference/post/favorites/create
+			'me/like' : function(p,callback){
+				var id = p.data.id;
+				p.data = null;
+				callback("favorites/create.json?id="+id);
+			}
+		},
+
+		del : {
+			// https://dev.twitter.com/rest/reference/post/favorites/destroy
+			'me/like' : function(){
+				p.method = 'post';
+				var id = p.data.id;
+				p.data = null;
+				callback("favorites/destroy.json?id="+id);
 			}
 		},
 
@@ -5107,6 +5156,7 @@ hello.init({
 				return res;
 			},
 			"default" : function(res){
+				res = arrayToDataResponse(res);
 				paging(res);
 				return res;
 			}
@@ -5117,6 +5167,14 @@ hello.init({
 		}
 	}
 });
+
+
+function arrayToDataResponse(res){
+
+	return hello.utils.isArray( res ) ? { data : res } : res;
+
+}
+
 
 })(hello);
 
