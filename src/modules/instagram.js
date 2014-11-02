@@ -65,7 +65,7 @@ hello.init({
 		scope : {
 			basic : 'basic',
 			friends : 'relationships',
-			photos : ''
+			publish : 'likes comments'
 		},
 		scope_delim : ' ',
 
@@ -78,6 +78,18 @@ hello.init({
 			'me/friends' : 'users/self/follows?count=@{limit|100}',
 			'me/following' : 'users/self/follows?count=@{limit|100}',
 			'me/followers' : 'users/self/followed-by?count=@{limit|100}'
+		},
+
+		post : {
+			'me/like' : function( p, callback ){
+				var id = p.data.id;
+				p.data = {};
+				callback('media/'+id+'/likes');
+			}
+		},
+
+		del : {
+			'me/like' : 'media/@{id}/likes'
 		},
 
 		wrap : {
@@ -120,8 +132,30 @@ hello.init({
 				return o;
 			}
 		},
-		// Use JSONP
-		xhr : false
+
+		// Instagram does not return any CORS Headers
+		// So besides JSONP we're stuck with proxy
+		xhr : function(p,qs){
+
+			var method = p.method;
+			var proxy = method !== 'get';
+
+			if( proxy ){
+
+				if( ( method === 'post' || method === 'put' ) && p.query.access_token ){
+					p.data.access_token = p.query.access_token;
+					delete p.query.access_token;
+				}
+				// No access control headers
+				// Use the proxy instead
+				p.proxy = proxy;
+			}
+
+			return proxy;
+		},
+
+		// no form
+		form : false
 	}
 });
 })(hello);
