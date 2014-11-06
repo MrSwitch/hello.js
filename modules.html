@@ -9,15 +9,15 @@
 <p>HelloJS is extensible, i.e. you can add new services to it as long as you can get your head around the important parts.
 
 <blockquote>
-	<p>Modules are just small javascript scripts that define the URL's for things like the login page and the REST'ful webserver. They're also a place which standardise a naming convention e.g. path locations, scopes, data response and delivery mechanisms.
+	<p>A module defines a providers Authorisation and RESTful endpoints. It translates the API's nuances for the provider to closely match those of its peers with similar features.
 </blockquote>
 
 <h2>HelloJS already has you connected</h2>
-<p>The table shows the services which are already documented on HelloJS. Simply include these scripts in your page after your HelloJS script tag</p>
+<p>The table shows the services which are already documented on HelloJS. Simply include these scripts in your page after your HelloJS script tag.</p>
 <table>
 	<thead>
 		<tr>
-			<th>extension</th>
+			<th>module</th>
 			<th>demo</th>
 			<th>credits</th>
 		</tr>
@@ -39,13 +39,23 @@
 			<td></td>
 		</tr>
 		<tr>
+			<td><a href="./src/modules/flickr.js">flickr.js</a></td>
+			<td><a href="demos/flickr.html">flickr demo</a></td>
+			<td></td>
+		</tr>
+		<tr>
 			<td><a href="./src/modules/github.js">github.js</a></td>
 			<td><a href="demos/github.html">github demo</a></td>
 			<td></td>
 		</tr>
 		<tr>
 			<td><a href="./src/modules/google.js">google.js</a></td>
+			<td><a href="demos/google.html">google demo</a></td>
 			<td></td>
+		</tr>
+		<tr>
+			<td><a href="./src/modules/instagram.js">instagram.js</a></td>
+			<td><a href="demos/instagram.html">instagram demo</a></td>
 			<td></td>
 		</tr>
 		<tr>
@@ -56,6 +66,11 @@
 		<tr>
 			<td><a href="./src/modules/soundcloud.js">soundcloud.js</a></td>
 			<td><a href="demos/soundcloud.html">soundcloud demo</a></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td><a href="./src/modules/tumblr.js">tumblr.js</a></td>
+			<td><a href="demos/tumblr.html">tumblr demo</a></td>
 			<td></td>
 		</tr>
 		<tr>
@@ -77,7 +92,7 @@
 </table>
 
 <h2>Writing your own module</h2>
-<p>Modules are loaded into helloJS using the hello.init() method, with a JSON object that has the name of the service as the only key and then whose value consists of an object with the following parameters.</p>
+<p>Modules are loaded into helloJS using the hello.init() method, with a JSON object that has the name of the service as the only key and then whose value consists of an object with the following properties.</p>
 <table>
 
 	<thead>
@@ -92,14 +107,6 @@
 	</thead>
 	<tbody>
 		<tr>
-			<td>url</td>
-			<td><i>Object<i></td>
-			<td></td>
-			<td>An array=&gt;key map of the paths to translate. The keys "auth" and "base" are required</td>
-			<td>required</td>
-			<td></td>
-		</tr>
-		<tr>
 			<td>oauth</td>
 			<td colspan="3">
 				<i>Object</i>
@@ -109,7 +116,7 @@
 						<tr>
 							<td>version</td>
 							<td>string</td>
-							<td>Version of OAuth, "1.0", "1.0a", "2"</td>
+							<td>Version of OAuth, <q>1.0</q>, <q>1.0a</q>, <q>2</q></td>
 						</tr>
 						<tr>
 							<td>request</td>
@@ -124,12 +131,25 @@
 						<tr>
 							<td>token</td>
 							<td>url</td>
-							<td>Path to get the Access token, the third leg of OAuth 1</td>
+							<td>Path to get the Access token, OAuth 1 only, third leg of flow</td>
+						</tr>
+						<tr>
+							<td>grant</td>
+							<td>url</td>
+							<td>Path to get the Access token, OAuth2 only</td>
 						</tr>
 					</tbody>
 				</table>
 			</td>
-			<td>optional*</td>
+			<td>required</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>login</td>
+			<td><i>function<i></td>
+			<td></td>
+			<td>A function to augment the login request.</td>
+			<td>optional</td>
 			<td></td>
 		</tr>
 		<tr>
@@ -144,7 +164,7 @@
 			<td>scope</td>
 			<td><i>Object<i></td>
 			<td></td>
-			<td>An array=&gt;key map of the scopes to translate</td>
+			<td>A dictionary of key and value (the providers sudonym or name of comparative scope)</td>
 			<td>optional</td>
 			<td></td>
 		</tr>
@@ -157,48 +177,40 @@
 			<td><q>,</q></td>
 		</tr>
 		<tr>
+			<td>base</td>
+			<td><q>url</q></td>
+			<td></td>
+			<td>Prefix for all API requests</td>
+			<td>required</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>get,post,put,del</td>
+			<td><i>Object<i></td>
+			<td></td>
+			<td>Map of standardized pathnames to an alternative path, or path rendering function, the key 'default' will be used where the path is unrecognised, see examples</td>
+			<td>optional</td>
+			<td></td>
+		</tr>
+		<tr>
 			<td>wrap</td>
 			<td><i>Object<i></td>
 			<td></td>
-			<td>An array=&gt;key map of pathnames, used to pre-process the response objects returned</td>
+			<td>Map containing response processing handlers, the key 'default' will be used where the path is unrecognised.</td>
 			<td>optional</td>
 			<td></td>
 		</tr>
 		<tr>
-			<td>querystring</td>
+			<td>xhr, jsonp, form</td>
 			<td><i>function<i></td>
 			<td></td>
-			<td>A function to preprocess the querystring</td>
+			<td>A function called if the browser supports the method requests. Use this function to augment the request. Return truthy value to proceed or false to fallback to another method.</td>
 			<td>optional</td>
 			<td>true</td>
-		</tr>
-		<tr>
-			<td>xhr</td>
-			<td><i>function<i></td>
-			<td></td>
-			<td>A function which if the browser supports XHR2 can be used to augment the request further, the function can return a boolean false to cancel this delivery mechanism and fallback to another</td>
-			<td>optional</td>
-			<td>true</td>
-		</tr>
-		<tr>
-			<td>jsonp</td>
-			<td><i>function<i></td>
-			<td></td>
-			<td>A function which if the data lends itself to transport over JSONP can be used to augment the request further, the function can return a boolean false to cancel this delivery mechanism and fallback to another</td>
-			<td>optional</td>
-			<td></td>
-		</tr>
-		<tr>
-			<td>post</td>
-			<td><i>function<i></td>
-			<td></td>
-			<td>A function which if the browser supports the Form+Iframe+Hash hack, can be used to augment the request further, the function can return a boolean false to cancel this delivery mechanism and fallback to another</td>
-			<td>optional</td>
-			<td></td>
 		</tr>
 	</tbody>
 </table>
-<p>*optional: If the service is an OAuth 1.0/1.0a version then 'oauth' object is required.</p>
+
 <h2>Contributing modules</h2>
 <p>That would be fantastic if you could. Please make the following updates so its easiy for people to discover and test.</p>
 <ul>
