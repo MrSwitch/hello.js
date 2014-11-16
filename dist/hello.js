@@ -90,7 +90,15 @@ hello.utils.extend( hello, {
 		//
 		// Force signin
 		// When hello.login is fired, ignore current session expiry and continue with login
-		force : true
+		force : true,
+
+
+		//
+		// Page URL
+		// When `display=page` this property defines where the users page should end up after redirect_uri
+		// Ths could be problematic if the redirect_uri is indeed the final place, 
+		// Typically this circumvents the problem of the redirect_url being a dumb relay page.
+		page_uri : window.location.href
 	},
 
 
@@ -401,6 +409,13 @@ hello.utils.extend( hello, {
 					return self;
 				}
 			}
+		}
+
+
+		// Page URL
+		if ( opts.display === 'page' && opts.page_uri ){
+			// Add a page location, place to endup after session has authenticated
+			p.qs.state.page_uri = utils.url(opts.page_uri).href;
 		}
 
 
@@ -1448,6 +1463,13 @@ hello.utils.extend( hello.utils, {
 				// Close this window
 				closeWindow();
 			}
+
+			// If this page is still open
+			if( p.page_uri ){
+				window.location = p.page_uri;
+			}
+			
+
 		}
 		//
 		// OAuth redirect, fixes URI fragments from being lost in Safari

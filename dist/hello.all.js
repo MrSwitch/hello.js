@@ -90,7 +90,15 @@ hello.utils.extend( hello, {
 		//
 		// Force signin
 		// When hello.login is fired, ignore current session expiry and continue with login
-		force : true
+		force : true,
+
+
+		//
+		// Page URL
+		// When `display=page` this property defines where the users page should end up after redirect_uri
+		// Ths could be problematic if the redirect_uri is indeed the final place, 
+		// Typically this circumvents the problem of the redirect_url being a dumb relay page.
+		page_uri : window.location.href
 	},
 
 
@@ -401,6 +409,13 @@ hello.utils.extend( hello, {
 					return self;
 				}
 			}
+		}
+
+
+		// Page URL
+		if ( opts.display === 'page' && opts.page_uri ){
+			// Add a page location, place to endup after session has authenticated
+			p.qs.state.page_uri = utils.url(opts.page_uri).href;
 		}
 
 
@@ -1448,6 +1463,13 @@ hello.utils.extend( hello.utils, {
 				// Close this window
 				closeWindow();
 			}
+
+			// If this page is still open
+			if( p.page_uri ){
+				window.location = p.page_uri;
+			}
+			
+
 		}
 		//
 		// OAuth redirect, fixes URI fragments from being lost in Safari
@@ -4604,7 +4626,7 @@ hello.init({
 		scope : {
 			basic : 'basic',
 			friends : 'relationships',
-			photos : ''
+			publish : 'likes comments'
 		},
 		scope_delim : ' ',
 
@@ -4617,6 +4639,18 @@ hello.init({
 			'me/friends' : 'users/self/follows?count=@{limit|100}',
 			'me/following' : 'users/self/follows?count=@{limit|100}',
 			'me/followers' : 'users/self/followed-by?count=@{limit|100}'
+		},
+
+		post : {
+			'me/like' : function( p, callback ){
+				var id = p.data.id;
+				p.data = {};
+				callback('media/'+id+'/likes');
+			}
+		},
+
+		del : {
+			'me/like' : 'media/@{id}/likes'
 		},
 
 		wrap : {
@@ -4659,8 +4693,30 @@ hello.init({
 				return o;
 			}
 		},
-		// Use JSONP
-		xhr : false
+
+		// Instagram does not return any CORS Headers
+		// So besides JSONP we're stuck with proxy
+		xhr : function(p,qs){
+
+			var method = p.method;
+			var proxy = method !== 'get';
+
+			if( proxy ){
+
+				if( ( method === 'post' || method === 'put' ) && p.query.access_token ){
+					p.data.access_token = p.query.access_token;
+					delete p.query.access_token;
+				}
+				// No access control headers
+				// Use the proxy instead
+				p.proxy = proxy;
+			}
+
+			return proxy;
+		},
+
+		// no form
+		form : false
 	}
 });
 })(hello);
@@ -4952,6 +5008,10 @@ function formatRequest(p,qs){
 //
 // Twitter
 //
+
+
+(function(hello){
+
 hello.init({
 	'tumblr' : {
 		// Set default window height
@@ -4971,7 +5031,28 @@ hello.init({
 		base	: "https://api.tumblr.com/v2/",
 
 		get : {
-			me		: 'user/info'
+			me		: 'user/info',
+			'me/like' : 'user/likes',
+			'default' : function(p,callback){
+				if(p.path.match(/(^|\/)blog\//)){
+					delete p.query.access_token;
+					p.query.api_key = hello.services.tumblr.id;
+				}
+				callback(p.path);
+			}
+		},
+		post : {
+			'me/like' : function(p,callback){
+				p.path = 'user/like';
+				query(p,callback);
+			}
+		},
+		del : {
+			'me/like' : function(p,callback){
+				p.method = 'post';
+				p.path = 'user/unlike';
+				query(p,callback);
+			}
 		},
 
 		wrap : {
@@ -4980,12 +5061,57 @@ hello.init({
 					o = o.response.user;
 				}
 				return o;
+			},
+			'me/like' : function(o){
+				if(o&&o.response&&o.response.liked_posts){
+					o.data = o.response.liked_posts;
+					delete o.response;
+				}
+				return o;
+			},
+			'default' : function(o){
+
+				if(o.response){
+					var r = o.response;
+					if( r.posts ){
+						o.data = r.posts;
+					}
+				}
+
+				return o;
 			}
 		},
 
-		xhr : false
+		xhr : function(p,qs){
+			if(p.method !== 'get'){
+				return true;
+			}
+			return false;
+		}
 	}
 });
+
+
+// Converts post parameters to query
+function query(p,callback){
+	if(p.data){
+		extend( p.query, p.data );
+		p.data = null;
+	}
+	callback(p.path);
+}
+
+function extend(a,b){
+	for(var x in b){
+		if(b.hasOwnProperty(x)){
+			a[x] = b[x];
+		}
+	}
+}
+
+
+
+})(hello);
 //
 // Twitter
 //
