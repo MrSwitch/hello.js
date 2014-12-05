@@ -77,7 +77,9 @@ hello.init({
 			'me/photos' : 'users/self/media/recent?min_id=0&count=@{limit|100}',
 			'me/friends' : 'users/self/follows?count=@{limit|100}',
 			'me/following' : 'users/self/follows?count=@{limit|100}',
-			'me/followers' : 'users/self/followed-by?count=@{limit|100}'
+			'me/followers' : 'users/self/followed-by?count=@{limit|100}',
+			
+			'friend/photos' : 'users/@{id}/media/recent?min_id=0&count=@{limit|100}'
 		},
 
 		post : {
