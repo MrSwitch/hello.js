@@ -17,4 +17,5 @@ deploy:
     secure: abqUceXSYbLwfwwOL6fZdYsaNVvPkJr1JdAWU+IJ9d1AKMTF50P6E1gZT4L1q6v/5Suio/4z2BT9Eg2R9jckEPwoVGl8s3fyaUjuz1JE8TiH2aecCx0PPn8jv+eUdiy0otzAkU7kAUN4cBPvS1UmT++o7/kWsxfQBD2eJlI8ZbQ=
   "on": 
     tags: true
+    branch: master
     repo: MrSwitch/hello.js
