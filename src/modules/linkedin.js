@@ -21,6 +21,7 @@ function formatUser(o){
 	o.last_name = o.lastName;
 	o.name = o.formattedName || (o.first_name + ' ' + o.last_name);
 	o.thumbnail = o.pictureUrl;
+	o.email = o.emailAddress;
 }
 
 
@@ -76,7 +77,7 @@ hello.init({
 		base	: "https://api.linkedin.com/v1/",
 
 		get : {
-			"me"			: 'people/~:(picture-url,first-name,last-name,id,formatted-name)',
+			"me"			: 'people/~:(picture-url,first-name,last-name,id,formatted-name,email-address)',
 			"me/friends"	: 'people/~/connections?count=@{limit|500}',
 			"me/followers"	: 'people/~/connections?count=@{limit|500}',
 			"me/following"	: 'people/~/connections?count=@{limit|500}',
@@ -96,7 +97,7 @@ hello.init({
 				};
 
 				if(p.data.id){
-					
+
 					data["attribution"] = {
 						"share": {
 							"id": p.data.id

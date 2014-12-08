@@ -121,7 +121,10 @@ hello.init({
 			'me/albums' : 'me/albums',
 			'me/album' : '@{id}/photos',
 			'me/photos' : 'me/photos',
-			'me/photo' : '@{id}'
+			'me/photo' : '@{id}',
+			
+			'friend/albums' : '@{id}/albums',
+			'friend/photos' : '@{id}/photos'
 
 			// PAGINATION
 			// https://developers.facebook.com/docs/reference/api/pagination/
