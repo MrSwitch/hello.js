@@ -107,10 +107,12 @@ hello.init({
 				}
 				else{
 					data["comment"] = p.data.message;
-					data["content"] = {
-						"submitted-url": p.data.link,
-						"submitted-image-url": p.data.picture
-					};
+					if (p.data.picture && p.data.link) {
+						data["content"] = {
+							"submitted-url": p.data.link,
+							"submitted-image-url": p.data.picture
+						};
+					}
 				}
 
 				p.data = JSON.stringify(data);
