@@ -18,3 +18,4 @@ deploy:
   "on": 
     tags: true
     repo: MrSwitch/hello.js
+    branch: master
