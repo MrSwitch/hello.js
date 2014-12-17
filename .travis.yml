@@ -14,8 +14,7 @@ deploy:
   provider: npm
   email: andrewjdodson@gmail.com
   api_key: 
-    secure: abqUceXSYbLwfwwOL6fZdYsaNVvPkJr1JdAWU+IJ9d1AKMTF50P6E1gZT4L1q6v/5Suio/4z2BT9Eg2R9jckEPwoVGl8s3fyaUjuz1JE8TiH2aecCx0PPn8jv+eUdiy0otzAkU7kAUN4cBPvS1UmT++o7/kWsxfQBD2eJlI8ZbQ=
+    secure: LRgjX0EAVDoVq3Ckng/7zJwJZbkLeVma9GIzAClHxi826acXG0gXE1QBXW+sr3mjb2Vz+sUcDhSvxZJZ9fQ2mZqWJSzGc0v+AfxHjTxLXE2DtS2N247OJVjcC4TvU6vctNd15VJ7spZ86fNnc9LQD7pIW/q2dYGvUcHDmVhf0Qg=
   "on": 
     tags: true
-    branch: master
     repo: MrSwitch/hello.js
