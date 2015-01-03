@@ -1,12 +1,10 @@
 define([], function () {
 
-	describe('modules', function () {
+  describe('modules', function () {
 
     var request = hello.utils.request;
 
     var requestProxy = function (req, callback) {
-
-      console.log(req);
 
       var r = {
         network: req.network,
@@ -17,9 +15,6 @@ define([], function () {
       };
 
       r.url = './stubs/' + req.network + '/' + req.method + '/' + req.path + '.json';
-
-      console.log(r.url);
-
       request.call(hello.utils, r, callback);
     };
 
@@ -68,6 +63,6 @@ define([], function () {
 
     });
 
-	});
+  });
 
 });

@@ -658,7 +658,7 @@ hello.utils.extend( hello, {
 
 hello.utils.extend( hello.utils, {
 
-	forEach : function(collection, fn){
+	forEach: function (collection, fn) {
 		if (collection && collection.length) {
 			for (var i = 0; i < collection.length; i += 1) {
 				fn(collection[i]);
