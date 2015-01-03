@@ -62,7 +62,6 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-mocha-phantomjs');
-	grunt.loadNpmTasks('grunt-karma');
 	grunt.loadNpmTasks('shunt');
 
 	grunt.registerTask('test', ['jshint', 'mocha_phantomjs']);
