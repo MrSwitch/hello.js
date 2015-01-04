@@ -96,7 +96,7 @@ hello.utils.extend( hello, {
 		//
 		// Page URL
 		// When `display=page` this property defines where the users page should end up after redirect_uri
-		// Ths could be problematic if the redirect_uri is indeed the final place,
+		// Ths could be problematic if the redirect_uri is indeed the final place, 
 		// Typically this circumvents the problem of the redirect_url being a dumb relay page.
 		page_uri : window.location.href
 	},
@@ -344,7 +344,7 @@ hello.utils.extend( hello, {
 		// SCOPES
 		// Authentication permisions
 		//
-
+		
 		// convert any array, or falsy value to a string.
 		var scope = (opts.scope||'').toString();
 
@@ -467,7 +467,7 @@ hello.utils.extend( hello, {
 			url = utils.qs( opts.oauth_proxy, p.qs );
 		}
 
-		//
+		// 
 		else{
 
 			url = utils.qs( provider.oauth.auth, p.qs );
@@ -571,7 +571,7 @@ hello.utils.extend( hello, {
 
 			//
 			// Run an async operation to remove the users session
-			//
+			// 
 			var _opts = {};
 			if(p.options.force){
 				var logout = self.services[p.name].logout;
@@ -658,14 +658,6 @@ hello.utils.extend( hello, {
 
 hello.utils.extend( hello.utils, {
 
-	forEach: function (collection, fn) {
-		if (collection && collection.length) {
-			for (var i = 0; i < collection.length; i += 1) {
-				fn(collection[i]);
-			}
-		}
-	},
-
 	// Append the querystring to a url
 	// @param string url
 	// @param object parameters
@@ -682,7 +674,7 @@ hello.utils.extend( hello.utils, {
 		}
 		return url + (!this.isEmpty(params) ? ( url.indexOf('?') > -1 ? "&" : "?" ) + this.param(params) : '');
 	},
-
+	
 
 	//
 	// Param
@@ -693,7 +685,7 @@ hello.utils.extend( hello.utils, {
 		var b,
 			a = {},
 			m;
-
+		
 		if(typeof(s)==='string'){
 
 			m = s.replace(/^[\#\?]/,'').match(/([^=\/\&]+)=([^\&]+)/g);
@@ -707,7 +699,7 @@ hello.utils.extend( hello.utils, {
 		}
 		else {
 			var o = s;
-
+		
 			a = [];
 
 			for( var x in o ){if(o.hasOwnProperty(x)){
@@ -719,7 +711,7 @@ hello.utils.extend( hello.utils, {
 			return a.join('&');
 		}
 	},
-
+	
 
 	//
 	// Local Storage Facade
@@ -843,7 +835,7 @@ hello.utils.extend( hello.utils, {
 				}}
 			}
 		}
-
+		
 		if(target==='body'){
 			(function self(){
 				if(document.body){
@@ -895,7 +887,7 @@ hello.utils.extend( hello.utils, {
 			i = 0,
 			t = null,
 			x = null;
-
+		
 		// define x
 		// x is the first key in the list of object parameters
 		for(x in o){if(o.hasOwnProperty(x)){
@@ -933,7 +925,7 @@ hello.utils.extend( hello.utils, {
 			){
 				p[x] = args[i++];
 			}
-
+			
 			else if( typeof( o[x] ) === 'string' && o[x].indexOf('!')>-1 ){
 				// ("Whoops! " + x + " not defined");
 				return false;
@@ -1295,7 +1287,7 @@ hello.utils.extend( hello.utils, {
 						location : {
 							// Change the location of the popup
 							assign : function(location){
-
+								
 								// Unfourtunatly an app is may not change the location of a InAppBrowser window.
 								// So to shim this, just open a new one.
 
@@ -1355,8 +1347,8 @@ hello.utils.extend( hello.utils, {
 		// OAuth redirect, fixes URI fragments from being lost in Safari
 		// (URI Fragments within 302 Location URI are lost over HTTPS)
 		// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
-		//
-		// FIREFOX, decodes URL fragments when calling location.hash.
+		// 
+		// FIREFOX, decodes URL fragments when calling location.hash. 
 		//  - This is bad if the value contains break points which are escaped
 		//  - Hence the url must be encoded twice as it contains breakpoints.
 		if (navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1) {
@@ -1391,7 +1383,7 @@ hello.utils.extend( hello.utils, {
 
 		//
 		// Is this an auth relay message which needs to call the proxy?
-		//
+		// 
 
 		p = utils.param(location.search);
 
@@ -1414,10 +1406,10 @@ hello.utils.extend( hello.utils, {
 		//
 		// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
 		// SoundCloud is the state in the querystring and the token in the hashtag, so we'll mix the two together
-
+		
 		p = utils.merge(utils.param(location.search||''), utils.param(location.hash||''));
 
-
+		
 		// if p.state
 		if( p && "state" in p ){
 
@@ -1476,7 +1468,7 @@ hello.utils.extend( hello.utils, {
 			if( p.page_uri ){
 				window.location = p.page_uri;
 			}
-
+			
 
 		}
 		//
@@ -1616,7 +1608,7 @@ hello.utils.responseHandler( window, window.opener || window.parent );
 			old_session[auth.network] = hello.utils.store(auth.network) || {};
 		}
 	});
-
+	
 
 
 	(function self(){
@@ -1636,7 +1628,7 @@ hello.utils.responseHandler( window, window.opener || window.parent );
 				// we haven't attached an ID so dont listen.
 				continue;
 			}
-
+		
 			// Get session
 			var session = hello.utils.store(name) || {};
 			var provider = hello.services[name];
@@ -1663,14 +1655,14 @@ hello.utils.responseHandler( window, window.opener || window.parent );
 				}
 				catch(e){}
 			}
-
+			
 			//
 			// Refresh token
 			//
 			if( session && ("expires" in session) && session.expires < CURRENT_TIME ){
 
 				// If auto refresh is possible
-				// Either the browser supports
+				// Either the browser supports 
 				var refresh = provider.refresh || session.refresh_token;
 
 				// Has the refresh been run recently?
@@ -1757,10 +1749,6 @@ hello.api = function(){
 	// get arguments
 	var p = this.utils.args({path:'s!', query : "o", method : "s", data:'o', timeout:'i', callback:"f" }, arguments);
 
-	// console.log('hello.api:');
-	// console.log(arguments);
-	// console.log(p);
-
 	// Create self
 	// An object which inherits its parent as the prototype.
 	// And constructs a new event chain.
@@ -1792,7 +1780,7 @@ hello.api = function(){
 	// Completed event
 	// callback
 	self.on('complete', p.callback);
-
+	
 
 	// Path
 	// Remove the network from path, e.g. facebook:/me/friends
@@ -1840,7 +1828,7 @@ hello.api = function(){
 	if(!("proxy" in p)){
 		p.proxy = p.oauth_proxy && o.oauth && parseInt(o.oauth.version,10) === 1;
 	}
-
+	
 
 
 	// TIMEOUT
@@ -1954,7 +1942,7 @@ hello.api = function(){
 		// Else the URL is a string
 		getPath(url);
 	}
-
+	
 
 	return self;
 
@@ -1962,8 +1950,6 @@ hello.api = function(){
 	// if url needs a base
 	// Wrap everything in
 	function getPath(url){
-
-		console.log('hello.js getPath: ' + url);
 
 		// Format the string if it needs it
 		url = url.replace(/\@\{([a-z\_\-]+)(\|.+?)?\}/gi, function(m,key,defaults){
@@ -1996,12 +1982,6 @@ hello.api = function(){
 		// @ response object
 		// @ statusCode integer if available
 		utils.request( p, function(r,headers){
-
-			console.dir(JSON.stringify(r));
-
-			// console.log('REQUEST');
-			// console.log(p);
-			// console.log(r);
 
 			// Should this be an object
 			if(r===true){
@@ -2085,12 +2065,11 @@ hello.utils.extend( hello.utils, {
 
 	//
 	// Make an HTTP request
-	//
+	// 
 	request : function( p, callback ){
 
 		var utils = this;
 
-		// console.log(Object.keys(this).join(', '));
 
 		// This has too go through a POST request
 		if( !utils.isEmpty( p.data ) && !("FileList" in window) && utils.hasBinary( p.data ) ){
@@ -2114,6 +2093,7 @@ hello.utils.extend( hello.utils, {
 			( !("xhr" in p) || ( p.xhr && ( typeof(p.xhr)!=='function' || p.xhr( p, p.query ) ) ) )
 
 			){
+
 
 			// Format the URL and return it...
 
@@ -2228,7 +2208,7 @@ hello.utils.extend( hello.utils, {
 		// Format URL
 		// Constructs the request URL, optionally wraps the URL through a call to a proxy server
 		// Returns the formatted URL
-		//
+		// 
 		function formatUrl( p, callback ){
 
 			// Are we signing the request?
@@ -2522,7 +2502,7 @@ hello.utils.extend( hello.utils, {
 		// However: unable recreate the bug of firing off the onreadystatechange before the script content has been executed and the value of "result" has been defined.
 		// Inject script tag into the head element
 		head.appendChild(script);
-
+		
 		// Append Opera Fix to run after our script
 		if(operafix){
 			head.appendChild(operafix);
@@ -2759,7 +2739,7 @@ hello.utils.extend( hello.utils, {
 
 		// Build an iFrame and inject it into the DOM
 		//var ifm = _append('iframe',{id:'_'+Math.round(Math.random()*1e9), style:shy});
-
+		
 		// Build an HTML form, with a target attribute as the ID of the iFrame, and inject it into the DOM.
 		//var frm = _append('form',{ method: 'post', action: uri, target: ifm.id, style:shy});
 
@@ -2795,7 +2775,7 @@ hello.utils.extend( hello.utils, {
 
 	// DataURI to Blob
 	// Converts a Data-URI to a Blob string
-
+	
 	toBlob : function(dataURI){
 		var reg = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
 		var m = dataURI.match(reg);
@@ -3517,10 +3497,7 @@ hello.init({
 			'me/albums' : 'me/albums',
 			'me/album' : '@{id}/photos',
 			'me/photos' : 'me/photos',
-			'me/photo' : '@{id}',
-			
-			'friend/albums' : '@{id}/albums',
-			'friend/photos' : '@{id}/photos'
+			'me/photo' : '@{id}'
 
 			// PAGINATION
 			// https://developers.facebook.com/docs/reference/api/pagination/
@@ -4661,9 +4638,7 @@ hello.init({
 			'me/photos' : 'users/self/media/recent?min_id=0&count=@{limit|100}',
 			'me/friends' : 'users/self/follows?count=@{limit|100}',
 			'me/following' : 'users/self/follows?count=@{limit|100}',
-			'me/followers' : 'users/self/followed-by?count=@{limit|100}',
-			
-			'friend/photos' : 'users/@{id}/media/recent?min_id=0&count=@{limit|100}'
+			'me/followers' : 'users/self/followed-by?count=@{limit|100}'
 		},
 
 		post : {
@@ -4768,7 +4743,6 @@ function formatUser(o){
 	o.last_name = o.lastName;
 	o.name = o.formattedName || (o.first_name + ' ' + o.last_name);
 	o.thumbnail = o.pictureUrl;
-	o.email = o.emailAddress;
 }
 
 
@@ -4824,7 +4798,7 @@ hello.init({
 		base	: "https://api.linkedin.com/v1/",
 
 		get : {
-			"me"			: 'people/~:(picture-url,first-name,last-name,id,formatted-name,email-address)',
+			"me"			: 'people/~:(picture-url,first-name,last-name,id,formatted-name)',
 			"me/friends"	: 'people/~/connections?count=@{limit|500}',
 			"me/followers"	: 'people/~/connections?count=@{limit|500}',
 			"me/following"	: 'people/~/connections?count=@{limit|500}',
@@ -4844,7 +4818,7 @@ hello.init({
 				};
 
 				if(p.data.id){
-
+					
 					data["attribution"] = {
 						"share": {
 							"id": p.data.id
@@ -4854,12 +4828,10 @@ hello.init({
 				}
 				else{
 					data["comment"] = p.data.message;
-					if (p.data.picture && p.data.link) {
-						data["content"] = {
-							"submitted-url": p.data.link,
-							"submitted-image-url": p.data.picture
-						};
-					}
+					data["content"] = {
+						"submitted-url": p.data.link,
+						"submitted-image-url": p.data.picture
+					};
 				}
 
 				p.data = JSON.stringify(data);
