@@ -1,10 +1,10 @@
 {
-  "id": "id-12345678",
-  "email": "user@gmail.com",
+  "id": "1234567890",
+  "email": "user@example.com",
   "first_name": "First",
   "gender": "female",
   "last_name": "Last",
-  "link": "https://www.facebook.com/app_scoped_user_id/10000000012345678/",
+  "link": "https://www.facebook.com/app_scoped_user_id/123456768/",
   "locale": "en_GB",
   "name": "Full Name",
   "timezone": 0,

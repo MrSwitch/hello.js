@@ -21,7 +21,7 @@ define([
 // Modules are of the following formats
 //
 
-describe( 'Modules', function(){
+describe( 'E2E Modules', function(){
 
 // Loop through all services
 for(var name in hello.services){

@@ -2,7 +2,9 @@ define([], function () {
 
   describe('modules', function () {
 
-    var request = hello.utils.request;
+    var utils = hello.utils;
+
+    var request = utils.request;
 
     var requestProxy = function (req, callback) {
 
@@ -15,40 +17,45 @@ define([], function () {
       };
 
       r.url = './stubs/' + req.network + '/' + req.method + '/' + req.path + '.json';
-      request.call(hello.utils, r, callback);
+      request.call(utils, r, callback);
     };
 
     before(function () {
-      hello.utils.request = requestProxy;
+      utils.request = requestProxy;
     });
 
     after(function () {
-      hello.utils.request = request;
+      utils.request = request;
     });
 
     describe.only('/me', function () {
 
       var tests = [];
 
-      tests.push({
-        network: "facebook",
-        expect: {
-          id: "id-12345678",
-          name: "Full Name",
-          thumbnail: "http://graph.facebook.com/id-12345678/picture"
-        }
-      });
+      var makeTest = function (network, override) {
+        override = override || {};
+        return {
+          network: network,
+          expect: utils.extend(
+            {
+              id: "1234567890",
+              name: "Full Name",
+              thumbnail: "http://example.com/1234567890/picture"
+            },
+            override
+          )
+        };
+      };
 
-      tests.push({
-        network: "instagram",
-        expect: {
-          id: "1012345678",
-          name: "My Name",
-          thumbnail: "https://www.examples.com/instagram-profile.jpg"
-        }
-      });
+      tests.push(makeTest("instagram"));
 
-      hello.utils.forEach(tests, function (test) {
+      tests.push(
+        makeTest("facebook", {
+          thumbnail: "http://graph.facebook.com/1234567890/picture"
+        })
+      );
+
+      utils.forEach(tests, function (test) {
 
         it('should format ' + test.network + ' correctly', function (done) {
           hello(test.network).api('/me', function (me) {

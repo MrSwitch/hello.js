@@ -6,13 +6,13 @@
     "username": "a.user",
     "bio": "",
     "website": "",
-    "profile_picture": "https://www.examples.com/instagram-profile.jpg",
-    "full_name": "My Name",
+    "profile_picture": "http://example.com/1234567890/picture",
+    "full_name": "Full Name",
     "counts": {
       "media": 30,
-      "followed_by": 9,
-      "follows": 12
+      "followed_by": 100,
+      "follows": 200
     },
-    "id": "1012345678"
+    "id": "1234567890"
   }
 }
