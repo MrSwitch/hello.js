@@ -2,13 +2,13 @@ define([], function () {
 
   describe('modules', function () {
 
-  	var forEach = function (collection, fn) {
-  		if (collection && collection.length) {
-  			for (var i = 0; i < collection.length; i += 1) {
-  				fn(collection[i]);
-  			}
-  		}
-  	};
+    var forEach = function (collection, fn) {
+      if (collection && collection.length) {
+        for (var i = 0; i < collection.length; i += 1) {
+          fn(collection[i]);
+        }
+      }
+    };
 
     var utils = hello.utils;
 
