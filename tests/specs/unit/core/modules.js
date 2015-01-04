@@ -2,6 +2,14 @@ define([], function () {
 
   describe('modules', function () {
 
+  	var forEach = function (collection, fn) {
+  		if (collection && collection.length) {
+  			for (var i = 0; i < collection.length; i += 1) {
+  				fn(collection[i]);
+  			}
+  		}
+  	};
+
     var utils = hello.utils;
 
     var request = utils.request;
@@ -60,7 +68,7 @@ define([], function () {
         })
       );
 
-      utils.forEach(tests, function (test) {
+      forEach(tests, function (test) {
 
         it('should format ' + test.network + ' correctly', function (done) {
           hello(test.network).api('/me', function (me) {
