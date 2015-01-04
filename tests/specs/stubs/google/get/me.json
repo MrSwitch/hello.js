@@ -1,0 +1,67 @@
+{
+  "kind": "plus#person",
+  "etag": "\"RpKWnWW4WW46-6W3rWhLR9iFZQM/dQkfTdnzgzlVVV0Kk8XnYzi_SOw\"",
+  "gender": "female",
+  "emails": [
+    {
+      "value": "a.user@example.com",
+      "type": "account"
+    }
+  ],
+  "urls": [
+    {
+      "value": "http://www.youtube.com/user/some-user",
+      "type": "otherProfile",
+      "label": "A User"
+    },
+    {
+      "value": "https://profiles.google.com/12345678/buzz",
+      "type": "contributor",
+      "label": "Buzz"
+    }
+  ],
+  "objectType": "person",
+  "id": "1234567890",
+  "displayName": "Full Name",
+  "name": {
+    "familyName": "Last",
+    "givenName": "Nickname"
+  },
+  "url": "https://plus.google.com/1234567890",
+  "image": {
+    "url": "https://lh6.googleusercontent.com/1234567890/photo.jpg?sz=50",
+    "isDefault": false
+  },
+  "organizations": [
+    {
+      "name": "Some Place",
+      "title": "Some Title",
+      "type": "some-type",
+      "startDate": "2005",
+      "endDate": "2011",
+      "primary": false
+    }
+  ],
+  "placesLived": [
+    {
+      "value": "Some, Place",
+      "primary": true
+    }
+  ],
+  "isPlusUser": true,
+  "language": "en_GB",
+  "circledByCount": 5000,
+  "verified": false,
+  "cover": {
+    "layout": "banner",
+    "coverPhoto": {
+      "url": "https://lh4.googleusercontent.com/pic.jpg",
+      "height": 626,
+      "width": 940
+    },
+    "coverInfo": {
+      "topImageOffset": 0,
+      "leftImageOffset": 0
+    }
+  }
+}

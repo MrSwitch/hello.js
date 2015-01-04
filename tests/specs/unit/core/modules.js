@@ -28,12 +28,11 @@ define([], function () {
       utils.request = request;
     });
 
-    describe.only('/me', function () {
+    describe('/me', function () {
 
       var tests = [];
 
       var makeTest = function (network, override) {
-        override = override || {};
         return {
           network: network,
           expect: utils.extend(
@@ -42,7 +41,7 @@ define([], function () {
               name: "Full Name",
               thumbnail: "http://example.com/1234567890/picture"
             },
-            override
+            override || {}
           )
         };
       };
@@ -52,6 +51,12 @@ define([], function () {
       tests.push(
         makeTest("facebook", {
           thumbnail: "http://graph.facebook.com/1234567890/picture"
+        })
+      );
+
+      tests.push(
+        makeTest("google", {
+          thumbnail: "https://lh6.googleusercontent.com/1234567890/photo.jpg?sz=50"
         })
       );
 
