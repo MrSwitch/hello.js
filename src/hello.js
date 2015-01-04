@@ -658,7 +658,6 @@ hello.utils.extend( hello, {
 
 hello.utils.extend( hello.utils, {
 
-
 	// Append the querystring to a url
 	// @param string url
 	// @param object parameters
