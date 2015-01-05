@@ -12,7 +12,8 @@ define([], function () {
 
     var utils = hello.utils;
 
-    var request = utils.request;
+    var originalGetAuthResponse = hello.getAuthResponse;
+    var originalRequest = utils.request;
 
     var requestProxy = function (req, callback) {
 
@@ -25,18 +26,24 @@ define([], function () {
       };
 
       r.url = './stubs/' + req.network + '/' + req.method + '/' + req.path + '.json';
-      request.call(utils, r, callback);
+      originalRequest.call(utils, r, callback);
     };
 
     before(function () {
+      hello.getAuthResponse = function (service) {
+        return {
+          access_token: 'the-access-token'
+        };
+      };
       utils.request = requestProxy;
     });
 
     after(function () {
-      utils.request = request;
+      hello.getAuthResponse = originalGetAuthResponse;
+      utils.request = originalRequest;
     });
 
-    describe('/me', function () {
+    describe.only('/me', function () {
 
       var tests = [];
 
@@ -45,26 +52,40 @@ define([], function () {
           network: network,
           expect: utils.extend(
             {
-              id: "1234567890",
-              name: "Full Name",
-              thumbnail: "http://example.com/1234567890/picture"
+              id: "",
+              name: "Jane McGee",
+              thumbnail: ""
             },
             override || {}
           )
         };
       };
 
-      tests.push(makeTest("instagram"));
+      tests.push(
+        makeTest("windows", {
+          id: "939f37452466502a",
+          thumbnail: "https://apis.live.net/v5.0/939f37452466502a/picture?access_token=the-access-token"
+        })
+      );
 
       tests.push(
         makeTest("facebook", {
-          thumbnail: "http://graph.facebook.com/1234567890/picture"
+          id: "100008806508341",
+          thumbnail: "http://graph.facebook.com/100008806508341/picture"
         })
       );
 
       tests.push(
         makeTest("google", {
-          thumbnail: "https://lh6.googleusercontent.com/1234567890/photo.jpg?sz=50"
+          id: "115111284799080900590",
+          thumbnail: "https://lh3.googleusercontent.com/-NWCgcgRDieE/AAAAAAAAAAI/AAAAAAAAABc/DCi-M8IuzMo/photo.jpg?sz=50"
+        })
+      );
+
+      tests.push(
+        makeTest("instagram", {
+          id: "1636340308",
+          thumbnail: "https://igcdn-photos-h-a.akamaihd.net/hphotos-ak-xaf1/t51.2885-19/10919499_876030935750711_2062576510_a.jpg"
         })
       );
 

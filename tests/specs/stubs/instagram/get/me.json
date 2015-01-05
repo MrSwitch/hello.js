@@ -3,16 +3,16 @@
     "code": 200
   },
   "data": {
-    "username": "a.user",
+    "username": "janemcgee35",
     "bio": "",
     "website": "",
-    "profile_picture": "http://example.com/1234567890/picture",
-    "full_name": "Full Name",
+    "profile_picture": "https://igcdn-photos-h-a.akamaihd.net/hphotos-ak-xaf1/t51.2885-19/10919499_876030935750711_2062576510_a.jpg",
+    "full_name": "Jane McGee",
     "counts": {
-      "media": 30,
-      "followed_by": 100,
-      "follows": 200
+      "media": 0,
+      "followed_by": 0,
+      "follows": 0
     },
-    "id": "1234567890"
+    "id": "1636340308"
   }
 }
