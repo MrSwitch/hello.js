@@ -82,6 +82,14 @@ define([], function () {
       );
 
       tests.push(
+        makeTest("github", {
+          id: 10398423,
+          name: "janemcgee35",
+          thumbnail: "https://avatars.githubusercontent.com/u/10398423?v=3"
+        })
+      );
+
+      tests.push(
         makeTest("google", {
           id: "115111284799080900590",
           thumbnail: "https://lh3.googleusercontent.com/-NWCgcgRDieE/AAAAAAAAAAI/AAAAAAAAABc/DCi-M8IuzMo/photo.jpg?sz=50"
@@ -104,8 +112,8 @@ define([], function () {
 
       tests.push(
         makeTest("soundcloud", {
-          name: "janemcgee35",
           id: 131420710,
+          name: "janemcgee35",
           thumbnail: "https://i1.sndcdn.com/avatars-000123511300-upb183-large.jpg"
         })
       );
