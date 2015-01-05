@@ -102,6 +102,13 @@ define([], function () {
         })
       );
 
+      tests.push(
+        makeTest("yahoo", {
+          id: "UKGYDRAHEWONVO35KOOBBGQ4UU",
+          thumbnail: "https://socialprofiles.zenfs.com/images/805efb9485e4878f21be4d9e9e5890ca_192.png"
+        })
+      );
+
       forEach(tests, function (test) {
 
         it('should format ' + test.network + ' correctly', function (done) {
