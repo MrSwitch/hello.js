@@ -54,12 +54,18 @@ define([], function () {
             {
               id: "",
               name: "Jane McGee",
-              thumbnail: ""
+              thumbnail: undefined
             },
             override || {}
           )
         };
       };
+
+      tests.push(
+        makeTest("dropbox", {
+          id: 374434467
+        })
+      );
 
       tests.push(
         makeTest("windows", {
