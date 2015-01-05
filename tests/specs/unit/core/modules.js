@@ -75,6 +75,13 @@ define([], function () {
       );
 
       tests.push(
+        makeTest("foursquare", {
+          id: "110649444",
+          thumbnail: "https://irs0.4sqi.net/img/user/100x100/110649444-XTNO1LD24NJOW0TW.jpg"
+        })
+      );
+
+      tests.push(
         makeTest("google", {
           id: "115111284799080900590",
           thumbnail: "https://lh3.googleusercontent.com/-NWCgcgRDieE/AAAAAAAAAAI/AAAAAAAAABc/DCi-M8IuzMo/photo.jpg?sz=50"
