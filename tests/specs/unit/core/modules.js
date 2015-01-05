@@ -89,6 +89,13 @@ define([], function () {
       );
 
       tests.push(
+        makeTest("linkedin", {
+          id: "sDsPqKdBkl",
+          thumbnail: "https://media.licdn.com/mpr/mprx/0_oFea4Eo2n6j5ZQS2oLwg4HE7NiWQ4Qp2H_yl4dVyw6gBFGIuQ3ZGnWmtsSdZUTjhIXErcmkkxGoX"
+        })
+      );
+
+      tests.push(
         makeTest("twitter", {
           id: 2961707375,
           thumbnail: "http://pbs.twimg.com/profile_images/552017091583152128/a8lyS35y_normal.jpeg"
