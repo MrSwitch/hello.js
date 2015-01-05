@@ -68,13 +68,6 @@ define([], function () {
       );
 
       tests.push(
-        makeTest("windows", {
-          id: "939f37452466502a",
-          thumbnail: "https://apis.live.net/v5.0/939f37452466502a/picture?access_token=the-access-token"
-        })
-      );
-
-      tests.push(
         makeTest("facebook", {
           id: "100008806508341",
           thumbnail: "http://graph.facebook.com/100008806508341/picture"
@@ -92,6 +85,20 @@ define([], function () {
         makeTest("instagram", {
           id: "1636340308",
           thumbnail: "https://igcdn-photos-h-a.akamaihd.net/hphotos-ak-xaf1/t51.2885-19/10919499_876030935750711_2062576510_a.jpg"
+        })
+      );
+
+      tests.push(
+        makeTest("twitter", {
+          id: 2961707375,
+          thumbnail: "http://pbs.twimg.com/profile_images/552017091583152128/a8lyS35y_normal.jpeg"
+        })
+      );
+
+      tests.push(
+        makeTest("windows", {
+          id: "939f37452466502a",
+          thumbnail: "https://apis.live.net/v5.0/939f37452466502a/picture?access_token=the-access-token"
         })
       );
 
