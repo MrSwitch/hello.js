@@ -96,6 +96,14 @@ define([], function () {
       );
 
       tests.push(
+        makeTest("soundcloud", {
+          name: "janemcgee35",
+          id: 131420710,
+          thumbnail: "https://i1.sndcdn.com/avatars-000123511300-upb183-large.jpg"
+        })
+      );
+
+      tests.push(
         makeTest("twitter", {
           id: 2961707375,
           thumbnail: "http://pbs.twimg.com/profile_images/552017091583152128/a8lyS35y_normal.jpeg"
