@@ -175,6 +175,17 @@ define([], function () {
               picture: "https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/wistful-piggy.jpg"
             }
           }
+        },
+        {
+          network: "facebook",
+          expect: {
+            length: 5,
+            first: {
+              id: "1380493922254145",
+              name: "LBD Piggy",
+              picture: "https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/v/t1.0-9/s130x130/10897962_1380493922254145_5386757285347386511_n.jpg?oh=98e30ce334bf9cb01f808c0c1134afff&oe=55291C94&__gda__=1429910956_84b3b9a2d5d9326485e630290657afcc"
+            }
+          }
         }
       ];
 
