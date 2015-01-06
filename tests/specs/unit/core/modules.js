@@ -43,7 +43,7 @@ define([], function () {
       utils.request = originalRequest;
     });
 
-    describe.only('/me', function () {
+    describe('/me', function () {
 
       var tests = [
         {
