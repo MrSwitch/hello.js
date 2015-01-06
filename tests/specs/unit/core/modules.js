@@ -1,6 +1,6 @@
 define([], function () {
 
-  describe('hello.api / modules', function () {
+  describe('hello.api modules', function () {
 
     var forEach = function (collection, fn) {
       if (collection && collection.length) {
@@ -15,8 +15,6 @@ define([], function () {
     var originalGetAuthResponse = hello.getAuthResponse;
     var originalRequest = utils.request;
 
-    var status = '';
-
     var requestProxy = function (req, callback) {
 
       var r = {
@@ -27,7 +25,7 @@ define([], function () {
         xhr: true
       };
 
-      var stubName = req.path + (req.options.status || '') + '.json';
+      var stubName = req.path + (req.options.stubType || '') + '.json';
       r.url = './stubs/' + req.network + '/' + req.method + '/' + stubName;
       originalRequest.call(utils, r, callback);
     };
@@ -188,7 +186,7 @@ define([], function () {
 
       });
 
-      describe('unauthorised', function () {
+      describe('unauthorised requests', function () {
 
         forEach(tests, function (test) {
 
@@ -200,7 +198,7 @@ define([], function () {
                 expect(data.error.code).to.be(test.errorExpect.code);
                 expect(data.error.message).to.be(test.errorExpect.message);
                 done();
-              }).api('/me', { status: '-unauth' });
+              }).api('/me', { stubType: '-unauth' });
 
             } else {
               done();
