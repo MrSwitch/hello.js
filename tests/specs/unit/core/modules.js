@@ -15,6 +15,8 @@ define([], function () {
     var originalGetAuthResponse = hello.getAuthResponse;
     var originalRequest = utils.request;
 
+    var status = '';
+
     var requestProxy = function (req, callback) {
 
       var r = {
@@ -25,7 +27,8 @@ define([], function () {
         xhr: true
       };
 
-      r.url = './stubs/' + req.network + '/' + req.method + '/' + req.path + '.json';
+      var stubName = req.path + (req.options.status || '') + '.json';
+      r.url = './stubs/' + req.network + '/' + req.method + '/' + stubName;
       originalRequest.call(utils, r, callback);
     };
 
@@ -52,6 +55,10 @@ define([], function () {
             id: 374434467,
             name: "Jane McGee",
             thumbnail: undefined
+          },
+          errorExpect: {
+            code: "server_error",
+            message: "The given OAuth 2 access token doesn't exist or has expired."
           }
         },
         {
@@ -60,6 +67,10 @@ define([], function () {
             id: "100008806508341",
             name: "Jane McGee",
             thumbnail: "http://graph.facebook.com/100008806508341/picture"
+          },
+          errorExpect: {
+            code: 190,
+            message: "Invalid OAuth access token."
           }
         },
         {
@@ -68,6 +79,10 @@ define([], function () {
             id: "110649444",
             name: "Jane McGee",
             thumbnail: "https://irs0.4sqi.net/img/user/100x100/110649444-XTNO1LD24NJOW0TW.jpg"
+          },
+          errorExpect: {
+            code: "access_denied",
+            message: "OAuth token invalid or revoked."
           }
         },
         {
@@ -76,7 +91,8 @@ define([], function () {
             id: 10398423,
             name: "janemcgee35",
             thumbnail: "https://avatars.githubusercontent.com/u/10398423?v=3"
-          }
+          },
+          errorExpect: false
         },
         {
           network: "google",
@@ -84,6 +100,10 @@ define([], function () {
             id: "115111284799080900590",
             name: "Jane McGee",
             thumbnail: "https://lh3.googleusercontent.com/-NWCgcgRDieE/AAAAAAAAAAI/AAAAAAAAABc/DCi-M8IuzMo/photo.jpg?sz=50"
+          },
+          errorExpect: {
+            code: 403,
+            message: "Daily Limit for Unauthenticated Use Exceeded. Continued use requires signup."
           }
         },
         {
@@ -92,6 +112,10 @@ define([], function () {
             id: "1636340308",
             name: "Jane McGee",
             thumbnail: "https://igcdn-photos-h-a.akamaihd.net/hphotos-ak-xaf1/t51.2885-19/10919499_876030935750711_2062576510_a.jpg"
+          },
+          errorExpect: {
+            code: "OAuthParameterException",
+            message: "Missing client_id or access_token URL parameter."
           }
         },
         {
@@ -100,6 +124,10 @@ define([], function () {
             id: "sDsPqKdBkl",
             name: "Jane McGee",
             thumbnail: "https://media.licdn.com/mpr/mprx/0_oFea4Eo2n6j5ZQS2oLwg4HE7NiWQ4Qp2H_yl4dVyw6gBFGIuQ3ZGnWmtsSdZUTjhIXErcmkkxGoX"
+          },
+          errorExpect: {
+            code: 401,
+            message: "Unknown authentication scheme"
           }
         },
         {
@@ -108,7 +136,8 @@ define([], function () {
             id: 131420710,
             name: "janemcgee35",
             thumbnail: "https://i1.sndcdn.com/avatars-000123511300-upb183-large.jpg"
-          }
+          },
+          errorExpect: false
         },
         {
           network: "twitter",
@@ -116,6 +145,10 @@ define([], function () {
             id: 2961707375,
             name: "Jane McGee",
             thumbnail: "http://pbs.twimg.com/profile_images/552017091583152128/a8lyS35y_normal.jpeg"
+          },
+          errorExpect: {
+            code: "request_failed",
+            message: "Bad Authentication data"
           }
         },
         {
@@ -124,6 +157,10 @@ define([], function () {
             id: "939f37452466502a",
             name: "Jane McGee",
             thumbnail: "https://apis.live.net/v5.0/939f37452466502a/picture?access_token=the-access-token"
+          },
+          errorExpect: {
+            code: "request_token_invalid",
+            message: "The access token isn't valid."
           }
         },
         {
@@ -132,9 +169,11 @@ define([], function () {
             id: "UKGYDRAHEWONVO35KOOBBGQ4UU",
             name: "Jane McGee",
             thumbnail: "https://socialprofiles.zenfs.com/images/805efb9485e4878f21be4d9e9e5890ca_192.png"
-          }
+          },
+          errorExpect: false
         }
       ];
+
 
       forEach(tests, function (test) {
 
@@ -149,6 +188,28 @@ define([], function () {
 
       });
 
+      describe('unauthorised', function () {
+
+        forEach(tests, function (test) {
+
+          it('should format the ' + test.network + ' error response correctly', function (done) {
+
+            if (test.errorExpect) {
+              hello(test.network).on('error', function (data) {
+                expect(data.error).to.not.be(undefined);
+                expect(data.error.code).to.be(test.errorExpect.code);
+                expect(data.error.message).to.be(test.errorExpect.message);
+                done();
+              }).api('/me', { status: '-unauth' });
+
+            } else {
+              done();
+            }
+          });
+
+        });
+
+      });
     });
 
     describe('/me/photos', function () {

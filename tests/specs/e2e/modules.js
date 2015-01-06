@@ -56,7 +56,7 @@ function setup_module_tests(module, name){
 			}
 		});
 
-		it('return error object when an api request is made with an unverified user', function(done){
+		xit('return error object when an api request is made with an unverified user', function(done){
 
 			var i=0;
 
