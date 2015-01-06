@@ -43,79 +43,98 @@ define([], function () {
       utils.request = originalRequest;
     });
 
-    describe('/me', function () {
+    describe.only('/me', function () {
 
-      var tests = [];
-
-      var makeTest = function (network, override) {
-        return {
-          network: network,
-          expect: utils.extend(
-            {
-              id: "",
-              name: "Jane McGee",
-              thumbnail: undefined
-            },
-            override || {}
-          )
-        };
-      };
-
-      tests.push(makeTest("dropbox", {
-        id: 374434467
-      }));
-
-      tests.push(makeTest("facebook", {
-        id: "100008806508341",
-        thumbnail: "http://graph.facebook.com/100008806508341/picture"
-      }));
-
-      tests.push(makeTest("foursquare", {
-        id: "110649444",
-        thumbnail: "https://irs0.4sqi.net/img/user/100x100/110649444-XTNO1LD24NJOW0TW.jpg"
-      }));
-
-      tests.push(makeTest("github", {
-        id: 10398423,
-        name: "janemcgee35",
-        thumbnail: "https://avatars.githubusercontent.com/u/10398423?v=3"
-      }));
-
-      tests.push(makeTest("google", {
-        id: "115111284799080900590",
-        thumbnail: "https://lh3.googleusercontent.com/-NWCgcgRDieE/AAAAAAAAAAI/AAAAAAAAABc/DCi-M8IuzMo/photo.jpg?sz=50"
-      }));
-
-      tests.push(makeTest("instagram", {
-        id: "1636340308",
-        thumbnail: "https://igcdn-photos-h-a.akamaihd.net/hphotos-ak-xaf1/t51.2885-19/10919499_876030935750711_2062576510_a.jpg"
-      }));
-
-      tests.push(makeTest("linkedin", {
-        id: "sDsPqKdBkl",
-        thumbnail: "https://media.licdn.com/mpr/mprx/0_oFea4Eo2n6j5ZQS2oLwg4HE7NiWQ4Qp2H_yl4dVyw6gBFGIuQ3ZGnWmtsSdZUTjhIXErcmkkxGoX"
-      }));
-
-      tests.push(makeTest("soundcloud", {
-        id: 131420710,
-        name: "janemcgee35",
-        thumbnail: "https://i1.sndcdn.com/avatars-000123511300-upb183-large.jpg"
-      }));
-
-      tests.push(makeTest("twitter", {
-        id: 2961707375,
-        thumbnail: "http://pbs.twimg.com/profile_images/552017091583152128/a8lyS35y_normal.jpeg"
-      }));
-
-      tests.push(makeTest("windows", {
-        id: "939f37452466502a",
-        thumbnail: "https://apis.live.net/v5.0/939f37452466502a/picture?access_token=the-access-token"
-      }));
-
-      tests.push(makeTest("yahoo", {
-        id: "UKGYDRAHEWONVO35KOOBBGQ4UU",
-        thumbnail: "https://socialprofiles.zenfs.com/images/805efb9485e4878f21be4d9e9e5890ca_192.png"
-      }));
+      var tests = [
+        {
+          network: "dropbox",
+          expect: {
+            id: 374434467,
+            name: "Jane McGee",
+            thumbnail: undefined
+          }
+        },
+        {
+          network: "facebook",
+          expect: {
+            id: "100008806508341",
+            name: "Jane McGee",
+            thumbnail: "http://graph.facebook.com/100008806508341/picture"
+          }
+        },
+        {
+          network: "foursquare",
+          expect: {
+            id: "110649444",
+            name: "Jane McGee",
+            thumbnail: "https://irs0.4sqi.net/img/user/100x100/110649444-XTNO1LD24NJOW0TW.jpg"
+          }
+        },
+        {
+          network: "github",
+          expect: {
+            id: 10398423,
+            name: "janemcgee35",
+            thumbnail: "https://avatars.githubusercontent.com/u/10398423?v=3"
+          }
+        },
+        {
+          network: "google",
+          expect: {
+            id: "115111284799080900590",
+            name: "Jane McGee",
+            thumbnail: "https://lh3.googleusercontent.com/-NWCgcgRDieE/AAAAAAAAAAI/AAAAAAAAABc/DCi-M8IuzMo/photo.jpg?sz=50"
+          }
+        },
+        {
+          network: "instagram",
+          expect: {
+            id: "1636340308",
+            name: "Jane McGee",
+            thumbnail: "https://igcdn-photos-h-a.akamaihd.net/hphotos-ak-xaf1/t51.2885-19/10919499_876030935750711_2062576510_a.jpg"
+          }
+        },
+        {
+          network: "linkedin",
+          expect: {
+            id: "sDsPqKdBkl",
+            name: "Jane McGee",
+            thumbnail: "https://media.licdn.com/mpr/mprx/0_oFea4Eo2n6j5ZQS2oLwg4HE7NiWQ4Qp2H_yl4dVyw6gBFGIuQ3ZGnWmtsSdZUTjhIXErcmkkxGoX"
+          }
+        },
+        {
+          network: "soundcloud",
+          expect: {
+            id: 131420710,
+            name: "janemcgee35",
+            thumbnail: "https://i1.sndcdn.com/avatars-000123511300-upb183-large.jpg"
+          }
+        },
+        {
+          network: "twitter",
+          expect: {
+            id: 2961707375,
+            name: "Jane McGee",
+            thumbnail: "http://pbs.twimg.com/profile_images/552017091583152128/a8lyS35y_normal.jpeg"
+          }
+        },
+        {
+          network: "windows",
+          expect: {
+            id: "939f37452466502a",
+            name: "Jane McGee",
+            thumbnail: "https://apis.live.net/v5.0/939f37452466502a/picture?access_token=the-access-token"
+          }
+        },
+        {
+          network: "yahoo",
+          expect: {
+            id: "UKGYDRAHEWONVO35KOOBBGQ4UU",
+            name: "Jane McGee",
+            thumbnail: "https://socialprofiles.zenfs.com/images/805efb9485e4878f21be4d9e9e5890ca_192.png"
+          }
+        }
+      ];
 
       forEach(tests, function (test) {
 
@@ -132,43 +151,32 @@ define([], function () {
 
     });
 
-    describe.only('/me/photos', function () {
+    describe('/me/photos', function () {
 
-      var tests = [];
-
-      var makeTest = function (network, override) {
-        return {
-          network: network,
-          expect: utils.extend(
-            {
-              length: 0,
-              first: {
-                id: undefined,
-                name: undefined,
-                picture: undefined
-              }
-            },
-            override || {}
-          )
-        };
-      };
-
-      tests.push(makeTest("instagram", {
-        length: 5,
-        first: {
-          id: "891783660020488189_1636340308",
-          name: "Red Carpet Piggy",
-          picture: "http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_n.jpg"
+      var tests = [
+        {
+          network: "instagram",
+          expect: {
+            length: 5,
+            first: {
+              id: "891783660020488189_1636340308",
+              name: "Red Carpet Piggy",
+              picture: "http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_n.jpg"
+            }
+          }
+        },
+        {
+          network: "google",
+          expect: {
+            length: 7,
+            first: {
+              id: "https://picasaweb.google.com/data/entry/api/user/115111284799080900590/albumid/6101137643479860177/photoid/6101137679962229346?alt=json",
+              name: "wistful-piggy.jpg",
+              picture: "https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/wistful-piggy.jpg"
+            }
+          }
         }
-      }));
-      tests.push(makeTest("google", {
-        length: 7,
-        first: {
-          id: "https://picasaweb.google.com/data/entry/api/user/115111284799080900590/albumid/6101137643479860177/photoid/6101137679962229346?alt=json",
-          name: "wistful-piggy.jpg",
-          picture: "https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/wistful-piggy.jpg"
-        }
-      }));
+      ];
 
       forEach(tests, function (test) {
 
