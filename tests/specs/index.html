@@ -37,7 +37,7 @@
 
 			// Load
 			require([
-				
+
 				// Utils
 				'./unit/utils/args',
 				'./unit/utils/clone',
@@ -61,7 +61,8 @@
 				'./unit/core/hello.use',
 
 				// Modules
-				'./unit/core/modules',
+				'./unit/modules/apiMe',
+				'./unit/modules/apiMePhotos',
 
 				// E2E
 				'./e2e/modules'
@@ -70,6 +71,6 @@
 				if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
 				else { mocha.run(); }
 			});
-		</script>      
+		</script>
 	</body>
 </html>
