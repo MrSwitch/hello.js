@@ -12,11 +12,11 @@ function formatError(o){
 	}
 }
 	
-function format_file(o){
+function format_file(o, headers, req){
 
 	if(typeof(o)!=='object' ||
-		"Blob" in window && o instanceof Blob ||
-		"ArrayBuffer" in window && o instanceof ArrayBuffer){
+		(typeof(Blob)!=='undefined' && o instanceof Blob) ||
+		(typeof(ArrayBuffer)!=='undefined' && o instanceof ArrayBuffer)){
 		// this is a file, let it through unformatted
 		return;
 	}
@@ -27,7 +27,7 @@ function format_file(o){
 	var path = o.root + o.path.replace(/\&/g, '%26');
 	if(o.thumb_exists){
 		o.thumbnail = hello.settings.oauth_proxy + "?path=" +
-		encodeURIComponent('https://api-content.dropbox.com/1/thumbnails/'+ path + '?format=jpeg&size=m') + '&access_token=' + hello.getAuthResponse('dropbox').access_token;
+		encodeURIComponent('https://api-content.dropbox.com/1/thumbnails/'+ path + '?format=jpeg&size=m') + '&access_token=' + req.query.access_token;
 	}
 	o.type = ( o.is_dir ? 'folder' : o.mime_type );
 	o.name = o.path.replace(/.*\//g,'');
@@ -36,7 +36,7 @@ function format_file(o){
 	}
 	else{
 		o.downloadLink = hello.settings.oauth_proxy + "?path=" +
-		encodeURIComponent('https://api-content.dropbox.com/1/files/'+ path ) + '&access_token=' + hello.getAuthResponse('dropbox').access_token;
+		encodeURIComponent('https://api-content.dropbox.com/1/files/'+ path ) + '&access_token=' + req.query.access_token;
 		o.file = 'https://api-content.dropbox.com/1/files/'+ path;
 	}
 	if(!o.id){
@@ -157,7 +157,7 @@ hello.init({
 				delete o.display_name;
 				return o;
 			},
-			"default"	: function(o){
+			"default"	: function(o,headers,req){
 				formatError(o);
 				if(o.is_dir && o.contents){
 					o.data = o.contents;
@@ -165,11 +165,11 @@ hello.init({
 
 					for(var i=0;i<o.data.length;i++){
 						o.data[i].root = o.root;
-						format_file(o.data[i]);
+						format_file(o.data[i],headers,req);
 					}
 				}
 
-				format_file(o);
+				format_file(o,headers,req);
 
 				if(o.is_deleted){
 					o.success = true;

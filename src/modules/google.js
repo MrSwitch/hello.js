@@ -1,7 +1,7 @@
 //
 // GOOGLE API
 //
-(function(hello, window){
+(function(hello){
 
 	"use strict";
 
@@ -128,11 +128,11 @@
 		o.thumbnail = o.picture;
 	}
 
-	function formatFriends(o){
+	function formatFriends(o, headers, req){
 		paging(o);
 		var r = [];
 		if("feed" in o && "entry" in o.feed){
-			var token = hello.getAuthResponse('google').access_token;
+			var token = req.query.access_token;
 			for(var i=0;i<o.feed.entry.length;i++){
 				var a = o.feed.entry[i];
 
@@ -190,10 +190,6 @@
 		}
 	}
 
-	//
-	// Misc
-	var utils = hello.utils;
-
 
 	// Multipart
 	// Construct a multipart message
@@ -242,7 +238,10 @@
 
 				// Is this a file?
 				// Files can be either Blobs or File types
-				if(item instanceof window.File || item instanceof window.Blob){
+				if(
+					(typeof(File) !== 'undefined' && item instanceof File) ||
+					(typeof(Blob) !== 'undefined' && item instanceof Blob)
+				){
 					// Read the file in
 					addFile(item);
 				}
@@ -287,9 +286,13 @@
 		
 		var data = {};
 
-		if( p.data && p.data instanceof window.HTMLInputElement ){
+		// Test for DOM element
+		if( p.data &&
+			( typeof(HTMLInputElement) !== 'undefined' && p.data instanceof HTMLInputElement )
+		){
 			p.data = { file : p.data };
 		}
+
 		if( !p.data.name && Object(Object(p.data.file).files).length && p.method === 'post' ){
 			p.data.name = p.data.file.files[0].name;
 		}
@@ -557,4 +560,4 @@
 	}
 
 
-})(hello, window);
+})(hello);

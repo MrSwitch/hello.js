@@ -4,9 +4,9 @@
 
 (function(hello){
 
-function formatUser(o){
+function formatUser(o,headers,req){
 	if(o.id){
-		var token = hello.getAuthResponse('windows').access_token;
+		var token = req.query.access_token;
 		if(o.emails){
 			o.email =  o.emails.preferred;
 		}
@@ -19,10 +19,10 @@ function formatUser(o){
 	}
 }
 
-function formatFriends(o){
+function formatFriends(o, headers, req){
 	if("data" in o){
 		for(var i=0;i<o.data.length;i++){
-			formatUser(o.data[i]);
+			formatUser(o.data[i], headers, req);
 		}
 	}
 	return o;
@@ -109,8 +109,8 @@ hello.init({
 		},
 
 		wrap : {
-			me : function(o){
-				formatUser(o);
+			me : function(o, headers, req){
+				formatUser(o, headers, req);
 				return o;
 			},
 			'me/friends' : formatFriends,
