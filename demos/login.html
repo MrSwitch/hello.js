@@ -39,7 +39,13 @@ function login(network){
 
 <p>Set up credentials for all experiments.</p>
 <script class="pre">
-hello.init( CLIENT_IDS_ALL, {
+hello.init( {
+	windows	: CLIENT_IDS_ALL.windows,
+	facebook: CLIENT_IDS_ALL.facebook,
+	google 	: CLIENT_IDS_ALL.google,
+	github	: CLIENT_IDS_ALL.github,
+	twitter	: CLIENT_IDS_ALL.twitter
+},{
 	redirect_uri:'../redirect.html'
 });
 </script>
@@ -115,7 +121,7 @@ function logout(network){
 	<button onclick="logoutForce('facebook')">Logout Facebook</button>
 	<button onclick="logoutForce('windows')">Logout Windows</button>
 	<button onclick="logoutForce('github')">Logout Github</button>
-	<button onclick="logoutForce('twitter')">Login Twitter</button>
+	<button onclick="logoutForce('twitter')">Logout Twitter</button>
 
 <button style="float:right;" onclick="this.nextElementSibling.innerHTML='';">Clear</button>
 <pre id="logout-force"></pre>
@@ -129,12 +135,35 @@ function logoutForce(network){
 }
 </script>
 
+
+<h2>hello.login [scope]</h2>
+
+<p>Force assign another scope</p>
+
+	<button onclick="loginScope('google')">Login Google</button>
+	<button onclick="loginScope('facebook')">Login Facebook</button>
+	<button onclick="loginScope('windows')">Login Windows</button>
+	<button onclick="loginScope('github')">Login Github</button>
+	<button onclick="loginScope('twitter')">Login Twitter</button>
+
+<button style="float:right;" onclick="this.nextElementSibling.innerHTML='';">Clear</button>
+<pre id="login-scope"></pre>
+
+<script class="pre">
+// Signin button click handler
+function loginScope(network){
+	hello( network ).login({scope:'email'},function(e){
+		log("login-scope",e);
+	});
+}
+</script>
+
+
 <script>
 function log(name,obj){
 	document.getElementById(name).appendChild(document.createTextNode(name + ':' + JSON.stringify(obj,true,2)));
    }
 </script>
-
 
 </body>
 </html>
