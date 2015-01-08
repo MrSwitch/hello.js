@@ -19,12 +19,12 @@ function formatFriends(o){
 	return o;
 }
 
-function format(o){
+function format(o,headers,req){
 	if (typeof o === 'boolean') {
 		o = {success: o};
 	}
 	if(o && "data" in o){
-		var token = hello.getAuthResponse('facebook').access_token;
+		var token = req.query.access_token;
 		for(var i=0;i<o.data.length;i++){
 			var d = o.data[i];
 			if(d.picture){

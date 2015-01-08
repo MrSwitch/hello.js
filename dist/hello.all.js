@@ -3174,11 +3174,11 @@ function formatError(o){
 	}
 }
 	
-function format_file(o){
+function format_file(o, headers, req){
 
 	if(typeof(o)!=='object' ||
-		"Blob" in window && o instanceof Blob ||
-		"ArrayBuffer" in window && o instanceof ArrayBuffer){
+		(typeof(Blob)!=='undefined' && o instanceof Blob) ||
+		(typeof(ArrayBuffer)!=='undefined' && o instanceof ArrayBuffer)){
 		// this is a file, let it through unformatted
 		return;
 	}
@@ -3189,7 +3189,7 @@ function format_file(o){
 	var path = o.root + o.path.replace(/\&/g, '%26');
 	if(o.thumb_exists){
 		o.thumbnail = hello.settings.oauth_proxy + "?path=" +
-		encodeURIComponent('https://api-content.dropbox.com/1/thumbnails/'+ path + '?format=jpeg&size=m') + '&access_token=' + hello.getAuthResponse('dropbox').access_token;
+		encodeURIComponent('https://api-content.dropbox.com/1/thumbnails/'+ path + '?format=jpeg&size=m') + '&access_token=' + req.query.access_token;
 	}
 	o.type = ( o.is_dir ? 'folder' : o.mime_type );
 	o.name = o.path.replace(/.*\//g,'');
@@ -3198,7 +3198,7 @@ function format_file(o){
 	}
 	else{
 		o.downloadLink = hello.settings.oauth_proxy + "?path=" +
-		encodeURIComponent('https://api-content.dropbox.com/1/files/'+ path ) + '&access_token=' + hello.getAuthResponse('dropbox').access_token;
+		encodeURIComponent('https://api-content.dropbox.com/1/files/'+ path ) + '&access_token=' + req.query.access_token;
 		o.file = 'https://api-content.dropbox.com/1/files/'+ path;
 	}
 	if(!o.id){
@@ -3319,7 +3319,7 @@ hello.init({
 				delete o.display_name;
 				return o;
 			},
-			"default"	: function(o){
+			"default"	: function(o,headers,req){
 				formatError(o);
 				if(o.is_dir && o.contents){
 					o.data = o.contents;
@@ -3327,11 +3327,11 @@ hello.init({
 
 					for(var i=0;i<o.data.length;i++){
 						o.data[i].root = o.root;
-						format_file(o.data[i]);
+						format_file(o.data[i],headers,req);
 					}
 				}
 
-				format_file(o);
+				format_file(o,headers,req);
 
 				if(o.is_deleted){
 					o.success = true;
@@ -3395,12 +3395,12 @@ function formatFriends(o){
 	return o;
 }
 
-function format(o){
+function format(o,headers,req){
 	if (typeof o === 'boolean') {
 		o = {success: o};
 	}
 	if(o && "data" in o){
-		var token = hello.getAuthResponse('facebook').access_token;
+		var token = req.query.access_token;
 		for(var i=0;i<o.data.length;i++){
 			var d = o.data[i];
 			if(d.picture){
@@ -3497,7 +3497,10 @@ hello.init({
 			'me/albums' : 'me/albums',
 			'me/album' : '@{id}/photos',
 			'me/photos' : 'me/photos',
-			'me/photo' : '@{id}'
+			'me/photo' : '@{id}',
+			
+			'friend/albums' : '@{id}/albums',
+			'friend/photos' : '@{id}/photos'
 
 			// PAGINATION
 			// https://developers.facebook.com/docs/reference/api/pagination/
@@ -4002,7 +4005,7 @@ hello.init({
 //
 // GOOGLE API
 //
-(function(hello, window){
+(function(hello){
 
 	"use strict";
 
@@ -4129,11 +4132,11 @@ hello.init({
 		o.thumbnail = o.picture;
 	}
 
-	function formatFriends(o){
+	function formatFriends(o, headers, req){
 		paging(o);
 		var r = [];
 		if("feed" in o && "entry" in o.feed){
-			var token = hello.getAuthResponse('google').access_token;
+			var token = req.query.access_token;
 			for(var i=0;i<o.feed.entry.length;i++){
 				var a = o.feed.entry[i];
 
@@ -4191,10 +4194,6 @@ hello.init({
 		}
 	}
 
-	//
-	// Misc
-	var utils = hello.utils;
-
 
 	// Multipart
 	// Construct a multipart message
@@ -4243,7 +4242,10 @@ hello.init({
 
 				// Is this a file?
 				// Files can be either Blobs or File types
-				if(item instanceof window.File || item instanceof window.Blob){
+				if(
+					(typeof(File) !== 'undefined' && item instanceof File) ||
+					(typeof(Blob) !== 'undefined' && item instanceof Blob)
+				){
 					// Read the file in
 					addFile(item);
 				}
@@ -4288,9 +4290,13 @@ hello.init({
 		
 		var data = {};
 
-		if( p.data && p.data instanceof window.HTMLInputElement ){
+		// Test for DOM element
+		if( p.data &&
+			( typeof(HTMLInputElement) !== 'undefined' && p.data instanceof HTMLInputElement )
+		){
 			p.data = { file : p.data };
 		}
+
 		if( !p.data.name && Object(Object(p.data.file).files).length && p.method === 'post' ){
 			p.data.name = p.data.file.files[0].name;
 		}
@@ -4558,7 +4564,7 @@ hello.init({
 	}
 
 
-})(hello, window);
+})(hello);
 //
 // Instagram
 //
@@ -4638,7 +4644,9 @@ hello.init({
 			'me/photos' : 'users/self/media/recent?min_id=0&count=@{limit|100}',
 			'me/friends' : 'users/self/follows?count=@{limit|100}',
 			'me/following' : 'users/self/follows?count=@{limit|100}',
-			'me/followers' : 'users/self/followed-by?count=@{limit|100}'
+			'me/followers' : 'users/self/followed-by?count=@{limit|100}',
+			
+			'friend/photos' : 'users/@{id}/media/recent?min_id=0&count=@{limit|100}'
 		},
 
 		post : {
@@ -4743,6 +4751,7 @@ function formatUser(o){
 	o.last_name = o.lastName;
 	o.name = o.formattedName || (o.first_name + ' ' + o.last_name);
 	o.thumbnail = o.pictureUrl;
+	o.email = o.emailAddress;
 }
 
 
@@ -4798,7 +4807,7 @@ hello.init({
 		base	: "https://api.linkedin.com/v1/",
 
 		get : {
-			"me"			: 'people/~:(picture-url,first-name,last-name,id,formatted-name)',
+			"me"			: 'people/~:(picture-url,first-name,last-name,id,formatted-name,email-address)',
 			"me/friends"	: 'people/~/connections?count=@{limit|500}',
 			"me/followers"	: 'people/~/connections?count=@{limit|500}',
 			"me/following"	: 'people/~/connections?count=@{limit|500}',
@@ -4818,7 +4827,7 @@ hello.init({
 				};
 
 				if(p.data.id){
-					
+
 					data["attribution"] = {
 						"share": {
 							"id": p.data.id
@@ -4828,10 +4837,12 @@ hello.init({
 				}
 				else{
 					data["comment"] = p.data.message;
-					data["content"] = {
-						"submitted-url": p.data.link,
-						"submitted-image-url": p.data.picture
-					};
+					if (p.data.picture && p.data.link) {
+						data["content"] = {
+							"submitted-url": p.data.link,
+							"submitted-image-url": p.data.picture
+						};
+					}
 				}
 
 				p.data = JSON.stringify(data);
@@ -5310,9 +5321,9 @@ function arrayToDataResponse(res){
 
 (function(hello){
 
-function formatUser(o){
+function formatUser(o,headers,req){
 	if(o.id){
-		var token = hello.getAuthResponse('windows').access_token;
+		var token = req.query.access_token;
 		if(o.emails){
 			o.email =  o.emails.preferred;
 		}
@@ -5325,10 +5336,10 @@ function formatUser(o){
 	}
 }
 
-function formatFriends(o){
+function formatFriends(o, headers, req){
 	if("data" in o){
 		for(var i=0;i<o.data.length;i++){
-			formatUser(o.data[i]);
+			formatUser(o.data[i], headers, req);
 		}
 	}
 	return o;
@@ -5415,8 +5426,8 @@ hello.init({
 		},
 
 		wrap : {
-			me : function(o){
-				formatUser(o);
+			me : function(o, headers, req){
+				formatUser(o, headers, req);
 				return o;
 			},
 			'me/friends' : formatFriends,
