@@ -89,12 +89,14 @@ define([
 		});
 
 		it('should throw a completed and error event if network name is wrong', function(done){
-			hello.login('invalidname', error_response('invalid_network',done) );
+			hello
+			.login('invalidname', error_response('invalid_network',done) );
 		});
 
 		it('should throw a error event if network name is wrong', function(done){
-			var instance = hello.login('invalidname');
-			instance.on('error', error_response('invalid_network',done) );
+			hello
+			.login('invalidname')
+			.then( null, error_response('invalid_network',done) );
 		});
 
 		it('should by default, trigger window.open request', function(done){

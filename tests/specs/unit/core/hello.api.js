@@ -62,26 +62,31 @@ describe('hello.api', function(){
 	});
 
 	it('should assign a complete event', function(done){
-		hello('test').api('/', function(){done();});
+		hello('test')
+		.api('/', function(){done();});
 	});
 
 	it('should throw a completed event if network name is undefined', function(done){
-		hello('test').api('/', error_response("invalid_network", done) );
+		hello('test')
+		.api('/', error_response("invalid_network", done) );
 	});
 
 	it('should throw a error event if network name is undefined', function(done){
-		var instance = hello('test').api("/");
-		instance.on('error', error_response("invalid_network", done) );
+		hello('test')
+		.api("/")
+		.then( null, error_response("invalid_network", done) );
 	});
 
 	it('should throw a error event if path name is undefined', function(done){
-		var instance = hello('test').api();
-		instance.on('error', error_response("invalid_path", done));
+		hello('test')
+		.api()
+		.then( null, error_response("invalid_path", done) );
 	});
 
 	it('should construct the url using the base and the pathname', function(done){
 
-		hello('testable').api("/endpoint", function(res){
+		hello('testable')
+		.api("/endpoint", function(res){
 			expect( res.url ).to.eql( 'https://testable/endpoint' );
 			done();
 		});
@@ -93,7 +98,8 @@ describe('hello.api', function(){
 		var session = _session;
 		_session = null;
 
-		hello('testable').api("/endpoint?a=a&b=b", function(res){
+		hello('testable')
+		.api("/endpoint?a=a&b=b", function(res){
 			_session = session;
 			expect( res.url ).to.eql( 'https://testable/endpoint' );
 			expect( res.query ).to.eql({
@@ -106,7 +112,8 @@ describe('hello.api', function(){
 
 	it('should attach query object to the req.query', function(done){
 
-		hello('testable').api("/endpoint", {a:'a'}, function(res){
+		hello('testable')
+		.api("/endpoint", {a:'a'}, function(res){
 
 			expect( res.query ).to.have.property('a','a');
 
@@ -116,7 +123,8 @@ describe('hello.api', function(){
 
 	it('should attach data object to the req.query when `req.method = get`', function(done){
 
-		hello('testable').api("/endpoint", 'get', {a:'a'}, function(res){
+		hello('testable')
+		.api("/endpoint", 'get', {a:'a'}, function(res){
 
 			expect( res.query ).to.have.property('a','a');
 			expect( res.data ).to.be.empty();
@@ -128,7 +136,8 @@ describe('hello.api', function(){
 
 	it('should attach post data object to the req.data', function(done){
 
-		hello('testable').api("/endpoint", 'post', {a:'a'}, function(res){
+		hello('testable')
+		.api("/endpoint", 'post', {a:'a'}, function(res){
 
 			expect( res.method ).to.eql( 'post' );
 			expect( res.query ).to.not.have.property('a');
@@ -142,7 +151,8 @@ describe('hello.api', function(){
 
 		it('should add the access_token to the req.query', function(done){
 
-			hello('testable').api("/endpoint", function(res){
+			hello('testable')
+			.api("/endpoint", function(res){
 				expect( res.url ).to.eql( 'https://testable/endpoint' );
 				expect( res.query ).to.eql( _session );
 				done();
@@ -155,7 +165,8 @@ describe('hello.api', function(){
 			// Override
 			testable.oauth.version = 1;
 
-			hello('testable').api("/endpoint", function(res){
+			hello('testable')
+			.api("/endpoint", function(res){
 
 				// Renew
 				testable.oauth.version = 2;
@@ -180,7 +191,8 @@ describe('hello.api', function(){
 				done();
 			};
 
-			hello('testable').api("/handled", {a:'a'});
+			hello('testable')
+			.api("/handled", {a:'a'});
 		});
 
 		it('should process req object through the modules.get.default function if req.path not in module.get', function(done){
@@ -192,7 +204,8 @@ describe('hello.api', function(){
 				done();
 			};
 
-			hello('testable').api("/unhandled", {a:'a'});
+			hello('testable')
+			.api("/unhandled", {a:'a'});
 		});
 
 
@@ -201,7 +214,8 @@ describe('hello.api', function(){
 			testable.get = testable.get || {};
 			testable.get.handled = 'endpoint?b=@{a}';
 
-			hello('testable').api("/handled", {a:'a'}, function(res){
+			hello('testable')
+			.api("/handled", {a:'a'}, function(res){
 
 				// Should place the value of a in the parameter list
 				expect( res.url ).to.contain('endpoint?b=a');
@@ -221,7 +235,9 @@ describe('hello.api', function(){
 			testable.get = testable.get || {};
 			testable.get.handled = 'endpoint?b=@{a}';
 
-			hello('testable').api("/handled").on('error', function(res){
+			hello('testable')
+			.api("/handled")
+			.then( null, function(res){
 
 				// Should place the value of a in the parameter list
 				expect( res.error ).to.have.property('code', 'missing_attribute');
@@ -237,7 +253,9 @@ describe('hello.api', function(){
 			testable.get = testable.get || {};
 			testable.get.handled = false;
 
-			hello('testable').api("/handled").on('error', function(res){
+			hello('testable')
+			.api("/handled")
+			.then( null, function(res){
 
 				// Should place the value of a in the parameter list
 				expect( res.error ).to.have.property('code', 'invalid_path');
@@ -259,7 +277,8 @@ describe('hello.api', function(){
 				done();
 			};
 
-			hello('testable').api("/handled");
+			hello('testable')
+			.api("/handled");
 		});
 
 		it('should trigger the wrap.default function if none exists', function(done){
@@ -270,7 +289,8 @@ describe('hello.api', function(){
 				done();
 			};
 
-			hello('testable').api("/unhandled");
+			hello('testable')
+			.api("/unhandled");
 		});
 	});
 
@@ -280,7 +300,8 @@ describe('hello.api', function(){
 
 		it('should override the path parameter with the hash fragment', function(done){
 
-			hello('testable').api("/endpoint#formatting", function(res){
+			hello('testable')
+			.api("/endpoint#formatting", function(res){
 				expect( res.url ).to.eql( 'https://testable/endpoint' );
 				expect( res.path ).to.eql( 'formatting' );
 				done();
@@ -295,7 +316,8 @@ describe('hello.api', function(){
 				delete testable.wrap['default'];
 			};
 
-			hello('testable').api("/unhandled", function(res){
+			hello('testable')
+			.api("/unhandled", function(res){
 
 				// Should place the value of a in the parameter list
 				expect( res.paging.next ).to.contain('#unhandled');

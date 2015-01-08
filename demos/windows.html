@@ -16,9 +16,14 @@
 function login(network){
 	var windows = hello(network);
 
-	windows.login().on('auth.login', function(r){
+	windows
+	.login()
+	.then( function(r){
+
 		// Get Profile
-		windows.api('/me', function(p){
+		windows
+		.api('/me')
+		.then( function(p){
 			document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
 		});
 	});

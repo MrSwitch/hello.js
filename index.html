@@ -700,7 +700,9 @@ hello.off("auth.login",sessionstart);
 
 <pre class="tryit" type="js">
 function paginationExample(path){
-	hello( "facebook" ).api( path, {limit: 1} ).on( 'success', function callback( resp ){
+	hello( "facebook" )
+	.api( path, {limit: 1} )
+	.then( function callback( resp ){
 		if( resp.paging && resp.paging.next ){
 			if( confirm( "Got friend "+ resp.data[0].name + ". Get another?" ) ){
 				// Call the api again but with the 'resp.paging.next` path
@@ -710,7 +712,7 @@ function paginationExample(path){
 		else{
 			alert( "Got friend "+ resp.data[0].name + ". That's it!" );
 		}
-	}).on('error', function(){
+	}, function(){
 		alert("Whoops!");
 	});
 }
@@ -769,7 +771,7 @@ hello( "facebook" ).login( {scope: "friends,photos,publish" } );
 
 <h2>Error handling</h2>
 
-<p>Errors can be returned in listeners to 'error' event, i.e. <code>hello.api([path]).on('error', [<em>errorhandler</em>])</code> or the 'complete' event, <code>hello.api([path]).on('complete', [<em>completehandler</em>])</code> - which may also be written as <code>hello.api([path], [<em>completehandler</em>])</code>.</p>
+<p>Errors are returned, i.e. <code>hello.api([path]).then(null, [<em>errorHandler</em>])</code> - alternatively <code>hello.api([path], [<em>handleSuccessOrError</em>])</code>.</p>
 
 <p>The <a href="#promises-a">Promise</a> response standardizes the binding of errorHandlers.</p>
 

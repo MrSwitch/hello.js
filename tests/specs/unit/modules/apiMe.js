@@ -135,12 +135,16 @@ define(['unit/modules/helper'], function (helper) {
       helper.forEach(tests, function (test) {
 
         it('should format ' + test.network + ' correctly', function (done) {
-          hello(test.network).api('/me', function (me) {
+
+          hello(test.network)
+          .api('/me')
+          .then( function (me){
             expect(me.id).to.be(test.expect.id);
             expect(me.name).to.be(test.expect.name);
             expect(me.thumbnail).to.be(test.expect.thumbnail);
             done();
           });
+
         });
 
       });
@@ -153,12 +157,15 @@ define(['unit/modules/helper'], function (helper) {
         it('should fire an error event and format the ' + test.network + ' response correctly', function (done) {
 
           if (test.errorExpect) {
-            hello(test.network).on('error', function (data) {
+
+            hello(test.network)
+            .api('/me', { stubType: '-unauth' })
+            .then( null, function (data) {
               expect(data.error).to.not.be(undefined);
               expect(data.error.code).to.be(test.errorExpect.code);
               expect(data.error.message).to.be(test.errorExpect.message);
               done();
-            }).api('/me', { stubType: '-unauth' });
+            });
 
           } else {
             done();

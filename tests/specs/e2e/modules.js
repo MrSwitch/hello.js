@@ -63,7 +63,7 @@ function setup_module_tests(module, name){
 			this.timeout(60000);
 
 			var cb = error_response(null, function(){
-				if(++i===3)
+				if(++i===2)
 					done();
 			});
 
@@ -71,7 +71,9 @@ function setup_module_tests(module, name){
 			hello.logout(name);
 
 			// Make a request that returns an error object
-			hello(name).on("error", cb).api('me', cb).on("error", cb);
+			hello(name)
+			.api('me', cb)
+			.then(null, cb);
 		});
 		/**/
 

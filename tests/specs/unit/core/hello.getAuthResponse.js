@@ -11,10 +11,6 @@ define([
 	//
 	describe("hello.getAuthResponse", function(){
 
-		it('should trigger an error when accessing an invalid network', function(done){
-			// Make request
-			hello("Facelessbook").on('error', error_response('invalid_network',done) ).getAuthResponse();
-		});
 		it('should return null when accessing an invalid network implicitly', function(){
 			// Make request
 			var r = hello("Facelessbook").getAuthResponse();
