@@ -141,11 +141,11 @@ Register your application with at least one of the following networks. Ensure yo
 <!-- 
 - [Windows Live](http://msdn.microsoft.com/en-us/library/hh243641.aspx)
 - [Google+](http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html)
-- [FaceBook](http://developers.facebook.com/docs/reference/dialogs/oauth/)
+- [Facebook](http://developers.facebook.com/docs/reference/dialogs/oauth/)
 -->
-- [FaceBook](https://developers.facebook.com/apps)
+- [Facebook](https://developers.facebook.com/apps)
 - [Windows Live](http://dev.live.com/) (click on dashboard)
-- [Google +](https://code.google.com/apis/console/b/0/#:access)
+- [Google+](https://code.google.com/apis/console/b/0/#:access)
 
 
 ### 2. Include Hello.js script in your page.
