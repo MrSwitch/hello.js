@@ -23,15 +23,7 @@ function withUser(cb){
 
 	var auth = hello.getAuthResponse("flickr");
 
-	if(auth&&auth.user_nsid){
-		cb(auth.user_nsid);
-	}
-	else{
-		hello.api(getApiUrl("flickr.test.login"), function(userJson){
-			// If the
-			cb( checkResponse(userJson, "user").id );
-		});
-	}
+	cb( auth && auth.user_nsid ? auth.user_nsid : null );
 }
 
 function sign(url, params){

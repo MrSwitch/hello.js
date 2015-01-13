@@ -30,6 +30,18 @@ define(['unit/modules/helper'], function (helper) {
         }
       },
       {
+        network: "flickr",
+        expect: {
+          id: "34790912@N05",
+          name: "Jane McGee",
+          thumbnail: "https://farm4.staticflickr.com/3729/buddyicons/34790912@N05_l.jpg"
+        },
+        errorExpect: {
+          code: 'invalid_request',
+          message: "User not found"
+        }
+      },
+      {
         network: "foursquare",
         expect: {
           id: "110649444",
@@ -150,19 +162,19 @@ define(['unit/modules/helper'], function (helper) {
 
       helper.forEach(tests, function (test) {
 
+        if (!test.errorExpect) {
+          return;
+        }
+
         it('should fire an error event and format the ' + test.network + ' response correctly', function (done) {
 
-          if (test.errorExpect) {
-            hello(test.network).on('error', function (data) {
-              expect(data.error).to.not.be(undefined);
-              expect(data.error.code).to.be(test.errorExpect.code);
-              expect(data.error.message).to.be(test.errorExpect.message);
-              done();
-            }).api('/me', { stubType: '-unauth' });
-
-          } else {
+          hello(test.network).on('error', function (data) {
+            expect(data.error).to.not.be(undefined);
+            expect(data.error.code).to.be(test.errorExpect.code);
+            expect(data.error.message).to.be(test.errorExpect.message);
             done();
-          }
+          }).api('/me', { stubType: '-unauth' });
+
         });
 
       });

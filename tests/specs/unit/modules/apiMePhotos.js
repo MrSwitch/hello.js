@@ -39,6 +39,17 @@ define(['unit/modules/helper'], function (helper) {
         }
       },
       {
+        network: "flickr",
+        expect: {
+          length: 5,
+          first: {
+            id: "6206400436",
+            name: "DSC03367",
+            picture: "https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99.jpg"
+          }
+        }
+      },
+      {
         network: "windows",
         expect: {
           length: 7,
