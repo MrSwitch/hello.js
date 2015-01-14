@@ -3381,7 +3381,7 @@ hello.init({
 
 function formatUser(o){
 	if(o.id){
-		o.thumbnail = o.picture = 'http://graph.facebook.com/'+o.id+'/picture';
+		o.thumbnail = o.picture = 'https://graph.facebook.com/'+o.id+'/picture';
 	}
 	return o;
 }
@@ -3605,15 +3605,7 @@ function withUser(cb){
 
 	var auth = hello.getAuthResponse("flickr");
 
-	if(auth&&auth.user_nsid){
-		cb(auth.user_nsid);
-	}
-	else{
-		hello.api(getApiUrl("flickr.test.login"), function(userJson){
-			// If the
-			cb( checkResponse(userJson, "user").id );
-		});
-	}
+	cb( auth && auth.user_nsid ? auth.user_nsid : null );
 }
 
 function sign(url, params){
@@ -5136,7 +5128,8 @@ function formatUser(o){
 			o.first_name = m[0];
 			o.last_name = m[1];
 		}
-		o.thumbnail = o.profile_image_url;
+		// See https://dev.twitter.com/overview/general/user-profile-images-and-banners
+		o.thumbnail = o.profile_image_url_https || o.profile_image_url;
 	}
 }
 
