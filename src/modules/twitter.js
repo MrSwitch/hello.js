@@ -11,7 +11,8 @@ function formatUser(o){
 			o.first_name = m[0];
 			o.last_name = m[1];
 		}
-		o.thumbnail = o.profile_image_url;
+		// See https://dev.twitter.com/overview/general/user-profile-images-and-banners
+		o.thumbnail = o.profile_image_url_https || o.profile_image_url;
 	}
 }
 
