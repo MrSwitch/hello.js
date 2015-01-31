@@ -7,7 +7,7 @@ A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.
 
 ## Features
 
-Here are some more demos...
+Here are some more examples...
 
 <table>
 	<thead>
