@@ -17,6 +17,10 @@ function formatUser(o){
   if(o.id){
     o.thumbnail = o.image;
   }
+  if(o.user){
+    o.name = o.user.name;
+  }
+  return o;
 }
 
 function paging(res,headers,req){
