@@ -331,7 +331,7 @@ hello.utils.extend( hello, {
 				display		: opts.display,
 				callback	: callback_id,
 				state		: opts.state,
-				redirect_uri: redirect_uri,
+				redirect_uri: redirect_uri
 			}
 		};
 
