@@ -18,7 +18,11 @@ function formatUser(o){
     o.thumbnail = o.image;
   }
   if(o.user){
-    o.name = o.user.name;
+    hello.utils.extend( o, o.user );
+    delete o.user;
+  }
+  if(o.image){
+    o.thumbnail = o.image;
   }
   return o;
 }
@@ -51,7 +55,7 @@ hello.init({
     refresh : true,
 
     scope : {
-      basic : 'read_bikes',
+      basic : 'read_user,read_bikes',
       email : 'read_user',
       // read_bikes : "View user's bikes user owned",
       // write_bikes : 'Edit and create bikes'
