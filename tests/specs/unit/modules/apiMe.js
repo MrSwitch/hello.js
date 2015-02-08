@@ -6,6 +6,17 @@ define(['unit/modules/helper'], function (helper) {
 
     var tests = [
       {
+        network: "bikeindex",
+        expect: {
+          id: '13674',
+          thumbnail: undefined
+        },
+        errorExpect: {
+          code: "access_denied",
+          message: "Could not get resource"
+        }
+      },
+      {
         network: "dropbox",
         expect: {
           id: 374434467,
