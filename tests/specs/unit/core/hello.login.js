@@ -224,8 +224,6 @@ define([
 
 					url = safari_hack(url);
 
-					console.log(url);
-
 					expect(url).to.contain(basic_scope.replace(/[\+\,\s]/, scope_delim));
 					done();
 				});
