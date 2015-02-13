@@ -371,7 +371,7 @@
 
 	//
 	// URLS
-	var contacts_url = 'https://www.google.com/m8/feeds/contacts/default/full?alt=json&max-results=@{limit|1000}&start-index=@{start|1}';
+	var contacts_url = 'https://www.google.com/m8/feeds/contacts/default/full?v=3.0&alt=json&max-results=@{limit|1000}&start-index=@{start|1}';
 
 	//
 	// Embed
