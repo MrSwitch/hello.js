@@ -1254,7 +1254,7 @@ hello.utils.extend( hello.utils, {
 			var popup = window.open(
 				url,
 				'_blank',
-				"resizeable=true,toolbar=no,location=no,height=" + windowHeight + ",width=" + windowWidth + ",left=" + left + ",top="  + top
+				"resizeable=true,"+(!!window.cordova?"toolbar=no,location=no,":"")+"height=" + windowHeight + ",width=" + windowWidth + ",left=" + left + ",top="  + top
 			);
 
 			// PhoneGap support
