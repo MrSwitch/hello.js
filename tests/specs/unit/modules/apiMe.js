@@ -22,11 +22,23 @@ define(['unit/modules/helper'], function (helper) {
         expect: {
           id: "100008806508341",
           name: "Jane McGee",
-          thumbnail: "http://graph.facebook.com/100008806508341/picture"
+          thumbnail: "https://graph.facebook.com/100008806508341/picture"
         },
         errorExpect: {
           code: 190,
           message: "Invalid OAuth access token."
+        }
+      },
+      {
+        network: "flickr",
+        expect: {
+          id: "34790912@N05",
+          name: "Jane McGee",
+          thumbnail: "https://farm4.staticflickr.com/3729/buddyicons/34790912@N05_l.jpg"
+        },
+        errorExpect: {
+          code: 'invalid_request',
+          message: "User not found"
         }
       },
       {
@@ -100,7 +112,7 @@ define(['unit/modules/helper'], function (helper) {
         expect: {
           id: 2961707375,
           name: "Jane McGee",
-          thumbnail: "http://pbs.twimg.com/profile_images/552017091583152128/a8lyS35y_normal.jpeg"
+          thumbnail: "https://pbs.twimg.com/profile_images/552017091583152128/a8lyS35y_normal.jpeg"
         },
         errorExpect: {
           code: "request_failed",
@@ -130,7 +142,7 @@ define(['unit/modules/helper'], function (helper) {
       }
     ];
 
-    describe('successful requests', function () {
+    describe('authorised requests', function () {
 
       helper.forEach(tests, function (test) {
 
@@ -154,23 +166,23 @@ define(['unit/modules/helper'], function (helper) {
 
       helper.forEach(tests, function (test) {
 
-        it('should fire an error event and format the ' + test.network + ' response correctly', function (done) {
+        if (!test.errorExpect) {
+          return;
+        }
 
-          if (test.errorExpect) {
 
-            hello(test.network)
-            .api('/me', { stubType: '-unauth' })
-            .then( null, function (data) {
-              expect(data.error).to.not.be(undefined);
-              expect(data.error.code).to.be(test.errorExpect.code);
-              expect(data.error.message).to.be(test.errorExpect.message);
-              done();
-            });
+        it('should trigger the error handler for ' + test.network, function (done) {
 
-          } else {
+          hello(test.network)
+          .api('/me', { stubType: '-unauth' })
+          .then( null, function (data) {
+            expect(data.error).to.not.be(undefined);
+            expect(data.error.code).to.be(test.errorExpect.code);
+            expect(data.error.message).to.be(test.errorExpect.message);
             done();
-          }
+          });
         });
+
 
       });
 

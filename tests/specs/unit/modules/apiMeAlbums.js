@@ -18,6 +18,17 @@ define(['unit/modules/helper'], function (helper) {
         }
       },
       {
+        network: "flickr",
+        expect: {
+          length: 3,
+          first: {
+            id: "72157627511003764",
+            name: "Wales with mum and Matt - dropped in on Ozzy",
+            photos: "https://api.flickr.com/services/rest?method=flickr.photosets.getPhotos&api_key=undefined&format=json&photoset_id=72157627511003764"
+          }
+        }
+      },
+      {
         network: "google",
         expect: {
           length: 2,

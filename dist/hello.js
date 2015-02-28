@@ -320,9 +320,9 @@ hello.utils.extend( hello, {
 		// querystring parameters, we may pass our own arguments to form the querystring
 		//
 		p.qs = {
-			client_id	: provider.id,
+			client_id	: encodeURIComponent( provider.id ),
 			response_type : response_type,
-			redirect_uri : redirect_uri,
+			redirect_uri : encodeURIComponent( redirect_uri ),
 			display		: opts.display,
 			scope		: 'basic',
 			state		: {
@@ -331,7 +331,7 @@ hello.utils.extend( hello, {
 				display		: opts.display,
 				callback	: callback_id,
 				state		: opts.state,
-				redirect_uri: redirect_uri,
+				redirect_uri: redirect_uri
 			}
 		};
 
@@ -444,8 +444,7 @@ hello.utils.extend( hello, {
 
 
 		// Convert state to a string
-		p.qs.state = JSON.stringify(p.qs.state);
-
+		p.qs.state = encodeURIComponent( JSON.stringify(p.qs.state) );
 
 
 		//
@@ -454,7 +453,7 @@ hello.utils.extend( hello, {
 		if( parseInt(provider.oauth.version,10) === 1 ){
 
 			// Turn the request to the OAuth Proxy for 3-legged auth
-			url = utils.qs( opts.oauth_proxy, p.qs );
+			url = utils.qs( opts.oauth_proxy, p.qs, encodeFunction );
 		}
 
 		// Refresh token
@@ -464,13 +463,13 @@ hello.utils.extend( hello, {
 			p.qs.refresh_token = session.refresh_token;
 
 			// Define the request path
-			url = utils.qs( opts.oauth_proxy, p.qs );
+			url = utils.qs( opts.oauth_proxy, p.qs, encodeFunction );
 		}
 
 		// 
 		else{
 
-			url = utils.qs( provider.oauth.auth, p.qs );
+			url = utils.qs( provider.oauth.auth, p.qs, encodeFunction );
 		}
 
 
@@ -522,6 +521,9 @@ hello.utils.extend( hello, {
 		}
 
 		return self;
+
+
+		function encodeFunction(s){return s;}
 	},
 
 
@@ -661,7 +663,7 @@ hello.utils.extend( hello.utils, {
 	// Append the querystring to a url
 	// @param string url
 	// @param object parameters
-	qs : function(url, params){
+	qs : function(url, params, formatFunction){
 		if(params){
 			var reg;
 			for(var x in params){
@@ -672,7 +674,7 @@ hello.utils.extend( hello.utils, {
 				}
 			}
 		}
-		return url + (!this.isEmpty(params) ? ( url.indexOf('?') > -1 ? "&" : "?" ) + this.param(params) : '');
+		return url + (!this.isEmpty(params) ? ( url.indexOf('?') > -1 ? "&" : "?" ) + this.param(params,formatFunction) : '');
 	},
 	
 
@@ -681,30 +683,35 @@ hello.utils.extend( hello.utils, {
 	// Explode/Encode the parameters of an URL string/object
 	// @param string s, String to decode
 	//
-	param : function(s){
+	param : function( s, formatFunction ){
 		var b,
 			a = {},
 			m;
 		
 		if(typeof(s)==='string'){
 
+			formatFunction = formatFunction || decodeURIComponent;
+
 			m = s.replace(/^[\#\?]/,'').match(/([^=\/\&]+)=([^\&]+)/g);
 			if(m){
 				for(var i=0;i<m.length;i++){
 					b = m[i].match(/([^=]+)=(.*)/);
-					a[b[1]] = decodeURIComponent( b[2] );
+					a[b[1]] = formatFunction( b[2] );
 				}
 			}
 			return a;
 		}
 		else {
+
+			formatFunction = formatFunction || encodeURIComponent;
+
 			var o = s;
 		
 			a = [];
 
 			for( var x in o ){if(o.hasOwnProperty(x)){
 				if( o.hasOwnProperty(x) ){
-					a.push( [x, o[x] === '?' ? '?' : encodeURIComponent(o[x]) ].join('=') );
+					a.push( [x, o[x] === '?' ? '?' : formatFunction(o[x]) ].join('=') );
 				}
 			}}
 

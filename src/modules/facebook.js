@@ -5,7 +5,7 @@
 
 function formatUser(o){
 	if(o.id){
-		o.thumbnail = o.picture = 'http://graph.facebook.com/'+o.id+'/picture';
+		o.thumbnail = o.picture = 'https://graph.facebook.com/'+o.id+'/picture';
 	}
 	return o;
 }
