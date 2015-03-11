@@ -64,10 +64,9 @@ hello.init({
 	'yahoo' : {
 		// Ensure that you define an oauth_proxy
 		oauth : {
-			version : "1.0a",
-			auth	: "https://api.login.yahoo.com/oauth/v2/request_auth",
-			request : 'https://api.login.yahoo.com/oauth/v2/get_request_token',
-			token	: 'https://api.login.yahoo.com/oauth/v2/get_token'
+			version : 2,
+			auth	: "https://api.login.yahoo.com/oauth2/request_auth",
+			grant : 'https://api.login.yahoo.com/oauth2/get_token'
 		},
 
 		// Login handler
@@ -76,8 +75,9 @@ hello.init({
 			// Yahoo does dynamically change it on the fly for the signin screen (only, what if your already signed in)
 			p.options.window_width = 560;
 
+
 			// Yahoo throws an parameter error if for whatever reason the state.scope contains a comma, so lets remove scope
-			try{delete p.qs.state.scope;}catch(e){}
+			try{delete p.qs.scope;delete p.qs.state.scope;}catch(e){}
 		},
 		/*
 		// AUTO REFRESH FIX: Bug in Yahoo can't get this to work with node-oauth-shim
@@ -99,7 +99,7 @@ hello.init({
 		base	: "https://social.yahooapis.com/v1/",
 
 		get : {
-			"me"		: yql('select * from social.profile(0) where guid=me'),
+			"me"		: "user/abcdef123/profile?format=json",
 			"me/friends"	: yql('select * from social.contacts(0) where guid=me'),
 			"me/following"	: yql('select * from social.contacts(0) where guid=me')
 		},
