@@ -293,12 +293,14 @@ hello.utils.extend( hello, {
 
 		//
 		// Response Type
+		// May be a comma-delimited list of multiple, complementary types
 		//
-		var response_type = provider.oauth.response_type || opts.response_type;
+		var response_type = (provider.oauth.response_type || opts.response_type).split(',');
 
 		// Fallback to token if the module hasn't defined a grant url
-		if( response_type === 'code' && !provider.oauth.grant ){
-			response_type = 'token';
+		var code_position = response_type.indexOf('code');
+		if( code_position > -1 && !provider.oauth.grant ){
+			response_type[code_position] = 'token';
 		}
 
 
@@ -308,7 +310,7 @@ hello.utils.extend( hello, {
 		//
 		p.qs = {
 			client_id	: encodeURIComponent( provider.id ),
-			response_type : response_type,
+			response_type : response_type.join(','),
 			redirect_uri : encodeURIComponent( redirect_uri ),
 			display		: opts.display,
 			scope		: 'basic',
@@ -417,7 +419,8 @@ hello.utils.extend( hello, {
 
 		// Add OAuth to state
 		// Where the service is going to take advantage of the oauth_proxy
-		if( response_type !== "token" ||
+		var token_position = response_type.indexOf('token');
+		if( token_position === -1 ||
 			parseInt(provider.oauth.version,10) < 2 ||
 			( opts.display === 'none' && provider.oauth.grant && session && session.refresh_token ) ){
 
