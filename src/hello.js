@@ -293,9 +293,9 @@ hello.utils.extend( hello, {
 
 		//
 		// Response Type
-		// May be a comma-delimited list of multiple, complementary types
+		// May be a space-delimited list of multiple, complementary types
 		//
-		var response_type = (provider.oauth.response_type || opts.response_type).split(',');
+		var response_type = (provider.oauth.response_type || opts.response_type).split(' ');
 
 		// Fallback to token if the module hasn't defined a grant url
 		var code_position = response_type.indexOf('code');
@@ -310,7 +310,7 @@ hello.utils.extend( hello, {
 		//
 		p.qs = {
 			client_id	: encodeURIComponent( provider.id ),
-			response_type : response_type.join(','),
+			response_type : response_type.join(' '),
 			redirect_uri : encodeURIComponent( redirect_uri ),
 			display		: opts.display,
 			scope		: 'basic',
