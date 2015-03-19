@@ -309,7 +309,7 @@ hello.utils.extend( hello, {
 		//
 		p.qs = {
 			client_id	: encodeURIComponent( provider.id ),
-			response_type : response_type,
+			response_type : encodeURIComponent( response_type ),
 			redirect_uri : encodeURIComponent( redirect_uri ),
 			display		: opts.display,
 			scope		: 'basic',
