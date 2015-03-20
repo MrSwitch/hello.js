@@ -51,6 +51,10 @@ hello.init({
 		name : 'Facebook',
 
 		login : function(p){
+			// Support Facebook's unique auth_type parameter
+			if(p.options.auth_type){
+				p.qs.auth_type = p.options.auth_type;
+			}
 			// The facebook login window is a different size.
 			p.options.window_width = 580;
 			p.options.window_height = 400;
