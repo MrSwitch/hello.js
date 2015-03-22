@@ -418,7 +418,7 @@ hello.utils.extend( hello, {
 
 		// Add OAuth to state
 		// Where the service is going to take advantage of the oauth_proxy
-		if( /\btoken\b/.test(response_type) ||
+		if( !/\btoken\b/.test(response_type) ||
 			parseInt(provider.oauth.version,10) < 2 ||
 			( opts.display === 'none' && provider.oauth.grant && session && session.refresh_token ) ){
 
