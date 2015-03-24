@@ -75,6 +75,9 @@ hello.init({
 			// Change the default popup window to be atleast 560
 			// Yahoo does dynamically change it on the fly for the signin screen (only, what if your already signed in)
 			p.options.window_width = 560;
+
+			// Yahoo throws an parameter error if for whatever reason the state.scope contains a comma, so lets remove scope
+			try{delete p.qs.state.scope;}catch(e){}
 		},
 		/*
 		// AUTO REFRESH FIX: Bug in Yahoo can't get this to work with node-oauth-shim
@@ -116,7 +119,7 @@ hello.init({
 						a.push(o.last_name);
 					}
 					o.name = a.join(' ');
-					o.email = o.emails?o.emails.handle:null;
+					o.email = ( o.emails && o.emails[0] ) ? o.emails[0].handle : null;
 					o.thumbnail = o.image?o.image.imageUrl:null;
 				}
 				return o;

@@ -1,4 +1,4 @@
-define(['unit/modules/helper'], function (helper) {
+define(['./helper'], function (helper) {
 
   describe('hello.api("/me")', function () {
 
@@ -135,7 +135,7 @@ define(['unit/modules/helper'], function (helper) {
         expect: {
           id: "939f37452466502a",
           name: "Jane McGee",
-          thumbnail: "https://apis.live.net/v5.0/939f37452466502a/picture?access_token=the-access-token"
+          thumbnail: "https://apis.live.net/v5.0/939f37452466502a/picture?access_token=token"
         },
         errorExpect: {
           code: "request_token_invalid",
@@ -153,17 +153,24 @@ define(['unit/modules/helper'], function (helper) {
       }
     ];
 
-    describe('successful requests', function () {
+    describe('authorised requests', function () {
 
       helper.forEach(tests, function (test) {
 
         it('should format ' + test.network + ' correctly', function (done) {
-          hello(test.network).api('/me', function (me) {
+
+          hello(test.network)
+          .api('/me',{
+            access_token : 'token'
+          })
+          .then( function (me){
             expect(me.id).to.be(test.expect.id);
             expect(me.name).to.be(test.expect.name);
             expect(me.thumbnail).to.be(test.expect.thumbnail);
             done();
-          });
+          })
+          .then(null, done);
+
         });
 
       });
@@ -177,16 +184,23 @@ define(['unit/modules/helper'], function (helper) {
           return;
         }
 
-        it('should fire an error event and format the ' + test.network + ' response correctly', function (done) {
 
-          hello(test.network).on('error', function (data) {
+        it('should trigger the error handler for ' + test.network, function (done) {
+
+          hello( test.network )
+          .api('/me',{
+            stubType : '-unauth',
+            access_token : 'token'
+          })
+          .then( done, function (data) {
             expect(data.error).to.not.be(undefined);
             expect(data.error.code).to.be(test.errorExpect.code);
             expect(data.error.message).to.be(test.errorExpect.message);
             done();
-          }).api('/me', { stubType: '-unauth' });
-
+          })
+          .then(null, done);
         });
+
 
       });
 

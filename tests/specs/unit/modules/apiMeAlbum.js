@@ -1,4 +1,4 @@
-define(['unit/modules/helper'], function (helper) {
+define(['./helper'], function (helper) {
 
   describe('hello.api("/me/album")', function () {
 
@@ -43,14 +43,21 @@ define(['unit/modules/helper'], function (helper) {
     helper.forEach(tests, function (test) {
 
       it('should format ' + test.network + ' correctly', function (done) {
-        hello(test.network).api('/me/album', { id: 'album-id' }, function (album) {
+
+        hello( test.network )
+        .api('/me/album', {
+          id: 'album-id'
+        })
+        .then( function (album) {
           var first = album.data[0];
           expect(album.data.length).to.be(test.expect.length);
           expect(first.id).to.be(test.expect.first.id);
           expect(first.name).to.be(test.expect.first.name);
           expect(first.picture).to.be(test.expect.first.picture);
           done();
-        });
+        })
+        .then(null, done);
+
       });
 
     });

@@ -39,7 +39,7 @@ define([], function () {
       before(function () {
         hello.getAuthResponse = function (service) {
           return {
-            access_token: 'the-access-token'
+            access_token: 'token'
           };
         };
         hello.utils.request = requestProxy;

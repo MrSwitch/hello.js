@@ -1,4 +1,4 @@
-define(['unit/modules/helper'], function (helper) {
+define(['./helper'], function (helper) {
 
   describe('hello.api("/me/albums")', function () {
 
@@ -12,7 +12,7 @@ define(['unit/modules/helper'], function (helper) {
           first: {
             id: "1380499628920241",
             name: "Timeline Photos",
-            thumbnail: "https://graph.facebook.com/1380493922254145/picture?access_token=the-access-token",
+            thumbnail: "https://graph.facebook.com/1380493922254145/picture?access_token=token",
             photos: undefined
           }
         }
@@ -57,7 +57,11 @@ define(['unit/modules/helper'], function (helper) {
     helper.forEach(tests, function (test) {
 
       it('should format ' + test.network + ' correctly', function (done) {
-        hello(test.network).api('/me/albums', function (albums) {
+        hello(test.network)
+        .api('/me/albums',{
+          access_token : 'token'
+        })
+        .then( function (albums) {
           var first = albums.data[0];
           expect(albums.data).not.to.be(undefined);
           expect(albums.data.length).to.be(test.expect.length);
@@ -66,7 +70,8 @@ define(['unit/modules/helper'], function (helper) {
           expect(first.thumbnail).to.be(test.expect.first.thumbnail);
           expect(first.photos).to.be(test.expect.first.photos);
           done();
-        });
+        })
+        .then(null, done);
       });
 
     });

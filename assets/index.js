@@ -317,14 +317,17 @@ var tests = [
 			id : "[ALBUM_ID]"
 		},
 		setup : function(test, callback){
-			hello(test.network).api("me/albums").on('success', function(r){
+
+			hello(test.network)
+			.api("me/albums")
+			.then(function(r){
 				if(r.data.length){
 					test.data.id = test.data.id.replace("[ALBUM_ID]", r.data[0].id );
 					callback();
 					return;
 				}
 				callback("Failed to setup: the user has no albums");
-			}).on('error',function(){
+			},function(){
 				callback("Failed to setup: could not open me/albums");
 			});
 		},
@@ -361,7 +364,9 @@ var tests = [
 			id : "[PHOTO_ID]"
 		},
 		setup : function(test, callback){
-			hello(test.network).api("me/albums").on('success', function(r){
+			hello(test.network)
+			.api("me/albums")
+			.then( function(r){
 				if("data" in r && r.data.length > 0){
 
 					// Pick one randomly
@@ -381,7 +386,7 @@ var tests = [
 				else{
 					callback("Failed to setup: The user has no albums yet");
 				}
-			}).on('error',function(){
+			},function(){
 				callback("Failed to setup: Error connecting to me/albums");
 			});
 		},
@@ -648,7 +653,9 @@ var tests = [
 // Get the ID of the test album
 //
 function before_photo_post(test, callback){
-	hello(test.network).api("me/albums").on('success',function(r){
+	hello(test.network)
+	.api("me/albums")
+	.then(function(r){
 		for(var i=0;i<r.data.length;i++){
 			if(r.data[i].name === "TestAlbum"){
 				var id = r.data[i].id;
@@ -657,7 +664,7 @@ function before_photo_post(test, callback){
 			}
 		}
 		callback("Failed to setup: Could not find the album 'TestAlbum'");
-	}).on('error',function(){
+	}, function(){
 		callback("Failed to setup: could not access me/albums");
 	});
 }
@@ -669,14 +676,16 @@ function get_test_photo(test, callback){
 			callback(s);
 			return;
 		}
-		hello(test.network).api( "me/album", { id : test.data.id } ).on('success',function(r){
+		hello(test.network)
+		.api( "me/album", { id : test.data.id } )
+		.then(function(r){
 			for(var i=0;i<r.data.length;i++){
 				var file = r.data[i];
 				test.data.id = file.id;
 				return callback();
 			}
 			callback("Failed to setup: Create file 'TestFile.png' (there's a test above which does this)");
-		}).on('error',function(){
+		},function(){
 			callback("Failed to setup, could not access me/files");
 		});
 	});
@@ -690,7 +699,9 @@ function get_test_folder(test, callback){
 	}
 
 	// If there is no ID, post to root
-	hello(test.network).api("me/folders").on('success',function(r){
+	hello(test.network)
+	.api("me/folders")
+	.then(function(r){
 		for(var i=0;i<r.data.length;i++){
 			var folder = r.data[i];
 			if(folder.name === "TestFolder"){
@@ -704,7 +715,7 @@ function get_test_folder(test, callback){
 			}
 		}
 		callback("Failed to setup: First create a folder called 'TestFolder' (there's a test above which does this)");
-	}).on('error',function(){
+	},function(){
 		callback("Failed to setup, could not access me/folders, ensure your signed in with the 'files' scope");
 	});
 }
@@ -716,14 +727,16 @@ function get_test_file(test, callback){
 			callback(s);
 			return;
 		}
-		hello(test.network).api( "me/files", { parent : test.data.id } ).on('success',function(r){
+		hello(test.network)
+		.api( "me/files", { parent : test.data.id } )
+		.then( function(r){
 			for(var i=0;i<r.data.length;i++){
 				var file = r.data[i];
 				test.data.id = file.id;
 				return callback();
 			}
 			callback("Failed to setup: Create file 'TestFile.png' (there's a test above which does this)");
-		}).on('error',function(){
+		}, function(){
 			callback("Failed to setup, could not access me/files");
 		});
 	});
