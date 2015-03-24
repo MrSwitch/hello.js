@@ -24,6 +24,7 @@ define([
 				testable : {
 					oauth : {
 						auth : 'https://testdemo/access',
+						grant : 'https://testdemo/grant',
 						version : 2
 					},
 					scope : {
@@ -233,6 +234,47 @@ define([
 				window.open = spy;
 
 				hello.login('test_delimit_scope');
+			});
+
+			it('should space encode the delimiter of multiple response_type\'s', function(done){
+
+				var opts = {
+					response_type : 'code grant_scopes'
+				};
+
+				var spy = sinon.spy(function(url, name){
+
+					url = safari_hack(url);
+
+					expect(url).to.contain( 'code%20grant_scopes' );
+					done();
+				});
+
+				window.open = spy;
+
+				hello.login('testable', opts);
+			});
+
+
+			it('should substitute "token" for "code" when there is no Grant URL defined', function(done){
+
+				var opts = {
+					response_type : 'code grant_scopes'
+				};
+
+				hello.services.testable.oauth.grant = null;
+
+				var spy = sinon.spy(function(url, name){
+
+					url = safari_hack(url);
+
+					expect(url).to.contain( 'token%20grant_scopes' );
+					done();
+				});
+
+				window.open = spy;
+
+				hello.login('testable', opts);
 			});
 
 		});
