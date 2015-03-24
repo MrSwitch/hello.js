@@ -11,7 +11,7 @@ define([
 	'../../../src/modules/linkedin',
 	'../../../src/modules/foursquare',
 	'../../../src/modules/github',
-  '../../../src/modules/bikeindex',
+	'../../../src/modules/bikeindex',
 	'../../../src/modules/soundcloud'
 ], function(
 //	hello

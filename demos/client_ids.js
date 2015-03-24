@@ -104,8 +104,6 @@ var TUMBLR_CLIENT_ID = {
 	'adodson.com' : 'BHKkYCvKt33lL34iM1yWUhkYRw1lqwifbKKTfgh5FAX5uBzzxn'
 }[window.location.hostname];
 
-// See https://bikeindex.org/
-var BIKEINDEX_CLIENT_ID = '406b92ba91fcf0a7695ed36e2e1fae83f9c5fdb2d3eeff6404d0ad47009f20fb';
 
 
 //

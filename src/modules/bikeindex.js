@@ -5,10 +5,10 @@
 
 
 function formatError(o){
-  if(o && "meta" in o && "error_type" in o.meta){
+  if(o && o.error){
     o.error = {
-      code : o.meta.error_type,
-      message : o.meta.error_message
+      code : (o.error === 'OAuth error: unauthorized'? 'access_denied':'server_error'),
+      message : o.error
     };
   }
 }

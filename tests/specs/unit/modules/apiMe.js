@@ -13,7 +13,7 @@ define(['./helper'], function (helper) {
         },
         errorExpect: {
           code: "access_denied",
-          message: "Could not get resource"
+          message: "OAuth error: unauthorized"
         }
       },
       {
@@ -190,7 +190,7 @@ define(['./helper'], function (helper) {
           hello( test.network )
           .api('/me',{
             stubType : '-unauth',
-            access_token : 'token'
+            access_token : null
           })
           .then( done, function (data) {
             expect(data.error).to.not.be(undefined);
