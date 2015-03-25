@@ -43,16 +43,10 @@ function login(){
 
 <p>Initiate box client</p>
 
-<script>
-var BOX_CLIENT_ID = {
-	'local.knarly.com' : 'rdyb5se2fcuioryle3qdw2wcrps959x4',
-	'adodson.com' : '264d13a33ba845f396a152cc326e6f5d'
-}[window.location.hostname];
-</script>
 
 <script class="pre">
 hello.init({
-	box : BOX_CLIENT_ID
+	box : 'rdyb5se2fcuioryle3qdw2wcrps959x4'
 },{
 	redirect_uri:'../redirect.html',
 	response_type:'code'
