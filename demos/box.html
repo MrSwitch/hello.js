@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+<script src="client_ids.js"></script>
+<style>
+.alert {
+	display: block;
+	padding: 15px;
+	margin-bottom: 20px;
+	border: 1px solid rgba(0, 0, 0, 0);
+	border-radius: 4px;
+}
+.alert-warning{
+	color: #8A6D3B;
+	background-color: #FCF8E3;
+	border-color: #FAEBCC;
+}
+.alert.alert-warning:before {
+	content: "Warning: ";
+	font-weight: bold;
+}
+</style>
+
+
+<title>hello( box )</title>
+<h1>hello( box )</h1>
+
+
+<blockquote>
+	Box.com only provides authentication from apps which are using HTTPS. <a href="https://developers.box.com/docs/#api-basics">See Box.com API documentation</a>
+</blockquote>
+
+<script>
+if(document.location.href.indexOf('https://')!==0){
+	document.body.appendChild((function(){
+		var div = document.createElement('div');
+		div.className = "alert alert-warning";
+		div.appendChild((function(){
+			var a = document.createElement('a');
+			a.href = document.location.href.replace('http://', 'https://');
+			a.innerHTML = "Launch page with secure protocol - https://";
+			return a;
+		})());
+		return div;
+	})());
+}
+</script>
+
+<button onclick="login();" id="profile">Login Box</button>
+
+<script src="../src/hello.js" class="pre"></script>
+<script src="../src/modules/box.js" class="pre"></script>
+
+<script class="pre">
+
+var profile = document.getElementById( 'profile' );
+
+function login(){
+
+	var box = hello('box');
+	
+	box
+	.login()
+	.then(function(){
+		return box.api('me')
+	})
+	.then(function(r){
+		
+		profile.innerHTML = "<img src='"+ r.thumbnail + "' width=24/>Connected to Box.com as " + r.name;
+
+	}, console.error.bind(console) );
+
+}
+</script>
+
+<p>Initiate box client</p>
+
+<script>
+var BOX_CLIENT_ID = {
+	'local.knarly.com' : 'rdyb5se2fcuioryle3qdw2wcrps959x4',
+	'adodson.com' : '264d13a33ba845f396a152cc326e6f5d'
+}[window.location.hostname];
+</script>
+
+<script class="pre">
+hello.init({
+	box : BOX_CLIENT_ID
+},{
+	redirect_uri:'../redirect.html',
+	response_type:'code'
+});
+</script>

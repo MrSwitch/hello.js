@@ -72,10 +72,6 @@ var INSTAGRAM_CLIENT_ID = {
 	'adodson.com' : location_https ? 'e47d210f864c4b1ca94225ddab97205a' : '264d13a33ba845f396a152cc326e6f5d'
 }[window.location.hostname];
 
-var BOX_CLIENT_ID = {
-	'local.knarly.com' : 'rdyb5se2fcuioryle3qdw2wcrps959x4',
-	'adodson.com' : '264d13a33ba845f396a152cc326e6f5d'
-}[window.location.hostname];
 
 var FLICKR_CLIENT_ID = {
 	'local.knarly.com' : '46dfea40b0f9d3765bc598966b5955d3',

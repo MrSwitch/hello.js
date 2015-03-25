@@ -1,5 +1,6 @@
 define([
 	'../libs/error_response',
+	'../../../src/modules/box',
 	'../../../src/modules/facebook',
 	'../../../src/modules/flickr',
 	'../../../src/modules/google',

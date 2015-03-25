@@ -2407,7 +2407,7 @@ hello.utils.extend( hello.utils, {
 				path = utils.qs( p.oauth_proxy, {
 					path : path,
 					access_token : sign||'', // This will prompt the request to be signed as though it is OAuth1
-					then : (p.method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
+					then : p.proxy_response_type || (p.method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
 					method : p.method.toLowerCase(),
 					suppress_response_codes : true
 				});
