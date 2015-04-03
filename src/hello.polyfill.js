@@ -50,7 +50,7 @@ if( !Array.isArray ){
 if( window && window.location && !window.location.assign ){
 	window.location.assign = function(url){
 		window.location = url;
-	}
+	};
 }
 
 

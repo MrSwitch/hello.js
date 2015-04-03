@@ -6,7 +6,6 @@ define([
 //	objectCreate
 ){
 
-var objectCreate = hello.utils.objectCreate;
 var utils = hello.utils;
 
 //
@@ -150,7 +149,7 @@ describe('utils / event', function(){
 
 
 		// PROTO
-		var child = objectCreate(hello);
+		var child = Object.create(hello);
 
 
 		var spy2 = sinon.spy(function(){
