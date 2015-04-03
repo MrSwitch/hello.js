@@ -129,10 +129,10 @@ hello.utils.extend( hello, {
 	use : function(service){
 
 		// Create self, which inherits from its parent
-		var self = this.utils.objectCreate(this);
+		var self = Object.create(this);
 
 		// Inherit the prototype from its parent
-		self.settings = this.utils.objectCreate(this.settings);
+		self.settings = Object.create(this.settings);
 
 		// Define the default service
 		if(service){
@@ -962,30 +962,12 @@ hello.utils.extend( hello.utils, {
 	diff : function(a,b){
 		var r = [];
 		for(var i=0;i<b.length;i++){
-			if(this.indexOf(a,b[i])===-1){
+			if(a.indexOf(b[i])===-1){
 				r.push(b[i]);
 			}
 		}
 		return r;
 	},
-
-	//
-	// indexOf
-	// IE hack Array.indexOf doesn't exist prior to IE9
-	indexOf : function(a,s){
-		// Do we need the hack?
-		if(a.indexOf){
-			return a.indexOf(s);
-		}
-
-		for(var j=0;j<a.length;j++){
-			if(a[j]===s){
-				return j;
-			}
-		}
-		return -1;
-	},
-
 
 	//
 	// unique
@@ -997,7 +979,7 @@ hello.utils.extend( hello.utils, {
 		var r = [];
 		for(var i=0;i<a.length;i++){
 
-			if(!a[i]||a[i].length===0||this.indexOf(r, a[i])!==-1){
+			if(!a[i]||a[i].length===0||r.indexOf(a[i])!==-1){
 				continue;
 			}
 			else{
@@ -1016,8 +998,9 @@ hello.utils.extend( hello.utils, {
 		}
 
 		// Array?
-		if(obj && obj.length>0) return false;
-		if(obj && obj.length===0) return true;
+		if( Array.isArray(obj) ){
+			return !obj.length;
+		}
 
 		// object?
 		for (var key in obj) {
@@ -1027,22 +1010,6 @@ hello.utils.extend( hello.utils, {
 		}
 		return true;
 	},
-
-	// Shim, Object create
-	// A shim for Object.create(), it adds a prototype to a new object
-	objectCreate : (function(){
-		if (Object.create) {
-			return Object.create;
-		}
-		function F(){}
-		return function(o){
-			if (arguments.length != 1) {
-				throw new Error('Object.create implementation only accepts one parameter.');
-			}
-			F.prototype = o;
-			return new F();
-		};
-	})(),
 
 	/*
 	//
@@ -1352,7 +1319,7 @@ hello.utils.extend( hello.utils, {
 
 			for(var name in this.events){if(this.events.hasOwnProperty(name)){
 
-				if( hello.utils.indexOf(a,name) > -1 ){
+				if( a.indexOf(name) > -1 ){
 
 					for(var i=0;i<this.events[name].length;i++){
 
@@ -1550,17 +1517,6 @@ hello.utils.extend( hello.utils, {
 		//
 		var location = window.location;
 
-		//
-		// Add a helper for relocating, instead of window.location  = url;
-		//
-		var relocate = function(path){
-			if(location.assign){
-				location.assign(path);
-			}
-			else{
-				window.location = path;
-			}
-		};
 
 		//
 		// Is this an auth relay message which needs to call the proxy?
@@ -1577,7 +1533,7 @@ hello.utils.extend( hello.utils, {
 			// redirect to the host
 			var path = (state.oauth_proxy || p.proxy_url) + "?" + utils.param(p);
 
-			relocate( path );
+			location.assign( path );
 			return;
 		}
 
@@ -1647,7 +1603,7 @@ hello.utils.extend( hello.utils, {
 
 			// If this page is still open
 			if( p.page_uri ){
-				window.location = p.page_uri;
+				location.assign( p.page_uri );
 			}
 			
 
@@ -1658,7 +1614,7 @@ hello.utils.extend( hello.utils, {
 		// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
 		else if("oauth_redirect" in p){
 
-			relocate( decodeURIComponent(p.oauth_redirect) );
+			location.assign( decodeURIComponent(p.oauth_redirect) );
 			return;
 		}
 
@@ -2419,14 +2375,6 @@ hello.utils.extend( hello.utils, {
 
 
 
-
-	//
-	// isArray
-	isArray : function (o){
-		return Object.prototype.toString.call(o) === '[object Array]';
-	},
-
-
 	// _DOM
 	// return the type of DOM object
 	domInstance : function(type,data){
@@ -2452,7 +2400,7 @@ hello.utils.extend( hello.utils, {
 			return obj;
 		}
 		var clone;
-		if(this.isArray(obj)){
+		if(Array.isArray(obj)){
 			clone = [];
 			for(var i=0;i<obj.length;i++){
 				clone.push(this.clone(obj[i]));
@@ -3084,29 +3032,3 @@ utils.extend(utils, {
 	};
 
 })(hello);
-
-
-
-
-
-
-// MDN
-// Polyfill IE8, does not support native Function.bind
-
-if (!Function.prototype.bind) {
-	Function.prototype.bind=function(b){
-		if(typeof this!=="function"){
-			throw new TypeError("Function.prototype.bind - what is trying to be bound is not callable");
-		}
-		function c(){}
-		var a=[].slice,
-			f=a.call(arguments,1),
-			e=this,
-			d=function(){
-				return e.apply(this instanceof c?this:b||window,f.concat(a.call(arguments)));
-			};
-			c.prototype=this.prototype;
-			d.prototype=new c();
-		return d;
-	};
-}
