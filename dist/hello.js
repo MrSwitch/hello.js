@@ -293,12 +293,13 @@ hello.utils.extend( hello, {
 
 		//
 		// Response Type
+		// May be a space-delimited list of multiple, complementary types
 		//
 		var response_type = provider.oauth.response_type || opts.response_type;
 
 		// Fallback to token if the module hasn't defined a grant url
-		if( response_type === 'code' && !provider.oauth.grant ){
-			response_type = 'token';
+		if( /\bcode\b/.test(response_type) && !provider.oauth.grant ){
+			response_type = response_type.replace(/\bcode\b/, 'token');
 		}
 
 
@@ -308,7 +309,7 @@ hello.utils.extend( hello, {
 		//
 		p.qs = {
 			client_id	: encodeURIComponent( provider.id ),
-			response_type : response_type,
+			response_type : encodeURIComponent( response_type ),
 			redirect_uri : encodeURIComponent( redirect_uri ),
 			display		: opts.display,
 			scope		: 'basic',
@@ -417,7 +418,7 @@ hello.utils.extend( hello, {
 
 		// Add OAuth to state
 		// Where the service is going to take advantage of the oauth_proxy
-		if( response_type !== "token" ||
+		if( !/\btoken\b/.test(response_type) ||
 			parseInt(provider.oauth.version,10) < 2 ||
 			( opts.display === 'none' && provider.oauth.grant && session && session.refresh_token ) ){
 
@@ -2406,7 +2407,7 @@ hello.utils.extend( hello.utils, {
 				path = utils.qs( p.oauth_proxy, {
 					path : path,
 					access_token : sign||'', // This will prompt the request to be signed as though it is OAuth1
-					then : (p.method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
+					then : p.proxy_response_type || (p.method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
 					method : p.method.toLowerCase(),
 					suppress_response_codes : true
 				});

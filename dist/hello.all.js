@@ -293,12 +293,13 @@ hello.utils.extend( hello, {
 
 		//
 		// Response Type
+		// May be a space-delimited list of multiple, complementary types
 		//
 		var response_type = provider.oauth.response_type || opts.response_type;
 
 		// Fallback to token if the module hasn't defined a grant url
-		if( response_type === 'code' && !provider.oauth.grant ){
-			response_type = 'token';
+		if( /\bcode\b/.test(response_type) && !provider.oauth.grant ){
+			response_type = response_type.replace(/\bcode\b/, 'token');
 		}
 
 
@@ -308,7 +309,7 @@ hello.utils.extend( hello, {
 		//
 		p.qs = {
 			client_id	: encodeURIComponent( provider.id ),
-			response_type : response_type,
+			response_type : encodeURIComponent( response_type ),
 			redirect_uri : encodeURIComponent( redirect_uri ),
 			display		: opts.display,
 			scope		: 'basic',
@@ -417,7 +418,7 @@ hello.utils.extend( hello, {
 
 		// Add OAuth to state
 		// Where the service is going to take advantage of the oauth_proxy
-		if( response_type !== "token" ||
+		if( !/\btoken\b/.test(response_type) ||
 			parseInt(provider.oauth.version,10) < 2 ||
 			( opts.display === 'none' && provider.oauth.grant && session && session.refresh_token ) ){
 
@@ -2406,7 +2407,7 @@ hello.utils.extend( hello.utils, {
 				path = utils.qs( p.oauth_proxy, {
 					path : path,
 					access_token : sign||'', // This will prompt the request to be signed as though it is OAuth1
-					then : (p.method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
+					then : p.proxy_response_type || (p.method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
 					method : p.method.toLowerCase(),
 					suppress_response_codes : true
 				});
@@ -3384,6 +3385,10 @@ hello.init({
 		name : 'Facebook',
 
 		login : function(p){
+			// Support Facebook's unique auth_type parameter
+			if(p.options.auth_type){
+				p.qs.auth_type = p.options.auth_type;
+			}
 			// The facebook login window is a different size.
 			p.options.window_width = 580;
 			p.options.window_height = 400;
@@ -4962,113 +4967,6 @@ function formatRequest(p,qs){
 	qs['_status_code_map[302]'] = 200;
 	return true;
 }
-
-
-})(hello);
-//
-// Twitter
-//
-
-
-(function(hello){
-
-hello.init({
-	'tumblr' : {
-		// Set default window height
-		login : function(p){
-			p.options.window_width = 600;
-			p.options.window_height = 510;
-		},
-
-		// Ensure that you define an oauth_proxy
-		oauth : {
-			version : "1.0a",
-			auth	: "https://www.tumblr.com/oauth/authorize",
-			request : 'https://www.tumblr.com/oauth/request_token',
-			token	: 'https://www.tumblr.com/oauth/access_token'
-		},
-
-		base	: "https://api.tumblr.com/v2/",
-
-		get : {
-			me		: 'user/info',
-			'me/like' : 'user/likes',
-			'default' : function(p,callback){
-				if(p.path.match(/(^|\/)blog\//)){
-					delete p.query.access_token;
-					p.query.api_key = hello.services.tumblr.id;
-				}
-				callback(p.path);
-			}
-		},
-		post : {
-			'me/like' : function(p,callback){
-				p.path = 'user/like';
-				query(p,callback);
-			}
-		},
-		del : {
-			'me/like' : function(p,callback){
-				p.method = 'post';
-				p.path = 'user/unlike';
-				query(p,callback);
-			}
-		},
-
-		wrap : {
-			me : function(o){
-				if(o&&o.response&&o.response.user){
-					o = o.response.user;
-				}
-				return o;
-			},
-			'me/like' : function(o){
-				if(o&&o.response&&o.response.liked_posts){
-					o.data = o.response.liked_posts;
-					delete o.response;
-				}
-				return o;
-			},
-			'default' : function(o){
-
-				if(o.response){
-					var r = o.response;
-					if( r.posts ){
-						o.data = r.posts;
-					}
-				}
-
-				return o;
-			}
-		},
-
-		xhr : function(p,qs){
-			if(p.method !== 'get'){
-				return true;
-			}
-			return false;
-		}
-	}
-});
-
-
-// Converts post parameters to query
-function query(p,callback){
-	if(p.data){
-		extend( p.query, p.data );
-		p.data = null;
-	}
-	callback(p.path);
-}
-
-function extend(a,b){
-	for(var x in b){
-		if(b.hasOwnProperty(x)){
-			a[x] = b[x];
-		}
-	}
-}
-
 
 
 })(hello);
