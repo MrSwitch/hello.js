@@ -369,9 +369,8 @@ hello.utils.extend( hello, {
 
 		}).replace(/[,\s]+/ig, ',');
 
-		// remove duplication and empty spaces
-		p.qs.scope = utils.unique(p.qs.scope.split(/,+/)).join( provider.scope_delim || ',');
-
+		// remove duplication and empty spaces; encode individual scopes
+		p.qs.scope = utils.unique(p.qs.scope.split(/,+/)).map(encodeURIComponent).join( provider.scope_delim || ',');
 
 
 
