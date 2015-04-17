@@ -85,9 +85,6 @@ hello.init({
 				if(Object.prototype.toString.call(o) === '[object Array]'){
 					o = {data:o};
 					paging(o,headers,req);
-					for(var i=0;i<o.data.length;i++){
-						formatUser(o.data[i]);
-					}
 				}
 				return o;
 			}
