@@ -227,10 +227,10 @@ hello.on('auth.login', function(auth){
 
 <script class="pre">
 hello.init({ 
-	facebook : FACEBOOK_CLIENT_ID,
-	windows  : WINDOWS_CLIENT_ID,
-	google   : GOOGLE_CLIENT_ID
-},{redirect_uri:'redirect.html'});
+	facebook: FACEBOOK_CLIENT_ID,
+	windows: WINDOWS_CLIENT_ID,
+	google : GOOGLE_CLIENT_ID
+}, { redirect_uri: 'redirect.html' });
 </script>
 
 <p>That's it. The code above actually powers the demo at the start so, no excuses.</p>
@@ -297,14 +297,14 @@ hello.init({
 
 <pre type="js">
 hello.init({
-	facebook : '359288236870',
-	windows : '000000004403AD10'
+	facebook: '359288236870',
+	windows: '000000004403AD10'
 });
 </pre>
 
 <h2>hello.login()</h2>
 
-<div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'login' } }"></div>
+<div data-bind="template: { name: 'tests-template', data: { test: $root, filter:'login' } }"></div>
 
 <p>If a network string is provided: A consent window to authenticate with that network will be initiated. Else if no network is provided a prompt to select one of the networks will open. A callback will be executed if the user authenticates and or cancels the authentication flow.</p>
 
@@ -407,7 +407,7 @@ hello( "facebook" ).login().then( function(){
 
 <h2>hello.logout()</h2>
 
-<div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'logout' } }"></div>
+<div data-bind="template: { name: 'tests-template', data: { test: $root, filter:'logout' } }"></div>
 
 <p>Remove all sessions or individual sessions.</p>
 
@@ -492,7 +492,7 @@ hello( "facebook" ).logout().then( function(){
 
 <h2>hello.getAuthResponse()</h2>
 
-<div data-bind="template: { name: 'tests-template', data: { test : $root, filter: 'getAuthResponse' } }"></div>
+<div data-bind="template: { name: 'tests-template', data: { test: $root, filter: 'getAuthResponse' } }"></div>
 
 <p>Get the current status of the session. This is a synchronous request and does not validate any session cookies which may have expired.</p>
 
@@ -828,7 +828,7 @@ hello( 'facebook' ).login( {scope: "friends,photos,publish" } );
 
 <h2>OAuth Proxy</h2>
 
-<div data-bind="template: { name: 'tests-template', data: { test : $root, filter: 'oauth' } }">
+<div data-bind="template: { name: 'tests-template', data: { test: $root, filter: 'oauth' } }">
 A list of the service providers OAuth* mechanisms is available at <a href="http://adodson.com/hello.js/#oauth-proxy">Provider OAuth Mechanisms</a>
 </div>
 
@@ -845,7 +845,7 @@ A list of the service providers OAuth* mechanisms is available at <a href="http:
 hello.init(
 	CLIENT_IDS,
 	{
-		oauth_proxy : 'https://auth-server.herokuapp.com/proxy'
+		oauth_proxy: 'https://auth-server.herokuapp.com/proxy'
 	}
 )
 </pre>
@@ -855,13 +855,13 @@ hello.init(
 
 <pre type="javascript">
 hello( network ).login({
-	response_type : 'code'
+	response_type: 'code'
 });
 </pre>
 
 <h2>Refresh Access Token</h2>
 <p>Access tokens provided by services are generally short lived - typically 1 hour. Some providers allow for the token to be refreshed in the background after expiry.</p>
-<div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'refresh' } }">A list of services which enable silent authentication after the Implicit Grant signin <a href="http://adodson.com/hello.js/#refresh-access-token">Refresh access_token</a>
+<div data-bind="template: { name: 'tests-template', data: { test: $root, filter:'refresh' } }">A list of services which enable silent authentication after the Implicit Grant signin <a href="http://adodson.com/hello.js/#refresh-access-token">Refresh access_token</a>
 </div>
 <p>Unlike Implicit grant; Explicit grant may return the <code>refresh_token</code>. HelloJS honors the OAuth2 refresh_token, and will also request a new access_token once it has expired.</p>
 
