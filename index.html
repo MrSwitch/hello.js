@@ -952,11 +952,10 @@ used - because of the XD, IFrame+Form+hack.</li>
 # cd into the project root and install dev dependencies 
 npm install -l
 
-# To run th tests, first ensure you have PhantomJS
-# and the PhantomJS runner for Mocha i.e.
+# To run the tests, first ensure you have PhantomJS and the PhantomJS runner for Mocha i.e.
 npm install -g mocha-phantomjs phantomjs
 
-# Run tests
+# Then...
 grunt test
 </pre>
 
@@ -969,11 +968,10 @@ grunt test
 <script>
 
 // Initiate the library
-hello.init(CLIENT_IDS_ALL,{
+hello.init(CLIENT_IDS_ALL, {
 	redirect_uri: 'redirect.html',
 	oauth_proxy: OAUTH_PROXY_URL
 });
-
 
 getText('assets/test_network.html', function(response){
 	document.getElementById('tests-template').text = response;
@@ -981,9 +979,8 @@ getText('assets/test_network.html', function(response){
 	ko.applyBindings(model);
 });
 
-
 hello.on('auth.login', function(){
-	document.getElementById("profile_done").style.display='block';
+	document.getElementById('profile_done').style.display='block';
 });
 
 </script>

@@ -188,10 +188,10 @@ Now let's wire it up with our registration detail obtained in step 1. By passing
 
 ```javascript
 hello.init({ 
-	facebook : FACEBOOK_CLIENT_ID,
-	windows  : WINDOWS_CLIENT_ID,
-	google   : GOOGLE_CLIENT_ID
-},{redirect_uri:'redirect.html'});
+	facebook: FACEBOOK_CLIENT_ID,
+	windows: WINDOWS_CLIENT_ID,
+	google : GOOGLE_CLIENT_ID
+}, { redirect_uri: 'redirect.html' });
 ```
 
 That's it. The code above actually powers the demo at the start so, no excuses.
@@ -258,8 +258,8 @@ Initiate the environment. And add the application credentials.
 
 ```js
 hello.init({
-	facebook : '359288236870',
-	windows : '000000004403AD10'
+	facebook: '359288236870',
+	windows: '000000004403AD10'
 });
 ```
 
@@ -806,7 +806,7 @@ Alternatively recreate this service with [node-oauth-shim](https://npmjs.org/pac
 hello.init(
 	CLIENT_IDS,
 	{
-		oauth_proxy : 'https://auth-server.herokuapp.com/proxy'
+		oauth_proxy: 'https://auth-server.herokuapp.com/proxy'
 	}
 )
 ```
@@ -816,7 +816,7 @@ Enforcing the OAuth2 Explicit Grant is done by setting `response_type=code` in [
 
 ```javascript
 hello( network ).login({
-	response_type : 'code'
+	response_type: 'code'
 });
 ```
 
@@ -913,11 +913,10 @@ Ensure you setup and test your code on a variety of browsers.
 # cd into the project root and install dev dependencies 
 npm install -l
 
-# To run th tests, first ensure you have PhantomJS
-# and the PhantomJS runner for Mocha i.e.
+# To run the tests, first ensure you have PhantomJS and the PhantomJS runner for Mocha i.e.
 npm install -g mocha-phantomjs phantomjs
 
-# Run tests
+# Then...
 grunt test
 ```
 
