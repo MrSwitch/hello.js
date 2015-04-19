@@ -169,7 +169,7 @@ bower install hello
 <ol>
 <li><a href="#1-register">Register your app domain</a></li>
 <li><a href="#2-include-hellojs-script-in-your-page">Include hello.js script</a></li>
-<li><a href="#3-create-the-signin-buttons">Create the signin buttons</a></li>
+<li><a href="#3-create-the-signin-buttons">Create the sign-in buttons</a></li>
 <li><a href="#4-add-listeners-for-the-user-login">Setup listener for login and retrieve user info</a></li>
 <li><a href="#5-configure-hellojs-with-your-client_ids-and-initiate-all-listeners">Initiate the client_ids and all listeners</a></li>
 </ol>
@@ -207,7 +207,7 @@ bower install hello
 <script class="pre">
 hello.on('auth.login', function(auth){
 	
-	// call user information, for the given network
+	// Call user information, for the given network
 	hello( auth.network ).api( '/me' ).then( function(r){
 		// Inject it into the container
 		var label = document.getElementById( 'profile_' + auth.network );
@@ -229,7 +229,7 @@ hello.on('auth.login', function(auth){
 hello.init({ 
 	facebook: FACEBOOK_CLIENT_ID,
 	windows: WINDOWS_CLIENT_ID,
-	google : GOOGLE_CLIENT_ID
+	google: GOOGLE_CLIENT_ID
 }, { redirect_uri: 'redirect.html' });
 </script>
 
@@ -397,17 +397,17 @@ hello.init({
 <h3>Examples:</h3>
 
 <pre class="tryitoffline" type="js">
-hello( "facebook" ).login().then( function(){
-	alert("You are signed in to Facebook");
+hello( 'facebook' ).login().then( function(){
+	alert('You are signed in to Facebook');
 }, function( e ){
-	alert("Signin error: " + e.error.message );
+	alert('Signin error: ' + e.error.message);
 });
 </pre>
 
 
 <h2>hello.logout()</h2>
 
-<div data-bind="template: { name: 'tests-template', data: { test: $root, filter:'logout' } }"></div>
+<div data-bind="template: { name: 'tests-template', data: { test: $root, filter: 'logout' } }"></div>
 
 <p>Remove all sessions or individual sessions.</p>
 
@@ -466,7 +466,7 @@ hello( "facebook" ).login().then( function(){
 		<td>callback</td>
 		<td><i>function</i></td>
 		<td>
-			<code>function(){alert("Logged out!");}
+			<code>function(){alert('Logged out!');}
 			</code>
 		</td>
 		<td>
@@ -483,10 +483,10 @@ hello( "facebook" ).login().then( function(){
 <h3>Example:</h3>
 
 <pre class="tryit" type="js">
-hello( "facebook" ).logout().then( function(){
-	alert("Signed out");
+hello( 'facebook' ).logout().then( function(){
+	alert('Signed out');
 }, function(e){
-	alert( "Signed out error:" + e.error.message );
+	alert( 'Signed out error:' + e.error.message );
 });
 </pre>
 
@@ -835,10 +835,10 @@ A list of the service providers OAuth* mechanisms is available at <a href="http:
 <p>For providers which support only OAuth1 or OAuth2 with Explicit Grant, the authentication flow needs to be signed with a secret key that may not be exposed in the browser. HelloJS gets round this problem by the use of an intermediary webservice defined by <code>oauth_proxy</code>. This service looks up the secret from a database and performs the handshake required to provision an <code>access_token</code>. In the case of OAuth1, the webservice also signs subsequent API requests.</p>
 
 <blockquote>
-<b>Quick start:</b> Register your client_id + client_secret at the OAuth Proxy service, <a class="green button" href="https://auth-server.herokuapp.com/">Register your App</a>
+<b>Quick start:</b> Register your Client ID and secret at the OAuth Proxy service, <a class="green button" href="https://auth-server.herokuapp.com/">Register your App</a>
 </blockquote>
 
-<p>The default proxy service is <a href="https://auth-server.herokuapp.com/">https://auth-server.herokuapp.com/</a>. Developers may add their own network registration AppID/client_id and secret to this service in order to get up and running.</p>
+<p>The default proxy service is <a href="https://auth-server.herokuapp.com/">https://auth-server.herokuapp.com/</a>. Developers may add their own network registration Client ID and secret to this service in order to get up and running.</p>
 <p>Alternatively recreate this service with <a href="https://npmjs.org/package/oauth-shim">node-oauth-shim</a>. Then override the default <code>oauth_proxy</code> in HelloJS client script in <code>hello.init</code>, like so...</p>
 
 <pre type="javascript">

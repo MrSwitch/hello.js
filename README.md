@@ -128,7 +128,7 @@ Quick start shows you how to go from zero to loading in the name and picture of 
 
 - [Register your app domain](#1-register)
 - [Include hello.js script](#2-include-hellojs-script-in-your-page)
-- [Create the signin buttons](#3-create-the-signin-buttons)
+- [Create the sign-in buttons](#3-create-the-signin-buttons)
 - [Setup listener for login and retrieve user info](#4-add-listeners-for-the-user-login)
 - [Initiate the client_ids and all listeners](#5-configure-hellojs-with-your-client_ids-and-initiate-all-listeners)
 
@@ -168,7 +168,7 @@ Let's define a simple function, which will load a user profile into the page aft
 ```javascript
 hello.on('auth.login', function(auth){
 	
-	// call user information, for the given network
+	// Call user information, for the given network
 	hello( auth.network ).api( '/me' ).then( function(r){
 		// Inject it into the container
 		var label = document.getElementById( 'profile_' + auth.network );
@@ -190,7 +190,7 @@ Now let's wire it up with our registration detail obtained in step 1. By passing
 hello.init({ 
 	facebook: FACEBOOK_CLIENT_ID,
 	windows: WINDOWS_CLIENT_ID,
-	google : GOOGLE_CLIENT_ID
+	google: GOOGLE_CLIENT_ID
 }, { redirect_uri: 'redirect.html' });
 ```
 
@@ -358,10 +358,10 @@ If a network string is provided: A consent window to authenticate with that netw
 ### Examples:
 
 ```js
-hello( "facebook" ).login().then( function(){
-	alert("You are signed in to Facebook");
+hello( 'facebook' ).login().then( function(){
+	alert('You are signed in to Facebook');
 }, function( e ){
-	alert("Signin error: " + e.error.message );
+	alert('Signin error: ' + e.error.message);
 });
 ```
 
@@ -427,7 +427,7 @@ Remove all sessions or individual sessions.
 		<td>callback</td>
 		<td><i>function</i></td>
 		<td>
-			<code>function(){alert("Logged out!");}
+			<code>function(){alert('Logged out!');}
 			</code>
 		</td>
 		<td>
@@ -444,10 +444,10 @@ Remove all sessions or individual sessions.
 ### Example:
 
 ```js
-hello( "facebook" ).logout().then( function(){
-	alert("Signed out");
+hello( 'facebook' ).logout().then( function(){
+	alert('Signed out');
 }, function(e){
-	alert( "Signed out error:" + e.error.message );
+	alert( 'Signed out error:' + e.error.message );
 });
 ```
 
@@ -796,10 +796,10 @@ A list of the service providers OAuth* mechanisms is available at [Provider OAut
 For providers which support only OAuth1 or OAuth2 with Explicit Grant, the authentication flow needs to be signed with a secret key that may not be exposed in the browser. HelloJS gets round this problem by the use of an intermediary webservice defined by `oauth_proxy`. This service looks up the secret from a database and performs the handshake required to provision an `access_token`. In the case of OAuth1, the webservice also signs subsequent API requests.
 
 
-**Quick start:** Register your client_id + client_secret at the OAuth Proxy service, [Register your App](https://auth-server.herokuapp.com/)
+**Quick start:** Register your Client ID and secret at the OAuth Proxy service, [Register your App](https://auth-server.herokuapp.com/)
 
 
-The default proxy service is [https://auth-server.herokuapp.com/](https://auth-server.herokuapp.com/). Developers may add their own network registration AppID/client_id and secret to this service in order to get up and running.
+The default proxy service is [https://auth-server.herokuapp.com/](https://auth-server.herokuapp.com/). Developers may add their own network registration Client ID and secret to this service in order to get up and running.
 Alternatively recreate this service with [node-oauth-shim](https://npmjs.org/package/oauth-shim). Then override the default `oauth_proxy` in HelloJS client script in `hello.init`, like so...
 
 ```javascript
