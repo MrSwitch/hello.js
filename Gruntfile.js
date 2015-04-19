@@ -1,6 +1,3 @@
-//
-// Grunttask runners
-//
 module.exports = function(grunt) {
 
 	grunt.initConfig({
@@ -17,39 +14,29 @@ module.exports = function(grunt) {
 					module: true,
 					document: true
 				},
-				// dont check dot notation
-				sub :true
+				// don't check dot notation
+				sub: true
 			}
 		},
 		watch: {
 			files: ['<%= jshint.files %>'],
 			tasks: ['jshint']
 		},
-		karma : {
-			unit: {
-				configFile: 'tests/karma.conf.js'
-//				autoWatch: true
-			}
-		},
 		mocha_phantomjs: {
-			options: {
-				//'reporter': 'xunit',
-				//'output': 'test/results/mocha.xml'
-			},
 			all: ['tests/specs/index.html'],
 		},
 		// Bump
 		bumpup: ['package.json', 'bower.json'],
 		// Shunt files around
-		shunt : {
+		shunt: {
 			// Shunt the documents of our project
-			docs : {
-				'README.md' : './index.html'
+			docs: {
+				'README.md': './index.html'
 			},
 			// Combine the src files, create minified versions
-			build : {
-				'dist/hello.js' : ['src/hello.js', 'src/hello.legacy.js', 'src/hello.amd.js', 'src/hello.commonjs.js'],
-				'dist/hello.all.js' : ['src/hello.js', 'src/hello.legacy.js',
+			build: {
+				'dist/hello.js': ['src/hello.js', 'src/hello.legacy.js', 'src/hello.amd.js', 'src/hello.commonjs.js'],
+				'dist/hello.all.js': ['src/hello.js', 'src/hello.legacy.js',
 					'src/modules/dropbox.js',
 					'src/modules/facebook.js',
 					'src/modules/flickr.js',
@@ -64,9 +51,9 @@ module.exports = function(grunt) {
 					'src/modules/yahoo.js',
 				'src/hello.amd.js', 'src/hello.commonjs.js']
 			},
-			minify : {
-				'dist/hello.min.js' : 'dist/hello.js',
-				'dist/hello.all.min.js' : 'dist/hello.all.js'
+			minify: {
+				'dist/hello.min.js': 'dist/hello.js',
+				'dist/hello.all.min.js': 'dist/hello.all.js'
 			}
 		}
 	});
