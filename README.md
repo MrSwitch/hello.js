@@ -154,7 +154,7 @@ Register your application with at least one of the following networks. Ensure yo
 <script class="pre" src="./dist/hello.all.js"></script>
 ```
 
-### 3. Create the signin buttons
+### 3. Create the sign-in buttons
 Just add onclick events to call hello( network ).login(). Style your buttons as you like; I've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts.
 
 ```html
