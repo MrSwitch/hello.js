@@ -1,16 +1,15 @@
 module.exports = function (karma) {
 	karma.set({
 
-// base path, that will be used to resolve files and exclude
+		// base path, that will be used to resolve files and exclude
 		basePath: '../',
 
 		frameworks: ['mocha', 'expect', 'requirejs'],
 
-// list of files / patterns to load in the browser
+		// list of files / patterns to load in the browser
 		files: [
 			'node_modules/karma-requirejs/lib/adapter.js',
 			'tests/testing.js',
-//            {pattern: '../node_modules/chai/chai.js', include: true},
 			{ pattern: 'node_modules/sinon/pkg/sinon.js', watched: false, included: true },
 			{ pattern: 'src/*/*.js', included: false },
 			{ pattern: 'src/*.js', included: false },
@@ -20,8 +19,7 @@ module.exports = function (karma) {
 			{ pattern: 'tests/specs/unit/*.js', included: false }
 		],
 
-
-// list of files to exclude
+		// list of files to exclude
 		exclude: [
 //			'karma.conf.js',
 			'src/temp/*',
@@ -30,10 +28,10 @@ module.exports = function (karma) {
 		],
 
 
-// use dots reporter, as travis terminal does not support escaping sequences
-// possible values: 'dots', 'progress', 'junit', 'teamcity'
-// CLI --reporters progress
-//		reporters: ['progress'],
+		// use dots reporter, as travis terminal does not support escaping sequences
+		// possible values: 'dots', 'progress', 'junit', 'teamcity'
+		// CLI --reporters progress
+		//		reporters: ['progress'],
 
 
 		reporters: ['progress', 'coverage'],
@@ -61,20 +59,19 @@ module.exports = function (karma) {
 //       },
 
 
-// web server port
+		// web server port
 		port: 9876,
 
-
-// cli runner port
+		// cli runner port
 		runnerPort: 9100,
 
 
-// enable / disable colors in the output (reporters and logs)
+		// enable / disable colors in the output (reporters and logs)
 		colors: true,
 
 
-// level of logging
-// possible values: LOG_DISABLE || LOG_ERROR || LOG_WARN || LOG_INFO || LOG_DEBUG
+		// level of logging
+		// possible values: LOG_DISABLE || LOG_ERROR || LOG_WARN || LOG_INFO || LOG_DEBUG
 		logLevel: karma.LOG_DEBUG,
 
 
@@ -94,7 +91,7 @@ module.exports = function (karma) {
 		browsers: ['PhantomJS'],
 
 
-// If browser does not capture in given timeout [ms], kill it
+		// if browser does not capture in given timeout [ms], kill it
 		captureTimeout: 6000,
 
 
@@ -105,14 +102,14 @@ module.exports = function (karma) {
 
 		plugins: [
 			'karma-phantomjs-launcher',
-//			'karma-coverage',
 			'karma-expect',
 			'karma-requirejs',
 			'karma-mocha'
-			//,
-//            'karma-jasmine'
-   //         'karma-junit-reporter',
-   //         'karma-coverage'
+
+			// 'karma-coverage',
+			// 'karma-jasmine'
+   		// 'karma-junit-reporter',
+   		// 'karma-coverage'
 		]
 	});
 };
