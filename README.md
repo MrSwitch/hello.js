@@ -640,7 +640,7 @@ Remove a callback. Both event name and function must exist.
 ### hello.off( event, callback );
 
 ```js
-hello.off('auth.login', sessionstart);
+hello.off('auth.login', sessionStart);
 ```
 
 # Misc
