@@ -269,7 +269,7 @@ hello.init({
 
 If a network string is provided: A consent window to authenticate with that network will be initiated. Else if no network is provided a prompt to select one of the networks will open. A callback will be executed if the user authenticates and or cancels the authentication flow.
 
-### hello.login( [network] [,options] [, callback() ] )
+### hello.login( [network] [, options] [, callback()] )
 
 <table>
 	<tr>
@@ -372,7 +372,7 @@ hello( 'facebook' ).login().then( function(){
 
 Remove all sessions or individual sessions.
 
-### hello.logout( [network] [, options ] [, callback() ] )
+### hello.logout( [network] [, options] [, callback()] )
 
 <table>
 	<tr>
