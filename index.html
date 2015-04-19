@@ -38,7 +38,7 @@
 
 <div id="profile">
 <!-- ko foreach:networks -->
-<button data-bind="click:function(){ hello( name ).login();}, attr:{'class':'zocial icon ' + name, title:'Signin to '+ displayName}" title="Signin"></button>
+<button data-bind="click:function(){ hello( name ).login();}, attr:{'class': 'zocial icon ' + name, title: 'Sign in to ' + displayName}" title="Sign in"></button>
 <!-- /ko -->
 <br />
 </div>
@@ -666,10 +666,10 @@ hello( "facebook" ).api("me").then(function(json){
 <h3>Example:</h3>
 
 <pre class="tryit" type="js">
-var sessionstart =  function(){
-	alert("Session has started");
+var sessionStart =  function(){
+	alert('Session has started');
 };
-hello.on("auth.login",sessionstart);
+hello.on('auth.login', sessionStart);
 </pre>
 
 <h2>hello.off()</h2>
@@ -679,7 +679,7 @@ hello.on("auth.login",sessionstart);
 <h3>hello.off( event, callback );</h3>
 
 <pre class="tryit" type="js">
-hello.off("auth.login",sessionstart);
+hello.off('auth.login', sessionstart);
 </pre>
 
 <h1>Misc</h1>
@@ -712,11 +712,11 @@ paginationExample( 'me/friends' );
 
 
 <h2>Scope</h2>
-<p>The scope property defines which privileges an app requires from a network provider. The scope can be defined globally for a session through <code>hello.init(object, {scope:'string'})</code>, or at the point of triggering the auth flow e.g. <code>hello('network').login({scope:'string'});</code></p>
+<p>The scope property defines which privileges an app requires from a network provider. The scope can be defined globally for a session through <code>hello.init(object, {scope: 'string'})</code>, or at the point of triggering the auth flow e.g. <code>hello('network').login({scope: 'string'});</code></p>
 <p>An app can specify multiple scopes, separated by commas - as in the example below.</p>
 
 <pre class="tryit" type="js">
-hello( 'facebook' ).login( {scope: "friends,photos,publish" } );
+hello( 'facebook' ).login( {scope: 'friends,photos,publish' } );
 </pre>
 
 <p>Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the <a href="http://adodson.com/hello.js/#helloapi">hello.api reference table</a>.</p>

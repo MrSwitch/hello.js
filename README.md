@@ -627,10 +627,10 @@ Bind a callback to an event. An event may be triggered by a change in user state
 ### Example:
 
 ```js
-var sessionstart =  function(){
-	alert("Session has started");
+var sessionStart =  function(){
+	alert('Session has started');
 };
-hello.on("auth.login",sessionstart);
+hello.on('auth.login', sessionStart);
 ```
 
 ## hello.off()
@@ -640,7 +640,7 @@ Remove a callback. Both event name and function must exist.
 ### hello.off( event, callback );
 
 ```js
-hello.off("auth.login",sessionstart);
+hello.off('auth.login', sessionstart);
 ```
 
 # Misc
@@ -673,11 +673,11 @@ paginationExample( 'me/friends' );
 
 
 ## Scope
-The scope property defines which privileges an app requires from a network provider. The scope can be defined globally for a session through `hello.init(object, {scope:'string'})`, or at the point of triggering the auth flow e.g. `hello('network').login({scope:'string'});`
+The scope property defines which privileges an app requires from a network provider. The scope can be defined globally for a session through `hello.init(object, {scope: 'string'})`, or at the point of triggering the auth flow e.g. `hello('network').login({scope: 'string'});`
 An app can specify multiple scopes, separated by commas - as in the example below.
 
 ```js
-hello( 'facebook' ).login( {scope: "friends,photos,publish" } );
+hello( 'facebook' ).login( {scope: 'friends,photos,publish' } );
 ```
 
 Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the [hello.api reference table](http://adodson.com/hello.js/#helloapi).
