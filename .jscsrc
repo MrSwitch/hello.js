@@ -7,5 +7,9 @@
   "disallowSpacesInCallExpression": true,
   "disallowSpacesInsideArrayBrackets": true,
   "disallowSpacesInsideBrackets": true,
-  "disallowSpacesInsideObjectBrackets": true
+  "disallowSpacesInsideObjectBrackets": true,
+  "disallowSpacesInsideParentheses": true,
+  "disallowTrailingComma": true,
+  "disallowTrailingWhitespace": true,
+  "requireCapitalizedComments": true
 }

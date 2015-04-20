@@ -732,7 +732,7 @@ hello.utils.extend(hello.utils, {
 
 	// Recursive merge two objects into one, second parameter overides the first
 	// @param a array
-	merge: function(/*a,b,c,..n*/) {
+	merge: function(/* Args: a, b, c, .. n */) {
 		var args = Array.prototype.slice.call(arguments);
 		args.unshift({});
 		return this.extend.apply(null, args);
@@ -748,8 +748,7 @@ hello.utils.extend(hello.utils, {
 		var t = null;
 		var x = null;
 
-		// define x
-		// x is the first key in the list of object parameters
+		// 'x' is the first key in the list of object parameters
 		for (x in o) {if (o.hasOwnProperty(x)) {
 			break;
 		}}
@@ -861,21 +860,20 @@ hello.utils.extend(hello.utils, {
 		return r;
 	},
 
-	// isEmpty
 	isEmpty: function(obj) {
-		// scalar?
-		if (!obj) {
-			return true;
-		}
 
-		// Array?
+		// Scalar
+		if (!obj)
+			return true;
+
+		// Array
 		if (obj && obj.length > 0)
 			return false;
 
 		if (obj && obj.length === 0)
 			return true;
 
-		// object?
+		// Object
 		for (var key in obj) {
 			if (obj.hasOwnProperty(key)) {
 				return false;
@@ -1942,7 +1940,7 @@ hello.utils.extend(hello.utils, {
 
 		var _this = this;
 
-		// This has too go through a POST request
+		// This has to go through a POST request
 		if (!_this.isEmpty(p.data) && !('FileList' in window) && _this.hasBinary(p.data)) {
 
 			// Disable XHR and JSONP
@@ -1951,26 +1949,19 @@ hello.utils.extend(hello.utils, {
 
 		}
 
-		// XHR: can we use XHR for Cross domain delivery?
+		// Check if the browser and service support CORS
 		if (
-
-		// Browser supports CORS
-		'withCredentials' in new XMLHttpRequest() &&
-
-		// ... now does the service support CORS?
-		// p.xhr is undefined, true or a function which returns true
-		(!('xhr' in p) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))))
-
+			'withCredentials' in new XMLHttpRequest() &&
+			(!('xhr' in p) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))))
 		) {
 
-			// Format the URL and return it...
 			formatUrl(p, function(url) {
 
 				var x = _this.xhr(p.method, url, p.headers, p.data, callback);
 				x.onprogress = p.onprogress || null;
 
-				// Windows PHone does not support xhr.upload, see #74
-				// Feature detect it...
+				// Windows Phone does not support xhr.upload, see #74
+				// Feature detect
 				if (x.upload && p.onuploadprogress) {
 					x.upload.onprogress = p.onuploadprogress;
 				}
@@ -1997,7 +1988,6 @@ hello.utils.extend(hello.utils, {
 
 			// If the JSONP is a function then run it
 			if (typeof (p.jsonp) === 'function') {
-
 				p.jsonp(p, p.query);
 			}
 
