@@ -114,7 +114,7 @@ hello.utils.extend(hello, {
   // @param number timeout, timeout in seconds
   init: function(services, options) {
 
-    var utils = this.utils;
+    var _this = this.utils;
 
     if (!services) {
       return this.services;
@@ -129,7 +129,7 @@ hello.utils.extend(hello, {
     }}
 
     // Merge services if there already exists some
-    utils.extend(this.services, services);
+    _this.extend(this.services, services);
 
     // Format the incoming
     for (x in this.services) {
@@ -141,11 +141,11 @@ hello.utils.extend(hello, {
     //
     // Update the default settings with this one.
     if (options) {
-      utils.extend(this.settings, options);
+      _this.extend(this.settings, options);
 
       // Do this immediatly incase the browser changes the current path.
       if ('redirect_uri' in options) {
-        this.settings.redirect_uri = utils.url(options.redirect_uri).href;
+        this.settings.redirect_uri = _this.url(options.redirect_uri).href;
       }
     }
 
@@ -161,17 +161,17 @@ hello.utils.extend(hello, {
 
     // Create an object which inherits its parent as the prototype and constructs a new event chain.
     var self = this,
-    utils = self.utils,
-    promise = utils.Promise();
+    _this = self.utils,
+    promise = _this.Promise();
 
     // Get parameters
-    var p = utils.args({network: 's', options: 'o', callback: 'f'}, arguments);
+    var p = _this.args({network: 's', options: 'o', callback: 'f'}, arguments);
 
     // Local vars
     var url;
 
     // merge/override options with app defaults
-    var opts = p.options = utils.merge(self.settings, p.options || {});
+    var opts = p.options = _this.merge(self.settings, p.options || {});
 
     // Network
     p.network = p.network || self.settings.default_service;
@@ -196,7 +196,7 @@ hello.utils.extend(hello, {
     var provider  = self.services[p.network];
 
     // Create a global listener to capture events triggered out of scope
-    var callback_id = utils.globalEvent(function(str) {
+    var callback_id = _this.globalEvent(function(str) {
 
       // The responseHandler returns a string, lets save this locally
       var obj;
@@ -208,14 +208,13 @@ hello.utils.extend(hello, {
         obj = error('cancelled', 'The authentication was not completed');
       }
 
-      //
       // Handle these response using the local
       // Trigger on the parent
       if (!obj.error) {
 
         // Save on the parent window the new credentials
         // This fixes an IE10 bug i think... atleast it does for me.
-        utils.store(obj.network, obj);
+        _this.store(obj.network, obj);
 
         // fulfill a successful login
         promise.fulfill({
@@ -229,16 +228,10 @@ hello.utils.extend(hello, {
       }
     });
 
-    //
-    // REDIRECT_URI
-    // Is the redirect_uri root?
-    //
-    var redirect_uri = utils.url(opts.redirect_uri).href;
+    var redirect_uri = _this.url(opts.redirect_uri).href;
 
-    //
     // Response Type
     // May be a space-delimited list of multiple, complementary types
-    //
     var response_type = provider.oauth.response_type || opts.response_type;
 
     // Fallback to token if the module hasn't defined a grant url
@@ -264,7 +257,7 @@ hello.utils.extend(hello, {
     };
 
     // Get current session for merging scopes, and for quick auth response
-    var session = utils.store(p.network);
+    var session = _this.store(p.network);
 
     // Scopes (authentication permisions)
     // convert any array, or falsy value to a string.
@@ -281,44 +274,41 @@ hello.utils.extend(hello, {
 
     // Save in the State
     // Convert to a string because IE, has a problem moving Arrays between windows
-    p.qs.state.scope = utils.unique(scope.split(/[,\s]+/)).join(',');
+    p.qs.state.scope = _this.unique(scope.split(/[,\s]+/)).join(',');
 
     // Map replace each scope with the providers default scopes
     p.qs.scope = scope.replace(/[^,\s]+/ig, function(m) {
       // Does this have a mapping?
       if (m in provider.scope) {
         return provider.scope[m];
-      }else {
+      } else {
         // Loop through all services and determine whether the scope is generic
         for (var x in self.services) {
-          var _scopes = self.services[x].scope;
-          if (_scopes && m in _scopes) {
-            // found an instance of this scope, so lets not assume its special
+          var serviceScopes = self.services[x].scope;
+          if (serviceScopes && m in serviceScopes) {
+            // Found an instance of this scope, so lets not assume its special
             return '';
           }
         }
 
-        // this is a unique scope to this service so lets in it.
+        // This is a unique scope to this service so lets in it.
         return m;
       }
 
     }).replace(/[,\s]+/ig, ',');
 
-    // remove duplication and empty spaces
-    p.qs.scope = utils.unique(p.qs.scope.split(/,+/)).join(provider.scope_delim || ',');
+    // Remove duplication and empty spaces
+    p.qs.scope = _this.unique(p.qs.scope.split(/,+/)).join(provider.scope_delim || ',');
 
-    //
-    // FORCE
     // Is the user already signed in with the appropriate scopes, valid access_token?
-    //
     if (opts.force === false) {
 
       if (session && 'access_token' in session && session.access_token && 'expires' in session && session.expires > ((new Date()).getTime() / 1e3)) {
         // What is different about the scopes in the session vs the scopes in the new login?
-        var diff = utils.diff(session.scope || [], p.qs.state.scope || []);
+        var diff = _this.diff(session.scope || [], p.qs.state.scope || []);
         if (diff.length === 0) {
 
-          // Ok trigger the callback
+          // OK trigger the callback
           promise.fulfill({
             unchanged: true,
             network: p.network,
@@ -334,7 +324,7 @@ hello.utils.extend(hello, {
     // Page URL
     if (opts.display === 'page' && opts.page_uri) {
       // Add a page location, place to endup after session has authenticated
-      p.qs.state.page_uri = utils.url(opts.page_uri).href;
+      p.qs.state.page_uri = _this.url(opts.page_uri).href;
     }
 
     // Bespoke
@@ -361,15 +351,12 @@ hello.utils.extend(hello, {
     // Convert state to a string
     p.qs.state = encodeURIComponent(JSON.stringify(p.qs.state));
 
-    //
     // URL
-    //
     if (parseInt(provider.oauth.version, 10) === 1) {
 
       // Turn the request to the OAuth Proxy for 3-legged auth
-      url = utils.qs(opts.oauth_proxy, p.qs, encodeFunction);
+      url = _this.qs(opts.oauth_proxy, p.qs, encodeFunction);
     }
-
     // Refresh token
     else if (opts.display === 'none' && provider.oauth.grant && session && session.refresh_token) {
 
@@ -377,20 +364,15 @@ hello.utils.extend(hello, {
       p.qs.refresh_token = session.refresh_token;
 
       // Define the request path
-      url = utils.qs(opts.oauth_proxy, p.qs, encodeFunction);
+      url = _this.qs(opts.oauth_proxy, p.qs, encodeFunction);
     }
-
-    //
     else {
-
-      url = utils.qs(provider.oauth.auth, p.qs, encodeFunction);
+      url = _this.qs(provider.oauth.auth, p.qs, encodeFunction);
     }
 
-    //
     // Execute
     // Trigger how we want self displayed
     // Calling Quietly?
-    //
     if (opts.display === 'none') {
       // signin in the background, iframe
       utils.iframe(url);
@@ -399,22 +381,22 @@ hello.utils.extend(hello, {
     // Triggering popup?
     else if (opts.display === 'popup') {
 
-      var popup = utils.popup(url, redirect_uri, opts.window_width || 500, opts.window_height || 550);
+      var popup = _this.popup(url, redirect_uri, opts.window_width || 500, opts.window_height || 550);
 
       var timer = setInterval(function() {
         if (!popup || popup.closed) {
           clearInterval(timer);
           if (!promise.state) {
 
-            var resp = error('cancelled', 'Login has been cancelled');
+            var response = error('cancelled', 'Login has been cancelled');
 
             if (!popup) {
-              resp = error('blocked', 'Popup was blocked');
+              response = error('blocked', 'Popup was blocked');
             }
 
-            resp.network = p.network;
+            response.network = p.network;
 
-            promise.reject(resp);
+            promise.reject(response);
           }
         }
       }, 100);
@@ -1405,9 +1387,6 @@ hello.utils.extend(hello.utils, {
         });
       }
 
-      //
-      // focus on this popup
-      //
       if (popup && popup.focus) {
         popup.focus();
       }
@@ -1415,14 +1394,13 @@ hello.utils.extend(hello.utils, {
       return popup;
     };
 
-    //
     // Call the open() function with the initial path
     //
     // OAuth redirect, fixes URI fragments from being lost in Safari
     // (URI Fragments within 302 Location URI are lost over HTTPS)
     // Loading the redirect.html before triggering the OAuth Flow seems to fix it.
     //
-    // FIREFOX, decodes URL fragments when calling location.hash.
+    // Firefox  decodes URL fragments when calling location.hash.
     //  - This is bad if the value contains break points which are escaped
     //  - Hence the url must be encoded twice as it contains breakpoints.
     if (navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1) {
@@ -1432,19 +1410,16 @@ hello.utils.extend(hello.utils, {
     return open(url);
   },
 
-  //
-  // OAuth/API Response Handler
-  //
+  // OAuth and API response handler
   responseHandler: function(window, parent) {
 
-    var utils = this, p;
+    var _this = this;
+    var p;
 
     //
     var location = window.location;
 
-    //
-    // Add a helper for relocating, instead of window.location  = url;
-    //
+    // Use instead of window.location = url
     var relocate = function(path) {
       if (location.assign) {
         location.assign(path);
@@ -1454,22 +1429,19 @@ hello.utils.extend(hello.utils, {
       }
     };
 
-    //
     // Is this an auth relay message which needs to call the proxy?
-    //
+    p = _this.param(location.search);
 
-    p = utils.param(location.search);
-
-    // IS THIS AN OAUTH2 SERVER RESPONSE? OR AN OAUTH1 SERVER RESPONSE?
+    // OAuth2 or OAuth1 server response?
     if (p  && ((p.code && p.state) || (p.oauth_token && p.proxy_url))) {
-      // JSON decode
+
       var state = JSON.parse(p.state);
 
       // Add this path as the redirect_uri
       p.redirect_uri = state.redirect_uri || location.href.replace(/[\?\#].*$/, '');
 
       // redirect to the host
-      var path = (state.oauth_proxy || p.proxy_url) + '?' + utils.param(p);
+      var path = (state.oauth_proxy || p.proxy_url) + '?' + _this.param(p);
 
       relocate(path);
       return;
@@ -1482,7 +1454,7 @@ hello.utils.extend(hello.utils, {
     // FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
     // SoundCloud is the state in the querystring and the token in the hashtag, so we'll mix the two together
 
-    p = utils.merge(utils.param(location.search || ''), utils.param(location.hash || ''));
+    p = _this.merge(_this.param(location.search || ''), _this.param(location.hash || ''));
 
     // if p.state
     if (p && 'state' in p) {
@@ -1491,7 +1463,7 @@ hello.utils.extend(hello.utils, {
       // e.g. p.state = 'facebook.page';
       try {
         var a = JSON.parse(p.state);
-        utils.extend(p, a);
+        _this.extend(p, a);
       } catch (e) {
         console.error('Could not decode state parameter');
       }
@@ -1511,31 +1483,29 @@ hello.utils.extend(hello.utils, {
         authCallback(p, window, parent);
       }
 
-      //error=?
-      //&error_description=?
-      //&state=?
+      // error=?
+      // &error_description=?
+      // &state=?
       else if (('error' in p && p.error) && p.network) {
-        // Error object
+
         p.error = {
           code: p.error,
           message: p.error_message || p.error_description
         };
 
-        // Let the state handler handle it.
+        // Let the state handler handle it
         authCallback(p, window, parent);
       }
 
-      // API Call, or a Cancelled login
-      // Result is serialized JSON string.
+      // API call, or a cancelled login
+      // Result is serialized JSON string
       else if (p.callback && p.callback in parent) {
 
-        // trigger a function in the parent
+        // Trigger a function in the parent
         var res = 'result' in p && p.result ? JSON.parse(p.result) : false;
 
         // Trigger the callback on the parent
         parent[p.callback](res);
-
-        // Close this window
         closeWindow();
       }
 
@@ -1543,10 +1513,8 @@ hello.utils.extend(hello.utils, {
       if (p.page_uri) {
         window.location = p.page_uri;
       }
-
     }
 
-    //
     // OAuth redirect, fixes URI fragments from being lost in Safari
     // (URI Fragments within 302 Location URI are lost over HTTPS)
     // Loading the redirect.html before triggering the OAuth Flow seems to fix it.
@@ -1556,40 +1524,36 @@ hello.utils.extend(hello.utils, {
       return;
     }
 
-    //
-    // AuthCallback
     // Trigger a callback to authenticate
-    //
     function authCallback(obj, window, parent) {
 
       // Trigger the callback on the parent
-      utils.store(obj.network, obj);
+      _this.store(obj.network, obj);
 
-      // if this is a page request
-      // therefore it has no parent or opener window to handle callbacks
+      // If this is a page request it has no parent or opener window to handle callbacks
       if (('display' in obj) && obj.display === 'page') {
         return;
       }
 
       if (parent) {
         // Call the generic listeners
-        //        win.hello.emit(network+":auth."+(obj.error?'failed':'login'), obj);
-        // Call the inline listeners
+        // win.hello.emit(network+":auth."+(obj.error?'failed':'login'), obj);
 
-        // TODO: remove from session object...
+        // TODO: remove from session object
         var cb = obj.callback;
         try {
           delete obj.callback;
-        }catch (e) {}
+        }
+        catch (e) {}
 
         // Update store
-        utils.store(obj.network, obj);
+        _this.store(obj.network, obj);
 
         // Call the globalEvent function on the parent
         if (cb in parent) {
 
-          // It's safer to pass back a string to the parent, rather than an object/array
-          // Better for IE8
+          // It's safer to pass back a string to the parent,
+          // rather than an object/array (better for IE8)
           var str = JSON.stringify(obj);
 
           try {
@@ -2146,13 +2110,12 @@ hello.utils.extend(hello.utils, {
 
     }
 
-    // Otherwise we're on to the old school, IFRAME hacks and JSONP
+    // Otherwise we're on to the old school, iframe hacks and JSONP
 
     if (p.form !== false) {
 
       // Add some additional query parameters to the URL
       // We're pretty stuffed if the endpoint doesn't like these
-
       p.query.redirect_uri = p.redirect_uri;
       p.query.state = JSON.stringify({callback:p.callbackID});
 
@@ -2186,11 +2149,9 @@ hello.utils.extend(hello.utils, {
 
     return;
 
-    //
     // Format URL
     // Constructs the request URL, optionally wraps the URL through a call to a proxy server
     // Returns the formatted URL
-    //
     function formatUrl(p, callback) {
 
       // Are we signing the request?
@@ -2210,7 +2171,7 @@ hello.utils.extend(hello.utils, {
         p.proxy = true;
       }
 
-      // POST BODY to QueryString
+      // POST body to querystring
       if (p.data && (p.method === 'get' || p.method === 'delete')) {
         // Attach the p.data to the querystring.
         utils.extend(p.query, p.data);
@@ -2240,31 +2201,33 @@ hello.utils.extend(hello.utils, {
     }
   },
 
-  //
-  // isArray
   isArray: function(o) {
     return Object.prototype.toString.call(o) === '[object Array]';
   },
 
-  // _DOM
-  // return the type of DOM object
+  // Return the type of DOM object
   domInstance: function(type, data) {
-    var test = 'HTML' + (type || '').replace(/^[a-z]/, function(m) {return m.toUpperCase();}) + 'Element';
+    var test = 'HTML' + (type || '').replace(
+      /^[a-z]/,
+      function(m) {
+        return m.toUpperCase();
+      }
+
+    ) + 'Element';
+
     if (!data) {
       return false;
     }
 
     if (window[test]) {
       return data instanceof window[test];
-    }else if (window.Element) {
+    } else if (window.Element) {
       return data instanceof window.Element && (!type || (data.tagName && data.tagName.toLowerCase() === type));
-    }else {
+    } else {
       return (!(data instanceof Object || data instanceof Array || data instanceof String || data instanceof Number) && data.tagName && data.tagName.toLowerCase() === type);
     }
   },
 
-  //
-  // Clone
   // Create a clone of an object
   clone: function(obj) {
     // Does not clone Dom elements, nor Binary data, e.g. Blobs, Filelists
@@ -2291,12 +2254,8 @@ hello.utils.extend(hello.utils, {
     return clone;
   },
 
-  //
-  // XHR
-  // This uses CORS to make requests
+  // XHR: uses CORS to make requests
   xhr: function(method, url, headers, data, callback) {
-
-    var utils = this;
 
     var r = new XMLHttpRequest();
 
@@ -2307,15 +2266,14 @@ hello.utils.extend(hello.utils, {
       method = 'GET';
     }
 
-    // UPPER CASE
     method = method.toUpperCase();
 
-    // xhr.responseType = "json"; // is not supported in any of the vendors yet.
+    // xhr.responseType 'json' is not supported in any of the vendors yet.
     r.onload = function(e) {
       var json = r.response;
       try {
         json = JSON.parse(r.responseText);
-      }catch (_e) {
+      } catch (e) {
         if (r.status === 401) {
           json = {
             error: {
@@ -2331,13 +2289,14 @@ hello.utils.extend(hello.utils, {
 
       callback(json || (method === 'GET' ? {error:{code: 'empty_response', message: 'Could not get resource'}} : {}), headers);
     };
+
     r.onerror = function(e) {
       var json = r.responseText;
       try {
         json = JSON.parse(r.responseText);
-      }catch (_e) {}
+      } catch (e) {}
 
-      callback(json || {error:{
+      callback(json || {error: {
         code: 'access_denied',
         message: 'Could not get resource'
       }});
@@ -2352,7 +2311,7 @@ hello.utils.extend(hello.utils, {
     else if (data && typeof (data) !== 'string' && !(data instanceof FormData) && !(data instanceof File) && !(data instanceof Blob)) {
       // Loop through and add formData
       var f = new FormData();
-      for (x in data)if (data.hasOwnProperty(x)) {
+      for (x in data) if (data.hasOwnProperty(x)) {
         if (data[x] instanceof HTMLInputElement) {
           if ('files' in data[x] && data[x].files.length > 0) {
             f.append(x, data[x].files[0]);
@@ -2395,8 +2354,8 @@ hello.utils.extend(hello.utils, {
     // Headers are returned as a string
     function headersToJSON(s) {
       var r = {};
-      var reg = /([a-z\-]+):\s?(.*);?/gi,
-      m;
+      var reg = /([a-z\-]+):\s?(.*);?/gi;
+      var m;
       while ((m = reg.exec(s))) {
         r[m[1]] = m[2];
       }
@@ -2406,12 +2365,12 @@ hello.utils.extend(hello.utils, {
   },
 
   // JSONP
-  // Injects a script tag into the dom to be executed and appends a callback function to the window object
+  // Injects a script tag into the DOM to be executed and appends a callback function to the window object
   // @param string/function pathFunc either a string of the URL or a callback function pathFunc(querystringhash, continueFunc);
   // @param function callback a function to call on completion;
   jsonp: function(url, callback, callbackID, timeout) {
 
-    var utils = this;
+    var _this = this;
 
     // Change the name of the callback
     var bool = 0;
@@ -2420,18 +2379,16 @@ hello.utils.extend(hello.utils, {
     var result = {error: {message: 'server_error', code: 'server_error'}};
     var cb = function() {
       if (!(bool++)) {
-        window.setTimeout(
-          function() {
-            callback(result);
-            head.removeChild(script);
-          },
-          0
-        );
+        window.setTimeout(function() {
+          callback(result);
+          head.removeChild(script);
+        }, 0);
       }
+
     };
 
     // Add callback to the window object
-    var callbackID = utils.globalEvent(function(json) {
+    var callbackID = _this.globalEvent(function(json) {
       result = json;
       return true;
 
@@ -2443,13 +2400,13 @@ hello.utils.extend(hello.utils, {
     var url = url.replace(new RegExp('=\\?(&|$)'), '=' + callbackID + '$1');
 
     // Build script tag
-    var script = utils.append('script', {
-      id:callbackID,
-      name:callbackID,
+    var script = _this.append('script', {
+      id: callbackID,
+      name: callbackID,
       src: url,
-      async:true,
-      onload:cb,
-      onerror:cb,
+      async: true,
+      onload: cb,
+      onerror: cb,
       onreadystatechange: function() {
         if (/loaded|complete/i.test(this.readyState)) {
           cb();
@@ -2459,12 +2416,13 @@ hello.utils.extend(hello.utils, {
 
     // Opera fix error
     // Problem: If an error occurs with script loading Opera fails to trigger the script.onerror handler we specified
+    //
     // Fix:
     // By setting the request to synchronous we can trigger the error handler when all else fails.
     // This action will be ignored if we've already called the callback handler "cb" with a successful onload event
     if (window.navigator.userAgent.toLowerCase().indexOf('opera') > -1) {
-      operaFix = utils.append('script', {
-        text: 'document.getElementById(\'' + cb_name + '\').onerror();'
+      operaFix = _this.append('script', {
+        text: 'document.getElementById(\'' + callbackId + '\').onerror();'
       });
       script.async = false;
     }
@@ -2472,7 +2430,7 @@ hello.utils.extend(hello.utils, {
     // Add timeout
     if (timeout) {
       window.setTimeout(function() {
-        result = {error:{message:'timeout', code:'timeout'}};
+        result = {error: {message: 'timeout', code: 'timeout'}};
         cb();
       }, timeout);
     }
