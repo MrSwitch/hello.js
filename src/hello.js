@@ -39,7 +39,6 @@ hello.utils = {
 };
 
 // Core library
-
 hello.utils.extend(hello, {
 
 	settings: {
@@ -279,7 +278,8 @@ hello.utils.extend(hello, {
 			// Does this have a mapping?
 			if (m in provider.scope) {
 				return provider.scope[m];
-			} else {
+			}
+			else {
 				// Loop through all services and determine whether the scope is generic
 				for (var x in _this.services) {
 					var serviceScopes = _this.services[x].scope;
@@ -630,7 +630,8 @@ hello.utils.extend(hello.utils, {
 			var json = {};
 			try {
 				json = JSON.parse(localStorage.getItem('hello')) || {};
-			}catch (e) {}
+			}
+			catch (e) {}
 
 			return json;
 		}
@@ -1213,7 +1214,8 @@ hello.utils.extend(hello.utils, {
 				// Remove this handler reference
 				try {
 					delete window[guid];
-				} catch (e) {}
+				}
+				catch (e) {}
 			}
 		};
 
@@ -1399,7 +1401,8 @@ hello.utils.extend(hello.utils, {
 			try {
 				var a = JSON.parse(p.state);
 				_this.extend(p, a);
-			} catch (e) {
+			}
+			catch (e) {
 				console.error('Could not decode state parameter');
 			}
 
@@ -1585,7 +1588,8 @@ hello.utils.responseHandler(window, window.opener || window.parent);
 				var cb = session.callback;
 				try {
 					delete session.callback;
-				}catch (e) {}
+				}
+				catch (e) {}
 
 				// Update store
 				// Removing the callback
@@ -1946,7 +1950,6 @@ hello.utils.extend(hello.utils, {
 			// Disable XHR and JSONP
 			p.xhr = false;
 			p.jsonp = false;
-
 		}
 
 		// Check if the browser and service support CORS
@@ -2115,9 +2118,11 @@ hello.utils.extend(hello.utils, {
 
 		if (window[test]) {
 			return data instanceof window[test];
-		} else if (window.Element) {
+		}
+		else if (window.Element) {
 			return data instanceof window.Element && (!type || (data.tagName && data.tagName.toLowerCase() === type));
-		} else {
+		}
+		else {
 			return (!(data instanceof Object || data instanceof Array || data instanceof String || data instanceof Number) && data.tagName && data.tagName.toLowerCase() === type);
 		}
 	},
@@ -2167,7 +2172,8 @@ hello.utils.extend(hello.utils, {
 			var json = r.response;
 			try {
 				json = JSON.parse(r.responseText);
-			} catch (_e) {
+			}
+			catch (_e) {
 				if (r.status === 401) {
 					json = {
 						error: {
@@ -2188,7 +2194,8 @@ hello.utils.extend(hello.utils, {
 			var json = r.responseText;
 			try {
 				json = JSON.parse(r.responseText);
-			} catch (_e) {}
+			}
+			catch (_e) {}
 
 			callback(json || {error: {
 				code: 'access_denied',
@@ -2490,7 +2497,8 @@ hello.utils.extend(hello.utils, {
 					}
 					else if (_this.domInstance(null, data[x])) {
 						input.value = data[x].innerHTML || data[x].innerText;
-					}else {
+					}
+					else {
 						input.value = data[x];
 					}
 
