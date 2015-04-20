@@ -2,5 +2,9 @@
   "preset": "airbnb",
   "requireCamelCaseOrUpperCaseIdentifiers": "ignoreProperties",
   "validateIndentation": "\t",
-  "disallowMultipleSpaces": true
+  "disallowMultipleSpaces": true,
+  "disallowSpaceAfterObjectKeys": true,
+  "disallowSpacesInCallExpression": true,
+  "disallowSpacesInsideArrayBrackets": true,
+  "disallowSpacesInsideBrackets": true
 }

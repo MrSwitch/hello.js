@@ -1804,7 +1804,7 @@ hello.api = function() {
 	}
 	else if (url in actions) {
 		p.path = url;
-		url = actions[ url ];
+		url = actions[url];
 	}
 	else if ('default' in actions) {
 		url = actions['default'];
@@ -2695,10 +2695,10 @@ hello.utils.extend(hello.utils, {
 
 				// Is this a file, does the browser not support 'files' and 'FormData'?
 				if (input.type === 'file') {
-					json[ input.name ] = input;
+					json[input.name] = input;
 				}
 				else {
-					json[ input.name ] = input.value || input.innerHTML;
+					json[input.name] = input.value || input.innerHTML;
 				}
 			}
 
