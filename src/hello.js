@@ -2501,30 +2501,25 @@ hello.utils.extend(hello.utils, {
   //
   post: function(url, data, options, callback, callbackID, timeout) {
 
-    var utils = this,
-    doc = document;
+    var _this = this;
+    var doc = document;
 
     // This hack needs a form
-    var form = null,
-    reenableAfterSubmit = [],
-    newform,
-    i = 0,
-    x = null,
-    bool = 0,
-      cb = function(r) {
-  if (!(bool++)) {
-
-    // fire the callback
-    callback(r);
-
-    // Do not return true, as that will remove the listeners
-    // return true;
-  }
-      };
+    var form = null;
+    var reenableAfterSubmit = [];
+    var newform;
+    var i = 0;
+    var x = null;
+    var bool = 0;
+    var cb = function(r) {
+      if (!(bool++)) {
+        callback(r);
+      }
+    };
 
     // What is the name of the callback to contain
-    // We'll also use this to name the iFrame
-    utils.globalEvent(cb, callbackID);
+    // We'll also use this to name the iframe
+    _this.globalEvent(cb, callbackID);
 
     // Build the iframe window
     var win;
@@ -2564,9 +2559,9 @@ hello.utils.extend(hello.utils, {
 
     doc.body.appendChild(win);
 
-    // if we are just posting a single item
-    if (utils.domInstance('form', data)) {
-      // get the parent form
+    // If we are just posting a single item
+    if (_this.domInstance('form', data)) {
+      // Get the parent form
       form = data.form;
 
       // Loop through and disable all of its siblings
@@ -2581,7 +2576,7 @@ hello.utils.extend(hello.utils, {
     }
 
     // Posting a form
-    if (utils.domInstance('form', data)) {
+    if (_this.domInstance('form', data)) {
       // This is a form element
       form = data;
 
@@ -2599,9 +2594,9 @@ hello.utils.extend(hello.utils, {
       // If anyone of those values are a input type=file we shall shall insert its siblings into the form for which it belongs.
       for (x in data) if (data.hasOwnProperty(x)) {
         // is this an input Element?
-        if (utils.domInstance('input', data[x]) && data[x].type === 'file') {
+        if (_this.domInstance('input', data[x]) && data[x].type === 'file') {
           form = data[x].form;
-          form.encoding = form.enctype = "multipart/form-data";
+          form.encoding = form.enctype = 'multipart/form-data';
         }
       }
 
@@ -2619,7 +2614,7 @@ hello.utils.extend(hello.utils, {
       for (x in data) if (data.hasOwnProperty(x)) {
 
         // Is this an element?
-        var el = (utils.domInstance('input', data[x]) || utils.domInstance('textArea', data[x]) || utils.domInstance('select', data[x]));
+        var el = (_this.domInstance('input', data[x]) || _this.domInstance('textArea', data[x]) || _this.domInstance('select', data[x]));
 
         // is this not an input element, or one that exists outside the form.
         if (!el || data[x].form !== form) {
@@ -2647,7 +2642,7 @@ hello.utils.extend(hello.utils, {
           if (el) {
             input.value = data[x].value;
           }
-          else if (utils.domInstance(null, data[x])) {
+          else if (_this.domInstance(null, data[x])) {
             input.value = data[x].innerHTML || data[x].innerText;
           }else {
             input.value = data[x];
@@ -2719,7 +2714,7 @@ hello.utils.extend(hello.utils, {
     }, 100);
   },
 
-  // Some of the providers require that only multi-part is used with non-binary forms.
+  // Some of the providers require that only multipart is used with non-binary forms.
   // This function checks whether the form contains binary data
   hasBinary: function(data) {
     for (var x in data) if (data.hasOwnProperty(x)) {
@@ -2762,20 +2757,18 @@ hello.utils.extend(hello.utils, {
 
 });
 
-//
-// EXTRA: Convert FORMElements to JSON for POSTING
+// EXTRA: Convert FormElement to JSON for POSTing
 // Wrappers to add additional functionality to existing functions
-//
 (function(hello) {
+
   // Copy original function
   var api = hello.api;
   var utils = hello.utils;
 
   utils.extend(utils, {
-    //
+
     // dataToJSON
     // This takes a FormElement|NodeList|InputElement|MixedObjects and convers the data object to JSON.
-    //
     dataToJSON: function(p) {
 
       var _this = this;
@@ -2828,7 +2821,6 @@ hello.utils.extend(hello.utils, {
       return data;
     },
 
-    //
     // NodeListToJSON
     // Given a list of elements extrapolate their values and return as a json object
     nodeListToJSON: function(nodelist) {
@@ -2860,7 +2852,8 @@ hello.utils.extend(hello.utils, {
 
   // Replace it
   hello.api = function() {
-    // get arguments
+
+    // Get arguments
     var p = utils.args({path: 's!', method: 's', data:'o', timeout: 'i', callback: 'f' }, arguments);
 
     // Change for into a data object
@@ -2868,7 +2861,6 @@ hello.utils.extend(hello.utils, {
       utils.dataToJSON(p);
     }
 
-    // Continue
     return api.call(this, p);
   };
 
