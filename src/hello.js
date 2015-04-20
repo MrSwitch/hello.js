@@ -160,9 +160,9 @@ hello.utils.extend(hello, {
   login: function() {
 
     // Create an object which inherits its parent as the prototype and constructs a new event chain.
-    var _this = this,
-    utils = _this.utils,
-    promise = utils.Promise();
+    var _this = this;
+    var utils = _this.utils;
+    var promise = utils.Promise();
 
     // Get parameters
     var p = utils.args({network: 's', options: 'o', callback: 'f'}, arguments);
@@ -196,7 +196,7 @@ hello.utils.extend(hello, {
     var provider  = _this.services[p.network];
 
     // Create a global listener to capture events triggered out of scope
-    var callback_id = utils.globalEvent(function(str) {
+    var callbackId = utils.globalEvent(function(str) {
 
       // The responseHandler returns a string, lets save this locally
       var obj;
@@ -228,31 +228,30 @@ hello.utils.extend(hello, {
       }
     });
 
-    var redirect_uri = utils.url(opts.redirect_uri).href;
+    var redirectUri = utils.url(opts.redirect_uri).href;
 
-    // Response Type
     // May be a space-delimited list of multiple, complementary types
-    var response_type = provider.oauth.response_type || opts.response_type;
+    var responseType = provider.oauth.response_type || opts.response_type;
 
     // Fallback to token if the module hasn't defined a grant url
-    if (/\bcode\b/.test(response_type) && !provider.oauth.grant) {
-      response_type = response_type.replace(/\bcode\b/, 'token');
+    if (/\bcode\b/.test(responseType) && !provider.oauth.grant) {
+      responseType = responseType.replace(/\bcode\b/, 'token');
     }
 
     // Query string parameters, we may pass our own arguments to form the querystring
     p.qs = {
       client_id: encodeURIComponent(provider.id),
-      response_type: encodeURIComponent(response_type),
-      redirect_uri: encodeURIComponent(redirect_uri),
+      response_type: encodeURIComponent(responseType),
+      redirect_uri: encodeURIComponent(redirectUri),
       display: opts.display,
       scope: 'basic',
       state: {
         client_id: provider.id,
         network: p.network,
         display: opts.display,
-        callback: callback_id,
+        callback: callbackId,
         state: opts.state,
-        redirect_uri: redirect_uri
+        redirect_uri: redirectUri
       }
     };
 
@@ -336,7 +335,7 @@ hello.utils.extend(hello, {
 
     // Add OAuth to state
     // Where the service is going to take advantage of the oauth_proxy
-    if (!/\btoken\b/.test(response_type) ||
+    if (!/\btoken\b/.test(responseType) ||
     parseInt(provider.oauth.version, 10) < 2 ||
     (opts.display === 'none' && provider.oauth.grant && session && session.refresh_token)) {
 
@@ -357,6 +356,7 @@ hello.utils.extend(hello, {
       // Turn the request to the OAuth Proxy for 3-legged auth
       url = utils.qs(opts.oauth_proxy, p.qs, encodeFunction);
     }
+
     // Refresh token
     else if (opts.display === 'none' && provider.oauth.grant && session && session.refresh_token) {
 
@@ -381,7 +381,7 @@ hello.utils.extend(hello, {
     // Triggering popup?
     else if (opts.display === 'popup') {
 
-      var popup = utils.popup(url, redirect_uri, opts.window_width || 500, opts.window_height || 550);
+      var popup = utils.popup(url, redirectUri, opts.window_width || 500, opts.window_height || 550);
 
       var timer = setInterval(function() {
         if (!popup || popup.closed) {
@@ -560,15 +560,13 @@ hello.utils.extend(hello.utils, {
     return url + (!this.isEmpty(params) ? (url.indexOf('?') > -1 ? '&' : '?') + this.param(params, formatFunction) : '');
   },
 
-  //
   // Param
-  // Explode/Encode the parameters of an URL string/object
-  // @param string s, String to decode
-  //
+  // Explode/encode the parameters of an URL string/object
+  // @param string s, string to decode
   param: function(s, formatFunction) {
-    var b,
-    a = {},
-    m;
+    var b;
+    var a = {};
+    var m;
 
     if (typeof (s) === 'string') {
 
@@ -602,14 +600,11 @@ hello.utils.extend(hello.utils, {
     }
   },
 
-  //
-  // Local Storage Facade
+  // Local storage facade
   store: (function(localStorage) {
 
-    //
-    // LocalStorage
-    var a = [localStorage, window.sessionStorage],
-    i = 0;
+    var a = [localStorage, window.sessionStorage];
+    var i = 0;
 
     // Set LocalStorage
     localStorage = a[i++];
@@ -639,6 +634,7 @@ hello.utils.extend(hello.utils, {
 
           return null;
         },
+
         setItem: function(prop, value) {
           document.cookie = prop + '=' + value;
         }
@@ -658,8 +654,7 @@ hello.utils.extend(hello.utils, {
       localStorage.setItem('hello', JSON.stringify(json));
     }
 
-    // Does this browser support localStorage?
-
+    // Check if the browser support local storage
     return function(name, value, days) {
 
       // Local storage
@@ -746,38 +741,29 @@ hello.utils.extend(hello.utils, {
     return n;
   },
 
-  //
-  // create IFRAME
   // An easy way to create a hidden iframe
   // @param string src
-  //
   iframe: function(src) {
     this.append('iframe', {src: src, style: {position:'absolute', left: '-1000px', bottom: 0, height: '1px', width: '1px'}}, 'body');
   },
 
-  //
-  // merge
-  // recursive merge two objects into one, second parameter overides the first
+  // Recursive merge two objects into one, second parameter overides the first
   // @param a array
-  //
   merge: function(/*a,b,c,..n*/) {
     var args = Array.prototype.slice.call(arguments);
     args.unshift({});
     return this.extend.apply(null, args);
   },
 
-  //
-  // Args utility
   // Makes it easier to assign parameters, where some are optional
   // @param o object
   // @param a arguments
-  //
   args: function(o, args) {
 
-    var p = {},
-    i = 0,
-    t = null,
-    x = null;
+    var p = {};
+    var i = 0;
+    var t = null;
+    var x = null;
 
     // define x
     // x is the first key in the list of object parameters
@@ -801,7 +787,7 @@ hello.utils.extend(hello.utils, {
       }}
     }
 
-    // else loop through and account for the missing ones.
+    // Else loop through and account for the missing ones.
     for (x in o) {if (o.hasOwnProperty(x)) {
 
       t = typeof (args[i]);
@@ -825,10 +811,7 @@ hello.utils.extend(hello.utils, {
     return p;
   },
 
-  //
-  // URL
   // Returns a URL instance
-  //
   url: function(path) {
 
     // If the path is empty
@@ -840,16 +823,15 @@ hello.utils.extend(hello.utils, {
     else if (window.URL && URL instanceof Function && URL.length !== 0) {
       return new URL(path, window.location);
     }
+
+    // Ugly shim, it works!
     else {
-      // ugly shim, it works!
       var a = document.createElement('a');
       a.href = path;
       return a;
     }
   },
 
-  //
-  // diff
   diff: function(a, b) {
     var r = [];
     for (var i = 0; i < b.length; i++) {
@@ -861,8 +843,6 @@ hello.utils.extend(hello.utils, {
     return r;
   },
 
-  //
-  // indexOf
   // IE hack Array.indexOf doesn't exist prior to IE9
   indexOf: function(a, s) {
     // Do we need the hack?
@@ -879,11 +859,8 @@ hello.utils.extend(hello.utils, {
     return -1;
   },
 
-  //
-  // unique
-  // remove duplicate and null values from an array
+  // Remove duplicate and null values from an array
   // @param a array
-  //
   unique: function(a) {
     if (typeof (a) !== 'object') { return []; }
 
@@ -909,8 +886,11 @@ hello.utils.extend(hello.utils, {
     }
 
     // Array?
-    if (obj && obj.length > 0) return false;
-    if (obj && obj.length === 0) return true;
+    if (obj && obj.length > 0)
+      return false;
+
+    if (obj && obj.length === 0)
+      return true;
 
     // object?
     for (var key in obj) {
@@ -922,7 +902,6 @@ hello.utils.extend(hello.utils, {
     return true;
   },
 
-  // Shim, Object create
   // A shim for Object.create(), it adds a prototype to a new object
   objectCreate: (function() {
     if (Object.create) {
@@ -941,49 +920,28 @@ hello.utils.extend(hello.utils, {
     };
   })(),
 
-  /*
-    //
-    // getProtoTypeOf
-    // Once all browsers catchup we can access the prototype
-    // Currently: manually define prototype object in the `parent` attribute
-    getPrototypeOf : (function(){
-      if(Object.getPrototypeOf){
-        return Object.getPrototypeOf;
-      }
-      else if(({}).__proto__){
-        return function(obj){
-          return obj.__proto__;
-        };
-      }
-      return function(obj){
-        if(obj.prototype && obj !== obj.prototype.constructor){
-          return obj.prototype.constructor;
-        }
-      };
-    })(),
-    */
+  //jscs:disable
 
   /*!
-    **  Thenable -- Embeddable Minimum Strictly-Compliant Promises/A+ 1.1.1 Thenable
-    **  Copyright (c) 2013-2014 Ralf S. Engelschall <http://engelschall.com>
-    **  Licensed under The MIT License <http://opensource.org/licenses/MIT>
-    **  Source-Code distributed on <http://github.com/rse/thenable>
-    */
-
-  Promise: (function() {
+   **  Thenable -- Embeddable Minimum Strictly-Compliant Promises/A+ 1.1.1 Thenable
+   **  Copyright (c) 2013-2014 Ralf S. Engelschall <http://engelschall.com>
+   **  Licensed under The MIT License <http://opensource.org/licenses/MIT>
+   **  Source-Code distributed on <http://github.com/rse/thenable>
+   */
+  Promise : (function(){
     /*  promise states [Promises/A+ 2.1]  */
     var STATE_PENDING   = 0;                                         /*  [Promises/A+ 2.1.1]  */
     var STATE_FULFILLED = 1;                                         /*  [Promises/A+ 2.1.2]  */
     var STATE_REJECTED  = 2;                                         /*  [Promises/A+ 2.1.3]  */
 
     /*  promise object constructor  */
-    var api = function(executor) {
+    var api = function (executor) {
       /*  optionally support non-constructor/plain-function call  */
       if (!(this instanceof api))
-      return new api(executor);
+        return new api(executor);
 
       /*  initialize object  */
-      this.id           = 'Thenable/1.0.6';
+      this.id           = "Thenable/1.0.6";
       this.state        = STATE_PENDING; /*  initial state  */
       this.fulfillValue = undefined;     /*  initial value  */     /*  [Promises/A+ 1.3, 2.1.2.2]  */
       this.rejectReason = undefined;     /*  initial reason */     /*  [Promises/A+ 1.5, 2.1.3.2]  */
@@ -996,80 +954,79 @@ hello.utils.extend(hello.utils, {
       };
 
       /*  support optional executor function  */
-      if (typeof executor === 'function')
-      executor.call(this, this.fulfill.bind(this), this.reject.bind(this));
+      if (typeof executor === "function")
+        executor.call(this, this.fulfill.bind(this), this.reject.bind(this));
     };
 
     /*  promise API methods  */
     api.prototype = {
       /*  promise resolving methods  */
-      fulfill: function(value) { return deliver(this, STATE_FULFILLED, 'fulfillValue', value); },
-      reject:  function(value) { return deliver(this, STATE_REJECTED,  'rejectReason', value); },
+      fulfill: function (value) { return deliver(this, STATE_FULFILLED, "fulfillValue", value); },
+      reject:  function (value) { return deliver(this, STATE_REJECTED,  "rejectReason", value); },
 
       /*  "The then Method" [Promises/A+ 1.1, 1.2, 2.2]  */
-      then: function(onFulfilled, onRejected) {
+      then: function (onFulfilled, onRejected) {
         var curr = this;
         var next = new api();                                    /*  [Promises/A+ 2.2.7]  */
         curr.onFulfilled.push(
-        resolver(onFulfilled, next, 'fulfill'));             /*  [Promises/A+ 2.2.2/2.2.6]  */
+          resolver(onFulfilled, next, "fulfill"));             /*  [Promises/A+ 2.2.2/2.2.6]  */
         curr.onRejected.push(
-        resolver(onRejected,  next, 'reject'));             /*  [Promises/A+ 2.2.3/2.2.6]  */
+          resolver(onRejected,  next, "reject" ));             /*  [Promises/A+ 2.2.3/2.2.6]  */
         execute(curr);
         return next.proxy;                                       /*  [Promises/A+ 2.2.7, 3.3]  */
       }
     };
 
     /*  deliver an action  */
-    var deliver = function(curr, state, name, value) {
+    var deliver = function (curr, state, name, value) {
       if (curr.state === STATE_PENDING) {
         curr.state = state;                                      /*  [Promises/A+ 2.1.2.1, 2.1.3.1]  */
         curr[name] = value;                                      /*  [Promises/A+ 2.1.2.2, 2.1.3.2]  */
         execute(curr);
       }
-
       return curr;
     };
 
     /*  execute all handlers  */
-    var execute = function(curr) {
+    var execute = function (curr) {
       if (curr.state === STATE_FULFILLED)
-      execute_handlers(curr, 'onFulfilled', curr.fulfillValue);
+        execute_handlers(curr, "onFulfilled", curr.fulfillValue);
       else if (curr.state === STATE_REJECTED)
-      execute_handlers(curr, 'onRejected',  curr.rejectReason);
+        execute_handlers(curr, "onRejected",  curr.rejectReason);
     };
 
     /*  execute particular set of handlers  */
-    var execute_handlers = function(curr, name, value) {
+    var execute_handlers = function (curr, name, value) {
       /* global process: true */
       /* global setImmediate: true */
       /* global setTimeout: true */
 
       /*  short-circuit processing  */
       if (curr[name].length === 0)
-      return;
+        return;
 
       /*  iterate over all handlers, exactly once  */
       var handlers = curr[name];
       curr[name] = [];                                             /*  [Promises/A+ 2.2.2.3, 2.2.3.3]  */
-      var func = function() {
+      var func = function () {
         for (var i = 0; i < handlers.length; i++)
-        handlers[i](value);                                  /*  [Promises/A+ 2.2.5]  */
+          handlers[i](value);                                  /*  [Promises/A+ 2.2.5]  */
       };
 
       /*  execute procedure asynchronously  */                     /*  [Promises/A+ 2.2.4, 3.1]  */
-      if (typeof process === 'object' && typeof process.nextTick === 'function')
-      process.nextTick(func);
-      else if (typeof setImmediate === 'function')
-      setImmediate(func);
+      if (typeof process === "object" && typeof process.nextTick === "function")
+        process.nextTick(func);
+      else if (typeof setImmediate === "function")
+        setImmediate(func);
       else
-      setTimeout(func, 0);
+        setTimeout(func, 0);
     };
 
     /*  generate a resolver function  */
-    var resolver = function(cb, next, method) {
-      return function(value) {
-        if (typeof cb !== 'function')                            /*  [Promises/A+ 2.2.1, 2.2.7.3, 2.2.7.4]  */
-        next[method].call(next, value);                      /*  [Promises/A+ 2.2.7.3, 2.2.7.4]  */
+    var resolver = function (cb, next, method) {
+      return function (value) {
+        if (typeof cb !== "function")                            /*  [Promises/A+ 2.2.1, 2.2.7.3, 2.2.7.4]  */
+          next[method].call(next, value);                      /*  [Promises/A+ 2.2.7.3, 2.2.7.4]  */
         else {
           var result;
           try { result = cb(value); }                          /*  [Promises/A+ 2.2.2.1, 2.2.3.1, 2.2.5, 3.2]  */
@@ -1077,24 +1034,23 @@ hello.utils.extend(hello.utils, {
             next.reject(e);                                  /*  [Promises/A+ 2.2.7.2]  */
             return;
           }
-
           resolve(next, result);                               /*  [Promises/A+ 2.2.7.1]  */
         }
       };
     };
 
     /*  "Promise Resolution Procedure"  */                           /*  [Promises/A+ 2.3]  */
-    var resolve = function(promise, x) {
-    /*  sanity check arguments  */                               /*  [Promises/A+ 2.3.1]  */
+    var resolve = function (promise, x) {
+      /*  sanity check arguments  */                               /*  [Promises/A+ 2.3.1]  */
       if (promise === x || promise.proxy === x) {
-        promise.reject(new TypeError('cannot resolve promise with itself'));
+        promise.reject(new TypeError("cannot resolve promise with itself"));
         return;
       }
 
       /*  surgically check for a "then" method
-              (mainly to just call the "getter" of "then" only once)  */
+        (mainly to just call the "getter" of "then" only once)  */
       var then;
-      if ((typeof x === 'object' && x !== null) || typeof x === 'function') {
+      if ((typeof x === "object" && x !== null) || typeof x === "function") {
         try { then = x.then; }                                   /*  [Promises/A+ 2.3.3.1, 3.5]  */
         catch (e) {
           promise.reject(e);                                   /*  [Promises/A+ 2.3.3.2]  */
@@ -1103,42 +1059,44 @@ hello.utils.extend(hello.utils, {
       }
 
       /*  handle own Thenables    [Promises/A+ 2.3.2]
-              and similar "thenables" [Promises/A+ 2.3.3]  */
-      if (typeof then === 'function') {
+        and similar "thenables" [Promises/A+ 2.3.3]  */
+      if (typeof then === "function") {
         var resolved = false;
         try {
           /*  call retrieved "then" method */                  /*  [Promises/A+ 2.3.3.3]  */
           then.call(x,
             /*  resolvePromise  */                           /*  [Promises/A+ 2.3.3.3.1]  */
-            function(y) {
+            function (y) {
               if (resolved) return; resolved = true;       /*  [Promises/A+ 2.3.3.3.3]  */
               if (y === x)                                 /*  [Promises/A+ 3.6]  */
-                promise.reject(new TypeError('circular thenable chain'));
+                promise.reject(new TypeError("circular thenable chain"));
               else
                 resolve(promise, y);
             },
 
             /*  rejectPromise  */                            /*  [Promises/A+ 2.3.3.3.2]  */
-            function(r) {
-              if (resolved) return;
-              resolved = true;       /*  [Promises/A+ 2.3.3.3.3]  */
+            function (r) {
+              if (resolved) return; resolved = true;       /*  [Promises/A+ 2.3.3.3.3]  */
               promise.reject(r);
             }
           );
         }
         catch (e) {
           if (!resolved)                                       /*  [Promises/A+ 2.3.3.3.3]  */
-          promise.reject(e);                               /*  [Promises/A+ 2.3.3.3.4]  */
+            promise.reject(e);                               /*  [Promises/A+ 2.3.3.3.4]  */
         }
-
         return;
       }
 
       /*  handle other values  */
       promise.fulfill(x);                                          /*  [Promises/A+ 2.3.4, 2.3.3.4]  */
     };
+
+    /*  export API  */
     return api;
   })(),
+
+  //jscs:enable
 
   // Event
   // A contructor superclass for adding event menthods, on, off, emit.
@@ -1207,14 +1165,12 @@ hello.utils.extend(hello.utils, {
       };
 
       // Find the callbacks which match the condition and call
-      var proto = this;
-      while (proto && proto.findEvents) {
+      var _this = this;
+      while (_this && _this.findEvents) {
 
         // Find events which match
-        proto.findEvents(evt + ',*', handler);
-
-        // proto = this.utils.getPrototypeOf(proto);
-        proto = proto.parent;
+        _this.findEvents(evt + ',*', handler);
+        _this = _this.parent;
       }
 
       return this;
@@ -1223,11 +1179,12 @@ hello.utils.extend(hello.utils, {
     //
     // Easy functions
     this.emitAfter = function() {
-      var self = this,
-      args = arguments;
+      var _this = this;
+      var args = arguments;
       setTimeout(function() {
-        self.emit.apply(self, args);
+        _this.emit.apply(_this, args);
       }, 0);
+
       return this;
     };
 
@@ -1278,6 +1235,7 @@ hello.utils.extend(hello.utils, {
         } catch (e) {}
       }
     };
+
     return guid;
   },
 
@@ -1285,7 +1243,7 @@ hello.utils.extend(hello.utils, {
   // Trigger a clientside popup
   // This has been augmented to support PhoneGap
   //
-  popup: function(url, redirect_uri, windowWidth, windowHeight) {
+  popup: function(url, redirectUri, windowWidth, windowHeight) {
 
     var documentElement = document.documentElement;
 
@@ -1319,8 +1277,8 @@ hello.utils.extend(hello.utils, {
 
         // Get the origin of the redirect URI
 
-        var a = hello.utils.url(redirect_uri);
-        var redirect_uri_origin = a.origin || (a.protocol + '//' + a.hostname);
+        var a = hello.utils.url(redirectUri);
+        var redirectUriOrigin = a.origin || (a.protocol + '//' + a.hostname);
 
         // Listen to changes in the InAppBrowser window
 
@@ -1328,12 +1286,12 @@ hello.utils.extend(hello.utils, {
 
           var url = e.url;
 
-          // Is this the path, as given by the redirect_uri?
-          // Check the new URL agains the redirect_uri_origin.
+          // Is this the path, as given by the redirectUri?
+          // Check the new URL agains the redirectUriOrigin.
           // According to #63 a user could click 'cancel' in some dialog boxes ....
           // The popup redirects to another page with the same origin, yet we still wish it to close.
 
-          if (url.indexOf(redirect_uri_origin) !== 0) {
+          if (url.indexOf(redirectUriOrigin) !== 0) {
             return;
           }
 
@@ -1360,6 +1318,7 @@ hello.utils.extend(hello.utils, {
                   }, 1000);
                 });
               },
+
               search: a.search,
               hash: a.hash,
               href: a.href
@@ -1404,7 +1363,7 @@ hello.utils.extend(hello.utils, {
     //  - This is bad if the value contains break points which are escaped
     //  - Hence the url must be encoded twice as it contains breakpoints.
     if (navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1) {
-      url = redirect_uri + '#oauth_redirect=' + encodeURIComponent(encodeURIComponent(url));
+      url = redirectUri + '#oauth_redirect=' + encodeURIComponent(encodeURIComponent(url));
     }
 
     return open(url);
@@ -1560,13 +1519,11 @@ hello.utils.extend(hello.utils, {
             parent[cb](str);
           }
           catch (e) {
-            // "Error thrown whilst executing parent callback"
+            // Error thrown whilst executing parent callback
           }
         }
-        else {
-          // "Error: Callback missing from parent window, snap!"
-        }
       }
+
       closeWindow();
     }
 
@@ -1578,7 +1535,7 @@ hello.utils.extend(hello.utils, {
       }
       catch (e) {}
 
-      // IOS bug wont let us close a popup if still loading
+      // iOS bug wont let us close a popup if still loading
       if (window.addEventListener) {
         window.addEventListener('load', function() {
           window.close();
@@ -1588,9 +1545,7 @@ hello.utils.extend(hello.utils, {
   }
 });
 
-//////////////////////////////////
 // Events
-//////////////////////////////////
 
 // Extend the hello object with its own event instance
 hello.utils.Event.call(hello);
@@ -1612,10 +1567,10 @@ hello.utils.responseHandler(window, window.opener || window.parent);
 (function(hello) {
 
   // Monitor for a change in state and fire
-  var oldSessions = {},
+  var oldSessions = {};
 
   // Hash of expired tokens
-  expired = {};
+  var expired = {};
 
   // Listen to other triggers to Auth events, use these to update this
   hello.on('auth.login, auth.logout', function(auth) {
@@ -1627,8 +1582,8 @@ hello.utils.responseHandler(window, window.opener || window.parent);
   (function self() {
 
     var CURRENT_TIME = ((new Date()).getTime() / 1e3);
-    var emit = function(event_name) {
-      hello.emit('auth.' + event_name, {
+    var emit = function(eventName) {
+      hello.emit('auth.' + eventName, {
         network: name,
         authResponse: session
       });
@@ -1907,7 +1862,7 @@ hello.api = function() {
 
   return promise.proxy;
 
-  // if url needs a base
+  // If url needs a base
   // Wrap everything in
   function getPath(url) {
 
