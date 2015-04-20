@@ -27,13 +27,13 @@
     "test": "grunt test"
   },
   "devDependencies": {
-    "shunt": "^0.1.4",
     "grunt": "^0.4.4",
-    "grunt-mocha-phantomjs": "~0.4.3",
-    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-bumpup": "^0.6.1",
     "grunt-contrib-watch": "^0.6.1",
+    "grunt-jscs": "^1.6.0",
+    "grunt-mocha-phantomjs": "~0.4.3",
     "mocha": "^1.18.2",
-    "sinon": "~1.7.3",
-    "grunt-bumpup": "^0.6.1"
+    "shunt": "^0.1.4",
+    "sinon": "~1.7.3"
   }
 }
