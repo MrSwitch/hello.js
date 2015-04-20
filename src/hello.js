@@ -6,23 +6,16 @@
  * @author Andrew Dodson
  * @company Knarly
  *
- * @copyright Andrew Dodson, 2012 - 2013
+ * @copyright Andrew Dodson, 2012 - 2015
  * @license MIT: You are free to use and modify this code for any use, on the condition that this copyright notice remains.
  */
-
-// Can't use strict with arguments.callee
-//"use strict";
-
-//
-// Setup
-// Initiates the construction of the library
 
 var hello = function(name) {
   return hello.use(name);
 };
 
 hello.utils = {
-  //
+
   // Extend the first object with the properties and methods of the second
   extend: function(r /*, a[, b[, ...]] */) {
 
@@ -33,10 +26,7 @@ hello.utils = {
       var a = args[i];
       if (r instanceof Object && a instanceof Object && r !== a) {
         for (var x in a) {
-          //if(a.hasOwnProperty(x)){
           r[x] = hello.utils.extend(r[x], a[x]);
-
-          //}
         }
       }
       else {
@@ -48,60 +38,42 @@ hello.utils = {
   }
 };
 
-/////////////////////////////////////////////////
 // Core library
-// This contains the following methods
-// ----------------------------------------------
-// init
-// login
-// logout
-// getAuthRequest
-/////////////////////////////////////////////////
 
 hello.utils.extend(hello, {
 
-  //
-  // Options
   settings: {
 
-    //
-    // OAuth 2 authentication defaults
+    // OAuth2 authentication defaults
     redirect_uri: window.location.href.split('#')[0],
     response_type: 'token',
     display: 'popup',
     state: '',
 
-    //
-    // OAuth 1 shim
+    // OAuth1 shim
     // The path to the OAuth1 server for signing user requests
-    // Wanna recreate your own? checkout https://github.com/MrSwitch/node-oauth-shim
+    // Want to recreate your own? Checkout https://github.com/MrSwitch/node-oauth-shim
     oauth_proxy: 'https://auth-server.herokuapp.com/proxy',
 
     //
-    // API Timeout, milliseconds
+    // API timeout in milliseconds
     timeout: 20000,
 
-    //
-    // Default Network
+    // Default service / network
     default_service: null,
 
-    //
-    // Force signin
+    // Force sign-in
     // When hello.login is fired, ignore current session expiry and continue with login
     force: true,
 
-    //
     // Page URL
-    // When `display=page` this property defines where the users page should end up after redirect_uri
+    // When 'display=page' this property defines where the users page should end up after redirect_uri
     // Ths could be problematic if the redirect_uri is indeed the final place, 
     // Typically this circumvents the problem of the redirect_url being a dumb relay page.
     page_uri: window.location.href
   },
 
-  //
   // Service
-  // Get/Set the default service
-  //
   service: function(service) {
 
     if (typeof (service) !== 'undefined') {
@@ -111,15 +83,11 @@ hello.utils.extend(hello, {
     return this.utils.store('sync_service');
   },
 
-  //
-  // Services
-  // Collection of objects which define services configurations
+  // Service configuration objects
   services: {},
 
-  //
   // Use
-  // Define a new instance of the Hello library with a default service
-  //
+  // Define a new instance of the HelloJS library with a default service
   use: function(service) {
 
     // Create self, which inherits from its parent
@@ -139,13 +107,11 @@ hello.utils.extend(hello, {
     return self;
   },
 
-  //
-  // init
-  // Define the clientId's for the endpoint services
+  // Initialize
+  // Define the client_ids for the endpoint services
   // @param object o, contains a key value pair, service => clientId
   // @param object opts, contains a key value pair of options used for defining the authentication defaults
   // @param number timeout, timeout in seconds
-  //
   init: function(services, options) {
 
     var utils = this.utils;
@@ -162,15 +128,15 @@ hello.utils.extend(hello, {
       }
     }}
 
-    //
-    // merge services if there already exists some
+    // Merge services if there already exists some
     utils.extend(this.services, services);
 
-    //
     // Format the incoming
-    for (x in this.services) {if (this.services.hasOwnProperty(x)) {
-      this.services[x].scope = this.services[x].scope || {};
-    }}
+    for (x in this.services) {
+      if (this.services.hasOwnProperty(x)) {
+        this.services[x].scope = this.services[x].scope || {};
+      }
+    }
 
     //
     // Update the default settings with this one.
@@ -186,24 +152,20 @@ hello.utils.extend(hello, {
     return this;
   },
 
-  //
   // Login
   // Using the endpoint
-  // @param network	stringify				name to connect to
-  // @param options	object		(optional)	{display mode, is either none|popup(default)|page, scope: email,birthday,publish, .. }
-  // @param callback	function	(optional)	fired on signin
-  //
-  login:  function() {
+  // @param network stringify       name to connect to
+  // @param options object    (optional)  {display mode, is either none|popup(default)|page, scope: email,birthday,publish, .. }
+  // @param callback  function  (optional)  fired on signin
+  login: function() {
 
-    // Create self
-    // An object which inherits its parent as the prototype.
-    // And constructs a new event chain.
+    // Create an object which inherits its parent as the prototype and constructs a new event chain.
     var self = this,
     utils = self.utils,
     promise = utils.Promise();
 
     // Get parameters
-    var p = utils.args({network:'s', options:'o', callback:'f'}, arguments);
+    var p = utils.args({network: 's', options: 'o', callback: 'f'}, arguments);
 
     // Local vars
     var url;
@@ -223,7 +185,7 @@ hello.utils.extend(hello, {
     }
 
     promise.proxy.then(emit.bind(this, 'auth.login auth'), emit.bind(this, 'auth.failed auth'));
-		
+    
     // Is our service valid?
     if (typeof (p.network) !== 'string' || !(p.network in self.services)) {
       // trigger the default login.
@@ -231,15 +193,12 @@ hello.utils.extend(hello, {
       return promise.reject(error('invalid_network', 'The provided network was not recognized'));
     }
 
-    //
     var provider  = self.services[p.network];
 
-    //
     // Create a global listener to capture events triggered out of scope
     var callback_id = utils.globalEvent(function(str) {
 
-      // Save this locally
-      // responseHandler returns a string, lets save this locally
+      // The responseHandler returns a string, lets save this locally
       var obj;
 
       if (str) {
@@ -287,10 +246,7 @@ hello.utils.extend(hello, {
       response_type = response_type.replace(/\bcode\b/, 'token');
     }
 
-    //
-    // QUERY STRING
-    // querystring parameters, we may pass our own arguments to form the querystring
-    //
+    // Query string parameters, we may pass our own arguments to form the querystring
     p.qs = {
       client_id: encodeURIComponent(provider.id),
       response_type: encodeURIComponent(response_type),
@@ -307,24 +263,18 @@ hello.utils.extend(hello, {
       }
     };
 
-    //
-    // SESSION
     // Get current session for merging scopes, and for quick auth response
     var session = utils.store(p.network);
-
-    //
-    // SCOPES
-    // Authentication permisions
-    //
-		
+    
+    // Scopes (authentication permisions)
     // convert any array, or falsy value to a string.
     var scope = (opts.scope || '').toString();
 
     scope = (scope ? scope + ',' : '') + p.qs.scope;
 
-    // Append scopes from a previous session
+    // Append scopes from a previous session.
     // This helps keep app credentials constant,
-    // Avoiding having to keep tabs on what scopes are authorized
+    // avoiding having to keep tabs on what scopes are authorized
     if (session && 'scope' in session && session.scope instanceof String) {
       scope += ',' + session.scope;
     }
@@ -628,7 +578,7 @@ hello.utils.extend(hello.utils, {
 
     return url + (!this.isEmpty(params) ? (url.indexOf('?') > -1 ? '&' : '?') + this.param(params, formatFunction) : '');
   },
-	
+  
   //
   // Param
   // Explode/Encode the parameters of an URL string/object
@@ -638,7 +588,7 @@ hello.utils.extend(hello.utils, {
     var b,
     a = {},
     m;
-		
+    
     if (typeof (s) === 'string') {
 
       formatFunction = formatFunction || decodeURIComponent;
@@ -658,7 +608,7 @@ hello.utils.extend(hello.utils, {
       formatFunction = formatFunction || encodeURIComponent;
 
       var o = s;
-		
+    
       a = [];
 
       for (var x in o) {if (o.hasOwnProperty(x)) {
@@ -670,7 +620,7 @@ hello.utils.extend(hello.utils, {
       return a.join('&');
     }
   },
-	
+  
   //
   // Local Storage Facade
   store: (function(localStorage) {
@@ -794,7 +744,7 @@ hello.utils.extend(hello.utils, {
         }}
       }
     }
-		
+    
     if (target === 'body') {
       (function self() {
         if (document.body) {
@@ -847,7 +797,7 @@ hello.utils.extend(hello.utils, {
     i = 0,
     t = null,
     x = null;
-		
+    
     // define x
     // x is the first key in the list of object parameters
     for (x in o) {if (o.hasOwnProperty(x)) {
@@ -885,9 +835,8 @@ hello.utils.extend(hello.utils, {
       ) {
         p[x] = args[i++];
       }
-			
+      
       else if (typeof (o[x]) === 'string' && o[x].indexOf('!') > -1) {
-        // ("Whoops! " + x + " not defined");
         return false;
       }
     }}
@@ -1012,33 +961,33 @@ hello.utils.extend(hello.utils, {
   })(),
 
   /*
-  	//
-  	// getProtoTypeOf
-  	// Once all browsers catchup we can access the prototype
-  	// Currently: manually define prototype object in the `parent` attribute
-  	getPrototypeOf : (function(){
-  		if(Object.getPrototypeOf){
-  			return Object.getPrototypeOf;
-  		}
-  		else if(({}).__proto__){
-  			return function(obj){
-  				return obj.__proto__;
-  			};
-  		}
-  		return function(obj){
-  			if(obj.prototype && obj !== obj.prototype.constructor){
-  				return obj.prototype.constructor;
-  			}
-  		};
-  	})(),
-  	*/
+    //
+    // getProtoTypeOf
+    // Once all browsers catchup we can access the prototype
+    // Currently: manually define prototype object in the `parent` attribute
+    getPrototypeOf : (function(){
+      if(Object.getPrototypeOf){
+        return Object.getPrototypeOf;
+      }
+      else if(({}).__proto__){
+        return function(obj){
+          return obj.__proto__;
+        };
+      }
+      return function(obj){
+        if(obj.prototype && obj !== obj.prototype.constructor){
+          return obj.prototype.constructor;
+        }
+      };
+    })(),
+    */
   
   /*!
-  	**  Thenable -- Embeddable Minimum Strictly-Compliant Promises/A+ 1.1.1 Thenable
-  	**  Copyright (c) 2013-2014 Ralf S. Engelschall <http://engelschall.com>
-  	**  Licensed under The MIT License <http://opensource.org/licenses/MIT>
-  	**  Source-Code distributed on <http://github.com/rse/thenable>
-  	*/
+    **  Thenable -- Embeddable Minimum Strictly-Compliant Promises/A+ 1.1.1 Thenable
+    **  Copyright (c) 2013-2014 Ralf S. Engelschall <http://engelschall.com>
+    **  Licensed under The MIT License <http://opensource.org/licenses/MIT>
+    **  Source-Code distributed on <http://github.com/rse/thenable>
+    */
   
   Promise: (function() {
     /*  promise states [Promises/A+ 2.1]  */
@@ -1162,7 +1111,7 @@ hello.utils.extend(hello.utils, {
       }
 
       /*  surgically check for a "then" method
-      				(mainly to just call the "getter" of "then" only once)  */
+              (mainly to just call the "getter" of "then" only once)  */
       var then;
       if ((typeof x === 'object' && x !== null) || typeof x === 'function') {
         try { then = x.then; }                                   /*  [Promises/A+ 2.3.3.1, 3.5]  */
@@ -1173,28 +1122,28 @@ hello.utils.extend(hello.utils, {
       }
 
       /*  handle own Thenables    [Promises/A+ 2.3.2]
-      				and similar "thenables" [Promises/A+ 2.3.3]  */
+              and similar "thenables" [Promises/A+ 2.3.3]  */
       if (typeof then === 'function') {
         var resolved = false;
         try {
-        /*  call retrieved "then" method */                  /*  [Promises/A+ 2.3.3.3]  */
+          /*  call retrieved "then" method */                  /*  [Promises/A+ 2.3.3.3]  */
           then.call(x,
-          /*  resolvePromise  */                           /*  [Promises/A+ 2.3.3.3.1]  */
-						function(y) {
-  if (resolved) return; resolved = true;       /*  [Promises/A+ 2.3.3.3.3]  */
-  if (y === x)                                 /*  [Promises/A+ 3.6]  */
-  promise.reject(new TypeError('circular thenable chain'));
-  else
-  resolve(promise, y);
-						},
+            /*  resolvePromise  */                           /*  [Promises/A+ 2.3.3.3.1]  */
+            function(y) {
+              if (resolved) return; resolved = true;       /*  [Promises/A+ 2.3.3.3.3]  */
+              if (y === x)                                 /*  [Promises/A+ 3.6]  */
+                promise.reject(new TypeError('circular thenable chain'));
+              else
+                resolve(promise, y);
+            },
 
-						/*  rejectPromise  */                            /*  [Promises/A+ 2.3.3.3.2]  */
-						function(r) {
-  if (resolved) return; resolved = true;       /*  [Promises/A+ 2.3.3.3.3]  */
-  promise.reject(r);
-						}
-
-					);
+            /*  rejectPromise  */                            /*  [Promises/A+ 2.3.3.3.2]  */
+            function(r) {
+              if (resolved) return;
+              resolved = true;       /*  [Promises/A+ 2.3.3.3.3]  */
+              promise.reject(r);
+            }
+          );
         }
         catch (e) {
           if (!resolved)                                       /*  [Promises/A+ 2.3.3.3.3]  */
@@ -1207,20 +1156,16 @@ hello.utils.extend(hello.utils, {
       /*  handle other values  */
       promise.fulfill(x);                                          /*  [Promises/A+ 2.3.4, 2.3.3.4]  */
     };
-
-    /*  export API  */
     return api;
   })(),
 
-  //
   // Event
   // A contructor superclass for adding event menthods, on, off, emit.
-  //
   Event: function() {
 
     var separator = /[\s\,]+/;
 
-    // If this doesn't support getProtoType then we can't get prototype.events of the parent
+    // If this doesn't support getPrototype then we can't get prototype.events of the parent
     // So lets get the current instance events, and add those to a parent property
     this.parent = {
       events: this.events,
@@ -1231,11 +1176,9 @@ hello.utils.extend(hello.utils, {
 
     this.events = {};
 
-    //
-    // On, Subscribe to events
-    // @param evt		string
-    // @param callback	function
-    //
+    // On, subscribe to events
+    // @param evt   string
+    // @param callback  function
     this.on = function(evt, callback) {
 
       if (callback && typeof (callback) === 'function') {
@@ -1250,11 +1193,9 @@ hello.utils.extend(hello.utils, {
       return this;
     };
 
-    //
-    // Off, Unsubscribe to events
-    // @param evt		string
-    // @param callback	function
-    //
+    // Off, unsubscribe to events
+    // @param evt   string
+    // @param callback  function
     this.off = function(evt, callback) {
 
       this.findEvents(evt, function(name, index) {
@@ -1266,10 +1207,8 @@ hello.utils.extend(hello.utils, {
       return this;
     };
 
-    //
     // Emit
     // Triggers any subscribed events
-    //
     this.emit = function(evt /*, data, ... */) {
 
       // Get arguments as an Array, knock off the first one
@@ -1332,10 +1271,8 @@ hello.utils.extend(hello.utils, {
     };
 
     return this;
-
   },
 
-  //
   // Global Events
   // Attach the callback to the window object
   // Return its unique reference
@@ -1357,7 +1294,7 @@ hello.utils.extend(hello.utils, {
         // Remove this handler reference
         try {
           delete window[guid];
-        }catch (e) {}
+        } catch (e) {}
       }
     };
     return guid;
@@ -1389,9 +1326,9 @@ hello.utils.extend(hello.utils, {
 
       // Trigger callback
       var popup = window.open(
-	      url,
-	      '_blank',
-	      'resizeable=true,height=' + windowHeight + ',width=' + windowWidth + ',left=' + left + ',top='  + top
+        url,
+        '_blank',
+        'resizeable=true,height=' + windowHeight + ',width=' + windowWidth + ',left=' + left + ',top='  + top
       );
 
       // PhoneGap support
@@ -1429,7 +1366,7 @@ hello.utils.extend(hello.utils, {
             location: {
               // Change the location of the popup
               assign: function(location) {
-								
+                
                 // Unfourtunatly an app is may not change the location of a InAppBrowser window.
                 // So to shim this, just open a new one.
 
@@ -1545,7 +1482,7 @@ hello.utils.extend(hello.utils, {
     //
     // FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
     // SoundCloud is the state in the querystring and the token in the hashtag, so we'll mix the two together
-		
+    
     p = utils.merge(utils.param(location.search || ''), utils.param(location.hash || ''));
 
     // if p.state
@@ -1607,10 +1544,10 @@ hello.utils.extend(hello.utils, {
       if (p.page_uri) {
         window.location = p.page_uri;
       }
-			
+      
     }
 
- 		//
+    //
     // OAuth redirect, fixes URI fragments from being lost in Safari
     // (URI Fragments within 302 Location URI are lost over HTTPS)
     // Loading the redirect.html before triggering the OAuth Flow seems to fix it.
@@ -1637,7 +1574,7 @@ hello.utils.extend(hello.utils, {
 
       if (parent) {
         // Call the generic listeners
-        //				win.hello.emit(network+":auth."+(obj.error?'failed':'login'), obj);
+        //        win.hello.emit(network+":auth."+(obj.error?'failed':'login'), obj);
         // Call the inline listeners
 
         // TODO: remove from session object...
@@ -1725,7 +1662,7 @@ hello.utils.responseHandler(window, window.opener || window.parent);
       old_session[auth.network] = hello.utils.store(auth.network) || {};
     }
   });
-	
+  
   (function self() {
 
     var CURRENT_TIME = ((new Date()).getTime() / 1e3);
@@ -1743,7 +1680,7 @@ hello.utils.responseHandler(window, window.opener || window.parent);
         // we haven't attached an ID so dont listen.
         continue;
       }
-		
+    
       // Get session
       var session = hello.utils.store(name) || {};
       var provider = hello.services[name];
@@ -1770,7 +1707,7 @@ hello.utils.responseHandler(window, window.opener || window.parent);
         }
         catch (e) {}
       }
-			
+      
       //
       // Refresh token
       //
@@ -1842,12 +1779,12 @@ hello.utils.responseHandler(window, window.opener || window.parent);
 
 /////////////////////////////////////////
 // API
-// @param path		string
-// @param query		object (optional)
-// @param method	string (optional)
-// @param data		object (optional)
-// @param timeout	integer (optional)
-// @param callback	function (optional)
+// @param path    string
+// @param query   object (optional)
+// @param method  string (optional)
+// @param data    object (optional)
+// @param timeout integer (optional)
+// @param callback  function (optional)
 
 hello.api = function() {
 
@@ -1927,7 +1864,7 @@ hello.api = function() {
   if (!('proxy' in p)) {
     p.proxy = p.oauth_proxy && o.oauth && parseInt(o.oauth.version, 10) === 1;
   }
-	
+  
   // TIMEOUT
   // Adopt timeout from global settings by default
 
@@ -2008,7 +1945,7 @@ hello.api = function() {
     // Else the URL is a string
     getPath(url);
   }
-	
+  
   return promise.proxy;
 
   // if url needs a base
@@ -2487,14 +2424,14 @@ hello.utils.extend(hello.utils, {
     operafix,
     script,
     result = {error:{message:'server_error', code:'server_error'}},
-			cb = function() {
+      cb = function() {
   if (!(bool++)) {
     window.setTimeout(function() {
       callback(result);
       head.removeChild(script);
     }, 0);
   }
-			};
+      };
 
     // Add callback to the window object
     callbackID = utils.globalEvent(function(json) {
@@ -2548,7 +2485,7 @@ hello.utils.extend(hello.utils, {
     // However: unable recreate the bug of firing off the onreadystatechange before the script content has been executed and the value of "result" has been defined.
     // Inject script tag into the head element
     head.appendChild(script);
-		
+    
     // Append Opera Fix to run after our script
     if (operafix) {
       head.appendChild(operafix);
@@ -2574,7 +2511,7 @@ hello.utils.extend(hello.utils, {
     i = 0,
     x = null,
     bool = 0,
-			cb = function(r) {
+      cb = function(r) {
   if (!(bool++)) {
 
     // fire the callback
@@ -2583,7 +2520,7 @@ hello.utils.extend(hello.utils, {
     // Do not return true, as that will remove the listeners
     // return true;
   }
-			};
+      };
 
     // What is the name of the callback to contain
     // We'll also use this to name the iFrame
@@ -2766,7 +2703,7 @@ hello.utils.extend(hello.utils, {
         }
         catch (e) {
           try {
-            console.error("HelloJS: could not remove iframe");
+            console.error('HelloJS: could not remove iframe');
           }
           catch (ee) {}
         }
@@ -2780,18 +2717,9 @@ hello.utils.extend(hello.utils, {
         }
       }, 0);
     }, 100);
-
-    // Build an iFrame and inject it into the DOM
-    //var ifm = _append('iframe',{id:'_'+Math.round(Math.random()*1e9), style:shy});
-		
-    // Build an HTML form, with a target attribute as the ID of the iFrame, and inject it into the DOM.
-    //var frm = _append('form',{ method: 'post', action: uri, target: ifm.id, style:shy});
-
-    // _append('input',{ name: x, value: data[x] }, frm);
   },
 
-  //
-  // Some of the providers require that only MultiPart is used with non-binary forms.
+  // Some of the providers require that only multi-part is used with non-binary forms.
   // This function checks whether the form contains binary data
   hasBinary: function(data) {
     for (var x in data) if (data.hasOwnProperty(x)) {
@@ -2809,15 +2737,13 @@ hello.utils.extend(hello.utils, {
 
     return data instanceof Object && (
     (this.domInstance('input', data) && data.type === 'file') ||
-    ("FileList" in window && data instanceof window.FileList) ||
-    ("File" in window && data instanceof window.File) ||
-    ("Blob" in window && data instanceof window.Blob));
+    ('FileList' in window && data instanceof window.FileList) ||
+    ('File' in window && data instanceof window.File) ||
+    ('Blob' in window && data instanceof window.Blob));
 
   },
 
-  // DataURI to Blob
-  // Converts a Data-URI to a Blob string
-	
+  // Convert Data-URI to Blob string
   toBlob: function(dataURI) {
     var reg = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
     var m = dataURI.match(reg);
@@ -2852,72 +2778,52 @@ hello.utils.extend(hello.utils, {
     //
     dataToJSON: function(p) {
 
-      var utils = this,
-      w = window;
-
+      var _this = this;
+      var w = window;
       var data = p.data;
 
       // Is data a form object
-      if (utils.domInstance('form', data)) {
-
-        data = utils.nodeListToJSON(data.elements);
-
+      if (_this.domInstance('form', data)) {
+        data = _this.nodeListToJSON(data.elements);
       }
-      else if ("NodeList" in w && data instanceof NodeList) {
-
-        data = utils.nodeListToJSON(data);
-
+      else if ('NodeList' in w && data instanceof NodeList) {
+        data = _this.nodeListToJSON(data);
       }
-      else if (utils.domInstance('input', data)) {
-
-        data = utils.nodeListToJSON([data]);
-
+      else if (_this.domInstance('input', data)) {
+        data = _this.nodeListToJSON([data]);
       }
 
       // Is data a blob, File, FileList?
-      if (("File" in w && data instanceof w.File) ||
-      ("Blob" in w && data instanceof w.Blob) ||
-      ("FileList" in w && data instanceof w.FileList)) {
-
-        // Convert to a JSON object
-        data = {'file': data};
+      if (('File' in w && data instanceof w.File) ||
+        ('Blob' in w && data instanceof w.Blob) ||
+        ('FileList' in w && data instanceof w.FileList)) {
+        data = {file: data};
       }
 
-      // Loop through data if its not FormData it must now be a JSON object
-      if (!("FormData" in w && data instanceof w.FormData)) {
+      // Loop through data if it's not form data it must now be a JSON object
+      if (!('FormData' in w && data instanceof w.FormData)) {
 
-        // Loop through the object
         for (var x in data) if (data.hasOwnProperty(x)) {
 
-          // FileList Object?
-          if ("FileList" in w && data[x] instanceof w.FileList) {
-            // Get first record only
+          if ('FileList' in w && data[x] instanceof w.FileList) {
             if (data[x].length === 1) {
               data[x] = data[x][0];
             }
-            else {
-              //("We were expecting the FileList to contain one file");
-            }
           }
-          else if (utils.domInstance('input', data[x]) && data[x].type === 'file') {
-            // ignore
+          else if (_this.domInstance('input', data[x]) && data[x].type === 'file') {
             continue;
           }
-          else if (utils.domInstance('input', data[x]) ||
-          utils.domInstance('select', data[x]) ||
-          utils.domInstance('textArea', data[x])
-          ) {
+          else if (_this.domInstance('input', data[x]) ||
+            _this.domInstance('select', data[x]) ||
+            _this.domInstance('textArea', data[x])) {
             data[x] = data[x].value;
           }
-
-          // Else is this another kind of element?
-          else if (utils.domInstance(null, data[x])) {
+          else if (_this.domInstance(null, data[x])) {
             data[x] = data[x].innerHTML || data[x].innerText;
           }
         }
       }
 
-      // Data has been converted to JSON.
       p.data = data;
       return data;
     },
@@ -2968,25 +2874,24 @@ hello.utils.extend(hello.utils, {
 
 })(hello);
 
-// MDN
-// Polyfill IE8, does not support native Function.bind
-
+// MDN: Polyfill IE8, does not support native Function.bind
 if (!Function.prototype.bind) {
   Function.prototype.bind = function(b) {
     if (typeof this !== 'function') {
       throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
     }
 
-    function c() {}
+    function C() {}
 
-    var a = [].slice,
-    f = a.call(arguments, 1),
-    e = this,
-			d = function() {
-  return e.apply(this instanceof c ? this : b || window, f.concat(a.call(arguments)));
-			};
-    c.prototype = this.prototype;
-    d.prototype = new c();
-    return d;
+    var a = [].slice;
+    var f = a.call(arguments, 1);
+    var _this = this;
+    var D = function() {
+      return _this.apply(this instanceof C ? this : b || window, f.concat(a.call(arguments)));
+    };
+
+    C.prototype = this.prototype;
+    D.prototype = new C();
+    return D;
   };
 }
