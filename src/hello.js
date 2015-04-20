@@ -192,7 +192,7 @@ hello.utils.extend(hello, {
 			return promise.reject(error('invalid_network', 'The provided network was not recognized'));
 		}
 
-		var provider  = _this.services[p.network];
+		var provider = _this.services[p.network];
 
 		// Create a global listener to capture events triggered out of scope
 		var callbackId = utils.globalEvent(function(str) {
@@ -1238,7 +1238,7 @@ hello.utils.extend(hello.utils, {
 		var height = window.innerHeight || documentElement.clientHeight || screen.height;
 
 		var left = ((width - windowWidth) / 2) + dualScreenLeft;
-		var top  = ((height - windowHeight) / 2) + dualScreenTop;
+		var top = ((height - windowHeight) / 2) + dualScreenTop;
 
 		// Create a function for reopening the popup, and assigning events to the new popup object
 		// This is a fix whereby triggering the
@@ -1248,7 +1248,7 @@ hello.utils.extend(hello.utils, {
 			var popup = window.open(
 				url,
 				'_blank',
-				'resizeable=true,height=' + windowHeight + ',width=' + windowWidth + ',left=' + left + ',top='  + top
+				'resizeable=true,height=' + windowHeight + ',width=' + windowWidth + ',left=' + left + ',top=' + top
 			);
 
 			// PhoneGap support
@@ -1371,7 +1371,7 @@ hello.utils.extend(hello.utils, {
 		p = _this.param(location.search);
 
 		// OAuth2 or OAuth1 server response?
-		if (p  && ((p.code && p.state) || (p.oauth_token && p.proxy_url))) {
+		if (p && ((p.code && p.state) || (p.oauth_token && p.proxy_url))) {
 
 			var state = JSON.parse(p.state);
 
