@@ -1,4 +1,5 @@
 {
   "preset": "airbnb",
-  "requireCamelCaseOrUpperCaseIdentifiers": "ignoreProperties"
+  "requireCamelCaseOrUpperCaseIdentifiers": "ignoreProperties",
+  "validateIndentation": "\t"
 }
