@@ -68,7 +68,7 @@ hello.utils.extend(hello, {
 
     // Page URL
     // When 'display=page' this property defines where the users page should end up after redirect_uri
-    // Ths could be problematic if the redirect_uri is indeed the final place, 
+    // Ths could be problematic if the redirect_uri is indeed the final place,
     // Typically this circumvents the problem of the redirect_url being a dumb relay page.
     page_uri: window.location.href
   },
@@ -185,7 +185,7 @@ hello.utils.extend(hello, {
     }
 
     promise.proxy.then(emit.bind(this, 'auth.login auth'), emit.bind(this, 'auth.failed auth'));
-    
+
     // Is our service valid?
     if (typeof (p.network) !== 'string' || !(p.network in self.services)) {
       // trigger the default login.
@@ -265,7 +265,7 @@ hello.utils.extend(hello, {
 
     // Get current session for merging scopes, and for quick auth response
     var session = utils.store(p.network);
-    
+
     // Scopes (authentication permisions)
     // convert any array, or falsy value to a string.
     var scope = (opts.scope || '').toString();
@@ -380,7 +380,7 @@ hello.utils.extend(hello, {
       url = utils.qs(opts.oauth_proxy, p.qs, encodeFunction);
     }
 
-    // 
+    //
     else {
 
       url = utils.qs(provider.oauth.auth, p.qs, encodeFunction);
@@ -488,7 +488,7 @@ hello.utils.extend(hello, {
 
       //
       // Run an async operation to remove the users session
-      // 
+      //
       var _opts = {};
       if (p.options.force) {
         var logout = self.services[p.name].logout;
@@ -512,7 +512,6 @@ hello.utils.extend(hello, {
         }
       }
 
-      //
       // Remove local credentials
       callback(_opts);
     }
@@ -578,7 +577,7 @@ hello.utils.extend(hello.utils, {
 
     return url + (!this.isEmpty(params) ? (url.indexOf('?') > -1 ? '&' : '?') + this.param(params, formatFunction) : '');
   },
-  
+
   //
   // Param
   // Explode/Encode the parameters of an URL string/object
@@ -588,7 +587,7 @@ hello.utils.extend(hello.utils, {
     var b,
     a = {},
     m;
-    
+
     if (typeof (s) === 'string') {
 
       formatFunction = formatFunction || decodeURIComponent;
@@ -608,7 +607,7 @@ hello.utils.extend(hello.utils, {
       formatFunction = formatFunction || encodeURIComponent;
 
       var o = s;
-    
+
       a = [];
 
       for (var x in o) {if (o.hasOwnProperty(x)) {
@@ -620,7 +619,7 @@ hello.utils.extend(hello.utils, {
       return a.join('&');
     }
   },
-  
+
   //
   // Local Storage Facade
   store: (function(localStorage) {
@@ -744,7 +743,7 @@ hello.utils.extend(hello.utils, {
         }}
       }
     }
-    
+
     if (target === 'body') {
       (function self() {
         if (document.body) {
@@ -797,7 +796,7 @@ hello.utils.extend(hello.utils, {
     i = 0,
     t = null,
     x = null;
-    
+
     // define x
     // x is the first key in the list of object parameters
     for (x in o) {if (o.hasOwnProperty(x)) {
@@ -835,7 +834,7 @@ hello.utils.extend(hello.utils, {
       ) {
         p[x] = args[i++];
       }
-      
+
       else if (typeof (o[x]) === 'string' && o[x].indexOf('!') > -1) {
         return false;
       }
@@ -981,14 +980,14 @@ hello.utils.extend(hello.utils, {
       };
     })(),
     */
-  
+
   /*!
     **  Thenable -- Embeddable Minimum Strictly-Compliant Promises/A+ 1.1.1 Thenable
     **  Copyright (c) 2013-2014 Ralf S. Engelschall <http://engelschall.com>
     **  Licensed under The MIT License <http://opensource.org/licenses/MIT>
     **  Source-Code distributed on <http://github.com/rse/thenable>
     */
-  
+
   Promise: (function() {
     /*  promise states [Promises/A+ 2.1]  */
     var STATE_PENDING   = 0;                                         /*  [Promises/A+ 2.1.1]  */
@@ -1366,7 +1365,7 @@ hello.utils.extend(hello.utils, {
             location: {
               // Change the location of the popup
               assign: function(location) {
-                
+
                 // Unfourtunatly an app is may not change the location of a InAppBrowser window.
                 // So to shim this, just open a new one.
 
@@ -1422,8 +1421,8 @@ hello.utils.extend(hello.utils, {
     // OAuth redirect, fixes URI fragments from being lost in Safari
     // (URI Fragments within 302 Location URI are lost over HTTPS)
     // Loading the redirect.html before triggering the OAuth Flow seems to fix it.
-    // 
-    // FIREFOX, decodes URL fragments when calling location.hash. 
+    //
+    // FIREFOX, decodes URL fragments when calling location.hash.
     //  - This is bad if the value contains break points which are escaped
     //  - Hence the url must be encoded twice as it contains breakpoints.
     if (navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1) {
@@ -1457,7 +1456,7 @@ hello.utils.extend(hello.utils, {
 
     //
     // Is this an auth relay message which needs to call the proxy?
-    // 
+    //
 
     p = utils.param(location.search);
 
@@ -1482,7 +1481,7 @@ hello.utils.extend(hello.utils, {
     //
     // FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
     // SoundCloud is the state in the querystring and the token in the hashtag, so we'll mix the two together
-    
+
     p = utils.merge(utils.param(location.search || ''), utils.param(location.hash || ''));
 
     // if p.state
@@ -1544,7 +1543,7 @@ hello.utils.extend(hello.utils, {
       if (p.page_uri) {
         window.location = p.page_uri;
       }
-      
+
     }
 
     //
@@ -1662,7 +1661,7 @@ hello.utils.responseHandler(window, window.opener || window.parent);
       old_session[auth.network] = hello.utils.store(auth.network) || {};
     }
   });
-  
+
   (function self() {
 
     var CURRENT_TIME = ((new Date()).getTime() / 1e3);
@@ -1680,7 +1679,7 @@ hello.utils.responseHandler(window, window.opener || window.parent);
         // we haven't attached an ID so dont listen.
         continue;
       }
-    
+
       // Get session
       var session = hello.utils.store(name) || {};
       var provider = hello.services[name];
@@ -1707,14 +1706,14 @@ hello.utils.responseHandler(window, window.opener || window.parent);
         }
         catch (e) {}
       }
-      
+
       //
       // Refresh token
       //
       if (session && ('expires' in session) && session.expires < CURRENT_TIME) {
 
         // If auto refresh is possible
-        // Either the browser supports 
+        // Either the browser supports
         var refresh = provider.refresh || session.refresh_token;
 
         // Has the refresh been run recently?
@@ -1864,7 +1863,7 @@ hello.api = function() {
   if (!('proxy' in p)) {
     p.proxy = p.oauth_proxy && o.oauth && parseInt(o.oauth.version, 10) === 1;
   }
-  
+
   // TIMEOUT
   // Adopt timeout from global settings by default
 
@@ -1945,7 +1944,7 @@ hello.api = function() {
     // Else the URL is a string
     getPath(url);
   }
-  
+
   return promise.proxy;
 
   // if url needs a base
@@ -2056,7 +2055,7 @@ hello.utils.extend(hello.utils, {
 
   //
   // Make an HTTP request
-  // 
+  //
   request: function(p, callback) {
 
     var utils = this;
@@ -2191,7 +2190,7 @@ hello.utils.extend(hello.utils, {
     // Format URL
     // Constructs the request URL, optionally wraps the URL through a call to a proxy server
     // Returns the formatted URL
-    // 
+    //
     function formatUrl(p, callback) {
 
       // Are we signing the request?
@@ -2393,9 +2392,7 @@ hello.utils.extend(hello.utils, {
 
     return r;
 
-    //
-    // headersToJSON
-    // Headers are returned as a string, which isn't all that great... is it?
+    // Headers are returned as a string
     function headersToJSON(s) {
       var r = {};
       var reg = /([a-z\-]+):\s?(.*);?/gi,
@@ -2408,45 +2405,45 @@ hello.utils.extend(hello.utils, {
     }
   },
 
-  //
   // JSONP
   // Injects a script tag into the dom to be executed and appends a callback function to the window object
   // @param string/function pathFunc either a string of the URL or a callback function pathFunc(querystringhash, continueFunc);
   // @param function callback a function to call on completion;
-  //
   jsonp: function(url, callback, callbackID, timeout) {
 
     var utils = this;
 
     // Change the name of the callback
-    var bool = 0,
-    head = document.getElementsByTagName('head')[0],
-    operafix,
-    script,
-    result = {error:{message:'server_error', code:'server_error'}},
-      cb = function() {
-  if (!(bool++)) {
-    window.setTimeout(function() {
-      callback(result);
-      head.removeChild(script);
-    }, 0);
-  }
-      };
+    var bool = 0;
+    var head = document.getElementsByTagName('head')[0];
+    var operaFix;
+    var result = {error: {message: 'server_error', code: 'server_error'}};
+    var cb = function() {
+      if (!(bool++)) {
+        window.setTimeout(
+          function() {
+            callback(result);
+            head.removeChild(script);
+          },
+          0
+        );
+      }
+    };
 
     // Add callback to the window object
-    callbackID = utils.globalEvent(function(json) {
+    var callbackID = utils.globalEvent(function(json) {
       result = json;
       return true;
 
-      // mark callback as done
+      // Mark callback as done
     }, callbackID);
 
     // The URL is a function for some cases and as such
     // Determine its value with a callback containing the new parameters of this function.
-    url = url.replace(new RegExp('=\\?(&|$)'), '=' + callbackID + '$1');
+    var url = url.replace(new RegExp('=\\?(&|$)'), '=' + callbackID + '$1');
 
     // Build script tag
-    script = utils.append('script', {
+    var script = utils.append('script', {
       id:callbackID,
       name:callbackID,
       src: url,
@@ -2466,7 +2463,7 @@ hello.utils.extend(hello.utils, {
     // By setting the request to synchronous we can trigger the error handler when all else fails.
     // This action will be ignored if we've already called the callback handler "cb" with a successful onload event
     if (window.navigator.userAgent.toLowerCase().indexOf('opera') > -1) {
-      operafix = utils.append('script', {
+      operaFix = utils.append('script', {
         text: 'document.getElementById(\'' + cb_name + '\').onerror();'
       });
       script.async = false;
@@ -2480,25 +2477,22 @@ hello.utils.extend(hello.utils, {
       }, timeout);
     }
 
-    // Todo:
-    // Add fix for msie,
+    // TODO: add fix for IE,
     // However: unable recreate the bug of firing off the onreadystatechange before the script content has been executed and the value of "result" has been defined.
     // Inject script tag into the head element
     head.appendChild(script);
-    
+
     // Append Opera Fix to run after our script
-    if (operafix) {
-      head.appendChild(operafix);
+    if (operaFix) {
+      head.appendChild(operaFix);
     }
   },
 
-  //
   // Post
   // Send information to a remote location using the post mechanism
   // @param string uri path
   // @param object data, key value data to send
   // @param function callback, function to execute in response
-  //
   post: function(url, data, options, callback, callbackID, timeout) {
 
     var _this = this;
