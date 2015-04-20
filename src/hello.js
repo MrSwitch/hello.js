@@ -114,7 +114,7 @@ hello.utils.extend(hello, {
   // @param number timeout, timeout in seconds
   init: function(services, options) {
 
-    var _this = this.utils;
+    var utils = this.utils;
 
     if (!services) {
       return this.services;
@@ -129,7 +129,7 @@ hello.utils.extend(hello, {
     }}
 
     // Merge services if there already exists some
-    _this.extend(this.services, services);
+    utils.extend(this.services, services);
 
     // Format the incoming
     for (x in this.services) {
@@ -141,7 +141,7 @@ hello.utils.extend(hello, {
     //
     // Update the default settings with this one.
     if (options) {
-      _this.extend(this.settings, options);
+      utils.extend(this.settings, options);
 
       // Do this immediatly incase the browser changes the current path.
       if ('redirect_uri' in options) {
@@ -160,21 +160,21 @@ hello.utils.extend(hello, {
   login: function() {
 
     // Create an object which inherits its parent as the prototype and constructs a new event chain.
-    var self = this,
-    _this = self.utils,
-    promise = _this.Promise();
+    var _this = this,
+    utils = _this.utils,
+    promise = utils.Promise();
 
     // Get parameters
-    var p = _this.args({network: 's', options: 'o', callback: 'f'}, arguments);
+    var p = utils.args({network: 's', options: 'o', callback: 'f'}, arguments);
 
     // Local vars
     var url;
 
     // merge/override options with app defaults
-    var opts = p.options = _this.merge(self.settings, p.options || {});
+    var opts = p.options = utils.merge(_this.settings, p.options || {});
 
     // Network
-    p.network = p.network || self.settings.default_service;
+    p.network = p.network || _this.settings.default_service;
 
     // Bind callback to both reject and fulfill states
     promise.proxy.then(p.callback, p.callback);
@@ -187,16 +187,16 @@ hello.utils.extend(hello, {
     promise.proxy.then(emit.bind(this, 'auth.login auth'), emit.bind(this, 'auth.failed auth'));
 
     // Is our service valid?
-    if (typeof (p.network) !== 'string' || !(p.network in self.services)) {
+    if (typeof (p.network) !== 'string' || !(p.network in _this.services)) {
       // trigger the default login.
       // ahh we dont have one.
       return promise.reject(error('invalid_network', 'The provided network was not recognized'));
     }
 
-    var provider  = self.services[p.network];
+    var provider  = _this.services[p.network];
 
     // Create a global listener to capture events triggered out of scope
-    var callback_id = _this.globalEvent(function(str) {
+    var callback_id = utils.globalEvent(function(str) {
 
       // The responseHandler returns a string, lets save this locally
       var obj;
@@ -214,7 +214,7 @@ hello.utils.extend(hello, {
 
         // Save on the parent window the new credentials
         // This fixes an IE10 bug i think... atleast it does for me.
-        _this.store(obj.network, obj);
+        utils.store(obj.network, obj);
 
         // fulfill a successful login
         promise.fulfill({
@@ -228,7 +228,7 @@ hello.utils.extend(hello, {
       }
     });
 
-    var redirect_uri = _this.url(opts.redirect_uri).href;
+    var redirect_uri = utils.url(opts.redirect_uri).href;
 
     // Response Type
     // May be a space-delimited list of multiple, complementary types
@@ -257,7 +257,7 @@ hello.utils.extend(hello, {
     };
 
     // Get current session for merging scopes, and for quick auth response
-    var session = _this.store(p.network);
+    var session = utils.store(p.network);
 
     // Scopes (authentication permisions)
     // convert any array, or falsy value to a string.
@@ -274,7 +274,7 @@ hello.utils.extend(hello, {
 
     // Save in the State
     // Convert to a string because IE, has a problem moving Arrays between windows
-    p.qs.state.scope = _this.unique(scope.split(/[,\s]+/)).join(',');
+    p.qs.state.scope = utils.unique(scope.split(/[,\s]+/)).join(',');
 
     // Map replace each scope with the providers default scopes
     p.qs.scope = scope.replace(/[^,\s]+/ig, function(m) {
@@ -283,8 +283,8 @@ hello.utils.extend(hello, {
         return provider.scope[m];
       } else {
         // Loop through all services and determine whether the scope is generic
-        for (var x in self.services) {
-          var serviceScopes = self.services[x].scope;
+        for (var x in _this.services) {
+          var serviceScopes = _this.services[x].scope;
           if (serviceScopes && m in serviceScopes) {
             // Found an instance of this scope, so lets not assume its special
             return '';
@@ -298,14 +298,14 @@ hello.utils.extend(hello, {
     }).replace(/[,\s]+/ig, ',');
 
     // Remove duplication and empty spaces
-    p.qs.scope = _this.unique(p.qs.scope.split(/,+/)).join(provider.scope_delim || ',');
+    p.qs.scope = utils.unique(p.qs.scope.split(/,+/)).join(provider.scope_delim || ',');
 
     // Is the user already signed in with the appropriate scopes, valid access_token?
     if (opts.force === false) {
 
       if (session && 'access_token' in session && session.access_token && 'expires' in session && session.expires > ((new Date()).getTime() / 1e3)) {
         // What is different about the scopes in the session vs the scopes in the new login?
-        var diff = _this.diff(session.scope || [], p.qs.state.scope || []);
+        var diff = utils.diff(session.scope || [], p.qs.state.scope || []);
         if (diff.length === 0) {
 
           // OK trigger the callback
@@ -324,7 +324,7 @@ hello.utils.extend(hello, {
     // Page URL
     if (opts.display === 'page' && opts.page_uri) {
       // Add a page location, place to endup after session has authenticated
-      p.qs.state.page_uri = _this.url(opts.page_uri).href;
+      p.qs.state.page_uri = utils.url(opts.page_uri).href;
     }
 
     // Bespoke
@@ -355,7 +355,7 @@ hello.utils.extend(hello, {
     if (parseInt(provider.oauth.version, 10) === 1) {
 
       // Turn the request to the OAuth Proxy for 3-legged auth
-      url = _this.qs(opts.oauth_proxy, p.qs, encodeFunction);
+      url = utils.qs(opts.oauth_proxy, p.qs, encodeFunction);
     }
     // Refresh token
     else if (opts.display === 'none' && provider.oauth.grant && session && session.refresh_token) {
@@ -364,10 +364,10 @@ hello.utils.extend(hello, {
       p.qs.refresh_token = session.refresh_token;
 
       // Define the request path
-      url = _this.qs(opts.oauth_proxy, p.qs, encodeFunction);
+      url = utils.qs(opts.oauth_proxy, p.qs, encodeFunction);
     }
     else {
-      url = _this.qs(provider.oauth.auth, p.qs, encodeFunction);
+      url = utils.qs(provider.oauth.auth, p.qs, encodeFunction);
     }
 
     // Execute
@@ -381,7 +381,7 @@ hello.utils.extend(hello, {
     // Triggering popup?
     else if (opts.display === 'popup') {
 
-      var popup = _this.popup(url, redirect_uri, opts.window_width || 500, opts.window_height || 550);
+      var popup = utils.popup(url, redirect_uri, opts.window_width || 500, opts.window_height || 550);
 
       var timer = setInterval(function() {
         if (!popup || popup.closed) {
@@ -428,8 +428,8 @@ hello.utils.extend(hello, {
   //
   logout: function() {
 
-    var self = this;
-    var utils = self.utils;
+    var _this = this;
+    var utils = _this.utils;
 
     // Create a new promise
     var promise = utils.Promise();
@@ -451,7 +451,7 @@ hello.utils.extend(hello, {
     // Netowrk
     p.name = p.name || this.settings.default_service;
 
-    if (p.name && !(p.name in self.services)) {
+    if (p.name && !(p.name in _this.services)) {
 
       promise.reject(error('invalid_network', 'The network was unrecognized'));
 
@@ -473,7 +473,7 @@ hello.utils.extend(hello, {
       //
       var _opts = {};
       if (p.options.force) {
-        var logout = self.services[p.name].logout;
+        var logout = _this.services[p.name].logout;
         if (logout) {
           // Convert logout to URL string,
           // If no string is returned, then this function will handle the logout async style
@@ -1750,8 +1750,8 @@ hello.utils.responseHandler(window, window.opener || window.parent);
 hello.api = function() {
 
   // Shorthand
-  var self = this;
-  var utils = self.utils;
+  var _this = this;
+  var utils = _this.utils;
 
   // Construct a new Promise object
   var promise = utils.Promise();
@@ -1788,7 +1788,7 @@ hello.api = function() {
   p.path = p.path.replace(/^\/+/, '');
   var a = (p.path.split(/[\/\:]/, 2) || [])[0].toLowerCase();
 
-  if (a in self.services) {
+  if (a in _this.services) {
     p.network = a;
     var reg = new RegExp('^' + a + ':?\/?');
     p.path = p.path.replace(reg, '');
@@ -1796,8 +1796,8 @@ hello.api = function() {
 
   // Network & Provider
   // Define the network that this request is made for
-  p.network = self.settings.default_service = p.network || self.settings.default_service;
-  var o = self.services[p.network];
+  p.network = _this.settings.default_service = p.network || _this.settings.default_service;
+  var o = _this.services[p.network];
 
   // INVALID
   // Is there no service by the given network name?
@@ -1816,7 +1816,7 @@ hello.api = function() {
   // OAuth1 calls always need a proxy
 
   if (!p.oauth_proxy) {
-    p.oauth_proxy = self.settings.oauth_proxy;
+    p.oauth_proxy = _this.settings.oauth_proxy;
   }
 
   if (!('proxy' in p)) {
@@ -1827,13 +1827,13 @@ hello.api = function() {
   // Adopt timeout from global settings by default
 
   if (!('timeout' in p)) {
-    p.timeout = self.settings.timeout;
+    p.timeout = _this.settings.timeout;
   }
 
   //
   // Get the current session
   // Append the access_token to the query
-  var session = self.getAuthResponse(p.network);
+  var session = _this.getAuthResponse(p.network);
   if (session && session.access_token) {
     p.query.access_token = session.access_token;
   }
@@ -1883,7 +1883,7 @@ hello.api = function() {
 
   // Redirect Handler
   // This defines for the Form+Iframe+Hash hack where to return the results too.
-  p.redirect_uri = self.settings.redirect_uri;
+  p.redirect_uri = _this.settings.redirect_uri;
 
   // Set OAuth settings
   p.oauth = o.oauth;
