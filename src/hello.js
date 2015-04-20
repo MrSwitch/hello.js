@@ -1686,7 +1686,7 @@ hello.api = function() {
 	var promise = utils.Promise();
 
 	// Arguments
-	var p = utils.args({path: 's!', query: 'o', method: 's', data: 'o', timeout: 'i', callback: 'f' }, arguments);
+	var p = utils.args({path: 's!', query: 'o', method: 's', data: 'o', timeout: 'i', callback: 'f'}, arguments);
 
 	// method
 	p.method = (p.method || 'get').toLowerCase();
@@ -2710,7 +2710,7 @@ hello.utils.extend(hello.utils, {
 	hello.api = function() {
 
 		// Get arguments
-		var p = utils.args({path: 's!', method: 's', data:'o', timeout: 'i', callback: 'f' }, arguments);
+		var p = utils.args({path: 's!', method: 's', data:'o', timeout: 'i', callback: 'f'}, arguments);
 
 		// Change for into a data object
 		if (p.data) {

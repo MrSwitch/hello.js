@@ -6,5 +6,6 @@
   "disallowSpaceAfterObjectKeys": true,
   "disallowSpacesInCallExpression": true,
   "disallowSpacesInsideArrayBrackets": true,
-  "disallowSpacesInsideBrackets": true
+  "disallowSpacesInsideBrackets": true,
+  "disallowSpacesInsideObjectBrackets": true
 }
