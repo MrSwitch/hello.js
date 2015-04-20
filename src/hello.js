@@ -55,7 +55,6 @@ hello.utils.extend(hello, {
 		// Want to recreate your own? Checkout https://github.com/MrSwitch/node-oauth-shim
 		oauth_proxy: 'https://auth-server.herokuapp.com/proxy',
 
-		//
 		// API timeout in milliseconds
 		timeout: 20000,
 
@@ -372,9 +371,8 @@ hello.utils.extend(hello, {
 
 		// Execute
 		// Trigger how we want self displayed
-		// Calling Quietly?
 		if (opts.display === 'none') {
-			// signin in the background, iframe
+			// Sign-in in the background, iframe
 			utils.iframe(url);
 		}
 
@@ -420,12 +418,9 @@ hello.utils.extend(hello, {
 		function encodeFunction(s) {return s;}
 	},
 
-	//
-	// Logout
 	// Remove any data associated with a given service
 	// @param string name of the service
 	// @param function callback
-	//
 	logout: function() {
 
 		var _this = this;
@@ -448,7 +443,7 @@ hello.utils.extend(hello, {
 
 		promise.proxy.then(emit.bind(this, 'auth.logout auth'), emit.bind(this, 'error'));
 
-		// Netowrk
+		// Network
 		p.name = p.name || this.settings.default_service;
 
 		if (p.name && !(p.name in _this.services)) {
@@ -468,9 +463,7 @@ hello.utils.extend(hello, {
 				promise.fulfill(hello.utils.merge({network:p.name}, opts || {}));
 			};
 
-			//
 			// Run an async operation to remove the users session
-			//
 			var _opts = {};
 			if (p.options.force) {
 				var logout = _this.services[p.name].logout;
@@ -513,11 +506,8 @@ hello.utils.extend(hello, {
 		}
 	},
 
-	//
-	// getAuthResponse
 	// Returns all the sessions that are subscribed too
 	// @param string optional, name of the service to get information about.
-	//
 	getAuthResponse: function(service) {
 
 		// If the service doesn't exist
@@ -530,16 +520,11 @@ hello.utils.extend(hello, {
 		return this.utils.store(service) || null;
 	},
 
-	//
-	// Events
-	// Define placeholder for the events
+	// Events: placeholder for the events
 	events: {}
 });
 
-///////////////////////////////////
-// Core Utilities
-///////////////////////////////////
-
+// Core utilities
 hello.utils.extend(hello.utils, {
 
 	// Append the querystring to a url
@@ -685,12 +670,10 @@ hello.utils.extend(hello.utils, {
 
 	})(window.localStorage),
 
-	//
-	// Create and Append new Dom elements
+	// Create and Append new DOM elements
 	// @param node string
 	// @param attr object literal
 	// @param dom/string
-	//
 	append: function(node, attr, target) {
 
 		var n = typeof (node) === 'string' ? document.createElement(node) : node;
@@ -1239,16 +1222,14 @@ hello.utils.extend(hello.utils, {
 		return guid;
 	},
 
-	//
 	// Trigger a clientside popup
 	// This has been augmented to support PhoneGap
-	//
 	popup: function(url, redirectUri, windowWidth, windowHeight) {
 
 		var documentElement = document.documentElement;
 
 		// Multi Screen Popup Positioning (http://stackoverflow.com/a/16861050)
-		//   Credit: http://www.xtf.dk/2011/08/center-new-popup-window-even-on.html
+		// Credit: http://www.xtf.dk/2011/08/center-new-popup-window-even-on.html
 		// Fixes dual-screen position                         Most browsers      Firefox
 		var dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
 		var dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
@@ -1374,8 +1355,6 @@ hello.utils.extend(hello.utils, {
 
 		var _this = this;
 		var p;
-
-		//
 		var location = window.location;
 
 		// Use instead of window.location = url
@@ -1406,7 +1385,6 @@ hello.utils.extend(hello.utils, {
 			return;
 		}
 
-		//
 		// Save session, from redirected authentication
 		// #access_token has come in?
 		//
@@ -1602,9 +1580,7 @@ hello.utils.responseHandler(window, window.opener || window.parent);
 			var provider = hello.services[name];
 			var oldSess = oldSessions[name] || {};
 
-			//
 			// Listen for globalEvents that did not get triggered from the child
-			//
 			if (session && 'callback' in session) {
 
 				// to do remove from session object...
@@ -1624,9 +1600,7 @@ hello.utils.responseHandler(window, window.opener || window.parent);
 				catch (e) {}
 			}
 
-			//
 			// Refresh token
-			//
 			if (session && ('expires' in session) && session.expires < CURRENT_TIME) {
 
 				// If auto refresh is possible
@@ -1888,7 +1862,6 @@ hello.api = function() {
 		// Define the request URL
 		p.url = url;
 
-		//
 		// Make the HTTP request with the curated request object
 		// CALLBACK HANDLER
 		// @ response object
@@ -1938,7 +1911,6 @@ hello.api = function() {
 				}
 			}
 
-			//
 			// Dispatch to listeners
 			// Emit events which pertain to the formatted response
 			if (!r || 'error' in r) {
@@ -1962,15 +1934,10 @@ hello.api = function() {
 
 };
 
-///////////////////////////////////
-// API Utilities
-///////////////////////////////////
-
+// API utilities
 hello.utils.extend(hello.utils, {
 
-	//
 	// Make an HTTP request
-	//
 	request: function(p, callback) {
 
 		var _this = this;
@@ -2167,7 +2134,7 @@ hello.utils.extend(hello.utils, {
 
 	// Create a clone of an object
 	clone: function(obj) {
-		// Does not clone Dom elements, nor Binary data, e.g. Blobs, Filelists
+		// Does not clone DOM elements, nor Binary data, e.g. Blobs, Filelists
 		if (obj === null || typeof (obj) !== 'object' || obj instanceof Date || 'nodeName' in obj || this.isBinary(obj)) {
 			return obj;
 		}
