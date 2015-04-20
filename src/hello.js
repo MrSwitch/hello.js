@@ -39,7 +39,6 @@ hello.utils = {
 };
 
 // Core library
-
 hello.utils.extend(hello, {
 
 	settings: {
@@ -192,7 +191,7 @@ hello.utils.extend(hello, {
 			return promise.reject(error('invalid_network', 'The provided network was not recognized'));
 		}
 
-		var provider  = _this.services[p.network];
+		var provider = _this.services[p.network];
 
 		// Create a global listener to capture events triggered out of scope
 		var callbackId = utils.globalEvent(function(str) {
@@ -279,7 +278,8 @@ hello.utils.extend(hello, {
 			// Does this have a mapping?
 			if (m in provider.scope) {
 				return provider.scope[m];
-			} else {
+			}
+			else {
 				// Loop through all services and determine whether the scope is generic
 				for (var x in _this.services) {
 					var serviceScopes = _this.services[x].scope;
@@ -630,7 +630,8 @@ hello.utils.extend(hello.utils, {
 			var json = {};
 			try {
 				json = JSON.parse(localStorage.getItem('hello')) || {};
-			}catch (e) {}
+			}
+			catch (e) {}
 
 			return json;
 		}
@@ -732,7 +733,7 @@ hello.utils.extend(hello.utils, {
 
 	// Recursive merge two objects into one, second parameter overides the first
 	// @param a array
-	merge: function(/*a,b,c,..n*/) {
+	merge: function(/* Args: a, b, c, .. n */) {
 		var args = Array.prototype.slice.call(arguments);
 		args.unshift({});
 		return this.extend.apply(null, args);
@@ -748,8 +749,7 @@ hello.utils.extend(hello.utils, {
 		var t = null;
 		var x = null;
 
-		// define x
-		// x is the first key in the list of object parameters
+		// 'x' is the first key in the list of object parameters
 		for (x in o) {if (o.hasOwnProperty(x)) {
 			break;
 		}}
@@ -861,21 +861,20 @@ hello.utils.extend(hello.utils, {
 		return r;
 	},
 
-	// isEmpty
 	isEmpty: function(obj) {
-		// scalar?
-		if (!obj) {
-			return true;
-		}
 
-		// Array?
+		// Scalar
+		if (!obj)
+			return true;
+
+		// Array
 		if (obj && obj.length > 0)
 			return false;
 
 		if (obj && obj.length === 0)
 			return true;
 
-		// object?
+		// Object
 		for (var key in obj) {
 			if (obj.hasOwnProperty(key)) {
 				return false;
@@ -1215,7 +1214,8 @@ hello.utils.extend(hello.utils, {
 				// Remove this handler reference
 				try {
 					delete window[guid];
-				} catch (e) {}
+				}
+				catch (e) {}
 			}
 		};
 
@@ -1238,7 +1238,7 @@ hello.utils.extend(hello.utils, {
 		var height = window.innerHeight || documentElement.clientHeight || screen.height;
 
 		var left = ((width - windowWidth) / 2) + dualScreenLeft;
-		var top  = ((height - windowHeight) / 2) + dualScreenTop;
+		var top = ((height - windowHeight) / 2) + dualScreenTop;
 
 		// Create a function for reopening the popup, and assigning events to the new popup object
 		// This is a fix whereby triggering the
@@ -1248,7 +1248,7 @@ hello.utils.extend(hello.utils, {
 			var popup = window.open(
 				url,
 				'_blank',
-				'resizeable=true,height=' + windowHeight + ',width=' + windowWidth + ',left=' + left + ',top='  + top
+				'resizeable=true,height=' + windowHeight + ',width=' + windowWidth + ',left=' + left + ',top=' + top
 			);
 
 			// PhoneGap support
@@ -1371,7 +1371,7 @@ hello.utils.extend(hello.utils, {
 		p = _this.param(location.search);
 
 		// OAuth2 or OAuth1 server response?
-		if (p  && ((p.code && p.state) || (p.oauth_token && p.proxy_url))) {
+		if (p && ((p.code && p.state) || (p.oauth_token && p.proxy_url))) {
 
 			var state = JSON.parse(p.state);
 
@@ -1401,7 +1401,8 @@ hello.utils.extend(hello.utils, {
 			try {
 				var a = JSON.parse(p.state);
 				_this.extend(p, a);
-			} catch (e) {
+			}
+			catch (e) {
 				console.error('Could not decode state parameter');
 			}
 
@@ -1587,7 +1588,8 @@ hello.utils.responseHandler(window, window.opener || window.parent);
 				var cb = session.callback;
 				try {
 					delete session.callback;
-				}catch (e) {}
+				}
+				catch (e) {}
 
 				// Update store
 				// Removing the callback
@@ -1686,7 +1688,7 @@ hello.api = function() {
 	var promise = utils.Promise();
 
 	// Arguments
-	var p = utils.args({path: 's!', query: 'o', method: 's', data: 'o', timeout: 'i', callback: 'f' }, arguments);
+	var p = utils.args({path: 's!', query: 'o', method: 's', data: 'o', timeout: 'i', callback: 'f'}, arguments);
 
 	// method
 	p.method = (p.method || 'get').toLowerCase();
@@ -1804,7 +1806,7 @@ hello.api = function() {
 	}
 	else if (url in actions) {
 		p.path = url;
-		url = actions[ url ];
+		url = actions[url];
 	}
 	else if ('default' in actions) {
 		url = actions['default'];
@@ -1942,35 +1944,27 @@ hello.utils.extend(hello.utils, {
 
 		var _this = this;
 
-		// This has too go through a POST request
+		// This has to go through a POST request
 		if (!_this.isEmpty(p.data) && !('FileList' in window) && _this.hasBinary(p.data)) {
 
 			// Disable XHR and JSONP
 			p.xhr = false;
 			p.jsonp = false;
-
 		}
 
-		// XHR: can we use XHR for Cross domain delivery?
+		// Check if the browser and service support CORS
 		if (
-
-		// Browser supports CORS
-		'withCredentials' in new XMLHttpRequest() &&
-
-		// ... now does the service support CORS?
-		// p.xhr is undefined, true or a function which returns true
-		(!('xhr' in p) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))))
-
+			'withCredentials' in new XMLHttpRequest() &&
+			(!('xhr' in p) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))))
 		) {
 
-			// Format the URL and return it...
 			formatUrl(p, function(url) {
 
 				var x = _this.xhr(p.method, url, p.headers, p.data, callback);
 				x.onprogress = p.onprogress || null;
 
-				// Windows PHone does not support xhr.upload, see #74
-				// Feature detect it...
+				// Windows Phone does not support xhr.upload, see #74
+				// Feature detect
 				if (x.upload && p.onuploadprogress) {
 					x.upload.onprogress = p.onuploadprogress;
 				}
@@ -1997,7 +1991,6 @@ hello.utils.extend(hello.utils, {
 
 			// If the JSONP is a function then run it
 			if (typeof (p.jsonp) === 'function') {
-
 				p.jsonp(p, p.query);
 			}
 
@@ -2125,9 +2118,11 @@ hello.utils.extend(hello.utils, {
 
 		if (window[test]) {
 			return data instanceof window[test];
-		} else if (window.Element) {
+		}
+		else if (window.Element) {
 			return data instanceof window.Element && (!type || (data.tagName && data.tagName.toLowerCase() === type));
-		} else {
+		}
+		else {
 			return (!(data instanceof Object || data instanceof Array || data instanceof String || data instanceof Number) && data.tagName && data.tagName.toLowerCase() === type);
 		}
 	},
@@ -2177,7 +2172,8 @@ hello.utils.extend(hello.utils, {
 			var json = r.response;
 			try {
 				json = JSON.parse(r.responseText);
-			} catch (_e) {
+			}
+			catch (_e) {
 				if (r.status === 401) {
 					json = {
 						error: {
@@ -2198,7 +2194,8 @@ hello.utils.extend(hello.utils, {
 			var json = r.responseText;
 			try {
 				json = JSON.parse(r.responseText);
-			} catch (_e) {}
+			}
+			catch (_e) {}
 
 			callback(json || {error: {
 				code: 'access_denied',
@@ -2500,7 +2497,8 @@ hello.utils.extend(hello.utils, {
 					}
 					else if (_this.domInstance(null, data[x])) {
 						input.value = data[x].innerHTML || data[x].innerText;
-					}else {
+					}
+					else {
 						input.value = data[x];
 					}
 
@@ -2695,10 +2693,10 @@ hello.utils.extend(hello.utils, {
 
 				// Is this a file, does the browser not support 'files' and 'FormData'?
 				if (input.type === 'file') {
-					json[ input.name ] = input;
+					json[input.name] = input;
 				}
 				else {
-					json[ input.name ] = input.value || input.innerHTML;
+					json[input.name] = input.value || input.innerHTML;
 				}
 			}
 
@@ -2710,7 +2708,7 @@ hello.utils.extend(hello.utils, {
 	hello.api = function() {
 
 		// Get arguments
-		var p = utils.args({path: 's!', method: 's', data:'o', timeout: 'i', callback: 'f' }, arguments);
+		var p = utils.args({path: 's!', method: 's', data:'o', timeout: 'i', callback: 'f'}, arguments);
 
 		// Change for into a data object
 		if (p.data) {
