@@ -1612,17 +1612,15 @@ hello.utils.responseHandler(window, window.opener || window.parent);
 (function(hello) {
 
   // Monitor for a change in state and fire
-  var old_session = {},
+  var oldSessions = {},
 
   // Hash of expired tokens
   expired = {};
 
-  //
   // Listen to other triggers to Auth events, use these to update this
-  //
   hello.on('auth.login, auth.logout', function(auth) {
     if (auth && typeof (auth) === 'object' && auth.network) {
-      old_session[auth.network] = hello.utils.store(auth.network) || {};
+      oldSessions[auth.network] = hello.utils.store(auth.network) || {};
     }
   });
 
@@ -1647,7 +1645,7 @@ hello.utils.responseHandler(window, window.opener || window.parent);
       // Get session
       var session = hello.utils.store(name) || {};
       var provider = hello.services[name];
-      var oldsess = old_session[name] || {};
+      var oldSess = oldSessions[name] || {};
 
       //
       // Listen for globalEvents that did not get triggered from the child
@@ -1702,28 +1700,28 @@ hello.utils.responseHandler(window, window.opener || window.parent);
       }
 
       // Has session changed?
-      else if (oldsess.access_token === session.access_token &&
-      oldsess.expires === session.expires) {
+      else if (oldSess.access_token === session.access_token &&
+      oldSess.expires === session.expires) {
         continue;
       }
 
       // Access_token has been removed
-      else if (!session.access_token && oldsess.access_token) {
+      else if (!session.access_token && oldSess.access_token) {
         emit('logout');
       }
 
       // Access_token has been created
-      else if (session.access_token && !oldsess.access_token) {
+      else if (session.access_token && !oldSess.access_token) {
         emit('login');
       }
 
       // Access_token has been updated
-      else if (session.expires !== oldsess.expires) {
+      else if (session.expires !== oldSess.expires) {
         emit('update');
       }
 
       // Updated stored session
-      old_session[name] = session;
+      oldSessions[name] = session;
 
       // Remove the expired flags
       if (name in expired) {
@@ -1759,7 +1757,7 @@ hello.api = function() {
   var promise = utils.Promise();
 
   // Arguments
-  var p = utils.args({path:'s!', query: 'o', method: 's', data: 'o', timeout: 'i', callback: 'f' }, arguments);
+  var p = utils.args({path: 's!', query: 'o', method: 's', data: 'o', timeout: 'i', callback: 'f' }, arguments);
 
   // method
   p.method = (p.method || 'get').toLowerCase();
@@ -1776,14 +1774,11 @@ hello.api = function() {
     p.data = {};
   }
 
-  // data
   var data = p.data = p.data || {};
 
-  // Completed event
-  // callback
+  // Completed event callback
   promise.then(p.callback, p.callback);
 
-  // Path
   // Remove the network from path, e.g. facebook:/me/friends
   // results in { network : facebook, path : me/friends }
   if (!p.path) {
@@ -1843,7 +1838,8 @@ hello.api = function() {
     p.query.access_token = session.access_token;
   }
 
-  var url = p.path, m;
+  var url = p.path;
+  var m;
 
   // Store the query as options
   // This is used to populate the request object before the data is augmented by the prewrap handlers.
@@ -1856,7 +1852,7 @@ hello.api = function() {
 
   // URL Mapping
   // Is there a map for the given URL?
-  var actions = o[{'delete': 'del'}[p.method] || p.method] || {};
+  var actions = o[{delete: 'del'}[p.method] || p.method] || {};
 
   // Extrapolate the QueryString
   // Provide a clean path
@@ -2022,10 +2018,10 @@ hello.utils.extend(hello.utils, {
   //
   request: function(p, callback) {
 
-    var utils = this;
+    var _this = this;
 
     // This has too go through a POST request
-    if (!utils.isEmpty(p.data) && !('FileList' in window) && utils.hasBinary(p.data)) {
+    if (!_this.isEmpty(p.data) && !('FileList' in window) && _this.hasBinary(p.data)) {
 
       // Disable XHR and JSONP
       p.xhr = false;
@@ -2033,9 +2029,7 @@ hello.utils.extend(hello.utils, {
 
     }
 
-    // XHR
-    // Can we use XHR for Cross domain delivery?
-
+    // XHR: can we use XHR for Cross domain delivery?
     if (
 
     // Browser supports CORS
@@ -2043,21 +2037,18 @@ hello.utils.extend(hello.utils, {
 
     // ... now does the service support CORS?
     // p.xhr is undefined, true or a function which returns true
-    (!("xhr" in p) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))))
+    (!('xhr' in p) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))))
 
     ) {
 
       // Format the URL and return it...
-
       formatUrl(p, function(url) {
 
-        var x = utils.xhr(p.method, url, p.headers, p.data, callback);
-
-        // Set handlers
+        var x = _this.xhr(p.method, url, p.headers, p.data, callback);
         x.onprogress = p.onprogress || null;
 
-        // Windows Phone does not support xhr.upload, see #74
-        // Feaure detect it...
+        // Windows PHone does not support xhr.upload, see #74
+        // Feature detect it...
         if (x.upload && p.onuploadprogress) {
           x.upload.onprogress = p.onuploadprogress;
         }
@@ -2068,18 +2059,15 @@ hello.utils.extend(hello.utils, {
     }
 
     // Clone the query object
-    // Each request modifies the query object.
-    // ... and needs to be tared after each one.
+    // Each request modifies the query object and needs to be tared after each one.
     var _query = p.query;
 
-    p.query = utils.clone(p.query);
+    p.query = _this.clone(p.query);
 
-    // CALLBACK
     // Assign a new callbackID
-    p.callbackID = utils.globalEvent();
+    p.callbackID = _this.globalEvent();
 
     // JSONP
-
     if (p.jsonp !== false) {
 
       // Clone the query object
@@ -2095,23 +2083,19 @@ hello.utils.extend(hello.utils, {
       if (p.method === 'get') {
 
         formatUrl(p, function(url) {
-
-          utils.jsonp(url, callback, p.callbackID, p.timeout);
-
+          _this.jsonp(url, callback, p.callbackID, p.timeout);
         });
 
         return;
-
       }
       else {
-        // Its not compatible reset query
+        // It's not compatible reset query
         p.query = _query;
       }
 
     }
 
     // Otherwise we're on to the old school, iframe hacks and JSONP
-
     if (p.form !== false) {
 
       // Add some additional query parameters to the URL
@@ -2130,9 +2114,7 @@ hello.utils.extend(hello.utils, {
       if (p.method === 'post' && opts !== false) {
 
         formatUrl(p, function(url) {
-
-          utils.post(url, p.data, opts, callback, p.callbackID, p.timeout);
-
+          _this.post(url, p.data, opts, callback, p.callbackID, p.timeout);
         });
 
         return;
@@ -2174,19 +2156,19 @@ hello.utils.extend(hello.utils, {
       // POST body to querystring
       if (p.data && (p.method === 'get' || p.method === 'delete')) {
         // Attach the p.data to the querystring.
-        utils.extend(p.query, p.data);
+        _this.extend(p.query, p.data);
         p.data = null;
       }
 
       // Construct the path
-      var path = utils.qs(p.url, p.query);
+      var path = _this.qs(p.url, p.query);
 
       // Proxy the request through a server
       // Used for signing OAuth1
       // And circumventing services without Access-Control Headers
       if (p.proxy) {
         // Use the proxy as a path
-        path = utils.qs(p.oauth_proxy, {
+        path = _this.qs(p.oauth_proxy, {
           path: path,
           access_token: sign || '',
 
