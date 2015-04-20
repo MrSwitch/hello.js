@@ -5,38 +5,34 @@ module.exports = function(grunt) {
 		jshint: {
 			files: ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js'],
 			options: {
-
 				ignores: ['tests/specs/libs/*.js'],
-
-				// options here to override JSHint defaults
 				globals: {
 					console: true,
 					module: true,
 					document: true
 				},
-				// don't check dot notation
 				sub: true
 			}
 		},
-		watch: {
-			files: ['<%= jshint.files %>'],
-			tasks: ['jshint']
+		jscs: {
+			src: ['Gruntfile.js', 'src/hello.js'],
+			options: {
+				config: '.jscsrc'
+			}
 		},
 		mocha_phantomjs: {
-			all: ['tests/specs/index.html'],
+			all: ['tests/specs/index.html']
 		},
-		// Bump
 		bumpup: ['package.json', 'bower.json'],
-		// Shunt files around
 		shunt: {
-			// Shunt the documents of our project
 			docs: {
 				'README.md': './index.html'
 			},
-			// Combine the src files, create minified versions
 			build: {
 				'dist/hello.js': ['src/hello.js', 'src/hello.legacy.js', 'src/hello.amd.js', 'src/hello.commonjs.js'],
-				'dist/hello.all.js': ['src/hello.js', 'src/hello.legacy.js',
+				'dist/hello.all.js': [
+					'src/hello.js',
+					'src/hello.legacy.js',
 					'src/modules/dropbox.js',
 					'src/modules/facebook.js',
 					'src/modules/flickr.js',
@@ -49,12 +45,18 @@ module.exports = function(grunt) {
 					'src/modules/twitter.js',
 					'src/modules/windows.js',
 					'src/modules/yahoo.js',
-				'src/hello.amd.js', 'src/hello.commonjs.js']
+					'src/hello.amd.js',
+					'src/hello.commonjs.js'
+				]
 			},
 			minify: {
 				'dist/hello.min.js': 'dist/hello.js',
 				'dist/hello.all.min.js': 'dist/hello.all.js'
 			}
+		},
+		watch: {
+			files: ['src/**/*.js'],
+			tasks: ['jscs']
 		}
 	});
 
@@ -62,9 +64,10 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-mocha-phantomjs');
+	grunt.loadNpmTasks('grunt-jscs');
 	grunt.loadNpmTasks('shunt');
 
-	grunt.registerTask('test', ['jshint', 'mocha_phantomjs']);
+	grunt.registerTask('test', ['jscs', 'jshint', 'mocha_phantomjs']);
 	grunt.registerTask('default', ['test', 'shunt:build', 'shunt:minify']);
 
 };
