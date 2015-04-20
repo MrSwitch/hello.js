@@ -2,6 +2,22 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
+    jshint: {
+      files: ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js'],
+      options: {
+
+        ignores: ['tests/specs/libs/*.js'],
+
+        // Options here to override JSHint defaults
+        globals: {
+          console: true,
+          module: true,
+          document: true
+        },
+        // Don't check dot notation
+        sub: true
+      }
+    },
     // Code formatting / linting
     jscs: {
       src: 'src/hello.js',
@@ -53,12 +69,13 @@ module.exports = function(grunt) {
   });
 
   grunt.loadNpmTasks('grunt-bumpup');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-mocha-phantomjs');
   grunt.loadNpmTasks("grunt-jscs");
   grunt.loadNpmTasks('shunt');
 
-  grunt.registerTask('test', ['jscs', 'mocha_phantomjs']);
+  grunt.registerTask('test', ['jscs', 'jshint', 'mocha_phantomjs']);
   grunt.registerTask('default', ['test', 'shunt:build', 'shunt:minify']);
 
 };

@@ -2177,7 +2177,7 @@ hello.utils.extend(hello.utils, {
 			var json = r.response;
 			try {
 				json = JSON.parse(r.responseText);
-			} catch (e) {
+			} catch (_e) {
 				if (r.status === 401) {
 					json = {
 						error: {
@@ -2198,7 +2198,7 @@ hello.utils.extend(hello.utils, {
 			var json = r.responseText;
 			try {
 				json = JSON.parse(r.responseText);
-			} catch (e) {}
+			} catch (_e) {}
 
 			callback(json || {error: {
 				code: 'access_denied',
@@ -2292,7 +2292,7 @@ hello.utils.extend(hello.utils, {
 		};
 
 		// Add callback to the window object
-		var callbackID = _this.globalEvent(function(json) {
+		callbackID = _this.globalEvent(function(json) {
 			result = json;
 			return true;
 
@@ -2301,7 +2301,7 @@ hello.utils.extend(hello.utils, {
 
 		// The URL is a function for some cases and as such
 		// Determine its value with a callback containing the new parameters of this function.
-		var url = url.replace(new RegExp('=\\?(&|$)'), '=' + callbackID + '$1');
+		url = url.replace(new RegExp('=\\?(&|$)'), '=' + callbackID + '$1');
 
 		// Build script tag
 		var script = _this.append('script', {
