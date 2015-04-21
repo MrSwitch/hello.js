@@ -66,14 +66,15 @@
 			/*
 				Dropbox does not allow insecure HTTP URI's in the redirect_uri field
 				...otherwise I'd love to use OAuth2
+
 				Follow request https://forums.dropbox.com/topic.php?id=106505
 
 				p.qs.response_type = 'code';
-				oauth:{
-					version:2,
-					auth	: 'https://www.dropbox.com/1/oauth2/authorize',
-					grant	: 'https://api.dropbox.com/1/oauth2/token'
-				},
+				oauth: {
+					version: 2,
+					auth: 'https://www.dropbox.com/1/oauth2/authorize',
+					grant: 'https://api.dropbox.com/1/oauth2/token'
+				}
 			*/
 			oauth: {
 				version: '1.0',
