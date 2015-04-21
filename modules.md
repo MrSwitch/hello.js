@@ -106,7 +106,7 @@ The table shows the services which are already documented on HelloJS. Simply inc
 
 ## Writing your own module
 
-Modules are loaded into HelloJS using the hello.init() method, with a JSON object that has the name of the service as the only key and then whose value consists of an object with the following properties.</p>
+Modules are loaded into HelloJS using the hello.init() method, with a JSON object that has the name of the service as the only key and then whose value consists of an object with the following properties.
 
 <table>
 	<thead>
