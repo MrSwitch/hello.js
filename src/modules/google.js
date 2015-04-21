@@ -458,7 +458,7 @@
 				'me/folder': 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}'
 			},
 
-			// Map post requests
+			// Map POST requests
 			post: {
 
 				// Google Drive
@@ -473,7 +473,7 @@
 				}
 			},
 
-			// Map POST requests
+			// Map PUT requests
 			put: {
 				'me/files': uploadDrive
 			},
