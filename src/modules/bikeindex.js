@@ -1,114 +1,121 @@
-//
 // BikeIndex
 // https://bikeindex.org/documentation/api_v2
-(function(hello){
+(function(hello) {
 
+	function formatError(o) {
+		if (o && o.error) {
+			o.error = {
+				code: (o.error === 'OAuth error: unauthorized' ? 'access_denied' : 'server_error'),
+				message: o.error
+			};
+		}
+	}
 
-function formatError(o){
-  if(o && o.error){
-    o.error = {
-      code : (o.error === 'OAuth error: unauthorized'? 'access_denied':'server_error'),
-      message : o.error
-    };
-  }
-}
+	function formatUser(o) {
+		if (o.id) {
+			o.thumbnail = o.image;
+		}
 
-function formatUser(o){
-  if(o.id){
-    o.thumbnail = o.image;
-  }
-  if(o.user){
-    hello.utils.extend( o, o.user );
-    delete o.user;
-  }
-  if(o.image){
-    o.thumbnail = o.image;
-  }
-  return o;
-}
+		if (o.user) {
+			hello.utils.extend(o, o.user);
+			delete o.user;
+		}
 
-function paging(res,headers,req){
-  if(res.data&&res.data.length&&headers&&headers.Link){
-    var next = headers.Link.match(/<(.*?)>;\s*rel=\"next\"/);
-    if(next){
-      res.paging = {
-        next : next[1]
-      };
-    }
-  }
-}
+		if (o.image) {
+			o.thumbnail = o.image;
+		}
 
-hello.init({
-  bikeindex : {
-    name : 'BikeIndex',
-    login: function(p){
-      p.qs.display = '';
-    },
+		return o;
+	}
 
-    oauth : {
-      version : 2,
-      auth : 'https://bikeindex.org/oauth/authorize/',
-      grant : 'https://api.bikeindex.org/oauth/access_token'
-    },
+	function paging(res, headers, req) {
+		if (res.data && res.data.length && headers && headers.Link) {
+			var next = headers.Link.match(/<(.*?)>;\s*rel=\"next\"/);
+			if (next) {
+				res.paging = {
+					next: next[1]
+				};
+			}
+		}
+	}
 
-    // Refresh the access_token once expired
-    refresh : true,
+	hello.init({
 
-    scope : {
-      basic : 'read_user,read_bikes',
-      email : 'read_user',
-      // read_bikes : "View user's bikes user owned",
-      // write_bikes : 'Edit and create bikes'
-    },
-    scope_delim : '+',
+		bikeindex: {
+			name: 'BikeIndex',
+			login: function(p) {
+				p.qs.display = '';
+			},
 
-    base : 'https://bikeindex.org/api/v2/',
+			oauth: {
+				version: 2,
+				auth: 'https://bikeindex.org/oauth/authorize/',
+				grant: 'https://api.bikeindex.org/oauth/access_token'
+			},
 
-    // There aren't many routes that map to the hello.api so I included me/bikes
-    // ... because, bikes
-    get : {
-      'me' : 'me',
-      'me/bikes' : 'me/bikes'
-    },
+			// Refresh the access_token once expired
+			refresh: true,
 
-    post : {},
+			scope: {
+				basic: 'read_user,read_bikes',
+				email: 'read_user'
 
-    del : {},
+				// read_bikes: 'View user's bikes user owned',
+				// write_bikes: 'Edit and create bikes'
+			},
 
-    wrap : {
-      me : function(o,headers){
+			scope_delim: '+',
 
-        formatError(o,headers);
-        formatUser(o);
+			base: 'https://bikeindex.org/api/v2/',
 
-        return o;
-      },
-      "default" : function(o,headers,req){
+			// There aren't many routes that map to the hello.api so I included me/bikes
+			// ... because, bikes
+			get: {
+				me: 'me',
+				'me/bikes': 'me/bikes'
+			},
 
-        formatError(o,headers);
+			post: {},
 
-        if(Object.prototype.toString.call(o) === '[object Array]'){
-          o = {data:o};
-          paging(o,headers,req);
-          for(var i=0;i<o.data.length;i++){
-            formatUser(o.data[i]);
-          }
-        }
-        return o;
-      }
-    },
-    xhr : function(p){
-      if( p.method !== 'get' && p.data ){
-        // Serialize payload as JSON
-        p.headers = p.headers || {};
-        p.headers['Content-Type'] = 'application/json';
-        if (typeof(p.data) === 'object'){
-          p.data = JSON.stringify(p.data);
-        }
-      }
+			del: {},
 
-      return true;
-    }
-  }
-});
+			wrap: {
+				me: function(o, headers) {
+
+					formatError(o, headers);
+					formatUser(o);
+
+					return o;
+				},
+
+				default: function(o, headers, req) {
+
+					formatError(o, headers);
+
+					if (Object.prototype.toString.call(o) === '[object Array]') {
+						o = {data:o};
+						paging(o, headers, req);
+						for (var i = 0; i < o.data.length; i++) {
+							formatUser(o.data[i]);
+						}
+					}
+
+					return o;
+				}
+			},
+
+			xhr: function(p) {
+				if (p.method !== 'get' && p.data) {
+					// Serialize payload as JSON
+					p.headers = p.headers || {};
+					p.headers['Content-Type'] = 'application/json';
+					if (typeof (p.data) === 'object') {
+						p.data = JSON.stringify(p.data);
+					}
+				}
+
+				return true;
+			}
+		}
+	});
 })(hello);

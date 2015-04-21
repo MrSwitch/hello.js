@@ -15,7 +15,7 @@ module.exports = function(grunt) {
 			}
 		},
 		jscs: {
-			src: ['Gruntfile.js', 'src/*.js'],
+			src: ['Gruntfile.js', 'src/*.js', 'src/modules/bikeindex.js'],
 			options: {
 				config: '.jscsrc'
 			}
