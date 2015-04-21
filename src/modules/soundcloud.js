@@ -41,7 +41,8 @@
 
 				// See: http://developers.soundcloud.com/docs/api/reference#activities
 				default: function(p, callback) {
-					// include '.json at the end of each request'
+
+					// Include '.json at the end of each request'
 					callback(p.path + '.json');
 				}
 			},
