@@ -226,7 +226,7 @@ Modules are loaded into HelloJS using the hello.init() method, with a JSON objec
 </table>
 
 
-# Contributing modules
+## Contributing modules
 
 That would be fantastic if you could. Please make the following updates so its easiy for people to discover and test.
 
