@@ -160,7 +160,7 @@ Modules are loaded into HelloJS using the hello.init() method, with a JSON objec
 		</tr>
 		<tr>
 			<td>login</td>
-			<td><i>function<i></td>
+			<td><i>function</i></td>
 			<td></td>
 			<td>A function to augment the login request.</td>
 			<td>optional</td>
@@ -168,7 +168,7 @@ Modules are loaded into HelloJS using the hello.init() method, with a JSON objec
 		</tr>
 		<tr>
 			<td>refresh</td>
-			<td><i>Boolean<i></td>
+			<td><i>Boolean</i></td>
 			<td></td>
 			<td>Indicate that the providers supports silent signin, aka display=none, however if a refresh_token was proffered at signin, then an attempt will be made with that.</td>
 			<td>optional</td>
@@ -176,7 +176,7 @@ Modules are loaded into HelloJS using the hello.init() method, with a JSON objec
 		</tr>
 		<tr>
 			<td>scope</td>
-			<td><i>Object<i></td>
+			<td><i>Object</i></td>
 			<td></td>
 			<td>A dictionary of key and value (the providers sudonym or name of comparative scope)</td>
 			<td>optional</td>
@@ -200,7 +200,7 @@ Modules are loaded into HelloJS using the hello.init() method, with a JSON objec
 		</tr>
 		<tr>
 			<td>get,post,put,del</td>
-			<td><i>Object<i></td>
+			<td><i>Object</i></td>
 			<td></td>
 			<td>Map of standardized pathnames to an alternative path, or path rendering function, the key 'default' will be used where the path is unrecognised, see examples</td>
 			<td>optional</td>
@@ -208,7 +208,7 @@ Modules are loaded into HelloJS using the hello.init() method, with a JSON objec
 		</tr>
 		<tr>
 			<td>wrap</td>
-			<td><i>Object<i></td>
+			<td><i>Object</i></td>
 			<td></td>
 			<td>Map containing response processing handlers, the key 'default' will be used where the path is unrecognised.</td>
 			<td>optional</td>
@@ -216,7 +216,7 @@ Modules are loaded into HelloJS using the hello.init() method, with a JSON objec
 		</tr>
 		<tr>
 			<td>xhr, jsonp, form</td>
-			<td><i>function<i></td>
+			<td><i>function</i></td>
 			<td></td>
 			<td>A function called if the browser supports the method requests. Use this function to augment the request. Return truthy value to proceed or false to fallback to another method.</td>
 			<td>optional</td>
