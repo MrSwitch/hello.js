@@ -38,8 +38,11 @@
 	}
 
 	hello.init({
+
 		instagram: {
+
 			name: 'Instagram',
+
 			login: function(p) {
 				// Instagram throws errors like 'Javascript API is unsupported' if the display is 'popup'.
 				// Make the display anything but 'popup'
