@@ -12,7 +12,7 @@ HelloJS is extensible, i.e. you can add new services to it as long as you can ge
 > A module defines a providers Authorisation and RESTful endpoints. It translates the API's nuances for the provider to closely match those of its peers with similar features.
 
 
-# HelloJS already has you connected
+## HelloJS already has you connected
 
 The table shows the services which are already documented on HelloJS. Simply include these scripts in your page after your HelloJS script tag.
 
@@ -109,7 +109,6 @@ The table shows the services which are already documented on HelloJS. Simply inc
 Modules are loaded into HelloJS using the hello.init() method, with a JSON object that has the name of the service as the only key and then whose value consists of an object with the following properties.</p>
 
 <table>
-
 	<thead>
 		<tr>
 			<th>name</th>
@@ -231,8 +230,8 @@ Modules are loaded into HelloJS using the hello.init() method, with a JSON objec
 
 That would be fantastic if you could. Please make the following updates so its easiy for people to discover and test.
 
-* Fork the code from GitHub
-* Name your script with the label you want it to be identified with and use this as the key name of module settings above
-* Add your module to tests/hello.all.js
-* Check your script passes the test in as many browsers as you can.
-* Update the list of services above with a name and link, also get credit for your hard work by including your name
+ * Fork the code from GitHub
+ * Name your script with the label you want it to be identified with and use this as the key name of module settings above
+ * Add your module to tests/hello.all.js
+ * Check your script passes the test in as many browsers as you can.
+ * Update the list of services above with a name and link, also get credit for your hard work by including your name
