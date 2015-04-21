@@ -47,7 +47,8 @@ if (!Array.isArray) {
 
 }
 
-if (window && window.location && !window.location.assign) {
+// Test for location.assign
+if (typeof window === 'object' && window.location && !window.location.assign) {
 
 	window.location.assign = function(url) {
 		window.location = url;
@@ -55,6 +56,7 @@ if (window && window.location && !window.location.assign) {
 
 }
 
+// Test for Function.bind
 if (!Function.prototype.bind) {
 
 	// MDN
