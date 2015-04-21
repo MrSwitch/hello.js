@@ -19,7 +19,13 @@
 <!-- <![endif]-->
 		<script src="./libs/atob.js"></script>
 
-		<script src="../../src/hello.polyfill.js"></script>
+		<script>
+			if (!window.mochaPhantomJS) {
+				require(["../../src/hello.polyfill.js"]);
+			}
+		</script>
+
+
 		<script src="../../src/hello.js"></script>
 		<script src="../../src/hello.legacy.js"></script>
 		<script src="../../src/hello.commonjs.js"></script>

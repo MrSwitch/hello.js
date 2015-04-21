@@ -48,7 +48,7 @@ if (!Array.isArray) {
 }
 
 // Test for location.assign
-if (typeof window === 'object' && window.location && !window.location.assign) {
+if (typeof window === 'object' && typeof window.location === 'object' && !window.location.assign) {
 
 	window.location.assign = function(url) {
 		window.location = url;
