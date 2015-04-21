@@ -64,7 +64,7 @@
 			},
 
 			/*
-				DropBox does not allow unsecure HTTP URI's in the redirect_uri field
+				Dropbox does not allow insecure HTTP URI's in the redirect_uri field
 				...otherwise I'd love to use OAuth2
 				Follow request https://forums.dropbox.com/topic.php?id=106505
 
@@ -85,10 +85,8 @@
 			// API Base URL
 			base: 'https://api.dropbox.com/1/',
 
-			// Root
-			// BESPOKE SETTING
-			// This is says whether to use the custom environment of Dropbox or to use their own environment
-			// Because it's notoriously difficult for DropBox too provide access from other webservices, this defaults to Sandbox
+			// Bespoke setting: this is states whether to use the custom environment of Dropbox or to use their own environment
+			// Because it's notoriously difficult for Dropbox too provide access from other webservices, this defaults to Sandbox
 			root: 'sandbox',
 
 			// Map GET requests
