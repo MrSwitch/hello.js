@@ -21,6 +21,8 @@ if (!Object.create) {
 
 }
 
+console.log('polyfill');
+
 if (!Array.prototype.indexOf) {
 
 	// IndexOf
@@ -72,14 +74,14 @@ if (!Function.prototype.bind) {
 		var a = [].slice;
 		var f = a.call(arguments, 1);
 		var _this = this;
-		var d = function() {
+		var D = function() {
 			return _this.apply(this instanceof C ? this : b || window, f.concat(a.call(arguments)));
 		};
 
-		c.prototype = this.prototype;
-		d.prototype = new C();
+		C.prototype = this.prototype;
+		D.prototype = new C();
 
-		return d;
+		return D;
 	};
 
 }

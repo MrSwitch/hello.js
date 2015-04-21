@@ -1740,7 +1740,7 @@ hello.api = function() {
 
 	// URL Mapping
 	// Is there a map for the given URL?
-	var actions = o[{delete: 'del'}[p.method] || p.method] || {};
+	var actions = o[(p.method === 'delete' ? 'del' : p.method)] || {};
 
 	// Extrapolate the QueryString
 	// Provide a clean path
