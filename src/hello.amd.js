@@ -1,9 +1,6 @@
-//
-// AMD shim
-//
+// Register as anonymous AMD module
 if (typeof define === 'function' && define.amd) {
-	// AMD. Register as an anonymous module.
-	define(function(){
+	define(function() {
 		return hello;
 	});
 }

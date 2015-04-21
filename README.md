@@ -1,13 +1,13 @@
 
 # hello.js
 
-A client-side Javascript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST API's. HelloJS standardizes paths and responses to common API's like Google Data Services, Facebook Graph and Windows Live Connect. It's **modular**, so that list is [growing](modules.html). No more spaghetti code! 
+A client-side JavaScript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST APIs. HelloJS standardizes paths and responses to common APIs like Google Data Services, Facebook Graph and Windows Live Connect. It's **modular**, so that list is [growing](./modules). No more spaghetti code! 
 
 
 
 ## Features
 
-Here are some more examples...
+Here are some more demos...
 
 <table>
 	<thead>
@@ -96,7 +96,7 @@ Here are some more examples...
 
 Download: [HelloJS](dist/hello.all.js) | [HelloJS (minified)](dist/hello.all.min.js)
 
-Compiled source, which combines all of the modules, can be obtained from [Github](https://github.com/MrSwitch/hello.js/tree/master/dist), and source files can be found in [Source](https://github.com/MrSwitch/hello.js/tree/master/src).
+Compiled source, which combines all of the modules, can be obtained from [GitHub](https://github.com/MrSwitch/hello.js/tree/master/dist), and source files can be found in [Source](https://github.com/MrSwitch/hello.js/tree/master/src).
 
 ### Bower Package
 
@@ -117,7 +117,7 @@ The [Bower](http://bower.io/) package shall install the aforementioned "/src" an
 
 - [GitHub](https://github.com/MrSwitch/hello.js/issues) for reporting bugs and feature requests.
 - [Gitter](https://gitter.im/MrSwitch/hello.js) to reach out for help.
-- [Stackoverflow](http://stackoverflow.com/questions/tagged/hello.js) use tag **hello.js**
+- [Stack Overflow](http://stackoverflow.com/questions/tagged/hello.js) use tag **hello.js**
 - [Slides](http://freddy03h.github.io/hello-presentation/#/) by Freddy Harris
 
 
@@ -128,7 +128,7 @@ Quick start shows you how to go from zero to loading in the name and picture of 
 
 - [Register your app domain](#1-register)
 - [Include hello.js script](#2-include-hellojs-script-in-your-page)
-- [Create the signin buttons](#3-create-the-signin-buttons)
+- [Create the sign-in buttons](#3-create-the-signin-buttons)
 - [Setup listener for login and retrieve user info](#4-add-listeners-for-the-user-login)
 - [Initiate the client_ids and all listeners](#5-configure-hellojs-with-your-client_ids-and-initiate-all-listeners)
 
@@ -144,7 +144,7 @@ Register your application with at least one of the following networks. Ensure yo
 - [Facebook](http://developers.facebook.com/docs/reference/dialogs/oauth/)
 -->
 - [Facebook](https://developers.facebook.com/apps)
-- [Windows Live](http://dev.live.com/) (click on dashboard)
+- [Windows Live](https://account.live.com/developers/applications/index)
 - [Google+](https://code.google.com/apis/console/b/0/#:access)
 
 
@@ -154,32 +154,30 @@ Register your application with at least one of the following networks. Ensure yo
 <script class="pre" src="./dist/hello.all.js"></script>
 ```
 
-### 3. Create the signin buttons
+### 3. Create the sign-in buttons
 Just add onclick events to call hello( network ).login(). Style your buttons as you like; I've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts.
 
 ```html
 <button onclick="hello( 'windows' ).login()">windows</button>
 ```
 
-
 ### 4. Add listeners for the user login
 
 Let's define a simple function, which will load a user profile into the page after they sign in and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.
 
-
 ```javascript
 hello.on('auth.login', function(auth){
 	
-	// call user information, for the given network
+	// Call user information, for the given network
 	hello( auth.network ).api( '/me' ).then( function(r){
 		// Inject it into the container
-		var label = document.getElementById( "profile_"+ auth.network );
-		if(!label){
+		var label = document.getElementById( 'profile_' + auth.network );
+		if (!label){
 			label = document.createElement('div');
-			label.id = "profile_"+auth.network;
+			label.id = 'profile_' + auth.network;
 			document.getElementById('profile').appendChild(label);
 		}
-		label.innerHTML = '<img src="'+ r.thumbnail +'" /> Hey '+r.name;
+		label.innerHTML = '<img src="' + r.thumbnail + '" /> Hey ' + r.name;
 	});
 });
 ```
@@ -190,14 +188,13 @@ Now let's wire it up with our registration detail obtained in step 1. By passing
 
 ```javascript
 hello.init({ 
-	facebook : FACEBOOK_CLIENT_ID,
-	windows  : WINDOWS_CLIENT_ID,
-	google   : GOOGLE_CLIENT_ID
-},{redirect_uri:'redirect.html'});
+	facebook: FACEBOOK_CLIENT_ID,
+	windows: WINDOWS_CLIENT_ID,
+	google: GOOGLE_CLIENT_ID
+}, { redirect_uri: 'redirect.html' });
 ```
 
 That's it. The code above actually powers the demo at the start so, no excuses.
-
 
 # Core Methods
 
@@ -252,7 +249,7 @@ Initiate the environment. And add the application credentials.
 		</tr>
 		<tr>
 			<td>options</td>
-			<td>set's default <i>options</i>, as in hello.login()</i></td>
+			<td>sets default <i>options</i>, as in hello.login()</i></td>
 		</tr>
 	</tbody>
 </table>
@@ -261,8 +258,8 @@ Initiate the environment. And add the application credentials.
 
 ```js
 hello.init({
-	facebook : '359288236870',
-	windows : '000000004403AD10'
+	facebook: '359288236870',
+	windows: '000000004403AD10'
 });
 ```
 
@@ -272,7 +269,7 @@ hello.init({
 
 If a network string is provided: A consent window to authenticate with that network will be initiated. Else if no network is provided a prompt to select one of the networks will open. A callback will be executed if the user authenticates and or cancels the authentication flow.
 
-### hello.login( [network] [,options] [, callback() ] )
+### hello.login( [network] [, options] [, callback()] )
 
 <table>
 	<tr>
@@ -361,10 +358,10 @@ If a network string is provided: A consent window to authenticate with that netw
 ### Examples:
 
 ```js
-hello( "facebook" ).login().then( function(){
-	alert("You are signed in to Facebook");
+hello( 'facebook' ).login().then( function(){
+	alert('You are signed in to Facebook');
 }, function( e ){
-	alert("Signin error: " + e.error.message );
+	alert('Signin error: ' + e.error.message);
 });
 ```
 
@@ -375,7 +372,7 @@ hello( "facebook" ).login().then( function(){
 
 Remove all sessions or individual sessions.
 
-### hello.logout( [network] [, options ] [, callback() ] )
+### hello.logout( [network] [, options] [, callback()] )
 
 <table>
 	<tr>
@@ -430,11 +427,11 @@ Remove all sessions or individual sessions.
 		<td>callback</td>
 		<td><i>function</i></td>
 		<td>
-			<code>function(){alert("Logged in!");}
+			<code>function(){alert('Logged out!');}
 			</code>
 		</td>
 		<td>
-			A callback when the users session has been initiated</td>
+			A callback when the users session has been terminated</td>
 		<td>
 			<em>optional</em>
 		</td>
@@ -447,13 +444,12 @@ Remove all sessions or individual sessions.
 ### Example:
 
 ```js
-hello( "facebook" ).logout().then( function(){
-	alert("Signed out");
+hello( 'facebook' ).logout().then( function(){
+	alert('Signed out');
 }, function(e){
-	alert( "Signed out error:" + e.error.message );
+	alert( 'Signed out error:' + e.error.message );
 });
 ```
-
 
 ## hello.getAuthResponse()
 
@@ -490,10 +486,10 @@ var online = function(session){
 	return session && session.access_token && session.expires > current_time;
 };
 
-var fb = hello( "facebook" ).getAuthResponse();
-var wl = hello( "windows" ).getAuthResponse();
+var fb = hello( 'facebook' ).getAuthResponse();
+var wl = hello( 'windows' ).getAuthResponse();
 
-alert(( online(fb) ? "Signed":"Not signed") + " into FaceBook, " + ( online(wl) ? "Signed":"Not signed")+" into Windows Live");
+alert(( online(fb) ? 'Signed' : 'Not signed') + ' into Facebook, ' + ( online(wl) ? 'Signed' : 'Not signed') + ' into Windows Live');
 ```
 
 ## hello.api()
@@ -601,7 +597,6 @@ Bind a callback to an event. An event may be triggered by a change in user state
 
 ### hello.on( event, callback );
 
-
 <table>
 	<thead>
 		<tr>
@@ -629,16 +624,14 @@ Bind a callback to an event. An event may be triggered by a change in user state
 	</tbody>
 </table>
 
-
 ### Example:
 
 ```js
-var sessionstart =  function(){
-	alert("Session has started");
+var sessionStart =  function(){
+	alert('Session has started');
 };
-hello.on("auth.login",sessionstart);
+hello.on('auth.login', sessionStart);
 ```
-
 
 ## hello.off()
 
@@ -647,9 +640,8 @@ Remove a callback. Both event name and function must exist.
 ### hello.off( event, callback );
 
 ```js
-hello.off("auth.login",sessionstart);
+hello.off('auth.login', sessionStart);
 ```
-
 
 # Misc
 
@@ -660,30 +652,32 @@ In the example below the function `paginationExample()` is initially called with
 
 ```js
 function paginationExample(path){
-	hello( "facebook" ).api( path, {limit: 1} ).on( 'success', function callback( resp ){
+	hello( 'facebook' )
+	.api( path, {limit: 1} )
+	.then( function callback( resp ){
 		if( resp.paging && resp.paging.next ){
-			if( confirm( "Got friend "+ resp.data[0].name + ". Get another?" ) ){
+			if( confirm( 'Got friend ' + resp.data[0].name + '. Get another?' ) ){
 				// Call the api again but with the 'resp.paging.next` path
 				paginationExample( resp.paging.next );
 			}
 		}
 		else{
-			alert( "Got friend "+ resp.data[0].name + ". That's it!" );
+			alert( 'Got friend ' + resp.data[0].name + '. That's it!' );
 		}
-	}).on('error', function(){
-		alert("Whoops!");
+	}, function(){
+		alert('Whoops!');
 	});
 }
-paginationExample( "me/friends" );
+paginationExample( 'me/friends' );
 ```
 
 
 ## Scope
-The scope property defines which privileges an app requires from a network provider. The scope can be defined globally for a session through `hello.init(object, {scope:'string'})`, or at the point of triggering the auth flow e.g. `hello('network').login({scope:'string'});`
+The scope property defines which privileges an app requires from a network provider. The scope can be defined globally for a session through `hello.init(object, {scope: 'string'})`, or at the point of triggering the auth flow e.g. `hello('network').login({scope: 'string'});`
 An app can specify multiple scopes, separated by commas - as in the example below.
 
 ```js
-hello( "facebook" ).login( {scope: "friends,photos,publish" } );
+hello( 'facebook' ).login( {scope: 'friends,photos,publish' } );
 ```
 
 Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the [hello.api reference table](http://adodson.com/hello.js/#helloapi).
@@ -726,12 +720,11 @@ The table below illustrates some of the default scopes HelloJS exposes. Addition
 
 It's good practice to limit the use of scopes and also to make users aware of why your app needs certain privileges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend, include a button that the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorization.
 
-
 ## Error handling
 
-Errors can be returned in listeners to 'error' event, i.e. `hello.api([path]).on('error', [*errorhandler*])` or the 'complete' event, `hello.api([path]).on('complete', [*completehandler*])` - which may also be written as `hello.api([path], [*completehandler*])`.
+Errors are returned, i.e. `hello.api([path]).then(null, [*errorHandler*])` - alternatively `hello.api([path], [*handleSuccessOrError*])`.
 
-The [Promise](#promises-a) response standardizes the binding of errorHandlers.
+The [Promise](#promises-a) response standardizes the binding of error handlers.
 
 ### Error Object
 
@@ -791,9 +784,8 @@ The first parameter of a failed request to the *errorHandler* may be either *boo
 </table>
 
 
-
 ## Extending the services
-Services are added to HelloJS as "modules" for more information about creating your own modules and examples, go to [Modules](./modules.html)
+Services are added to HelloJS as "modules" for more information about creating your own modules and examples, go to [Modules](./modules)
 
 ## OAuth Proxy
 
@@ -801,21 +793,20 @@ Services are added to HelloJS as "modules" for more information about creating y
 A list of the service providers OAuth* mechanisms is available at [Provider OAuth Mechanisms](http://adodson.com/hello.js/#oauth-proxy)
 
 
-
 For providers which support only OAuth1 or OAuth2 with Explicit Grant, the authentication flow needs to be signed with a secret key that may not be exposed in the browser. HelloJS gets round this problem by the use of an intermediary webservice defined by `oauth_proxy`. This service looks up the secret from a database and performs the handshake required to provision an `access_token`. In the case of OAuth1, the webservice also signs subsequent API requests.
 
 
-**Quick start:** Register your client_id + client_secret at the OAuth Proxy service, [Register your App](https://auth-server.herokuapp.com/)
+**Quick start:** Register your Client ID and secret at the OAuth Proxy service, [Register your App](https://auth-server.herokuapp.com/)
 
 
-The default proxy service is [https://auth-server.herokuapp.com/](https://auth-server.herokuapp.com/). Developers may add their own network registration AppID/client_id and secret to this service in order to get up and running.
+The default proxy service is [https://auth-server.herokuapp.com/](https://auth-server.herokuapp.com/). Developers may add their own network registration Client ID and secret to this service in order to get up and running.
 Alternatively recreate this service with [node-oauth-shim](https://npmjs.org/package/oauth-shim). Then override the default `oauth_proxy` in HelloJS client script in `hello.init`, like so...
 
 ```javascript
 hello.init(
 	CLIENT_IDS,
 	{
-		oauth_proxy : 'https://auth-server.herokuapp.com/proxy'
+		oauth_proxy: 'https://auth-server.herokuapp.com/proxy'
 	}
 )
 ```
@@ -825,7 +816,7 @@ Enforcing the OAuth2 Explicit Grant is done by setting `response_type=code` in [
 
 ```javascript
 hello( network ).login({
-	response_type : 'code'
+	response_type: 'code'
 });
 ```
 
@@ -846,14 +837,11 @@ google.login({force:false}).then(function(){
 });;
 ```
 
-
-
 ## Promises A+
 
 The response from the async methods `hello.login`, `hello.logout` and `hello.api` return a thenable method which is Promise A+ compatible.
 
 For a demo, or, if you're bundling up the library from `src/*` files, then please checkout [Promises](demos/promises.html)
-
 
 ## Browser Support
 
@@ -904,33 +892,33 @@ used - because of the XD, IFrame+Form+hack.-
 
 
 
+## PhoneGap Support
 
-## Phonegap Support
-
-HelloJS can also be run on phonegap applications. Checkout the demo [hellojs-phonegap-demo](https://github.com/MrSwitch/hellojs-phonegap-demo)
-
+HelloJS can also be run on PhoneGap applications. Checkout the demo [hellojs-phonegap-demo](https://github.com/MrSwitch/hellojs-phonegap-demo)
 
 ## Contributing
 
-**"No, It's perfect!"**.... If you believe that then give it a [star](https://github.com/MrSwitch/hello.js).
+**"No, it's perfect!"**.... If you believe that then give it a [star](https://github.com/MrSwitch/hello.js).
 
 Having read this far you have already invested your time, why not contribute!?
 
 HelloJS is constantly evolving, as are the services which it connects too. So if you think something could be said better, find something buggy or missing from either the code, documentation or demos then please put it in, no matter how trivial.
 
-
 ### Changing code?
 Ensure you setup and test your code on a variety of browsers.
 
 ```bash
-# Using NodeJS on your dev environment
+
+# Using Node.js on your dev environment
 # cd into the project root and install dev dependencies 
 npm install -l
 
-# run continuous integration tests
+# To run the tests, first ensure you have PhantomJS and the PhantomJS runner for Mocha i.e.
+npm install -g mocha-phantomjs phantomjs
+
+# Then...
 grunt test
 ```
-
 
 
 
