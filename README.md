@@ -1,7 +1,7 @@
 
 # hello.js
 
-A client-side JavaScript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST APIs. HelloJS standardizes paths and responses to common APIs like Google Data Services, Facebook Graph and Windows Live Connect. It's **modular**, so that list is [growing](./modules). No more spaghetti code! 
+A client-side JavaScript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST APIs. HelloJS standardizes paths and responses to common APIs like Google Data Services, Facebook Graph and Windows Live Connect. It's **modular**, so that list is [growing](./modules). No more spaghetti code!
 
 
 
@@ -85,8 +85,8 @@ Here are some more demos...
 
 
 
-- Items marked with a &#10003; are fully working and can be [tested here](./tests/). 
-- Items marked with a &#10007; aren't provided by the provider at this time. 
+- Items marked with a &#10003; are fully working and can be [tested here](./tests/).
+- Items marked with a &#10007; aren't provided by the provider at this time.
 - Blank items are a work in progress, but there is good evidence that they can be done.
 - I have no knowledge of anything unlisted and would appreciate input.
 
@@ -138,7 +138,7 @@ Quick start shows you how to go from zero to loading in the name and picture of 
 Register your application with at least one of the following networks. Ensure you register the correct domain as they can be quite picky.
 
 
-<!-- 
+<!--
 - [Windows Live](http://msdn.microsoft.com/en-us/library/hh243641.aspx)
 - [Google+](http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html)
 - [Facebook](http://developers.facebook.com/docs/reference/dialogs/oauth/)
@@ -167,7 +167,7 @@ Let's define a simple function, which will load a user profile into the page aft
 
 ```javascript
 hello.on('auth.login', function(auth){
-	
+
 	// Call user information, for the given network
 	hello( auth.network ).api( '/me' ).then( function(r){
 		// Inject it into the container
@@ -187,7 +187,7 @@ hello.on('auth.login', function(auth){
 Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the `hello.init` function. e.g....
 
 ```javascript
-hello.init({ 
+hello.init({
 	facebook: FACEBOOK_CLIENT_ID,
 	windows: WINDOWS_CLIENT_ID,
 	google: GOOGLE_CLIENT_ID
@@ -200,7 +200,7 @@ That's it. The code above actually powers the demo at the start so, no excuses.
 
 ## hello.init()
 
-Initiate the environment. And add the application credentials. 
+Initiate the environment. And add the application credentials.
 
 ### hello.init( {facebook: *id*, windows: *id*, google: *id*, .... } )
 
@@ -884,7 +884,7 @@ For a demo, or, if you're bundling up the library from `src/*` files, then pleas
 
 
 
-- IE7: Makes beeping sounds whenever the POST, PUT or DELETE methods are 
+- IE7: Makes beeping sounds whenever the POST, PUT or DELETE methods are
 used - because of the XD, IFrame+Form+hack.- 
 - IE7: Requires JSON.js and localStorage shims.
 - Opera Mini: Supports inline consent only, i.e. reloads original page.
@@ -908,15 +908,14 @@ HelloJS is constantly evolving, as are the services which it connects too. So if
 Ensure you setup and test your code on a variety of browsers.
 
 ```bash
-
 # Using Node.js on your dev environment
-# cd into the project root and install dev dependencies 
+# cd into the project root and install dev dependencies
 npm install -l
 
-# To run the tests, first ensure you have PhantomJS and the PhantomJS runner for Mocha i.e.
-npm install -g mocha-phantomjs phantomjs
+# Install the grunt CLI (if you haven't already)
+sudo npm install -g grunt-cli
 
-# Then...
+# Run the tests
 grunt test
 ```
 

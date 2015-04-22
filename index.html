@@ -29,7 +29,7 @@
 
 <h1><img src="assets/favicon.ico" width=64 height=64 style="vertical-align:middle;margin-right:20px;"/>hello.js</h1>
 
-<blockquote><p>A client-side JavaScript SDK for authenticating with <a href="http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf" target="_blank">OAuth2</a> (and <b>OAuth1</b> with a <a href="#oauth-proxy">oauth proxy</a>) web services and querying their REST APIs. HelloJS standardizes paths and responses to common APIs like Google Data Services, Facebook Graph and Windows Live Connect. It's <b>modular</b>, so that list is <a href="./modules">growing</a>. No more spaghetti code! 
+<blockquote><p>A client-side JavaScript SDK for authenticating with <a href="http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf" target="_blank">OAuth2</a> (and <b>OAuth1</b> with a <a href="#oauth-proxy">oauth proxy</a>) web services and querying their REST APIs. HelloJS standardizes paths and responses to common APIs like Google Data Services, Facebook Graph and Windows Live Connect. It's <b>modular</b>, so that list is <a href="./modules">growing</a>. No more spaghetti code!
 </blockquote>
 
 <!--NO-MARKDOWN-->
@@ -126,8 +126,8 @@
 
 
 <ul>
-<li>Items marked with a <span>&check;</span> are fully working and can be <a href="./tests/">tested here</a>. 
-<li>Items marked with a <span>&cross;</span> aren't provided by the provider at this time. 
+<li>Items marked with a <span>&check;</span> are fully working and can be <a href="./tests/">tested here</a>.
+<li>Items marked with a <span>&cross;</span> aren't provided by the provider at this time.
 <li>Blank items are a work in progress, but there is good evidence that they can be done.
 <li>I have no knowledge of anything unlisted and would appreciate input.
 </ul>
@@ -179,7 +179,7 @@ bower install hello
 <p>Register your application with at least one of the following networks. Ensure you register the correct domain as they can be quite picky.</p>
 
 <ul>
-<!-- 
+<!--
 <li><a target="_blank" href="http://msdn.microsoft.com/en-us/library/hh243641.aspx">Windows Live</a></li>
 <li><a target="_blank" href="http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html">Google+</a></li>
 <li><a target="_blank" href="http://developers.facebook.com/docs/reference/dialogs/oauth/">Facebook</a></li>
@@ -206,7 +206,7 @@ bower install hello
 
 <script class="pre">
 hello.on('auth.login', function(auth){
-	
+
 	// Call user information, for the given network
 	hello( auth.network ).api( '/me' ).then( function(r){
 		// Inject it into the container
@@ -226,7 +226,7 @@ hello.on('auth.login', function(auth){
 <p>Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the <code>hello.init</code> function. e.g....</p>
 
 <script class="pre">
-hello.init({ 
+hello.init({
 	facebook: FACEBOOK_CLIENT_ID,
 	windows: WINDOWS_CLIENT_ID,
 	google: GOOGLE_CLIENT_ID
@@ -239,7 +239,7 @@ hello.init({
 
 <h2>hello.init()</h2>
 
-<p>Initiate the environment. And add the application credentials.</p> 
+<p>Initiate the environment. And add the application credentials.</p>
 
 <h3>hello.init( {facebook: <em>id</em>, windows: <em>id</em>, google: <em>id</em>, .... } )</h3>
 
@@ -923,7 +923,7 @@ google.login({force:false}).then(function(){
 
 <ol>
 
-<li><span>IE7</span>: Makes beeping sounds whenever the POST, PUT or DELETE methods are 
+<li><span>IE7</span>: Makes beeping sounds whenever the POST, PUT or DELETE methods are
 used - because of the XD, IFrame+Form+hack.</li>
 <li><span>IE7</span>: Requires JSON.js and localStorage shims.</li>
 <li><span>Opera Mini</span>: Supports inline consent only, i.e. reloads original page.</li>
@@ -948,13 +948,13 @@ used - because of the XD, IFrame+Form+hack.</li>
 
 <pre type="bash">
 # Using Node.js on your dev environment
-# cd into the project root and install dev dependencies 
+# cd into the project root and install dev dependencies
 npm install -l
 
-# To run the tests, first ensure you have PhantomJS and the PhantomJS runner for Mocha i.e.
-npm install -g mocha-phantomjs phantomjs
+# Install the grunt CLI (if you haven't already)
+sudo npm install -g grunt-cli
 
-# Then...
+# Run the tests
 grunt test
 </pre>
 
