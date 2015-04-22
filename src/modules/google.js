@@ -2,7 +2,7 @@
 
 	'use strict';
 
-	function int(s) {
+	function toInt(s) {
 		return parseInt(s, 10);
 	}
 
@@ -182,9 +182,9 @@
 
 		// Contacts V2
 		if ('feed' in res && res.feed.openSearch$itemsPerPage) {
-			var limit = int(res.feed.openSearch$itemsPerPage.$t);
-			var start = int(res.feed.openSearch$startIndex.$t);
-			var total = int(res.feed.openSearch$totalResults.$t);
+			var limit = toInt(res.feed.openSearch$itemsPerPage.$t);
+			var start = toInt(res.feed.openSearch$startIndex.$t);
+			var total = toInt(res.feed.openSearch$totalResults.$t);
 
 			if ((start + limit) < total) {
 				res.paging = {

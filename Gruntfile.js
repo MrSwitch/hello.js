@@ -11,7 +11,8 @@ module.exports = function(grunt) {
 					module: true,
 					document: true
 				},
-				sub: true
+				sub: true,
+				es3: true
 			}
 		},
 		jscs: {
