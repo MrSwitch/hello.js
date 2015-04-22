@@ -3,6 +3,7 @@
   "requireCamelCaseOrUpperCaseIdentifiers": "ignoreProperties",
   "validateIndentation": "\t",
   "disallowMultipleSpaces": true,
+  "disallowQuotedKeysInObjects": "allButReserved",
   "disallowSpaceAfterObjectKeys": true,
   "disallowSpacesInCallExpression": true,
   "disallowSpacesInsideArrayBrackets": true,

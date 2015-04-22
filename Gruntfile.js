@@ -11,11 +11,12 @@ module.exports = function(grunt) {
 					module: true,
 					document: true
 				},
-				sub: true
+				sub: true,
+				es3: true
 			}
 		},
 		jscs: {
-			src: ['Gruntfile.js', 'src/*.js'],
+			src: ['Gruntfile.js', 'src/**/*.js'],
 			options: {
 				config: '.jscsrc'
 			}
@@ -67,7 +68,8 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-jscs');
 	grunt.loadNpmTasks('shunt');
 
-	grunt.registerTask('test', ['jscs', 'jshint', 'mocha_phantomjs']);
+	grunt.registerTask('mocha', ['mocha_phantomjs']);
+	grunt.registerTask('test', ['jscs', 'jshint', 'mocha']);
 	grunt.registerTask('default', ['test', 'shunt:build', 'shunt:minify']);
 
 };
