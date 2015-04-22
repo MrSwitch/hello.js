@@ -1,5 +1,25 @@
 define([], function () {
 
+
+  // Shim up IE8
+  if (!("withCredentials" in (new XMLHttpRequest()))){
+
+    XMLHttpRequest.prototype.withCredentials = true;
+    hello.utils.xhr = function(method, url, headers, body, callback){
+      var x = new XMLHttpRequest();
+      x.onreadystatechange = function(){
+        if(x.readyState === 4){
+          var r = x.responseText;
+          r = JSON.parse(r);
+          callback(r);
+        }
+      };
+      x.open(method, url);
+      x.send(body);
+      return x;
+    };
+  }
+
   return {
 
     forEach: function (collection, fn) {
@@ -19,6 +39,7 @@ define([], function () {
           method: req.method,
           url: req.url,
           data: req.data,
+          query: {},
           xhr: true
         };
 
