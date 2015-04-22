@@ -89,10 +89,10 @@ hello.utils.extend(hello, {
 	use: function(service) {
 
 		// Create self, which inherits from its parent
-		var self = this.utils.objectCreate(this);
+		var self = Object.create(this);
 
 		// Inherit the prototype from its parent
-		self.settings = this.utils.objectCreate(this.settings);
+		self.settings = Object.create(this.settings);
 
 		// Define the default service
 		if (service) {
@@ -818,7 +818,7 @@ hello.utils.extend(hello.utils, {
 	diff: function(a, b) {
 		var r = [];
 		for (var i = 0; i < b.length; i++) {
-			if (this.indexOf(a, b[i]) === -1) {
+			if (a.indexOf(b[i]) === -1) {
 				r.push(b[i]);
 			}
 		}
@@ -826,23 +826,8 @@ hello.utils.extend(hello.utils, {
 		return r;
 	},
 
-	// IE hack Array.indexOf doesn't exist prior to IE9
-	indexOf: function(a, s) {
-		// Do we need the hack?
-		if (a.indexOf) {
-			return a.indexOf(s);
-		}
-
-		for (var j = 0; j < a.length; j++) {
-			if (a[j] === s) {
-				return j;
-			}
-		}
-
-		return -1;
-	},
-
-	// Remove duplicate and null values from an array
+	// Unique
+	// remove duplicate and null values from an array
 	// @param a array
 	unique: function(a) {
 		if (typeof (a) !== 'object') { return []; }
@@ -850,7 +835,7 @@ hello.utils.extend(hello.utils, {
 		var r = [];
 		for (var i = 0; i < a.length; i++) {
 
-			if (!a[i] || a[i].length === 0 || this.indexOf(r, a[i]) !== -1) {
+			if (!a[i] || a[i].length === 0 || r.indexOf(a[i]) !== -1) {
 				continue;
 			}
 			else {
@@ -868,39 +853,20 @@ hello.utils.extend(hello.utils, {
 			return true;
 
 		// Array
-		if (obj && obj.length > 0)
-			return false;
-
-		if (obj && obj.length === 0)
-			return true;
-
-		// Object
-		for (var key in obj) {
-			if (obj.hasOwnProperty(key)) {
-				return false;
+		if (Array.isArray(obj)) {
+			return !obj.length;
+		}
+		else if (typeof (obj) === 'object') {
+			// Object
+			for (var key in obj) {
+				if (obj.hasOwnProperty(key)) {
+					return false;
+				}
 			}
 		}
 
 		return true;
 	},
-
-	// A shim for Object.create(), it adds a prototype to a new object
-	objectCreate: (function() {
-		if (Object.create) {
-			return Object.create;
-		}
-
-		function F() {}
-
-		return function(o) {
-			if (arguments.length != 1) {
-				throw new Error('Object.create implementation only accepts one parameter.');
-			}
-
-			F.prototype = o;
-			return new F();
-		};
-	})(),
 
 	//jscs:disable
 
@@ -910,7 +876,7 @@ hello.utils.extend(hello.utils, {
 	 **  Licensed under The MIT License <http://opensource.org/licenses/MIT>
 	 **  Source-Code distributed on <http://github.com/rse/thenable>
 	 */
-	Promise : (function(){
+	Promise: (function(){
 		/*  promise states [Promises/A+ 2.1]  */
 		var STATE_PENDING   = 0;                                         /*  [Promises/A+ 2.1.1]  */
 		var STATE_FULFILLED = 1;                                         /*  [Promises/A+ 2.1.2]  */
@@ -1176,7 +1142,7 @@ hello.utils.extend(hello.utils, {
 
 			for (var name in this.events) {if (this.events.hasOwnProperty(name)) {
 
-				if (hello.utils.indexOf(a, name) > -1) {
+				if (a.indexOf(name) > -1) {
 
 					for (var i = 0; i < this.events[name].length; i++) {
 
@@ -1357,16 +1323,6 @@ hello.utils.extend(hello.utils, {
 		var p;
 		var location = window.location;
 
-		// Use instead of window.location = url
-		var relocate = function(path) {
-			if (location.assign) {
-				location.assign(path);
-			}
-			else {
-				window.location = path;
-			}
-		};
-
 		// Is this an auth relay message which needs to call the proxy?
 		p = _this.param(location.search);
 
@@ -1381,7 +1337,8 @@ hello.utils.extend(hello.utils, {
 			// redirect to the host
 			var path = (state.oauth_proxy || p.proxy_url) + '?' + _this.param(p);
 
-			relocate(path);
+			location.assign(path);
+
 			return;
 		}
 
@@ -1449,7 +1406,7 @@ hello.utils.extend(hello.utils, {
 
 			// If this page is still open
 			if (p.page_uri) {
-				window.location = p.page_uri;
+				location.assign(p.page_uri);
 			}
 		}
 
@@ -1458,7 +1415,7 @@ hello.utils.extend(hello.utils, {
 		// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
 		else if ('oauth_redirect' in p) {
 
-			relocate(decodeURIComponent(p.oauth_redirect));
+			location.assign(decodeURIComponent(p.oauth_redirect));
 			return;
 		}
 
@@ -2098,10 +2055,6 @@ hello.utils.extend(hello.utils, {
 		}
 	},
 
-	isArray: function(o) {
-		return Object.prototype.toString.call(o) === '[object Array]';
-	},
-
 	// Return the type of DOM object
 	domInstance: function(type, data) {
 		var test = 'HTML' + (type || '').replace(
@@ -2135,7 +2088,7 @@ hello.utils.extend(hello.utils, {
 		}
 
 		var clone;
-		if (this.isArray(obj)) {
+		if (Array.isArray(obj)) {
 			clone = [];
 			for (var i = 0; i < obj.length; i++) {
 				clone.push(this.clone(obj[i]));
@@ -2719,25 +2672,3 @@ hello.utils.extend(hello.utils, {
 	};
 
 })(hello);
-
-// MDN: Polyfill IE8, does not support native Function.bind
-if (!Function.prototype.bind) {
-	Function.prototype.bind = function(b) {
-		if (typeof this !== 'function') {
-			throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
-		}
-
-		function C() {}
-
-		var a = [].slice;
-		var f = a.call(arguments, 1);
-		var _this = this;
-		var D = function() {
-			return _this.apply(this instanceof C ? this : b || window, f.concat(a.call(arguments)));
-		};
-
-		C.prototype = this.prototype;
-		D.prototype = new C();
-		return D;
-	};
-}

@@ -845,52 +845,9 @@ For a demo, or, if you're bundling up the library from `src/*` files, then pleas
 
 ## Browser Support
 
-<table>
-	<thead>
-	<tr>
-		<td>Browser</td>
-		<th><div class="ie9"></div>IE10</th>
-		<th><div class="ie9"></div>IE9</th>
-		<th><div class="ie8"></div>IE8</th>
-		<th><div class="ie7"></div>IE7</th>
-		<th><div class="ff"></div>FF</th>
-		<th><div class="cr"></div>CR</th>
-		<th><div class="sa"></div>SA</th>
-		<th><div class="op"></div>OP</th>
-		<th><div class="op"></div>Mob</th>
-		<th><div class="op"></div>Mini5</th>
-		<th>iOS</th>
-		<th>WP 7</th>
-	</tr>
-	</thead>
-	<tbody>
-	<tr>
-		<th>hello.js</th>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
-		<td>&#10003;<sup>1,2</sup></td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
-		<td>&#10003;</td>
-		<td>&#10003;<sup>3</sup></td>
-		<td>&#10003;</td>
-		<td>&#10003;<sup>4</sup></td>
-	</tr>
-	</tbody>
-</table>
+HelloJS targets all modern browsers.
 
-
-
-- IE7: Makes beeping sounds whenever the POST, PUT or DELETE methods are
-used - because of the XD, IFrame+Form+hack.- 
-- IE7: Requires JSON.js and localStorage shims.
-- Opera Mini: Supports inline consent only, i.e. reloads original page.
-- WP7: Supports inline consent only, i.e. reloads original page.
-
-
+Polyfills are included in `src/hello.polyfill.js` this is to bring older browsers upto date. If your using the resources located in `dist/` this is already bundled in. But if your building from source you might like to first determine whether these polyfills are required, or if your already supporting them etc...
 
 ## PhoneGap Support
 

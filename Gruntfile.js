@@ -30,8 +30,9 @@ module.exports = function(grunt) {
 				'README.md': './index.html'
 			},
 			build: {
-				'dist/hello.js': ['src/hello.js', 'src/hello.legacy.js', 'src/hello.amd.js', 'src/hello.commonjs.js'],
+				'dist/hello.js': ['src/hello.polyfill.js', 'src/hello.js', 'src/hello.legacy.js', 'src/hello.amd.js', 'src/hello.commonjs.js'],
 				'dist/hello.all.js': [
+          'src/hello.polyfill.js',
 					'src/hello.js',
 					'src/hello.legacy.js',
 					'src/modules/dropbox.js',
