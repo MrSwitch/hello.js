@@ -40,7 +40,7 @@
 				'me/following': 'me/followings.json',
 
 				// See: http://developers.soundcloud.com/docs/api/reference#activities
-				default: function(p, callback) {
+				'default': function(p, callback) {
 
 					// Include '.json at the end of each request'
 					callback(p.path + '.json');
@@ -54,7 +54,7 @@
 					return o;
 				},
 
-				default: function(o) {
+				'default': function(o) {
 					if (o instanceof Array) {
 						o = {
 							data: o

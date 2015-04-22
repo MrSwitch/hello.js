@@ -532,7 +532,7 @@
 
 				'me/albums': gEntry,
 				'me/photos': gEntry,
-				default: gEntry
+				'default': gEntry
 			},
 
 			xhr: function(p) {

@@ -151,7 +151,7 @@
 					return o;
 				},
 
-				default: function(o, headers) {
+				'default': function(o, headers) {
 					formatError(o);
 					empty(o, headers);
 					paging(o);

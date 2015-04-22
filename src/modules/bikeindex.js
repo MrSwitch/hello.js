@@ -88,7 +88,7 @@
 					return o;
 				},
 
-				default: function(o, headers, req) {
+				'default': function(o, headers, req) {
 
 					formatError(o, headers);
 

@@ -99,7 +99,7 @@
 				'me/folder': req('metadata/@{root|sandbox}/@{id}'),
 				'me/folders': req('metadata/@{root|sandbox}/'),
 
-				default: function(p, callback) {
+				'default': function(p, callback) {
 					if (p.path.match('https://api-content.dropbox.com/1/files/')) {
 						// this is a file, return binary data
 						p.method = 'blob';
@@ -160,7 +160,7 @@
 					return o;
 				},
 
-				default: function(o, headers, req) {
+				'default': function(o, headers, req) {
 					formatError(o);
 					if (o.is_dir && o.contents) {
 						o.data = o.contents;

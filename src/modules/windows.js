@@ -124,7 +124,7 @@
 					return o;
 				},
 
-				default: function(o) {
+				'default': function(o) {
 					if ('data' in o) {
 						for (var i = 0; i < o.data.length; i++) {
 							var d = o.data[i];

@@ -171,7 +171,7 @@
 					return res;
 				},
 
-				default: function(res) {
+				'default': function(res) {
 					res = arrayToDataResponse(res);
 					paging(res);
 					return res;

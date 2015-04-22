@@ -22,7 +22,7 @@
 			get: {
 				me: 'user/info',
 				'me/like': 'user/likes',
-				default: function(p, callback) {
+				'default': function(p, callback) {
 					if (p.path.match(/(^|\/)blog\//)) {
 						delete p.query.access_token;
 						p.query.api_key = hello.services.tumblr.id;
@@ -65,7 +65,7 @@
 					return o;
 				},
 
-				default: function(o) {
+				'default': function(o) {
 
 					if (o.response) {
 						var r = o.response;

@@ -152,7 +152,7 @@
 				'me/followers': formatFriends,
 				'me/albums': format,
 				'me/files': format,
-				default: format
+				'default': format
 			},
 
 			// Special requirements for handling XHR

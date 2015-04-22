@@ -62,7 +62,7 @@
 					return o;
 				},
 
-				default: function(o) {
+				'default': function(o) {
 					formatError(o);
 
 					// Format friends

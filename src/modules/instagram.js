@@ -131,7 +131,7 @@
 					return o;
 				},
 
-				default: function(o) {
+				'default': function(o) {
 					paging(o);
 					return o;
 				}

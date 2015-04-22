@@ -195,7 +195,7 @@
 					return formatPhotos(o);
 				},
 
-				default: function(o) {
+				'default': function(o) {
 					formatError(o);
 					return formatPhotos(o);
 				}
