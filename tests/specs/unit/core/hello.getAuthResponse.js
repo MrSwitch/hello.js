@@ -1,26 +1,17 @@
-define([
-//	'../../../src/hello'
-	'../../libs/error_response'
-], function(
-//	hello
-	error_response
-){
+define([], function() {
 
-	//
-	// GetAuthResposne
-	//
-	describe("hello.getAuthResponse", function(){
+	describe('hello.getAuthResponse', function() {
 
-		it('should return null when accessing an invalid network implicitly', function(){
+		it('should return null when accessing an invalid network implicitly', function() {
 			// Make request
-			var r = hello("Facelessbook").getAuthResponse();
+			var r = hello('Facelessbook').getAuthResponse();
 			expect(r).to.be(null);
 		});
-		it('should return null when accessing an invalid network explicitly', function(){
+
+		it('should return null when accessing an invalid network explicitly', function() {
 			// Make request
-			var r = hello.getAuthResponse("Facelessbook");
+			var r = hello.getAuthResponse('Facelessbook');
 			expect(r).to.be(null);
 		});
 	});
-
 });

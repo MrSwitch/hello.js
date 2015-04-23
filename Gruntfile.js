@@ -16,7 +16,7 @@ module.exports = function(grunt) {
 			}
 		},
 		jscs: {
-			src: ['Gruntfile.js', 'src/**/*.js', 'tests/specs/e2e/**/*.js', 'tests/specs/unit/core/hello.api.js'],
+			src: ['Gruntfile.js', 'src/**/*.js', 'tests/specs/e2e/**/*.js', 'tests/specs/unit/core/*.js'],
 			options: {
 				config: '.jscsrc'
 			}
