@@ -1,13 +1,12 @@
 module.exports = function(grunt) {
 
-	var source = ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js', '!tests/specs/libs/*.js'];
+	var source = ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js', '!tests/specs/libs/**/*'];
 
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		jshint: {
 			src: source,
 			options: {
-				ignores: ['tests/specs/libs/*.js'],
 				globals: {
 					console: true,
 					module: true,
