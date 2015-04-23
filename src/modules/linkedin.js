@@ -1,55 +1,5 @@
 (function(hello) {
 
-	function formatError(o) {
-		if (o && 'errorCode' in o) {
-			o.error = {
-				code: o.status,
-				message: o.message
-			};
-		}
-	}
-
-	function formatUser(o) {
-		if (o.error) {
-			return;
-		}
-
-		o.first_name = o.firstName;
-		o.last_name = o.lastName;
-		o.name = o.formattedName || (o.first_name + ' ' + o.last_name);
-		o.thumbnail = o.pictureUrl;
-		o.email = o.emailAddress;
-	}
-
-	function formatFriends(o) {
-		formatError(o);
-		paging(o);
-		if (o.values) {
-			o.data = o.values;
-			for (var i = 0; i < o.data.length; i++) {
-				formatUser(o.data[i]);
-			}
-
-			delete o.values;
-		}
-
-		return o;
-	}
-
-	function paging(res) {
-		if ('_count' in res && '_start' in res && (res._count + res._start) < res._total) {
-			res.paging = {
-				next: '?start=' + (res._start + res._count) + '&count=' + res._count
-			};
-		}
-	}
-
-	function empty(o, headers) {
-		if (JSON.stringify(o) === '{}' && headers.statusCode === 200) {
-			o.success = true;
-		}
-	}
-
 	hello.init({
 
 		linkedin: {
@@ -181,6 +131,56 @@
 			}
 		}
 	});
+
+	function formatError(o) {
+		if (o && 'errorCode' in o) {
+			o.error = {
+				code: o.status,
+				message: o.message
+			};
+		}
+	}
+
+	function formatUser(o) {
+		if (o.error) {
+			return;
+		}
+
+		o.first_name = o.firstName;
+		o.last_name = o.lastName;
+		o.name = o.formattedName || (o.first_name + ' ' + o.last_name);
+		o.thumbnail = o.pictureUrl;
+		o.email = o.emailAddress;
+	}
+
+	function formatFriends(o) {
+		formatError(o);
+		paging(o);
+		if (o.values) {
+			o.data = o.values;
+			for (var i = 0; i < o.data.length; i++) {
+				formatUser(o.data[i]);
+			}
+
+			delete o.values;
+		}
+
+		return o;
+	}
+
+	function paging(res) {
+		if ('_count' in res && '_start' in res && (res._count + res._start) < res._total) {
+			res.paging = {
+				next: '?start=' + (res._start + res._count) + '&count=' + res._count
+			};
+		}
+	}
+
+	function empty(o, headers) {
+		if (JSON.stringify(o) === '{}' && headers.statusCode === 200) {
+			o.success = true;
+		}
+	}
 
 	function formatQuery(qs) {
 		// LinkedIn signs requests with the parameter 'oauth2_access_token'

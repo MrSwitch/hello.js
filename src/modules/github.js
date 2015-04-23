@@ -1,37 +1,11 @@
 (function(hello) {
 
-	function formatError(o, headers) {
-		var code = headers ? headers.statusCode : (o && 'meta' in o && 'status' in o.meta && o.meta.status);
-		if ((code === 401 || code === 403)) {
-			o.error = {
-				code: 'access_denied',
-				message: o.message || (o.data ? o.data.message : 'Could not get response')
-			};
-			delete o.message;
-		}
-	}
-
-	function formatUser(o) {
-		if (o.id) {
-			o.thumbnail = o.picture = o.avatar_url;
-			o.name = o.login;
-		}
-	}
-
-	function paging(res, headers, req) {
-		if (res.data && res.data.length && headers && headers.Link) {
-			var next = headers.Link.match(/<(.*?)>;\s*rel=\"next\"/);
-			if (next) {
-				res.paging = {
-					next: next[1]
-				};
-			}
-		}
-	}
-
 	hello.init({
+
 		github: {
+
 			name: 'GitHub',
+
 			oauth: {
 				version: 2,
 				auth: 'https://github.com/login/oauth/authorize',
@@ -67,7 +41,7 @@
 
 					formatError(o, headers);
 
-					if (Object.prototype.toString.call(o) === '[object Array]') {
+					if (Array.isArray(o)) {
 						o = {data:o};
 						paging(o, headers, req);
 						for (var i = 0; i < o.data.length; i++) {
@@ -95,5 +69,34 @@
 			}
 		}
 	});
+
+	function formatError(o, headers) {
+		var code = headers ? headers.statusCode : (o && 'meta' in o && 'status' in o.meta && o.meta.status);
+		if ((code === 401 || code === 403)) {
+			o.error = {
+				code: 'access_denied',
+				message: o.message || (o.data ? o.data.message : 'Could not get response')
+			};
+			delete o.message;
+		}
+	}
+
+	function formatUser(o) {
+		if (o.id) {
+			o.thumbnail = o.picture = o.avatar_url;
+			o.name = o.login;
+		}
+	}
+
+	function paging(res, headers, req) {
+		if (res.data && res.data.length && headers && headers.Link) {
+			var next = headers.Link.match(/<(.*?)>;\s*rel=\"next\"/);
+			if (next) {
+				res.paging = {
+					next: next[1]
+				};
+			}
+		}
+	}
 
 })(hello);

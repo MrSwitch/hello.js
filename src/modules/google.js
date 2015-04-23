@@ -1,9 +1,178 @@
 (function(hello) {
 
-	'use strict';
+	// URLs
+	var contactsUrl = 'https://www.google.com/m8/feeds/contacts/default/full?v=3.0&alt=json&max-results=@{limit|1000}&start-index=@{start|1}';
+
+	hello.init({
+
+		google: {
+
+			name: 'Google Plus',
+
+			// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
+			oauth: {
+				version: 2,
+				auth: 'https://accounts.google.com/o/oauth2/auth',
+				grant: 'https://accounts.google.com/o/oauth2/token'
+			},
+
+			// Authorization scopes
+			scope: {
+				basic: 'https://www.googleapis.com/auth/plus.me profile',
+				email: 'email',
+				birthday: '',
+				events: '',
+				photos: 'https://picasaweb.google.com/data/',
+				videos: 'http://gdata.youtube.com',
+				friends: 'https://www.google.com/m8/feeds, https://www.googleapis.com/auth/plus.login',
+				files: 'https://www.googleapis.com/auth/drive.readonly',
+				publish: '',
+				publish_files: 'https://www.googleapis.com/auth/drive',
+				create_event: '',
+				offline_access: ''
+			},
+
+			scope_delim: ' ',
+
+			// Login
+			login: function(p) {
+				if (p.qs.display === 'none') {
+					// Google doesn't like display=none
+					p.qs.display = '';
+				}
+
+				if (p.qs.response_type === 'code') {
+
+					// Lets set this to an offline access to return a refresh_token
+					p.qs.access_type = 'offline';
+				}
+			},
+
+			// API base URI
+			base: 'https://www.googleapis.com/',
+
+			// Map GET requests
+			get: {
+				me: 'plus/v1/people/me',
+
+				// Deprecated Sept 1, 2014
+				//'me': 'oauth2/v1/userinfo?alt=json',
+
+				// See: https://developers.google.com/+/api/latest/people/list
+				'me/friends': 'plus/v1/people/me/people/visible?maxResults=@{limit|100}',
+				'me/following': contactsUrl,
+				'me/followers': contactsUrl,
+				'me/contacts': contactsUrl,
+				'me/share': 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
+				'me/feed': 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
+				'me/albums': 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}&start-index=@{start|1}',
+				'me/album': function(p, callback) {
+					var key = p.query.id;
+					delete p.query.id;
+					callback(key.replace('/entry/', '/feed/'));
+				},
+
+				'me/photos': 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}&start-index=@{start|1}',
+
+				// See: https://developers.google.com/drive/v2/reference/files/list
+				'me/files': 'drive/v2/files?q=%22@{parent|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}',
+
+				// See: https://developers.google.com/drive/v2/reference/files/list
+				'me/folders': 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+mimeType+=+%22application/vnd.google-apps.folder%22+and+trashed=false&maxResults=@{limit|100}',
+
+				// See: https://developers.google.com/drive/v2/reference/files/list
+				'me/folder': 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}'
+			},
+
+			// Map POST requests
+			post: {
+
+				// Google Drive
+				'me/files': uploadDrive,
+				'me/folders': function(p, callback) {
+					p.data = {
+						title: p.data.name,
+						parents: [{id: p.data.parent || 'root'}],
+						mimeType: 'application/vnd.google-apps.folder'
+					};
+					callback('drive/v2/files');
+				}
+			},
+
+			// Map PUT requests
+			put: {
+				'me/files': uploadDrive
+			},
+
+			// Map DELETE requests
+			del: {
+				'me/files': 'drive/v2/files/@{id}',
+				'me/folder': 'drive/v2/files/@{id}'
+			},
+
+			wrap: {
+				me: function(o) {
+					if (o.id) {
+						o.last_name = o.family_name || (o.name ? o.name.familyName : null);
+						o.first_name = o.given_name || (o.name ? o.name.givenName : null);
+
+						if (o.emails && o.emails.length) {
+							o.email = o.emails[0].value;
+						}
+
+						formatPerson(o);
+					}
+
+					return o;
+				},
+
+				'me/friends': function(o) {
+					if (o.items) {
+						paging(o);
+						o.data = o.items;
+						delete o.items;
+						for (var i = 0; i < o.data.length; i++) {
+							formatPerson(o.data[i]);
+						}
+					}
+
+					return o;
+				},
+
+				'me/contacts': formatFriends,
+				'me/followers': formatFriends,
+				'me/following': formatFriends,
+				'me/share': formatFeed,
+				'me/feed': formatFeed,
+				'me/albums': gEntry,
+				'me/photos': gEntry,
+				'default': gEntry
+			},
+
+			xhr: function(p) {
+
+				if (p.method === 'post' || p.method === 'put') {
+					toJSON(p);
+				}
+
+				return true;
+			},
+
+			// Don't even try submitting via form.
+			// This means no POST operations in <=IE9
+			form: false
+		}
+	});
 
 	function toInt(s) {
 		return parseInt(s, 10);
+	}
+
+	function formatFeed(o) {
+		paging(o);
+		o.data = o.items;
+		delete o.items;
+		return o;
 	}
 
 	// Format: ensure each record contains a name, id etc.
@@ -375,180 +544,6 @@
 		});
 
 	}
-
-	// URLs
-	var contactsUrl = 'https://www.google.com/m8/feeds/contacts/default/full?v=3.0&alt=json&max-results=@{limit|1000}&start-index=@{start|1}';
-
-	hello.init({
-		google: {
-			name: 'Google Plus',
-
-			// Login
-			login: function(p) {
-				if (p.qs.display === 'none') {
-					// Google doesn't like display=none
-					p.qs.display = '';
-				}
-
-				if (p.qs.response_type === 'code') {
-
-					// Lets set this to an offline access to return a refresh_token
-					p.qs.access_type = 'offline';
-				}
-			},
-
-			// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
-			oauth: {
-				version: 2,
-				auth: 'https://accounts.google.com/o/oauth2/auth',
-				grant: 'https://accounts.google.com/o/oauth2/token'
-			},
-
-			// Authorization scopes
-			scope: {
-				basic: 'https://www.googleapis.com/auth/plus.me profile',
-				email: 'email',
-				birthday: '',
-				events: '',
-				photos: 'https://picasaweb.google.com/data/',
-				videos: 'http://gdata.youtube.com',
-				friends: 'https://www.google.com/m8/feeds, https://www.googleapis.com/auth/plus.login',
-				files: 'https://www.googleapis.com/auth/drive.readonly',
-				publish: '',
-				publish_files: 'https://www.googleapis.com/auth/drive',
-				create_event: '',
-				offline_access: ''
-			},
-
-			scope_delim: ' ',
-
-			// API base URI
-			base: 'https://www.googleapis.com/',
-
-			// Map GET requests
-			get: {
-				me: 'plus/v1/people/me',
-
-				// Deprecated Sept 1, 2014
-				//'me': 'oauth2/v1/userinfo?alt=json',
-
-				// See: https://developers.google.com/+/api/latest/people/list
-				'me/friends': 'plus/v1/people/me/people/visible?maxResults=@{limit|100}',
-				'me/following': contactsUrl,
-				'me/followers': contactsUrl,
-				'me/contacts': contactsUrl,
-				'me/share': 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
-				'me/feed': 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
-				'me/albums': 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}&start-index=@{start|1}',
-				'me/album': function(p, callback) {
-					var key = p.query.id;
-					delete p.query.id;
-					callback(key.replace('/entry/', '/feed/'));
-				},
-
-				'me/photos': 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}&start-index=@{start|1}',
-
-				// See: https://developers.google.com/drive/v2/reference/files/list
-				'me/files': 'drive/v2/files?q=%22@{parent|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}',
-
-				// See: https://developers.google.com/drive/v2/reference/files/list
-				'me/folders': 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+mimeType+=+%22application/vnd.google-apps.folder%22+and+trashed=false&maxResults=@{limit|100}',
-
-				// See: https://developers.google.com/drive/v2/reference/files/list
-				'me/folder': 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}'
-			},
-
-			// Map POST requests
-			post: {
-
-				// Google Drive
-				'me/files': uploadDrive,
-				'me/folders': function(p, callback) {
-					p.data = {
-						title: p.data.name,
-						parents: [{id: p.data.parent || 'root'}],
-						mimeType: 'application/vnd.google-apps.folder'
-					};
-					callback('drive/v2/files');
-				}
-			},
-
-			// Map PUT requests
-			put: {
-				'me/files': uploadDrive
-			},
-
-			// Map DELETE requests
-			del: {
-				'me/files': 'drive/v2/files/@{id}',
-				'me/folder': 'drive/v2/files/@{id}'
-			},
-
-			wrap: {
-				me: function(o) {
-					if (o.id) {
-						o.last_name = o.family_name || (o.name ? o.name.familyName : null);
-						o.first_name = o.given_name || (o.name ? o.name.givenName : null);
-
-						if (o.emails && o.emails.length) {
-							o.email = o.emails[0].value;
-						}
-
-						formatPerson(o);
-					}
-
-					return o;
-				},
-
-				'me/friends': function(o) {
-					if (o.items) {
-						paging(o);
-						o.data = o.items;
-						delete o.items;
-						for (var i = 0; i < o.data.length; i++) {
-							formatPerson(o.data[i]);
-						}
-					}
-
-					return o;
-				},
-
-				'me/contacts': formatFriends,
-				'me/followers': formatFriends,
-				'me/following': formatFriends,
-				'me/share': function(o) {
-					paging(o);
-					o.data = o.items;
-					delete o.items;
-					return o;
-				},
-
-				'me/feed': function(o) {
-					paging(o);
-					o.data = o.items;
-					delete o.items;
-					return o;
-				},
-
-				'me/albums': gEntry,
-				'me/photos': gEntry,
-				'default': gEntry
-			},
-
-			xhr: function(p) {
-
-				if (p.method === 'post' || p.method === 'put') {
-					toJSON(p);
-				}
-
-				return true;
-			},
-
-			// Don't even try submitting via form.
-			// This means no POST operations in <=IE9
-			form: false
-		}
-	});
 
 	function toJSON(p) {
 		if (typeof (p.data) === 'object') {

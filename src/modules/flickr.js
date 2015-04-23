@@ -1,9 +1,97 @@
 (function(hello) {
 
+	hello.init({
+
+		flickr: {
+
+			name: 'Flickr',
+
+			// Ensure that you define an oauth_proxy
+			oauth: {
+				version: '1.0a',
+				auth: 'https://www.flickr.com/services/oauth/authorize?perms=read',
+				request: 'https://www.flickr.com/services/oauth/request_token',
+				token: 'https://www.flickr.com/services/oauth/access_token'
+			},
+
+			// API base URL
+			base: 'https://api.flickr.com/services/rest',
+
+			// Map GET resquests
+			get: {
+				me: sign('flickr.people.getInfo'),
+				'me/friends': sign('flickr.contacts.getList', {per_page:'@{limit|50}'}),
+				'me/following': sign('flickr.contacts.getList', {per_page:'@{limit|50}'}),
+				'me/followers': sign('flickr.contacts.getList', {per_page:'@{limit|50}'}),
+				'me/albums': sign('flickr.photosets.getList', {per_page:'@{limit|50}'}),
+				'me/photos': sign('flickr.people.getPhotos', {per_page:'@{limit|50}'})
+			},
+
+			wrap: {
+				me: function(o) {
+					formatError(o);
+					o = checkResponse(o, 'person');
+					if (o.id) {
+						if (o.realname) {
+							o.name = o.realname._content;
+							var m = o.name.split(' ');
+							o.first_name = m[0];
+							o.last_name = m[1];
+						}
+
+						o.thumbnail = getBuddyIcon(o, 'l');
+						o.picture = getBuddyIcon(o, 'l');
+					}
+
+					return o;
+				},
+
+				'me/friends': formatFriends,
+				'me/followers': formatFriends,
+				'me/following': formatFriends,
+				'me/albums': function(o) {
+					formatError(o);
+					o = checkResponse(o, 'photosets');
+					paging(o);
+					if (o.photoset) {
+						o.data = o.photoset;
+						delete o.photoset;
+						for (var i = 0; i < o.data.length; i++) {
+							var item = o.data[i];
+							item.name = item.title._content;
+							item.photos = 'https://api.flickr.com/services/rest' + getApiUrl('flickr.photosets.getPhotos', {photoset_id: item.id}, true);
+						}
+					}
+
+					return o;
+				},
+
+				'me/photos': function(o) {
+					formatError(o);
+					return formatPhotos(o);
+				},
+
+				'default': function(o) {
+					formatError(o);
+					return formatPhotos(o);
+				}
+			},
+
+			xhr: false,
+
+			jsonp: function(p, qs) {
+				if (p.method == 'get') {
+					delete qs.callback;
+					qs.jsoncallback = p.callbackID;
+				}
+			}
+		}
+	});
+
 	function getApiUrl(method, extraParams, skipNetwork) {
 		var url = ((skipNetwork) ? '' : 'flickr:') +
 			'?method=' + method +
-			'&api_key=' + hello.init().flickr.id +
+			'&api_key=' + hello.services.flickr.id +
 			'&format=json';
 		for (var param in extraParams) {
 			if (extraParams.hasOwnProperty(param)) {
@@ -124,91 +212,4 @@
 		}
 	}
 
-	hello.init({
-
-		flickr: {
-
-			name: 'Flickr',
-
-			// Ensure that you define an oauth_proxy
-			oauth: {
-				version: '1.0a',
-				auth: 'https://www.flickr.com/services/oauth/authorize?perms=read',
-				request: 'https://www.flickr.com/services/oauth/request_token',
-				token: 'https://www.flickr.com/services/oauth/access_token'
-			},
-
-			// API base URL
-			base: 'https://api.flickr.com/services/rest',
-
-			// Map GET resquests
-			get: {
-				me: sign('flickr.people.getInfo'),
-				'me/friends': sign('flickr.contacts.getList', {per_page:'@{limit|50}'}),
-				'me/following': sign('flickr.contacts.getList', {per_page:'@{limit|50}'}),
-				'me/followers': sign('flickr.contacts.getList', {per_page:'@{limit|50}'}),
-				'me/albums': sign('flickr.photosets.getList', {per_page:'@{limit|50}'}),
-				'me/photos': sign('flickr.people.getPhotos', {per_page:'@{limit|50}'})
-			},
-
-			wrap: {
-				me: function(o) {
-					formatError(o);
-					o = checkResponse(o, 'person');
-					if (o.id) {
-						if (o.realname) {
-							o.name = o.realname._content;
-							var m = o.name.split(' ');
-							o.first_name = m[0];
-							o.last_name = m[1];
-						}
-
-						o.thumbnail = getBuddyIcon(o, 'l');
-						o.picture = getBuddyIcon(o, 'l');
-					}
-
-					return o;
-				},
-
-				'me/friends': formatFriends,
-				'me/followers': formatFriends,
-				'me/following': formatFriends,
-				'me/albums': function(o) {
-					formatError(o);
-					o = checkResponse(o, 'photosets');
-					paging(o);
-					if (o.photoset) {
-						o.data = o.photoset;
-						delete o.photoset;
-						for (var i = 0; i < o.data.length; i++) {
-							var item = o.data[i];
-							item.name = item.title._content;
-							item.photos = 'https://api.flickr.com/services/rest' + getApiUrl('flickr.photosets.getPhotos', {photoset_id: item.id}, true);
-						}
-					}
-
-					return o;
-				},
-
-				'me/photos': function(o) {
-					formatError(o);
-					return formatPhotos(o);
-				},
-
-				'default': function(o) {
-					formatError(o);
-					return formatPhotos(o);
-				}
-			},
-
-			xhr: false,
-
-			jsonp: function(p, qs) {
-				if (p.method == 'get') {
-					delete qs.callback;
-					qs.jsoncallback = p.callbackID;
-				}
-			}
-		}
-	});
 })(hello);

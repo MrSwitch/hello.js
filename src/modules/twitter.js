@@ -1,81 +1,5 @@
 (function(hello) {
 
-	function formatUser(o) {
-		if (o.id) {
-			if (o.name) {
-				var m = o.name.split(' ');
-				o.first_name = m[0];
-				o.last_name = m[1];
-			}
-
-			// See: https://dev.twitter.com/overview/general/user-profile-images-and-banners
-			o.thumbnail = o.profile_image_url_https || o.profile_image_url;
-		}
-	}
-
-	function formatFriends(o) {
-		formatError(o);
-		paging(o);
-		if (o.users) {
-			o.data = o.users;
-			for (var i = 0; i < o.data.length; i++) {
-				formatUser(o.data[i]);
-			}
-
-			delete o.users;
-		}
-
-		return o;
-	}
-
-	function formatError(o) {
-		if (o.errors) {
-			var e = o.errors[0];
-			o.error = {
-				code: 'request_failed',
-				message: e.message
-			};
-		}
-	}
-
-	// Take a cursor and add it to the path
-	function paging(res) {
-		// Does the response include a 'next_cursor_string'
-		if ('next_cursor_str' in res) {
-			// See: https://dev.twitter.com/docs/misc/cursoring
-			res.paging = {
-				next: '?cursor=' + res.next_cursor_str
-			};
-		}
-	}
-
-	/*
-		// The documentation says to define user in the request
-		// although its not actually required.
-
-		var user_id;
-
-		function withUserId(callback){
-			if(user_id){
-				callback(user_id);
-			}
-			else{
-				hello.api('twitter:/me', function(o){
-					user_id = o.id;
-					callback(o.id);
-				});
-			}
-		}
-
-		function sign(url){
-			return function(p, callback){
-				withUserId(function(user_id){
-					callback(url+'?user_id='+user_id);
-				});
-			};
-		}
-	*/
-
 	var base = 'https://api.twitter.com/';
 
 	hello.init({
@@ -185,8 +109,84 @@
 		}
 	});
 
-	function arrayToDataResponse(res) {
-		return hello.utils.isArray(res) ? {data: res} : res;
+	function formatUser(o) {
+		if (o.id) {
+			if (o.name) {
+				var m = o.name.split(' ');
+				o.first_name = m[0];
+				o.last_name = m[1];
+			}
+
+			// See: https://dev.twitter.com/overview/general/user-profile-images-and-banners
+			o.thumbnail = o.profile_image_url_https || o.profile_image_url;
+		}
 	}
+
+	function formatFriends(o) {
+		formatError(o);
+		paging(o);
+		if (o.users) {
+			o.data = o.users;
+			for (var i = 0; i < o.data.length; i++) {
+				formatUser(o.data[i]);
+			}
+
+			delete o.users;
+		}
+
+		return o;
+	}
+
+	function formatError(o) {
+		if (o.errors) {
+			var e = o.errors[0];
+			o.error = {
+				code: 'request_failed',
+				message: e.message
+			};
+		}
+	}
+
+	// Take a cursor and add it to the path
+	function paging(res) {
+		// Does the response include a 'next_cursor_string'
+		if ('next_cursor_str' in res) {
+			// See: https://dev.twitter.com/docs/misc/cursoring
+			res.paging = {
+				next: '?cursor=' + res.next_cursor_str
+			};
+		}
+	}
+
+	function arrayToDataResponse(res) {
+		return Array.isArray(res) ? {data: res} : res;
+	}
+
+	/**
+	// The documentation says to define user in the request
+	// although its not actually required.
+
+	var user_id;
+
+	function withUserId(callback){
+		if(user_id){
+			callback(user_id);
+		}
+		else{
+			hello.api('twitter:/me', function(o){
+				user_id = o.id;
+				callback(o.id);
+			});
+		}
+	}
+
+	function sign(url){
+		return function(p, callback){
+			withUserId(function(user_id){
+				callback(url+'?user_id='+user_id);
+			});
+		};
+	}
+	*/
 
 })(hello);

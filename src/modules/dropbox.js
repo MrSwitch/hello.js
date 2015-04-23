@@ -1,61 +1,17 @@
 (function(hello) {
 
-	function formatError(o) {
-		if (o && 'error' in o) {
-			o.error = {
-				code: 'server_error',
-				message: o.error.message || o.error
-			};
-		}
-	}
-
-	function formatFile(o, headers, req) {
-
-		if (typeof (o) !== 'object' ||
-			(typeof (Blob) !== 'undefined' && o instanceof Blob) ||
-			(typeof (ArrayBuffer) !== 'undefined' && o instanceof ArrayBuffer)) {
-			// This is a file, let it through unformatted
-			return;
-		}
-
-		if ('error' in o) {
-			return;
-		}
-
-		var path = o.root + o.path.replace(/\&/g, '%26');
-		if (o.thumb_exists) {
-			o.thumbnail = hello.settings.oauth_proxy + '?path=' +
-			encodeURIComponent('https://api-content.dropbox.com/1/thumbnails/' + path + '?format=jpeg&size=m') + '&access_token=' + req.query.access_token;
-		}
-
-		o.type = (o.is_dir ? 'folder' : o.mime_type);
-		o.name = o.path.replace(/.*\//g, '');
-		if (o.is_dir) {
-			o.files = 'metadata/' + path;
-		}
-		else {
-			o.downloadLink = hello.settings.oauth_proxy + '?path=' +
-			encodeURIComponent('https://api-content.dropbox.com/1/files/' + path) + '&access_token=' + req.query.access_token;
-			o.file = 'https://api-content.dropbox.com/1/files/' + path;
-		}
-
-		if (!o.id) {
-			o.id = o.path.replace(/^\//, '');
-		}
-
-		// o.media = 'https://api-content.dropbox.com/1/files/' + path;
-	}
-
-	function req(str) {
-		return function(p, cb) {
-			delete p.query.limit;
-			cb(str);
-		};
-	}
-
 	hello.init({
 
 		dropbox: {
+
+			name: 'Dropbox',
+
+			oauth: {
+				version: '1.0',
+				auth: 'https://www.dropbox.com/1/oauth/authorize',
+				request: 'https://api.dropbox.com/1/oauth/request_token',
+				token: 'https://api.dropbox.com/1/oauth/access_token'
+			},
 
 			login: function(p) {
 				// The dropbox login window is a different size
@@ -76,12 +32,6 @@
 					grant: 'https://api.dropbox.com/1/oauth2/token'
 				}
 			*/
-			oauth: {
-				version: '1.0',
-				auth: 'https://www.dropbox.com/1/oauth/authorize',
-				request: 'https://api.dropbox.com/1/oauth/request_token',
-				token: 'https://api.dropbox.com/1/oauth/access_token'
-			},
 
 			// API Base URL
 			base: 'https://api.dropbox.com/1/',
@@ -212,5 +162,58 @@
 			}
 		}
 	});
+
+	function formatError(o) {
+		if (o && 'error' in o) {
+			o.error = {
+				code: 'server_error',
+				message: o.error.message || o.error
+			};
+		}
+	}
+
+	function formatFile(o, headers, req) {
+
+		if (typeof o !== 'object' ||
+			(typeof Blob !== 'undefined' && o instanceof Blob) ||
+			(typeof ArrayBuffer !== 'undefined' && o instanceof ArrayBuffer)) {
+			// This is a file, let it through unformatted
+			return;
+		}
+
+		if ('error' in o) {
+			return;
+		}
+
+		var path = o.root + o.path.replace(/\&/g, '%26');
+		if (o.thumb_exists) {
+			o.thumbnail = hello.settings.oauth_proxy + '?path=' +
+			encodeURIComponent('https://api-content.dropbox.com/1/thumbnails/' + path + '?format=jpeg&size=m') + '&access_token=' + req.query.access_token;
+		}
+
+		o.type = (o.is_dir ? 'folder' : o.mime_type);
+		o.name = o.path.replace(/.*\//g, '');
+		if (o.is_dir) {
+			o.files = 'metadata/' + path;
+		}
+		else {
+			o.downloadLink = hello.settings.oauth_proxy + '?path=' +
+			encodeURIComponent('https://api-content.dropbox.com/1/files/' + path) + '&access_token=' + req.query.access_token;
+			o.file = 'https://api-content.dropbox.com/1/files/' + path;
+		}
+
+		if (!o.id) {
+			o.id = o.path.replace(/^\//, '');
+		}
+
+		// o.media = 'https://api-content.dropbox.com/1/files/' + path;
+	}
+
+	function req(str) {
+		return function(p, cb) {
+			delete p.query.limit;
+			cb(str);
+		};
+	}
 
 })(hello);

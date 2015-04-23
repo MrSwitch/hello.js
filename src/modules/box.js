@@ -1,5 +1,7 @@
 hello.init({
+
 	box: {
+
 		name: 'Box',
 
 		oauth: {
@@ -9,15 +11,15 @@ hello.init({
 			response_type: 'code'
 		},
 
+		scope: {
+			basic: ''
+		},
+
 		base: 'https://api.box.com/2.0/',
 
 		get: {
 			me: 'users/me',
 			'me/files': 'files'
-		},
-
-		scope: {
-			basic: ''
 		},
 
 		wrap: {
@@ -33,7 +35,7 @@ hello.init({
 			},
 
 			'me/files': function(o) {
-				if (Object.prototype.toString.call(o) === '[object Array]') {
+				if (Array.isArray(o)) {
 					return {data:o};
 				}
 

@@ -1,23 +1,6 @@
 // See: https://developers.soundcloud.com/docs/api/reference
 (function(hello) {
 
-	function formatUser(o) {
-		if (o.id) {
-			o.picture = o.avatar_url;
-			o.thumbnail = o.avatar_url;
-			o.name = o.username || o.full_name;
-		}
-	}
-
-	// See: http://developers.soundcloud.com/docs/api/reference#activities
-	function paging(res) {
-		if ('next_href' in res) {
-			res.paging = {
-				next: res.next_href
-			};
-		}
-	}
-
 	hello.init({
 
 		soundcloud: {
@@ -55,7 +38,7 @@
 				},
 
 				'default': function(o) {
-					if (o instanceof Array) {
+					if (Array.isArray(o)) {
 						o = {
 							data: o
 						};
@@ -81,6 +64,23 @@
 		qs.oauth_token = token;
 		qs['_status_code_map[302]'] = 200;
 		return true;
+	}
+
+	function formatUser(o) {
+		if (o.id) {
+			o.picture = o.avatar_url;
+			o.thumbnail = o.avatar_url;
+			o.name = o.username || o.full_name;
+		}
+	}
+
+	// See: http://developers.soundcloud.com/docs/api/reference#activities
+	function paging(res) {
+		if ('next_href' in res) {
+			res.paging = {
+				next: res.next_href
+			};
+		}
 	}
 
 })(hello);

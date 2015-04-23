@@ -1,31 +1,5 @@
 (function(hello) {
 
-	function formatUser(o, headers, req) {
-		if (o.id) {
-			var token = req.query.access_token;
-			if (o.emails) {
-				o.email = o.emails.preferred;
-			}
-
-			// If this is not an non-network friend
-			if (o.is_friend !== false) {
-				// Use the id of the user_id if available
-				var id = (o.user_id || o.id);
-				o.thumbnail = o.picture = 'https://apis.live.net/v5.0/' + id + '/picture?access_token=' + token;
-			}
-		}
-	}
-
-	function formatFriends(o, headers, req) {
-		if ('data' in o) {
-			for (var i = 0; i < o.data.length; i++) {
-				formatUser(o.data[i], headers, req);
-			}
-		}
-
-		return o;
-	}
-
 	hello.init({
 		windows: {
 			name: 'Windows live',
@@ -165,5 +139,31 @@
 			}
 		}
 	});
+
+	function formatUser(o, headers, req) {
+		if (o.id) {
+			var token = req.query.access_token;
+			if (o.emails) {
+				o.email = o.emails.preferred;
+			}
+
+			// If this is not an non-network friend
+			if (o.is_friend !== false) {
+				// Use the id of the user_id if available
+				var id = (o.user_id || o.id);
+				o.thumbnail = o.picture = 'https://apis.live.net/v5.0/' + id + '/picture?access_token=' + token;
+			}
+		}
+	}
+
+	function formatFriends(o, headers, req) {
+		if ('data' in o) {
+			for (var i = 0; i < o.data.length; i++) {
+				formatUser(o.data[i], headers, req);
+			}
+		}
+
+		return o;
+	}
 
 })(hello);

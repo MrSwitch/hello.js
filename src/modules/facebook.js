@@ -1,98 +1,16 @@
 (function(hello) {
 
-	function formatUser(o) {
-		if (o.id) {
-			o.thumbnail = o.picture = 'https://graph.facebook.com/' + o.id + '/picture';
-		}
-
-		return o;
-	}
-
-	function formatFriends(o) {
-		if ('data' in o) {
-			for (var i = 0; i < o.data.length; i++) {
-				formatUser(o.data[i]);
-			}
-		}
-
-		return o;
-	}
-
-	function format(o, headers, req) {
-		if (typeof o === 'boolean') {
-			o = {success: o};
-		}
-
-		if (o && 'data' in o) {
-			var token = req.query.access_token;
-			for (var i = 0; i < o.data.length; i++) {
-				var d = o.data[i];
-				if (d.picture) {
-					d.thumbnail = d.picture;
-				}
-
-				if (d.cover_photo) {
-					d.thumbnail = base + d.cover_photo + '/picture?access_token=' + token;
-				}
-
-				if (d.type === 'album') {
-					d.files = d.photos = base + d.id + '/photos';
-				}
-
-				if (d.can_upload) {
-					d.upload_location = base + d.id + '/photos';
-				}
-			}
-		}
-
-		return o;
-	}
-
-	var base = 'https://graph.facebook.com/';
-
 	hello.init({
 
 		facebook: {
 
 			name: 'Facebook',
 
-			login: function(p) {
-				// Support Facebook's unique auth_type parameter
-				if (p.options.auth_type) {
-					p.qs.auth_type = p.options.auth_type;
-				}
-
-				// The facebook login window is a different size.
-				p.options.window_width = 580;
-				p.options.window_height = 400;
-			},
-
-			// https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/v2.1
+			// SEE https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/v2.1
 			oauth: {
 				version: 2,
 				auth: 'https://www.facebook.com/dialog/oauth/',
 				grant: 'https://graph.facebook.com/oauth/access_token'
-			},
-
-			// Refresh the access_token
-			refresh: true,
-
-			logout: function(callback) {
-				// Assign callback to a global handler
-				var callbackID = hello.utils.globalEvent(callback);
-				var redirect = encodeURIComponent(hello.settings.redirect_uri + '?' + hello.utils.param({callback:callbackID, result: JSON.stringify({force:true}), state: '{}'}));
-				var token = (hello.utils.store('facebook') || {}).access_token;
-				hello.utils.iframe('https://www.facebook.com/logout.php?next=' + redirect + '&access_token=' + token);
-
-				// Possible responses:
-				// String URL	- hello.logout should handle the logout
-				// undefined	- this function will handle the callback
-				// true - throw a success, this callback isn't handling the callback
-				// false - throw a error
-				if (!token) {
-					// If there isn't a token, the above wont return a response, so lets trigger a response
-					return false;
-				}
 			},
 
 			// Authorization scopes
@@ -112,6 +30,38 @@
 				// create_event	: 'create_event',
 
 				offline_access: 'offline_access'
+			},
+
+			// Refresh the access_token
+			refresh: true,
+
+			login: function(p) {
+				// Support Facebook's unique auth_type parameter
+				if (p.options.auth_type) {
+					p.qs.auth_type = p.options.auth_type;
+				}
+
+				// The facebook login window is a different size.
+				p.options.window_width = 580;
+				p.options.window_height = 400;
+			},
+
+			logout: function(callback) {
+				// Assign callback to a global handler
+				var callbackID = hello.utils.globalEvent(callback);
+				var redirect = encodeURIComponent(hello.settings.redirect_uri + '?' + hello.utils.param({callback:callbackID, result: JSON.stringify({force:true}), state: '{}'}));
+				var token = (hello.utils.store('facebook') || {}).access_token;
+				hello.utils.iframe('https://www.facebook.com/logout.php?next=' + redirect + '&access_token=' + token);
+
+				// Possible responses:
+				// String URL	- hello.logout should handle the logout
+				// undefined	- this function will handle the callback
+				// true - throw a success, this callback isn't handling the callback
+				// false - throw a error
+				if (!token) {
+					// If there isn't a token, the above wont return a response, so lets trigger a response
+					return false;
+				}
 			},
 
 			// API Base URL
@@ -192,5 +142,55 @@
 			}
 		}
 	});
+
+	var base = 'https://graph.facebook.com/';
+
+	function formatUser(o) {
+		if (o.id) {
+			o.thumbnail = o.picture = 'https://graph.facebook.com/' + o.id + '/picture';
+		}
+
+		return o;
+	}
+
+	function formatFriends(o) {
+		if ('data' in o) {
+			for (var i = 0; i < o.data.length; i++) {
+				formatUser(o.data[i]);
+			}
+		}
+
+		return o;
+	}
+
+	function format(o, headers, req) {
+		if (typeof o === 'boolean') {
+			o = {success: o};
+		}
+
+		if (o && 'data' in o) {
+			var token = req.query.access_token;
+			for (var i = 0; i < o.data.length; i++) {
+				var d = o.data[i];
+				if (d.picture) {
+					d.thumbnail = d.picture;
+				}
+
+				if (d.cover_photo) {
+					d.thumbnail = base + d.cover_photo + '/picture?access_token=' + token;
+				}
+
+				if (d.type === 'album') {
+					d.files = d.photos = base + d.id + '/photos';
+				}
+
+				if (d.can_upload) {
+					d.upload_location = base + d.id + '/photos';
+				}
+			}
+		}
+
+		return o;
+	}
 
 })(hello);

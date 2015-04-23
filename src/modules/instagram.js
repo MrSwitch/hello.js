@@ -1,56 +1,13 @@
 (function(hello) {
 
-	function formatError(o) {
-		if (o && 'meta' in o && 'error_type' in o.meta) {
-			o.error = {
-				code: o.meta.error_type,
-				message: o.meta.error_message
-			};
-		}
-	}
-
-	function formatFriends(o) {
-		paging(o);
-		if (o && 'data' in o) {
-			for (var i = 0; i < o.data.length; i++) {
-				formatFriend(o.data[i]);
-			}
-		}
-
-		return o;
-	}
-
-	function formatFriend(o) {
-		if (o.id) {
-			o.thumbnail = o.profile_picture;
-			o.name = o.full_name || o.username;
-		}
-	}
-
-	// See: http://instagram.com/developer/endpoints/
-	function paging(res) {
-		if ('pagination' in res) {
-			res.paging = {
-				next: res.pagination.next_url
-			};
-			delete res.pagination;
-		}
-	}
-
 	hello.init({
 
 		instagram: {
 
 			name: 'Instagram',
 
-			login: function(p) {
-				// Instagram throws errors like 'Javascript API is unsupported' if the display is 'popup'.
-				// Make the display anything but 'popup'
-				p.qs.display = '';
-			},
-
 			oauth: {
-				// http://instagram.com/developer/authentication/
+				// SEE http://instagram.com/developer/authentication/
 				version: 2,
 				auth: 'https://instagram.com/oauth/authorize/',
 				grant: 'https://api.instagram.com/oauth/access_token'
@@ -66,6 +23,12 @@
 			},
 
 			scope_delim: ' ',
+
+			login: function(p) {
+				// Instagram throws errors like 'Javascript API is unsupported' if the display is 'popup'.
+				// Make the display anything but 'popup'
+				p.qs.display = '';
+			},
 
 			base: 'https://api.instagram.com/v1/',
 
@@ -163,5 +126,42 @@
 			form: false
 		}
 	});
+
+	function formatError(o) {
+		if (o && 'meta' in o && 'error_type' in o.meta) {
+			o.error = {
+				code: o.meta.error_type,
+				message: o.meta.error_message
+			};
+		}
+	}
+
+	function formatFriends(o) {
+		paging(o);
+		if (o && 'data' in o) {
+			for (var i = 0; i < o.data.length; i++) {
+				formatFriend(o.data[i]);
+			}
+		}
+
+		return o;
+	}
+
+	function formatFriend(o) {
+		if (o.id) {
+			o.thumbnail = o.profile_picture;
+			o.name = o.full_name || o.username;
+		}
+	}
+
+	// See: http://instagram.com/developer/endpoints/
+	function paging(res) {
+		if ('pagination' in res) {
+			res.paging = {
+				next: res.pagination.next_url
+			};
+			delete res.pagination;
+		}
+	}
 
 })(hello);
