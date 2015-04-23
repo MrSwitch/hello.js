@@ -17,5 +17,7 @@ define([], function() {
 			var instance = hello('instance');
 			expect(instance).to.not.be(hello);
 		});
+
 	});
+
 });

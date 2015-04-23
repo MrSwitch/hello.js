@@ -1,5 +1,5 @@
 define([
-	'../libs/error_response',
+	'../libs/errorResponse',
 	'../../../src/modules/box',
 	'../../../src/modules/facebook',
 	'../../../src/modules/flickr',
@@ -31,17 +31,17 @@ define([
 
 				var MATCH_URL = /^https?\:\/\//;
 
-				it('contain oauth.auth path', function() {
+				it('should contain oauth.auth path', function() {
 				var path = module.oauth.auth;
 				expect(path).to.match(/^https?\:\/\//);
 			});
 
-				it('specify a base url', function() {
+				it('should specify a base url', function() {
 				// Loop through all services
 				expect(module.base).to.match(/^https?\:\/\//);
 			});
 
-				it('using OAuth1 contain, auth, request, token properties', function() {
+				it('should be using OAuth1 contain, auth, request, token properties', function() {
 
 					// Loop through all services
 					var oauth = module.oauth;
@@ -52,25 +52,27 @@ define([
 					}
 				});
 
-				xit('return error object when an api request is made with an unverified user', function(done) {
+				/*
+					xit('should return error object when an api request is made with an unverified user', function(done) {
 
-					var i = 0;
+						var i = 0;
 
-					this.timeout(60000);
+						this.timeout(60000);
 
-					var cb = errorResponse(null, function() {
-					if (++i === 2)
-						done();
-				});
+						var cb = errorResponse(null, function() {
+						if (++i === 2)
+							done();
+					});
 
-					// ensure user is signed out
-					hello.logout(name);
+						// Ensure user is signed out
+						hello.logout(name);
 
-					// Make a request that returns an error object
-					hello(name)
-					.api('me', cb)
-					.then(null, cb);
-				});
+						// Make a request that returns an error object
+						hello(name)
+						.api('me', cb)
+						.then(null, cb);
+					});
+				*/
 			});
 		}
 	});

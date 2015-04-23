@@ -1,9 +1,11 @@
 module.exports = function(grunt) {
 
+	var source = ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js', '!tests/specs/libs/*.js'];
+
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
 		jshint: {
-			files: ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js'],
+			src: source,
 			options: {
 				ignores: ['tests/specs/libs/*.js'],
 				globals: {
@@ -16,7 +18,7 @@ module.exports = function(grunt) {
 			}
 		},
 		jscs: {
-			src: ['Gruntfile.js', 'src/**/*.js', 'tests/specs/e2e/**/*.js', 'tests/specs/unit/core/*.js'],
+			src: source,
 			options: {
 				config: '.jscsrc'
 			}
@@ -30,9 +32,15 @@ module.exports = function(grunt) {
 				'README.md': './index.html'
 			},
 			build: {
-				'dist/hello.js': ['src/hello.polyfill.js', 'src/hello.js', 'src/hello.legacy.js', 'src/hello.amd.js', 'src/hello.commonjs.js'],
+				'dist/hello.js': [
+					'src/hello.polyfill.js',
+					'src/hello.js',
+					'src/hello.legacy.js',
+					'src/hello.amd.js',
+					'src/hello.commonjs.js'
+				],
 				'dist/hello.all.js': [
-          'src/hello.polyfill.js',
+					'src/hello.polyfill.js',
 					'src/hello.js',
 					'src/hello.legacy.js',
 					'src/modules/dropbox.js',

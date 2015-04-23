@@ -1,61 +1,50 @@
-define([
-//	'../../../../src/utils/extend'
-], function(
-//	extend
-){
+define([], function() {
 
-var extend = hello.utils.extend;
+	var extend = hello.utils.extend;
 
+	describe('utils.extend', function() {
 
-//
-// Events
-//
-describe('utils / extend', function(){
+		it('should overide the properties in the first object with those within the second', function() {
 
+			var a = {
+				key: 'valueA'
+			};
 
-	it('should overide the properties in the first object with those within the second', function(){
+			var b = {
+				key: 'valueB'
+			};
 
-		var a = {
-			key : 'valueA'
-		};
+			extend(a, b);
 
-		var b = {
-			key : 'valueB'
-		};
+			// Check a is like b
+			expect(a).to.eql(b);
 
-		extend(a, b);
+			// But a is not b
+			expect(a).to.not.equal(b);
 
-		// a is like b
-		expect( a ).to.eql( b );
+		});
 
-		// But a is not b
-		expect( a ).to.not.equal( b );
+		it('should merge child objects', function() {
 
-	});
+			var a = {
+				key: 'valueA'
+			};
+			a.child = {};
+			a.child.key = 'valueA';
+			a.child.key2 = 'valueA';
 
+			var b = {
+				key: 'valueB'
+			};
+			b.child = b;
 
-	it('should merge child objects', function(){
+			extend(a, b);
 
-		var a = {
-			key : 'valueA'
-		};
-		a.child = {};
-		a.child.key = 'valueA';
-		a.child.key2 = 'valueA';
+			// Check a is like b
+			expect(a).to.not.eql(b);
 
-		var b = {
-			key : 'valueB'
-		};
-		b.child = b;
-
-		extend(a, b);
-
-		// a is like b
-		expect( a ).to.not.eql( b );
+		});
 
 	});
 
-});
-
-	
 });

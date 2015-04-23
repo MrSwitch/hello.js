@@ -1,176 +1,147 @@
-define([
-//	'../../../../src/utils/event',
-//	'../../../../src/utils/objectCreate'
-], function(
-//	Event,
-//	objectCreate
-){
+define([], function() {
 
-var utils = hello.utils;
+	var utils = hello.utils;
 
-//
-// Events
-//
-describe('utils / event', function(){
+	describe('utils.event', function() {
 
-	var hello,
-		arbitary_data,
-		event_name;
+		var hello;
+		var arbitaryData;
+		var eventName;
 
-	beforeEach(function(){
+		beforeEach(function() {
 
-		// Pass an arbitary piece of data around
-		arbitary_data = {boom:true};
+			// Pass an arbitary piece of data around
+			arbitaryData = {boom:true};
 
-		event_name = 'custom';
+			eventName = 'custom';
 
-		hello = {
-			utils : utils
-		};
-		utils.Event.call(hello);
-	});
+			hello = {
+				utils: utils
+			};
+			utils.Event.call(hello);
+		});
 
+		it('should bind events by name and be able to trigger them by name', function() {
 
+			// Make request
+			var spy = sinon.spy(function(data, type) {
 
-	it('should bind events by name and be able to trigger them by name', function(){
+				expect(eventName).to.be(type);
 
-		// Make request
-		var spy = sinon.spy(function( data, type ){
+				expect(arbitaryData).to.be(data);
 
-			expect( event_name ).to.be( type );
+			});
 
-			expect( arbitary_data ).to.be( data );
+			hello.on(eventName, spy);
+
+			hello.emit(eventName, arbitaryData);
+
+			expect(spy.called).to.be.ok();
+		});
+
+		it('should listen to any event by using a "*"', function() {
+
+			// Make request
+			var spy = sinon.spy(function(data, type) {
+
+				expect(eventName).to.be(type);
+
+				expect(arbitaryData).to.be(data);
+
+			});
+
+			hello.on('*', spy);
+
+			hello.emit(eventName, arbitaryData);
+
+			expect(spy.called).to.be.ok();
+		});
+
+		it('should unbind an event by name and callback', function() {
+
+			// Listeners
+			var spy = sinon.spy(function() {
+				// should not be called.
+			});
+
+			var spy2 = sinon.spy(function() {
+				// should not be called.
+			});
+
+			// Bind
+			hello.on(eventName, spy);
+
+			hello.on(eventName, spy2);
+
+			// Remove
+			hello.off(eventName, spy);
+
+			// Trigger
+			hello.emit(eventName);
+
+			// Test spies
+			expect(!spy.called).to.be.ok();
+			expect(spy2.called).to.be.ok();
 
 		});
 
+		it('should unbind all events by name', function() {
 
-		hello.on( event_name, spy );
+			// Listeners
+			var spy = sinon.spy(function() {
+				// should not be called.
+			});
 
-		hello.emit( event_name, arbitary_data );
+			var spy2 = sinon.spy(function() {
+				// should not be called.
+			});
 
+			// Bind
+			hello.on(eventName, spy);
 
-		expect( spy.called ).to.be.ok();
-	});
+			hello.on(eventName, spy2);
 
+			// Remove
+			hello.off(eventName);
 
-	it('should listen to any event by using a "*"', function(){
+			// Trigger
+			hello.emit(eventName);
 
-		// Make request
-		var spy = sinon.spy(function( data, type ){
-
-			expect( event_name ).to.be( type );
-
-			expect( arbitary_data ).to.be( data );
+			// Test spies
+			expect(!spy.called).to.be.ok();
+			expect(!spy2.called).to.be.ok();
 
 		});
 
+		it('should trigger events on its proto (predecessor in chain)', function() {
 
-		hello.on( '*', spy );
+			// PROTO
+			// Listeners
+			var spy = sinon.spy(function() {
+				// should not be called.
+			});
 
-		hello.emit( event_name, arbitary_data );
+			// Bind
+			hello.on(eventName, spy);
 
+			// PROTO
+			var child = Object.create(hello);
 
-		expect( spy.called ).to.be.ok();
-	});
+			var spy2 = sinon.spy(function() {
+				// should not be called.
+			});
 
+			hello.on(eventName, spy2);
 
-	it('should unbind an event by name and callback', function(){
+			// Trigger
+			hello.emit(eventName);
 
-		// Listeners
-		var spy = sinon.spy(function(){
-			// should not be called.
+			// Test spies
+			expect(spy.called).to.be.ok();
+			expect(spy2.called).to.be.ok();
+
 		});
-
-		var spy2 = sinon.spy(function(){
-			// should not be called.
-		});
-
-
-		// Bind
-		hello.on( event_name, spy );
-
-		hello.on( event_name, spy2 );
-
-		// Remove
-		hello.off( event_name, spy );
-
-		// Trigger
-		hello.emit( event_name );
-
-		// Test spies
-		expect( !spy.called ).to.be.ok();
-		expect( spy2.called ).to.be.ok();
-
-	});
-
-
-	it('should unbind all events by name', function(){
-
-		// Listeners
-		var spy = sinon.spy(function(){
-			// should not be called.
-		});
-
-		var spy2 = sinon.spy(function(){
-			// should not be called.
-		});
-
-
-		// Bind
-		hello.on( event_name, spy );
-
-		hello.on( event_name, spy2 );
-
-		// Remove
-		hello.off( event_name );
-
-		// Trigger
-		hello.emit( event_name );
-
-		// Test spies
-		expect( !spy.called ).to.be.ok();
-		expect( !spy2.called ).to.be.ok();
-
-	});
-
-
-
-	it('should trigger events on its proto (predecessor in chain)', function(){
-
-		// PROTO
-		// Listeners
-		var spy = sinon.spy(function(){
-			// should not be called.
-		});
-
-		// Bind
-		hello.on( event_name, spy );
-
-
-
-		// PROTO
-		var child = Object.create(hello);
-
-
-		var spy2 = sinon.spy(function(){
-			// should not be called.
-		});
-
-		hello.on( event_name, spy2 );
-
-
-
-		// Trigger
-		hello.emit( event_name );
-
-		// Test spies
-		expect( spy.called ).to.be.ok();
-		expect( spy2.called ).to.be.ok();
 
 	});
 
-
-});
-
-	
 });

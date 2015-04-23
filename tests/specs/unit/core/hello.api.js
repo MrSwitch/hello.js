@@ -1,5 +1,5 @@
 define([
-	'../../libs/error_response'
+	'../../libs/errorResponse'
 ], function(
 	errorResponse
 ) {
@@ -317,7 +317,11 @@ define([
 					done();
 
 				});
+
 			});
+
 		});
+
 	});
+
 });

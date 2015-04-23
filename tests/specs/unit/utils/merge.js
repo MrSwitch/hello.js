@@ -1,39 +1,29 @@
-define([
-//	'../../../../src/utils/extend'
-], function(
-//	extend
-){
+define([], function() {
 
-var utils = hello.utils;
+	var utils = hello.utils;
 
+	describe('utils.merge', function() {
 
-//
-// Events
-//
-describe('utils / merge', function(){
+		it('should merge arguments into one new object', function() {
 
+			var a = {
+				key: 'valueA'
+			};
 
-	it('should merge arguments into one new object', function(){
+			var b = {
+				key: 'valueB'
+			};
 
-		var a = {
-			key : 'valueA'
-		};
+			var value = utils.merge(a, b);
 
-		var b = {
-			key : 'valueB'
-		};
+			// Check: a is like b
+			expect(value).to.eql(b);
 
-		var value = utils.merge(a, b);
+			// But a is not b
+			expect(value).to.not.equal(b);
 
-		// a is like b
-		expect( value ).to.eql( b );
-
-		// But a is not b
-		expect( value ).to.not.equal( b );
+		});
 
 	});
 
-});
-
-	
 });

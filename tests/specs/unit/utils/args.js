@@ -1,80 +1,65 @@
-define([
-//	'../../../../src/utils/diff'
-], function(
-//	diff
-){
+define([], function() {
 
-var args = hello.utils.args;
+	var args = hello.utils.args;
 
-//
-// Events
-//
-describe('utils / args', function(){
+	describe('utils.args', function() {
 
+		it('should accept an object and arguments as first and second parameters and return an object', function() {
 
-	it('should accept an object and arguments as first and second parameters and return an object', function(){
+			var value = args({}, []);
 
-		var value = args({}, []);
+			expect(value).to.be.an(Object);
 
-		expect( value ).to.be.an( Object );
+		});
 
-	});
+		it('should map arguments to an object', function() {
 
+			var value = args({str: 's', obj: 'o', func: 'f'}, ['String', {}, function() {}]);
 
-	it('should map arguments to an object', function(){
+			expect(value).to.be.an('object');
 
-		var value = args({str:'s', obj: 'o', func : 'f'}, ['String', {}, function(){}]);
+			expect(value.str).to.be.a('string');
 
-		expect( value ).to.be.an( 'object' );
+			expect(value.obj).to.be.an('object');
 
-		expect( value.str ).to.be.a( 'string' );
+			expect(value.func).to.be.a('function');
 
-		expect( value.obj ).to.be.an( 'object' );
+		});
 
-		expect( value.func ).to.be.a( 'function' );
+		it('should interpret the order of arguments, so some can be ommited', function() {
 
-	});
+			var value = args({str: 's', obj: 'o', func: 'f'}, [function() {}]);
 
+			expect(value)
 
+				.to.be.an('object')
 
-	it('should interpret the order of arguments, so some can be ommited', function(){
+				.and.to.not.have.property('str')
 
-		var value = args({str:'s', obj: 'o', func : 'f'}, [function(){}]);
+				.and.to.not.have.property('obj');
 
+			expect(value.func).to.be.a('function');
 
-		expect( value )
+		});
 
-			.to.be.an( 'object' )
+		it('should decipher whether the first argument is all the arguments represented as an object', function() {
 
-			.and.to.not.have.property('str')
+			var value = args({str: 's', obj: 'o', func: 'f'}, [{
+				func: function() {}
+			}]);
 
-			.and.to.not.have.property('obj');
+			expect(value)
 
+				.to.be.an('object')
 
-		expect( value.func ).to.be.a( 'function' );
+				.and.to.not.have.property('str')
 
-	});
+				.and.to.not.have.property('obj');
 
-	it('should decipher whether the first argument is all the arguments represented as an object', function(){
+			expect(value.func).to.be.a('function');
 
-		var value = args({str:'s', obj: 'o', func : 'f'}, [{
-			func : function(){}
-		}]);
-
-		expect( value )
-
-			.to.be.an( 'object' )
-
-			.and.to.not.have.property('str')
-
-			.and.to.not.have.property('obj');
-
-
-		expect( value.func ).to.be.a( 'function' );
+		});
 
 	});
 
-});
-
-	
 });

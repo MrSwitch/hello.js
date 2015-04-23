@@ -1,5 +1,5 @@
 define([
-	'../../libs/error_response'
+	'../../libs/errorResponse'
 ], function(
 	errorResponse
 ) {
@@ -263,6 +263,9 @@ define([
 
 				hello.login('testable', opts);
 			});
+
 		});
+
 	});
+
 });

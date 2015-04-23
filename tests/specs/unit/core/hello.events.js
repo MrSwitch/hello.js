@@ -20,4 +20,5 @@ describe('hello events', function() {
 		hello.emit('auth.login');
 		hello.unsubscribe('auth.login', handler);
 	});
+
 });
