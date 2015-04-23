@@ -143,7 +143,7 @@ hello.utils.extend(hello, {
 
 			// Do this immediatly incase the browser changes the current path.
 			if ('redirect_uri' in options) {
-				this.settings.redirect_uri = _this.url(options.redirect_uri).href;
+				this.settings.redirect_uri = utils.url(options.redirect_uri).href;
 			}
 		}
 
