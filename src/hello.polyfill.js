@@ -1,4 +1,4 @@
-
+// ES5 Object.create
 if (!Object.create) {
 
 	// Shim, Object create
@@ -21,8 +21,7 @@ if (!Object.create) {
 
 }
 
-console.log('polyfill');
-
+// ES5 [].indexOf
 if (!Array.prototype.indexOf) {
 
 	// IndexOf
@@ -40,6 +39,7 @@ if (!Array.prototype.indexOf) {
 
 }
 
+// ES5 isArray
 if (!Array.isArray) {
 
 	// isArray
