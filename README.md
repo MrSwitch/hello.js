@@ -588,7 +588,7 @@ hello('facebook').api('me').then(function(json) {
 });
 ```
 
-# Event subscription
+# Event Subscription
 
 ## hello.on()
 
