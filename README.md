@@ -158,7 +158,7 @@ Register your application with at least one of the following networks. Ensure yo
 Just add onclick events to call hello( network ).login(). Style your buttons as you like; I've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts.
 
 ```html
-<button onclick="hello( 'windows' ).login()">windows</button>
+<button onclick="hello('windows').login()">windows</button>
 ```
 
 ### 4. Add listeners for the user login
@@ -182,7 +182,7 @@ hello.on('auth.login', function(auth) {
 });
 ```
 
-### 5. Configure hello.js with your client_id's and initiate all listeners.
+### 5. Configure hello.js with your client IDs and initiate all listeners
 
 Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the `hello.init` function. e.g....
 
@@ -231,7 +231,7 @@ Initiate the environment. And add the application credentials.
 							<td>key</td>
 							<td><i>string</i></td>
 							<td><q>windows</q>, <q>facebook</q> or <q>google</q></td>
-							<td>App name"s</td>
+							<td>App names</td>
 							<td><em>required</em></td>
 							<td>n/a</td>
 						</tr>
@@ -269,7 +269,7 @@ hello.init({
 
 If a network string is provided: A consent window to authenticate with that network will be initiated. Else if no network is provided a prompt to select one of the networks will open. A callback will be executed if the user authenticates and or cancels the authentication flow.
 
-### hello.login( [network] [, options] [, callback()] )
+### hello.login([network] [, options] [, callback()])
 
 <table>
 	<tr>
@@ -358,13 +358,12 @@ If a network string is provided: A consent window to authenticate with that netw
 ### Examples:
 
 ```js
-hello( 'facebook' ).login().then( function(){
+hello('facebook').login().then(function() {
 	alert('You are signed in to Facebook');
-}, function( e ){
+}, function(e){
 	alert('Signin error: ' + e.error.message);
 });
 ```
-
 
 ## hello.logout()
 
@@ -427,7 +426,7 @@ Remove all sessions or individual sessions.
 		<td>callback</td>
 		<td><i>function</i></td>
 		<td>
-			<code>function(){alert('Logged out!');}
+			<code>function() {alert('Logged out!');}
 			</code>
 		</td>
 		<td>
@@ -637,7 +636,7 @@ hello.on('auth.login', sessionStart);
 
 Remove a callback. Both event name and function must exist.
 
-### hello.off( event, callback );
+### hello.off(event, callback)
 
 ```js
 hello.off('auth.login', sessionStart);

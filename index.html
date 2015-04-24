@@ -197,7 +197,7 @@ bower install hello
 <p>Just add onclick events to call hello( network ).login(). Style your buttons as you like; I've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts.</p>
 
 <script class="pre" type="html">
-<button onclick="hello( 'windows' ).login()">windows</button>
+<button onclick="hello('windows').login()">windows</button>
 </script>
 
 <h3>4. Add listeners for the user login</h3>
@@ -221,7 +221,7 @@ hello.on('auth.login', function(auth) {
 });
 </script>
 
-<h3>5. Configure hello.js with your client_id's and initiate all listeners.</h3>
+<h3>5. Configure hello.js with your client IDs and initiate all listeners</h3>
 
 <p>Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the <code>hello.init</code> function. e.g....</p>
 
@@ -270,7 +270,7 @@ hello.init({
 							<td>key</td>
 							<td><i>string</i></td>
 							<td><q>windows</q>, <q>facebook</q> or <q>google</q></td>
-							<td>App name"s</td>
+							<td>App names</td>
 							<td><em>required</em></td>
 							<td>n/a</td>
 						</tr>
@@ -308,7 +308,7 @@ hello.init({
 
 <p>If a network string is provided: A consent window to authenticate with that network will be initiated. Else if no network is provided a prompt to select one of the networks will open. A callback will be executed if the user authenticates and or cancels the authentication flow.</p>
 
-<h3>hello.login( [network] [, options] [, callback()] )</h3>
+<h3>hello.login([network] [, options] [, callback()])</h3>
 
 <table>
 	<tr>
@@ -397,13 +397,12 @@ hello.init({
 <h3>Examples:</h3>
 
 <pre class="tryitoffline" type="js">
-hello( 'facebook' ).login().then( function(){
+hello('facebook').login().then(function() {
 	alert('You are signed in to Facebook');
-}, function( e ){
+}, function(e){
 	alert('Signin error: ' + e.error.message);
 });
 </pre>
-
 
 <h2>hello.logout()</h2>
 
@@ -466,7 +465,7 @@ hello( 'facebook' ).login().then( function(){
 		<td>callback</td>
 		<td><i>function</i></td>
 		<td>
-			<code>function(){alert('Logged out!');}
+			<code>function() {alert('Logged out!');}
 			</code>
 		</td>
 		<td>
@@ -676,7 +675,7 @@ hello.on('auth.login', sessionStart);
 
 <p>Remove a callback. Both event name and function must exist.</p>
 
-<h3>hello.off( event, callback );</h3>
+<h3>hello.off(event, callback)</h3>
 
 <pre class="tryit" type="js">
 hello.off('auth.login', sessionStart);
