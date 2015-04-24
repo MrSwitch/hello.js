@@ -456,7 +456,7 @@ hello('facebook').logout().then(function() {
 
 Get the current status of the session. This is a synchronous request and does not validate any session cookies which may have expired.
 
-### hello.getAuthResponse( network );
+### hello.getAuthResponse(network)
 
 <table>
 	<tr>
