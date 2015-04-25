@@ -148,14 +148,14 @@ Register your application with at least one of the following networks. Ensure yo
 - [Google+](https://code.google.com/apis/console/b/0/#:access)
 
 
-### 2. Include Hello.js script in your page.
+### 2. Include Hello.js script in your page
 
 ```html
 <script class="pre" src="./dist/hello.all.js"></script>
 ```
 
 ### 3. Create the sign-in buttons
-Just add onclick events to call hello( network ).login(). Style your buttons as you like; I've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts.
+Just add onclick events to call hello(network).login(). Style your buttons as you like; I've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts.
 
 ```html
 <button onclick="hello('windows').login()">windows</button>
@@ -360,7 +360,7 @@ If a network string is provided: A consent window to authenticate with that netw
 ```js
 hello('facebook').login().then(function() {
 	alert('You are signed in to Facebook');
-}, function(e){
+}, function(e) {
 	alert('Signin error: ' + e.error.message);
 });
 ```
@@ -723,9 +723,9 @@ The table below illustrates some of the default scopes HelloJS exposes. Addition
 
 It's good practice to limit the use of scopes and also to make users aware of why your app needs certain privileges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend, include a button that the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorization.
 
-## Error handling
+## Error Handling
 
-Errors are returned, i.e. `hello.api([path]).then(null, [*errorHandler*])` - alternatively `hello.api([path], [*handleSuccessOrError*])`.
+Errors are returned i.e. `hello.api([path]).then(null, [*errorHandler*])` - alternatively `hello.api([path], [*handleSuccessOrError*])`.
 
 The [Promise](#promises-a) response standardizes the binding of error handlers.
 
@@ -829,15 +829,15 @@ A list of services which enable silent authentication after the Implicit Grant s
 
 Unlike Implicit grant; Explicit grant may return the `refresh_token`. HelloJS honors the OAuth2 refresh_token, and will also request a new access_token once it has expired.
 
-### Bullet proof requests
-A good way to design your app is to trigger requests through a user action, you can then test for a valid access token prior to making the api request with a potentially expired token.
+### Bulletproof Requests
+A good way to design your app is to trigger requests through a user action, you can then test for a valid access token prior to making the API request with a potentially expired token.
 
 ```javascript
 var google = hello('google');
 // Set force to false, to avoid triggering the OAuth flow if there is an unexpired access_token available.
-google.login({force:false}).then(function(){
+google.login({force: false}).then(function() {
 	google.api('me').then(handler);
-});;
+});
 ```
 
 ## Promises A+
@@ -864,7 +864,7 @@ Having read this far you have already invested your time, why not contribute!?
 
 HelloJS is constantly evolving, as are the services which it connects too. So if you think something could be said better, find something buggy or missing from either the code, documentation or demos then please put it in, no matter how trivial.
 
-### Changing code?
+### Changing Code?
 Ensure you setup and test your code on a variety of browsers.
 
 ```bash
