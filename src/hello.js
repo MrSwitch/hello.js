@@ -35,497 +35,7 @@ hello.utils = {
 		}
 
 		return r;
-	}
-};
-
-// Core library
-hello.utils.extend(hello, {
-
-	settings: {
-
-		// OAuth2 authentication defaults
-		redirect_uri: window.location.href.split('#')[0],
-		response_type: 'token',
-		display: 'popup',
-		state: '',
-
-		// OAuth1 shim
-		// The path to the OAuth1 server for signing user requests
-		// Want to recreate your own? Checkout https://github.com/MrSwitch/node-oauth-shim
-		oauth_proxy: 'https://auth-server.herokuapp.com/proxy',
-
-		// API timeout in milliseconds
-		timeout: 20000,
-
-		// Default service / network
-		default_service: null,
-
-		// Force sign-in
-		// When hello.login is fired, ignore current session expiry and continue with login
-		force: true,
-
-		// Page URL
-		// When 'display=page' this property defines where the users page should end up after redirect_uri
-		// Ths could be problematic if the redirect_uri is indeed the final place,
-		// Typically this circumvents the problem of the redirect_url being a dumb relay page.
-		page_uri: window.location.href
 	},
-
-	// Service
-	service: function(service) {
-
-		if (typeof (service) !== 'undefined') {
-			return this.utils.store('sync_service', service);
-		}
-
-		return this.utils.store('sync_service');
-	},
-
-	// Service configuration objects
-	services: {},
-
-	// Use
-	// Define a new instance of the HelloJS library with a default service
-	use: function(service) {
-
-		// Create self, which inherits from its parent
-		var self = Object.create(this);
-
-		// Inherit the prototype from its parent
-		self.settings = Object.create(this.settings);
-
-		// Define the default service
-		if (service) {
-			self.settings.default_service = service;
-		}
-
-		// Create an instance of Events
-		self.utils.Event.call(self);
-
-		return self;
-	},
-
-	// Initialize
-	// Define the client_ids for the endpoint services
-	// @param object o, contains a key value pair, service => clientId
-	// @param object opts, contains a key value pair of options used for defining the authentication defaults
-	// @param number timeout, timeout in seconds
-	init: function(services, options) {
-
-		var utils = this.utils;
-
-		if (!services) {
-			return this.services;
-		}
-
-		// Define provider credentials
-		// Reformat the ID field
-		for (var x in services) {if (services.hasOwnProperty(x)) {
-			if (typeof (services[x]) !== 'object') {
-				services[x] = {id: services[x]};
-			}
-		}}
-
-		// Merge services if there already exists some
-		utils.extend(this.services, services);
-
-		// Format the incoming
-		for (x in this.services) {
-			if (this.services.hasOwnProperty(x)) {
-				this.services[x].scope = this.services[x].scope || {};
-			}
-		}
-
-		//
-		// Update the default settings with this one.
-		if (options) {
-			utils.extend(this.settings, options);
-
-			// Do this immediatly incase the browser changes the current path.
-			if ('redirect_uri' in options) {
-				this.settings.redirect_uri = utils.url(options.redirect_uri).href;
-			}
-		}
-
-		return this;
-	},
-
-	// Login
-	// Using the endpoint
-	// @param network stringify       name to connect to
-	// @param options object    (optional)  {display mode, is either none|popup(default)|page, scope: email,birthday,publish, .. }
-	// @param callback  function  (optional)  fired on signin
-	login: function() {
-
-		// Create an object which inherits its parent as the prototype and constructs a new event chain.
-		var _this = this;
-		var utils = _this.utils;
-		var promise = utils.Promise();
-
-		// Get parameters
-		var p = utils.args({network: 's', options: 'o', callback: 'f'}, arguments);
-
-		// Local vars
-		var url;
-
-		// merge/override options with app defaults
-		var opts = p.options = utils.merge(_this.settings, p.options || {});
-
-		// Network
-		p.network = p.network || _this.settings.default_service;
-
-		// Bind callback to both reject and fulfill states
-		promise.proxy.then(p.callback, p.callback);
-
-		// Trigger an event on the global listener
-		function emit(s, value) {
-			hello.emit(s, value);
-		}
-
-		promise.proxy.then(emit.bind(this, 'auth.login auth'), emit.bind(this, 'auth.failed auth'));
-
-		// Is our service valid?
-		if (typeof (p.network) !== 'string' || !(p.network in _this.services)) {
-			// trigger the default login.
-			// ahh we dont have one.
-			return promise.reject(error('invalid_network', 'The provided network was not recognized'));
-		}
-
-		var provider = _this.services[p.network];
-
-		// Create a global listener to capture events triggered out of scope
-		var callbackId = utils.globalEvent(function(str) {
-
-			// The responseHandler returns a string, lets save this locally
-			var obj;
-
-			if (str) {
-				obj = JSON.parse(str);
-			}
-			else {
-				obj = error('cancelled', 'The authentication was not completed');
-			}
-
-			// Handle these response using the local
-			// Trigger on the parent
-			if (!obj.error) {
-
-				// Save on the parent window the new credentials
-				// This fixes an IE10 bug i think... atleast it does for me.
-				utils.store(obj.network, obj);
-
-				// fulfill a successful login
-				promise.fulfill({
-					network: obj.network,
-					authResponse: obj
-				});
-			}
-			else {
-				// Reject a successful login
-				promise.reject(obj);
-			}
-		});
-
-		var redirectUri = utils.url(opts.redirect_uri).href;
-
-		// May be a space-delimited list of multiple, complementary types
-		var responseType = provider.oauth.response_type || opts.response_type;
-
-		// Fallback to token if the module hasn't defined a grant url
-		if (/\bcode\b/.test(responseType) && !provider.oauth.grant) {
-			responseType = responseType.replace(/\bcode\b/, 'token');
-		}
-
-		// Query string parameters, we may pass our own arguments to form the querystring
-		p.qs = {
-			client_id: encodeURIComponent(provider.id),
-			response_type: encodeURIComponent(responseType),
-			redirect_uri: encodeURIComponent(redirectUri),
-			display: opts.display,
-			scope: 'basic',
-			state: {
-				client_id: provider.id,
-				network: p.network,
-				display: opts.display,
-				callback: callbackId,
-				state: opts.state,
-				redirect_uri: redirectUri
-			}
-		};
-
-		// Get current session for merging scopes, and for quick auth response
-		var session = utils.store(p.network);
-
-		// Scopes (authentication permisions)
-		// convert any array, or falsy value to a string.
-		var scope = (opts.scope || '').toString();
-
-		scope = (scope ? scope + ',' : '') + p.qs.scope;
-
-		// Append scopes from a previous session.
-		// This helps keep app credentials constant,
-		// avoiding having to keep tabs on what scopes are authorized
-		if (session && 'scope' in session && session.scope instanceof String) {
-			scope += ',' + session.scope;
-		}
-
-		// Save in the State
-		// Convert to a string because IE, has a problem moving Arrays between windows
-		p.qs.state.scope = utils.unique(scope.split(/[,\s]+/)).join(',');
-
-		// Map replace each scope with the providers default scopes
-		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m) {
-			// Does this have a mapping?
-			if (m in provider.scope) {
-				return provider.scope[m];
-			}
-			else {
-				// Loop through all services and determine whether the scope is generic
-				for (var x in _this.services) {
-					var serviceScopes = _this.services[x].scope;
-					if (serviceScopes && m in serviceScopes) {
-						// Found an instance of this scope, so lets not assume its special
-						return '';
-					}
-				}
-
-				// This is a unique scope to this service so lets in it.
-				return m;
-			}
-
-		}).replace(/[,\s]+/ig, ',');
-
-		// Remove duplication and empty spaces
-		p.qs.scope = utils.unique(p.qs.scope.split(/,+/)).join(provider.scope_delim || ',');
-
-		// Is the user already signed in with the appropriate scopes, valid access_token?
-		if (opts.force === false) {
-
-			if (session && 'access_token' in session && session.access_token && 'expires' in session && session.expires > ((new Date()).getTime() / 1e3)) {
-				// What is different about the scopes in the session vs the scopes in the new login?
-				var diff = utils.diff(session.scope || [], p.qs.state.scope || []);
-				if (diff.length === 0) {
-
-					// OK trigger the callback
-					promise.fulfill({
-						unchanged: true,
-						network: p.network,
-						authResponse: session
-					});
-
-					// Nothing has changed
-					return promise;
-				}
-			}
-		}
-
-		// Page URL
-		if (opts.display === 'page' && opts.page_uri) {
-			// Add a page location, place to endup after session has authenticated
-			p.qs.state.page_uri = utils.url(opts.page_uri).href;
-		}
-
-		// Bespoke
-		// Override login querystrings from auth_options
-		if ('login' in provider && typeof (provider.login) === 'function') {
-			// Format the paramaters according to the providers formatting function
-			provider.login(p);
-		}
-
-		// Add OAuth to state
-		// Where the service is going to take advantage of the oauth_proxy
-		if (!/\btoken\b/.test(responseType) ||
-		parseInt(provider.oauth.version, 10) < 2 ||
-		(opts.display === 'none' && provider.oauth.grant && session && session.refresh_token)) {
-
-			// Add the oauth endpoints
-			p.qs.state.oauth = provider.oauth;
-
-			// Add the proxy url
-			p.qs.state.oauth_proxy = opts.oauth_proxy;
-
-		}
-
-		// Convert state to a string
-		p.qs.state = encodeURIComponent(JSON.stringify(p.qs.state));
-
-		// URL
-		if (parseInt(provider.oauth.version, 10) === 1) {
-
-			// Turn the request to the OAuth Proxy for 3-legged auth
-			url = utils.qs(opts.oauth_proxy, p.qs, encodeFunction);
-		}
-
-		// Refresh token
-		else if (opts.display === 'none' && provider.oauth.grant && session && session.refresh_token) {
-
-			// Add the refresh_token to the request
-			p.qs.refresh_token = session.refresh_token;
-
-			// Define the request path
-			url = utils.qs(opts.oauth_proxy, p.qs, encodeFunction);
-		}
-		else {
-			url = utils.qs(provider.oauth.auth, p.qs, encodeFunction);
-		}
-
-		// Execute
-		// Trigger how we want self displayed
-		if (opts.display === 'none') {
-			// Sign-in in the background, iframe
-			utils.iframe(url);
-		}
-
-		// Triggering popup?
-		else if (opts.display === 'popup') {
-
-			var popup = utils.popup(url, redirectUri, opts.window_width || 500, opts.window_height || 550);
-
-			var timer = setInterval(function() {
-				if (!popup || popup.closed) {
-					clearInterval(timer);
-					if (!promise.state) {
-
-						var response = error('cancelled', 'Login has been cancelled');
-
-						if (!popup) {
-							response = error('blocked', 'Popup was blocked');
-						}
-
-						response.network = p.network;
-
-						promise.reject(response);
-					}
-				}
-			}, 100);
-		}
-
-		else {
-			window.location = url;
-		}
-
-		return promise.proxy;
-
-		function error(code, message) {
-			return {
-				error: {
-					code: code,
-					message: message
-				}
-			};
-		}
-
-		function encodeFunction(s) {return s;}
-	},
-
-	// Remove any data associated with a given service
-	// @param string name of the service
-	// @param function callback
-	logout: function() {
-
-		var _this = this;
-		var utils = _this.utils;
-
-		// Create a new promise
-		var promise = utils.Promise();
-
-		var p = utils.args({name:'s', options: 'o', callback: 'f'}, arguments);
-
-		p.options = p.options || {};
-
-		// Add callback to events
-		promise.proxy.then(p.callback, p.callback);
-
-		// Trigger an event on the global listener
-		function emit(s, value) {
-			hello.emit(s, value);
-		}
-
-		promise.proxy.then(emit.bind(this, 'auth.logout auth'), emit.bind(this, 'error'));
-
-		// Network
-		p.name = p.name || this.settings.default_service;
-
-		if (p.name && !(p.name in _this.services)) {
-
-			promise.reject(error('invalid_network', 'The network was unrecognized'));
-
-		}
-		else if (p.name && utils.store(p.name)) {
-
-			// Define the callback
-			var callback = function(opts) {
-
-				// Remove from the store
-				utils.store(p.name, '');
-
-				// Emit events by default
-				promise.fulfill(hello.utils.merge({network:p.name}, opts || {}));
-			};
-
-			// Run an async operation to remove the users session
-			var _opts = {};
-			if (p.options.force) {
-				var logout = _this.services[p.name].logout;
-				if (logout) {
-					// Convert logout to URL string,
-					// If no string is returned, then this function will handle the logout async style
-					if (typeof (logout) === 'function') {
-						logout = logout(callback);
-					}
-
-					// If logout is a string then assume URL and open in iframe.
-					if (typeof (logout) === 'string') {
-						utils.iframe(logout);
-						_opts.force = null;
-						_opts.message = 'Logout success on providers site was indeterminate';
-					}
-					else if (logout === undefined) {
-						// the callback function will handle the response.
-						return promise.proxy;
-					}
-				}
-			}
-
-			// Remove local credentials
-			callback(_opts);
-		}
-		else {
-			promise.reject(error('invalid_session', 'There was no session to remove'));
-		}
-
-		return promise.proxy;
-
-		function error(code, message) {
-			return {
-				error: {
-					code: code,
-					message: message
-				}
-			};
-		}
-	},
-
-	// Returns all the sessions that are subscribed too
-	// @param string optional, name of the service to get information about.
-	getAuthResponse: function(service) {
-
-		// If the service doesn't exist
-		service = service || this.settings.default_service;
-
-		if (!service || !(service in this.services)) {
-			return null;
-		}
-
-		return this.utils.store(service) || null;
-	},
-
-	// Events: placeholder for the events
-	events: {}
-});
-
-// Core utilities
-hello.utils.extend(hello.utils, {
 
 	// Append the querystring to a url
 	// @param string url
@@ -684,24 +194,26 @@ hello.utils.extend(hello.utils, {
 				target = attr;
 			}
 			else {
-				for (var x in attr) {if (attr.hasOwnProperty(x)) {
-					if (typeof (attr[x]) === 'object') {
-						for (var y in attr[x]) {if (attr[x].hasOwnProperty(y)) {
-							n[x][y] = attr[x][y];
-						}}
-					}
-					else if (x === 'html') {
-						n.innerHTML = attr[x];
-					}
+				for (var x in attr) {
+					if (attr.hasOwnProperty(x)) {
+						if (typeof (attr[x]) === 'object') {
+							for (var y in attr[x]) {if (attr[x].hasOwnProperty(y)) {
+								n[x][y] = attr[x][y];
+							}}
+						}
+						else if (x === 'html') {
+							n.innerHTML = attr[x];
+						}
 
-					// IE doesn't like us setting methods with setAttribute
-					else if (!/^on/.test(x)) {
-						n.setAttribute(x, attr[x]);
+						// IE doesn't setting methods with setAttribute
+						else if (!/^on/.test(x)) {
+							n.setAttribute(x, attr[x]);
+						}
+						else {
+							n[x] = attr[x];
+						}
 					}
-					else {
-						n[x] = attr[x];
-					}
-				}}
+				}
 			}
 		}
 
@@ -876,25 +388,25 @@ hello.utils.extend(hello.utils, {
 	 **  Licensed under The MIT License <http://opensource.org/licenses/MIT>
 	 **  Source-Code distributed on <http://github.com/rse/thenable>
 	 */
-	Promise: (function(){
+	Promise: (function() {
 		/*  promise states [Promises/A+ 2.1]  */
-		var STATE_PENDING   = 0;                                         /*  [Promises/A+ 2.1.1]  */
-		var STATE_FULFILLED = 1;                                         /*  [Promises/A+ 2.1.2]  */
-		var STATE_REJECTED  = 2;                                         /*  [Promises/A+ 2.1.3]  */
+		var STATE_PENDING = 0; /*  [Promises/A+ 2.1.1]  */
+		var STATE_FULFILLED = 1; /*  [Promises/A+ 2.1.2]  */
+		var STATE_REJECTED = 2; /*  [Promises/A+ 2.1.3]  */
 
 		/*  promise object constructor  */
-		var api = function (executor) {
+		var api = function(executor) {
 			/*  optionally support non-constructor/plain-function call  */
 			if (!(this instanceof api))
 				return new api(executor);
 
 			/*  initialize object  */
-			this.id           = "Thenable/1.0.6";
-			this.state        = STATE_PENDING; /*  initial state  */
-			this.fulfillValue = undefined;     /*  initial value  */     /*  [Promises/A+ 1.3, 2.1.2.2]  */
-			this.rejectReason = undefined;     /*  initial reason */     /*  [Promises/A+ 1.5, 2.1.3.2]  */
-			this.onFulfilled  = [];            /*  initial handlers  */
-			this.onRejected   = [];            /*  initial handlers  */
+			this.id = "Thenable/1.0.6";
+			this.state = STATE_PENDING; /*  initial state  */
+			this.fulfillValue = undefined; /*  initial value  */ /*  [Promises/A+ 1.3, 2.1.2.2]  */
+			this.rejectReason = undefined; /*  initial reason */ /*  [Promises/A+ 1.5, 2.1.3.2]  */
+			this.onFulfilled = []; /*  initial handlers  */
+			this.onRejected = []; /*  initial handlers  */
 
 			/*  provide optional information-hiding proxy  */
 			this.proxy = {
@@ -909,42 +421,43 @@ hello.utils.extend(hello.utils, {
 		/*  promise API methods  */
 		api.prototype = {
 			/*  promise resolving methods  */
-			fulfill: function (value) { return deliver(this, STATE_FULFILLED, "fulfillValue", value); },
-			reject:  function (value) { return deliver(this, STATE_REJECTED,  "rejectReason", value); },
+			fulfill: function(value) { return deliver(this, STATE_FULFILLED, "fulfillValue", value); },
+			reject: function(value) { return deliver(this, STATE_REJECTED, "rejectReason", value); },
 
 			/*  "The then Method" [Promises/A+ 1.1, 1.2, 2.2]  */
-			then: function (onFulfilled, onRejected) {
+			then: function(onFulfilled, onRejected) {
 				var curr = this;
-				var next = new api();                                    /*  [Promises/A+ 2.2.7]  */
+				var next = new api(); /*  [Promises/A+ 2.2.7]  */
 				curr.onFulfilled.push(
-					resolver(onFulfilled, next, "fulfill"));             /*  [Promises/A+ 2.2.2/2.2.6]  */
+					resolver(onFulfilled, next, "fulfill")); /*  [Promises/A+ 2.2.2/2.2.6]  */
 				curr.onRejected.push(
-					resolver(onRejected,  next, "reject" ));             /*  [Promises/A+ 2.2.3/2.2.6]  */
+					resolver(onRejected, next, "reject")); /*  [Promises/A+ 2.2.3/2.2.6]  */
 				execute(curr);
-				return next.proxy;                                       /*  [Promises/A+ 2.2.7, 3.3]  */
+				return next.proxy; /*  [Promises/A+ 2.2.7, 3.3]  */
 			}
 		};
 
 		/*  deliver an action  */
-		var deliver = function (curr, state, name, value) {
+		var deliver = function(curr, state, name, value) {
 			if (curr.state === STATE_PENDING) {
-				curr.state = state;                                      /*  [Promises/A+ 2.1.2.1, 2.1.3.1]  */
-				curr[name] = value;                                      /*  [Promises/A+ 2.1.2.2, 2.1.3.2]  */
+				curr.state = state; /*  [Promises/A+ 2.1.2.1, 2.1.3.1]  */
+				curr[name] = value; /*  [Promises/A+ 2.1.2.2, 2.1.3.2]  */
 				execute(curr);
 			}
+
 			return curr;
 		};
 
 		/*  execute all handlers  */
-		var execute = function (curr) {
+		var execute = function(curr) {
 			if (curr.state === STATE_FULFILLED)
 				execute_handlers(curr, "onFulfilled", curr.fulfillValue);
 			else if (curr.state === STATE_REJECTED)
-				execute_handlers(curr, "onRejected",  curr.rejectReason);
+				execute_handlers(curr, "onRejected", curr.rejectReason);
 		};
 
 		/*  execute particular set of handlers  */
-		var execute_handlers = function (curr, name, value) {
+		var execute_handlers = function(curr, name, value) {
 			/* global process: true */
 			/* global setImmediate: true */
 			/* global setTimeout: true */
@@ -955,13 +468,13 @@ hello.utils.extend(hello.utils, {
 
 			/*  iterate over all handlers, exactly once  */
 			var handlers = curr[name];
-			curr[name] = [];                                             /*  [Promises/A+ 2.2.2.3, 2.2.3.3]  */
-			var func = function () {
+			curr[name] = []; /*  [Promises/A+ 2.2.2.3, 2.2.3.3]  */
+			var func = function() {
 				for (var i = 0; i < handlers.length; i++)
-					handlers[i](value);                                  /*  [Promises/A+ 2.2.5]  */
+					handlers[i](value); /*  [Promises/A+ 2.2.5]  */
 			};
 
-			/*  execute procedure asynchronously  */                     /*  [Promises/A+ 2.2.4, 3.1]  */
+			/*  execute procedure asynchronously  */ /*  [Promises/A+ 2.2.4, 3.1]  */
 			if (typeof process === "object" && typeof process.nextTick === "function")
 				process.nextTick(func);
 			else if (typeof setImmediate === "function")
@@ -971,25 +484,26 @@ hello.utils.extend(hello.utils, {
 		};
 
 		/*  generate a resolver function  */
-		var resolver = function (cb, next, method) {
-			return function (value) {
-				if (typeof cb !== "function")                            /*  [Promises/A+ 2.2.1, 2.2.7.3, 2.2.7.4]  */
-					next[method].call(next, value);                      /*  [Promises/A+ 2.2.7.3, 2.2.7.4]  */
+		var resolver = function(cb, next, method) {
+			return function(value) {
+				if (typeof cb !== "function") /*  [Promises/A+ 2.2.1, 2.2.7.3, 2.2.7.4]  */
+					next[method].call(next, value); /*  [Promises/A+ 2.2.7.3, 2.2.7.4]  */
 				else {
 					var result;
-					try { result = cb(value); }                          /*  [Promises/A+ 2.2.2.1, 2.2.3.1, 2.2.5, 3.2]  */
+					try { result = cb(value); } /*  [Promises/A+ 2.2.2.1, 2.2.3.1, 2.2.5, 3.2]  */
 					catch (e) {
-						next.reject(e);                                  /*  [Promises/A+ 2.2.7.2]  */
+						next.reject(e); /*  [Promises/A+ 2.2.7.2]  */
 						return;
 					}
-					resolve(next, result);                               /*  [Promises/A+ 2.2.7.1]  */
+
+					resolve(next, result); /*  [Promises/A+ 2.2.7.1]  */
 				}
 			};
 		};
 
-		/*  "Promise Resolution Procedure"  */                           /*  [Promises/A+ 2.3]  */
-		var resolve = function (promise, x) {
-			/*  sanity check arguments  */                               /*  [Promises/A+ 2.3.1]  */
+		/*  "Promise Resolution Procedure"  */ /*  [Promises/A+ 2.3]  */
+		var resolve = function(promise, x) {
+			/*  sanity check arguments  */ /*  [Promises/A+ 2.3.1]  */
 			if (promise === x || promise.proxy === x) {
 				promise.reject(new TypeError("cannot resolve promise with itself"));
 				return;
@@ -999,9 +513,9 @@ hello.utils.extend(hello.utils, {
 				(mainly to just call the "getter" of "then" only once)  */
 			var then;
 			if ((typeof x === "object" && x !== null) || typeof x === "function") {
-				try { then = x.then; }                                   /*  [Promises/A+ 2.3.3.1, 3.5]  */
+				try { then = x.then; } /*  [Promises/A+ 2.3.3.1, 3.5]  */
 				catch (e) {
-					promise.reject(e);                                   /*  [Promises/A+ 2.3.3.2]  */
+					promise.reject(e); /*  [Promises/A+ 2.3.3.2]  */
 					return;
 				}
 			}
@@ -1011,33 +525,35 @@ hello.utils.extend(hello.utils, {
 			if (typeof then === "function") {
 				var resolved = false;
 				try {
-					/*  call retrieved "then" method */                  /*  [Promises/A+ 2.3.3.3]  */
+					/*  call retrieved "then" method */ /*  [Promises/A+ 2.3.3.3]  */
 					then.call(x,
-						/*  resolvePromise  */                           /*  [Promises/A+ 2.3.3.3.1]  */
-						function (y) {
-							if (resolved) return; resolved = true;       /*  [Promises/A+ 2.3.3.3.3]  */
-							if (y === x)                                 /*  [Promises/A+ 3.6]  */
+						/*  resolvePromise  */ /*  [Promises/A+ 2.3.3.3.1]  */
+						function(y) {
+							if (resolved) return; resolved = true; /*  [Promises/A+ 2.3.3.3.3]  */
+							if (y === x) /*  [Promises/A+ 3.6]  */
 								promise.reject(new TypeError("circular thenable chain"));
 							else
 								resolve(promise, y);
 						},
 
-						/*  rejectPromise  */                            /*  [Promises/A+ 2.3.3.3.2]  */
-						function (r) {
-							if (resolved) return; resolved = true;       /*  [Promises/A+ 2.3.3.3.3]  */
+						/*  rejectPromise  */ /*  [Promises/A+ 2.3.3.3.2]  */
+						function(r) {
+							if (resolved) return; resolved = true; /*  [Promises/A+ 2.3.3.3.3]  */
 							promise.reject(r);
 						}
+
 					);
 				}
 				catch (e) {
-					if (!resolved)                                       /*  [Promises/A+ 2.3.3.3.3]  */
-						promise.reject(e);                               /*  [Promises/A+ 2.3.3.3.4]  */
+					if (!resolved) /*  [Promises/A+ 2.3.3.3.3]  */
+						promise.reject(e); /*  [Promises/A+ 2.3.3.3.4]  */
 				}
+
 				return;
 			}
 
 			/*  handle other values  */
-			promise.fulfill(x);                                          /*  [Promises/A+ 2.3.4, 2.3.3.4]  */
+			promise.fulfill(x); /*  [Promises/A+ 2.3.4, 2.3.3.4]  */
 		};
 
 		/*  export API  */
@@ -1046,7 +562,6 @@ hello.utils.extend(hello.utils, {
 
 	//jscs:enable
 
-	// Event
 	// A contructor superclass for adding event menthods, on, off, emit.
 	Event: function() {
 
@@ -1159,7 +674,6 @@ hello.utils.extend(hello.utils, {
 		return this;
 	},
 
-	// Global Events
 	// Attach the callback to the window object
 	// Return its unique reference
 	globalEvent: function(callback, guid) {
@@ -1188,8 +702,7 @@ hello.utils.extend(hello.utils, {
 		return guid;
 	},
 
-	// Trigger a clientside popup
-	// This has been augmented to support PhoneGap
+	// Trigger a clientside popup (this has been augmented to support PhoneGap)
 	popup: function(url, redirectUri, windowWidth, windowHeight) {
 
 		var documentElement = document.documentElement;
@@ -1478,430 +991,14 @@ hello.utils.extend(hello.utils, {
 				});
 			}
 		}
-	}
-});
+	},
 
-// Events
-
-// Extend the hello object with its own event instance
-hello.utils.Event.call(hello);
-
-/////////////////////////////////////
-//
-// Save any access token that is in the current page URL
-// Handle any response solicited through iframe hash tag following an API request
-//
-/////////////////////////////////////
-
-hello.utils.responseHandler(window, window.opener || window.parent);
-
-///////////////////////////////////
-// Monitoring session state
-// Check for session changes
-///////////////////////////////////
-
-(function(hello) {
-
-	// Monitor for a change in state and fire
-	var oldSessions = {};
-
-	// Hash of expired tokens
-	var expired = {};
-
-	// Listen to other triggers to Auth events, use these to update this
-	hello.on('auth.login, auth.logout', function(auth) {
-		if (auth && typeof (auth) === 'object' && auth.network) {
-			oldSessions[auth.network] = hello.utils.store(auth.network) || {};
-		}
-	});
-
-	(function self() {
-
-		var CURRENT_TIME = ((new Date()).getTime() / 1e3);
-		var emit = function(eventName) {
-			hello.emit('auth.' + eventName, {
-				network: name,
-				authResponse: session
-			});
-		};
-
-		// Loop through the services
-		for (var name in hello.services) {if (hello.services.hasOwnProperty(name)) {
-
-			if (!hello.services[name].id) {
-				// we haven't attached an ID so dont listen.
-				continue;
-			}
-
-			// Get session
-			var session = hello.utils.store(name) || {};
-			var provider = hello.services[name];
-			var oldSess = oldSessions[name] || {};
-
-			// Listen for globalEvents that did not get triggered from the child
-			if (session && 'callback' in session) {
-
-				// to do remove from session object...
-				var cb = session.callback;
-				try {
-					delete session.callback;
-				}
-				catch (e) {}
-
-				// Update store
-				// Removing the callback
-				hello.utils.store(name, session);
-
-				// Emit global events
-				try {
-					window[cb](session);
-				}
-				catch (e) {}
-			}
-
-			// Refresh token
-			if (session && ('expires' in session) && session.expires < CURRENT_TIME) {
-
-				// If auto refresh is possible
-				// Either the browser supports
-				var refresh = provider.refresh || session.refresh_token;
-
-				// Has the refresh been run recently?
-				if (refresh && (!(name in expired) || expired[name] < CURRENT_TIME)) {
-					// try to resignin
-					hello.emit('notice', name + ' has expired trying to resignin');
-					hello.login(name, {display: 'none', force: false});
-
-					// update expired, every 10 minutes
-					expired[name] = CURRENT_TIME + 600;
-				}
-
-				// Does this provider not support refresh
-				else if (!refresh && !(name in expired)) {
-					// Label the event
-					emit('expired');
-					expired[name] = true;
-				}
-
-				// If session has expired then we dont want to store its value until it can be established that its been updated
-				continue;
-			}
-
-			// Has session changed?
-			else if (oldSess.access_token === session.access_token &&
-			oldSess.expires === session.expires) {
-				continue;
-			}
-
-			// Access_token has been removed
-			else if (!session.access_token && oldSess.access_token) {
-				emit('logout');
-			}
-
-			// Access_token has been created
-			else if (session.access_token && !oldSess.access_token) {
-				emit('login');
-			}
-
-			// Access_token has been updated
-			else if (session.expires !== oldSess.expires) {
-				emit('update');
-			}
-
-			// Updated stored session
-			oldSessions[name] = session;
-
-			// Remove the expired flags
-			if (name in expired) {
-				delete expired[name];
-			}
-		}}
-
-		// Check error events
-		setTimeout(self, 1000);
-	})();
-
-})(hello);
-
-// EOF CORE lib
-//////////////////////////////////
-
-/////////////////////////////////////////
-// API
-// @param path    string
-// @param query   object (optional)
-// @param method  string (optional)
-// @param data    object (optional)
-// @param timeout integer (optional)
-// @param callback  function (optional)
-
-hello.api = function() {
-
-	// Shorthand
-	var _this = this;
-	var utils = _this.utils;
-
-	// Construct a new Promise object
-	var promise = utils.Promise();
-
-	// Arguments
-	var p = utils.args({path: 's!', query: 'o', method: 's', data: 'o', timeout: 'i', callback: 'f'}, arguments);
-
-	// method
-	p.method = (p.method || 'get').toLowerCase();
-
-	// headers
-	p.headers = p.headers || {};
-
-	// query
-	p.query = p.query || {};
-
-	// If get, put all parameters into query
-	if (p.method === 'get' || p.method === 'delete') {
-		utils.extend(p.query, p.data);
-		p.data = {};
-	}
-
-	var data = p.data = p.data || {};
-
-	// Completed event callback
-	promise.then(p.callback, p.callback);
-
-	// Remove the network from path, e.g. facebook:/me/friends
-	// results in { network : facebook, path : me/friends }
-	if (!p.path) {
-		return promise.reject(error('invalid_path', 'Missing the path parameter from the request'));
-	}
-
-	p.path = p.path.replace(/^\/+/, '');
-	var a = (p.path.split(/[\/\:]/, 2) || [])[0].toLowerCase();
-
-	if (a in _this.services) {
-		p.network = a;
-		var reg = new RegExp('^' + a + ':?\/?');
-		p.path = p.path.replace(reg, '');
-	}
-
-	// Network & Provider
-	// Define the network that this request is made for
-	p.network = _this.settings.default_service = p.network || _this.settings.default_service;
-	var o = _this.services[p.network];
-
-	// INVALID
-	// Is there no service by the given network name?
-	if (!o) {
-		return promise.reject(error('invalid_network', 'Could not match the service requested: ' + p.network));
-	}
-
-	// PATH
-	// as long as the path isn't flagged as unavaiable, e.g. path == false
-
-	if (!(!(p.method in o) || !(p.path in o[p.method]) || o[p.method][p.path] !== false)) {
-		return promise.reject(error('invalid_path', 'The provided path is not available on the selected network'));
-	}
-
-	// PROXY
-	// OAuth1 calls always need a proxy
-
-	if (!p.oauth_proxy) {
-		p.oauth_proxy = _this.settings.oauth_proxy;
-	}
-
-	if (!('proxy' in p)) {
-		p.proxy = p.oauth_proxy && o.oauth && parseInt(o.oauth.version, 10) === 1;
-	}
-
-	// TIMEOUT
-	// Adopt timeout from global settings by default
-
-	if (!('timeout' in p)) {
-		p.timeout = _this.settings.timeout;
-	}
-
-	//
-	// Get the current session
-	// Append the access_token to the query
-	var session = _this.getAuthResponse(p.network);
-	if (session && session.access_token) {
-		p.query.access_token = session.access_token;
-	}
-
-	var url = p.path;
-	var m;
-
-	// Store the query as options
-	// This is used to populate the request object before the data is augmented by the prewrap handlers.
-	p.options = utils.clone(p.query);
-
-	// Clone the data object
-	// Prevent this script overwriting the data of the incoming object.
-	// ensure that everytime we run an iteration the callbacks haven't removed some data
-	p.data = utils.clone(data);
-
-	// URL Mapping
-	// Is there a map for the given URL?
-	var actions = o[{'delete': 'del'}[p.method] || p.method] || {};
-
-	// Extrapolate the QueryString
-	// Provide a clean path
-	// Move the querystring into the data
-	if (p.method === 'get') {
-
-		var query = url.split(/[\?#]/)[1];
-		if (query) {
-			utils.extend(p.query, utils.param(query));
-
-			// Remove the query part from the URL
-			url = url.replace(/\?.*?(#|$)/, '$1');
-		}
-	}
-
-	// is the hash fragment defined
-	if ((m = url.match(/#(.+)/, ''))) {
-		url = url.split('#')[0];
-		p.path = m[1];
-	}
-	else if (url in actions) {
-		p.path = url;
-		url = actions[url];
-	}
-	else if ('default' in actions) {
-		url = actions['default'];
-	}
-
-	// Redirect Handler
-	// This defines for the Form+Iframe+Hash hack where to return the results too.
-	p.redirect_uri = _this.settings.redirect_uri;
-
-	// Set OAuth settings
-	p.oauth = o.oauth;
-
-	// Define FormatHandler
-	// The request can be procesed in a multitude of ways
-	// Here's the options - depending on the browser and endpoint
-	p.xhr = o.xhr;
-	p.jsonp = o.jsonp;
-	p.form = o.form;
-
-	// Make request
-	if (typeof (url) === 'function') {
-		// Does self have its own callback?
-		url(p, getPath);
-	}
-	else {
-		// Else the URL is a string
-		getPath(url);
-	}
-
-	return promise.proxy;
-
-	// If url needs a base
-	// Wrap everything in
-	function getPath(url) {
-
-		// Format the string if it needs it
-		url = url.replace(/\@\{([a-z\_\-]+)(\|.+?)?\}/gi, function(m, key, defaults) {
-			var val = defaults ? defaults.replace(/^\|/, '') : '';
-			if (key in p.query) {
-				val = p.query[key];
-				delete p.query[key];
-			}
-			else if (!defaults) {
-				promise.reject(error('missing_attribute', 'The attribute ' + key + ' is missing from the request'));
-			}
-
-			return val;
-		});
-
-		// Add base
-		if (!url.match(/^https?:\/\//)) {
-			url = o.base + url;
-		}
-
-		// Define the request URL
-		p.url = url;
-
-		// Make the HTTP request with the curated request object
-		// CALLBACK HANDLER
-		// @ response object
-		// @ statusCode integer if available
-		utils.request(p, function(r, headers) {
-
-			// Should this be an object
-			if (r === true) {
-				r = {success:true};
-			}
-			else if (!r) {
-				r = {};
-			}
-
-			// the delete callback needs a better response
-			if (p.method === 'delete') {
-				r = (!r || utils.isEmpty(r)) ? {success:true} : r;
-			}
-
-			// FORMAT RESPONSE?
-			// Does self request have a corresponding formatter
-			if (o.wrap && ((p.path in o.wrap) || ('default' in o.wrap))) {
-				var wrap = (p.path in o.wrap ? p.path : 'default');
-				var time = (new Date()).getTime();
-
-				// FORMAT RESPONSE
-				var b = o.wrap[wrap](r, headers, p);
-
-				// Has the response been utterly overwritten?
-				// Typically self augments the existing object.. but for those rare occassions
-				if (b) {
-					r = b;
-				}
-			}
-
-			// Is there a next_page defined in the response?
-			if (r && 'paging' in r && r.paging.next) {
-
-				// Add the relative path if it is missing from the paging/next path
-				if (r.paging.next[0] === '?') {
-					r.paging.next = p.path + r.paging.next;
-				}
-
-				// The relative path has been defined, lets markup the handler in the HashFragment
-				else {
-					r.paging.next += '#' + p.path;
-				}
-			}
-
-			// Dispatch to listeners
-			// Emit events which pertain to the formatted response
-			if (!r || 'error' in r) {
-				promise.reject(r);
-			}
-			else {
-				promise.fulfill(r);
-			}
-		});
-	}
-
-	// Error handling
-	function error(code, message) {
-		return {
-			error:{
-				code:code,
-				message:message
-			}
-		};
-	}
-
-};
-
-// API utilities
-hello.utils.extend(hello.utils, {
-
-	// Make an HTTP request
+	// Make a HTTP request
 	request: function(p, callback) {
 
 		var _this = this;
 
-		// This has to go through a POST request
+		// POST the request
 		if (!_this.isEmpty(p.data) && !('FileList' in window) && _this.hasBinary(p.data)) {
 
 			// Disable XHR and JSONP
@@ -1920,8 +1017,7 @@ hello.utils.extend(hello.utils, {
 				var x = _this.xhr(p.method, url, p.headers, p.data, callback);
 				x.onprogress = p.onprogress || null;
 
-				// Windows Phone does not support xhr.upload, see #74
-				// Feature detect
+				// Feature detect (Windows Phone does not support xhr.upload, see #74)
 				if (x.upload && p.onuploadprogress) {
 					x.upload.onprogress = p.onuploadprogress;
 				}
@@ -2534,7 +1630,6 @@ hello.utils.extend(hello.utils, {
 	},
 
 	// Determines if a variable Either Is or like a FormInput has the value of a Blob
-
 	isBinary: function(data) {
 
 		return data instanceof Object && (
@@ -2560,102 +1655,971 @@ hello.utils.extend(hello.utils, {
 		}
 
 		return new Blob([new Uint8Array(array)], {type: m[1]});
-	}
+	},
 
-});
+	// Convert FormElement|NodeList|InputElement|objects to JSON
+	dataToJSON: function(p) {
 
-// EXTRA: Convert FormElement to JSON for POSTing
-// Wrappers to add additional functionality to existing functions
-(function(hello) {
+		var _this = this;
+		var w = window;
+		var data = p.data;
 
-	// Copy original function
-	var api = hello.api;
-	var utils = hello.utils;
+		// Is data a form object
+		if (_this.domInstance('form', data)) {
+			data = _this.nodeListToJSON(data.elements);
+		}
+		else if ('NodeList' in w && data instanceof NodeList) {
+			data = _this.nodeListToJSON(data);
+		}
+		else if (_this.domInstance('input', data)) {
+			data = _this.nodeListToJSON([data]);
+		}
 
-	utils.extend(utils, {
+		// Is data a Blob, File, FileList?
+		if (('File' in w && data instanceof w.File) ||
+			('Blob' in w && data instanceof w.Blob) ||
+			('FileList' in w && data instanceof w.FileList)) {
+			data = {file: data};
+		}
 
-		// dataToJSON
-		// This takes a FormElement|NodeList|InputElement|MixedObjects and convers the data object to JSON.
-		dataToJSON: function(p) {
+		// Loop through data if it's not form data it must now be a JSON object
+		if (!('FormData' in w && data instanceof w.FormData)) {
 
-			var _this = this;
-			var w = window;
-			var data = p.data;
+			for (var x in data) if (data.hasOwnProperty(x)) {
 
-			// Is data a form object
-			if (_this.domInstance('form', data)) {
-				data = _this.nodeListToJSON(data.elements);
-			}
-			else if ('NodeList' in w && data instanceof NodeList) {
-				data = _this.nodeListToJSON(data);
-			}
-			else if (_this.domInstance('input', data)) {
-				data = _this.nodeListToJSON([data]);
-			}
-
-			// Is data a blob, File, FileList?
-			if (('File' in w && data instanceof w.File) ||
-				('Blob' in w && data instanceof w.Blob) ||
-				('FileList' in w && data instanceof w.FileList)) {
-				data = {file: data};
-			}
-
-			// Loop through data if it's not form data it must now be a JSON object
-			if (!('FormData' in w && data instanceof w.FormData)) {
-
-				for (var x in data) if (data.hasOwnProperty(x)) {
-
-					if ('FileList' in w && data[x] instanceof w.FileList) {
-						if (data[x].length === 1) {
-							data[x] = data[x][0];
-						}
-					}
-					else if (_this.domInstance('input', data[x]) && data[x].type === 'file') {
-						continue;
-					}
-					else if (_this.domInstance('input', data[x]) ||
-						_this.domInstance('select', data[x]) ||
-						_this.domInstance('textArea', data[x])) {
-						data[x] = data[x].value;
-					}
-					else if (_this.domInstance(null, data[x])) {
-						data[x] = data[x].innerHTML || data[x].innerText;
+				if ('FileList' in w && data[x] instanceof w.FileList) {
+					if (data[x].length === 1) {
+						data[x] = data[x][0];
 					}
 				}
-			}
-
-			p.data = data;
-			return data;
-		},
-
-		// NodeListToJSON
-		// Given a list of elements extrapolate their values and return as a json object
-		nodeListToJSON: function(nodelist) {
-
-			var json = {};
-
-			// Create a data string
-			for (var i = 0; i < nodelist.length; i++) {
-
-				var input = nodelist[i];
-
-				// If the name of the input is empty or diabled, dont add it.
-				if (input.disabled || !input.name) {
+				else if (_this.domInstance('input', data[x]) && data[x].type === 'file') {
 					continue;
 				}
-
-				// Is this a file, does the browser not support 'files' and 'FormData'?
-				if (input.type === 'file') {
-					json[input.name] = input;
+				else if (_this.domInstance('input', data[x]) ||
+					_this.domInstance('select', data[x]) ||
+					_this.domInstance('textArea', data[x])) {
+					data[x] = data[x].value;
 				}
-				else {
-					json[input.name] = input.value || input.innerHTML;
+				else if (_this.domInstance(null, data[x])) {
+					data[x] = data[x].innerHTML || data[x].innerText;
+				}
+			}
+		}
+
+		p.data = data;
+		return data;
+	},
+
+	// Given a list of elements extrapolate their values and return as a JSON object
+	nodeListToJSON: function(nodeList) {
+
+		var json = {};
+
+		// Create a data string
+		for (var i = 0; i < nodeList.length; i++) {
+
+			var input = nodeList[i];
+
+			// If the name of the input is empty or diabled, dont add it.
+			if (input.disabled || !input.name) {
+				continue;
+			}
+
+			// Is this a file, does the browser not support 'files' and 'FormData'?
+			if (input.type === 'file') {
+				json[input.name] = input;
+			}
+			else {
+				json[input.name] = input.value || input.innerHTML;
+			}
+		}
+
+		return json;
+	}
+
+};
+
+// Core
+hello.utils.extend(hello, {
+
+	settings: {
+
+		// OAuth2 authentication defaults
+		redirect_uri: window.location.href.split('#')[0],
+		response_type: 'token',
+		display: 'popup',
+		state: '',
+
+		// OAuth1 shim
+		// The path to the OAuth1 server for signing user requests
+		// Want to recreate your own? Checkout https://github.com/MrSwitch/node-oauth-shim
+		oauth_proxy: 'https://auth-server.herokuapp.com/proxy',
+
+		// API timeout in milliseconds
+		timeout: 20000,
+
+		// Default service / network
+		default_service: null,
+
+		// Force sign-in
+		// When hello.login is fired, ignore current session expiry and continue with login
+		force: true,
+
+		// Page URL
+		// When 'display=page' this property defines where the users page should end up after redirect_uri
+		// Ths could be problematic if the redirect_uri is indeed the final place,
+		// Typically this circumvents the problem of the redirect_url being a dumb relay page.
+		page_uri: window.location.href
+	},
+
+	service: function(service) {
+
+		if (typeof (service) !== 'undefined') {
+			return this.utils.store('sync_service', service);
+		}
+
+		return this.utils.store('sync_service');
+	},
+
+	// Service configuration objects
+	services: {},
+
+	// Define a new instance of the HelloJS library with a default service
+	use: function(service) {
+
+		// Create self, which inherits from its parent
+		var self = Object.create(this);
+
+		// Inherit the prototype from its parent
+		self.settings = Object.create(this.settings);
+
+		// Define the default service
+		if (service) {
+			self.settings.default_service = service;
+		}
+
+		// Create an instance of Events
+		self.utils.Event.call(self);
+
+		return self;
+	},
+
+	// Define the client IDs for the endpoint services
+	// @param object o, contains a key value pair, service => client ID
+	// @param object opts, contains a key value pair of options used for defining the authentication defaults
+	// @param number timeout, timeout in seconds
+	init: function(services, options) {
+
+		var utils = this.utils;
+
+		if (!services) {
+			return this.services;
+		}
+
+		// Define provider credentials
+		// Reformat the ID field
+		for (var x in services) {if (services.hasOwnProperty(x)) {
+			if (typeof (services[x]) !== 'object') {
+				services[x] = {id: services[x]};
+			}
+		}}
+
+		// Merge services if there already exists some
+		utils.extend(this.services, services);
+
+		// Format the incoming
+		for (x in this.services) {
+			if (this.services.hasOwnProperty(x)) {
+				this.services[x].scope = this.services[x].scope || {};
+			}
+		}
+
+		//
+		// Update the default settings with this one.
+		if (options) {
+			utils.extend(this.settings, options);
+
+			// Do this immediatly incase the browser changes the current path.
+			if ('redirect_uri' in options) {
+				this.settings.redirect_uri = utils.url(options.redirect_uri).href;
+			}
+		}
+
+		return this;
+	},
+
+	// Using the endpoint
+	// @param network stringify name to connect to
+	// @param options object (optional) {display mode, is either none|popup(default)|page, scope: email,birthday,publish, .. }
+	// @param callback  function (optional) fired on signin
+	login: function() {
+
+		// Create an object which inherits its parent as the prototype and constructs a new event chain.
+		var _this = this;
+		var utils = _this.utils;
+		var promise = utils.Promise();
+
+		// Get parameters
+		var p = utils.args({network: 's', options: 'o', callback: 'f'}, arguments);
+
+		// Local vars
+		var url;
+
+		// merge/override options with app defaults
+		var opts = p.options = utils.merge(_this.settings, p.options || {});
+
+		// Network
+		p.network = p.network || _this.settings.default_service;
+
+		// Bind callback to both reject and fulfill states
+		promise.proxy.then(p.callback, p.callback);
+
+		// Trigger an event on the global listener
+		function emit(s, value) {
+			hello.emit(s, value);
+		}
+
+		promise.proxy.then(emit.bind(this, 'auth.login auth'), emit.bind(this, 'auth.failed auth'));
+
+		// Is our service valid?
+		if (typeof (p.network) !== 'string' || !(p.network in _this.services)) {
+			// trigger the default login.
+			// ahh we dont have one.
+			return promise.reject(error('invalid_network', 'The provided network was not recognized'));
+		}
+
+		var provider = _this.services[p.network];
+
+		// Create a global listener to capture events triggered out of scope
+		var callbackId = utils.globalEvent(function(str) {
+
+			// The responseHandler returns a string, lets save this locally
+			var obj;
+
+			if (str) {
+				obj = JSON.parse(str);
+			}
+			else {
+				obj = error('cancelled', 'The authentication was not completed');
+			}
+
+			// Handle these response using the local
+			// Trigger on the parent
+			if (!obj.error) {
+
+				// Save on the parent window the new credentials
+				// This fixes an IE10 bug i think... atleast it does for me.
+				utils.store(obj.network, obj);
+
+				// fulfill a successful login
+				promise.fulfill({
+					network: obj.network,
+					authResponse: obj
+				});
+			}
+			else {
+				// Reject a successful login
+				promise.reject(obj);
+			}
+		});
+
+		var redirectUri = utils.url(opts.redirect_uri).href;
+
+		// May be a space-delimited list of multiple, complementary types
+		var responseType = provider.oauth.response_type || opts.response_type;
+
+		// Fallback to token if the module hasn't defined a grant url
+		if (/\bcode\b/.test(responseType) && !provider.oauth.grant) {
+			responseType = responseType.replace(/\bcode\b/, 'token');
+		}
+
+		// Query string parameters, we may pass our own arguments to form the querystring
+		p.qs = {
+			client_id: encodeURIComponent(provider.id),
+			response_type: encodeURIComponent(responseType),
+			redirect_uri: encodeURIComponent(redirectUri),
+			display: opts.display,
+			scope: 'basic',
+			state: {
+				client_id: provider.id,
+				network: p.network,
+				display: opts.display,
+				callback: callbackId,
+				state: opts.state,
+				redirect_uri: redirectUri
+			}
+		};
+
+		// Get current session for merging scopes, and for quick auth response
+		var session = utils.store(p.network);
+
+		// Scopes (authentication permisions)
+		// convert any array, or falsy value to a string.
+		var scope = (opts.scope || '').toString();
+
+		scope = (scope ? scope + ',' : '') + p.qs.scope;
+
+		// Append scopes from a previous session.
+		// This helps keep app credentials constant,
+		// avoiding having to keep tabs on what scopes are authorized
+		if (session && 'scope' in session && session.scope instanceof String) {
+			scope += ',' + session.scope;
+		}
+
+		// Save in the State
+		// Convert to a string because IE, has a problem moving Arrays between windows
+		p.qs.state.scope = utils.unique(scope.split(/[,\s]+/)).join(',');
+
+		// Map replace each scope with the providers default scopes
+		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m) {
+			// Does this have a mapping?
+			if (m in provider.scope) {
+				return provider.scope[m];
+			}
+			else {
+				// Loop through all services and determine whether the scope is generic
+				for (var x in _this.services) {
+					var serviceScopes = _this.services[x].scope;
+					if (serviceScopes && m in serviceScopes) {
+						// Found an instance of this scope, so lets not assume its special
+						return '';
+					}
+				}
+
+				// This is a unique scope to this service so lets in it.
+				return m;
+			}
+
+		}).replace(/[,\s]+/ig, ',');
+
+		// Remove duplication and empty spaces
+		p.qs.scope = utils.unique(p.qs.scope.split(/,+/)).join(provider.scope_delim || ',');
+
+		// Is the user already signed in with the appropriate scopes, valid access_token?
+		if (opts.force === false) {
+
+			if (session && 'access_token' in session && session.access_token && 'expires' in session && session.expires > ((new Date()).getTime() / 1e3)) {
+				// What is different about the scopes in the session vs the scopes in the new login?
+				var diff = utils.diff(session.scope || [], p.qs.state.scope || []);
+				if (diff.length === 0) {
+
+					// OK trigger the callback
+					promise.fulfill({
+						unchanged: true,
+						network: p.network,
+						authResponse: session
+					});
+
+					// Nothing has changed
+					return promise;
+				}
+			}
+		}
+
+		// Page URL
+		if (opts.display === 'page' && opts.page_uri) {
+			// Add a page location, place to endup after session has authenticated
+			p.qs.state.page_uri = utils.url(opts.page_uri).href;
+		}
+
+		// Bespoke
+		// Override login querystrings from auth_options
+		if ('login' in provider && typeof (provider.login) === 'function') {
+			// Format the paramaters according to the providers formatting function
+			provider.login(p);
+		}
+
+		// Add OAuth to state
+		// Where the service is going to take advantage of the oauth_proxy
+		if (!/\btoken\b/.test(responseType) ||
+		parseInt(provider.oauth.version, 10) < 2 ||
+		(opts.display === 'none' && provider.oauth.grant && session && session.refresh_token)) {
+
+			// Add the oauth endpoints
+			p.qs.state.oauth = provider.oauth;
+
+			// Add the proxy url
+			p.qs.state.oauth_proxy = opts.oauth_proxy;
+
+		}
+
+		// Convert state to a string
+		p.qs.state = encodeURIComponent(JSON.stringify(p.qs.state));
+
+		// URL
+		if (parseInt(provider.oauth.version, 10) === 1) {
+
+			// Turn the request to the OAuth Proxy for 3-legged auth
+			url = utils.qs(opts.oauth_proxy, p.qs, encodeFunction);
+		}
+
+		// Refresh token
+		else if (opts.display === 'none' && provider.oauth.grant && session && session.refresh_token) {
+
+			// Add the refresh_token to the request
+			p.qs.refresh_token = session.refresh_token;
+
+			// Define the request path
+			url = utils.qs(opts.oauth_proxy, p.qs, encodeFunction);
+		}
+		else {
+			url = utils.qs(provider.oauth.auth, p.qs, encodeFunction);
+		}
+
+		// Execute
+		// Trigger how we want self displayed
+		if (opts.display === 'none') {
+			// Sign-in in the background, iframe
+			utils.iframe(url);
+		}
+
+		// Triggering popup?
+		else if (opts.display === 'popup') {
+
+			var popup = utils.popup(url, redirectUri, opts.window_width || 500, opts.window_height || 550);
+
+			var timer = setInterval(function() {
+				if (!popup || popup.closed) {
+					clearInterval(timer);
+					if (!promise.state) {
+
+						var response = error('cancelled', 'Login has been cancelled');
+
+						if (!popup) {
+							response = error('blocked', 'Popup was blocked');
+						}
+
+						response.network = p.network;
+
+						promise.reject(response);
+					}
+				}
+			}, 100);
+		}
+
+		else {
+			window.location = url;
+		}
+
+		return promise.proxy;
+
+		function error(code, message) {
+			return {
+				error: {
+					code: code,
+					message: message
+				}
+			};
+		}
+
+		function encodeFunction(s) {return s;}
+	},
+
+	// Remove any data associated with a given service
+	// @param string name of the service
+	// @param function callback
+	logout: function() {
+
+		var _this = this;
+		var utils = _this.utils;
+
+		// Create a new promise
+		var promise = utils.Promise();
+
+		var p = utils.args({name:'s', options: 'o', callback: 'f'}, arguments);
+
+		p.options = p.options || {};
+
+		// Add callback to events
+		promise.proxy.then(p.callback, p.callback);
+
+		// Trigger an event on the global listener
+		function emit(s, value) {
+			hello.emit(s, value);
+		}
+
+		promise.proxy.then(emit.bind(this, 'auth.logout auth'), emit.bind(this, 'error'));
+
+		// Network
+		p.name = p.name || this.settings.default_service;
+
+		if (p.name && !(p.name in _this.services)) {
+
+			promise.reject(error('invalid_network', 'The network was unrecognized'));
+
+		}
+		else if (p.name && utils.store(p.name)) {
+
+			// Define the callback
+			var callback = function(opts) {
+
+				// Remove from the store
+				utils.store(p.name, '');
+
+				// Emit events by default
+				promise.fulfill(hello.utils.merge({network:p.name}, opts || {}));
+			};
+
+			// Run an async operation to remove the users session
+			var _opts = {};
+			if (p.options.force) {
+				var logout = _this.services[p.name].logout;
+				if (logout) {
+					// Convert logout to URL string,
+					// If no string is returned, then this function will handle the logout async style
+					if (typeof (logout) === 'function') {
+						logout = logout(callback);
+					}
+
+					// If logout is a string then assume URL and open in iframe.
+					if (typeof (logout) === 'string') {
+						utils.iframe(logout);
+						_opts.force = null;
+						_opts.message = 'Logout success on providers site was indeterminate';
+					}
+					else if (logout === undefined) {
+						// the callback function will handle the response.
+						return promise.proxy;
+					}
 				}
 			}
 
-			return json;
+			// Remove local credentials
+			callback(_opts);
+		}
+		else {
+			promise.reject(error('invalid_session', 'There was no session to remove'));
+		}
+
+		return promise.proxy;
+
+		function error(code, message) {
+			return {
+				error: {
+					code: code,
+					message: message
+				}
+			};
+		}
+	},
+
+	// Returns all the sessions that are subscribed too
+	// @param string optional, name of the service to get information about.
+	getAuthResponse: function(service) {
+
+		// If the service doesn't exist
+		service = service || this.settings.default_service;
+
+		if (!service || !(service in this.services)) {
+			return null;
+		}
+
+		return this.utils.store(service) || null;
+	},
+
+	// Placeholder for the events
+	events: {}
+});
+
+// Extend the hello object with its own event instance
+hello.utils.Event.call(hello);
+
+// Save any access token that is in the current page URL
+// Handle any response solicited through iframe hash tag following an API request
+hello.utils.responseHandler(window, window.opener || window.parent);
+
+// Monitoring session changes
+(function(hello) {
+
+	// Monitor for a change in state and fire
+	var oldSessions = {};
+
+	// Hash of expired tokens
+	var expired = {};
+
+	// Listen to other triggers to Auth events, use these to update this
+	hello.on('auth.login, auth.logout', function(auth) {
+		if (auth && typeof (auth) === 'object' && auth.network) {
+			oldSessions[auth.network] = hello.utils.store(auth.network) || {};
 		}
 	});
+
+	(function self() {
+
+		var CURRENT_TIME = ((new Date()).getTime() / 1e3);
+		var emit = function(eventName) {
+			hello.emit('auth.' + eventName, {
+				network: name,
+				authResponse: session
+			});
+		};
+
+		// Loop through the services
+		for (var name in hello.services) {if (hello.services.hasOwnProperty(name)) {
+
+			if (!hello.services[name].id) {
+				// we haven't attached an ID so dont listen.
+				continue;
+			}
+
+			// Get session
+			var session = hello.utils.store(name) || {};
+			var provider = hello.services[name];
+			var oldSess = oldSessions[name] || {};
+
+			// Listen for globalEvents that did not get triggered from the child
+			if (session && 'callback' in session) {
+
+				// to do remove from session object...
+				var cb = session.callback;
+				try {
+					delete session.callback;
+				}
+				catch (e) {}
+
+				// Update store
+				// Removing the callback
+				hello.utils.store(name, session);
+
+				// Emit global events
+				try {
+					window[cb](session);
+				}
+				catch (e) {}
+			}
+
+			// Refresh token
+			if (session && ('expires' in session) && session.expires < CURRENT_TIME) {
+
+				// If auto refresh is possible
+				// Either the browser supports
+				var refresh = provider.refresh || session.refresh_token;
+
+				// Has the refresh been run recently?
+				if (refresh && (!(name in expired) || expired[name] < CURRENT_TIME)) {
+					// try to resignin
+					hello.emit('notice', name + ' has expired trying to resignin');
+					hello.login(name, {display: 'none', force: false});
+
+					// update expired, every 10 minutes
+					expired[name] = CURRENT_TIME + 600;
+				}
+
+				// Does this provider not support refresh
+				else if (!refresh && !(name in expired)) {
+					// Label the event
+					emit('expired');
+					expired[name] = true;
+				}
+
+				// If session has expired then we dont want to store its value until it can be established that its been updated
+				continue;
+			}
+
+			// Has session changed?
+			else if (oldSess.access_token === session.access_token &&
+			oldSess.expires === session.expires) {
+				continue;
+			}
+
+			// Access_token has been removed
+			else if (!session.access_token && oldSess.access_token) {
+				emit('logout');
+			}
+
+			// Access_token has been created
+			else if (session.access_token && !oldSess.access_token) {
+				emit('login');
+			}
+
+			// Access_token has been updated
+			else if (session.expires !== oldSess.expires) {
+				emit('update');
+			}
+
+			// Updated stored session
+			oldSessions[name] = session;
+
+			// Remove the expired flags
+			if (name in expired) {
+				delete expired[name];
+			}
+		}}
+
+		// Check error events
+		setTimeout(self, 1000);
+	})();
+
+})(hello);
+
+// @param path string
+// @param query object (optional)
+// @param method string (optional)
+// @param data object (optional)
+// @param timeout integer (optional)
+// @param callback function (optional)
+hello.api = function() {
+
+	// Shorthand
+	var _this = this;
+	var utils = _this.utils;
+
+	// Construct a new Promise object
+	var promise = utils.Promise();
+
+	// Arguments
+	var p = utils.args({path: 's!', query: 'o', method: 's', data: 'o', timeout: 'i', callback: 'f'}, arguments);
+
+	// method
+	p.method = (p.method || 'get').toLowerCase();
+
+	// headers
+	p.headers = p.headers || {};
+
+	// query
+	p.query = p.query || {};
+
+	// If get, put all parameters into query
+	if (p.method === 'get' || p.method === 'delete') {
+		utils.extend(p.query, p.data);
+		p.data = {};
+	}
+
+	var data = p.data = p.data || {};
+
+	// Completed event callback
+	promise.then(p.callback, p.callback);
+
+	// Remove the network from path, e.g. facebook:/me/friends
+	// results in { network : facebook, path : me/friends }
+	if (!p.path) {
+		return promise.reject(error('invalid_path', 'Missing the path parameter from the request'));
+	}
+
+	p.path = p.path.replace(/^\/+/, '');
+	var a = (p.path.split(/[\/\:]/, 2) || [])[0].toLowerCase();
+
+	if (a in _this.services) {
+		p.network = a;
+		var reg = new RegExp('^' + a + ':?\/?');
+		p.path = p.path.replace(reg, '');
+	}
+
+	// Network & Provider
+	// Define the network that this request is made for
+	p.network = _this.settings.default_service = p.network || _this.settings.default_service;
+	var o = _this.services[p.network];
+
+	// INVALID
+	// Is there no service by the given network name?
+	if (!o) {
+		return promise.reject(error('invalid_network', 'Could not match the service requested: ' + p.network));
+	}
+
+	// PATH
+	// as long as the path isn't flagged as unavaiable, e.g. path == false
+
+	if (!(!(p.method in o) || !(p.path in o[p.method]) || o[p.method][p.path] !== false)) {
+		return promise.reject(error('invalid_path', 'The provided path is not available on the selected network'));
+	}
+
+	// PROXY
+	// OAuth1 calls always need a proxy
+
+	if (!p.oauth_proxy) {
+		p.oauth_proxy = _this.settings.oauth_proxy;
+	}
+
+	if (!('proxy' in p)) {
+		p.proxy = p.oauth_proxy && o.oauth && parseInt(o.oauth.version, 10) === 1;
+	}
+
+	// TIMEOUT
+	// Adopt timeout from global settings by default
+
+	if (!('timeout' in p)) {
+		p.timeout = _this.settings.timeout;
+	}
+
+	//
+	// Get the current session
+	// Append the access_token to the query
+	var session = _this.getAuthResponse(p.network);
+	if (session && session.access_token) {
+		p.query.access_token = session.access_token;
+	}
+
+	var url = p.path;
+	var m;
+
+	// Store the query as options
+	// This is used to populate the request object before the data is augmented by the prewrap handlers.
+	p.options = utils.clone(p.query);
+
+	// Clone the data object
+	// Prevent this script overwriting the data of the incoming object.
+	// ensure that everytime we run an iteration the callbacks haven't removed some data
+	p.data = utils.clone(data);
+
+	// URL Mapping
+	// Is there a map for the given URL?
+	var actions = o[{'delete': 'del'}[p.method] || p.method] || {};
+
+	// Extrapolate the QueryString
+	// Provide a clean path
+	// Move the querystring into the data
+	if (p.method === 'get') {
+
+		var query = url.split(/[\?#]/)[1];
+		if (query) {
+			utils.extend(p.query, utils.param(query));
+
+			// Remove the query part from the URL
+			url = url.replace(/\?.*?(#|$)/, '$1');
+		}
+	}
+
+	// is the hash fragment defined
+	if ((m = url.match(/#(.+)/, ''))) {
+		url = url.split('#')[0];
+		p.path = m[1];
+	}
+	else if (url in actions) {
+		p.path = url;
+		url = actions[url];
+	}
+	else if ('default' in actions) {
+		url = actions['default'];
+	}
+
+	// Redirect Handler
+	// This defines for the Form+Iframe+Hash hack where to return the results too.
+	p.redirect_uri = _this.settings.redirect_uri;
+
+	// Set OAuth settings
+	p.oauth = o.oauth;
+
+	// Define FormatHandler
+	// The request can be procesed in a multitude of ways
+	// Here's the options - depending on the browser and endpoint
+	p.xhr = o.xhr;
+	p.jsonp = o.jsonp;
+	p.form = o.form;
+
+	// Make request
+	if (typeof (url) === 'function') {
+		// Does self have its own callback?
+		url(p, getPath);
+	}
+	else {
+		// Else the URL is a string
+		getPath(url);
+	}
+
+	return promise.proxy;
+
+	// If url needs a base
+	// Wrap everything in
+	function getPath(url) {
+
+		// Format the string if it needs it
+		url = url.replace(/\@\{([a-z\_\-]+)(\|.+?)?\}/gi, function(m, key, defaults) {
+			var val = defaults ? defaults.replace(/^\|/, '') : '';
+			if (key in p.query) {
+				val = p.query[key];
+				delete p.query[key];
+			}
+			else if (!defaults) {
+				promise.reject(error('missing_attribute', 'The attribute ' + key + ' is missing from the request'));
+			}
+
+			return val;
+		});
+
+		// Add base
+		if (!url.match(/^https?:\/\//)) {
+			url = o.base + url;
+		}
+
+		// Define the request URL
+		p.url = url;
+
+		// Make the HTTP request with the curated request object
+		// CALLBACK HANDLER
+		// @ response object
+		// @ statusCode integer if available
+		utils.request(p, function(r, headers) {
+
+			// Should this be an object
+			if (r === true) {
+				r = {success:true};
+			}
+			else if (!r) {
+				r = {};
+			}
+
+			// the delete callback needs a better response
+			if (p.method === 'delete') {
+				r = (!r || utils.isEmpty(r)) ? {success:true} : r;
+			}
+
+			// FORMAT RESPONSE?
+			// Does self request have a corresponding formatter
+			if (o.wrap && ((p.path in o.wrap) || ('default' in o.wrap))) {
+				var wrap = (p.path in o.wrap ? p.path : 'default');
+				var time = (new Date()).getTime();
+
+				// FORMAT RESPONSE
+				var b = o.wrap[wrap](r, headers, p);
+
+				// Has the response been utterly overwritten?
+				// Typically self augments the existing object.. but for those rare occassions
+				if (b) {
+					r = b;
+				}
+			}
+
+			// Is there a next_page defined in the response?
+			if (r && 'paging' in r && r.paging.next) {
+
+				// Add the relative path if it is missing from the paging/next path
+				if (r.paging.next[0] === '?') {
+					r.paging.next = p.path + r.paging.next;
+				}
+
+				// The relative path has been defined, lets markup the handler in the HashFragment
+				else {
+					r.paging.next += '#' + p.path;
+				}
+			}
+
+			// Dispatch to listeners
+			// Emit events which pertain to the formatted response
+			if (!r || 'error' in r) {
+				promise.reject(r);
+			}
+			else {
+				promise.fulfill(r);
+			}
+		});
+	}
+
+	// Error handling
+	function error(code, message) {
+		return {
+			error:{
+				code:code,
+				message:message
+			}
+		};
+	}
+
+};
+
+(function(hello) {
+
+	var api = hello.api;
+	var utils = hello.utils;
 
 	// Replace it
 	hello.api = function() {
@@ -2663,7 +2627,7 @@ hello.utils.extend(hello.utils, {
 		// Get arguments
 		var p = utils.args({path: 's!', method: 's', data:'o', timeout: 'i', callback: 'f'}, arguments);
 
-		// Change for into a data object
+		// Change into a data object
 		if (p.data) {
 			utils.dataToJSON(p);
 		}
