@@ -116,10 +116,10 @@
 						o.data = o.contents;
 						delete o.contents;
 
-						for (var i = 0; i < o.data.length; i++) {
-							o.data[i].root = o.root;
-							formatFile(o.data[i], headers, req);
-						}
+						o.data.forEach(function(item) {
+							item.root = o.root;
+							formatFile(item, headers, req);
+						});
 					}
 
 					formatFile(o, headers, req);

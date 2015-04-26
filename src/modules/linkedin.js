@@ -89,13 +89,12 @@
 					formatError(o);
 					paging(o);
 					if (o.values) {
-						o.data = o.values;
+						o.data = o.values.map(formatUser);
+						o.data.forEach(function(item) {
+							item.message = item.headline;
+						});
+
 						delete o.values;
-						for (var i = 0; i < o.data.length; i++) {
-							var d = o.data[i];
-							formatUser(d);
-							d.message = d.headline;
-						}
 					}
 
 					return o;
@@ -151,17 +150,14 @@
 		o.name = o.formattedName || (o.first_name + ' ' + o.last_name);
 		o.thumbnail = o.pictureUrl;
 		o.email = o.emailAddress;
+		return o;
 	}
 
 	function formatFriends(o) {
 		formatError(o);
 		paging(o);
 		if (o.values) {
-			o.data = o.values;
-			for (var i = 0; i < o.data.length; i++) {
-				formatUser(o.data[i]);
-			}
-
+			o.data = o.values.map(formatUser);
 			delete o.values;
 		}
 

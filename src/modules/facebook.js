@@ -155,9 +155,7 @@
 
 	function formatFriends(o) {
 		if ('data' in o) {
-			for (var i = 0; i < o.data.length; i++) {
-				formatUser(o.data[i]);
-			}
+			o.data.forEach(formatUser);
 		}
 
 		return o;
@@ -170,8 +168,7 @@
 
 		if (o && 'data' in o) {
 			var token = req.query.access_token;
-			for (var i = 0; i < o.data.length; i++) {
-				var d = o.data[i];
+			o.data.forEach(function(d) {
 				if (d.picture) {
 					d.thumbnail = d.picture;
 				}
@@ -187,7 +184,7 @@
 				if (d.can_upload) {
 					d.upload_location = base + d.id + '/photos';
 				}
-			}
+			});
 		}
 
 		return o;

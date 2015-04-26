@@ -816,34 +816,21 @@ hello.utils.extend(hello.utils, {
 	},
 
 	diff: function(a, b) {
-		var r = [];
-		for (var i = 0; i < b.length; i++) {
-			if (a.indexOf(b[i]) === -1) {
-				r.push(b[i]);
-			}
-		}
-
-		return r;
+		return b.filter(function(item) {
+			return a.indexOf(item) === -1;
+		});
 	},
 
 	// Unique
 	// remove duplicate and null values from an array
 	// @param a array
 	unique: function(a) {
-		if (typeof (a) !== 'object') { return []; }
+		if (!Array.isArray(a)) { return []; }
 
-		var r = [];
-		for (var i = 0; i < a.length; i++) {
-
-			if (!a[i] || a[i].length === 0 || r.indexOf(a[i]) !== -1) {
-				continue;
-			}
-			else {
-				r.push(a[i]);
-			}
-		}
-
-		return r;
+		return a.filter(function(item, index) {
+			// Is this the first location of item
+			return a.indexOf(item) === index;
+		});
 	},
 
 	isEmpty: function(obj) {
@@ -2087,18 +2074,13 @@ hello.utils.extend(hello.utils, {
 			return obj;
 		}
 
-		var clone;
 		if (Array.isArray(obj)) {
-			clone = [];
-			for (var i = 0; i < obj.length; i++) {
-				clone.push(this.clone(obj[i]));
-			}
-
-			return clone;
+			// Clone each item in the array
+			return obj.map(this.clone);
 		}
 
 		// But does clone everything else.
-		clone = {};
+		var clone = {};
 		for (var x in obj) {
 			clone[x] = this.clone(obj[x]);
 		}

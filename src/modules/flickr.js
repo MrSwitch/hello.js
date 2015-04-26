@@ -55,12 +55,12 @@
 					paging(o);
 					if (o.photoset) {
 						o.data = o.photoset;
-						delete o.photoset;
-						for (var i = 0; i < o.data.length; i++) {
-							var item = o.data[i];
+						o.data.forEach(function(item) {
 							item.name = item.title._content;
 							item.photos = 'https://api.flickr.com/services/rest' + getApiUrl('flickr.photosets.getPhotos', {photoset_id: item.id}, true);
-						}
+						});
+
+						delete o.photoset;
 					}
 
 					return o;

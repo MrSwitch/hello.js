@@ -59,9 +59,7 @@
 					if (Array.isArray(o)) {
 						o = {data:o};
 						paging(o, headers, req);
-						for (var i = 0; i < o.data.length; i++) {
-							formatUser(o.data[i]);
-						}
+						o.data.forEach(formatUser);
 					}
 
 					return o;

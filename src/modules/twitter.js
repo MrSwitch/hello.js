@@ -126,11 +126,7 @@
 		formatError(o);
 		paging(o);
 		if (o.users) {
-			o.data = o.users;
-			for (var i = 0; i < o.data.length; i++) {
-				formatUser(o.data[i]);
-			}
-
+			o.data = o.users.map(formatUser);
 			delete o.users;
 		}
 

@@ -77,18 +77,15 @@
 					paging(o);
 
 					if ('data' in o) {
-						for (var i = 0; i < o.data.length; i++) {
-							var d = o.data[i];
-							if (d.type !== 'image') {
-								o.data.splice(i, 1);
-								i--;
-								continue;
-							}
+						o.data = o.data.filter(function(d) {
+							return d.type === 'image';
+						});
 
+						o.data.forEach(function(d) {
 							d.thumbnail = d.images.thumbnail.url;
 							d.picture = d.images.standard_resolution.url;
 							d.name = d.caption ? d.caption.text : null;
-						}
+						});
 					}
 
 					return o;
@@ -139,9 +136,7 @@
 	function formatFriends(o) {
 		paging(o);
 		if (o && 'data' in o) {
-			for (var i = 0; i < o.data.length; i++) {
-				formatFriend(o.data[i]);
-			}
+			o.data.forEach(formatFriend);
 		}
 
 		return o;

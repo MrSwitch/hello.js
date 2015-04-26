@@ -40,11 +40,8 @@
 				'default': function(o) {
 					if (Array.isArray(o)) {
 						o = {
-							data: o
+							data: o.map(formatUser)
 						};
-						for (var i = 0; i < o.data.length; i++) {
-							formatUser(o.data[i]);
-						}
 					}
 
 					paging(o);

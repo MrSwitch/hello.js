@@ -42,10 +42,8 @@
 					// Format friends
 					if (o && 'response' in o && 'friends' in o.response && 'items' in o.response.friends) {
 						o.data = o.response.friends.items;
+						o.data.forEach(formatUser);
 						delete o.response;
-						for (var i = 0; i < o.data.length; i++) {
-							formatUser(o.data[i]);
-						}
 					}
 
 					return o;
