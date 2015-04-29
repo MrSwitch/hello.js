@@ -127,7 +127,6 @@
 
 			jsonp: function(p) {
 				if (p.method !== 'get' && !hello.utils.hasBinary(p.data)) {
-					//p.data = {data: JSON.stringify(p.data), method: p.method.toLowerCase()};
 					p.data.method = p.method;
 					p.method = 'get';
 				}

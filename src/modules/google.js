@@ -513,7 +513,7 @@
 			}
 		}
 
-		//		p.data.mimeType = Object(file[0]).type || 'application/octet-stream';
+		// Set type p.data.mimeType = Object(file[0]).type || 'application/octet-stream';
 
 		// Construct a multipart message
 		var parts = new Multipart();
