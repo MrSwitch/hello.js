@@ -120,6 +120,7 @@
 			// See: https://dev.twitter.com/overview/general/user-profile-images-and-banners
 			o.thumbnail = o.profile_image_url_https || o.profile_image_url;
 		}
+
 		return o;
 	}
 

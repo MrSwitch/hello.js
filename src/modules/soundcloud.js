@@ -69,6 +69,7 @@
 			o.thumbnail = o.avatar_url;
 			o.name = o.username || o.full_name;
 		}
+
 		return o;
 	}
 

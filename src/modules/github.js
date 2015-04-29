@@ -43,6 +43,9 @@
 
 					if (Array.isArray(o)) {
 						o = {data:o};
+					}
+
+					if (o.data) {
 						paging(o, headers, req);
 						o.data.forEach(formatUser);
 					}
