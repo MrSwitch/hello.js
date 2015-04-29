@@ -394,7 +394,7 @@
 
 			// Does the content have an array
 			if (typeof (content) === 'string' || !('length' in Object(content))) {
-				// converti to multiples
+				// Converti to multiples
 				content = [content];
 			}
 
@@ -415,7 +415,7 @@
 				}
 
 				// Data-URI?
-				// data:[<mime type>][;charset=<charset>][;base64],<encoded data>
+				// Data:[<mime type>][;charset=<charset>][;base64],<encoded data>
 				// /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i
 				else if (typeof (item) === 'string' && item.match(dataUri)) {
 					var m = item.match(dataUri);
@@ -432,7 +432,7 @@
 		this.onready = function(fn) {
 			ready = function() {
 				if (counter === 0) {
-					// trigger ready
+					// Trigger ready
 					body.unshift('');
 					body.push('--');
 					fn(body.join(delim), boundary);

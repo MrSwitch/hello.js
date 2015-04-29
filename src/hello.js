@@ -1258,7 +1258,6 @@ hello.utils.extend(hello.utils, {
 							href: a.href
 						},
 						close: function() {
-							//alert('closing location:'+url);
 							if (popup.close) {
 								popup.close();
 							}

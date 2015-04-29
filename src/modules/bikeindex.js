@@ -1,5 +1,5 @@
 // BikeIndex
-// https://bikeindex.org/documentation/api_v2
+// Https://bikeindex.org/documentation/api_v2
 (function(hello) {
 
 	hello.init({
@@ -17,8 +17,8 @@
 				basic: 'read_user,read_bikes',
 				email: 'read_user'
 
-				// read_bikes: 'View user's bikes user owned',
-				// write_bikes: 'Edit and create bikes'
+				// Read_bikes: 'View user's bikes user owned',
+				// Write_bikes: 'Edit and create bikes'
 			},
 
 			scope_delim: '+',

@@ -22,10 +22,10 @@
 				'me/following': 'friends/list.json?count=@{limit|200}',
 				'me/followers': 'followers/list.json?count=@{limit|200}',
 
-				// https://dev.twitter.com/docs/api/1.1/get/statuses/user_timeline
+				// Https://dev.twitter.com/docs/api/1.1/get/statuses/user_timeline
 				'me/share': 'statuses/user_timeline.json?count=@{limit|200}',
 
-				// https://dev.twitter.com/rest/reference/get/favorites/list
+				// Https://dev.twitter.com/rest/reference/get/favorites/list
 				'me/like': 'favorites/list.json?count=@{limit|200}'
 			},
 
@@ -162,7 +162,7 @@
 
 	/**
 	// The documentation says to define user in the request
-	// although its not actually required.
+	// Although its not actually required.
 
 	var user_id;
 

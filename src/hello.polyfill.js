@@ -93,7 +93,7 @@ if (!Array.prototype.map) {
 // ES5 isArray
 if (!Array.isArray) {
 
-	// isArray
+	// Function Array.isArray
 	Array.isArray = function(o) {
 		return Object.prototype.toString.call(o) === '[object Array]';
 	};

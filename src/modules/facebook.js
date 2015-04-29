@@ -27,7 +27,7 @@
 				publish: 'publish_actions',
 
 				// Deprecated in v2.0
-				// create_event	: 'create_event',
+				// Create_event	: 'create_event',
 
 				offline_access: 'offline_access'
 			},
@@ -55,9 +55,9 @@
 
 				// Possible responses:
 				// String URL	- hello.logout should handle the logout
-				// undefined	- this function will handle the callback
-				// true - throw a success, this callback isn't handling the callback
-				// false - throw a error
+				// Undefined	- this function will handle the callback
+				// True - throw a success, this callback isn't handling the callback
+				// False - throw a error
 				if (!token) {
 					// If there isn't a token, the above wont return a response, so lets trigger a response
 					return false;
@@ -84,7 +84,7 @@
 				'friend/photos': '@{id}/photos'
 
 				// Pagination
-				// https://developers.facebook.com/docs/reference/api/pagination/
+				// Https://developers.facebook.com/docs/reference/api/pagination/
 			},
 
 			// Map POST requests
@@ -92,7 +92,7 @@
 				'me/share': 'me/feed',
 				'me/photo': '@{id}'
 
-				// https://developers.facebook.com/docs/graph-api/reference/v2.2/object/likes/
+				// Https://developers.facebook.com/docs/graph-api/reference/v2.2/object/likes/
 			},
 
 			wrap: {
@@ -136,7 +136,7 @@
 			// Special requirements for iframe form hack
 			form: function(p) {
 				return {
-					// fire the callback onload
+					// Fire the callback onload
 					callbackonload: true
 				};
 			}

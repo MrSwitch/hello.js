@@ -52,7 +52,7 @@ define([
 					}
 				});
 
-				/*
+				/**
 					xit('should return error object when an api request is made with an unverified user', function(done) {
 
 						var i = 0;

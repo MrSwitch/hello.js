@@ -61,11 +61,11 @@ define([], function() {
 
 			// Listeners
 			var spy = sinon.spy(function() {
-				// should not be called.
+				// Should not be called.
 			});
 
 			var spy2 = sinon.spy(function() {
-				// should not be called.
+				// Should not be called.
 			});
 
 			// Bind
@@ -89,11 +89,11 @@ define([], function() {
 
 			// Listeners
 			var spy = sinon.spy(function() {
-				// should not be called.
+				// Should not be called.
 			});
 
 			var spy2 = sinon.spy(function() {
-				// should not be called.
+				// Should not be called.
 			});
 
 			// Bind
@@ -118,7 +118,7 @@ define([], function() {
 			// PROTO
 			// Listeners
 			var spy = sinon.spy(function() {
-				// should not be called.
+				// Should not be called.
 			});
 
 			// Bind
@@ -128,7 +128,7 @@ define([], function() {
 			var child = Object.create(hello);
 
 			var spy2 = sinon.spy(function() {
-				// should not be called.
+				// Should not be called.
 			});
 
 			hello.on(eventName, spy2);

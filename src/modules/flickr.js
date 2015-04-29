@@ -103,7 +103,7 @@
 	}
 
 	// This is not exactly neat but avoid to call
-	// the method 'flickr.test.login' for each api call
+	// The method 'flickr.test.login' for each api call
 
 	function withUser(cb) {
 		var auth = hello.getAuthResponse('flickr');

@@ -17,7 +17,7 @@
 			get: {
 				me: 'me.json',
 
-				// http://developers.soundcloud.com/docs/api/reference#me
+				// Http://developers.soundcloud.com/docs/api/reference#me
 				'me/friends': 'me/followings.json',
 				'me/followers': 'me/followers.json',
 				'me/following': 'me/followings.json',
