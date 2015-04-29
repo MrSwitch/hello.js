@@ -23,9 +23,6 @@ if (!Object.create) {
 
 // ES5 [].indexOf
 if (!Array.prototype.indexOf) {
-
-	// IndexOf
-	// IE hack Array.indexOf doesn't exist prior to IE9
 	Array.prototype.indexOf = function(s) {
 
 		for (var j = 0; j < this.length; j++) {
@@ -36,13 +33,67 @@ if (!Array.prototype.indexOf) {
 
 		return -1;
 	};
+}
 
+// ES5 [].forEach
+if (!Array.prototype.forEach) {
+	Array.prototype.forEach = function(fun/*, thisArg*/) {
+
+		if (this === void 0 || this === null) {
+			throw new TypeError();
+		}
+
+		var t = Object(this);
+		var len = t.length >>> 0;
+		if (typeof fun !== 'function') {
+			throw new TypeError();
+		}
+
+		var thisArg = arguments.length >= 2 ? arguments[1] : void 0;
+		for (var i = 0; i < len; i++) {
+			if (i in t) {
+				fun.call(thisArg, t[i], i, t);
+			}
+		}
+
+		return this;
+	};
+}
+
+// ES5 [].filter
+if (!Array.prototype.filter) {
+	Array.prototype.filter = function(fun, thisArg) {
+
+		var a = [];
+		this.forEach(function(val, i, t) {
+			if (fun.call(thisArg || void 0, val, i, t)) {
+				a.push(val);
+			}
+		});
+
+		return a;
+	};
+}
+
+// Production steps of ECMA-262, Edition 5, 15.4.4.19
+// Reference: http://es5.github.io/#x15.4.4.19
+if (!Array.prototype.map) {
+
+	Array.prototype.map = function(fun, thisArg) {
+
+		var a = [];
+		this.forEach(function(val, i, t) {
+			a.push(fun.call(thisArg || void 0, val, i, t));
+		});
+
+		return a;
+	};
 }
 
 // ES5 isArray
 if (!Array.isArray) {
 
-	// isArray
+	// Function Array.isArray
 	Array.isArray = function(o) {
 		return Object.prototype.toString.call(o) === '[object Array]';
 	};

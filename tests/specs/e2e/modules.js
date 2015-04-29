@@ -32,14 +32,14 @@ define([
 				var MATCH_URL = /^https?\:\/\//;
 
 				it('should contain oauth.auth path', function() {
-				var path = module.oauth.auth;
-				expect(path).to.match(/^https?\:\/\//);
-			});
+					var path = module.oauth.auth;
+					expect(path).to.match(/^https?\:\/\//);
+				});
 
 				it('should specify a base url', function() {
-				// Loop through all services
-				expect(module.base).to.match(/^https?\:\/\//);
-			});
+					// Loop through all services
+					expect(module.base).to.match(/^https?\:\/\//);
+				});
 
 				it('should be using OAuth1 contain, auth, request, token properties', function() {
 
@@ -52,27 +52,25 @@ define([
 					}
 				});
 
-				/*
-					xit('should return error object when an api request is made with an unverified user', function(done) {
+				xit('should return error object when an api request is made with an unverified user', function(done) {
 
-						var i = 0;
+					var i = 0;
 
-						this.timeout(60000);
+					this.timeout(60000);
 
-						var cb = errorResponse(null, function() {
+					var cb = errorResponse(null, function() {
 						if (++i === 2)
 							done();
 					});
 
-						// Ensure user is signed out
-						hello.logout(name);
+					// Ensure user is signed out
+					hello.logout(name);
 
-						// Make a request that returns an error object
-						hello(name)
-						.api('me', cb)
-						.then(null, cb);
-					});
-				*/
+					// Make a request that returns an error object
+					hello(name)
+					.api('me', cb)
+					.then(null, cb);
+				});
 			});
 		}
 	});

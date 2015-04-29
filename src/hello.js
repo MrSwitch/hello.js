@@ -168,7 +168,7 @@ hello.utils.extend(hello, {
 		// Local vars
 		var url;
 
-		// merge/override options with app defaults
+		// Merge/override options with app defaults
 		var opts = p.options = utils.merge(_this.settings, p.options || {});
 
 		// Network
@@ -186,8 +186,8 @@ hello.utils.extend(hello, {
 
 		// Is our service valid?
 		if (typeof (p.network) !== 'string' || !(p.network in _this.services)) {
-			// trigger the default login.
-			// ahh we dont have one.
+			// Trigger the default login.
+			// Ahh we dont have one.
 			return promise.reject(error('invalid_network', 'The provided network was not recognized'));
 		}
 
@@ -214,7 +214,7 @@ hello.utils.extend(hello, {
 				// This fixes an IE10 bug i think... atleast it does for me.
 				utils.store(obj.network, obj);
 
-				// fulfill a successful login
+				// Fulfill a successful login
 				promise.fulfill({
 					network: obj.network,
 					authResponse: obj
@@ -257,14 +257,14 @@ hello.utils.extend(hello, {
 		var session = utils.store(p.network);
 
 		// Scopes (authentication permisions)
-		// convert any array, or falsy value to a string.
+		// Convert any array, or falsy value to a string.
 		var scope = (opts.scope || '').toString();
 
 		scope = (scope ? scope + ',' : '') + p.qs.scope;
 
 		// Append scopes from a previous session.
 		// This helps keep app credentials constant,
-		// avoiding having to keep tabs on what scopes are authorized
+		// Avoiding having to keep tabs on what scopes are authorized
 		if (session && 'scope' in session && session.scope instanceof String) {
 			scope += ',' + session.scope;
 		}
@@ -481,7 +481,7 @@ hello.utils.extend(hello, {
 						_opts.message = 'Logout success on providers site was indeterminate';
 					}
 					else if (logout === undefined) {
-						// the callback function will handle the response.
+						// The callback function will handle the response.
 						return promise.proxy;
 					}
 				}
@@ -764,7 +764,7 @@ hello.utils.extend(hello.utils, {
 				// Does this key exist in the property list?
 				if (x in o) {
 					// Yes this key does exist so its most likely this function has been invoked with an object parameter
-					// return first argument as the hash of all arguments
+					// Return first argument as the hash of all arguments
 					return args[0];
 				}
 			}}
@@ -816,34 +816,21 @@ hello.utils.extend(hello.utils, {
 	},
 
 	diff: function(a, b) {
-		var r = [];
-		for (var i = 0; i < b.length; i++) {
-			if (a.indexOf(b[i]) === -1) {
-				r.push(b[i]);
-			}
-		}
-
-		return r;
+		return b.filter(function(item) {
+			return a.indexOf(item) === -1;
+		});
 	},
 
 	// Unique
-	// remove duplicate and null values from an array
+	// Remove duplicate and null values from an array
 	// @param a array
 	unique: function(a) {
-		if (typeof (a) !== 'object') { return []; }
+		if (!Array.isArray(a)) { return []; }
 
-		var r = [];
-		for (var i = 0; i < a.length; i++) {
-
-			if (!a[i] || a[i].length === 0 || r.indexOf(a[i]) !== -1) {
-				continue;
-			}
-			else {
-				r.push(a[i]);
-			}
-		}
-
-		return r;
+		return a.filter(function(item, index) {
+			// Is this the first location of item
+			return a.indexOf(item) === index;
+		});
 	},
 
 	isEmpty: function(obj) {
@@ -1271,7 +1258,6 @@ hello.utils.extend(hello.utils, {
 							href: a.href
 						},
 						close: function() {
-							//alert('closing location:'+url);
 							if (popup.close) {
 								popup.close();
 							}
@@ -1334,7 +1320,7 @@ hello.utils.extend(hello.utils, {
 			// Add this path as the redirect_uri
 			p.redirect_uri = state.redirect_uri || location.href.replace(/[\?\#].*$/, '');
 
-			// redirect to the host
+			// Redirect to the host
 			var path = (state.oauth_proxy || p.proxy_url) + '?' + _this.param(p);
 
 			location.assign(path);
@@ -1350,11 +1336,11 @@ hello.utils.extend(hello.utils, {
 
 		p = _this.merge(_this.param(location.search || ''), _this.param(location.hash || ''));
 
-		// if p.state
+		// If p.state
 		if (p && 'state' in p) {
 
-			// remove any addition information
-			// e.g. p.state = 'facebook.page';
+			// Remove any addition information
+			// E.g. p.state = 'facebook.page';
 			try {
 				var a = JSON.parse(p.state);
 				_this.extend(p, a);
@@ -1363,7 +1349,7 @@ hello.utils.extend(hello.utils, {
 				console.error('Could not decode state parameter');
 			}
 
-			// access_token?
+			// Access_token?
 			if (('access_token' in p && p.access_token) && p.network) {
 
 				if (!p.expires_in || parseInt(p.expires_in, 10) === 0) {
@@ -1378,7 +1364,7 @@ hello.utils.extend(hello.utils, {
 				authCallback(p, window, parent);
 			}
 
-			// error=?
+			// Error=?
 			// &error_description=?
 			// &state=?
 			else if (('error' in p && p.error) && p.network) {
@@ -1432,7 +1418,7 @@ hello.utils.extend(hello.utils, {
 
 			if (parent) {
 				// Call the generic listeners
-				// win.hello.emit(network+":auth."+(obj.error?'failed':'login'), obj);
+				// Win.hello.emit(network+":auth."+(obj.error?'failed':'login'), obj);
 
 				// TODO: remove from session object
 				var cb = obj.callback;
@@ -1448,7 +1434,7 @@ hello.utils.extend(hello.utils, {
 				if (cb in parent) {
 
 					// It's safer to pass back a string to the parent,
-					// rather than an object/array (better for IE8)
+					// Rather than an object/array (better for IE8)
 					var str = JSON.stringify(obj);
 
 					try {
@@ -1471,7 +1457,7 @@ hello.utils.extend(hello.utils, {
 			}
 			catch (e) {}
 
-			// iOS bug wont let us close a popup if still loading
+			// IOS bug wont let us close a popup if still loading
 			if (window.addEventListener) {
 				window.addEventListener('load', function() {
 					window.close();
@@ -1529,7 +1515,7 @@ hello.utils.responseHandler(window, window.opener || window.parent);
 		for (var name in hello.services) {if (hello.services.hasOwnProperty(name)) {
 
 			if (!hello.services[name].id) {
-				// we haven't attached an ID so dont listen.
+				// We haven't attached an ID so dont listen.
 				continue;
 			}
 
@@ -1541,7 +1527,7 @@ hello.utils.responseHandler(window, window.opener || window.parent);
 			// Listen for globalEvents that did not get triggered from the child
 			if (session && 'callback' in session) {
 
-				// to do remove from session object...
+				// To do remove from session object...
 				var cb = session.callback;
 				try {
 					delete session.callback;
@@ -1568,11 +1554,11 @@ hello.utils.responseHandler(window, window.opener || window.parent);
 
 				// Has the refresh been run recently?
 				if (refresh && (!(name in expired) || expired[name] < CURRENT_TIME)) {
-					// try to resignin
+					// Try to resignin
 					hello.emit('notice', name + ' has expired trying to resignin');
 					hello.login(name, {display: 'none', force: false});
 
-					// update expired, every 10 minutes
+					// Update expired, every 10 minutes
 					expired[name] = CURRENT_TIME + 600;
 				}
 
@@ -1647,13 +1633,13 @@ hello.api = function() {
 	// Arguments
 	var p = utils.args({path: 's!', query: 'o', method: 's', data: 'o', timeout: 'i', callback: 'f'}, arguments);
 
-	// method
+	// Method
 	p.method = (p.method || 'get').toLowerCase();
 
-	// headers
+	// Headers
 	p.headers = p.headers || {};
 
-	// query
+	// Query
 	p.query = p.query || {};
 
 	// If get, put all parameters into query
@@ -1668,7 +1654,7 @@ hello.api = function() {
 	promise.then(p.callback, p.callback);
 
 	// Remove the network from path, e.g. facebook:/me/friends
-	// results in { network : facebook, path : me/friends }
+	// Results in { network : facebook, path : me/friends }
 	if (!p.path) {
 		return promise.reject(error('invalid_path', 'Missing the path parameter from the request'));
 	}
@@ -1694,7 +1680,7 @@ hello.api = function() {
 	}
 
 	// PATH
-	// as long as the path isn't flagged as unavaiable, e.g. path == false
+	// As long as the path isn't flagged as unavaiable, e.g. path == false
 
 	if (!(!(p.method in o) || !(p.path in o[p.method]) || o[p.method][p.path] !== false)) {
 		return promise.reject(error('invalid_path', 'The provided path is not available on the selected network'));
@@ -1735,7 +1721,7 @@ hello.api = function() {
 
 	// Clone the data object
 	// Prevent this script overwriting the data of the incoming object.
-	// ensure that everytime we run an iteration the callbacks haven't removed some data
+	// Ensure that everytime we run an iteration the callbacks haven't removed some data
 	p.data = utils.clone(data);
 
 	// URL Mapping
@@ -1756,7 +1742,7 @@ hello.api = function() {
 		}
 	}
 
-	// is the hash fragment defined
+	// Is the hash fragment defined
 	if ((m = url.match(/#(.+)/, ''))) {
 		url = url.split('#')[0];
 		p.path = m[1];
@@ -1835,7 +1821,7 @@ hello.api = function() {
 				r = {};
 			}
 
-			// the delete callback needs a better response
+			// The delete callback needs a better response
 			if (p.method === 'delete') {
 				r = (!r || utils.isEmpty(r)) ? {success:true} : r;
 			}
@@ -2087,18 +2073,13 @@ hello.utils.extend(hello.utils, {
 			return obj;
 		}
 
-		var clone;
 		if (Array.isArray(obj)) {
-			clone = [];
-			for (var i = 0; i < obj.length; i++) {
-				clone.push(this.clone(obj[i]));
-			}
-
-			return clone;
+			// Clone each item in the array
+			return obj.map(this.clone);
 		}
 
 		// But does clone everything else.
-		clone = {};
+		var clone = {};
 		for (var x in obj) {
 			clone[x] = this.clone(obj[x]);
 		}
@@ -2120,7 +2101,7 @@ hello.utils.extend(hello.utils, {
 
 		method = method.toUpperCase();
 
-		// xhr.responseType 'json' is not supported in any of the vendors yet.
+		// Xhr.responseType 'json' is not supported in any of the vendors yet.
 		r.onload = function(e) {
 			var json = r.response;
 			try {
@@ -2343,7 +2324,7 @@ hello.utils.extend(hello.utils, {
 
 		// Override callback mechanism. Triggger a response onload/onerror
 		if (options && options.callbackonload) {
-			// onload is being fired twice
+			// Onload is being fired twice
 			win.onload = function() {
 				cb({
 					response: 'posted',
@@ -2399,7 +2380,7 @@ hello.utils.extend(hello.utils, {
 			// Therefore it must be a JSON object of Key=>Value or Key=>Element
 			// If anyone of those values are a input type=file we shall shall insert its siblings into the form for which it belongs.
 			for (x in data) if (data.hasOwnProperty(x)) {
-				// is this an input Element?
+				// Is this an input Element?
 				if (_this.domInstance('input', data[x]) && data[x].type === 'file') {
 					form = data[x].form;
 					form.encoding = form.enctype = 'multipart/form-data';
@@ -2422,7 +2403,7 @@ hello.utils.extend(hello.utils, {
 				// Is this an element?
 				var el = (_this.domInstance('input', data[x]) || _this.domInstance('textArea', data[x]) || _this.domInstance('select', data[x]));
 
-				// is this not an input element, or one that exists outside the form.
+				// Is this not an input element, or one that exists outside the form.
 				if (!el || data[x].form !== form) {
 
 					// Does an element have the same name?
@@ -2458,7 +2439,7 @@ hello.utils.extend(hello.utils, {
 					form.appendChild(input);
 				}
 
-				// it is an element, which exists within the form, but the name is wrong
+				// It is an element, which exists within the form, but the name is wrong
 				else if (el && data[x].name !== x) {
 					data[x].setAttribute('name', x);
 					data[x].name = x;
@@ -2472,10 +2453,10 @@ hello.utils.extend(hello.utils, {
 
 				// Does the same name and value exist in the parent
 				if (!(input.name in data) && input.getAttribute('disabled') !== true) {
-					// disable
+					// Disable
 					input.setAttribute('disabled', true);
 
-					// add re-enable to callback
+					// Add re-enable to callback
 					reenableAfterSubmit.push(input);
 				}
 			}
@@ -2496,9 +2477,9 @@ hello.utils.extend(hello.utils, {
 
 			setTimeout(function() {
 				try {
-					// remove the iframe from the page.
+					// Remove the iframe from the page.
 					//win.parentNode.removeChild(win);
-					// remove the form
+					// Remove the form
 					if (newform) {
 						newform.parentNode.removeChild(newform);
 					}
@@ -2510,7 +2491,7 @@ hello.utils.extend(hello.utils, {
 					catch (ee) {}
 				}
 
-				// reenable the disabled form
+				// Reenable the disabled form
 				for (var i = 0; i < reenableAfterSubmit.length; i++) {
 					if (reenableAfterSubmit[i]) {
 						reenableAfterSubmit[i].setAttribute('disabled', false);
@@ -2574,7 +2555,7 @@ hello.utils.extend(hello.utils, {
 
 	utils.extend(utils, {
 
-		// dataToJSON
+		// DataToJSON
 		// This takes a FormElement|NodeList|InputElement|MixedObjects and convers the data object to JSON.
 		dataToJSON: function(p) {
 

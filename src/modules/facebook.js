@@ -27,7 +27,7 @@
 				publish: 'publish_actions',
 
 				// Deprecated in v2.0
-				// create_event	: 'create_event',
+				// Create_event	: 'create_event',
 
 				offline_access: 'offline_access'
 			},
@@ -55,9 +55,9 @@
 
 				// Possible responses:
 				// String URL	- hello.logout should handle the logout
-				// undefined	- this function will handle the callback
-				// true - throw a success, this callback isn't handling the callback
-				// false - throw a error
+				// Undefined	- this function will handle the callback
+				// True - throw a success, this callback isn't handling the callback
+				// False - throw a error
 				if (!token) {
 					// If there isn't a token, the above wont return a response, so lets trigger a response
 					return false;
@@ -84,7 +84,7 @@
 				'friend/photos': '@{id}/photos'
 
 				// Pagination
-				// https://developers.facebook.com/docs/reference/api/pagination/
+				// Https://developers.facebook.com/docs/reference/api/pagination/
 			},
 
 			// Map POST requests
@@ -92,7 +92,7 @@
 				'me/share': 'me/feed',
 				'me/photo': '@{id}'
 
-				// https://developers.facebook.com/docs/graph-api/reference/v2.2/object/likes/
+				// Https://developers.facebook.com/docs/graph-api/reference/v2.2/object/likes/
 			},
 
 			wrap: {
@@ -136,7 +136,7 @@
 			// Special requirements for iframe form hack
 			form: function(p) {
 				return {
-					// fire the callback onload
+					// Fire the callback onload
 					callbackonload: true
 				};
 			}
@@ -155,9 +155,7 @@
 
 	function formatFriends(o) {
 		if ('data' in o) {
-			for (var i = 0; i < o.data.length; i++) {
-				formatUser(o.data[i]);
-			}
+			o.data.forEach(formatUser);
 		}
 
 		return o;
@@ -170,8 +168,7 @@
 
 		if (o && 'data' in o) {
 			var token = req.query.access_token;
-			for (var i = 0; i < o.data.length; i++) {
-				var d = o.data[i];
+			o.data.forEach(function(d) {
 				if (d.picture) {
 					d.thumbnail = d.picture;
 				}
@@ -187,7 +184,7 @@
 				if (d.can_upload) {
 					d.upload_location = base + d.id + '/photos';
 				}
-			}
+			});
 		}
 
 		return o;

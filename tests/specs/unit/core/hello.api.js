@@ -52,7 +52,7 @@ define([
 
 		after(function() {
 
-			// renew
+			// Renew
 			hello.utils.request = _request;
 
 		});

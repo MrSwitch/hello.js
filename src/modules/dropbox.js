@@ -44,14 +44,14 @@
 			get: {
 				me: 'account/info',
 
-				// https://www.dropbox.com/developers/core/docs#metadata
+				// Https://www.dropbox.com/developers/core/docs#metadata
 				'me/files': req('metadata/@{root|sandbox}/@{parent}'),
 				'me/folder': req('metadata/@{root|sandbox}/@{id}'),
 				'me/folders': req('metadata/@{root|sandbox}/'),
 
 				'default': function(p, callback) {
 					if (p.path.match('https://api-content.dropbox.com/1/files/')) {
-						// this is a file, return binary data
+						// This is a file, return binary data
 						p.method = 'blob';
 					}
 
@@ -116,10 +116,10 @@
 						o.data = o.contents;
 						delete o.contents;
 
-						for (var i = 0; i < o.data.length; i++) {
-							o.data[i].root = o.root;
-							formatFile(o.data[i], headers, req);
-						}
+						o.data.forEach(function(item) {
+							item.root = o.root;
+							formatFile(item, headers, req);
+						});
 					}
 
 					formatFile(o, headers, req);
@@ -136,7 +136,7 @@
 			xhr: function(p) {
 
 				// The proxy supports allow-cross-origin-resource
-				// alas that's the only thing we're using.
+				// Alas that's the only thing we're using.
 				if (p.data && p.data.file) {
 					var file = p.data.file;
 					if (file) {
@@ -206,7 +206,7 @@
 			o.id = o.path.replace(/^\//, '');
 		}
 
-		// o.media = 'https://api-content.dropbox.com/1/files/' + path;
+		// O.media = 'https://api-content.dropbox.com/1/files/' + path;
 	}
 
 	function req(str) {

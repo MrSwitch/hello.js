@@ -130,10 +130,8 @@
 					if (o.items) {
 						paging(o);
 						o.data = o.items;
+						o.data.forEach(formatPerson);
 						delete o.items;
-						for (var i = 0; i < o.data.length; i++) {
-							formatPerson(o.data[i]);
-						}
 					}
 
 					return o;
@@ -197,98 +195,35 @@
 			o.type = 'folder';
 			o.files = 'https://www.googleapis.com/drive/v2/files?q=%22' + o.id + '%22+in+parents';
 		}
+
+		return o;
+	}
+
+	function formatImage(item) {
+		return {
+			source: item.url,
+			width: item.width,
+			height: item.height
+		};
 	}
 
 	// Google has a horrible JSON API
 	function gEntry(o) {
 		paging(o);
 
-		var entry = function(a) {
-
-			var media = a.media$group.media$content.length ? a.media$group.media$content[0] : {};
-			var i = 0;
-			var _a;
-			var p = {
-				id: a.id.$t,
-				name: a.title.$t,
-				description: a.summary.$t,
-				updated_time: a.updated.$t,
-				created_time: a.published.$t,
-				picture: media ? media.url : null,
-				thumbnail: media ? media.url : null,
-				width: media.width,
-				height: media.height
-			};
-
-			// Get feed/children
-			if ('link' in a) {
-				for (i = 0; i < a.link.length; i++) {
-					var d = a.link[i];
-					if (d.rel.match(/\#feed$/)) {
-						p.upload_location = p.files = p.photos = d.href;
-						break;
-					}
-				}
-			}
-
-			// Get images of different scales
-			if ('category' in a && a.category.length) {
-				_a = a.category;
-				for (i = 0; i < _a.length; i++) {
-					if (_a[i].scheme && _a[i].scheme.match(/\#kind$/)) {
-						p.type = _a[i].term.replace(/^.*?\#/, '');
-					}
-				}
-			}
-
-			// Get images of different scales
-			if ('media$thumbnail' in a.media$group && a.media$group.media$thumbnail.length) {
-				_a = a.media$group.media$thumbnail;
-				p.thumbnail = a.media$group.media$thumbnail[0].url;
-				p.images = [];
-				for (i = 0; i < _a.length; i++) {
-					p.images.push({
-						source: _a[i].url,
-						width: _a[i].width,
-						height: _a[i].height
-					});
-				}
-
-				_a = a.media$group.media$content.length ? a.media$group.media$content[0] : null;
-				if (_a) {
-					p.images.push({
-						source: _a.url,
-						width: _a.width,
-						height: _a.height
-					});
-				}
-			}
-
-			return p;
-		};
-
-		var r = [];
 		if ('feed' in o && 'entry' in o.feed) {
-			for (i = 0; i < o.feed.entry.length; i++) {
-				r.push(entry(o.feed.entry[i]));
-			}
-
-			o.data = r;
+			o.data = o.feed.entry.map(formatEntry);
 			delete o.feed;
 		}
 
 		// Old style, Picasa, etc...
 		else if ('entry' in o) {
-			return entry(o.entry);
+			return formatEntry(o.entry);
 		}
 
 		// New Style, Google Drive & Plus
 		else if ('items' in o) {
-			for (var i = 0; i < o.items.length; i++) {
-				formatItem(o.items[i]);
-			}
-
-			o.data = o.items;
+			o.data = o.items.map(formatItem);
 			delete o.items;
 		}
 		else {
@@ -347,6 +282,62 @@
 		return o;
 	}
 
+	function formatEntry(a) {
+
+		var group = a.media$group;
+		var media = group.media$content.length ? group.media$content[0] : {};
+		var i = 0;
+		var _a;
+		var p = {
+			id: a.id.$t,
+			name: a.title.$t,
+			description: a.summary.$t,
+			updated_time: a.updated.$t,
+			created_time: a.published.$t,
+			picture: media ? media.url : null,
+			images: [],
+			thumbnail: media ? media.url : null,
+			width: media.width,
+			height: media.height
+		};
+
+		// Get feed/children
+		if ('link' in a) {
+			for (i = 0; i < a.link.length; i++) {
+				var d = a.link[i];
+				if (d.rel.match(/\#feed$/)) {
+					p.upload_location = p.files = p.photos = d.href;
+					break;
+				}
+			}
+		}
+
+		// Get images of different scales
+		if ('category' in a && a.category.length) {
+			_a = a.category;
+			for (i = 0; i < _a.length; i++) {
+				if (_a[i].scheme && _a[i].scheme.match(/\#kind$/)) {
+					p.type = _a[i].term.replace(/^.*?\#/, '');
+				}
+			}
+		}
+
+		// Get images of different scales
+		if ('media$thumbnail' in group && group.media$thumbnail.length) {
+			_a = group.media$thumbnail;
+			p.thumbnail = _a[0].url;
+			p.images = _a.map(formatImage);
+		}
+
+		_a = group.media$content;
+
+		if (_a && _a.length) {
+			p.images.push(formatImage(_a[0]));
+		}
+
+		return p;
+	}
+
 	function paging(res) {
 
 		// Contacts V2
@@ -403,7 +394,7 @@
 
 			// Does the content have an array
 			if (typeof (content) === 'string' || !('length' in Object(content))) {
-				// converti to multiples
+				// Converti to multiples
 				content = [content];
 			}
 
@@ -424,7 +415,7 @@
 				}
 
 				// Data-URI?
-				// data:[<mime type>][;charset=<charset>][;base64],<encoded data>
+				// Data:[<mime type>][;charset=<charset>][;base64],<encoded data>
 				// /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i
 				else if (typeof (item) === 'string' && item.match(dataUri)) {
 					var m = item.match(dataUri);
@@ -441,7 +432,7 @@
 		this.onready = function(fn) {
 			ready = function() {
 				if (counter === 0) {
-					// trigger ready
+					// Trigger ready
 					body.unshift('');
 					body.push('--');
 					fn(body.join(delim), boundary);
@@ -522,7 +513,7 @@
 			}
 		}
 
-		//		p.data.mimeType = Object(file[0]).type || 'application/octet-stream';
+		// Set type p.data.mimeType = Object(file[0]).type || 'application/octet-stream';
 
 		// Construct a multipart message
 		var parts = new Multipart();

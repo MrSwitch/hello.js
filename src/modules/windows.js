@@ -78,10 +78,7 @@
 			},
 
 			wrap: {
-				me: function(o, headers, req) {
-					formatUser(o, headers, req);
-					return o;
-				},
+				me: formatUser,
 
 				'me/friends': formatFriends,
 				'me/contacts': formatFriends,
@@ -89,10 +86,9 @@
 				'me/following': formatFriends,
 				'me/albums': function(o) {
 					if ('data' in o) {
-						for (var i = 0; i < o.data.length; i++) {
-							var d = o.data[i];
+						o.data.forEach(function(d) {
 							d.photos = d.files = 'https://apis.live.net/v5.0/' + d.id + '/photos';
-						}
+						});
 					}
 
 					return o;
@@ -100,12 +96,11 @@
 
 				'default': function(o) {
 					if ('data' in o) {
-						for (var i = 0; i < o.data.length; i++) {
-							var d = o.data[i];
+						o.data.forEach(function(d) {
 							if (d.picture) {
 								d.thumbnail = d.picture;
 							}
-						}
+						});
 					}
 
 					return o;
@@ -132,7 +127,6 @@
 
 			jsonp: function(p) {
 				if (p.method !== 'get' && !hello.utils.hasBinary(p.data)) {
-					//p.data = {data: JSON.stringify(p.data), method: p.method.toLowerCase()};
 					p.data.method = p.method;
 					p.method = 'get';
 				}
@@ -154,13 +148,15 @@
 				o.thumbnail = o.picture = 'https://apis.live.net/v5.0/' + id + '/picture?access_token=' + token;
 			}
 		}
+
+		return o;
 	}
 
 	function formatFriends(o, headers, req) {
 		if ('data' in o) {
-			for (var i = 0; i < o.data.length; i++) {
-				formatUser(o.data[i], headers, req);
-			}
+			o.data.forEach(function(d) {
+				formatUser(d, headers, req);
+			});
 		}
 
 		return o;

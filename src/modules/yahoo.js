@@ -31,29 +31,7 @@
 				'me/following': yql('select * from social.contacts(0) where guid=me')
 			},
 			wrap: {
-				me: function(o) {
-					formatError(o);
-					if (o.query && o.query.results && o.query.results.profile) {
-						o = o.query.results.profile;
-						o.id = o.guid;
-						o.last_name = o.familyName;
-						o.first_name = o.givenName || o.nickname;
-						var a = [];
-						if (o.first_name) {
-							a.push(o.first_name);
-						}
-
-						if (o.last_name) {
-							a.push(o.last_name);
-						}
-
-						o.name = a.join(' ');
-						o.email = (o.emails && o.emails[0]) ? o.emails[0].handle : null;
-						o.thumbnail = o.image ? o.image.imageUrl : null;
-					}
-
-					return o;
-				},
+				me: formatUser,
 
 				// Can't get IDs
 				// It might be better to loop through the social.relationship table with has unique IDs of users.
@@ -93,6 +71,31 @@
 		}
 	}
 
+	function formatUser(o) {
+
+		formatError(o);
+		if (o.query && o.query.results && o.query.results.profile) {
+			o = o.query.results.profile;
+			o.id = o.guid;
+			o.last_name = o.familyName;
+			o.first_name = o.givenName || o.nickname;
+			var a = [];
+			if (o.first_name) {
+				a.push(o.first_name);
+			}
+
+			if (o.last_name) {
+				a.push(o.last_name);
+			}
+
+			o.name = a.join(' ');
+			o.email = (o.emails && o.emails[0]) ? o.emails[0].handle : null;
+			o.thumbnail = o.image ? o.image.imageUrl : null;
+		}
+
+		return o;
+	}
+
 	function formatFriends(o, headers, request) {
 		formatError(o);
 		paging(o, headers, request);
@@ -106,29 +109,29 @@
 				o.data = [o.data];
 			}
 
-			for (var i = 0; i < o.data.length; i++) {
-				contact = o.data[i];
-				contact.id = null;
-				for (var j = 0; j < contact.fields.length; j++) {
-					field = contact.fields[j];
-					if (field.type === 'email') {
-						contact.email = field.value;
-					}
-
-					if (field.type === 'name') {
-						contact.first_name = field.value.givenName;
-						contact.last_name = field.value.familyName;
-						contact.name = field.value.givenName + ' ' + field.value.familyName;
-					}
-
-					if (field.type === 'yahooid') {
-						contact.id = field.value;
-					}
-				}
-			}
+			o.data.forEach(formatFriend);
 		}
 
 		return o;
+	}
+
+	function formatFriend(contact) {
+		contact.id = null;
+		contact.fields.forEach(function(field) {
+			if (field.type === 'email') {
+				contact.email = field.value;
+			}
+
+			if (field.type === 'name') {
+				contact.first_name = field.value.givenName;
+				contact.last_name = field.value.familyName;
+				contact.name = field.value.givenName + ' ' + field.value.familyName;
+			}
+
+			if (field.type === 'yahooid') {
+				contact.id = field.value;
+			}
+		});
 	}
 
 	function paging(res, headers, request) {
