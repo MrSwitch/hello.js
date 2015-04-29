@@ -189,15 +189,15 @@ bower install hello
 <li><a target="_blank" href="https://code.google.com/apis/console/b/0/#:access">Google+</a></li>
 </ul>
 
-<h3>2. Include Hello.js script in your page.</h3>
+<h3>2. Include Hello.js script in your page</h3>
 
 <script class="pre" src="./dist/hello.all.js"></script>
 
 <h3>3. Create the sign-in buttons</h3>
-<p>Just add onclick events to call hello( network ).login(). Style your buttons as you like; I've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts.</p>
+<p>Just add onclick events to call hello(network).login(). Style your buttons as you like; I've used <a href="http://zocial.smcllns.com">zocial css</a>, but there are many other icon sets and fonts.</p>
 
 <script class="pre" type="html">
-<button onclick="hello( 'windows' ).login()">windows</button>
+<button onclick="hello('windows').login()">windows</button>
 </script>
 
 <h3>4. Add listeners for the user login</h3>
@@ -205,13 +205,13 @@ bower install hello
 <p>Let's define a simple function, which will load a user profile into the page after they sign in and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.</p>
 
 <script class="pre">
-hello.on('auth.login', function(auth){
+hello.on('auth.login', function(auth) {
 
 	// Call user information, for the given network
-	hello( auth.network ).api( '/me' ).then( function(r){
+	hello(auth.network).api('/me').then(function(r) {
 		// Inject it into the container
-		var label = document.getElementById( 'profile_' + auth.network );
-		if (!label){
+		var label = document.getElementById('profile_' + auth.network);
+		if (!label) {
 			label = document.createElement('div');
 			label.id = 'profile_' + auth.network;
 			document.getElementById('profile').appendChild(label);
@@ -221,7 +221,7 @@ hello.on('auth.login', function(auth){
 });
 </script>
 
-<h3>5. Configure hello.js with your client_id's and initiate all listeners.</h3>
+<h3>5. Configure hello.js with your client IDs and initiate all listeners</h3>
 
 <p>Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the <code>hello.init</code> function. e.g....</p>
 
@@ -230,7 +230,7 @@ hello.init({
 	facebook: FACEBOOK_CLIENT_ID,
 	windows: WINDOWS_CLIENT_ID,
 	google: GOOGLE_CLIENT_ID
-}, { redirect_uri: 'redirect.html' });
+}, {redirect_uri: 'redirect.html'});
 </script>
 
 <p>That's it. The code above actually powers the demo at the start so, no excuses.</p>
@@ -241,7 +241,7 @@ hello.init({
 
 <p>Initiate the environment. And add the application credentials.</p>
 
-<h3>hello.init( {facebook: <em>id</em>, windows: <em>id</em>, google: <em>id</em>, .... } )</h3>
+<h3>hello.init({facebook: <em>id</em>, windows: <em>id</em>, google: <em>id</em>, ... })</h3>
 
 <table>
 	<thead>
@@ -270,7 +270,7 @@ hello.init({
 							<td>key</td>
 							<td><i>string</i></td>
 							<td><q>windows</q>, <q>facebook</q> or <q>google</q></td>
-							<td>App name"s</td>
+							<td>App names</td>
 							<td><em>required</em></td>
 							<td>n/a</td>
 						</tr>
@@ -308,7 +308,7 @@ hello.init({
 
 <p>If a network string is provided: A consent window to authenticate with that network will be initiated. Else if no network is provided a prompt to select one of the networks will open. A callback will be executed if the user authenticates and or cancels the authentication flow.</p>
 
-<h3>hello.login( [network] [, options] [, callback()] )</h3>
+<h3>hello.login([network] [, options] [, callback()])</h3>
 
 <table>
 	<tr>
@@ -397,13 +397,12 @@ hello.init({
 <h3>Examples:</h3>
 
 <pre class="tryitoffline" type="js">
-hello( 'facebook' ).login().then( function(){
+hello('facebook').login().then(function() {
 	alert('You are signed in to Facebook');
-}, function( e ){
+}, function(e) {
 	alert('Signin error: ' + e.error.message);
 });
 </pre>
-
 
 <h2>hello.logout()</h2>
 
@@ -411,7 +410,7 @@ hello( 'facebook' ).login().then( function(){
 
 <p>Remove all sessions or individual sessions.</p>
 
-<h3>hello.logout( [network] [, options] [, callback()] )</h3>
+<h3>hello.logout([network] [, options] [, callback()])</h3>
 
 <table>
 	<tr>
@@ -466,7 +465,7 @@ hello( 'facebook' ).login().then( function(){
 		<td>callback</td>
 		<td><i>function</i></td>
 		<td>
-			<code>function(){alert('Logged out!');}
+			<code>function() {alert('Logged out!');}
 			</code>
 		</td>
 		<td>
@@ -483,10 +482,10 @@ hello( 'facebook' ).login().then( function(){
 <h3>Example:</h3>
 
 <pre class="tryit" type="js">
-hello( 'facebook' ).logout().then( function(){
+hello('facebook').logout().then(function() {
 	alert('Signed out');
-}, function(e){
-	alert( 'Signed out error:' + e.error.message );
+}, function(e) {
+	alert('Signed out error: ' + e.error.message);
 });
 </pre>
 
@@ -496,7 +495,7 @@ hello( 'facebook' ).logout().then( function(){
 
 <p>Get the current status of the session. This is a synchronous request and does not validate any session cookies which may have expired.</p>
 
-<h3>hello.getAuthResponse( network );</h3>
+<h3>hello.getAuthResponse(network)</h3>
 
 <table>
 	<tr>
@@ -520,15 +519,15 @@ hello( 'facebook' ).logout().then( function(){
 <h3>Examples:</h3>
 
 <pre class="tryitoffline" type="js">
-var online = function(session){
-	var current_time = (new Date()).getTime() / 1000;
-	return session && session.access_token && session.expires > current_time;
+var online = function(session) {
+	var currentTime = (new Date()).getTime() / 1000;
+	return session && session.access_token && session.expires > currentTime;
 };
 
-var fb = hello( 'facebook' ).getAuthResponse();
-var wl = hello( 'windows' ).getAuthResponse();
+var fb = hello('facebook').getAuthResponse();
+var wl = hello('windows').getAuthResponse();
 
-alert(( online(fb) ? 'Signed' : 'Not signed') + ' into Facebook, ' + ( online(wl) ? 'Signed' : 'Not signed') + ' into Windows Live');
+alert((online(fb) ? 'Signed' : 'Not signed') + ' into Facebook, ' + (online(wl) ? 'Signed' : 'Not signed') + ' into Windows Live');
 </pre>
 
 <h2>hello.api()</h2>
@@ -537,7 +536,7 @@ alert(( online(fb) ? 'Signed' : 'Not signed') + ' into Facebook, ' + ( online(wl
 
 <p>Make calls to the API for getting and posting data.</p>
 
-<h3>hello.api( [ path ], [ method ], [ data ], [ callback(json) ] )</h3>
+<h3>hello.api([path], [method], [data], [callback(json)])</h3>
 
 <table>
 	<tr>
@@ -621,20 +620,20 @@ alert(( online(fb) ? 'Signed' : 'Not signed') + ' into Facebook, ' + ( online(wl
 <h3>Examples:</h3>
 
 <pre class="tryit" type="js">
-hello( "facebook" ).api("me").then(function(json){
-	alert("Your name is "+ json.name);
-}, function(e){
-	alert("Whoops! " + e.error.message );
+hello('facebook').api('me').then(function(json) {
+	alert('Your name is ' + json.name);
+}, function(e) {
+	alert('Whoops! ' + e.error.message);
 });
 </pre>
 
-<h1>Event subscription</h1>
+<h1>Event Subscription</h1>
 
 <h2>hello.on()</h2>
 
 <p>Bind a callback to an event. An event may be triggered by a change in user state or a change in some detail.</p>
 
-<h3>hello.on( event, callback );</h3>
+<h3>hello.on(event, callback)</h3>
 
 <table>
 	<thead>
@@ -666,7 +665,7 @@ hello( "facebook" ).api("me").then(function(json){
 <h3>Example:</h3>
 
 <pre class="tryit" type="js">
-var sessionStart =  function(){
+var sessionStart = function() {
 	alert('Session has started');
 };
 hello.on('auth.login', sessionStart);
@@ -676,7 +675,7 @@ hello.on('auth.login', sessionStart);
 
 <p>Remove a callback. Both event name and function must exist.</p>
 
-<h3>hello.off( event, callback );</h3>
+<h3>hello.off(event, callback)</h3>
 
 <pre class="tryit" type="js">
 hello.off('auth.login', sessionStart);
@@ -690,24 +689,28 @@ hello.off('auth.login', sessionStart);
 <p>In the example below the function <code>paginationExample()</code> is initially called with <code><q>me/friends</q></code>. Subsequent calls take the path from <code>resp.paging.next</code>.</p>
 
 <pre class="tryit" type="js">
-function paginationExample(path){
-	hello( 'facebook' )
-	.api( path, {limit: 1} )
-	.then( function callback( resp ){
-		if( resp.paging && resp.paging.next ){
-			if( confirm( 'Got friend ' + resp.data[0].name + '. Get another?' ) ){
-				// Call the api again but with the 'resp.paging.next` path
-				paginationExample( resp.paging.next );
+function paginationExample(path) {
+	hello('facebook')
+		.api(path, {limit: 1})
+		.then(
+			function callback(resp) {
+				if (resp.paging && resp.paging.next) {
+					if (confirm('Got friend ' + resp.data[0].name + '. Get another?')) {
+						// Call the API again but with the 'resp.paging.next` path
+						paginationExample(resp.paging.next);
+					}
+				}
+				else {
+					alert('Got friend ' + resp.data[0].name);
+				}
+			},
+			function() {
+				alert('Whoops!');
 			}
-		}
-		else{
-			alert( 'Got friend ' + resp.data[0].name + '. That's it!' );
-		}
-	}, function(){
-		alert('Whoops!');
-	});
+		);
 }
-paginationExample( 'me/friends' );
+
+paginationExample('me/friends');
 </pre>
 
 
@@ -716,7 +719,7 @@ paginationExample( 'me/friends' );
 <p>An app can specify multiple scopes, separated by commas - as in the example below.</p>
 
 <pre class="tryit" type="js">
-hello( 'facebook' ).login( {scope: 'friends,photos,publish' } );
+hello('facebook').login({scope: 'friends,photos,publish'});
 </pre>
 
 <p>Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the <a href="http://adodson.com/hello.js/#helloapi">hello.api reference table</a>.</p>
@@ -759,9 +762,9 @@ hello( 'facebook' ).login( {scope: 'friends,photos,publish' } );
 
 <p>It's good practice to limit the use of scopes and also to make users aware of why your app needs certain privileges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend, include a button that the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorization.</p>
 
-<h2>Error handling</h2>
+<h2>Error Handling</h2>
 
-<p>Errors are returned, i.e. <code>hello.api([path]).then(null, [<em>errorHandler</em>])</code> - alternatively <code>hello.api([path], [<em>handleSuccessOrError</em>])</code>.</p>
+<p>Errors are returned i.e. <code>hello.api([path]).then(null, [<em>errorHandler</em>])</code> - alternatively <code>hello.api([path], [<em>handleSuccessOrError</em>])</code>.</p>
 
 <p>The <a href="#promises-a">Promise</a> response standardizes the binding of error handlers.</p>
 
@@ -854,7 +857,7 @@ hello.init(
 <p>Enforcing the OAuth2 Explicit Grant is done by setting <code>response_type=code</code> in <a href="#hellologin">hello.login</a> options - or globally in <a href="#helloinit">hello.init</a> options. E.g...</p>
 
 <pre type="javascript">
-hello( network ).login({
+hello(network).login({
 	response_type: 'code'
 });
 </pre>
@@ -865,15 +868,15 @@ hello( network ).login({
 </div>
 <p>Unlike Implicit grant; Explicit grant may return the <code>refresh_token</code>. HelloJS honors the OAuth2 refresh_token, and will also request a new access_token once it has expired.</p>
 
-<h3>Bullet proof requests</h3>
-<p>A good way to design your app is to trigger requests through a user action, you can then test for a valid access token prior to making the api request with a potentially expired token.</p>
+<h3>Bulletproof Requests</h3>
+<p>A good way to design your app is to trigger requests through a user action, you can then test for a valid access token prior to making the API request with a potentially expired token.</p>
 
 <pre type="javascript">
 var google = hello('google');
 // Set force to false, to avoid triggering the OAuth flow if there is an unexpired access_token available.
-google.login({force:false}).then(function(){
+google.login({force: false}).then(function() {
 	google.api('me').then(handler);
-});;
+});
 </pre>
 
 <h2>Promises A+</h2>
@@ -900,7 +903,7 @@ google.login({force:false}).then(function(){
 
 <p>HelloJS is constantly evolving, as are the services which it connects too. So if you think something could be said better, find something buggy or missing from either the code, documentation or demos then please put it in, no matter how trivial.</p>
 
-<h3>Changing code?</h3>
+<h3>Changing Code?</h3>
 <p>Ensure you setup and test your code on a variety of browsers.</p>
 
 <pre type="bash">
@@ -929,13 +932,13 @@ hello.init(CLIENT_IDS_ALL, {
 	oauth_proxy: OAUTH_PROXY_URL
 });
 
-getText('assets/test_network.html', function(response){
+getText('assets/test_network.html', function(response) {
 	document.getElementById('tests-template').text = response;
-	//knockout binding goes here
+	// Knockout binding goes here
 	ko.applyBindings(model);
 });
 
-hello.on('auth.login', function(){
+hello.on('auth.login', function() {
 	document.getElementById('profile_done').style.display='block';
 });
 

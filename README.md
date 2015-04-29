@@ -148,17 +148,17 @@ Register your application with at least one of the following networks. Ensure yo
 - [Google+](https://code.google.com/apis/console/b/0/#:access)
 
 
-### 2. Include Hello.js script in your page.
+### 2. Include Hello.js script in your page
 
 ```html
 <script class="pre" src="./dist/hello.all.js"></script>
 ```
 
 ### 3. Create the sign-in buttons
-Just add onclick events to call hello( network ).login(). Style your buttons as you like; I've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts.
+Just add onclick events to call hello(network).login(). Style your buttons as you like; I've used [zocial css](http://zocial.smcllns.com), but there are many other icon sets and fonts.
 
 ```html
-<button onclick="hello( 'windows' ).login()">windows</button>
+<button onclick="hello('windows').login()">windows</button>
 ```
 
 ### 4. Add listeners for the user login
@@ -166,13 +166,13 @@ Just add onclick events to call hello( network ).login(). Style your buttons as 
 Let's define a simple function, which will load a user profile into the page after they sign in and on subsequent page refreshes. Below is our event listener which will listen for a change in the authentication event and make an API call for data.
 
 ```javascript
-hello.on('auth.login', function(auth){
+hello.on('auth.login', function(auth) {
 
 	// Call user information, for the given network
-	hello( auth.network ).api( '/me' ).then( function(r){
+	hello(auth.network).api('/me').then(function(r) {
 		// Inject it into the container
-		var label = document.getElementById( 'profile_' + auth.network );
-		if (!label){
+		var label = document.getElementById('profile_' + auth.network);
+		if (!label) {
 			label = document.createElement('div');
 			label.id = 'profile_' + auth.network;
 			document.getElementById('profile').appendChild(label);
@@ -182,7 +182,7 @@ hello.on('auth.login', function(auth){
 });
 ```
 
-### 5. Configure hello.js with your client_id's and initiate all listeners.
+### 5. Configure hello.js with your client IDs and initiate all listeners
 
 Now let's wire it up with our registration detail obtained in step 1. By passing a [key:value, ...] list into the `hello.init` function. e.g....
 
@@ -191,7 +191,7 @@ hello.init({
 	facebook: FACEBOOK_CLIENT_ID,
 	windows: WINDOWS_CLIENT_ID,
 	google: GOOGLE_CLIENT_ID
-}, { redirect_uri: 'redirect.html' });
+}, {redirect_uri: 'redirect.html'});
 ```
 
 That's it. The code above actually powers the demo at the start so, no excuses.
@@ -202,7 +202,7 @@ That's it. The code above actually powers the demo at the start so, no excuses.
 
 Initiate the environment. And add the application credentials.
 
-### hello.init( {facebook: *id*, windows: *id*, google: *id*, .... } )
+### hello.init({facebook: *id*, windows: *id*, google: *id*, ... })
 
 <table>
 	<thead>
@@ -231,7 +231,7 @@ Initiate the environment. And add the application credentials.
 							<td>key</td>
 							<td><i>string</i></td>
 							<td><q>windows</q>, <q>facebook</q> or <q>google</q></td>
-							<td>App name"s</td>
+							<td>App names</td>
 							<td><em>required</em></td>
 							<td>n/a</td>
 						</tr>
@@ -269,7 +269,7 @@ hello.init({
 
 If a network string is provided: A consent window to authenticate with that network will be initiated. Else if no network is provided a prompt to select one of the networks will open. A callback will be executed if the user authenticates and or cancels the authentication flow.
 
-### hello.login( [network] [, options] [, callback()] )
+### hello.login([network] [, options] [, callback()])
 
 <table>
 	<tr>
@@ -358,13 +358,12 @@ If a network string is provided: A consent window to authenticate with that netw
 ### Examples:
 
 ```js
-hello( 'facebook' ).login().then( function(){
+hello('facebook').login().then(function() {
 	alert('You are signed in to Facebook');
-}, function( e ){
+}, function(e) {
 	alert('Signin error: ' + e.error.message);
 });
 ```
-
 
 ## hello.logout()
 
@@ -372,7 +371,7 @@ hello( 'facebook' ).login().then( function(){
 
 Remove all sessions or individual sessions.
 
-### hello.logout( [network] [, options] [, callback()] )
+### hello.logout([network] [, options] [, callback()])
 
 <table>
 	<tr>
@@ -427,7 +426,7 @@ Remove all sessions or individual sessions.
 		<td>callback</td>
 		<td><i>function</i></td>
 		<td>
-			<code>function(){alert('Logged out!');}
+			<code>function() {alert('Logged out!');}
 			</code>
 		</td>
 		<td>
@@ -444,10 +443,10 @@ Remove all sessions or individual sessions.
 ### Example:
 
 ```js
-hello( 'facebook' ).logout().then( function(){
+hello('facebook').logout().then(function() {
 	alert('Signed out');
-}, function(e){
-	alert( 'Signed out error:' + e.error.message );
+}, function(e) {
+	alert('Signed out error: ' + e.error.message);
 });
 ```
 
@@ -457,7 +456,7 @@ hello( 'facebook' ).logout().then( function(){
 
 Get the current status of the session. This is a synchronous request and does not validate any session cookies which may have expired.
 
-### hello.getAuthResponse( network );
+### hello.getAuthResponse(network)
 
 <table>
 	<tr>
@@ -481,15 +480,15 @@ Get the current status of the session. This is a synchronous request and does no
 ### Examples:
 
 ```js
-var online = function(session){
-	var current_time = (new Date()).getTime() / 1000;
-	return session && session.access_token && session.expires > current_time;
+var online = function(session) {
+	var currentTime = (new Date()).getTime() / 1000;
+	return session && session.access_token && session.expires > currentTime;
 };
 
-var fb = hello( 'facebook' ).getAuthResponse();
-var wl = hello( 'windows' ).getAuthResponse();
+var fb = hello('facebook').getAuthResponse();
+var wl = hello('windows').getAuthResponse();
 
-alert(( online(fb) ? 'Signed' : 'Not signed') + ' into Facebook, ' + ( online(wl) ? 'Signed' : 'Not signed') + ' into Windows Live');
+alert((online(fb) ? 'Signed' : 'Not signed') + ' into Facebook, ' + (online(wl) ? 'Signed' : 'Not signed') + ' into Windows Live');
 ```
 
 ## hello.api()
@@ -498,7 +497,7 @@ alert(( online(fb) ? 'Signed' : 'Not signed') + ' into Facebook, ' + ( online(wl
 
 Make calls to the API for getting and posting data.
 
-### hello.api( [ path ], [ method ], [ data ], [ callback(json) ] )
+### hello.api([path], [method], [data], [callback(json)])
 
 <table>
 	<tr>
@@ -582,20 +581,20 @@ Make calls to the API for getting and posting data.
 ### Examples:
 
 ```js
-hello( "facebook" ).api("me").then(function(json){
-	alert("Your name is "+ json.name);
-}, function(e){
-	alert("Whoops! " + e.error.message );
+hello('facebook').api('me').then(function(json) {
+	alert('Your name is ' + json.name);
+}, function(e) {
+	alert('Whoops! ' + e.error.message);
 });
 ```
 
-# Event subscription
+# Event Subscription
 
 ## hello.on()
 
 Bind a callback to an event. An event may be triggered by a change in user state or a change in some detail.
 
-### hello.on( event, callback );
+### hello.on(event, callback)
 
 <table>
 	<thead>
@@ -627,7 +626,7 @@ Bind a callback to an event. An event may be triggered by a change in user state
 ### Example:
 
 ```js
-var sessionStart =  function(){
+var sessionStart = function() {
 	alert('Session has started');
 };
 hello.on('auth.login', sessionStart);
@@ -637,7 +636,7 @@ hello.on('auth.login', sessionStart);
 
 Remove a callback. Both event name and function must exist.
 
-### hello.off( event, callback );
+### hello.off(event, callback)
 
 ```js
 hello.off('auth.login', sessionStart);
@@ -651,24 +650,28 @@ Responses which are a subset of the total results should provide a `response.pag
 In the example below the function `paginationExample()` is initially called with `me/friends`. Subsequent calls take the path from `resp.paging.next`.
 
 ```js
-function paginationExample(path){
-	hello( 'facebook' )
-	.api( path, {limit: 1} )
-	.then( function callback( resp ){
-		if( resp.paging && resp.paging.next ){
-			if( confirm( 'Got friend ' + resp.data[0].name + '. Get another?' ) ){
-				// Call the api again but with the 'resp.paging.next` path
-				paginationExample( resp.paging.next );
+function paginationExample(path) {
+	hello('facebook')
+		.api(path, {limit: 1})
+		.then(
+			function callback(resp) {
+				if (resp.paging && resp.paging.next) {
+					if (confirm('Got friend ' + resp.data[0].name + '. Get another?')) {
+						// Call the API again but with the 'resp.paging.next` path
+						paginationExample(resp.paging.next);
+					}
+				}
+				else {
+					alert('Got friend ' + resp.data[0].name);
+				}
+			},
+			function() {
+				alert('Whoops!');
 			}
-		}
-		else{
-			alert( 'Got friend ' + resp.data[0].name + '. That's it!' );
-		}
-	}, function(){
-		alert('Whoops!');
-	});
+		);
 }
-paginationExample( 'me/friends' );
+
+paginationExample('me/friends');
 ```
 
 
@@ -677,7 +680,7 @@ The scope property defines which privileges an app requires from a network provi
 An app can specify multiple scopes, separated by commas - as in the example below.
 
 ```js
-hello( 'facebook' ).login( {scope: 'friends,photos,publish' } );
+hello('facebook').login({scope: 'friends,photos,publish'});
 ```
 
 Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the [hello.api reference table](http://adodson.com/hello.js/#helloapi).
@@ -720,9 +723,9 @@ The table below illustrates some of the default scopes HelloJS exposes. Addition
 
 It's good practice to limit the use of scopes and also to make users aware of why your app needs certain privileges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend, include a button that the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorization.
 
-## Error handling
+## Error Handling
 
-Errors are returned, i.e. `hello.api([path]).then(null, [*errorHandler*])` - alternatively `hello.api([path], [*handleSuccessOrError*])`.
+Errors are returned i.e. `hello.api([path]).then(null, [*errorHandler*])` - alternatively `hello.api([path], [*handleSuccessOrError*])`.
 
 The [Promise](#promises-a) response standardizes the binding of error handlers.
 
@@ -815,7 +818,7 @@ hello.init(
 Enforcing the OAuth2 Explicit Grant is done by setting `response_type=code` in [hello.login](#hellologin) options - or globally in [hello.init](#helloinit) options. E.g...
 
 ```javascript
-hello( network ).login({
+hello(network).login({
 	response_type: 'code'
 });
 ```
@@ -826,15 +829,15 @@ A list of services which enable silent authentication after the Implicit Grant s
 
 Unlike Implicit grant; Explicit grant may return the `refresh_token`. HelloJS honors the OAuth2 refresh_token, and will also request a new access_token once it has expired.
 
-### Bullet proof requests
-A good way to design your app is to trigger requests through a user action, you can then test for a valid access token prior to making the api request with a potentially expired token.
+### Bulletproof Requests
+A good way to design your app is to trigger requests through a user action, you can then test for a valid access token prior to making the API request with a potentially expired token.
 
 ```javascript
 var google = hello('google');
 // Set force to false, to avoid triggering the OAuth flow if there is an unexpired access_token available.
-google.login({force:false}).then(function(){
+google.login({force: false}).then(function() {
 	google.api('me').then(handler);
-});;
+});
 ```
 
 ## Promises A+
@@ -847,7 +850,7 @@ For a demo, or, if you're bundling up the library from `src/*` files, then pleas
 
 HelloJS targets all modern browsers.
 
-Polyfills are included in `src/hello.polyfill.js` this is to bring older browsers upto date. If your using the resources located in `dist/` this is already bundled in. But if your building from source you might like to first determine whether these polyfills are required, or if your already supporting them etc...
+Polyfills are included in `src/hello.polyfill.js` this is to bring older browsers upto date. If you're using the resources located in `dist/` this is already bundled in. But if you're building from source you might like to first determine whether these polyfills are required, or if you're already supporting them etc...
 
 ## PhoneGap Support
 
@@ -861,7 +864,7 @@ Having read this far you have already invested your time, why not contribute!?
 
 HelloJS is constantly evolving, as are the services which it connects too. So if you think something could be said better, find something buggy or missing from either the code, documentation or demos then please put it in, no matter how trivial.
 
-### Changing code?
+### Changing Code?
 Ensure you setup and test your code on a variety of browsers.
 
 ```bash
