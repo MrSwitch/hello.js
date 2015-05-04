@@ -6,7 +6,7 @@ define(['./helper'], function(helper) {
 
 		helper.sharedSetup();
 
-		var tests = ['flickr', 'foursquare', 'github', 'google', 'linkedin', 'soundcloud', 'twitter', 'yahoo'];
+		var tests = ['flickr', 'foursquare', 'github', 'google', 'linkedin', 'soundcloud', 'twitter', 'windows', 'yahoo'];
 
 		tests.forEach(function(network) {
 
