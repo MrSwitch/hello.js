@@ -1501,7 +1501,7 @@ hello.utils.extend( hello.utils, {
 					hello.utils.responseHandler( _popup, window );
 
 
-					// Always close the popup reguardless of whether the hello.utils.responseHandler detects a state parameter or not in the querystring.
+					// Always close the popup regardless of whether the hello.utils.responseHandler detects a state parameter or not in the querystring.
 					// Such situations might arise such as those in #63
 
 					_popup.close();
