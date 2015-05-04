@@ -3,6 +3,7 @@ define([
 	'./apiMe',
 	'./apiMeAlbum',
 	'./apiMeAlbums',
+	'./apiMeFriends',
 	'./apiMePhotos'
 ], function() {
 	// Done
