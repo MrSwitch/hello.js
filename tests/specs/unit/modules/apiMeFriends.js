@@ -23,6 +23,8 @@ define(['./helper'], function(helper) {
 						}
 					});
 
+					expect(friends.data.length).to.be.ok();
+
 					done();
 				})
 				.then(null, done);
