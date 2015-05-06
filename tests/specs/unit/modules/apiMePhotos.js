@@ -12,7 +12,26 @@ define(['./helper'], function(helper) {
 					first: {
 						id: '891783660020488189_1636340308',
 						name: 'Red Carpet Piggy',
-						picture: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_n.jpg'
+						picture: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_n.jpg',
+						pictures: {
+							all: [
+								{
+									url: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_s.jpg',
+									width: 150,
+									height: 150
+								},
+								{
+									url: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_a.jpg',
+									width: 306,
+									height: 306
+								},
+								{
+									url: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_n.jpg',
+									width: 640,
+									height: 640
+								}
+							]
+						}
 					}
 				}
 			},
@@ -23,7 +42,8 @@ define(['./helper'], function(helper) {
 					first: {
 						id: 'https://picasaweb.google.com/data/entry/api/user/115111284799080900590/albumid/6101137643479860177/photoid/6101137679962229346?alt=json',
 						name: 'wistful-piggy.jpg',
-						picture: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/wistful-piggy.jpg'
+						picture: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/wistful-piggy.jpg',
+						pictures: null
 					}
 				}
 			},
@@ -34,7 +54,8 @@ define(['./helper'], function(helper) {
 					first: {
 						id: '1380493922254145',
 						name: 'LBD Piggy',
-						picture: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/v/t1.0-9/s130x130/10897962_1380493922254145_5386757285347386511_n.jpg?oh=98e30ce334bf9cb01f808c0c1134afff&oe=55291C94&__gda__=1429910956_84b3b9a2d5d9326485e630290657afcc'
+						picture: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/v/t1.0-9/s130x130/10897962_1380493922254145_5386757285347386511_n.jpg?oh=98e30ce334bf9cb01f808c0c1134afff&oe=55291C94&__gda__=1429910956_84b3b9a2d5d9326485e630290657afcc',
+						pictures: null
 					}
 				}
 			},
@@ -45,7 +66,8 @@ define(['./helper'], function(helper) {
 					first: {
 						id: '6206400436',
 						name: 'DSC03367',
-						picture: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99.jpg'
+						picture: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99.jpg',
+						pictures: null
 					}
 				}
 			},
@@ -56,7 +78,8 @@ define(['./helper'], function(helper) {
 					first: {
 						id: 'file.939f37452466502a.939F37452466502A!109',
 						name: 'funeral-piggy.jpg',
-						picture: 'https://public-ch3301.files.1drv.com/y2mtE3u-1oVm7UJkYR5Ylxn2b8BR4attabxQ0AEiajowKHvlJUZBxjLpP8LWG4Pi4ZEuDyQFELhxSxoNNHxP--6kcx0Z6mCsWnYjR1_1-izBx8HkqE1ghH6I22bQtIKPjFXnXJbHtHXhFgvQwq7eKZ03Q/funeral-piggy.jpg?psid=1'
+						picture: 'https://public-ch3301.files.1drv.com/y2mtE3u-1oVm7UJkYR5Ylxn2b8BR4attabxQ0AEiajowKHvlJUZBxjLpP8LWG4Pi4ZEuDyQFELhxSxoNNHxP--6kcx0Z6mCsWnYjR1_1-izBx8HkqE1ghH6I22bQtIKPjFXnXJbHtHXhFgvQwq7eKZ03Q/funeral-piggy.jpg?psid=1',
+						pictures: null
 					}
 				}
 			}
@@ -74,6 +97,8 @@ define(['./helper'], function(helper) {
 					expect(first.id).to.be(test.expect.first.id);
 					expect(first.name).to.be(test.expect.first.name);
 					expect(first.picture).to.be(test.expect.first.picture);
+					if (test.expect.first.pictures)
+						expect(first.pictures).to.eql(test.expect.first.pictures);
 					done();
 				})
 				.then(null, done);

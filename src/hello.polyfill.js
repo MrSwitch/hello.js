@@ -21,6 +21,19 @@ if (!Object.create) {
 
 }
 
+// ES5 Object.keys
+if (!Object.keys) {
+	Object.keys = function(o, k, r) {
+		r = [];
+		for (k in o) {
+			if (r.hasOwnProperty.call(o, k))
+				r.push(k);
+		}
+
+		return r;
+	};
+}
+
 // ES5 [].indexOf
 if (!Array.prototype.indexOf) {
 	Array.prototype.indexOf = function(s) {
