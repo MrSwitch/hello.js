@@ -82,14 +82,17 @@
 						});
 
 						o.data.forEach(function(d) {
+							d.name = d.caption ? d.caption.text : null;
 							d.thumbnail = d.images.thumbnail.url;
 							d.picture = d.images.standard_resolution.url;
-							d.name = d.caption ? d.caption.text : null;
-
 							d.pictures = Object.keys(d.images)
 								.map(function(key) {
 									var image = d.images[key];
-									return image;
+									return {
+										source: image.url,
+										width: image.width,
+										height: image.height
+									};
 								})
 								.sort(function(a, b) {
 									return a.width - b.width;

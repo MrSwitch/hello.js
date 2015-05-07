@@ -15,17 +15,17 @@ define(['./helper'], function(helper) {
 						picture: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_n.jpg',
 						pictures: [
 							{
-								url: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_s.jpg',
+								source: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_s.jpg',
 								width: 150,
 								height: 150
 							},
 							{
-								url: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_a.jpg',
+								source: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_a.jpg',
 								width: 306,
 								height: 306
 							},
 							{
-								url: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_n.jpg',
+								source: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_n.jpg',
 								width: 640,
 								height: 640
 							}
@@ -41,7 +41,28 @@ define(['./helper'], function(helper) {
 						id: 'https://picasaweb.google.com/data/entry/api/user/115111284799080900590/albumid/6101137643479860177/photoid/6101137679962229346?alt=json',
 						name: 'wistful-piggy.jpg',
 						picture: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/wistful-piggy.jpg',
-						pictures: null
+						pictures: [
+							{
+								source: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/s72/wistful-piggy.jpg',
+								width: 48,
+								height: 72
+							},
+							{
+								source: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/s144/wistful-piggy.jpg',
+								width: 96,
+								height: 144
+							},
+							{
+								source: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/s288/wistful-piggy.jpg',
+								width: 192,
+								height: 288
+							},
+							{
+								source: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/wistful-piggy.jpg',
+								width: 300,
+								height: 450
+							}
+						]
 					}
 				}
 			},
