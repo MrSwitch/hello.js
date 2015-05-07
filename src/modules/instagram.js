@@ -86,8 +86,7 @@
 							d.picture = d.images.standard_resolution.url;
 							d.name = d.caption ? d.caption.text : null;
 
-							d.pictures = {};
-							d.pictures.all = Object.keys(d.images)
+							d.pictures = Object.keys(d.images)
 								.map(function(key) {
 									var image = d.images[key];
 									return image;

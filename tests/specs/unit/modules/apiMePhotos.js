@@ -13,25 +13,23 @@ define(['./helper'], function(helper) {
 						id: '891783660020488189_1636340308',
 						name: 'Red Carpet Piggy',
 						picture: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_n.jpg',
-						pictures: {
-							all: [
-								{
-									url: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_s.jpg',
-									width: 150,
-									height: 150
-								},
-								{
-									url: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_a.jpg',
-									width: 306,
-									height: 306
-								},
-								{
-									url: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_n.jpg',
-									width: 640,
-									height: 640
-								}
-							]
-						}
+						pictures: [
+							{
+								url: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_s.jpg',
+								width: 150,
+								height: 150
+							},
+							{
+								url: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_a.jpg',
+								width: 306,
+								height: 306
+							},
+							{
+								url: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_n.jpg',
+								width: 640,
+								height: 640
+							}
+						]
 					}
 				}
 			},
