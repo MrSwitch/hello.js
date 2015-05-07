@@ -74,7 +74,53 @@ define(['./helper'], function(helper) {
 						id: '1380493922254145',
 						name: 'LBD Piggy',
 						picture: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/v/t1.0-9/s130x130/10897962_1380493922254145_5386757285347386511_n.jpg?oh=98e30ce334bf9cb01f808c0c1134afff&oe=55291C94&__gda__=1429910956_84b3b9a2d5d9326485e630290657afcc',
-						pictures: null
+						pictures: [
+							{
+								height: 147,
+								source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/v/t1.0-9/p130x130/10897962_1380493922254145_5386757285347386511_n.jpg?oh=c844758a0168dc0fa20106614496f20f&oe=553CD544&__gda__=1433335420_b6b78a2b6554da54741dffea139b18bf',
+								width: 130
+							},
+							{
+								height: 225,
+								source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/v/t1.0-9/p75x225/10897962_1380493922254145_5386757285347386511_n.jpg?oh=ea4175f2762b46d4b8b3bfb663a0cc91&oe=55361281&__gda__=1428907231_a5b7ab31f4bdf6ad829389734e4bf42b',
+								width: 198
+							},
+							{
+								height: 362,
+								source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/v/t1.0-9/p320x320/10897962_1380493922254145_5386757285347386511_n.jpg?oh=be66c3ee515536d73917146cfa6f7d86&oe=552CF0A3&__gda__=1428296859_6705bd7c1183d77b84a9249492334798',
+								width: 320
+							},
+							{
+								height: 540,
+								source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/v/t1.0-9/p180x540/10897962_1380493922254145_5386757285347386511_n.jpg?oh=a5cd1de629354d1b880133cf314408c9&oe=552BFCE8&__gda__=1430386896_07316fcb7c40fc98585837b6b33773ff',
+								width: 477
+							},
+							{
+								height: 543,
+								source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/v/t1.0-9/p480x480/10897962_1380493922254145_5386757285347386511_n.jpg?oh=be2c6c759107eecf58c323cfb2053492&oe=553FE4E4&__gda__=1428803548_71b51cb1f98f4eb0608bcb11df5cb8bf',
+								width: 480
+							},
+							{
+								height: 679,
+								source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/t31.0-8/p600x600/10896389_1380493922254145_5386757285347386511_o.jpg',
+								width: 600
+							},
+							{
+								height: 815,
+								source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/t31.0-8/p720x720/10896389_1380493922254145_5386757285347386511_o.jpg',
+								width: 720
+							},
+							{
+								height: 1086,
+								source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/t31.0-8/p960x960/10896389_1380493922254145_5386757285347386511_o.jpg',
+								width: 960
+							},
+							{
+								height: 2048,
+								source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/t31.0-8/10896389_1380493922254145_5386757285347386511_o.jpg',
+								width: 1809
+							}
+						]
 					}
 				}
 			},
