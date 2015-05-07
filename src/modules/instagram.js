@@ -88,11 +88,7 @@
 							d.pictures = Object.keys(d.images)
 								.map(function(key) {
 									var image = d.images[key];
-									return {
-										source: image.url,
-										width: image.width,
-										height: image.height
-									};
+									return formatImage(image);
 								})
 								.sort(function(a, b) {
 									return a.width - b.width;
@@ -135,6 +131,14 @@
 			form: false
 		}
 	});
+
+	function formatImage(image) {
+		return {
+			source: image.url,
+			width: image.width,
+			height: image.height
+		};
+	}
 
 	function formatError(o) {
 		if (o && 'meta' in o && 'error_type' in o.meta) {
