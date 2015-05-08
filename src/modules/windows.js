@@ -84,27 +84,9 @@
 				'me/contacts': formatFriends,
 				'me/followers': formatFriends,
 				'me/following': formatFriends,
-				'me/albums': function(o) {
-					if ('data' in o) {
-						o.data.forEach(function(d) {
-							d.photos = d.files = 'https://apis.live.net/v5.0/' + d.id + '/photos';
-						});
-					}
-
-					return o;
-				},
-
-				'default': function(o) {
-					if ('data' in o) {
-						o.data.forEach(function(d) {
-							if (d.picture) {
-								d.thumbnail = d.picture;
-							}
-						});
-					}
-
-					return o;
-				}
+				'me/albums': formatAlbums,
+				'me/photos': formatDefault,
+				'default': formatDefault
 			},
 
 			xhr: function(p) {
@@ -133,6 +115,43 @@
 			}
 		}
 	});
+
+	function formatDefault(o) {
+		if ('data' in o) {
+			o.data.forEach(function(d) {
+				if (d.picture) {
+					d.thumbnail = d.picture;
+				}
+				if (d.images) {
+					d.pictures = d.images
+						.map(formatImage)
+						.sort(function (a, b) {
+							return a.width - b.width
+						});
+				}
+			});
+		}
+
+		return o;
+	}
+
+	function formatImage(image) {
+		return {
+			width: image.width,
+			height: image.height,
+			source: image.source
+		};
+	}
+
+	function formatAlbums(o) {
+		if ('data' in o) {
+			o.data.forEach(function(d) {
+				d.photos = d.files = 'https://apis.live.net/v5.0/' + d.id + '/photos';
+			});
+		}
+
+		return o;
+	}
 
 	function formatUser(o, headers, req) {
 		if (o.id) {
