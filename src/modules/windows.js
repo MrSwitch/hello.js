@@ -122,11 +122,12 @@
 				if (d.picture) {
 					d.thumbnail = d.picture;
 				}
+
 				if (d.images) {
 					d.pictures = d.images
 						.map(formatImage)
-						.sort(function (a, b) {
-							return a.width - b.width
+						.sort(function(a, b) {
+							return a.width - b.width;
 						});
 				}
 			});

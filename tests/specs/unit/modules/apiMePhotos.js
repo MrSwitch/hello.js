@@ -132,7 +132,58 @@ define(['./helper'], function(helper) {
 						id: '6206400436',
 						name: 'DSC03367',
 						picture: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99.jpg',
-						pictures: []
+						pictures: [
+							{
+								source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_t.jpg',
+								width: 100,
+								height: 100
+							},
+							{
+								source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_m.jpg',
+								width: 240,
+								height: 240
+							},
+							{
+								source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_n.jpg',
+								width: 320,
+								height: 320
+							},
+							{
+								source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99.jpg',
+								width: 500,
+								height: 500
+							},
+							{
+								source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_z.jpg',
+								width: 640,
+								height: 640
+							},
+							{
+								source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_c.jpg',
+								width: 800,
+								height: 800
+							},
+							{
+								source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_b.jpg',
+								width: 1024,
+								height: 1024
+							},
+							{
+								source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_h.jpg',
+								width: 1600,
+								height: 1600
+							},
+							{
+								source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_k.jpg',
+								width: 2048,
+								height: 2048
+							},
+							{
+								source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_o.jpg',
+								width: 2048,
+								height: 2048
+							}
+						]
 					}
 				}
 			},
