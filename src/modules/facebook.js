@@ -36,6 +36,13 @@
 			refresh: true,
 
 			login: function(p) {
+
+				// Reauthenticate
+				// https://developers.facebook.com/docs/facebook-login/reauthentication
+				if (p.options.force) {
+					p.qs.auth_type = 'reauthenticate';
+				}
+
 				// Support Facebook's unique auth_type parameter
 				if (p.options.auth_type) {
 					p.qs.auth_type = p.options.auth_type;

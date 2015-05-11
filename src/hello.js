@@ -57,9 +57,12 @@ hello.utils.extend(hello, {
 		// Default service / network
 		default_service: null,
 
-		// Force sign-in
-		// When hello.login is fired, ignore current session expiry and continue with login
-		force: true,
+		// Force authentication
+		// When hello.login is fired.
+		// (null): ignore current session expiry and continue with login
+		// (true): ignore current session expiry and continue with login, ask for user to reauthenticate
+		// (false): if the current session looks good for the request scopes return the current session.
+		force: null,
 
 		// Page URL
 		// When 'display=page' this property defines where the users page should end up after redirect_uri

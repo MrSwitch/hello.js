@@ -336,11 +336,11 @@ If a network string is provided: A consent window to authenticate with that netw
 				</tr>
 				<tr>
 					<td>force</td>
-					<td><i>Boolean</i></td>
-					<td><i>true</i> or <i>false</i></td>
-					<td>Always initiate auth flow, despite current valid token.</td>
+					<td><i>Boolean</i> or <i>null</i></td>
+					<td><i>true</i>, <i>false</i> or <i>null</i></td>
+					<td>(true) initiate auth flow and prompt for reauthentication where available. (null) initiate auth flow. (false) only prompt auth flow if the scopes have changed or the token expired.</td>
 					<td><em>optional</em></td>
-					<td><i>true</i></td>
+					<td><i>null</i></td>
 				</tr>
 			</table>
 		</td>

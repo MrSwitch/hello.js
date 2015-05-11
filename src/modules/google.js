@@ -46,6 +46,12 @@
 					// Lets set this to an offline access to return a refresh_token
 					p.qs.access_type = 'offline';
 				}
+
+				// Reauthenticate
+				// https://developers.google.com/identity/protocols/
+				if (p.options.force) {
+					p.qs.approval_prompt = 'force';
+				}
 			},
 
 			// API base URI

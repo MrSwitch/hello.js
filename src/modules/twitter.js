@@ -14,6 +14,13 @@
 				token: base + 'oauth/access_token'
 			},
 
+			login: function(p) {
+				// Reauthenticate
+				// https://dev.twitter.com/oauth/reference/get/oauth/authenticate
+				var prefix = '?force_login=true';
+				this.oauth.auth = this.oauth.auth.replace(prefix, '') + (p.options.force ? prefix : '');
+			},
+
 			base: base + '1.1/',
 
 			get: {

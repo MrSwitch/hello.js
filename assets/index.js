@@ -44,6 +44,30 @@ var tests = [
 			network: reg.string
 		}
 	},
+	{
+		title : "Login force reauthentication",
+		api : "login",
+		method : 'login',
+		data : {
+			display : ["popup", "none", "page"],
+			scope : "",
+			force : true
+		},
+		filter: function(p){
+			var login = hello.services[p.network].login;
+			if (login) {
+				return !!login.toString().match(/\.force\b/);
+			}
+			return false;
+		},
+		expected : {
+			authResponse : {
+				access_token : reg.string,
+				expires : /\d/
+			},
+			network: reg.string
+		}
+	},
 	// {
 	// 	title : "Login via Authorization code grant flow",
 	// 	api : "login",
