@@ -282,6 +282,33 @@ hello.init({
 							<td><em>required</em></td>
 							<td>n/a</td>
 						</tr>
+						<tr>
+						    <td></td>
+							<td colspan="5">Or if you want, for some reason, to customize service settings:</td>
+						</tr>
+						<tr>
+							<td></td>
+							<td colspan="3">
+								<i>object( key =&gt; value, ...&nbsp; )</i>
+								<table>
+									<thead><tr><th>name</th><th>type</th><th>description</th><th>argument</th><th>default</th></tr></thead>
+									<tbody>
+										<tr>
+											<td>id</td>
+											<td><i>string</i></td>
+											<td>ID of the service to connect to</td>
+											<td>required</td>
+											<td>n/a</td>
+										</tr>
+										<tr>
+											<td colspan="5">Other properties you can get from a <a href="http://adodson.com/hello.js/modules#writing-your-own-module">module settings page</a>.</td>
+										</tr>
+									</tbody>
+								</table>
+							</td>
+							<td><em>required</em></td>
+							<td>n/a</td>
+						</tr>
 					</tbody>
 				</table>
 			</td>
@@ -299,6 +326,28 @@ hello.init({
 hello.init({
 	facebook: '359288236870',
 	windows: '000000004403AD10'
+});
+</pre>
+<p>Or an alternative way:</p>
+<pre type="js">
+hello.init({
+	facebook: {
+		id: '359288236870',
+		// For example you want to disable a refresh token option
+		refresh: false,
+		// And modify a standard popup size
+		login: function(p) {
+			p.options.window_width = 600;
+			p.options.window_height = 600;
+		}
+		// The rest of settings you can get on the facebook module page: http://adodson.com/hello.js/src/modules/facebook.js
+	},
+	windows: {
+		id: '000000004403AD10',
+		// Either disable a token refresh option for the windows module
+		refresh: false
+		// The rest of settings you can get on the windows module page: http://adodson.com/hello.js/src/modules/windows.js
+	}
 });
 </pre>
 
