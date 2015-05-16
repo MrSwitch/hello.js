@@ -34,14 +34,12 @@ module.exports = function(grunt) {
 				'dist/hello.js': [
 					'src/hello.polyfill.js',
 					'src/hello.js',
-					'src/hello.legacy.js',
 					'src/hello.amd.js',
 					'src/hello.commonjs.js'
 				],
 				'dist/hello.all.js': [
 					'src/hello.polyfill.js',
 					'src/hello.js',
-					'src/hello.legacy.js',
 					'src/modules/dropbox.js',
 					'src/modules/facebook.js',
 					'src/modules/flickr.js',
