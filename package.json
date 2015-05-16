@@ -2,6 +2,7 @@
   "name": "hellojs",
   "version": "1.5.1",
   "description": "A clientside Javascript library for standardizing requests to OAuth2 web services (and OAuth1 - with a shim)",
+  "homepage": "https://adodson.com/hello.js",
   "main": "dist/hello.all.js",
   "repository": {
     "type": "git",
@@ -18,7 +19,10 @@
     "linkedin",
     "twitter"
   ],
-  "author": "Andrew Dodson <andrewjdodson@gmail.com>",
+  "author": {
+    "name": "Andrew Dodson",
+    "email": "andrewjdodson@gmail.com"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/MrSwitch/hello.js/issues"
@@ -27,7 +31,8 @@
     "test": "grunt test"
   },
   "devDependencies": {
-    "grunt": "^0.4.5",  
+    "grunt": "^0.4.5",
+    "grunt-banner": "^0.4.0",
     "grunt-bumpup": "^0.6.1",
     "grunt-contrib-jshint": "^0.10.0",
     "grunt-contrib-watch": "^0.6.1",

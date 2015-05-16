@@ -61,12 +61,25 @@ module.exports = function(grunt) {
 				'dist/hello.all.min.js': 'dist/hello.all.js'
 			}
 		},
+		usebanner: {
+			build: {
+				options: {
+					position: 'top',
+					banner: '/*! <%= pkg.name %> v<%= pkg.version %> | (c) 2012-<%= (new Date()).getFullYear() %> <%= pkg.author.name %> | <%= pkg.license %> <%= pkg.homepage %>/LICENSE */',
+					linebreak: true
+				},
+				files: {
+					src: ['dist/hello.*']
+				}
+			}
+		},
 		watch: {
 			files: ['src/**/*.js'],
 			tasks: ['jscs']
 		}
 	});
 
+	grunt.loadNpmTasks('grunt-banner');
 	grunt.loadNpmTasks('grunt-bumpup');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
@@ -76,6 +89,6 @@ module.exports = function(grunt) {
 
 	grunt.registerTask('mocha', ['mocha_phantomjs']);
 	grunt.registerTask('test', ['jscs', 'jshint', 'mocha']);
-	grunt.registerTask('default', ['test', 'shunt:build', 'shunt:minify']);
+	grunt.registerTask('default', ['test', 'shunt:build', 'shunt:minify', 'usebanner']);
 
 };
