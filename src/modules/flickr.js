@@ -35,8 +35,8 @@
 						if (o.realname) {
 							o.name = o.realname._content;
 							var m = o.name.split(' ');
-							o.first_name = m[0];
-							o.last_name = m[1];
+							o.first_name = m.shift();
+							o.last_name = m.join(' ');
 						}
 
 						o.thumbnail = getBuddyIcon(o, 'l');
