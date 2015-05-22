@@ -102,8 +102,9 @@
 					}
 
 					o.name = o.display_name;
-					o.first_name = o.name.split(' ')[0];
-					o.last_name = o.name.split(' ')[1];
+					var m = o.name.split(' ');
+					o.first_name = m.shift();
+					o.last_name = m.join(' ');
 					o.id = o.uid;
 					delete o.uid;
 					delete o.display_name;
