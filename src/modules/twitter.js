@@ -120,8 +120,8 @@
 		if (o.id) {
 			if (o.name) {
 				var m = o.name.split(' ');
-				o.first_name = m[0];
-				o.last_name = m[1];
+				o.first_name = m.shift();
+				o.last_name = m.join(' ');
 			}
 
 			// See: https://dev.twitter.com/overview/general/user-profile-images-and-banners
