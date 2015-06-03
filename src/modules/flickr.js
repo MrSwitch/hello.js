@@ -24,6 +24,7 @@
 				'me/following': sign('flickr.contacts.getList', {per_page:'@{limit|50}'}),
 				'me/followers': sign('flickr.contacts.getList', {per_page:'@{limit|50}'}),
 				'me/albums': sign('flickr.photosets.getList', {per_page:'@{limit|50}'}),
+                'me/album" : sign("flickr.photosets.getPhotos&photoset_id=@{id}'),
 				'me/photos': sign('flickr.people.getPhotos', {per_page:'@{limit|50}'})
 			},
 
