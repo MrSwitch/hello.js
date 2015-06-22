@@ -9,6 +9,7 @@ define([
 	'../../../src/modules/twitter',
 	'../../../src/modules/yahoo',
 	'../../../src/modules/instagram',
+	'../../../src/modules/joinme',
 	'../../../src/modules/linkedin',
 	'../../../src/modules/foursquare',
 	'../../../src/modules/github',

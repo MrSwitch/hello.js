@@ -72,6 +72,11 @@ The table shows the services which are already documented on HelloJS. Simply inc
 			<td></td>
 		</tr>
 		<tr>
+			<td><a href="./src/modules/joinme.js">joinme.js</a></td>
+			<td><a href="demos/joinme.html">join.me demo</a></td>
+			<td></td>
+		</tr>
+		<tr>
 			<td><a href="./src/modules/linkedin.js">linkedin.js</a></td>
 			<td><a href="demos/linkedin.html">LinkedIn demo</a></td>
 			<td></td>
