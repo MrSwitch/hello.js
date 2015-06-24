@@ -91,30 +91,23 @@
     });
 
     function formatError(o, headers) {
-        if (o && ('Message' in o) || 
-            (headers.statusCode === 401 || headers.statusCode === 403)) {
-            
-            var errorCode;
-            switch(headers.statusCode) {
-                case 400:
-                    errorCode = 'invalid_request';
-                    break;
-                case 401: 
-                    errorCode = 'stale_token';
-                    break;
-                case 403:
-                    errorCode = 'invalid_token';
-                    break;
-                case 500:
-                    errorCode = 'server_error';
-                    break;
-                default:
-                    errorCode = 'server_error';
+        var errorCode, message, details;
+
+        if (o && ('Message' in o)) {
+            message = o.Message;
+            delete o.Message;
+
+            if ('ErrorCode' in o) {
+                errorCode = o.ErrorCode;
+                delete o.ErrorCode;
+            }
+            else {
+                errorCode = getErrorCode(headers);
             }
 
             o.error = {
                 code: errorCode,
-                message: o.Message || o,
+                message: message,
                 details: o
             };
         }
@@ -144,4 +137,19 @@
         return true;
     }
 
+    function getErrorCode(headers) {
+        switch(headers.statusCode) {
+            case 400:
+                return 'invalid_request';
+            case 403: 
+                return 'stale_token';
+            case 401:
+                return 'invalid_token';
+            case 500:
+                return 'server_error';
+            default:
+                return 'server_error';
+        }
+    }
+    
 }(hello));

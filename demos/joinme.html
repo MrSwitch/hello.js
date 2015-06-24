@@ -27,7 +27,10 @@ function login(network){
 
 		// Get your upcoming meetings from joinme
 		joinme.api( '/meetings', function(r) {
-			document.getElementById('result').innerHTML = JSON.stringify(r.meetings,null,3);
+			if (r.meetings && r.meetings.length > 0)
+				document.getElementById('result').innerHTML = JSON.stringify(r.meetings,null,3);
+			else
+				document.getElementById('result').innerHTML = "There are no upcoming meetings on your schedule.";
 		});
 
 	});
