@@ -2,36 +2,36 @@
 
     hello.init({
 
-        joinme : {
+        joinme: {
 
-            name : 'join.me',
+            name: 'join.me',
 
-            oauth : {
-                version : 2,
-                auth : 'https://secure.join.me/api/public/v1/auth/oauth2',
-                grant : 'https://secure.join.me/api/public/v1/auth/oauth2'
+            oauth: {
+                version: 2,
+                auth: 'https://secure.join.me/api/public/v1/auth/oauth2',
+                grant: 'https://secure.join.me/api/public/v1/auth/oauth2'
             },
 
-            refresh : false,
+            refresh: false,
 
-            scope : {
+            scope: {
                 basic: '',
-                user : 'user_info',
-                scheduler : 'scheduler',
-                start : 'start_meeting'
+                user: 'user_info',
+                scheduler: 'scheduler',
+                start: 'start_meeting'
             },
 
-            scope_delim : ' ',
+            scope_delim: ' ',
 
             login: function(p) {
                 p.options.window_width = 400;
                 p.options.window_height = 700;
             },
 
-            base : 'https://api.join.me/v1/',
+            base: 'https://api.join.me/v1/',
 
-            get : {
-                "me" : "user",
+            get: {
+                "me": "user",
                 "meetings": "meetings",
                 "meetings/info": "meetings/@{id}"
             },
@@ -85,7 +85,7 @@
                 }
             },
 
-            xhr : formatRequest
+            xhr: formatRequest
 
         }
     });
@@ -111,6 +111,7 @@
                 details: o
             };
         }
+
         return o;
     }
 
@@ -138,7 +139,7 @@
     }
 
     function getErrorCode(headers) {
-        switch(headers.statusCode) {
+        switch (headers.statusCode) {
             case 400:
                 return 'invalid_request';
             case 403: 
