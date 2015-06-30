@@ -1,6 +1,5 @@
 (function(hello) {
 
-	// URLs
 	var contactsUrl = 'https://www.google.com/m8/feeds/contacts/default/full?v=3.0&alt=json&max-results=@{limit|1000}&start-index=@{start|1}';
 
 	hello.init({
@@ -9,7 +8,7 @@
 
 			name: 'Google Plus',
 
-			// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
+			// See: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
 			oauth: {
 				version: 2,
 				auth: 'https://accounts.google.com/o/oauth2/auth',
@@ -34,7 +33,6 @@
 
 			scope_delim: ' ',
 
-			// Login
 			login: function(p) {
 				if (p.qs.display === 'none') {
 					// Google doesn't like display=none
@@ -43,7 +41,7 @@
 
 				if (p.qs.response_type === 'code') {
 
-					// Lets set this to an offline access to return a refresh_token
+					// Let's set this to an offline access to return a refresh_token
 					p.qs.access_type = 'offline';
 				}
 
@@ -149,7 +147,7 @@
 				'me/share': formatFeed,
 				'me/feed': formatFeed,
 				'me/albums': gEntry,
-				'me/photos': gEntry,
+				'me/photos': formatPhotos,
 				'default': gEntry
 			},
 
@@ -205,12 +203,17 @@
 		return o;
 	}
 
-	function formatImage(item) {
+	function formatImage(image) {
 		return {
-			source: item.url,
-			width: item.width,
-			height: item.height
+			source: image.url,
+			width: image.width,
+			height: image.height
 		};
+	}
+
+	function formatPhotos(o) {
+		o.data = o.feed.entry.map(formatEntry);
+		delete o.feed;
 	}
 
 	// Google has a horrible JSON API
@@ -222,12 +225,12 @@
 			delete o.feed;
 		}
 
-		// Old style, Picasa, etc...
+		// Old style: Picasa, etc.
 		else if ('entry' in o) {
 			return formatEntry(o.entry);
 		}
 
-		// New Style, Google Drive & Plus
+		// New style: Google Drive & Plus
 		else if ('items' in o) {
 			o.data = o.items.map(formatItem);
 			delete o.items;
@@ -293,7 +296,17 @@
 	function formatEntry(a) {
 
 		var group = a.media$group;
-		var media = group.media$content.length ? group.media$content[0] : {};
+		var photo = group.media$content.length ? group.media$content[0] : {};
+		var mediaContent = group.media$content || [];
+		var mediaThumbnail = group.media$thumbnail || [];
+
+		var pictures = mediaContent
+			.concat(mediaThumbnail)
+			.map(formatImage)
+			.sort(function(a, b) {
+				return a.width - b.width;
+			});
+
 		var i = 0;
 		var _a;
 		var p = {
@@ -302,11 +315,12 @@
 			description: a.summary.$t,
 			updated_time: a.updated.$t,
 			created_time: a.published.$t,
-			picture: media ? media.url : null,
+			picture: photo ? photo.url : null,
+			pictures: pictures,
 			images: [],
-			thumbnail: media ? media.url : null,
-			width: media.width,
-			height: media.height
+			thumbnail: photo ? photo.url : null,
+			width: photo.width,
+			height: photo.height
 		};
 
 		// Get feed/children

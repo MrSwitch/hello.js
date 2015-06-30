@@ -7,7 +7,7 @@
 			name: 'Instagram',
 
 			oauth: {
-				// SEE http://instagram.com/developer/authentication/
+				// See: http://instagram.com/developer/authentication/
 				version: 2,
 				auth: 'https://instagram.com/oauth/authorize/',
 				grant: 'https://api.instagram.com/oauth/access_token'
@@ -25,7 +25,7 @@
 			scope_delim: ' ',
 
 			login: function(p) {
-				// Instagram throws errors like 'Javascript API is unsupported' if the display is 'popup'.
+				// Instagram throws errors like 'JavaScript API is unsupported' if the display is 'popup'.
 				// Make the display anything but 'popup'
 				p.qs.display = '';
 			},
@@ -82,9 +82,17 @@
 						});
 
 						o.data.forEach(function(d) {
+							d.name = d.caption ? d.caption.text : null;
 							d.thumbnail = d.images.thumbnail.url;
 							d.picture = d.images.standard_resolution.url;
-							d.name = d.caption ? d.caption.text : null;
+							d.pictures = Object.keys(d.images)
+								.map(function(key) {
+									var image = d.images[key];
+									return formatImage(image);
+								})
+								.sort(function(a, b) {
+									return a.width - b.width;
+								});
 						});
 					}
 
@@ -123,6 +131,14 @@
 			form: false
 		}
 	});
+
+	function formatImage(image) {
+		return {
+			source: image.url,
+			width: image.width,
+			height: image.height
+		};
+	}
 
 	function formatError(o) {
 		if (o && 'meta' in o && 'error_type' in o.meta) {

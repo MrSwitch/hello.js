@@ -108,6 +108,7 @@
 				'me/following': formatFriends,
 				'me/followers': formatFriends,
 				'me/albums': format,
+				'me/photos': format,
 				'me/files': format,
 				'default': format
 			},
@@ -176,9 +177,15 @@
 		if (o && 'data' in o) {
 			var token = req.query.access_token;
 			o.data.forEach(function(d) {
+
 				if (d.picture) {
 					d.thumbnail = d.picture;
 				}
+
+				d.pictures = (d.images || [])
+					.sort(function(a, b) {
+						return a.width - b.width;
+					});
 
 				if (d.cover_photo) {
 					d.thumbnail = base + d.cover_photo + '/picture?access_token=' + token;
