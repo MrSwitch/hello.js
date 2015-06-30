@@ -25,7 +25,7 @@ module.exports = function(grunt) {
 		mocha_phantomjs: {
 			all: ['tests/specs/index.html']
 		},
-		bumpup: ['package.json', 'bower.json'],
+		bumpup: ['package.json'],
 		shunt: {
 			docs: {
 				'README.md': './index.html'
