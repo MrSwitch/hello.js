@@ -201,47 +201,6 @@ define([
 				.api('/unhandled', {a: 'a'});
 			});
 
-			it('should process req object through the modules.get[req.path] map string', function(done) {
-
-				testable.get = testable.get || {};
-				testable.get.handled = 'endpoint?b=@{a}';
-
-				hello('testable')
-				.api('/handled', {a: 'a'}, function(res) {
-
-					// Should place the value of a in the parameter list
-					expect(res.url).to.contain('endpoint?b=a');
-
-					// Should place the value of a in the parameter list
-					expect(res.path).to.eql('handled');
-
-					// Should remove the property from the req.query
-					expect(res.query).to.not.have.property('a');
-
-					delete testable.get.handled;
-
-					done();
-				});
-			});
-
-			it('should trigger an error if there was no value for a map string argument', function(done) {
-
-				testable.get = testable.get || {};
-				testable.get.handled = 'endpoint?b=@{a}';
-
-				hello('testable')
-				.api('/handled')
-				.then(null, function(res) {
-
-					// Should place the value of a in the parameter list
-					expect(res.error).to.have.property('code', 'missing_attribute');
-
-					delete testable.get.handled;
-
-					done();
-				});
-			});
-
 			it('should trigger an error if the mapped value is false', function(done) {
 
 				testable.get = testable.get || {};
@@ -258,6 +217,71 @@ define([
 
 					done();
 				});
+			});
+
+			describe('Replace @{} in path with query parameters', function() {
+
+				it('should define the path using the query parameters and remove them from the query', function(done) {
+
+					testable.get = testable.get || {};
+					testable.get.handled = 'endpoint?b=@{a}';
+
+					hello('testable')
+					.api('/handled', {a: 'a'}, function(res) {
+
+						// Should place the value of a in the parameter list
+						expect(res.url).to.contain('endpoint?b=a');
+
+						// Should place the value of a in the parameter list
+						expect(res.path).to.eql('handled');
+
+						// Should remove the property from the req.query
+						expect(res.query).to.not.have.property('a');
+
+						delete testable.get.handled;
+
+						done();
+					});
+				});
+
+				it('should trigger an error if there was no query parameter arg, i.e. @{arg}', function(done) {
+
+					testable.get = testable.get || {};
+					testable.get.handled = 'endpoint?b=@{a}';
+
+					hello('testable')
+					.api('/handled')
+					.then(null, function(res) {
+
+						// Should place the value of a in the parameter list
+						expect(res.error).to.have.property('code', 'missing_attribute');
+
+						delete testable.get.handled;
+
+						done();
+					});
+				});
+
+				it('should use the default value if one is defined i.e. @{arg|default}', function(done) {
+
+					testable.get = testable.get || {};
+					testable.get.handled = 'endpoint?empty=@{a|}&arg=@{b|default}';
+
+					hello('testable')
+					.api('/handled', function(res) {
+
+						// Should place the value of a in the parameter list
+						expect(res.url).to.contain('endpoint?empty=&arg=default');
+
+						// Should place the value of a in the parameter list
+						expect(res.path).to.eql('handled');
+
+						delete testable.get.handled;
+
+						done();
+					});
+				});
+
 			});
 		});
 

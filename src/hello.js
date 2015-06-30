@@ -1771,7 +1771,7 @@ hello.api = function() {
 	function getPath(url) {
 
 		// Format the string if it needs it
-		url = url.replace(/\@\{([a-z\_\-]+)(\|.+?)?\}/gi, function(m, key, defaults) {
+		url = url.replace(/\@\{([a-z\_\-]+)(\|.*?)?\}/gi, function(m, key, defaults) {
 			var val = defaults ? defaults.replace(/^\|/, '') : '';
 			if (key in p.query) {
 				val = p.query[key];
