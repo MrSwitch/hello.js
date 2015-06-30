@@ -267,8 +267,10 @@
 				}
 
 				if (a.link) {
-					var pic = (a.link.length > 0) ? a.link[0].href + '&access_token=' + token : null;
-					if (pic) {
+
+					var pic = (a.link.length > 0) ? a.link[0].href : null;
+					if (pic && a.link[0].gd$etag) {
+						pic += (pic.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + token;
 						a.picture = pic;
 						a.thumbnail = pic;
 					}
