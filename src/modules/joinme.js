@@ -1,156 +1,156 @@
 (function(hello) {
 
-    hello.init({
+	hello.init({
 
-        joinme: {
+		joinme: {
 
-            name: 'join.me',
+			name: 'join.me',
 
-            oauth: {
-                version: 2,
-                auth: 'https://secure.join.me/api/public/v1/auth/oauth2',
-                grant: 'https://secure.join.me/api/public/v1/auth/oauth2'
-            },
+			oauth: {
+				version: 2,
+				auth: 'https://secure.join.me/api/public/v1/auth/oauth2',
+				grant: 'https://secure.join.me/api/public/v1/auth/oauth2'
+			},
 
-            refresh: false,
+			refresh: false,
 
-            scope: {
-                basic: '',
-                user: 'user_info',
-                scheduler: 'scheduler',
-                start: 'start_meeting'
-            },
+			scope: {
+				basic: '',
+				user: 'user_info',
+				scheduler: 'scheduler',
+				start: 'start_meeting'
+			},
 
-            scope_delim: ' ',
+			scope_delim: ' ',
 
-            login: function(p) {
-                p.options.window_width = 400;
-                p.options.window_height = 700;
-            },
+			login: function(p) {
+				p.options.window_width = 400;
+				p.options.window_height = 700;
+			},
 
-            base: 'https://api.join.me/v1/',
+			base: 'https://api.join.me/v1/',
 
-            get: {
-                "me": "user",
-                "meetings": "meetings",
-                "meetings/info": "meetings/@{id}"
-            },
+			get: {
+				me: 'user',
+				meetings: 'meetings',
+				'meetings/info': 'meetings/@{id}'
+			},
 
-            post: {
-                "meetings/start/adhoc": function(p, callback) {
-                    callback('meetings/start');
-                },
+			post: {
+				'meetings/start/adhoc': function(p, callback) {
+					callback('meetings/start');
+				},
 
-                "meetings/start/scheduled": function(p, callback) {
-                    var meetingId = p.data.meetingId;
-                    p.data = {};
-                    callback('meetings/' + meetingId + '/start');
-                },
+				'meetings/start/scheduled': function(p, callback) {
+					var meetingId = p.data.meetingId;
+					p.data = {};
+					callback('meetings/' + meetingId + '/start');
+				},
 
-                "meetings/schedule": function(p, callback) {
-                    callback('meetings');
-                }
-            },
+				'meetings/schedule': function(p, callback) {
+					callback('meetings');
+				}
+			},
 
-            patch: {
-                "meetings/update": function(p, callback) {
-                    callback('meetings/' + p.data.meetingId);
-                }
-            },
+			patch: {
+				'meetings/update': function(p, callback) {
+					callback('meetings/' + p.data.meetingId);
+				}
+			},
 
-            del: {
-                "meetings/delete": "meetings/@{id}"
-            },
+			del: {
+				'meetings/delete': 'meetings/@{id}'
+			},
 
-            wrap: {
-                me: function(o, headers) {
-                    formatError(o, headers);
+			wrap: {
+				me: function(o, headers) {
+					formatError(o, headers);
 
-                    if (!o.email) {
-                        return o;
-                    }
+					if (!o.email) {
+						return o;
+					}
 
-                    o.name = o.fullName;
-                    o.first_name = o.name.split(' ')[0];
-                    o.last_name = o.name.split(' ')[1];
-                    o.id = o.email;         
+					o.name = o.fullName;
+					o.first_name = o.name.split(' ')[0];
+					o.last_name = o.name.split(' ')[1];
+					o.id = o.email;
 
-                    return o;
-                },
+					return o;
+				},
 
-                'default': function(o, headers) {
-                    formatError(o, headers);
+				'default': function(o, headers) {
+					formatError(o, headers);
 
-                    return o;
-                }
-            },
+					return o;
+				}
+			},
 
-            xhr: formatRequest
+			xhr: formatRequest
 
-        }
-    });
+		}
+	});
 
-    function formatError(o, headers) {
-        var errorCode, message, details;
+	function formatError(o, headers) {
+		var errorCode;
+		var message;
+		var details;
 
-        if (o && ('Message' in o)) {
-            message = o.Message;
-            delete o.Message;
+		if (o && ('Message' in o)) {
+			message = o.Message;
+			delete o.Message;
 
-            if ('ErrorCode' in o) {
-                errorCode = o.ErrorCode;
-                delete o.ErrorCode;
-            }
-            else {
-                errorCode = getErrorCode(headers);
-            }
+			if ('ErrorCode' in o) {
+				errorCode = o.ErrorCode;
+				delete o.ErrorCode;
+			}
+			else {
+				errorCode = getErrorCode(headers);
+			}
 
-            o.error = {
-                code: errorCode,
-                message: message,
-                details: o
-            };
-        }
+			o.error = {
+				code: errorCode,
+				message: message,
+				details: o
+			};
+		}
 
-        return o;
-    }
+		return o;
+	}
 
-    function formatRequest(p, qs) {
-        // move the access token from the request body to the request header
-        var token = qs.access_token;
-        delete qs.access_token;
-        p.headers = {
-            "Authorization": "Bearer " + token
-        };
+	function formatRequest(p, qs) {
+		// Move the access token from the request body to the request header
+		var token = qs.access_token;
+		delete qs.access_token;
+		p.headers.Authorization = 'Bearer ' + token;
 
-        // format non-get requests to indicate json body
-        if (p.method !== 'get' && p.data) {
-            p.headers['Content-Type'] = 'application/json';
-            if (typeof (p.data) === 'object') {
-                p.data = JSON.stringify(p.data);
-            }
-        }
+		// Format non-get requests to indicate json body
+		if (p.method !== 'get' && p.data) {
+			p.headers['Content-Type'] = 'application/json';
+			if (typeof (p.data) === 'object') {
+				p.data = JSON.stringify(p.data);
+			}
+		}
 
-        if (p.method === 'put') {
-            p.method = 'patch';
-        }
+		if (p.method === 'put') {
+			p.method = 'patch';
+		}
 
-        return true;
-    }
+		return true;
+	}
 
-    function getErrorCode(headers) {
-        switch (headers.statusCode) {
-            case 400:
-                return 'invalid_request';
-            case 403: 
-                return 'stale_token';
-            case 401:
-                return 'invalid_token';
-            case 500:
-                return 'server_error';
-            default:
-                return 'server_error';
-        }
-    }
-    
+	function getErrorCode(headers) {
+		switch (headers.statusCode) {
+			case 400:
+				return 'invalid_request';
+			case 403:
+				return 'stale_token';
+			case 401:
+				return 'invalid_token';
+			case 500:
+				return 'server_error';
+			default:
+				return 'server_error';
+		}
+	}
+
 }(hello));
