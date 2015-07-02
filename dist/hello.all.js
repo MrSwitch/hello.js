@@ -1,4 +1,4 @@
-/*! hellojs v1.6.0 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.7.0 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -20,6 +20,19 @@ if (!Object.create) {
 
 	})();
 
+}
+
+// ES5 Object.keys
+if (!Object.keys) {
+	Object.keys = function(o, k, r) {
+		r = [];
+		for (k in o) {
+			if (r.hasOwnProperty.call(o, k))
+				r.push(k);
+		}
+
+		return r;
+	};
 }
 
 // ES5 [].indexOf
@@ -1325,7 +1338,7 @@ hello.utils.extend(hello.utils, {
 			var popup = window.open(
 				url,
 				'_blank',
-				'resizeable=true,height=' + windowHeight + ',width=' + windowWidth + ',left=' + left + ',top=' + top
+				'resizeable=true,scrollbars,height=' + windowHeight + ',width=' + windowWidth + ',left=' + left + ',top=' + top
 			);
 
 			// PhoneGap support
@@ -1911,7 +1924,7 @@ hello.api = function() {
 	function getPath(url) {
 
 		// Format the string if it needs it
-		url = url.replace(/\@\{([a-z\_\-]+)(\|.+?)?\}/gi, function(m, key, defaults) {
+		url = url.replace(/\@\{([a-z\_\-]+)(\|.*?)?\}/gi, function(m, key, defaults) {
 			var val = defaults ? defaults.replace(/^\|/, '') : '';
 			if (key in p.query) {
 				val = p.query[key];
@@ -2858,8 +2871,9 @@ hello.utils.extend(hello.utils, {
 					}
 
 					o.name = o.display_name;
-					o.first_name = o.name.split(' ')[0];
-					o.last_name = o.name.split(' ')[1];
+					var m = o.name.split(' ');
+					o.first_name = m.shift();
+					o.last_name = m.join(' ');
 					o.id = o.uid;
 					delete o.uid;
 					delete o.display_name;
@@ -3084,6 +3098,7 @@ hello.utils.extend(hello.utils, {
 				'me/following': formatFriends,
 				'me/followers': formatFriends,
 				'me/albums': format,
+				'me/photos': format,
 				'me/files': format,
 				'default': format
 			},
@@ -3152,9 +3167,15 @@ hello.utils.extend(hello.utils, {
 		if (o && 'data' in o) {
 			var token = req.query.access_token;
 			o.data.forEach(function(d) {
+
 				if (d.picture) {
 					d.thumbnail = d.picture;
 				}
+
+				d.pictures = (d.images || [])
+					.sort(function(a, b) {
+						return a.width - b.width;
+					});
 
 				if (d.cover_photo) {
 					d.thumbnail = base + d.cover_photo + '/picture?access_token=' + token;
@@ -3201,6 +3222,7 @@ hello.utils.extend(hello.utils, {
 				'me/following': sign('flickr.contacts.getList', {per_page:'@{limit|50}'}),
 				'me/followers': sign('flickr.contacts.getList', {per_page:'@{limit|50}'}),
 				'me/albums': sign('flickr.photosets.getList', {per_page:'@{limit|50}'}),
+				'me/album': sign('flickr.photosets.getPhotos', {photoset_id: '@{id}'}),
 				'me/photos': sign('flickr.people.getPhotos', {per_page:'@{limit|50}'})
 			},
 
@@ -3212,8 +3234,8 @@ hello.utils.extend(hello.utils, {
 						if (o.realname) {
 							o.name = o.realname._content;
 							var m = o.name.split(' ');
-							o.first_name = m[0];
-							o.last_name = m[1];
+							o.first_name = m.shift();
+							o.last_name = m.join(' ');
 						}
 
 						o.thumbnail = getBuddyIcon(o, 'l');
@@ -3312,7 +3334,8 @@ hello.utils.extend(hello.utils, {
 		return url;
 	}
 
-	function getPhoto(id, farm, server, secret, size) {
+	// See: https://www.flickr.com/services/api/misc.urls.html
+	function createPhotoUrl(id, farm, server, secret, size) {
 		size = (size) ? '_' + size : '';
 		return 'https://farm' + farm + '.staticflickr.com/' + server + '/' + id + '_' + secret + size + '.jpg';
 	}
@@ -3339,13 +3362,42 @@ hello.utils.extend(hello.utils, {
 			for (var i = 0; i < o.data.length; i++) {
 				var photo = o.data[i];
 				photo.name = photo.title;
-				photo.picture = getPhoto(photo.id, photo.farm, photo.server, photo.secret, '');
-				photo.source = getPhoto(photo.id, photo.farm, photo.server, photo.secret, 'b');
-				photo.thumbnail = getPhoto(photo.id, photo.farm, photo.server, photo.secret, 'm');
+				photo.picture = createPhotoUrl(photo.id, photo.farm, photo.server, photo.secret, '');
+				photo.pictures = createPictures(photo.id, photo.farm, photo.server, photo.secret);
+				photo.source = createPhotoUrl(photo.id, photo.farm, photo.server, photo.secret, 'b');
+				photo.thumbnail = createPhotoUrl(photo.id, photo.farm, photo.server, photo.secret, 'm');
 			}
 		}
 
 		return o;
+	}
+
+	// See: https://www.flickr.com/services/api/misc.urls.html
+	function createPictures(id, farm, server, secret) {
+
+		var NO_LIMIT = 2048;
+		var sizes = [
+			{id: 't', max: 100},
+			{id: 'm', max: 240},
+			{id: 'n', max: 320},
+			{id: '', max: 500},
+			{id: 'z', max: 640},
+			{id: 'c', max: 800},
+			{id: 'b', max: 1024},
+			{id: 'h', max: 1600},
+			{id: 'k', max: 2048},
+			{id: 'o', max: NO_LIMIT}
+		];
+
+		return sizes.map(function(size) {
+			return {
+				source: createPhotoUrl(id, farm, server, secret, size.id),
+
+				// Note: this is a guess that's almost certain to be wrong (unless square source)
+				width: size.max,
+				height: size.max
+			};
+		});
 	}
 
 	function checkResponse(o, key) {
@@ -3587,7 +3639,6 @@ hello.utils.extend(hello.utils, {
 
 (function(hello) {
 
-	// URLs
 	var contactsUrl = 'https://www.google.com/m8/feeds/contacts/default/full?v=3.0&alt=json&max-results=@{limit|1000}&start-index=@{start|1}';
 
 	hello.init({
@@ -3596,7 +3647,7 @@ hello.utils.extend(hello.utils, {
 
 			name: 'Google Plus',
 
-			// REF: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
+			// See: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
 			oauth: {
 				version: 2,
 				auth: 'https://accounts.google.com/o/oauth2/auth',
@@ -3621,7 +3672,6 @@ hello.utils.extend(hello.utils, {
 
 			scope_delim: ' ',
 
-			// Login
 			login: function(p) {
 				if (p.qs.display === 'none') {
 					// Google doesn't like display=none
@@ -3630,7 +3680,7 @@ hello.utils.extend(hello.utils, {
 
 				if (p.qs.response_type === 'code') {
 
-					// Lets set this to an offline access to return a refresh_token
+					// Let's set this to an offline access to return a refresh_token
 					p.qs.access_type = 'offline';
 				}
 
@@ -3736,7 +3786,7 @@ hello.utils.extend(hello.utils, {
 				'me/share': formatFeed,
 				'me/feed': formatFeed,
 				'me/albums': gEntry,
-				'me/photos': gEntry,
+				'me/photos': formatPhotos,
 				'default': gEntry
 			},
 
@@ -3792,12 +3842,17 @@ hello.utils.extend(hello.utils, {
 		return o;
 	}
 
-	function formatImage(item) {
+	function formatImage(image) {
 		return {
-			source: item.url,
-			width: item.width,
-			height: item.height
+			source: image.url,
+			width: image.width,
+			height: image.height
 		};
+	}
+
+	function formatPhotos(o) {
+		o.data = o.feed.entry.map(formatEntry);
+		delete o.feed;
 	}
 
 	// Google has a horrible JSON API
@@ -3809,12 +3864,12 @@ hello.utils.extend(hello.utils, {
 			delete o.feed;
 		}
 
-		// Old style, Picasa, etc...
+		// Old style: Picasa, etc.
 		else if ('entry' in o) {
 			return formatEntry(o.entry);
 		}
 
-		// New Style, Google Drive & Plus
+		// New style: Google Drive & Plus
 		else if ('items' in o) {
 			o.data = o.items.map(formatItem);
 			delete o.items;
@@ -3854,8 +3909,10 @@ hello.utils.extend(hello.utils, {
 				}
 
 				if (a.link) {
-					var pic = (a.link.length > 0) ? a.link[0].href + '?access_token=' + token : null;
-					if (pic) {
+
+					var pic = (a.link.length > 0) ? a.link[0].href : null;
+					if (pic && a.link[0].gd$etag) {
+						pic += (pic.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + token;
 						a.picture = pic;
 						a.thumbnail = pic;
 					}
@@ -3878,7 +3935,17 @@ hello.utils.extend(hello.utils, {
 	function formatEntry(a) {
 
 		var group = a.media$group;
-		var media = group.media$content.length ? group.media$content[0] : {};
+		var photo = group.media$content.length ? group.media$content[0] : {};
+		var mediaContent = group.media$content || [];
+		var mediaThumbnail = group.media$thumbnail || [];
+
+		var pictures = mediaContent
+			.concat(mediaThumbnail)
+			.map(formatImage)
+			.sort(function(a, b) {
+				return a.width - b.width;
+			});
+
 		var i = 0;
 		var _a;
 		var p = {
@@ -3887,11 +3954,12 @@ hello.utils.extend(hello.utils, {
 			description: a.summary.$t,
 			updated_time: a.updated.$t,
 			created_time: a.published.$t,
-			picture: media ? media.url : null,
+			picture: photo ? photo.url : null,
+			pictures: pictures,
 			images: [],
-			thumbnail: media ? media.url : null,
-			width: media.width,
-			height: media.height
+			thumbnail: photo ? photo.url : null,
+			width: photo.width,
+			height: photo.height
 		};
 
 		// Get feed/children
@@ -4151,7 +4219,7 @@ hello.utils.extend(hello.utils, {
 			name: 'Instagram',
 
 			oauth: {
-				// SEE http://instagram.com/developer/authentication/
+				// See: http://instagram.com/developer/authentication/
 				version: 2,
 				auth: 'https://instagram.com/oauth/authorize/',
 				grant: 'https://api.instagram.com/oauth/access_token'
@@ -4169,7 +4237,7 @@ hello.utils.extend(hello.utils, {
 			scope_delim: ' ',
 
 			login: function(p) {
-				// Instagram throws errors like 'Javascript API is unsupported' if the display is 'popup'.
+				// Instagram throws errors like 'JavaScript API is unsupported' if the display is 'popup'.
 				// Make the display anything but 'popup'
 				p.qs.display = '';
 			},
@@ -4226,9 +4294,17 @@ hello.utils.extend(hello.utils, {
 						});
 
 						o.data.forEach(function(d) {
+							d.name = d.caption ? d.caption.text : null;
 							d.thumbnail = d.images.thumbnail.url;
 							d.picture = d.images.standard_resolution.url;
-							d.name = d.caption ? d.caption.text : null;
+							d.pictures = Object.keys(d.images)
+								.map(function(key) {
+									var image = d.images[key];
+									return formatImage(image);
+								})
+								.sort(function(a, b) {
+									return a.width - b.width;
+								});
 						});
 					}
 
@@ -4267,6 +4343,14 @@ hello.utils.extend(hello.utils, {
 			form: false
 		}
 	});
+
+	function formatImage(image) {
+		return {
+			source: image.url,
+			width: image.width,
+			height: image.height
+		};
+	}
 
 	function formatError(o) {
 		if (o && 'meta' in o && 'error_type' in o.meta) {
@@ -4712,8 +4796,8 @@ hello.utils.extend(hello.utils, {
 		if (o.id) {
 			if (o.name) {
 				var m = o.name.split(' ');
-				o.first_name = m[0];
-				o.last_name = m[1];
+				o.first_name = m.shift();
+				o.last_name = m.join(' ');
 			}
 
 			// See: https://dev.twitter.com/overview/general/user-profile-images-and-banners
@@ -4874,27 +4958,9 @@ hello.utils.extend(hello.utils, {
 				'me/contacts': formatFriends,
 				'me/followers': formatFriends,
 				'me/following': formatFriends,
-				'me/albums': function(o) {
-					if ('data' in o) {
-						o.data.forEach(function(d) {
-							d.photos = d.files = 'https://apis.live.net/v5.0/' + d.id + '/photos';
-						});
-					}
-
-					return o;
-				},
-
-				'default': function(o) {
-					if ('data' in o) {
-						o.data.forEach(function(d) {
-							if (d.picture) {
-								d.thumbnail = d.picture;
-							}
-						});
-					}
-
-					return o;
-				}
+				'me/albums': formatAlbums,
+				'me/photos': formatDefault,
+				'default': formatDefault
 			},
 
 			xhr: function(p) {
@@ -4923,6 +4989,44 @@ hello.utils.extend(hello.utils, {
 			}
 		}
 	});
+
+	function formatDefault(o) {
+		if ('data' in o) {
+			o.data.forEach(function(d) {
+				if (d.picture) {
+					d.thumbnail = d.picture;
+				}
+
+				if (d.images) {
+					d.pictures = d.images
+						.map(formatImage)
+						.sort(function(a, b) {
+							return a.width - b.width;
+						});
+				}
+			});
+		}
+
+		return o;
+	}
+
+	function formatImage(image) {
+		return {
+			width: image.width,
+			height: image.height,
+			source: image.source
+		};
+	}
+
+	function formatAlbums(o) {
+		if ('data' in o) {
+			o.data.forEach(function(d) {
+				d.photos = d.files = 'https://apis.live.net/v5.0/' + d.id + '/photos';
+			});
+		}
+
+		return o;
+	}
 
 	function formatUser(o, headers, req) {
 		if (o.id) {

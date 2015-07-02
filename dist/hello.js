@@ -1,4 +1,4 @@
-/*! hellojs v1.6.0 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.7.0 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -20,6 +20,19 @@ if (!Object.create) {
 
 	})();
 
+}
+
+// ES5 Object.keys
+if (!Object.keys) {
+	Object.keys = function(o, k, r) {
+		r = [];
+		for (k in o) {
+			if (r.hasOwnProperty.call(o, k))
+				r.push(k);
+		}
+
+		return r;
+	};
 }
 
 // ES5 [].indexOf
@@ -1325,7 +1338,7 @@ hello.utils.extend(hello.utils, {
 			var popup = window.open(
 				url,
 				'_blank',
-				'resizeable=true,height=' + windowHeight + ',width=' + windowWidth + ',left=' + left + ',top=' + top
+				'resizeable=true,scrollbars,height=' + windowHeight + ',width=' + windowWidth + ',left=' + left + ',top=' + top
 			);
 
 			// PhoneGap support
@@ -1911,7 +1924,7 @@ hello.api = function() {
 	function getPath(url) {
 
 		// Format the string if it needs it
-		url = url.replace(/\@\{([a-z\_\-]+)(\|.+?)?\}/gi, function(m, key, defaults) {
+		url = url.replace(/\@\{([a-z\_\-]+)(\|.*?)?\}/gi, function(m, key, defaults) {
 			var val = defaults ? defaults.replace(/^\|/, '') : '';
 			if (key in p.query) {
 				val = p.query[key];
