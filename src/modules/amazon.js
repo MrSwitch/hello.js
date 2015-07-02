@@ -23,7 +23,7 @@
 			scope_delim: ' ',
 
 			login: function(p) {
-				p.options.window_width = 710;
+				p.options.popup.width = 710;
 			},
 
 			base: 'https://api.amazon.com/',

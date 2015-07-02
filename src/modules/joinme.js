@@ -24,8 +24,8 @@
 			scope_delim: ' ',
 
 			login: function(p) {
-				p.options.window_width = 400;
-				p.options.window_height = 700;
+				p.options.popup.width = 400;
+				p.options.popup.height = 700;
 			},
 
 			base: 'https://api.join.me/v1/',

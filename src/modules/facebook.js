@@ -49,8 +49,8 @@
 				}
 
 				// The facebook login window is a different size.
-				p.options.window_width = 580;
-				p.options.window_height = 400;
+				p.options.popup.width = 580;
+				p.options.popup.height = 400;
 			},
 
 			logout: function(callback) {

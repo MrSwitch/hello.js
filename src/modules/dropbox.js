@@ -15,8 +15,8 @@
 
 			login: function(p) {
 				// The dropbox login window is a different size
-				p.options.window_width = 1000;
-				p.options.window_height = 1000;
+				p.options.popup.width = 1000;
+				p.options.popup.height = 1000;
 			},
 
 			/*

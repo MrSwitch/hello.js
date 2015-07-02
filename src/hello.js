@@ -54,7 +54,13 @@ hello.utils.extend(hello, {
 		// API timeout in milliseconds
 		timeout: 20000,
 
-		// Default service / network
+		// Popup Options
+		popup: {
+			resizeable:true,
+			scrollbars:1
+		},
+
+		// options service / network
 		default_service: null,
 
 		// Force authentication
@@ -161,6 +167,9 @@ hello.utils.extend(hello, {
 
 		// Merge/override options with app defaults
 		var opts = p.options = utils.merge(_this.settings, p.options || {});
+
+		// Merge/override options with app defaults
+		opts.popup = utils.merge(_this.settings.popup, p.options.popup || {});
 
 		// Network
 		p.network = p.network || _this.settings.default_service;
@@ -370,7 +379,7 @@ hello.utils.extend(hello, {
 		// Triggering popup?
 		else if (opts.display === 'popup') {
 
-			var popup = utils.popup(url, redirectUri, opts.window_width || 500, opts.window_height || 550);
+			var popup = utils.popup(url, redirectUri, opts.popup);
 
 			var timer = setInterval(function() {
 				if (!popup || popup.closed) {
@@ -1161,7 +1170,10 @@ hello.utils.extend(hello.utils, {
 
 	// Trigger a clientside popup
 	// This has been augmented to support PhoneGap
-	popup: function(url, redirectUri, windowWidth, windowHeight) {
+	popup: function(url, redirectUri, options) {
+
+		options.width = options.width || 500;
+		options.height = options.height || 550;
 
 		var documentElement = document.documentElement;
 
@@ -1171,11 +1183,18 @@ hello.utils.extend(hello.utils, {
 		var dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
 		var dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
 
-		var width = window.innerWidth || documentElement.clientWidth || screen.width;
-		var height = window.innerHeight || documentElement.clientHeight || screen.height;
+		var width = screen.width || window.innerWidth || documentElement.clientWidth;
+		var height = screen.height || window.innerHeight || documentElement.clientHeight;
 
-		var left = ((width - windowWidth) / 2) + dualScreenLeft;
-		var top = ((height - windowHeight) / 2) + dualScreenTop;
+		options.left = parseInt((width - options.width) / 2, 10) + dualScreenLeft;
+		options.top = parseInt((height - options.height) / 2, 10) + dualScreenTop;
+
+		// Convert options into an array
+		var optionsArray = [];
+		Object.keys(options).forEach(function(name) {
+			var value = options[name];
+			optionsArray.push(name + (value !== null ? '=' + value : ''));
+		});
 
 		// Create a function for reopening the popup, and assigning events to the new popup object
 		// This is a fix whereby triggering the
@@ -1185,7 +1204,7 @@ hello.utils.extend(hello.utils, {
 			var popup = window.open(
 				url,
 				'_blank',
-				'resizeable=true,scrollbars,height=' + windowHeight + ',width=' + windowWidth + ',left=' + left + ',top=' + top
+				optionsArray.join(',')
 			);
 
 			// PhoneGap support

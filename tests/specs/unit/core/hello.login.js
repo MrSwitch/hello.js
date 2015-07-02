@@ -263,9 +263,47 @@ define([
 
 				hello.login('testable', opts);
 			});
-
 		});
 
+		describe('popup options', function() {
+
+			it('should give the popup the default options', function(done) {
+
+				var spy = sinon.spy(function(url, name, options) {
+					expect(options).to.contain('resizeable');
+					expect(options).to.contain('scrollbars');
+					expect(options).to.contain('width');
+					expect(options).to.contain('height');
+					expect(options).to.contain('top');
+					expect(options).to.contain('left');
+					done();
+				});
+
+				window.open = spy;
+
+				hello.login('testable');
+			});
+
+			it('should allow the popup options to be overridden', function(done) {
+
+				var spy = sinon.spy(function(url, name, options) {
+					expect(options).to.contain('location=no');
+					expect(options).to.contain('toolbar=no');
+					expect(options).to.contain('hidden=true');
+					done();
+				});
+
+				window.open = spy;
+
+				hello.login('testable', {
+					popup: {
+						hidden: true,
+						location: 'no',
+						toolbar: 'no'
+					}
+				});
+			});
+		});
 	});
 
 });

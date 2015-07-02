@@ -14,8 +14,8 @@
 
 			// Set default window height
 			login: function(p) {
-				p.options.window_width = 600;
-				p.options.window_height = 510;
+				p.options.popup.width = 600;
+				p.options.popup.height = 510;
 			},
 
 			base: 'https://api.tumblr.com/v2/',

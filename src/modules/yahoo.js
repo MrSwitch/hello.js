@@ -16,7 +16,7 @@
 			login: function(p) {
 				// Change the default popup window to be at least 560
 				// Yahoo does dynamically change it on the fly for the signin screen (only, what if your already signed in)
-				p.options.window_width = 560;
+				p.options.popup.width = 560;
 
 				// Yahoo throws an parameter error if for whatever reason the state.scope contains a comma, so lets remove scope
 				try {delete p.qs.state.scope;}
