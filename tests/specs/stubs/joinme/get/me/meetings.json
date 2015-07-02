@@ -1,0 +1,16 @@
+{
+    "meetings": [
+        {
+            "meetingId": 12345,
+            "meetingName": "Weekly update with the boss",
+            "meetingStart":"2015-06-02T09:00:00Z",
+            "meetingEnd":"2015-06-02T10:00:00Z",
+        },
+        {
+            "meetingId": 12399,
+            "meetingName": "Follow up with our best customer",
+            "meetingStart": "2015-06-02T10:00:00Z",
+            "meetingEnd":"2015-06-02T11:00:00Z",
+        }
+    ]
+}

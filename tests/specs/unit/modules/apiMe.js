@@ -107,6 +107,15 @@ define(['./helper'], function(helper) {
 				}
 			},
 			{
+				network: 'joinme',
+				expect: {
+					id: 'janemcgee35@join.me',
+					name: 'Jane McGee',
+					thumbnail: undefined
+				},
+				errorExpect: false
+			},
+			{
 				network: 'linkedin',
 				expect: {
 					id: 'sDsPqKdBkl',
