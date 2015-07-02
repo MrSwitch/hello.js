@@ -60,7 +60,7 @@ hello.utils.extend(hello, {
 			scrollbars:1
 		},
 
-		// options service / network
+		// Default service / network
 		default_service: null,
 
 		// Force authentication
