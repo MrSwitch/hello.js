@@ -13,7 +13,7 @@
 			},
 
 			login: function(p) {
-				// node-oauth-shim passes an extra Authorization header when granting
+				// Instruct node-oauth-shim to pass an extra Authorization header when granting
 				// Authorization: basic base64(client_id:cient_secret)
 				// https://developer.vimeo.com/api/authentication#generate-redirect
 				p.qs.state.authorisation = 'header';
