@@ -12,6 +12,13 @@
 				response_type: 'code'
 			},
 
+			login: function(p) {
+				// node-oauth-shim passes an extra Authorization header when granting
+				// Authorization: basic base64(client_id:cient_secret)
+				// https://developer.vimeo.com/api/authentication#generate-redirect
+				p.qs.state.authorisation = 'header';
+			},
+
 			xhr: function(p) {
 				if (p.method !== 'get' && p.data) {
 
@@ -34,9 +41,7 @@
 				publish_files: 'create edit delete interact upload'
 			},
 
-			// Ensure node-oauth-shim passes an extra Authorization header when granting
-			// https://developer.vimeo.com/api/authentication#generate-redirect
-			authorisation: 'header'
+			base: baseUrl
 		}
 	});
 })(hello);
