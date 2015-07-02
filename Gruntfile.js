@@ -50,6 +50,7 @@ module.exports = function(grunt) {
 					'src/modules/linkedin.js',
 					'src/modules/soundcloud.js',
 					'src/modules/twitter.js',
+					'src/modules/vimeo.js',
 					'src/modules/windows.js',
 					'src/modules/yahoo.js',
 					'src/hello.amd.js',
