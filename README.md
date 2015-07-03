@@ -590,6 +590,8 @@ hello('facebook').api('me').then(function(json) {
 
 # Event Subscription
 
+Please see [demo of the global events](demos/events.html).
+
 ## hello.on()
 
 Bind a callback to an event. An event may be triggered by a change in user state or a change in some detail.
@@ -877,6 +879,14 @@ sudo npm install -g grunt-cli
 
 # Run the tests
 grunt test
+
+# Run the tests in the browser...
+
+# 1. In project root create local web server e.g.
+python -m SimpleHTTPServer
+
+# 2. Then open the following URL in your web browser:
+# http://localhost:8000/tests/specs/index.html
 ```
 
 

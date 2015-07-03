@@ -629,6 +629,8 @@ hello('facebook').api('me').then(function(json) {
 
 <h1>Event Subscription</h1>
 
+<p>Please see <a href="demos/events.html">demo of the global events</a>.</p>
+
 <h2>hello.on()</h2>
 
 <p>Bind a callback to an event. An event may be triggered by a change in user state or a change in some detail.</p>
@@ -664,7 +666,7 @@ hello('facebook').api('me').then(function(json) {
 
 <h3>Example:</h3>
 
-<pre class="tryit" type="js">
+<pre type="js">
 var sessionStart = function() {
 	alert('Session has started');
 };
@@ -677,7 +679,7 @@ hello.on('auth.login', sessionStart);
 
 <h3>hello.off(event, callback)</h3>
 
-<pre class="tryit" type="js">
+<pre type="js">
 hello.off('auth.login', sessionStart);
 </pre>
 
