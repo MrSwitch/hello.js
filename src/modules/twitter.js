@@ -58,7 +58,7 @@
 
 					// Tweet
 					else {
-						callback('statuses/update.json?include_entities=1&status=' + data.message);
+						callback('statuses/update.json?include_entities=1&status=' + encodeURIComponent(data.message));
 					}
 				},
 
