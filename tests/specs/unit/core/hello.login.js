@@ -6,30 +6,36 @@ define([
 
 	describe('hello.login', function() {
 
+		var testable, second;
+
 		// Create a dummy network
 		before(function() {
-
-			// Add a default network
-			hello.init({
-				testable: {
-					oauth: {
-						auth: 'https://testdemo/access',
-						grant: 'https://testdemo/grant',
-						version: 2
-					},
-					scope: {
-						basic: 'basic_scope'
-					}
+			// Create networks
+			testable = {
+				oauth: {
+					auth: 'https://testdemo/access',
+					grant: 'https://testdemo/grant',
+					version: 2
 				},
-				second: {
-					oauth: {
-						auth: 'https://testdemo/access',
-						version: 2
-					},
-					scope: {
-						common_scope: 'common_scope'
-					}
+				scope: {
+					basic: 'basic_scope'
 				}
+			};
+
+			second = {
+				oauth: {
+					auth: 'https://testdemo/access',
+					version: 2
+				},
+				scope: {
+					common_scope: 'common_scope'
+				}
+			}
+
+			// Add a network
+			hello.init({
+				testable: testable,
+				second: second
 			});
 
 		});
@@ -191,6 +197,28 @@ define([
 				window.open = spy;
 
 				hello.login('testable', {scope: commonScope});
+			});
+
+			it('should not included empty scopes', function(done) {
+
+				var scope = 'scope';
+				var paddedScope = ',' + scope + ',';
+				delete testable.scope.basic;
+
+				var spy = sinon.spy(function(url, name, optins) {
+
+					url = safariHack(url);
+
+					// Parse parameters
+					var params = hello.utils.param(url.split('?')[1]);
+
+					expect(params.scope).to.eql(scope);
+					done();
+				});
+
+				window.open = spy;
+
+				hello.login('testable', {scope: paddedScope});
 			});
 
 			it('should use the correct and unencoded delimiter to separate scope', function(done) {

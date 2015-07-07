@@ -257,10 +257,9 @@ hello.utils.extend(hello, {
 		var session = utils.store(p.network);
 
 		// Scopes (authentication permisions)
-		// Convert any array, or falsy value to a string.
-		var scope = (opts.scope || '').toString();
-
-		scope = (scope ? scope + ',' : '') + p.qs.scope;
+		// Ensure this is a string - IE has a problem moving Arrays between windows
+		// Append the setup scope
+		var scope = (opts.scope || '').toString() + ',' + p.qs.scope;
 
 		// Append scopes from a previous session.
 		// This helps keep app credentials constant,
@@ -270,8 +269,8 @@ hello.utils.extend(hello, {
 		}
 
 		// Save in the State
-		// Convert to a string because IE, has a problem moving Arrays between windows
-		p.qs.state.scope = utils.unique(scope.split(/[,\s]+/)).join(',');
+		// Format remove duplicates and empty values
+		p.qs.state.scope = utils.unique(scope.split(/[,\s]+/)).filter(filterEmpty).join(',');
 
 		// Map replace each scope with the providers default scopes
 		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m) {
@@ -296,7 +295,8 @@ hello.utils.extend(hello, {
 		}).replace(/[,\s]+/ig, ',');
 
 		// Remove duplication and empty spaces
-		p.qs.scope = utils.unique(p.qs.scope.split(/,+/)).join(provider.scope_delim || ',');
+		// Join with the expected scope
+		p.qs.scope = utils.unique(p.qs.scope.split(/,+/)).filter(filterEmpty).join(provider.scope_delim || ',');
 
 		// Is the user already signed in with the appropriate scopes, valid access_token?
 		if (opts.force === false) {
@@ -407,6 +407,7 @@ hello.utils.extend(hello, {
 		return promise.proxy;
 
 		function encodeFunction(s) {return s;}
+		function filterEmpty(s) {return !!s;}
 	},
 
 	// Remove any data associated with a given service
