@@ -419,6 +419,7 @@ hello.utils.extend(hello, {
 		return promise.proxy;
 
 		function encodeFunction(s) {return s;}
+
 		function filterEmpty(s) {return !!s;}
 	},
 

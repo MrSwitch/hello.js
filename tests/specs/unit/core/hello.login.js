@@ -6,10 +6,11 @@ define([
 
 	describe('hello.login', function() {
 
-		var testable, second;
+		var testable;
+		var second;
 
 		// Create a dummy network
-		before(function() {
+		beforeEach(function() {
 			// Create networks
 			testable = {
 				oauth: {
@@ -30,7 +31,7 @@ define([
 				scope: {
 					common_scope: 'common_scope'
 				}
-			}
+			};
 
 			// Add a network
 			hello.init({
@@ -41,7 +42,7 @@ define([
 		});
 
 		// Destroy it
-		after(function() {
+		afterEach(function() {
 			delete hello.services.testable;
 		});
 
