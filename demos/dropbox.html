@@ -14,23 +14,29 @@
 <title>hello( dropbox )</title>
 <h1>hello( dropbox )</h1>
 
-<button id='dropbox' onclick="demo('dropbox');">Dropbox</button>
+<button id='profile' onclick="demo();">Dropbox</button>
 <div id="uiFiles"></div>
 
 <p>Include the UI demo script.</p>
 <script src="./helper/uiFiles.js" class="pre"></script>
 
 <script class="pre">
-function demo(network){
 
-	// Get the username
-	hello(network).api("me", function(p) {
-		document.getElementById(network).innerHTML = "Connected to "+ network +" as " + p.name;
+function demo(){
+
+	var dropbox = hello('dropbox');
+
+	dropbox.login().then(function() {
+
+		dropbox.api("me", function(p) {
+			document.getElementById('profile').innerHTML = "Connected to dropbox as " + p.name;
+		});
+
+		// See the included script of this same name.
+		uiFiles('dropbox');
 	});
-
-	// See the included script of this same name.
-	uiFiles(network);
 }
+
 </script>
 <script class="pre">
 hello.init({
