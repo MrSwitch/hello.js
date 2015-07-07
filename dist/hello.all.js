@@ -1,4 +1,4 @@
-/*! hellojs v1.7.0 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.7.1 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -207,6 +207,12 @@ hello.utils.extend(hello, {
 		// API timeout in milliseconds
 		timeout: 20000,
 
+		// Popup Options
+		popup: {
+			resizeable:true,
+			scrollbars:1
+		},
+
 		// Default service / network
 		default_service: null,
 
@@ -315,6 +321,9 @@ hello.utils.extend(hello, {
 		// Merge/override options with app defaults
 		var opts = p.options = utils.merge(_this.settings, p.options || {});
 
+		// Merge/override options with app defaults
+		opts.popup = utils.merge(_this.settings.popup, p.options.popup || {});
+
 		// Network
 		p.network = p.network || _this.settings.default_service;
 
@@ -401,10 +410,9 @@ hello.utils.extend(hello, {
 		var session = utils.store(p.network);
 
 		// Scopes (authentication permisions)
-		// Convert any array, or falsy value to a string.
-		var scope = (opts.scope || '').toString();
-
-		scope = (scope ? scope + ',' : '') + p.qs.scope;
+		// Ensure this is a string - IE has a problem moving Arrays between windows
+		// Append the setup scope
+		var scope = (opts.scope || '').toString() + ',' + p.qs.scope;
 
 		// Append scopes from a previous session.
 		// This helps keep app credentials constant,
@@ -413,34 +421,47 @@ hello.utils.extend(hello, {
 			scope += ',' + session.scope;
 		}
 
-		// Save in the State
-		// Convert to a string because IE, has a problem moving Arrays between windows
-		p.qs.state.scope = utils.unique(scope.split(/[,\s]+/)).join(',');
+		// Convert scope to an Array
+		// - easier to manipulate
+		scope = scope.split(/[,\s]+/);
 
-		// Map replace each scope with the providers default scopes
-		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m) {
+		// Format remove duplicates and empty values
+		scope = utils.unique(scope).filter(filterEmpty);
+
+		// Save the the scopes to the state with the names that they were requested with.
+		p.qs.state.scope = scope.join(',');
+
+		// Map scopes to the providers naming convention
+		scope = scope.map(function(item) {
 			// Does this have a mapping?
-			if (m in provider.scope) {
-				return provider.scope[m];
+			if (item in provider.scope) {
+				return provider.scope[item];
 			}
 			else {
 				// Loop through all services and determine whether the scope is generic
 				for (var x in _this.services) {
 					var serviceScopes = _this.services[x].scope;
-					if (serviceScopes && m in serviceScopes) {
+					if (serviceScopes && item in serviceScopes) {
 						// Found an instance of this scope, so lets not assume its special
 						return '';
 					}
 				}
 
 				// This is a unique scope to this service so lets in it.
-				return m;
+				return item;
 			}
 
-		}).replace(/[,\s]+/ig, ',');
+		});
 
-		// Remove duplication and empty spaces
-		p.qs.scope = utils.unique(p.qs.scope.split(/,+/)).join(provider.scope_delim || ',');
+		// Stringify and Arrayify so that double mapped scopes are given the chance to be formatted
+		scope = scope.join(',').split(/[,\s]+/);
+
+		// Again...
+		// Format remove duplicates and empty values
+		scope = utils.unique(scope).filter(filterEmpty);
+
+		// Join with the expected scope delimiter into a string
+		p.qs.scope = scope.join(provider.scope_delim || ',');
 
 		// Is the user already signed in with the appropriate scopes, valid access_token?
 		if (opts.force === false) {
@@ -523,7 +544,7 @@ hello.utils.extend(hello, {
 		// Triggering popup?
 		else if (opts.display === 'popup') {
 
-			var popup = utils.popup(url, redirectUri, opts.window_width || 500, opts.window_height || 550);
+			var popup = utils.popup(url, redirectUri, opts.popup);
 
 			var timer = setInterval(function() {
 				if (!popup || popup.closed) {
@@ -551,6 +572,8 @@ hello.utils.extend(hello, {
 		return promise.proxy;
 
 		function encodeFunction(s) {return s;}
+
+		function filterEmpty(s) {return !!s;}
 	},
 
 	// Remove any data associated with a given service
@@ -1314,7 +1337,10 @@ hello.utils.extend(hello.utils, {
 
 	// Trigger a clientside popup
 	// This has been augmented to support PhoneGap
-	popup: function(url, redirectUri, windowWidth, windowHeight) {
+	popup: function(url, redirectUri, options) {
+
+		options.width = options.width || 500;
+		options.height = options.height || 550;
 
 		var documentElement = document.documentElement;
 
@@ -1324,11 +1350,18 @@ hello.utils.extend(hello.utils, {
 		var dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
 		var dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
 
-		var width = window.innerWidth || documentElement.clientWidth || screen.width;
-		var height = window.innerHeight || documentElement.clientHeight || screen.height;
+		var width = screen.width || window.innerWidth || documentElement.clientWidth;
+		var height = screen.height || window.innerHeight || documentElement.clientHeight;
 
-		var left = ((width - windowWidth) / 2) + dualScreenLeft;
-		var top = ((height - windowHeight) / 2) + dualScreenTop;
+		options.left = parseInt((width - options.width) / 2, 10) + dualScreenLeft;
+		options.top = parseInt((height - options.height) / 2, 10) + dualScreenTop;
+
+		// Convert options into an array
+		var optionsArray = [];
+		Object.keys(options).forEach(function(name) {
+			var value = options[name];
+			optionsArray.push(name + (value !== null ? '=' + value : ''));
+		});
 
 		// Create a function for reopening the popup, and assigning events to the new popup object
 		// This is a fix whereby triggering the
@@ -1338,7 +1371,7 @@ hello.utils.extend(hello.utils, {
 			var popup = window.open(
 				url,
 				'_blank',
-				'resizeable=true,scrollbars,height=' + windowHeight + ',width=' + windowWidth + ',left=' + left + ',top=' + top
+				optionsArray.join(',')
 			);
 
 			// PhoneGap support
@@ -1450,7 +1483,7 @@ hello.utils.extend(hello.utils, {
 		p = _this.param(location.search);
 
 		// OAuth2 or OAuth1 server response?
-		if (p && ((p.code && p.state) || (p.oauth_token && p.proxy_url))) {
+		if (p && p.state && (p.code || p.oauth_token)) {
 
 			var state = JSON.parse(p.state);
 
@@ -1458,7 +1491,7 @@ hello.utils.extend(hello.utils, {
 			p.redirect_uri = state.redirect_uri || location.href.replace(/[\?\#].*$/, '');
 
 			// Redirect to the host
-			var path = (state.oauth_proxy || p.proxy_url) + '?' + _this.param(p);
+			var path = state.oauth_proxy + '?' + _this.param(p);
 
 			location.assign(path);
 
@@ -2784,8 +2817,8 @@ hello.utils.extend(hello.utils, {
 
 			login: function(p) {
 				// The dropbox login window is a different size
-				p.options.window_width = 1000;
-				p.options.window_height = 1000;
+				p.options.popup.width = 1000;
+				p.options.popup.height = 1000;
 			},
 
 			/*
@@ -2814,9 +2847,9 @@ hello.utils.extend(hello.utils, {
 				me: 'account/info',
 
 				// Https://www.dropbox.com/developers/core/docs#metadata
-				'me/files': req('metadata/@{root|sandbox}/@{parent}'),
-				'me/folder': req('metadata/@{root|sandbox}/@{id}'),
-				'me/folders': req('metadata/@{root|sandbox}/'),
+				'me/files': req('metadata/auto/@{parent|}'),
+				'me/folder': req('metadata/auto/@{id}'),
+				'me/folders': req('metadata/auto/'),
 
 				'default': function(p, callback) {
 					if (p.path.match('https://api-content.dropbox.com/1/files/')) {
@@ -2843,7 +2876,7 @@ hello.utils.extend(hello.utils, {
 						p.data.file = hello.utils.toBlob(p.data.file);
 					}
 
-					callback('https://api-content.dropbox.com/1/files_put/@{root|sandbox}/' + path + '/' + fileName);
+					callback('https://api-content.dropbox.com/1/files_put/auto/' + path + '/' + fileName);
 				},
 
 				'me/folders': function(p, callback) {
@@ -2955,21 +2988,22 @@ hello.utils.extend(hello.utils, {
 			return;
 		}
 
-		var path = o.root + o.path.replace(/\&/g, '%26');
+		var path = (o.root !== 'app_folder' ? o.root : '') + o.path.replace(/\&/g, '%26');
+		path = path.replace(/^\//, '');
 		if (o.thumb_exists) {
-			o.thumbnail = hello.settings.oauth_proxy + '?path=' +
-			encodeURIComponent('https://api-content.dropbox.com/1/thumbnails/' + path + '?format=jpeg&size=m') + '&access_token=' + req.query.access_token;
+			o.thumbnail = req.oauth_proxy + '?path=' +
+			encodeURIComponent('https://api-content.dropbox.com/1/thumbnails/auto/' + path + '?format=jpeg&size=m') + '&access_token=' + req.options.access_token;
 		}
 
 		o.type = (o.is_dir ? 'folder' : o.mime_type);
 		o.name = o.path.replace(/.*\//g, '');
 		if (o.is_dir) {
-			o.files = 'metadata/' + path;
+			o.files = path.replace(/^\//, '');
 		}
 		else {
 			o.downloadLink = hello.settings.oauth_proxy + '?path=' +
-			encodeURIComponent('https://api-content.dropbox.com/1/files/' + path) + '&access_token=' + req.query.access_token;
-			o.file = 'https://api-content.dropbox.com/1/files/' + path;
+			encodeURIComponent('https://api-content.dropbox.com/1/files/auto/' + path) + '&access_token=' + req.options.access_token;
+			o.file = 'https://api-content.dropbox.com/1/files/auto/' + path;
 		}
 
 		if (!o.id) {
@@ -3039,8 +3073,8 @@ hello.utils.extend(hello.utils, {
 				}
 
 				// The facebook login window is a different size.
-				p.options.window_width = 580;
-				p.options.window_height = 400;
+				p.options.popup.width = 580;
+				p.options.popup.height = 400;
 			},
 
 			logout: function(callback) {
@@ -4408,8 +4442,8 @@ hello.utils.extend(hello.utils, {
 			scope: {
 				basic: 'r_basicprofile',
 				email: 'r_emailaddress',
-				friends: 'r_network',
-				publish: 'rw_nus'
+				friends: '',
+				publish: 'w_share'
 			},
 			scope_delim: ' ',
 
@@ -4734,7 +4768,7 @@ hello.utils.extend(hello.utils, {
 
 					// Tweet
 					else {
-						callback('statuses/update.json?include_entities=1&status=' + data.message);
+						callback('statuses/update.json?include_entities=1&status=' + encodeURIComponent(data.message));
 					}
 				},
 
@@ -5076,7 +5110,7 @@ hello.utils.extend(hello.utils, {
 			login: function(p) {
 				// Change the default popup window to be at least 560
 				// Yahoo does dynamically change it on the fly for the signin screen (only, what if your already signed in)
-				p.options.window_width = 560;
+				p.options.popup.width = 560;
 
 				// Yahoo throws an parameter error if for whatever reason the state.scope contains a comma, so lets remove scope
 				try {delete p.qs.state.scope;}
