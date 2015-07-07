@@ -268,35 +268,47 @@ hello.utils.extend(hello, {
 			scope += ',' + session.scope;
 		}
 
-		// Save in the State
-		// Format remove duplicates and empty values
-		p.qs.state.scope = utils.unique(scope.split(/[,\s]+/)).filter(filterEmpty).join(',');
+		// Convert scope to an Array
+		// - easier to manipulate
+		scope = scope.split(/[,\s]+/);
 
-		// Map replace each scope with the providers default scopes
-		p.qs.scope = scope.replace(/[^,\s]+/ig, function(m) {
+		// Format remove duplicates and empty values
+		scope = utils.unique(scope).filter(filterEmpty);
+
+		// Save the the scopes to the state with the names that they were requested with.
+		p.qs.state.scope = scope.join(',');
+
+		// Map scopes to the providers naming convention
+		scope = scope.map(function(item) {
 			// Does this have a mapping?
-			if (m in provider.scope) {
-				return provider.scope[m];
+			if (item in provider.scope) {
+				return provider.scope[item];
 			}
 			else {
 				// Loop through all services and determine whether the scope is generic
 				for (var x in _this.services) {
 					var serviceScopes = _this.services[x].scope;
-					if (serviceScopes && m in serviceScopes) {
+					if (serviceScopes && item in serviceScopes) {
 						// Found an instance of this scope, so lets not assume its special
 						return '';
 					}
 				}
 
 				// This is a unique scope to this service so lets in it.
-				return m;
+				return item;
 			}
 
-		}).replace(/[,\s]+/ig, ',');
+		});
 
-		// Remove duplication and empty spaces
-		// Join with the expected scope
-		p.qs.scope = utils.unique(p.qs.scope.split(/,+/)).filter(filterEmpty).join(provider.scope_delim || ',');
+		// Stringify and Arrayify so that double mapped scopes are given the chance to be formatted
+		scope = scope.join(',').split(/[,\s]+/);
+
+		// Again...
+		// Format remove duplicates and empty values
+		scope = utils.unique(scope).filter(filterEmpty);
+
+		// Join with the expected scope delimiter into a string
+		p.qs.scope = scope.join(provider.scope_delim || ',');
 
 		// Is the user already signed in with the appropriate scopes, valid access_token?
 		if (opts.force === false) {
