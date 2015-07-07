@@ -45,9 +45,9 @@
 				me: 'account/info',
 
 				// Https://www.dropbox.com/developers/core/docs#metadata
-				'me/files': req('metadata/@{root|sandbox}/@{parent}'),
-				'me/folder': req('metadata/@{root|sandbox}/@{id}'),
-				'me/folders': req('metadata/@{root|sandbox}/'),
+				'me/files': req('metadata/auto/@{parent|}'),
+				'me/folder': req('metadata/auto/@{id}'),
+				'me/folders': req('metadata/auto/'),
 
 				'default': function(p, callback) {
 					if (p.path.match('https://api-content.dropbox.com/1/files/')) {
@@ -74,7 +74,7 @@
 						p.data.file = hello.utils.toBlob(p.data.file);
 					}
 
-					callback('https://api-content.dropbox.com/1/files_put/@{root|sandbox}/' + path + '/' + fileName);
+					callback('https://api-content.dropbox.com/1/files_put/auto/' + path + '/' + fileName);
 				},
 
 				'me/folders': function(p, callback) {
@@ -186,21 +186,22 @@
 			return;
 		}
 
-		var path = o.root + o.path.replace(/\&/g, '%26');
+		var path = (o.root !== 'app_folder' ? o.root : '') + o.path.replace(/\&/g, '%26');
+		path = path.replace(/^\//, '');
 		if (o.thumb_exists) {
-			o.thumbnail = hello.settings.oauth_proxy + '?path=' +
-			encodeURIComponent('https://api-content.dropbox.com/1/thumbnails/' + path + '?format=jpeg&size=m') + '&access_token=' + req.query.access_token;
+			o.thumbnail = req.oauth_proxy + '?path=' +
+			encodeURIComponent('https://api-content.dropbox.com/1/thumbnails/auto/' + path + '?format=jpeg&size=m') + '&access_token=' + req.options.access_token;
 		}
 
 		o.type = (o.is_dir ? 'folder' : o.mime_type);
 		o.name = o.path.replace(/.*\//g, '');
 		if (o.is_dir) {
-			o.files = 'metadata/' + path;
+			o.files = path.replace(/^\//, '');
 		}
 		else {
 			o.downloadLink = hello.settings.oauth_proxy + '?path=' +
-			encodeURIComponent('https://api-content.dropbox.com/1/files/' + path) + '&access_token=' + req.query.access_token;
-			o.file = 'https://api-content.dropbox.com/1/files/' + path;
+			encodeURIComponent('https://api-content.dropbox.com/1/files/auto/' + path) + '&access_token=' + req.options.access_token;
+			o.file = 'https://api-content.dropbox.com/1/files/auto/' + path;
 		}
 
 		if (!o.id) {
