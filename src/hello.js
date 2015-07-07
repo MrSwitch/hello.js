@@ -1316,7 +1316,7 @@ hello.utils.extend(hello.utils, {
 		p = _this.param(location.search);
 
 		// OAuth2 or OAuth1 server response?
-		if (p && ((p.code && p.state) || (p.oauth_token && p.proxy_url))) {
+		if (p && p.state && (p.code || p.oauth_token)) {
 
 			var state = JSON.parse(p.state);
 
@@ -1324,7 +1324,7 @@ hello.utils.extend(hello.utils, {
 			p.redirect_uri = state.redirect_uri || location.href.replace(/[\?\#].*$/, '');
 
 			// Redirect to the host
-			var path = (state.oauth_proxy || p.proxy_url) + '?' + _this.param(p);
+			var path = state.oauth_proxy + '?' + _this.param(p);
 
 			location.assign(path);
 
