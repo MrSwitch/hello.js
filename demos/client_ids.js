@@ -94,8 +94,7 @@ var CLIENT_IDS_ALL = {
 	soundcloud : SOUNDCLOUD_CLIENT_ID,
 	foursquare : FOURSQUARE_CLIENT_ID,
 	github : GITHUB_CLIENT_ID,
-	flickr: FLICKR_CLIENT_ID,
-	joinme: JOINME_CLIENT_ID
+	flickr: FLICKR_CLIENT_ID
 };
 
 var TUMBLR_CLIENT_ID = {
