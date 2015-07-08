@@ -1,4 +1,4 @@
-/*! hellojs v1.7.1 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.7.2 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -2231,7 +2231,7 @@ hello.utils.extend(hello.utils, {
 
 		if (Array.isArray(obj)) {
 			// Clone each item in the array
-			return obj.map(this.clone);
+			return obj.map(this.clone.bind(this));
 		}
 
 		// But does clone everything else.
