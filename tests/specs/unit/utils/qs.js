@@ -1,5 +1,6 @@
+// Qs
+// Binds arguments to a URL string.
 define([], function() {
-
 	var u = hello.utils;
 
 	describe('utils.qs', function() {
@@ -11,7 +12,7 @@ define([], function() {
 
 		it('should append arguments to a url', function() {
 
-			var value = u.qs("https://api.com/path?q=%22root%22+in+parents+and+trashed=false&maxResults=5", {access_token:"token"});
+			var value = u.qs('https://api.com/path?q=%22root%22+in+parents+and+trashed=false&maxResults=5', {access_token:'token'});
 
 			expect(value).to.eql('https://api.com/path?q=%22root%22+in+parents+and+trashed=false&maxResults=5&access_token=token');
 
@@ -19,7 +20,7 @@ define([], function() {
 
 		it('should overwrite existing arguments in a url', function() {
 
-			var value = u.qs("https://api.com/path?q=%22root%22+in+parents+and+trashed=false&maxResults=5", {q:"word", access_token:"token"});
+			var value = u.qs('https://api.com/path?q=%22root%22+in+parents+and+trashed=false&maxResults=5', {q:'word', access_token:'token'});
 
 			expect(value).to.eql('https://api.com/path?q=word&maxResults=5&access_token=token');
 
