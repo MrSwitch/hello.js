@@ -538,18 +538,28 @@ hello.utils.extend(hello.utils, {
 	// @param string url
 	// @param object parameters
 	qs: function(url, params, formatFunction) {
+
 		if (params) {
-			var reg;
+
+			// Set default formatting function
+			formatFunction = formatFunction || encodeURIComponent;
+
+			// Override the items in the URL which already exist
 			for (var x in params) {
-				if (url.indexOf(x) > -1) {
-					var str = '[\\?\\&]' + x + '=[^\\&]*';
-					reg = new RegExp(str);
-					url = url.replace(reg, '');
+				var str = '([\\?\\&])' + x + '=[^\\&]*';
+				reg = new RegExp(str);
+				if (url.match(x)) {
+					url = url.replace(reg, '$1' + x + '=' + formatFunction(params[x]));
+					delete params[x];
 				}
 			}
 		}
 
-		return url + (!this.isEmpty(params) ? (url.indexOf('?') > -1 ? '&' : '?') + this.param(params, formatFunction) : '');
+		if (!this.isEmpty(params)) {
+			return url + (url.indexOf('?') > -1 ? '&' : '?') + this.param(params, formatFunction);
+		}
+
+		return url;
 	},
 
 	// Param
