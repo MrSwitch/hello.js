@@ -99,6 +99,24 @@ define([], function() {
 
 		});
 
+		it('should clone arrays in objects', function() {
+			var orig = {
+				foo: 'bar',
+				arr: [
+					{
+						a: 'b',
+						c: 'd'
+					},
+					{
+						a: '1',
+						c: '3'
+					}
+				]
+			};
+			var clone = utils.clone(orig);
+
+			expect(clone).to.be.eql(orig).and.to.not.be.equal(orig);
+		});
 	});
 
 });
