@@ -342,6 +342,14 @@ If a network string is provided: A consent window to authenticate with that netw
 					<td><em>optional</em></td>
 					<td><i>null</i></td>
 				</tr>
+				<tr>
+					<td>popup</td>
+					<td><i>object</i></td>
+					<td>{resizable:1}</td>
+					<td>Overrides the <a href="http://www.w3schools.com/jsref/met_win_open.asp">popups specs</a></td>
+					<td><em>optional</em></td>
+					<td>See <code>hello.settings.popup</code></td>
+				</tr>
 			</table>
 		</td>
 	</tr>

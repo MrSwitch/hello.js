@@ -299,10 +299,10 @@ define([
 			it('should give the popup the default options', function(done) {
 
 				var spy = sinon.spy(function(url, name, options) {
-					expect(options).to.contain('resizeable');
-					expect(options).to.contain('scrollbars');
-					expect(options).to.contain('width');
-					expect(options).to.contain('height');
+					expect(options).to.contain('resizable=1');
+					expect(options).to.contain('scrollbars=1');
+					expect(options).to.contain('width=500');
+					expect(options).to.contain('height=550');
 					expect(options).to.contain('top');
 					expect(options).to.contain('left');
 					done();

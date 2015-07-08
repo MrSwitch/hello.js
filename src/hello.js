@@ -56,8 +56,10 @@ hello.utils.extend(hello, {
 
 		// Popup Options
 		popup: {
-			resizeable:true,
-			scrollbars:1
+			resizable: 1,
+			scrollbars: 1,
+			width: 500,
+			height: 550
 		},
 
 		// Default service / network
@@ -1196,22 +1198,23 @@ hello.utils.extend(hello.utils, {
 	// This has been augmented to support PhoneGap
 	popup: function(url, redirectUri, options) {
 
-		options.width = options.width || 500;
-		options.height = options.height || 550;
-
 		var documentElement = document.documentElement;
 
 		// Multi Screen Popup Positioning (http://stackoverflow.com/a/16861050)
 		// Credit: http://www.xtf.dk/2011/08/center-new-popup-window-even-on.html
 		// Fixes dual-screen position                         Most browsers      Firefox
-		var dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
-		var dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
 
-		var width = screen.width || window.innerWidth || documentElement.clientWidth;
-		var height = screen.height || window.innerHeight || documentElement.clientHeight;
+		if (options.height) {
+			var dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
+			var height = screen.height || window.innerHeight || documentElement.clientHeight;
+			options.top = parseInt((height - options.height) / 2, 10) + dualScreenTop;
+		}
 
-		options.left = parseInt((width - options.width) / 2, 10) + dualScreenLeft;
-		options.top = parseInt((height - options.height) / 2, 10) + dualScreenTop;
+		if (options.width) {
+			var dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
+			var width = screen.width || window.innerWidth || documentElement.clientWidth;
+			options.left = parseInt((width - options.width) / 2, 10) + dualScreenLeft;
+		}
 
 		// Convert options into an array
 		var optionsArray = [];
