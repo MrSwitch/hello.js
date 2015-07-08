@@ -2078,7 +2078,7 @@ hello.utils.extend(hello.utils, {
 
 		if (Array.isArray(obj)) {
 			// Clone each item in the array
-			return obj.map(this.clone);
+			return obj.map(this.clone.bind(this));
 		}
 
 		// But does clone everything else.
