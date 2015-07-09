@@ -333,6 +333,66 @@ define([
 				});
 			});
 		});
+
+		describe('option.force = false', function() {
+
+			var _store = hello.utils.store;
+			var session = null;
+
+			beforeEach(function() {
+
+				session = {
+					access_token: 'token',
+					expires: ((new Date()).getTime() / 1e3) + 1000,
+					scope: 'basic'
+				};
+
+				hello.utils.store = function() {
+					return session;
+				};
+			});
+
+			afterEach(function() {
+
+				hello.utils.store = _store;
+			});
+
+			it('should not trigger the popup if there is a valid session', function(done) {
+
+				var spy = sinon.spy(done.bind(null, new Error('window.open should not be called')));
+				window.open = spy;
+
+				hello('testable').login({force: false}).then(function(r) {
+					expect(spy.notCalled).to.be.ok();
+					expect(r.authResponse).to.eql(session);
+					done();
+				});
+			});
+
+			it('should trigger the popup if the token has expired', function(done) {
+
+				var spy = sinon.spy(function() {
+					done();
+				});
+
+				window.open = spy;
+
+				session.expires = ((new Date()).getTime() / 1e3) - 1000;
+
+				hello('testable').login({force: false});
+			});
+
+			it('should trigger the popup if the scopes have changed', function(done) {
+
+				var spy = sinon.spy(function() {
+					done();
+				});
+
+				window.open = spy;
+
+				hello('testable').login({force: false, scope: 'not-basic'});
+			});
+		});
 	});
 
 });

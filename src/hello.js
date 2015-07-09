@@ -261,6 +261,7 @@ hello.utils.extend(hello, {
 		// Scopes (authentication permisions)
 		// Ensure this is a string - IE has a problem moving Arrays between windows
 		// Append the setup scope
+		var SCOPE_SPLIT = /[,\s]+/;
 		var scope = (opts.scope || '').toString() + ',' + p.qs.scope;
 
 		// Append scopes from a previous session.
@@ -272,7 +273,7 @@ hello.utils.extend(hello, {
 
 		// Convert scope to an Array
 		// - easier to manipulate
-		scope = scope.split(/[,\s]+/);
+		scope = scope.split(SCOPE_SPLIT);
 
 		// Format remove duplicates and empty values
 		scope = utils.unique(scope).filter(filterEmpty);
@@ -303,7 +304,7 @@ hello.utils.extend(hello, {
 		});
 
 		// Stringify and Arrayify so that double mapped scopes are given the chance to be formatted
-		scope = scope.join(',').split(/[,\s]+/);
+		scope = scope.join(',').split(SCOPE_SPLIT);
 
 		// Again...
 		// Format remove duplicates and empty values
@@ -317,7 +318,7 @@ hello.utils.extend(hello, {
 
 			if (session && 'access_token' in session && session.access_token && 'expires' in session && session.expires > ((new Date()).getTime() / 1e3)) {
 				// What is different about the scopes in the session vs the scopes in the new login?
-				var diff = utils.diff(session.scope || [], p.qs.state.scope || []);
+				var diff = utils.diff((session.scope || '').split(SCOPE_SPLIT), (p.qs.state.scope || '').split(SCOPE_SPLIT));
 				if (diff.length === 0) {
 
 					// OK trigger the callback
