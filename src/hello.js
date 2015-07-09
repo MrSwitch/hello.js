@@ -606,26 +606,32 @@ hello.utils.extend(hello.utils, {
 	},
 
 	// Local storage facade
-	store: (function(localStorage) {
+	store: (function() {
 
-		var a = [localStorage, window.sessionStorage];
+		var a = ['localStorage', 'sessionStorage'];
 		var i = 0;
+		var prefix = 'test';
 
 		// Set LocalStorage
-		localStorage = a[i++];
+		var localStorage;
 
-		while (localStorage) {
+		while (a[i++]) {
 			try {
-				localStorage.setItem(i, i);
-				localStorage.removeItem(i);
+				// In Chrome with cookies blocked, calling localStorage throws an error
+				localStorage = window[a[i]];
+				localStorage.setItem(prefix + i, i);
+				localStorage.removeItem(prefix + i);
 				break;
 			}
 			catch (e) {
-				localStorage = a[i++];
+				localStorage = null;
 			}
 		}
 
 		if (!localStorage) {
+
+			var cache = null;
+
 			localStorage = {
 				getItem: function(prop) {
 					prop = prop + '=';
@@ -637,13 +643,17 @@ hello.utils.extend(hello.utils, {
 						}
 					}
 
-					return null;
+					return cache;
 				},
 
 				setItem: function(prop, value) {
+					cache = value;
 					document.cookie = prop + '=' + value;
 				}
 			};
+
+			// Fill the cache up
+			cache = localStorage.getItem('hello');
 		}
 
 		function get() {
@@ -689,7 +699,7 @@ hello.utils.extend(hello.utils, {
 			return json || null;
 		};
 
-	})(window.localStorage),
+	})(),
 
 	// Create and Append new DOM elements
 	// @param node string
