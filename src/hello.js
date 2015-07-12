@@ -1928,7 +1928,7 @@ hello.utils.extend(hello.utils, {
 		}
 
 		// Check if the browser and service support CORS
-		var cors = this.request_cors(function(){
+		var cors = this.request_cors(function() {
 			// If it does then run this...
 			return (!('xhr' in p) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))));
 		});
