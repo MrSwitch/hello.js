@@ -1,16 +1,18 @@
-// hello.chromeapp.js
+// Script to support ChromeApps
 // This overides the hello.utils.popup method to support chrome.identity.launchWebAuthFlow
 // See https://developer.chrome.com/apps/app_identity#non
 
 // Is this a chrome app?
+
 if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.identity.launchWebAuthFlow) {
 
-	(function(){
+	(function() {
 
 		// Swap the popup method
+
 		hello.utils.popup = function(url) {
-			
-			_open(url,true);
+
+			_open(url, true);
 
 			return {
 				closed: false
@@ -18,41 +20,52 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 		};
 
 		// Swap the request_cors method
+
 		hello.utils.request_cors = function(callback) {
+
 			callback();
-			// Always run as cors
+
+			// Always run as CORS
+
 			return true;
-		}
+		};
 
 		// Open function
-		function _open(url,interactive) {
-			// Launch 
+		function _open(url, interactive) {
+
+			// Launch
+
 			chrome.identity.launchWebAuthFlow({
 				url: url,
 				interactive: interactive
-			}, function(response_url) {
+			}, function(responseUrl) {
 
 				// Split appart the URL
-				var a = hello.utils.url(response_url);
+
+				var a = hello.utils.url(responseUrl);
 
 				// The location can be augmented in to a location object like so...
 				// We dont have window operations on the popup so lets create some
 
 				var _popup = {
 					location: {
+
 						// Change the location of the popup
-						assign(url){
+
+						assign: function(url) {
+
 							// If there is a secondary reassign
 							// In the case of OAuth1
 							// Trigger this in non-interactive mode.
-							_open(url,false);
+
+							_open(url, false);
 						},
 
 						search: a.search,
 						hash: a.hash,
 						href: a.href
 					},
-					close(){}
+					close: function() {}
 				};
 
 				// Then this URL contains information which HelloJS must process
@@ -63,7 +76,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				hello.utils.responseHandler(_popup, window);
 			});
 		}
-
 
 	})();
 }
