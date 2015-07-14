@@ -8,17 +8,14 @@ var location_https = window.location.href.indexOf('https://') === 0;
 
 // Register your domain with Facebook at  and add here
 var FACEBOOK_CLIENT_ID = {
-	'adodson.com' : '160981280706879',
 	'local.knarly.com' : '285836944766385',
-	'mrswitch.github.com' : '304672569582045'
-}[window.location.hostname];
+}[window.location.hostname] || '160981280706879';
+
 
 // Register your domain with Windows Live at http://manage.dev.live.com and add here
 var WINDOWS_CLIENT_ID = {
-	'adodson.com' : '00000000400D8578',
-	'mrswitch.github.com' : '0000000044088105',
 	'local.knarly.com' : '000000004405FD31'
-}[window.location.hostname];
+}[window.location.hostname] || '00000000400D8578';
 
 
 // Google Register --  https://console.developers.google.com
@@ -43,9 +40,8 @@ var YAHOO_CLIENT_ID = {
 }[window.location.hostname];
 
 var TWITTER_CLIENT_ID = {
-	'local.knarly.com' : 'krGNvpEVVBE27jcemC6uA',
-	'adodson.com' : 'eQuyZuECKWPiv3D7E4qdg'
-}[window.location.hostname];
+	'local.knarly.com' : 'krGNvpEVVBE27jcemC6uA'
+}[window.location.hostname] || 'eQuyZuECKWPiv3D7E4qdg';
 
 
 // SoundCloud Register - http://soundcloud.com/you/apps/
@@ -110,3 +106,13 @@ var TUMBLR_CLIENT_ID = {
 var OAUTH_PROXY_URL = {
 	'local.knarly.com' : 'http://local.knarly.com:5500/proxy'
 }[window.location.hostname] || 'https://auth-server.herokuapp.com/proxy';
+
+
+
+//
+// Redirect URI
+//
+var REDIRECT_URI = '/hello.js/redirect.html';
+if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.identity.launchWebAuthFlow) {
+	REDIRECT_URI = 'https://'+window.location.hostname+'.chromiumapp.org/redirect.html';
+}
