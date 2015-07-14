@@ -46,24 +46,12 @@ define([
 			delete hello.services.testable;
 		});
 
-		var _open;
-
-		before(function() {
-			_open = window.open;
-		});
+		var utils = hello.utils;
+		var _open = utils.popup;
 
 		after(function() {
-			window.open = _open;
+			hello.utils.popup = _open;
 		});
-
-		function safariHack(url) {
-			var m = url.match(/\#oauth_redirect\=(.+)$/i);
-			if (m) {
-				url = decodeURIComponent(decodeURIComponent(m[1]));
-			}
-
-			return url;
-		}
 
 		it('should assign a complete event', function(done) {
 
@@ -98,7 +86,7 @@ define([
 
 			var spy = sinon.spy(function() {done();});
 
-			window.open = spy;
+			utils.popup = spy;
 
 			hello.login('testable');
 		});
@@ -107,14 +95,12 @@ define([
 
 			var spy = sinon.spy(function(url, name, optins) {
 
-				url = safariHack(url);
-
 				expect(url).to.contain('scope=' + hello.services.testable.scope.basic);
 
 				done();
 			});
 
-			window.open = spy;
+			utils.popup = spy;
 
 			hello.login('testable');
 		});
@@ -125,9 +111,7 @@ define([
 
 				var REDIRECT_URI = 'http://dummydomain.com/';
 
-				var spy = sinon.spy(function(url, name, optins) {
-
-					url = safariHack(url);
+				var spy = sinon.spy(function(url, name, options) {
 
 					var params = hello.utils.param(url.split('?')[1]);
 
@@ -136,7 +120,7 @@ define([
 					done();
 				});
 
-				window.open = spy;
+				utils.popup = spy;
 
 				hello.login('testable', {redirect_uri:REDIRECT_URI});
 			});
@@ -147,15 +131,13 @@ define([
 
 				var spy = sinon.spy(function(url, name, optins) {
 
-					url = safariHack(url);
-
 					expect(url).to.not.contain(REDIRECT_URI);
 					expect(url).to.contain(encodeURIComponent(REDIRECT_URI));
 
 					done();
 				});
 
-				window.open = spy;
+				utils.popup = spy;
 
 				hello.login('testable', {redirect_uri:REDIRECT_URI});
 			});
@@ -166,8 +148,6 @@ define([
 
 				var spy = sinon.spy(function(url, name, optins) {
 
-					url = safariHack(url);
-
 					var params = hello.utils.param(url.split('?')[1]);
 
 					expect(params.scope).to.contain(customScope);
@@ -175,7 +155,7 @@ define([
 					done();
 				});
 
-				window.open = spy;
+				utils.popup = spy;
 
 				hello.login('testable', {scope: customScope});
 			});
@@ -186,8 +166,6 @@ define([
 
 				var spy = sinon.spy(function(url, name, optins) {
 
-					url = safariHack(url);
-
 					// Parse parameters
 					var params = hello.utils.param(url.split('?')[1]);
 
@@ -195,7 +173,7 @@ define([
 					done();
 				});
 
-				window.open = spy;
+				utils.popup = spy;
 
 				hello.login('testable', {scope: commonScope});
 			});
@@ -208,8 +186,6 @@ define([
 
 				var spy = sinon.spy(function(url, name, optins) {
 
-					url = safariHack(url);
-
 					// Parse parameters
 					var params = hello.utils.param(url.split('?')[1]);
 
@@ -217,7 +193,7 @@ define([
 					done();
 				});
 
-				window.open = spy;
+				utils.popup = spy;
 
 				hello.login('testable', {scope: paddedScope});
 			});
@@ -242,13 +218,11 @@ define([
 
 				var spy = sinon.spy(function(url, name, optins) {
 
-					url = safariHack(url);
-
 					expect(url).to.contain(basicScope.replace(/[\+\,\s]/, scopeDelim));
 					done();
 				});
 
-				window.open = spy;
+				utils.popup = spy;
 
 				hello.login('test_delimit_scope');
 			});
@@ -261,13 +235,11 @@ define([
 
 				var spy = sinon.spy(function(url, name) {
 
-					url = safariHack(url);
-
 					expect(url).to.contain('code%20grant_scopes');
 					done();
 				});
 
-				window.open = spy;
+				utils.popup = spy;
 
 				hello.login('testable', opts);
 			});
@@ -282,13 +254,11 @@ define([
 
 				var spy = sinon.spy(function(url, name) {
 
-					url = safariHack(url);
-
 					expect(url).to.contain('token%20grant_scopes');
 					done();
 				});
 
-				window.open = spy;
+				utils.popup = spy;
 
 				hello.login('testable', opts);
 			});
@@ -299,16 +269,14 @@ define([
 			it('should give the popup the default options', function(done) {
 
 				var spy = sinon.spy(function(url, name, options) {
-					expect(options).to.contain('resizable=1');
-					expect(options).to.contain('scrollbars=1');
-					expect(options).to.contain('width=500');
-					expect(options).to.contain('height=550');
-					expect(options).to.contain('top');
-					expect(options).to.contain('left');
+					expect(options.resizable).to.eql('1');
+					expect(options.scrollbars).to.eql('1');
+					expect(options.width).to.eql('500');
+					expect(options.height).to.eql('550');
 					done();
 				});
 
-				window.open = spy;
+				utils.popup = spy;
 
 				hello.login('testable');
 			});
@@ -316,13 +284,13 @@ define([
 			it('should allow the popup options to be overridden', function(done) {
 
 				var spy = sinon.spy(function(url, name, options) {
-					expect(options).to.contain('location=no');
-					expect(options).to.contain('toolbar=no');
-					expect(options).to.contain('hidden=true');
+					expect(options.location).to.eql('no');
+					expect(options.toolbar).to.eql('no');
+					expect(options.hidden).to.eql(true);
 					done();
 				});
 
-				window.open = spy;
+				utils.popup = spy;
 
 				hello.login('testable', {
 					popup: {
@@ -360,7 +328,7 @@ define([
 			it('should not trigger the popup if there is a valid session', function(done) {
 
 				var spy = sinon.spy(done.bind(null, new Error('window.open should not be called')));
-				window.open = spy;
+				utils.popup = spy;
 
 				hello('testable').login({force: false}).then(function(r) {
 					expect(spy.notCalled).to.be.ok();
@@ -375,7 +343,7 @@ define([
 					done();
 				});
 
-				window.open = spy;
+				utils.popup = spy;
 
 				session.expires = ((new Date()).getTime() / 1e3) - 1000;
 
@@ -388,7 +356,7 @@ define([
 					done();
 				});
 
-				window.open = spy;
+				utils.popup = spy;
 
 				hello('testable').login({force: false, scope: 'not-basic'});
 			});
