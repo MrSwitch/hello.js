@@ -25,15 +25,15 @@
 
 <script class="pre">
 function getActivities(network){
-	hello.login( network, function(){
+	var hi = hello(network);
+	hi.login({scope:'share'}).then(function(){
 		// Get the friends
-		hello.api( network +':/me/share', function(r){
-			for(var i=0;i<r.data.length;i++){
-				var o = r.data[i];
+		hi.api('me/share').then(function(r){
+			r.data.forEach(function(o){
 				var li = document.createElement('li');
 				li.innerHTML = o.name || o.message || o.story || o.title;
 				document.getElementById('list').appendChild(li);
-			};
+			});
 		});
 	});
 }

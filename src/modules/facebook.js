@@ -17,6 +17,7 @@
 			scope: {
 				basic: 'public_profile',
 				email: 'email',
+				share: 'user_posts',
 				birthday: 'user_birthday',
 				events: 'user_events',
 				photos: 'user_photos,user_videos',

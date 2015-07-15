@@ -236,6 +236,7 @@ var tests = [
 		api : "api",
 		method : 'get',
 		path : 'me/share',
+		scope : ["share"],
 		data : query,
 		expected : {
 			data : []
