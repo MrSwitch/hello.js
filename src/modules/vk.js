@@ -76,7 +76,7 @@
 			if (vk != null && vk.email != null)
 				o.email = vk.email;
 		}
-		
+
 		return o;
 	}
 })(hello);
