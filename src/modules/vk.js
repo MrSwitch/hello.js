@@ -26,8 +26,7 @@
 			login: function(p) {
 				p.qs.display = window.navigator &&
 					window.navigator.userAgent &&
-					/ipad|phone|phone|android/.test(window.navigator.userAgent.toLowerCase())
-					? 'mobile' : 'popup';
+					/ipad|phone|phone|android/.test(window.navigator.userAgent.toLowerCase()) ? 'mobile' : 'popup';
 			},
 
 			// API Base URL
@@ -65,7 +64,7 @@
 
 	function formatUser(o) {
 
-		if (o != null && o.response != null && o.response.length) {
+		if (o !== null && o.response !== null && o.response.length) {
 			o = o.response[0];
 			o.id = o.uid;
 			o.thumbnail = o.picture = o.photo_max;
@@ -73,7 +72,7 @@
 
 			var vk = hello.utils.store('vk');
 
-			if (vk != null && vk.email != null)
+			if (vk !== null && vk.email !== null)
 				o.email = vk.email;
 		}
 
