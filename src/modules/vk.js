@@ -1,8 +1,8 @@
 // Vkontakte (vk.com)
 (function(hello) {
-	
+
 	hello.init({
-		
+
 		vk: {
 			name: 'Vk',
 
@@ -50,11 +50,11 @@
 
 			// All requests should be JSONP as of missing CORS headers in https://api.vk.com/method/*
 			jsonp: function(p, qs) {
-				
+
 				if (p.path === 'me') {
 					qs.fields = 'id,first_name,last_name,photo_max';
 				}
-				
+
 				return true;
 			},
 
@@ -72,6 +72,7 @@
 			o.name = o.first_name + ' ' + o.last_name;
 
 			var vk = hello.utils.store('vk');
+
 			if (vk != null && vk.email != null)
 				o.email = vk.email;
 		}
