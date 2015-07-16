@@ -94,7 +94,8 @@ var CLIENT_IDS_ALL = {
 	soundcloud : SOUNDCLOUD_CLIENT_ID,
 	foursquare : FOURSQUARE_CLIENT_ID,
 	github : GITHUB_CLIENT_ID,
-	flickr: FLICKR_CLIENT_ID
+	flickr: FLICKR_CLIENT_ID,
+	vk: VK_CLIENT_ID
 };
 
 var TUMBLR_CLIENT_ID = {
@@ -102,7 +103,7 @@ var TUMBLR_CLIENT_ID = {
 	'adodson.com' : 'BHKkYCvKt33lL34iM1yWUhkYRw1lqwifbKKTfgh5FAX5uBzzxn'
 }[window.location.hostname];
 
-
+var VK_CLIENT_ID = '4998483';
 
 //
 // OAUTH PROXY
