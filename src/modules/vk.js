@@ -12,7 +12,7 @@
 				auth: 'https://oauth.vk.com/authorize',
 				grant: 'https://oauth.vk.com/access_token'
 			},
-			
+
 			// Authorization scopes
 			scope: {
 				basic: '',
@@ -64,7 +64,7 @@
 	});
 
 	function formatUser(o) {
-		
+
 		if (o != null && o.response != null && o.response.length) {
 			o = o.response[0];
 			o.id = o.uid;
