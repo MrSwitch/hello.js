@@ -14,7 +14,8 @@ define([
 	'../../../src/modules/foursquare',
 	'../../../src/modules/github',
 	'../../../src/modules/bikeindex',
-	'../../../src/modules/soundcloud'
+	'../../../src/modules/soundcloud',
+	'../../../src/modules/vk',
 ], function(
 	errorResponse
 ) {
