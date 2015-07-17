@@ -156,8 +156,10 @@ define(['./helper'], function(helper) {
 					thumbnail: 'http://cs304605.vk.me/u434460/d_1acca7c0.jpg'
 				},
 				errorExpect: {
-					code: 'request_failed',
-					message: 'Bad Authentication data'
+					error: {
+						error_code: 10,
+						error_message: 'Internal server error: could not get application'
+					}
 				}
 			},
 			{
