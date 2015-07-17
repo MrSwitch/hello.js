@@ -103,7 +103,10 @@ var TUMBLR_CLIENT_ID = {
 	'adodson.com' : 'BHKkYCvKt33lL34iM1yWUhkYRw1lqwifbKKTfgh5FAX5uBzzxn'
 }[window.location.hostname];
 
-var VK_CLIENT_ID = '4998483';
+var VK_CLIENT_ID = {
+	'local.knarly.com' : '',
+	'adodson.com' : ''
+}[window.location.hostname];
 
 //
 // OAUTH PROXY
