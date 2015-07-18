@@ -10,7 +10,7 @@
 				version : "1.0a",
 				auth	: "http://api.smugmug.com/services/oauth/1.0a/authorize?Access=Full&Permissions=Modify",
 				//http://api.smugmug.com/services/oauth/1.0a/authorize?Access=Full&Permissions=Modify&allowThirdPartyLogin=0&showSignUpButton=false&viewportScale=1.0
-				request : "http://api.smugmug.com/services/oauth/1.0a/getRequestToken?oauth_callback=http://localhost:3000/redirect.html",
+				request : "http://api.smugmug.com/services/oauth/1.0a/getRequestToken",
 				token	: "http://api.smugmug.com/services/oauth/1.0a/getAccessToken"
 			},
 			refresh: true,
