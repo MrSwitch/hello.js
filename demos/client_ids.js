@@ -104,8 +104,8 @@ var TUMBLR_CLIENT_ID = {
 }[window.location.hostname];
 
 var VK_CLIENT_ID = {
-	'local.knarly.com' : '',
-	'adodson.com' : ''
+	'local.knarly.com' : '5001721',
+	'adodson.com' : '5001721'
 }[window.location.hostname];
 
 //

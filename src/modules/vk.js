@@ -64,7 +64,7 @@
 
 	function formatUser(o) {
 
-		if (o !== null && o.response !== null && o.response.length) {
+		if (o !== null && 'response' in o && o.response !== null && o.response.length) {
 			o = o.response[0];
 			o.id = o.uid;
 			o.thumbnail = o.picture = o.photo_max;
