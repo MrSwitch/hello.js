@@ -34,9 +34,9 @@
 
 			// Map GET requests
 			get: {
-				me: function(p,cb) {
+				me: function(p, callback) {
 					p.query.fields = 'id,first_name,last_name,photo_max';
-					cb('users.get');
+					callback('users.get');
 				}
 			},
 
@@ -44,7 +44,10 @@
 			post: false,
 
 			wrap: {
-				me: formatUser
+				me: function(res) {
+					formatError(res);
+					return formatUser(res);
+				}
 			},
 
 			// No XHR
@@ -74,4 +77,16 @@
 
 		return o;
 	}
+
+	function formatError(o) {
+
+		if (o.error) {
+			var e = o.error;
+			o.error = {
+				code: e.error_code,
+				message: e.error_msg
+			};
+		}
+	}
+
 })(hello);
