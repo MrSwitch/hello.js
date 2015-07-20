@@ -34,7 +34,10 @@
 
 			// Map GET requests
 			get: {
-				me: 'users.get'
+				me: function(p,cb) {
+					p.query.fields = 'id,first_name,last_name,photo_max';
+					cb('users.get');
+				}
 			},
 
 			// Map POST requests
@@ -48,14 +51,7 @@
 			xhr: false,
 
 			// All requests should be JSONP as of missing CORS headers in https://api.vk.com/method/*
-			jsonp: function(p, qs) {
-
-				if (p.path === 'me') {
-					qs.fields = 'id,first_name,last_name,photo_max';
-				}
-
-				return true;
-			},
+			jsonp: true,
 
 			// No form
 			form: false
