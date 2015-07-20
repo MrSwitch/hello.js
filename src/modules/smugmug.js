@@ -6,12 +6,11 @@
 		smugmug: {
 			name: 'SmugMug',
 
-			oauth : {
-				version : "1.0a",
-				auth	: "http://api.smugmug.com/services/oauth/1.0a/authorize?Access=Full&Permissions=Modify",
-				//http://api.smugmug.com/services/oauth/1.0a/authorize?Access=Full&Permissions=Modify&allowThirdPartyLogin=0&showSignUpButton=false&viewportScale=1.0
-				request : "http://api.smugmug.com/services/oauth/1.0a/getRequestToken",
-				token	: "http://api.smugmug.com/services/oauth/1.0a/getAccessToken"
+			oauth: {
+				version: "1.0a",
+				auth: 'http://api.smugmug.com/services/oauth/1.0a/authorize',
+				request: 'http://api.smugmug.com/services/oauth/1.0a/getRequestToken',
+				token: 'http://api.smugmug.com/services/oauth/1.0a/getAccessToken'
 			},
 			refresh: true,
 
