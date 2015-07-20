@@ -7,7 +7,7 @@
 			name: 'SmugMug',
 
 			oauth: {
-				version: "1.0a",
+				version: '1.0a',
 				auth: 'http://api.smugmug.com/services/oauth/1.0a/authorize',
 				request: 'http://api.smugmug.com/services/oauth/1.0a/getRequestToken',
 				token: 'http://api.smugmug.com/services/oauth/1.0a/getAccessToken'
