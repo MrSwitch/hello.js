@@ -17,7 +17,7 @@
 				p.options.window_width = 710;
 			},
 
-			base: 'https://api.smugmug.com/api/v2',
+			base: 'https://api.smugmug.com/api/v2'
 
 		}
 	});
