@@ -108,6 +108,8 @@ var VK_CLIENT_ID = {
 	'adodson.com' : '5001721'
 }[window.location.hostname];
 
+var SMUGMUG_CLIENT_ID = 'NFfNfAK47ZfnkMl4EjO48pgEQQWCMFJu';
+
 //
 // OAUTH PROXY
 //
