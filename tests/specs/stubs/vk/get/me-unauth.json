@@ -1,0 +1,1 @@
+{"error":{"error_code":10,"error_msg":"Internal server error: could not get application","request_params":[{"key":"oauth","value":"1"},{"key":"method","value":"users.get"},{"key":"callback","value":"_hellojs_5c6ie2u7"},{"key":"fields","value":"id,first_name,last_name,contacts,photo_max"}]}}

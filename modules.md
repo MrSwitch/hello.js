@@ -97,6 +97,11 @@ The table shows the services which are already documented on HelloJS. Simply inc
 			<td></td>
 		</tr>
 		<tr>
+			<td><a href="./src/modules/vk.js">vk.js</a></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
 			<td><a href="./src/modules/windows.js">windows.js</a></td>
 			<td></td>
 			<td></td>
