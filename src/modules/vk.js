@@ -44,9 +44,9 @@
 			post: false,
 
 			wrap: {
-				me: function(res) {
+				me: function(res, headers, req) {
 					formatError(res);
-					return formatUser(res);
+					return formatUser(res, req);
 				}
 			},
 
@@ -61,7 +61,7 @@
 		}
 	});
 
-	function formatUser(o) {
+	function formatUser(o, req) {
 
 		if (o !== null && 'response' in o && o.response !== null && o.response.length) {
 			o = o.response[0];
@@ -69,10 +69,8 @@
 			o.thumbnail = o.picture = o.photo_max;
 			o.name = o.first_name + ' ' + o.last_name;
 
-			var vk = hello.utils.store('vk');
-
-			if (vk !== null && vk.email !== null)
-				o.email = vk.email;
+			if (req.authResponse && req.authResponse.email !== null)
+				o.email = req.authResponse.email;
 		}
 
 		return o;
