@@ -6,36 +6,21 @@
 <script src="client_ids.js"></script>
 <script src="../src/hello.polyfill.js"></script>
 <script src="../src/hello.js"></script>
+<script src="../src/hello.chromeapp.js"></script>
 <script src="../src/modules/windows.js"></script>
 <script src="../src/modules/facebook.js"></script>
 <script src="../src/modules/google.js"></script>
+<script src="../src/modules/twitter.js"></script>
 
 <h1>hello.api( me )</h1>
-<button id='google' onclick="hello.login('google');">google</button>
-<button id='facebook' onclick="hello.login('facebook');">facebook</button>
-<button id='windows' onclick="hello.login('windows');">windows</button>
 
 <p>Listen to the event "auth.login", and call <code>hello( network ).api( 'me' ).then( handler )</code></p>
 
-<script class="pre">
-hello.on('auth.login', function(r){
-	// Get Profile
-	hello( r.network ).api( '/me' ).then( function(p){
-		var label = document.getElementById(r.network)
-		label.innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
-	});
-});
-</script>
+<h2>Demo</h2>
+<button id='google' class="profile">google</button>
+<button id='facebook' class="profile">facebook</button>
+<button id='windows' class="profile">windows</button>
+<button id='twitter' class="profile">twitter</button>
 
-<p>Intiate App credentials</p>
-
-<script class="pre">
-hello.init({
-	google : CLIENT_IDS.google,
-	windows : CLIENT_IDS.windows,
-	facebook : CLIENT_IDS.facebook
-},{
-	scope : 'email',
-	redirect_uri:'../redirect.html'
-});
-</script>
+<h2>Code</h2>
+<script src="helper/uiProfile.js" class="pre"></script>

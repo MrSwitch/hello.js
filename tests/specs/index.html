@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 		<title>HelloJS Unit and E2E tests</title>
 		<link href="../../assets/mocha/mocha.css" media="screen" rel="stylesheet" type="text/css" />
+		<style>html,body{overflow:auto;-webkit-user-select: text;}</style>
 	</head>
 	<body>
 		<!-- Required for browser reporter -->
@@ -22,52 +23,9 @@
 		<script src="../../src/hello.polyfill.js"></script>
 <![endif]-->
 		<script src="../../src/hello.js"></script>
+		<script src="../../src/hello.chromeapp.js"></script>
 		<script src="../../src/hello.commonjs.js"></script>
+		<script src="./index.js"></script>
 
-		<script>
-			mocha.ui('bdd');
-		</script>
-
-		<script>
-
-			// Load
-			require([
-
-				// Utils
-				'./unit/utils/args',
-				'./unit/utils/clone',
-				'./unit/utils/dataToJSON',
-				'./unit/utils/diff',
-				'./unit/utils/domInstance',
-				'./unit/utils/events',
-				'./unit/utils/extend',
-				'./unit/utils/merge',
-				'./unit/utils/param',
-				'./unit/utils/qs',
-				'./unit/utils/responseHandler',
-				'./unit/utils/store',
-				'./unit/utils/toBlob',
-				'./unit/utils/url',
-
-				// Core
-				'./unit/core/hello.api',
-				'./unit/core/hello.getAuthResponse',
-				'./unit/core/hello.init',
-				'./unit/core/hello.login',
-				'./unit/core/hello.logout',
-				'./unit/core/hello.use',
-				'./unit/core/hello.events',
-
-				// Modules
-				'./unit/modules/index',
-
-				// E2E
-				'./e2e/modules'
-
-			], function(){
-				if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
-				else { mocha.run(); }
-			});
-		</script>
 	</body>
 </html>

@@ -1928,10 +1928,12 @@ hello.utils.extend(hello.utils, {
 		}
 
 		// Check if the browser and service support CORS
-		if (
-			'withCredentials' in new XMLHttpRequest() &&
-			(!('xhr' in p) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))))
-		) {
+		var cors = this.request_cors(function() {
+			// If it does then run this...
+			return (!('xhr' in p) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))));
+		});
+
+		if (cors) {
 
 			formatUrl(p, function(url) {
 
@@ -2066,6 +2068,11 @@ hello.utils.extend(hello.utils, {
 
 			callback(path);
 		}
+	},
+
+	// Test whether the browser supports the CORS response
+	request_cors: function(callback) {
+		return 'withCredentials' in new XMLHttpRequest() && callback();
 	},
 
 	// Return the type of DOM object
