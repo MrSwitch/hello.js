@@ -3,11 +3,17 @@
 
 
 // Listen to signin requests
-hello.on('auth.login', function(r){
+hello.on('auth.login', function(r) {
 	// Get Profile
-	hello( r.network ).api( '/me' ).then( function(p){
-		var label = document.getElementById(r.network)
+	hello( r.network ).api( '/me' ).then( function(p) {
+		var label = document.getElementById(r.network);
 		label.innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
+
+		// On chrome apps we're not able to get remote images
+		// This is a workaround
+		if (typeof(chrome) === 'object') {
+			img_xhr(label.getElementsByTagName('img')[0], p.thumbnail);
+		}
 	});
 });
 
@@ -31,3 +37,14 @@ b.forEach(function(btn){
 		hello(this.id).login();
 	};
 });
+
+// Utility for loading the thumbnail in chromeapp
+function img_xhr(img, url) {
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', url, true);
+	xhr.responseType = 'blob';
+	xhr.onload = function(e) {
+		img.src = window.URL.createObjectURL(this.response);
+	};
+	xhr.send();
+}
