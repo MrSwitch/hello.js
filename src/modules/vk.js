@@ -40,9 +40,6 @@
 				}
 			},
 
-			// Map POST requests
-			post: false,
-
 			wrap: {
 				me: function(res, headers, req) {
 					formatError(res);
