@@ -34,12 +34,14 @@ module.exports = function(grunt) {
 				'dist/hello.js': [
 					'src/hello.polyfill.js',
 					'src/hello.js',
+					'src/hello.chromeapp.js',
 					'src/hello.amd.js',
 					'src/hello.commonjs.js'
 				],
 				'dist/hello.all.js': [
 					'src/hello.polyfill.js',
 					'src/hello.js',
+					'src/hello.chromeapp.js',
 					'src/modules/dropbox.js',
 					'src/modules/facebook.js',
 					'src/modules/flickr.js',
@@ -50,6 +52,7 @@ module.exports = function(grunt) {
 					'src/modules/linkedin.js',
 					'src/modules/soundcloud.js',
 					'src/modules/twitter.js',
+					'src/modules/vk.js',
 					'src/modules/windows.js',
 					'src/modules/yahoo.js',
 					'src/hello.amd.js',

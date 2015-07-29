@@ -1,4 +1,4 @@
-/*! hellojs v1.7.5 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.8.0 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -607,13 +607,14 @@ hello.utils.extend(hello, {
 
 		// Network
 		p.name = p.name || this.settings.default_service;
+		p.authResponse = utils.store(p.name);
 
 		if (p.name && !(p.name in _this.services)) {
 
 			promise.reject(error('invalid_network', 'The network was unrecognized'));
 
 		}
-		else if (p.name && utils.store(p.name)) {
+		else if (p.name && p.authResponse) {
 
 			// Define the callback
 			var callback = function(opts) {
@@ -633,7 +634,7 @@ hello.utils.extend(hello, {
 					// Convert logout to URL string,
 					// If no string is returned, then this function will handle the logout async style
 					if (typeof (logout) === 'function') {
-						logout = logout(callback);
+						logout = logout(callback, p);
 					}
 
 					// If logout is a string then assume URL and open in iframe.
@@ -1899,12 +1900,11 @@ hello.api = function() {
 		p.timeout = _this.settings.timeout;
 	}
 
-	//
 	// Get the current session
 	// Append the access_token to the query
-	var session = _this.getAuthResponse(p.network);
-	if (session && session.access_token) {
-		p.query.access_token = session.access_token;
+	p.authResponse = _this.getAuthResponse(p.network);
+	if (p.authResponse && p.authResponse.access_token) {
+		p.query.access_token = p.authResponse.access_token;
 	}
 
 	var url = p.path;
@@ -2081,10 +2081,12 @@ hello.utils.extend(hello.utils, {
 		}
 
 		// Check if the browser and service support CORS
-		if (
-			'withCredentials' in new XMLHttpRequest() &&
-			(!('xhr' in p) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))))
-		) {
+		var cors = this.request_cors(function() {
+			// If it does then run this...
+			return (!('xhr' in p) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))));
+		});
+
+		if (cors) {
 
 			formatUrl(p, function(url) {
 
@@ -2219,6 +2221,11 @@ hello.utils.extend(hello.utils, {
 
 			callback(path);
 		}
+	},
+
+	// Test whether the browser supports the CORS response
+	request_cors: function(callback) {
+		return 'withCredentials' in new XMLHttpRequest() && callback();
 	},
 
 	// Return the type of DOM object
@@ -2824,6 +2831,88 @@ hello.utils.extend(hello.utils, {
 
 })(hello);
 
+// Script to support ChromeApps
+// This overides the hello.utils.popup method to support chrome.identity.launchWebAuthFlow
+// See https://developer.chrome.com/apps/app_identity#non
+
+// Is this a chrome app?
+
+if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.identity.launchWebAuthFlow) {
+
+	(function() {
+
+		// Swap the popup method
+
+		hello.utils.popup = function(url) {
+
+			_open(url, true);
+
+			return {
+				closed: false
+			};
+		};
+
+		// Swap the request_cors method
+
+		hello.utils.request_cors = function(callback) {
+
+			callback();
+
+			// Always run as CORS
+
+			return true;
+		};
+
+		// Open function
+		function _open(url, interactive) {
+
+			// Launch
+
+			chrome.identity.launchWebAuthFlow({
+				url: url,
+				interactive: interactive
+			}, function(responseUrl) {
+
+				// Split appart the URL
+
+				var a = hello.utils.url(responseUrl);
+
+				// The location can be augmented in to a location object like so...
+				// We dont have window operations on the popup so lets create some
+
+				var _popup = {
+					location: {
+
+						// Change the location of the popup
+
+						assign: function(url) {
+
+							// If there is a secondary reassign
+							// In the case of OAuth1
+							// Trigger this in non-interactive mode.
+
+							_open(url, false);
+						},
+
+						search: a.search,
+						hash: a.hash,
+						href: a.href
+					},
+					close: function() {}
+				};
+
+				// Then this URL contains information which HelloJS must process
+				// URL string
+				// Window - any action such as window relocation goes here
+				// Opener - the parent window which opened this, aka this script
+
+				hello.utils.responseHandler(_popup, window);
+			});
+		}
+
+	})();
+}
+
 (function(hello) {
 
 	hello.init({
@@ -3065,6 +3154,7 @@ hello.utils.extend(hello.utils, {
 			scope: {
 				basic: 'public_profile',
 				email: 'email',
+				share: 'user_posts',
 				birthday: 'user_birthday',
 				events: 'user_events',
 				photos: 'user_photos,user_videos',
@@ -3101,11 +3191,11 @@ hello.utils.extend(hello.utils, {
 				p.options.popup.height = 400;
 			},
 
-			logout: function(callback) {
+			logout: function(callback, options) {
 				// Assign callback to a global handler
 				var callbackID = hello.utils.globalEvent(callback);
 				var redirect = encodeURIComponent(hello.settings.redirect_uri + '?' + hello.utils.param({callback:callbackID, result: JSON.stringify({force:true}), state: '{}'}));
-				var token = (hello.utils.store('facebook') || {}).access_token;
+				var token = (options.authResponse || {}).access_token;
 				hello.utils.iframe('https://www.facebook.com/logout.php?next=' + redirect + '&access_token=' + token);
 
 				// Possible responses:
@@ -4927,6 +5017,94 @@ hello.utils.extend(hello.utils, {
 		};
 	}
 	*/
+
+})(hello);
+
+// Vkontakte (vk.com)
+(function(hello) {
+
+	hello.init({
+
+		vk: {
+			name: 'Vk',
+
+			// See https://vk.com/dev/oauth_dialog
+			oauth: {
+				version: 2,
+				auth: 'https://oauth.vk.com/authorize',
+				grant: 'https://oauth.vk.com/access_token'
+			},
+
+			// Authorization scopes
+			scope: {
+				basic: '',
+				email: 'email',
+				offline_access: 'offline'
+			},
+
+			// Refresh the access_token
+			refresh: true,
+
+			login: function(p) {
+				p.qs.display = window.navigator &&
+					window.navigator.userAgent &&
+					/ipad|phone|phone|android/.test(window.navigator.userAgent.toLowerCase()) ? 'mobile' : 'popup';
+			},
+
+			// API Base URL
+			base: 'https://api.vk.com/method/',
+
+			// Map GET requests
+			get: {
+				me: function(p, callback) {
+					p.query.fields = 'id,first_name,last_name,photo_max';
+					callback('users.get');
+				}
+			},
+
+			wrap: {
+				me: function(res, headers, req) {
+					formatError(res);
+					return formatUser(res, req);
+				}
+			},
+
+			// No XHR
+			xhr: false,
+
+			// All requests should be JSONP as of missing CORS headers in https://api.vk.com/method/*
+			jsonp: true,
+
+			// No form
+			form: false
+		}
+	});
+
+	function formatUser(o, req) {
+
+		if (o !== null && 'response' in o && o.response !== null && o.response.length) {
+			o = o.response[0];
+			o.id = o.uid;
+			o.thumbnail = o.picture = o.photo_max;
+			o.name = o.first_name + ' ' + o.last_name;
+
+			if (req.authResponse && req.authResponse.email !== null)
+				o.email = req.authResponse.email;
+		}
+
+		return o;
+	}
+
+	function formatError(o) {
+
+		if (o.error) {
+			var e = o.error;
+			o.error = {
+				code: e.error_code,
+				message: e.error_msg
+			};
+		}
+	}
 
 })(hello);
 
