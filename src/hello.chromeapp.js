@@ -36,27 +36,30 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 		var _cache = {};
 		chrome.storage.local.get('hello', function(r) {
 			// Update the cache
-			_cache = r['hello'];
+			_cache = r.hello;
 		});
 
 		hello.utils.store = function(name, value) {
 
 			// Get all
-			if(arguments.length === 0) {
+			if (arguments.length === 0) {
 				return _cache;
 			}
+
 			// Get
-			if(arguments.length === 1) {
+			if (arguments.length === 1) {
 				return _cache[name] || null;
 			}
+
 			// Set
-			if(value) {
+			if (value) {
 				_cache[name] = value;
 				chrome.storage.local.set({hello: _cache});
 				return value;
 			}
+
 			// Delete
-			if(value === null) {
+			if (value === null) {
 				delete _cache[name];
 				chrome.storage.local.set({hello: _cache});
 				return null;
@@ -68,7 +71,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 			// Launch
 			var ref = {
-				closed : false
+				closed: false
 			};
 
 			// Launch the webAuthFlow
