@@ -42,22 +42,40 @@
 					var data = p.data;
 					p.data = null;
 
+					var status = [];
+
 					// Change message to status
 					if (data.message) {
-						data.status = data.message;
+						status.push(data.message);
 						delete data.message;
+					}
+
+					// If link is given
+					if (data.link) {
+						status.push(data.link);
+						delete data.link;
+					}
+
+					if (data.picture) {
+						status.push(data.picture);
+						delete data.picture;
+					}
+
+					// Compound all the components
+					if (status.length) {
+						data.status = status.join(' ');
 					}
 
 					// Tweet media
 					if (data.file) {
 						data['media[]'] = data.file;
 						delete data.file;
-						p.data = file;
+						p.data = data;
 						callback('statuses/update_with_media.json');
 					}
 
 					// Retweet?
-					else if (data.id) {
+					else if ('id' in data) {
 						callback('statuses/retweet/' + data.id + '.json');
 					}
 
