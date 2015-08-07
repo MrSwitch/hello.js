@@ -552,7 +552,7 @@ hello.utils.extend(hello.utils, {
 			for (var x in params) {
 				var str = '([\\?\\&])' + x + '=[^\\&]*';
 				reg = new RegExp(str);
-				if (url.match(x)) {
+				if (url.match(reg)) {
 					url = url.replace(reg, '$1' + x + '=' + formatFunction(params[x]));
 					delete params[x];
 				}

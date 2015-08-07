@@ -12,9 +12,9 @@ define([], function() {
 
 		it('should append arguments to a url', function() {
 
-			var value = u.qs('https://api.com/path?q=%22root%22+in+parents+and+trashed=false&maxResults=5', {access_token:'token'});
+			var value = u.qs('https://api.com/path?q=%22root%22+in+parents+and+trashed=false&maxResults=5', {access_token:'token', path: 'path'});
 
-			expect(value).to.eql('https://api.com/path?q=%22root%22+in+parents+and+trashed=false&maxResults=5&access_token=token');
+			expect(value).to.eql('https://api.com/path?q=%22root%22+in+parents+and+trashed=false&maxResults=5&access_token=token&path=path');
 
 		});
 
@@ -25,6 +25,7 @@ define([], function() {
 			expect(value).to.eql('https://api.com/path?q=word&maxResults=5&access_token=token');
 
 		});
+
 	});
 
 });
