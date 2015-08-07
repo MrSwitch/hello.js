@@ -42,50 +42,30 @@
 					var data = p.data;
 					p.data = null;
 
-					if (!data.lat && !data['long']) {
-						// Tweet media
-						if (data.file) {
-							p.data = {
-								status: data.message,
-								'media[]': data.file
-							};
-							callback('statuses/update_with_media.json');
-						}
-
-						// Retweet?
-						else if (data.id) {
-							callback('statuses/retweet/' + data.id + '.json');
-						}
-
-						// Tweet
-						else {
-							callback('statuses/update.json?include_entities=1&status=' + encodeURIComponent(data.message));
-						}
+					// Change message to status
+					if (data.message) {
+						data.status = data.message;
+						delete data.message;
 					}
 
+					// Tweet media
+					if (data.file) {
+						data['media[]'] = data.file;
+						delete data.file;
+						p.data = file;
+						callback('statuses/update_with_media.json');
+					}
+
+					// Retweet?
+					else if (data.id) {
+						callback('statuses/retweet/' + data.id + '.json');
+					}
+
+					// Tweet
 					else {
-						// Tweet media with geolocation infomation
-						if (data.file) {
-							p.data = {
-								status: data.message,
-								'media[]': data.file,
-								lat: data.lat,
-								'long': data['long']
-							};
-							callback('statuses/update_with_media.json');
-						}
-
-						// Retweet
-						// Retweets don't support retweets with geolocation yet.
-						// https://dev.twitter.com/rest/reference/post/statuses/retweet/%3Aid
-						else if (data.id) {
-							callback('statuses/retweet/' + data.id + '.json');
-						}
-
-						// Tweet with geo location info
-						else {
-							callback('statuses/update.json?include_entities=1&status=' + encodeURIComponent(data.message) + '&lat=' + encodeURIComponent(data.lat) + '&long=' + encodeURIComponent(data['long']));
-						}
+						// Assign the post body to the query parameters
+						hello.utils.extend(p.query, data);
+						callback('statuses/update.json?include_entities=1');
 					}
 				},
 
