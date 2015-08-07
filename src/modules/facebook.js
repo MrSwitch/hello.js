@@ -17,6 +17,7 @@
 			scope: {
 				basic: 'public_profile',
 				email: 'email',
+				share: 'user_posts',
 				birthday: 'user_birthday',
 				events: 'user_events',
 				photos: 'user_photos,user_videos',
@@ -53,11 +54,11 @@
 				p.options.popup.height = 400;
 			},
 
-			logout: function(callback) {
+			logout: function(callback, options) {
 				// Assign callback to a global handler
 				var callbackID = hello.utils.globalEvent(callback);
 				var redirect = encodeURIComponent(hello.settings.redirect_uri + '?' + hello.utils.param({callback:callbackID, result: JSON.stringify({force:true}), state: '{}'}));
-				var token = (hello.utils.store('facebook') || {}).access_token;
+				var token = (options.authResponse || {}).access_token;
 				hello.utils.iframe('https://www.facebook.com/logout.php?next=' + redirect + '&access_token=' + token);
 
 				// Possible responses:
@@ -72,7 +73,7 @@
 			},
 
 			// API Base URL
-			base: 'https://graph.facebook.com/',
+			base: 'https://graph.facebook.com/v2.3/',
 
 			// Map GET requests
 			get: {

@@ -454,13 +454,14 @@ hello.utils.extend(hello, {
 
 		// Network
 		p.name = p.name || this.settings.default_service;
+		p.authResponse = utils.store(p.name);
 
 		if (p.name && !(p.name in _this.services)) {
 
 			promise.reject(error('invalid_network', 'The network was unrecognized'));
 
 		}
-		else if (p.name && utils.store(p.name)) {
+		else if (p.name && p.authResponse) {
 
 			// Define the callback
 			var callback = function(opts) {
@@ -480,7 +481,7 @@ hello.utils.extend(hello, {
 					// Convert logout to URL string,
 					// If no string is returned, then this function will handle the logout async style
 					if (typeof (logout) === 'function') {
-						logout = logout(callback);
+						logout = logout(callback, p);
 					}
 
 					// If logout is a string then assume URL and open in iframe.
@@ -551,7 +552,7 @@ hello.utils.extend(hello.utils, {
 			for (var x in params) {
 				var str = '([\\?\\&])' + x + '=[^\\&]*';
 				reg = new RegExp(str);
-				if (url.match(x)) {
+				if (url.match(reg)) {
 					url = url.replace(reg, '$1' + x + '=' + formatFunction(params[x]));
 					delete params[x];
 				}
@@ -1746,12 +1747,11 @@ hello.api = function() {
 		p.timeout = _this.settings.timeout;
 	}
 
-	//
 	// Get the current session
 	// Append the access_token to the query
-	var session = _this.getAuthResponse(p.network);
-	if (session && session.access_token) {
-		p.query.access_token = session.access_token;
+	p.authResponse = _this.getAuthResponse(p.network);
+	if (p.authResponse && p.authResponse.access_token) {
+		p.query.access_token = p.authResponse.access_token;
 	}
 
 	var url = p.path;
@@ -1800,9 +1800,6 @@ hello.api = function() {
 	// Redirect Handler
 	// This defines for the Form+Iframe+Hash hack where to return the results too.
 	p.redirect_uri = _this.settings.redirect_uri;
-
-	// Set OAuth settings
-	p.oauth = o.oauth;
 
 	// Define FormatHandler
 	// The request can be procesed in a multitude of ways
@@ -2028,7 +2025,7 @@ hello.utils.extend(hello.utils, {
 
 			// OAuth1
 			// Remove the token from the query before signing
-			if (p.oauth && parseInt(p.oauth.version, 10) === 1) {
+			if (p.authResponse && p.authResponse.oauth && parseInt(p.authResponse.oauth.version, 10) === 1) {
 
 				// OAUTH SIGNING PROXY
 				sign = p.query.access_token;

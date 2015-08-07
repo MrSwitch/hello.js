@@ -1,19 +1,47 @@
 (function(hello) {
 
+	// OAuth1
+	var OAuth1Settings = {
+		version: '1.0',
+		auth: 'https://www.dropbox.com/1/oauth/authorize',
+		request: 'https://api.dropbox.com/1/oauth/request_token',
+		token: 'https://api.dropbox.com/1/oauth/access_token'
+	};
+
+	// OAuth2 Settings
+	var OAuth2Settings = {
+		version: 2,
+		auth: 'https://www.dropbox.com/1/oauth2/authorize',
+		grant: 'https://api.dropbox.com/1/oauth2/token'
+	};
+
+	// Initiate the Dropbox module
 	hello.init({
 
 		dropbox: {
 
 			name: 'Dropbox',
 
-			oauth: {
-				version: '1.0',
-				auth: 'https://www.dropbox.com/1/oauth/authorize',
-				request: 'https://api.dropbox.com/1/oauth/request_token',
-				token: 'https://api.dropbox.com/1/oauth/access_token'
-			},
+			oauth: OAuth2Settings,
 
 			login: function(p) {
+				// OAuth2 non-standard adjustments
+				p.qs.scope = '';
+				delete p.qs.display;
+
+				// Should this be run as OAuth1?
+				// If the redirect_uri is is HTTP (non-secure) then its required to revert to the OAuth1 endpoints
+				var redirect = decodeURIComponent(p.qs.redirect_uri);
+				if (redirect.indexOf('http:') === 0 && redirect.indexOf('http://localhost/') !== 0) {
+
+					// Override the dropbox OAuth settings.
+					hello.services.dropbox.oauth = OAuth1Settings;
+				}
+				else {
+					// Override the dropbox OAuth settings.
+					hello.services.dropbox.oauth = OAuth2Settings;
+				}
+
 				// The dropbox login window is a different size
 				p.options.popup.width = 1000;
 				p.options.popup.height = 1000;

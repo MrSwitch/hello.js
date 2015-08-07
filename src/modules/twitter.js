@@ -42,23 +42,48 @@
 					var data = p.data;
 					p.data = null;
 
+					var status = [];
+
+					// Change message to status
+					if (data.message) {
+						status.push(data.message);
+						delete data.message;
+					}
+
+					// If link is given
+					if (data.link) {
+						status.push(data.link);
+						delete data.link;
+					}
+
+					if (data.picture) {
+						status.push(data.picture);
+						delete data.picture;
+					}
+
+					// Compound all the components
+					if (status.length) {
+						data.status = status.join(' ');
+					}
+
 					// Tweet media
 					if (data.file) {
-						p.data = {
-							status: data.message,
-							'media[]': data.file
-						};
+						data['media[]'] = data.file;
+						delete data.file;
+						p.data = data;
 						callback('statuses/update_with_media.json');
 					}
 
 					// Retweet?
-					else if (data.id) {
+					else if ('id' in data) {
 						callback('statuses/retweet/' + data.id + '.json');
 					}
 
 					// Tweet
 					else {
-						callback('statuses/update.json?include_entities=1&status=' + encodeURIComponent(data.message));
+						// Assign the post body to the query parameters
+						hello.utils.extend(p.query, data);
+						callback('statuses/update.json?include_entities=1');
 					}
 				},
 

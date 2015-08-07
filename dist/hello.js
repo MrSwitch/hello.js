@@ -1,4 +1,4 @@
-/*! hellojs v1.7.5 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.8.1 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -607,13 +607,14 @@ hello.utils.extend(hello, {
 
 		// Network
 		p.name = p.name || this.settings.default_service;
+		p.authResponse = utils.store(p.name);
 
 		if (p.name && !(p.name in _this.services)) {
 
 			promise.reject(error('invalid_network', 'The network was unrecognized'));
 
 		}
-		else if (p.name && utils.store(p.name)) {
+		else if (p.name && p.authResponse) {
 
 			// Define the callback
 			var callback = function(opts) {
@@ -633,7 +634,7 @@ hello.utils.extend(hello, {
 					// Convert logout to URL string,
 					// If no string is returned, then this function will handle the logout async style
 					if (typeof (logout) === 'function') {
-						logout = logout(callback);
+						logout = logout(callback, p);
 					}
 
 					// If logout is a string then assume URL and open in iframe.
@@ -704,7 +705,7 @@ hello.utils.extend(hello.utils, {
 			for (var x in params) {
 				var str = '([\\?\\&])' + x + '=[^\\&]*';
 				reg = new RegExp(str);
-				if (url.match(x)) {
+				if (url.match(reg)) {
 					url = url.replace(reg, '$1' + x + '=' + formatFunction(params[x]));
 					delete params[x];
 				}
@@ -1899,12 +1900,11 @@ hello.api = function() {
 		p.timeout = _this.settings.timeout;
 	}
 
-	//
 	// Get the current session
 	// Append the access_token to the query
-	var session = _this.getAuthResponse(p.network);
-	if (session && session.access_token) {
-		p.query.access_token = session.access_token;
+	p.authResponse = _this.getAuthResponse(p.network);
+	if (p.authResponse && p.authResponse.access_token) {
+		p.query.access_token = p.authResponse.access_token;
 	}
 
 	var url = p.path;
@@ -1953,9 +1953,6 @@ hello.api = function() {
 	// Redirect Handler
 	// This defines for the Form+Iframe+Hash hack where to return the results too.
 	p.redirect_uri = _this.settings.redirect_uri;
-
-	// Set OAuth settings
-	p.oauth = o.oauth;
 
 	// Define FormatHandler
 	// The request can be procesed in a multitude of ways
@@ -2081,10 +2078,12 @@ hello.utils.extend(hello.utils, {
 		}
 
 		// Check if the browser and service support CORS
-		if (
-			'withCredentials' in new XMLHttpRequest() &&
-			(!('xhr' in p) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))))
-		) {
+		var cors = this.request_cors(function() {
+			// If it does then run this...
+			return (!('xhr' in p) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))));
+		});
+
+		if (cors) {
 
 			formatUrl(p, function(url) {
 
@@ -2179,7 +2178,7 @@ hello.utils.extend(hello.utils, {
 
 			// OAuth1
 			// Remove the token from the query before signing
-			if (p.oauth && parseInt(p.oauth.version, 10) === 1) {
+			if (p.authResponse && p.authResponse.oauth && parseInt(p.authResponse.oauth.version, 10) === 1) {
 
 				// OAUTH SIGNING PROXY
 				sign = p.query.access_token;
@@ -2219,6 +2218,11 @@ hello.utils.extend(hello.utils, {
 
 			callback(path);
 		}
+	},
+
+	// Test whether the browser supports the CORS response
+	request_cors: function(callback) {
+		return 'withCredentials' in new XMLHttpRequest() && callback();
 	},
 
 	// Return the type of DOM object
@@ -2823,6 +2827,88 @@ hello.utils.extend(hello.utils, {
 	};
 
 })(hello);
+
+// Script to support ChromeApps
+// This overides the hello.utils.popup method to support chrome.identity.launchWebAuthFlow
+// See https://developer.chrome.com/apps/app_identity#non
+
+// Is this a chrome app?
+
+if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.identity.launchWebAuthFlow) {
+
+	(function() {
+
+		// Swap the popup method
+
+		hello.utils.popup = function(url) {
+
+			_open(url, true);
+
+			return {
+				closed: false
+			};
+		};
+
+		// Swap the request_cors method
+
+		hello.utils.request_cors = function(callback) {
+
+			callback();
+
+			// Always run as CORS
+
+			return true;
+		};
+
+		// Open function
+		function _open(url, interactive) {
+
+			// Launch
+
+			chrome.identity.launchWebAuthFlow({
+				url: url,
+				interactive: interactive
+			}, function(responseUrl) {
+
+				// Split appart the URL
+
+				var a = hello.utils.url(responseUrl);
+
+				// The location can be augmented in to a location object like so...
+				// We dont have window operations on the popup so lets create some
+
+				var _popup = {
+					location: {
+
+						// Change the location of the popup
+
+						assign: function(url) {
+
+							// If there is a secondary reassign
+							// In the case of OAuth1
+							// Trigger this in non-interactive mode.
+
+							_open(url, false);
+						},
+
+						search: a.search,
+						hash: a.hash,
+						href: a.href
+					},
+					close: function() {}
+				};
+
+				// Then this URL contains information which HelloJS must process
+				// URL string
+				// Window - any action such as window relocation goes here
+				// Opener - the parent window which opened this, aka this script
+
+				hello.utils.responseHandler(_popup, window);
+			});
+		}
+
+	})();
+}
 
 // Register as anonymous AMD module
 if (typeof define === 'function' && define.amd) {

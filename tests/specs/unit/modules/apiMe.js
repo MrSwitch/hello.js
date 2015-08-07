@@ -149,6 +149,18 @@ define(['./helper'], function(helper) {
 				}
 			},
 			{
+				network: 'vk',
+				expect: {
+					id: 434460,
+					name: 'Юрий Опарин',
+					thumbnail: 'http://cs304605.vk.me/u434460/d_1acca7c0.jpg'
+				},
+				errorExpect: {
+					code: 10,
+					message: 'Internal server error: could not get application'
+				}
+			},
+			{
 				network: 'windows',
 				expect: {
 					id: '939f37452466502a',

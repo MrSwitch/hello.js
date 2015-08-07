@@ -116,6 +116,17 @@ define([
 			});
 		});
 
+		it('should attach authResponse object to the req.authResponse', function(done) {
+
+			hello('testable')
+			.api('/endpoint', function(res) {
+
+				expect(res.authResponse).to.eql(_session);
+
+				done();
+			});
+		});
+
 		it('should attach data object to the req.query when `req.method = get`', function(done) {
 
 			hello('testable')
