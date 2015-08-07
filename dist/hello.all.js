@@ -1,4 +1,4 @@
-/*! hellojs v1.8.0 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.8.1 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -705,7 +705,7 @@ hello.utils.extend(hello.utils, {
 			for (var x in params) {
 				var str = '([\\?\\&])' + x + '=[^\\&]*';
 				reg = new RegExp(str);
-				if (url.match(x)) {
+				if (url.match(reg)) {
 					url = url.replace(reg, '$1' + x + '=' + formatFunction(params[x]));
 					delete params[x];
 				}
@@ -1954,9 +1954,6 @@ hello.api = function() {
 	// This defines for the Form+Iframe+Hash hack where to return the results too.
 	p.redirect_uri = _this.settings.redirect_uri;
 
-	// Set OAuth settings
-	p.oauth = o.oauth;
-
 	// Define FormatHandler
 	// The request can be procesed in a multitude of ways
 	// Here's the options - depending on the browser and endpoint
@@ -2181,7 +2178,7 @@ hello.utils.extend(hello.utils, {
 
 			// OAuth1
 			// Remove the token from the query before signing
-			if (p.oauth && parseInt(p.oauth.version, 10) === 1) {
+			if (p.authResponse && p.authResponse.oauth && parseInt(p.authResponse.oauth.version, 10) === 1) {
 
 				// OAUTH SIGNING PROXY
 				sign = p.query.access_token;
@@ -2915,20 +2912,48 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 (function(hello) {
 
+	// OAuth1
+	var OAuth1Settings = {
+		version: '1.0',
+		auth: 'https://www.dropbox.com/1/oauth/authorize',
+		request: 'https://api.dropbox.com/1/oauth/request_token',
+		token: 'https://api.dropbox.com/1/oauth/access_token'
+	};
+
+	// OAuth2 Settings
+	var OAuth2Settings = {
+		version: 2,
+		auth: 'https://www.dropbox.com/1/oauth2/authorize',
+		grant: 'https://api.dropbox.com/1/oauth2/token'
+	};
+
+	// Initiate the Dropbox module
 	hello.init({
 
 		dropbox: {
 
 			name: 'Dropbox',
 
-			oauth: {
-				version: '1.0',
-				auth: 'https://www.dropbox.com/1/oauth/authorize',
-				request: 'https://api.dropbox.com/1/oauth/request_token',
-				token: 'https://api.dropbox.com/1/oauth/access_token'
-			},
+			oauth: OAuth2Settings,
 
 			login: function(p) {
+				// OAuth2 non-standard adjustments
+				p.qs.scope = '';
+				delete p.qs.display;
+
+				// Should this be run as OAuth1?
+				// If the redirect_uri is is HTTP (non-secure) then its required to revert to the OAuth1 endpoints
+				var redirect = decodeURIComponent(p.qs.redirect_uri);
+				if (redirect.indexOf('http:') === 0 && redirect.indexOf('http://localhost/') !== 0) {
+
+					// Override the dropbox OAuth settings.
+					hello.services.dropbox.oauth = OAuth1Settings;
+				}
+				else {
+					// Override the dropbox OAuth settings.
+					hello.services.dropbox.oauth = OAuth2Settings;
+				}
+
 				// The dropbox login window is a different size
 				p.options.popup.width = 1000;
 				p.options.popup.height = 1000;
@@ -3210,7 +3235,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			// API Base URL
-			base: 'https://graph.facebook.com/',
+			base: 'https://graph.facebook.com/v2.3/',
 
 			// Map GET requests
 			get: {
@@ -4866,23 +4891,48 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 					var data = p.data;
 					p.data = null;
 
+					var status = [];
+
+					// Change message to status
+					if (data.message) {
+						status.push(data.message);
+						delete data.message;
+					}
+
+					// If link is given
+					if (data.link) {
+						status.push(data.link);
+						delete data.link;
+					}
+
+					if (data.picture) {
+						status.push(data.picture);
+						delete data.picture;
+					}
+
+					// Compound all the components
+					if (status.length) {
+						data.status = status.join(' ');
+					}
+
 					// Tweet media
 					if (data.file) {
-						p.data = {
-							status: data.message,
-							'media[]': data.file
-						};
+						data['media[]'] = data.file;
+						delete data.file;
+						p.data = data;
 						callback('statuses/update_with_media.json');
 					}
 
 					// Retweet?
-					else if (data.id) {
+					else if ('id' in data) {
 						callback('statuses/retweet/' + data.id + '.json');
 					}
 
 					// Tweet
 					else {
-						callback('statuses/update.json?include_entities=1&status=' + encodeURIComponent(data.message));
+						// Assign the post body to the query parameters
+						hello.utils.extend(p.query, data);
+						callback('statuses/update.json?include_entities=1');
 					}
 				},
 
