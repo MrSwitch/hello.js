@@ -552,7 +552,7 @@ hello.utils.extend(hello.utils, {
 			for (var x in params) {
 				var str = '([\\?\\&])' + x + '=[^\\&]*';
 				reg = new RegExp(str);
-				if (url.match(x)) {
+				if (url.match(reg)) {
 					url = url.replace(reg, '$1' + x + '=' + formatFunction(params[x]));
 					delete params[x];
 				}
@@ -1807,9 +1807,6 @@ hello.api = function() {
 	// This defines for the Form+Iframe+Hash hack where to return the results too.
 	p.redirect_uri = _this.settings.redirect_uri;
 
-	// Set OAuth settings
-	p.oauth = o.oauth;
-
 	// Define FormatHandler
 	// The request can be procesed in a multitude of ways
 	// Here's the options - depending on the browser and endpoint
@@ -2046,7 +2043,7 @@ hello.utils.extend(hello.utils, {
 
 			// OAuth1
 			// Remove the token from the query before signing
-			if (p.oauth && parseInt(p.oauth.version, 10) === 1) {
+			if (p.authResponse && p.authResponse.oauth && parseInt(p.authResponse.oauth.version, 10) === 1) {
 
 				// OAUTH SIGNING PROXY
 				sign = p.query.access_token;
