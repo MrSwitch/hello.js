@@ -326,14 +326,14 @@ define([
 
 				testable.wrap = testable.wrap || {};
 				testable.wrap.handled = function(req) {
-					done(new Error("Wrap handler erroneously called"));
+					done(new Error('Wrap handler erroneously called'));
 				};
 
 				hello('testable')
 				.api({
-					path : '/handled',
-					formatResponse : false
-				}).then(function(){
+					path: '/handled',
+					formatResponse: false
+				}).then(function() {
 					// If the response handler was not called then we're good
 					done();
 				});

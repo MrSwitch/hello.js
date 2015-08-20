@@ -1861,12 +1861,13 @@ hello.api = function() {
 			// Is this a raw response?
 			if (!p.formatResponse) {
 				// Bad request? error statusCode or otherwise contains an error response vis JSONP?
-				if (typeof(headers) === 'object' ? (headers.statusCode >= 400) : (typeof(r) === 'object' && 'error' in r)) {
+				if (typeof headers === 'object' ? (headers.statusCode >= 400) : (typeof r === 'object' && 'error' in r)) {
 					promise.reject(r);
 				}
 				else {
 					promise.fulfill(r);
 				}
+
 				return;
 			}
 

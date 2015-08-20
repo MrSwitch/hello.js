@@ -1,4 +1,4 @@
-/*! hellojs v1.8.1 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.8.2 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -1900,6 +1900,12 @@ hello.api = function() {
 		p.timeout = _this.settings.timeout;
 	}
 
+	// Format response
+	// Whether to run the raw response through post processing.
+	if (!('formatResponse' in p)) {
+		p.formatResponse = true;
+	}
+
 	// Get the current session
 	// Append the access_token to the query
 	p.authResponse = _this.getAuthResponse(p.network);
@@ -2004,6 +2010,19 @@ hello.api = function() {
 		// @ response object
 		// @ statusCode integer if available
 		utils.request(p, function(r, headers) {
+
+			// Is this a raw response?
+			if (!p.formatResponse) {
+				// Bad request? error statusCode or otherwise contains an error response vis JSONP?
+				if (typeof headers === 'object' ? (headers.statusCode >= 400) : (typeof r === 'object' && 'error' in r)) {
+					promise.reject(r);
+				}
+				else {
+					promise.fulfill(r);
+				}
+
+				return;
+			}
 
 			// Should this be an object
 			if (r === true) {
@@ -2839,18 +2858,20 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	(function() {
 
 		// Swap the popup method
-
 		hello.utils.popup = function(url) {
 
-			_open(url, true);
+			return _open(url, true);
 
-			return {
-				closed: false
-			};
+		};
+
+		// Swap the hidden iframe method
+		hello.utils.iframe = function(url) {
+
+			_open(url, false);
+
 		};
 
 		// Swap the request_cors method
-
 		hello.utils.request_cors = function(callback) {
 
 			callback();
@@ -2860,34 +2881,74 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			return true;
 		};
 
+		// Swap the storage method
+		var _cache = {};
+		chrome.storage.local.get('hello', function(r) {
+			// Update the cache
+			_cache = r.hello;
+		});
+
+		hello.utils.store = function(name, value) {
+
+			// Get all
+			if (arguments.length === 0) {
+				return _cache;
+			}
+
+			// Get
+			if (arguments.length === 1) {
+				return _cache[name] || null;
+			}
+
+			// Set
+			if (value) {
+				_cache[name] = value;
+				chrome.storage.local.set({hello: _cache});
+				return value;
+			}
+
+			// Delete
+			if (value === null) {
+				delete _cache[name];
+				chrome.storage.local.set({hello: _cache});
+				return null;
+			}
+		};
+
 		// Open function
 		function _open(url, interactive) {
 
 			// Launch
+			var ref = {
+				closed: false
+			};
 
+			// Launch the webAuthFlow
 			chrome.identity.launchWebAuthFlow({
 				url: url,
 				interactive: interactive
 			}, function(responseUrl) {
 
-				// Split appart the URL
+				// Did the user cancel this prematurely
+				if (responseUrl === undefined) {
+					ref.closed = true;
+					return;
+				}
 
+				// Split appart the URL
 				var a = hello.utils.url(responseUrl);
 
 				// The location can be augmented in to a location object like so...
 				// We dont have window operations on the popup so lets create some
-
 				var _popup = {
 					location: {
 
 						// Change the location of the popup
-
 						assign: function(url) {
 
 							// If there is a secondary reassign
 							// In the case of OAuth1
 							// Trigger this in non-interactive mode.
-
 							_open(url, false);
 						},
 
@@ -2905,6 +2966,9 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 				hello.utils.responseHandler(_popup, window);
 			});
+
+			// Return the reference
+			return ref;
 		}
 
 	})();
