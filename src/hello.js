@@ -1747,6 +1747,12 @@ hello.api = function() {
 		p.timeout = _this.settings.timeout;
 	}
 
+	// Format response
+	// Whether to run the raw response through post processing.
+	if (!('formatResponse' in p)) {
+		p.formatResponse = true;
+	}
+
 	// Get the current session
 	// Append the access_token to the query
 	p.authResponse = _this.getAuthResponse(p.network);
@@ -1854,6 +1860,18 @@ hello.api = function() {
 		// @ response object
 		// @ statusCode integer if available
 		utils.request(p, function(r, headers) {
+
+			// Is this a raw response?
+			if (!p.formatResponse) {
+				// Bad request? error statusCode or otherwise contains an error response vis JSONP?
+				if (typeof(headers) === 'object' ? (headers.statusCode >= 400) : (typeof(r) === 'object' && 'error' in r)) {
+					promise.reject(r);
+				}
+				else {
+					promise.fulfill(r);
+				}
+				return;
+			}
 
 			// Should this be an object
 			if (r === true) {

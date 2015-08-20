@@ -321,6 +321,24 @@ define([
 				hello('testable')
 				.api('/unhandled');
 			});
+
+			it('should not trigger the wrap function if formatResponse = false', function(done) {
+
+				testable.wrap = testable.wrap || {};
+				testable.wrap.handled = function(req) {
+					done(new Error("Wrap handler erroneously called"));
+				};
+
+				hello('testable')
+				.api({
+					path : '/handled',
+					formatResponse : false
+				}).then(function(){
+					// If the response handler was not called then we're good
+					done();
+				});
+			});
+
 		});
 
 		describe('paging', function() {
