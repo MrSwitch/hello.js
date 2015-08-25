@@ -100,9 +100,9 @@ function getPopular(){
 	instagram.login({scope:'publish'}).then(function(){
 
 		// Custom instagram endpoint
-		instagram.api('media/popular').then( popularMediaHandler, errorHandler );
-
-	}, errorHandler)
+		return instagram.api('media/popular');
+	})
+	.then(popularMediaHandler, errorHandler)
 }
 
 
@@ -132,12 +132,15 @@ function likePic(img){
 
 	var method = !pic.user_has_liked ? 'post' : 'delete';
 
-	hello( 'instagram' ).api( 'me/like', method, { id : pic.id } ).then(function( r ){
-		if(r.meta.code === 200){
+	hello( 'instagram' ).api( 'me/like', method, {
+		id: pic.id
+	})
+	.then(function(r) {
+		if (r.meta.code === 200) {
 			pic.user_has_liked = method === 'post';
 			img.className = ( pic.user_has_liked ? 'liked' : '' );
 		}
-	});
+	}, console.error.bind(console));
 };
 
 

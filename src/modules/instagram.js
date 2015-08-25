@@ -100,6 +100,7 @@
 				},
 
 				'default': function(o) {
+					o = formatError(o);
 					paging(o);
 					return o;
 				}
@@ -141,12 +142,23 @@
 	}
 
 	function formatError(o) {
+		if (typeof o === 'string') {
+			return {
+				error: {
+					code: 'invalid_request',
+					message: o
+				}
+			};
+		}
+
 		if (o && 'meta' in o && 'error_type' in o.meta) {
 			o.error = {
 				code: o.meta.error_type,
 				message: o.meta.error_message
 			};
 		}
+
+		return o;
 	}
 
 	function formatFriends(o) {
