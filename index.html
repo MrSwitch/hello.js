@@ -546,6 +546,8 @@ alert((online(fb) ? 'Signed' : 'Not signed') + ' into Facebook, ' + (online(wl) 
 
 <h3>hello.api([path], [method], [data], [callback(json)])</h3>
 
+<p><code>hello.api([path], [method], [data], [callback(json)]).then(successHandler, errorHandler)</code>.</p>
+
 <table>
 	<tr>
 		<th>name</th>
@@ -622,8 +624,45 @@ alert((online(fb) ? 'Signed' : 'Not signed') + ' into Facebook, ' + (online(wl) 
 			<em>null</em>
 		</td>
 	</tr>
-</table>
 
+	<tr>
+		<td colspan=6>More options (below) require putting the options into a 'key'=>'value' hash. I.e. <code>hello(network).api(options)</code></td>
+	</tr>
+
+	<tr>
+		<td>timeout</td>
+		<td><i>integer</i></td>
+		<td>
+			<code>3000</code> = 3 seconds.
+		</td>
+		<td>
+			Wait <em>milliseconds</em> before resolving the Promise with a reject.
+		</td>
+		<td>
+			<em>optional</em>
+		</td>
+		<td>
+			<em>60000</em>
+		</td>
+	</tr>
+
+	<tr>
+		<td>formatResponse</td>
+		<td><i>boolean</i></td>
+		<td>
+			<code>false</code>
+		</td>
+		<td>
+			<code>true</code>: format the response, <code>false</code>: return raw response.
+		</td>
+		<td>
+			<em>optional</em>
+		</td>
+		<td>
+			<em>true</em>
+		</td>
+	</tr>
+</table>
 
 <h3>Examples:</h3>
 
