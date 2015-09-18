@@ -37,10 +37,7 @@
 				// It might be better to loop through the social.relationship table with has unique IDs of users.
 				'me/friends': formatFriends,
 				'me/following': formatFriends,
-				'default': function(res) {
-					paging(res);
-					return res;
-				}
+				'default': paging
 			}
 		}
 	});
@@ -142,6 +139,8 @@
 				next: '?start=' + (res.query.count + (+request.options.start || 1))
 			};
 		}
+
+		return res;
 	}
 
 	function yql(q) {
