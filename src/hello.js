@@ -1188,18 +1188,10 @@ hello.utils.extend(hello.utils, {
 		window[guid] = function() {
 			// Trigger the callback
 			try {
-				bool = callback.apply(this, arguments);
+				callback.apply(this, arguments) && delete window[guid];
 			}
 			catch (e) {
 				console.error(e);
-			}
-
-			if (bool) {
-				// Remove this handler reference
-				try {
-					delete window[guid];
-				}
-				catch (e) {}
 			}
 		};
 
