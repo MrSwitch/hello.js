@@ -1,4 +1,4 @@
-/*! hellojs v1.8.3 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.8.4 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -4653,7 +4653,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			refresh: false,
 
 			scope: {
-				basic: '',
+				basic: 'user_info',
 				user: 'user_info',
 				scheduler: 'scheduler',
 				start: 'start_meeting'
