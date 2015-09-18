@@ -1829,6 +1829,10 @@ hello.api = function() {
 				val = p.query[key];
 				delete p.query[key];
 			}
+			else if (p.data && key in p.data) {
+				val = p.data[key];
+				delete p.data[key];
+			}
 			else if (!defaults) {
 				promise.reject(error('missing_attribute', 'The attribute ' + key + ' is missing from the request'));
 			}

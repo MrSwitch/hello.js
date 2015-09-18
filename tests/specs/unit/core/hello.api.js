@@ -230,7 +230,7 @@ define([
 				});
 			});
 
-			describe('Replace @{} in path with query parameters', function() {
+			describe('Replace @{} in path with request parameters', function() {
 
 				it('should define the path using the query parameters and remove them from the query', function(done) {
 
@@ -238,7 +238,8 @@ define([
 					testable.get.handled = 'endpoint?b=@{a}';
 
 					hello('testable')
-					.api('/handled', {a: 'a'}, function(res) {
+					.api('/handled', {a: 'a'})
+					.then(function(res) {
 
 						// Should place the value of a in the parameter list
 						expect(res.url).to.contain('endpoint?b=a');
@@ -252,7 +253,31 @@ define([
 						delete testable.get.handled;
 
 						done();
-					});
+					}, done);
+				});
+
+				it('should define the path using the query parameters and remove them from the post data', function(done) {
+
+					testable.post = testable.post || {};
+					testable.post.handled = 'endpoint?b=@{a}';
+
+					hello('testable')
+					.api('/handled', 'post', {a: 'a'})
+					.then(function(res) {
+
+						// Should place the value of a in the parameter list
+						expect(res.url).to.contain('endpoint?b=a');
+
+						// Should place the value of a in the parameter list
+						expect(res.path).to.eql('handled');
+
+						// Should remove the property from the req.query
+						expect(res.data).to.not.have.property('a');
+
+						delete testable.get.handled;
+
+						done();
+					}, done);
 				});
 
 				it('should trigger an error if there was no query parameter arg, i.e. @{arg}', function(done) {
