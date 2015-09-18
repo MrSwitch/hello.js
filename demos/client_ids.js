@@ -80,6 +80,19 @@ var VK_CLIENT_ID = {
 }[window.location.hostname];
 
 
+var TUMBLR_CLIENT_ID = {
+	'local.knarly.com' : '1odTR4hLo2oAoPlIoGN8O60d1tUw0CsZGdysFFPikX7APlcXlN',
+	'adodson.com' : 'BHKkYCvKt33lL34iM1yWUhkYRw1lqwifbKKTfgh5FAX5uBzzxn'
+}[window.location.hostname];
+
+
+// join.me Register - https://developer.join.me
+var JOINME_CLIENT_ID = {
+	'adodson.com': (location_https ? 'hnvbrvsb63gt3fwa2c7nmhfc' : 'myenm7aw34dbgejhuw4sv8zz'),
+	'local.knarly.com': 'e7jmevgbve6uzqvsttf7pb85'
+}[window.location.hostname];
+
+
 // To make it a little easier
 var CLIENT_IDS_ALL = {
 	windows : WINDOWS_CLIENT_ID,
@@ -89,6 +102,7 @@ var CLIENT_IDS_ALL = {
 	twitter : TWITTER_CLIENT_ID,
 	yahoo : YAHOO_CLIENT_ID,
 	instagram : INSTAGRAM_CLIENT_ID,
+	joinme: JOINME_CLIENT_ID,
 	linkedin : LINKEDIN_CLIENT_ID,
 	soundcloud : SOUNDCLOUD_CLIENT_ID,
 	foursquare : FOURSQUARE_CLIENT_ID,
@@ -96,15 +110,6 @@ var CLIENT_IDS_ALL = {
 	flickr: FLICKR_CLIENT_ID,
 	vk: VK_CLIENT_ID
 };
-
-var TUMBLR_CLIENT_ID = {
-	'local.knarly.com' : '1odTR4hLo2oAoPlIoGN8O60d1tUw0CsZGdysFFPikX7APlcXlN',
-	'adodson.com' : 'BHKkYCvKt33lL34iM1yWUhkYRw1lqwifbKKTfgh5FAX5uBzzxn'
-}[window.location.hostname];
-
-
-// join.me Register - https://developer.join.me
-var JOINME_CLIENT_ID = 'myenm7aw34dbgejhuw4sv8zz';
 
 
 //
