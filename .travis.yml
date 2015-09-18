@@ -1,20 +1,23 @@
 language: node_js
 sudo: false
-node_js: 
-- "0.10"
-before_script: 
+node_js:
+- "0.12"
+cache:
+  directories:
+  - node_modules
+before_script:
 - npm install -g grunt-cli
-notifications: 
-  webhooks: 
-    urls: 
+notifications:
+  webhooks:
+    urls:
     - https://webhooks.gitter.im/e/7b309d0fef51b1696205
     on_success: always
     on_failure: always
     on_start: false
-deploy: 
+deploy:
   provider: npm
   email: andrewjdodson@gmail.com
-  api_key: 
+  api_key:
     secure: LRgjX0EAVDoVq3Ckng/7zJwJZbkLeVma9GIzAClHxi826acXG0gXE1QBXW+sr3mjb2Vz+sUcDhSvxZJZ9fQ2mZqWJSzGc0v+AfxHjTxLXE2DtS2N247OJVjcC4TvU6vctNd15VJ7spZ86fNnc9LQD7pIW/q2dYGvUcHDmVhf0Qg=
   "on":
     tags: true
