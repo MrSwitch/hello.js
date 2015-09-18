@@ -1,4 +1,4 @@
-/*! hellojs v1.8.2 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.8.3 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -1341,18 +1341,12 @@ hello.utils.extend(hello.utils, {
 		window[guid] = function() {
 			// Trigger the callback
 			try {
-				bool = callback.apply(this, arguments);
+				if (callback.apply(this, arguments)) {
+					delete window[guid];
+				}
 			}
 			catch (e) {
 				console.error(e);
-			}
-
-			if (bool) {
-				// Remove this handler reference
-				try {
-					delete window[guid];
-				}
-				catch (e) {}
 			}
 		};
 
@@ -1989,6 +1983,10 @@ hello.api = function() {
 			if (key in p.query) {
 				val = p.query[key];
 				delete p.query[key];
+			}
+			else if (p.data && key in p.data) {
+				val = p.data[key];
+				delete p.data[key];
 			}
 			else if (!defaults) {
 				promise.reject(error('missing_attribute', 'The attribute ' + key + ' is missing from the request'));
@@ -4549,6 +4547,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				},
 
 				'default': function(o) {
+					o = formatError(o);
 					paging(o);
 					return o;
 				}
@@ -4590,12 +4589,23 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 	function formatError(o) {
+		if (typeof o === 'string') {
+			return {
+				error: {
+					code: 'invalid_request',
+					message: o
+				}
+			};
+		}
+
 		if (o && 'meta' in o && 'error_type' in o.meta) {
 			o.error = {
 				code: o.meta.error_type,
 				message: o.meta.error_message
 			};
 		}
+
+		return o;
 	}
 
 	function formatFriends(o) {
@@ -4625,6 +4635,163 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 })(hello);
+
+(function(hello) {
+
+	hello.init({
+
+		joinme: {
+
+			name: 'join.me',
+
+			oauth: {
+				version: 2,
+				auth: 'https://secure.join.me/api/public/v1/auth/oauth2',
+				grant: 'https://secure.join.me/api/public/v1/auth/oauth2'
+			},
+
+			refresh: false,
+
+			scope: {
+				basic: '',
+				user: 'user_info',
+				scheduler: 'scheduler',
+				start: 'start_meeting'
+			},
+
+			scope_delim: ' ',
+
+			login: function(p) {
+				p.options.popup.width = 400;
+				p.options.popup.height = 700;
+			},
+
+			base: 'https://api.join.me/v1/',
+
+			get: {
+				me: 'user',
+				meetings: 'meetings',
+				'meetings/info': 'meetings/@{id}'
+			},
+
+			post: {
+				'meetings/start/adhoc': function(p, callback) {
+					callback('meetings/start');
+				},
+
+				'meetings/start/scheduled': function(p, callback) {
+					var meetingId = p.data.meetingId;
+					p.data = {};
+					callback('meetings/' + meetingId + '/start');
+				},
+
+				'meetings/schedule': function(p, callback) {
+					callback('meetings');
+				}
+			},
+
+			patch: {
+				'meetings/update': function(p, callback) {
+					callback('meetings/' + p.data.meetingId);
+				}
+			},
+
+			del: {
+				'meetings/delete': 'meetings/@{id}'
+			},
+
+			wrap: {
+				me: function(o, headers) {
+					formatError(o, headers);
+
+					if (!o.email) {
+						return o;
+					}
+
+					o.name = o.fullName;
+					o.first_name = o.name.split(' ')[0];
+					o.last_name = o.name.split(' ')[1];
+					o.id = o.email;
+
+					return o;
+				},
+
+				'default': function(o, headers) {
+					formatError(o, headers);
+
+					return o;
+				}
+			},
+
+			xhr: formatRequest
+
+		}
+	});
+
+	function formatError(o, headers) {
+		var errorCode;
+		var message;
+		var details;
+
+		if (o && ('Message' in o)) {
+			message = o.Message;
+			delete o.Message;
+
+			if ('ErrorCode' in o) {
+				errorCode = o.ErrorCode;
+				delete o.ErrorCode;
+			}
+			else {
+				errorCode = getErrorCode(headers);
+			}
+
+			o.error = {
+				code: errorCode,
+				message: message,
+				details: o
+			};
+		}
+
+		return o;
+	}
+
+	function formatRequest(p, qs) {
+		// Move the access token from the request body to the request header
+		var token = qs.access_token;
+		delete qs.access_token;
+		p.headers.Authorization = 'Bearer ' + token;
+
+		// Format non-get requests to indicate json body
+		if (p.method !== 'get' && p.data) {
+			p.headers['Content-Type'] = 'application/json';
+			if (typeof (p.data) === 'object') {
+				p.data = JSON.stringify(p.data);
+			}
+		}
+
+		if (p.method === 'put') {
+			p.method = 'patch';
+		}
+
+		return true;
+	}
+
+	function getErrorCode(headers) {
+		switch (headers.statusCode) {
+			case 400:
+				return 'invalid_request';
+			case 403:
+				return 'stale_token';
+			case 401:
+				return 'invalid_token';
+			case 500:
+				return 'server_error';
+			default:
+				return 'server_error';
+		}
+	}
+
+}(hello));
 
 (function(hello) {
 
@@ -5289,7 +5456,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				'me/album': '@{id}/files/',
 
 				'me/folders': '@{id|me/skydrive/}',
-				'me/files': '@{parent|me/skydrive/}/files'
+				'me/files': '@{parent|me/skydrive}/files'
 			},
 
 			// Map DELETE requests
@@ -5447,10 +5614,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				// It might be better to loop through the social.relationship table with has unique IDs of users.
 				'me/friends': formatFriends,
 				'me/following': formatFriends,
-				'default': function(res) {
-					paging(res);
-					return res;
-				}
+				'default': paging
 			}
 		}
 	});
@@ -5527,7 +5691,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 	function formatFriend(contact) {
 		contact.id = null;
-		contact.fields.forEach(function(field) {
+		(contact.fields || []).forEach(function(field) {
 			if (field.type === 'email') {
 				contact.email = field.value;
 			}
@@ -5552,6 +5716,8 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				next: '?start=' + (res.query.count + (+request.options.start || 1))
 			};
 		}
+
+		return res;
 	}
 
 	function yql(q) {

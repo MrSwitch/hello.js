@@ -1,4 +1,4 @@
-/*! hellojs v1.8.2 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.8.3 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -1341,18 +1341,12 @@ hello.utils.extend(hello.utils, {
 		window[guid] = function() {
 			// Trigger the callback
 			try {
-				bool = callback.apply(this, arguments);
+				if (callback.apply(this, arguments)) {
+					delete window[guid];
+				}
 			}
 			catch (e) {
 				console.error(e);
-			}
-
-			if (bool) {
-				// Remove this handler reference
-				try {
-					delete window[guid];
-				}
-				catch (e) {}
 			}
 		};
 
@@ -1989,6 +1983,10 @@ hello.api = function() {
 			if (key in p.query) {
 				val = p.query[key];
 				delete p.query[key];
+			}
+			else if (p.data && key in p.data) {
+				val = p.data[key];
+				delete p.data[key];
 			}
 			else if (!defaults) {
 				promise.reject(error('missing_attribute', 'The attribute ' + key + ' is missing from the request'));
