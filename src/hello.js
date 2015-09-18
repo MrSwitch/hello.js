@@ -1188,7 +1188,9 @@ hello.utils.extend(hello.utils, {
 		window[guid] = function() {
 			// Trigger the callback
 			try {
-				callback.apply(this, arguments) && delete window[guid];
+				if (callback.apply(this, arguments)) {
+					delete window[guid];
+				}
 			}
 			catch (e) {
 				console.error(e);
