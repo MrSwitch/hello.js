@@ -44,11 +44,6 @@
 					p.qs.auth_type = 'reauthenticate';
 				}
 
-				// Support Facebook's unique auth_type parameter
-				if (p.options.auth_type) {
-					p.qs.auth_type = p.options.auth_type;
-				}
-
 				// The facebook login window is a different size.
 				p.options.popup.width = 580;
 				p.options.popup.height = 400;

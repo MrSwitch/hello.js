@@ -167,6 +167,9 @@ hello.utils.extend(hello, {
 		// Local vars
 		var url;
 
+		// Get all the custom options and store to be appended to the querystring
+		var qs = utils.diffKey(p.options, _this.settings);
+
 		// Merge/override options with app defaults
 		var opts = p.options = utils.merge(_this.settings, p.options || {});
 
@@ -239,7 +242,7 @@ hello.utils.extend(hello, {
 		}
 
 		// Query string parameters, we may pass our own arguments to form the querystring
-		p.qs = {
+		p.qs = utils.merge(qs, {
 			client_id: encodeURIComponent(provider.id),
 			response_type: encodeURIComponent(responseType),
 			redirect_uri: encodeURIComponent(redirectUri),
@@ -253,7 +256,7 @@ hello.utils.extend(hello, {
 				state: opts.state,
 				redirect_uri: redirectUri
 			}
-		};
+		});
 
 		// Get current session for merging scopes, and for quick auth response
 		var session = utils.store(p.network);
@@ -850,6 +853,21 @@ hello.utils.extend(hello.utils, {
 		return b.filter(function(item) {
 			return a.indexOf(item) === -1;
 		});
+	},
+
+	// Get the different hash of properties unique to `a`, and not in `b`
+	diffKey: function(a, b) {
+		if (a || !b) {
+			var r = {};
+			for (var x in a) {
+				// is this a custom property?
+				if (!(x in b)) {
+					r[x] = a[x];
+				}
+			}
+			return r;
+		}
+		return a;
 	},
 
 	// Unique

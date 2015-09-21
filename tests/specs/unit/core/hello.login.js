@@ -361,6 +361,29 @@ define([
 				hello('testable').login({force: false, scope: 'not-basic'});
 			});
 		});
+
+		describe('custom query string parameters', function() {
+
+			it('should attach custom parameters to the querystring', function(done) {
+
+				var options = {
+					custom: 'custom'
+				};
+
+				var spy = sinon.spy(function(url, name, options) {
+
+					var params = hello.utils.param(url.split('?')[1]);
+
+					expect(params).to.have.property('custom', options.custom);
+
+					done();
+				});
+
+				utils.popup = spy;
+
+				hello.login('testable', options);
+			});
+		});
 	});
 
 });
