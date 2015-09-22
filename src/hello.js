@@ -860,7 +860,7 @@ hello.utils.extend(hello.utils, {
 		if (a || !b) {
 			var r = {};
 			for (var x in a) {
-				// is this a custom property?
+				// Does the property not exist?
 				if (!(x in b)) {
 					r[x] = a[x];
 				}
