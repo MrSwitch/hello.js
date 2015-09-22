@@ -35,8 +35,7 @@
 			},
 			wrap: {
 				me: function(o, headers) {}
-			},
-			xhr: true
+			}
 		}
 	});
 
