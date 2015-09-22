@@ -7,7 +7,7 @@ define([], function() {
 		// Stub utils/xhr
 		var xhr = utils.xhr;
 
-		afterEach(function(){
+		afterEach(function() {
 			utils.xhr = xhr;
 		});
 
@@ -17,7 +17,7 @@ define([], function() {
 				url: '/localrequest'
 			};
 
-			var spy = sinon.spy(function(){
+			var spy = sinon.spy(function() {
 				return {};
 			});
 

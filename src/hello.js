@@ -865,8 +865,10 @@ hello.utils.extend(hello.utils, {
 					r[x] = a[x];
 				}
 			}
+
 			return r;
 		}
+
 		return a;
 	},
 
