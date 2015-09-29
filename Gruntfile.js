@@ -35,6 +35,7 @@ module.exports = function(grunt) {
 					'src/hello.polyfill.js',
 					'src/hello.js',
 					'src/hello.chromeapp.js',
+					'src/hello.phonegap.js',
 					'src/hello.amd.js',
 					'src/hello.commonjs.js'
 				],
