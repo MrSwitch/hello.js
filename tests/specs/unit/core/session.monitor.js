@@ -39,7 +39,7 @@ define([], function() {
 		});
 
 		it('should ignore services which do not have an id defined', function(done) {
-			// create a spy
+			// Create a spy
 			var spy = sinon.spy(done);
 
 			// Remove the id from the test service

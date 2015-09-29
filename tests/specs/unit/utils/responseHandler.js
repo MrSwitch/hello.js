@@ -155,14 +155,14 @@ define([], function() {
 				var spy = sinon.spy();
 				_window.close = spy;
 
-				// remove the global callback function
+				// Remove the global callback function
 				delete _parent.callbackTestFunc;
 
 				// Spy on the store function
 				var spy2 = sinon.spy();
 				utils.store = spy2;
 
-				// trigger the response handler
+				// Trigger the response handler
 				utils.responseHandler(_window, _parent);
 
 				expect(spy.calledOnce).to.be.ok();
