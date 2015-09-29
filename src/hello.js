@@ -1464,41 +1464,38 @@ hello.utils.extend(hello.utils, {
 		// Trigger a callback to authenticate
 		function authCallback(obj, window, parent) {
 
+			var cb = obj.callback;
+			var network = obj.network;
+
 			// Trigger the callback on the parent
-			_this.store(obj.network, obj);
+			_this.store(network, obj);
 
 			// If this is a page request it has no parent or opener window to handle callbacks
 			if (('display' in obj) && obj.display === 'page') {
 				return;
 			}
 
-			if (parent) {
-				// Call the generic listeners
-				// Win.hello.emit(network+":auth."+(obj.error?'failed':'login'), obj);
+			// Remove from session object
+			if (parent && cb && cb in parent) {
 
-				// TODO: remove from session object
-				var cb = obj.callback;
 				try {
 					delete obj.callback;
 				}
 				catch (e) {}
 
 				// Update store
-				_this.store(obj.network, obj);
+				_this.store(network, obj);
 
 				// Call the globalEvent function on the parent
-				if (cb in parent) {
+				// It's safer to pass back a string to the parent,
+				// Rather than an object/array (better for IE8)
+				var str = JSON.stringify(obj);
 
-					// It's safer to pass back a string to the parent,
-					// Rather than an object/array (better for IE8)
-					var str = JSON.stringify(obj);
-
-					try {
-						parent[cb](str);
-					}
-					catch (e) {
-						// Error thrown whilst executing parent callback
-					}
+				try {
+					parent[cb](str);
+				}
+				catch (e) {
+					// Error thrown whilst executing parent callback
 				}
 			}
 

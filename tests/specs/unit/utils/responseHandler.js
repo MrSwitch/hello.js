@@ -33,6 +33,8 @@ define([], function() {
 
 		describe('OAuth handler', function() {
 
+			var _store = utils.store;
+
 			beforeEach(function() {
 
 				_accessToken = '1234';
@@ -54,6 +56,10 @@ define([], function() {
 						// This is the callback function on the parent
 					}
 				};
+			});
+
+			afterEach(function() {
+				utils.store = _store;
 			});
 
 			it('should do nothing if the current window has no state parameter', function() {
@@ -142,6 +148,28 @@ define([], function() {
 				expect(response.error).to.have.property('code', 'error')
 					.and.to.have.property('message', 'description');
 
+			});
+
+			it('should call hello.utils.store with the authResponse including callback property, if the callback was not found on the parent', function() {
+
+				var spy = sinon.spy();
+				_window.close = spy;
+
+				// remove the global callback function
+				delete _parent.callbackTestFunc;
+
+				// Spy on the store function
+				var spy2 = sinon.spy();
+				utils.store = spy2;
+
+				// trigger the response handler
+				utils.responseHandler(_window, _parent);
+
+				expect(spy.calledOnce).to.be.ok();
+				expect(spy2.calledOnce).to.be.ok();
+
+				// Should set the callback name along with the auth response.
+				expect(spy2.args[0][1]).to.have.property('callback', 'callbackTestFunc');
 			});
 
 		});

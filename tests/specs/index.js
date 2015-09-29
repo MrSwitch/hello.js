@@ -41,6 +41,7 @@ require([
 	'./unit/core/hello.logout',
 	'./unit/core/hello.use',
 	'./unit/core/hello.events',
+	'./unit/core/session.monitor',
 
 	// Modules
 	'./unit/modules/index',
