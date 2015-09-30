@@ -2,7 +2,7 @@
  * Blob.js
  * A Blob implementation.
  * 2013-06-20
- * 
+ *
  * By Eli Grey, http://eligrey.com
  * By Devin Samarin, https://github.com/eboyjr
  * License: X11/MIT
@@ -50,7 +50,7 @@ this.Blob = (function(view) {
 			, URL = real_URL
 			, btoa = view.btoa
 			, atob = view.atob
-			
+
 			, ArrayBuffer = view.ArrayBuffer
 			, Uint8Array = view.Uint8Array
 		;
@@ -178,3 +178,12 @@ this.Blob = (function(view) {
 	Blob.prototype = getPrototypeOf(new Blob());
 	return Blob;
 }(this));
+
+var supportsBlob = false;
+if (this.Blob) {
+	try{
+		new Blob([new Int8Array([17, -45.3])], {type: 'image/jpeg'});
+		supportsBlob = true;
+	}
+	catch(e) {}
+}

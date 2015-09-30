@@ -6,19 +6,13 @@
 		<title>HelloJS Unit and E2E tests</title>
 		<link href="../../assets/mocha/mocha.css" media="screen" rel="stylesheet" type="text/css" />
 		<style>html,body{overflow:auto;-webkit-user-select: text;}</style>
-	</head>
-	<body>
-		<!-- Required for browser reporter -->
-		<div id="mocha"></div>
 		<script src="../../assets/mocha/mocha.js"></script>
 		<script src="../../assets/expect/index.js"></script>
 		<script src="../../assets/sinonjs/sinon.js"></script>
 		<script src="../../assets/requirejs/require.js"></script>
 		<script src="../../assets/json2/json2.js"></script>
 		<script src="./libs/atob.js"></script>
-<!--[if !IE]>-->
 		<script src="./libs/Blob.js"></script>
-<!-- <![endif]-->
 <!--[if lte IE 9]>
 		<script src="../../src/hello.polyfill.js"></script>
 <![endif]-->
@@ -26,6 +20,9 @@
 		<script src="../../src/hello.chromeapp.js"></script>
 		<script src="../../src/hello.commonjs.js"></script>
 		<script src="./index.js"></script>
-
+	</head>
+	<body>
+		<!-- Required for browser reporter -->
+		<div id="mocha"></div>
 	</body>
 </html>

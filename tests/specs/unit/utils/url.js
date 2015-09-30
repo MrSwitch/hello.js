@@ -4,7 +4,7 @@ define([], function() {
 
 	describe('utils.url', function() {
 
-		var testLocationRoot = window.location.protocol + '//' + window.location.hostname;
+		var testLocationRoot = window.location.protocol + '//' + window.location.host;
 		var testLocationDir = window.location.pathname.replace(/\/[^\/]+$/, '/');
 		var testLocationFilename = 'redirect.html';
 

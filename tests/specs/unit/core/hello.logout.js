@@ -39,6 +39,9 @@ define([
 
 				before(function() {
 
+					// Clear all services
+					delete hello.services.testable;
+
 					hello.init({
 						testable: module
 					});
