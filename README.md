@@ -905,10 +905,10 @@ HelloJS can also be run on PhoneGap applications. Checkout the demo [hellojs-pho
 HelloJS relies on the these fantastic services for its development and deployment. Without which it would still be kicking around in a cave - not evolving very fast.
 
 
-	<li><a href="https://www.browserstack.com/">BrowserStack</a> for providing a means to test across multiple devices.
-	<li><a href="https://github.com">Github</a> for maintaining the repo and issue tracking.
-	<li><a href="https://travis-ci.org/">Travis</a> for providing fantastic continuous integration.
-	<li>... and others i've forgotten to mention
+- [BrowserStack](https://www.browserstack.com/) for providing a means to test across multiple devices.
+- [Github](https://github.com) for maintaining the repo and issue tracking.
+- [Travis](https://travis-ci.org/) for providing fantastic continuous integration.
+- ... and others i've forgotten to mention
 
 
 ## Can i contribute?
