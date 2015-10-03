@@ -1,7 +1,7 @@
 language: node_js
 sudo: false
 node_js:
-- "0.12"
+- '0.12'
 cache:
   directories:
   - node_modules
@@ -13,8 +13,8 @@ env:
   - SELENIUM_PORT=80
   - BS_AUTOMATE_PROJECT="$TRAVIS_REPO_SLUG"
   - BS_AUTOMATE_BUILD="Travis build No. $TRAVIS_BUILD_NUMBER for $TRAVIS_REPO_SLUG"
-  - secure: "AIIthWLUAlwPCkEt6IRpheZUmXqJHh2n/6SC+WEBLzU9l2oCw/gaeRZFP3lKvAxSiPTNpXhXyknD7Y6cCCAX1fjw2t3qhy9yBVrwucQo/FsEsbwFw3ZBxzIbQYAsSnq2iQ6pAvCYcnE9iriYQu+VnUZabGeAjOZKx7ajH5k9edo="
-  - secure: "HIEWChVznK3FvyS1xiFCCd5ffzLpN7LHj7NAkR1bvFXi7sI2w+/kcKjl8wCd4eAm/SMk0liOhYPycym0BWfkkJWygEq77mJ0FhCvFj67vqOmXqawR9j6WKqGvhsUpQoJTgRfQdxdfuaYgxHx71bYzphFViZMRrdBnlvploEXtQ8="
+  - secure: AIIthWLUAlwPCkEt6IRpheZUmXqJHh2n/6SC+WEBLzU9l2oCw/gaeRZFP3lKvAxSiPTNpXhXyknD7Y6cCCAX1fjw2t3qhy9yBVrwucQo/FsEsbwFw3ZBxzIbQYAsSnq2iQ6pAvCYcnE9iriYQu+VnUZabGeAjOZKx7ajH5k9edo=
+  - secure: HIEWChVznK3FvyS1xiFCCd5ffzLpN7LHj7NAkR1bvFXi7sI2w+/kcKjl8wCd4eAm/SMk0liOhYPycym0BWfkkJWygEq77mJ0FhCvFj67vqOmXqawR9j6WKqGvhsUpQoJTgRfQdxdfuaYgxHx71bYzphFViZMRrdBnlvploEXtQ8=
 notifications:
   webhooks:
     urls:
@@ -26,9 +26,8 @@ deploy:
   provider: npm
   email: andrewjdodson@gmail.com
   api_key:
-    secure: LRgjX0EAVDoVq3Ckng/7zJwJZbkLeVma9GIzAClHxi826acXG0gXE1QBXW+sr3mjb2Vz+sUcDhSvxZJZ9fQ2mZqWJSzGc0v+AfxHjTxLXE2DtS2N247OJVjcC4TvU6vctNd15VJ7spZ86fNnc9LQD7pIW/q2dYGvUcHDmVhf0Qg=
-  "on":
+    secure: GMOX0qPWjW3QGVaIaYfN2kltuKgZ4L7e7Zryvnk+CwdOt2wxaVtOVZocDyLXlV3lEbpK6nTkL6Icbxh6YkZedeRdOvuCcN8NG1C7Cij4edhwgRyipVIcAug1YIOcsYAkRGT+8SE9K/qn7/LGdXk33EL0nTGoPmNcfM7a/YX9vqM=
+  on:
     tags: true
     repo: MrSwitch/hello.js
     all_branches: true
-
