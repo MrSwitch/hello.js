@@ -138,11 +138,6 @@ Quick start shows you how to go from zero to loading in the name and picture of 
 Register your application with at least one of the following networks. Ensure you register the correct domain as they can be quite picky.
 
 
-<!--
-- [Windows Live](http://msdn.microsoft.com/en-us/library/hh243641.aspx)
-- [Google+](http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html)
-- [Facebook](http://developers.facebook.com/docs/reference/dialogs/oauth/)
--->
 - [Facebook](https://developers.facebook.com/apps)
 - [Windows Live](https://account.live.com/developers/applications/index)
 - [Google+](https://code.google.com/apis/console/b/0/#:access)
@@ -507,6 +502,8 @@ Make calls to the API for getting and posting data.
 
 ### hello.api([path], [method], [data], [callback(json)])
 
+`hello.api([path], [method], [data], [callback(json)]).then(successHandler, errorHandler)`.
+
 <table>
 	<tr>
 		<th>name</th>
@@ -583,8 +580,45 @@ Make calls to the API for getting and posting data.
 			<em>null</em>
 		</td>
 	</tr>
-</table>
 
+	<tr>
+		<td colspan=6>More options (below) require putting the options into a 'key'=>'value' hash. I.e. <code>hello(network).api(options)</code></td>
+	</tr>
+
+	<tr>
+		<td>timeout</td>
+		<td><i>integer</i></td>
+		<td>
+			<code>3000</code> = 3 seconds.
+		</td>
+		<td>
+			Wait <em>milliseconds</em> before resolving the Promise with a reject.
+		</td>
+		<td>
+			<em>optional</em>
+		</td>
+		<td>
+			<em>60000</em>
+		</td>
+	</tr>
+
+	<tr>
+		<td>formatResponse</td>
+		<td><i>boolean</i></td>
+		<td>
+			<code>false</code>
+		</td>
+		<td>
+			<code>true</code>: format the response, <code>false</code>: return raw response.
+		</td>
+		<td>
+			<em>optional</em>
+		</td>
+		<td>
+			<em>true</em>
+		</td>
+	</tr>
+</table>
 
 ### Examples:
 
@@ -866,13 +900,23 @@ Polyfills are included in `src/hello.polyfill.js` this is to bring older browser
 
 HelloJS can also be run on PhoneGap applications. Checkout the demo [hellojs-phonegap-demo](https://github.com/MrSwitch/hellojs-phonegap-demo)
 
-## Contributing
+# Thankyou
 
-**"No, it's perfect!"**.... If you believe that then give it a [star](https://github.com/MrSwitch/hello.js).
+HelloJS relies on the these fantastic services for its development and deployment. Without which it would still be kicking around in a cave - not evolving very fast.
 
-Having read this far you have already invested your time, why not contribute!?
 
-HelloJS is constantly evolving, as are the services which it connects too. So if you think something could be said better, find something buggy or missing from either the code, documentation or demos then please put it in, no matter how trivial.
+- [BrowserStack](https://www.browserstack.com/) for providing a means to test across multiple devices.
+- [Github](https://github.com) for maintaining the repo and issue tracking.
+- [Travis](https://travis-ci.org/) for providing fantastic continuous integration.
+- ... and others i've forgotten to mention
+
+
+## Can i contribute?
+
+Yes, yes you can. Infact this isnt really free software, it comes with bugs documentation errors, more over it tracks thirdparty API's which just wont sit still. And its intended for everyone to understand, so if you dont understand something then its not fulfilling its goal.
+
+... otherwise give it a [star](https://github.com/MrSwitch/hello.js).
+
 
 ### Changing Code?
 Ensure you setup and test your code on a variety of browsers.
@@ -896,6 +940,7 @@ python -m SimpleHTTPServer
 # 2. Then open the following URL in your web browser:
 # http://localhost:8000/tests/specs/index.html
 ```
+
 
 
 

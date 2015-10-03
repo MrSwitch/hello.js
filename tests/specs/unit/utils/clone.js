@@ -19,10 +19,10 @@ define([], function() {
 
 		});
 
-		if (window.Blob) {
+		if (supportsBlob) {
 			it('should not clone Blob values', function() {
 
-				var blob = new Blob();
+				var blob = new Blob([new Int8Array([17, -45.3])], {type: 'image/jpeg'});
 
 				var orig = {
 					prop: blob
