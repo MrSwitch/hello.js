@@ -1,4 +1,4 @@
-/*! hellojs v1.8.4 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.9.0 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -320,6 +320,9 @@ hello.utils.extend(hello, {
 		// Local vars
 		var url;
 
+		// Get all the custom options and store to be appended to the querystring
+		var qs = utils.diffKey(p.options, _this.settings);
+
 		// Merge/override options with app defaults
 		var opts = p.options = utils.merge(_this.settings, p.options || {});
 
@@ -392,7 +395,7 @@ hello.utils.extend(hello, {
 		}
 
 		// Query string parameters, we may pass our own arguments to form the querystring
-		p.qs = {
+		p.qs = utils.merge(qs, {
 			client_id: encodeURIComponent(provider.id),
 			response_type: encodeURIComponent(responseType),
 			redirect_uri: encodeURIComponent(redirectUri),
@@ -406,7 +409,7 @@ hello.utils.extend(hello, {
 				state: opts.state,
 				redirect_uri: redirectUri
 			}
-		};
+		});
 
 		// Get current session for merging scopes, and for quick auth response
 		var session = utils.store(p.network);
@@ -541,7 +544,7 @@ hello.utils.extend(hello, {
 		// Trigger how we want self displayed
 		if (opts.display === 'none') {
 			// Sign-in in the background, iframe
-			utils.iframe(url);
+			utils.iframe(url, redirectUri);
 		}
 
 		// Triggering popup?
@@ -1003,6 +1006,23 @@ hello.utils.extend(hello.utils, {
 		return b.filter(function(item) {
 			return a.indexOf(item) === -1;
 		});
+	},
+
+	// Get the different hash of properties unique to `a`, and not in `b`
+	diffKey: function(a, b) {
+		if (a || !b) {
+			var r = {};
+			for (var x in a) {
+				// Does the property not exist?
+				if (!(x in b)) {
+					r[x] = a[x];
+				}
+			}
+
+			return r;
+		}
+
+		return a;
 	},
 
 	// Unique
@@ -1597,41 +1617,38 @@ hello.utils.extend(hello.utils, {
 		// Trigger a callback to authenticate
 		function authCallback(obj, window, parent) {
 
+			var cb = obj.callback;
+			var network = obj.network;
+
 			// Trigger the callback on the parent
-			_this.store(obj.network, obj);
+			_this.store(network, obj);
 
 			// If this is a page request it has no parent or opener window to handle callbacks
 			if (('display' in obj) && obj.display === 'page') {
 				return;
 			}
 
-			if (parent) {
-				// Call the generic listeners
-				// Win.hello.emit(network+":auth."+(obj.error?'failed':'login'), obj);
+			// Remove from session object
+			if (parent && cb && cb in parent) {
 
-				// TODO: remove from session object
-				var cb = obj.callback;
 				try {
 					delete obj.callback;
 				}
 				catch (e) {}
 
 				// Update store
-				_this.store(obj.network, obj);
+				_this.store(network, obj);
 
 				// Call the globalEvent function on the parent
-				if (cb in parent) {
+				// It's safer to pass back a string to the parent,
+				// Rather than an object/array (better for IE8)
+				var str = JSON.stringify(obj);
 
-					// It's safer to pass back a string to the parent,
-					// Rather than an object/array (better for IE8)
-					var str = JSON.stringify(obj);
-
-					try {
-						parent[cb](str);
-					}
-					catch (e) {
-						// Error thrown whilst executing parent callback
-					}
+				try {
+					parent[cb](str);
+				}
+				catch (e) {
+					// Error thrown whilst executing parent callback
 				}
 			}
 
@@ -2097,7 +2114,7 @@ hello.utils.extend(hello.utils, {
 		// Check if the browser and service support CORS
 		var cors = this.request_cors(function() {
 			// If it does then run this...
-			return (!('xhr' in p) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))));
+			return ((p.xhr === undefined) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))));
 		});
 
 		if (cors) {
@@ -3268,11 +3285,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 					p.qs.auth_type = 'reauthenticate';
 				}
 
-				// Support Facebook's unique auth_type parameter
-				if (p.options.auth_type) {
-					p.qs.auth_type = p.options.auth_type;
-				}
-
 				// The facebook login window is a different size.
 				p.options.popup.width = 580;
 				p.options.popup.height = 400;
@@ -3297,11 +3309,11 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			// API Base URL
-			base: 'https://graph.facebook.com/v2.3/',
+			base: 'https://graph.facebook.com/v2.4/',
 
 			// Map GET requests
 			get: {
-				me: 'me',
+				me: 'me?fields=email,first_name,last_name,name,timezone,verified',
 				'me/friends': 'me/friends',
 				'me/following': 'me/friends',
 				'me/followers': 'me/friends',

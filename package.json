@@ -1,6 +1,6 @@
 {
   "name": "hellojs",
-  "version": "1.8.4",
+  "version": "1.9.0",
   "description": "A clientside Javascript library for standardizing requests to OAuth2 web services (and OAuth1 - with a shim)",
   "homepage": "https://adodson.com/hello.js",
   "main": "dist/hello.all.js",
@@ -28,7 +28,7 @@
     "url": "https://github.com/MrSwitch/hello.js/issues"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "grunt test && node_modules/.bin/browserstack-runner"
   },
   "devDependencies": {
     "browserstack-runner": "^0.3.7",
