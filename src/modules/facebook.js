@@ -79,7 +79,7 @@
 				'me/share': 'me/feed',
 				'me/like': 'me/likes',
 				'me/files': 'me/albums',
-				'me/albums': 'me/albums',
+				'me/albums': 'me/albums?fields=cover_photo,name',
 				'me/album': '@{id}/photos?fields=picture',
 				'me/photos': 'me/photos',
 				'me/photo': '@{id}',
@@ -183,8 +183,8 @@
 						return a.width - b.width;
 					});
 
-				if (d.cover_photo) {
-					d.thumbnail = base + d.cover_photo + '/picture?access_token=' + token;
+				if (d.cover_photo && d.cover_photo.id) {
+					d.thumbnail = base + d.cover_photo.id + '/picture?access_token=' + token;
 				}
 
 				if (d.type === 'album') {
