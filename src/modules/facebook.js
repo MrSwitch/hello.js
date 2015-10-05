@@ -80,7 +80,7 @@
 				'me/like': 'me/likes',
 				'me/files': 'me/albums',
 				'me/albums': 'me/albums',
-				'me/album': '@{id}/photos',
+				'me/album': '@{id}/photos?fields=picture',
 				'me/photos': 'me/photos',
 				'me/photo': '@{id}',
 				'friend/albums': '@{id}/albums',
