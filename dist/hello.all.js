@@ -1,4 +1,4 @@
-/*! hellojs v1.9.0 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.9.4 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -3321,7 +3321,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				'me/like': 'me/likes',
 				'me/files': 'me/albums',
 				'me/albums': 'me/albums',
-				'me/album': '@{id}/photos',
+				'me/album': '@{id}/photos?fields=picture',
 				'me/photos': 'me/photos',
 				'me/photo': '@{id}',
 				'friend/albums': '@{id}/albums',
