@@ -1,4 +1,4 @@
-/*! hellojs v1.9.4 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.9.5 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -766,13 +766,13 @@ hello.utils.extend(hello.utils, {
 	store: (function() {
 
 		var a = ['localStorage', 'sessionStorage'];
-		var i = 0;
+		var i = -1;
 		var prefix = 'test';
 
 		// Set LocalStorage
 		var localStorage;
 
-		while (a[i++]) {
+		while (a[++i]) {
 			try {
 				// In Chrome with cookies blocked, calling localStorage throws an error
 				localStorage = window[a[i]];
@@ -3320,7 +3320,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				'me/share': 'me/feed',
 				'me/like': 'me/likes',
 				'me/files': 'me/albums',
-				'me/albums': 'me/albums',
+				'me/albums': 'me/albums?fields=cover_photo,name',
 				'me/album': '@{id}/photos?fields=picture',
 				'me/photos': 'me/photos',
 				'me/photo': '@{id}',
@@ -3424,8 +3424,8 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 						return a.width - b.width;
 					});
 
-				if (d.cover_photo) {
-					d.thumbnail = base + d.cover_photo + '/picture?access_token=' + token;
+				if (d.cover_photo && d.cover_photo.id) {
+					d.thumbnail = base + d.cover_photo.id + '/picture?access_token=' + token;
 				}
 
 				if (d.type === 'album') {
