@@ -79,8 +79,8 @@ module.exports = function(grunt) {
 			}
 		},
 		watch: {
-			files: ['src/**/*.js'],
-			tasks: ['jscs']
+			files: ['src/**/*.js', 'tests/specs/**/*'],
+			tasks: ['test']
 		}
 	});
 
