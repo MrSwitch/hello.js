@@ -17,11 +17,10 @@
     "sinonjs": "~1.10.2"
   },
   "ignore": [
-    "tests",
-    "demos",
-    "assets",
-    "ui",
-    "*.html",
+    "**/*",
+    "!dist/*",
+    "!src/**",
+    "!README.md",
     "package.json"
   ]
 }
