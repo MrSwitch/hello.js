@@ -36,7 +36,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 		var _cache = {};
 		chrome.storage.local.get('hello', function(r) {
 			// Update the cache
-			_cache = r.hello;
+			_cache = r.hello || {};
 		});
 
 		hello.utils.store = function(name, value) {
