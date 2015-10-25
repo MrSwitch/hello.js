@@ -900,20 +900,20 @@ Polyfills are included in `src/hello.polyfill.js` this is to bring older browser
 
 HelloJS can also be run on PhoneGap applications. Checkout the demo [hellojs-phonegap-demo](https://github.com/MrSwitch/hellojs-phonegap-demo)
 
-# Thankyou
+# Thank you
 
-HelloJS relies on the these fantastic services for its development and deployment. Without which it would still be kicking around in a cave - not evolving very fast.
+HelloJS relies on these fantastic services for it's development and deployment, without which it would still be kicking around in a cave - not evolving very fast.
 
 
 - [BrowserStack](https://www.browserstack.com/) for providing a means to test across multiple devices.
 - [Github](https://github.com) for maintaining the repo and issue tracking.
 - [Travis](https://travis-ci.org/) for providing fantastic continuous integration.
-- ... and others i've forgotten to mention
+- ... and others I've forgotten to mention
 
 
-## Can i contribute?
+## Can I contribute?
 
-Yes, yes you can. Infact this isnt really free software, it comes with bugs documentation errors, more over it tracks thirdparty API's which just wont sit still. And its intended for everyone to understand, so if you dont understand something then its not fulfilling its goal.
+Yes, yes you can. In fact this isn't really free software, it comes with bugs and documentation errors. Moreover it tracks third party API's which just won't sit still. And it's intended for everyone to understand, so if you dont understand something then it's not fulfilling it's goal.
 
 ... otherwise give it a [star](https://github.com/MrSwitch/hello.js).
 
