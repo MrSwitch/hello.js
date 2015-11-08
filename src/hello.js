@@ -554,7 +554,7 @@ hello.utils.extend(hello.utils, {
 			// Override the items in the URL which already exist
 			for (var x in params) {
 				var str = '([\\?\\&])' + x + '=[^\\&]*';
-				reg = new RegExp(str);
+				var reg = new RegExp(str);
 				if (url.match(reg)) {
 					url = url.replace(reg, '$1' + x + '=' + formatFunction(params[x]));
 					delete params[x];
@@ -2319,7 +2319,7 @@ hello.utils.extend(hello.utils, {
 		// This action will be ignored if we've already called the callback handler "cb" with a successful onload event
 		if (window.navigator.userAgent.toLowerCase().indexOf('opera') > -1) {
 			operaFix = _this.append('script', {
-				text: 'document.getElementById(\'' + callbackId + '\').onerror();'
+				text: 'document.getElementById(\'' + callbackID + '\').onerror();'
 			});
 			script.async = false;
 		}
