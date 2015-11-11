@@ -167,8 +167,12 @@
 
 			xhr: function(p) {
 
-				if (p.method === 'post' || p.method === 'put' || p.method === 'patch') {
+				if (p.method === 'post' || p.method === 'put') {
 					toJSON(p);
+				}
+				else if (p.method === 'patch') {
+					hello.utils.extend(p.query, p.data);
+					p.data = null;
 				}
 
 				return true;
