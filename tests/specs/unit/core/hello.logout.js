@@ -6,7 +6,7 @@ define([
 
 	describe('hello.logout', function() {
 
-		before(function (){
+		before(function() {
 			hello.init({
 				test: {
 					name: 'test',
@@ -40,10 +40,8 @@ define([
 		it('should remove the session from the localStorage', function(done) {
 
 			hello.utils.store('test', {token:'text'});
-			console.log(hello.utils.store('test'));
 
-			hello.logout('test').then(function () {
-				console.log(hello.utils.store('test'));
+			hello.logout('test').then(function() {
 				expect(hello.utils.store('test')).to.equal(null);
 				done();
 			});
