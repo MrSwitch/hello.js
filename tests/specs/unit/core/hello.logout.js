@@ -6,22 +6,45 @@ define([
 
 	describe('hello.logout', function() {
 
-		it('should trigger an error when accessed through logout', function(done) {
+		before(function (){
+			hello.init({
+				test: {
+					name: 'test',
+					id: 'id'
+				}
+			});
+		});
 
+		after(function() {
+			delete hello.services.test;
+		});
+
+		it('should trigger an error when network is unknown', function(done) {
 			// Make request
-			hello('Facelessbook')
+			hello('unknown')
 				.logout()
 				.then(null, errorResponse('invalid_network', done));
-
 		});
 
 		it('should assign a complete event', function(done) {
-			hello.logout('test', function() {done();});
+			hello.logout('unknown', function() {done();});
 		});
 
-		it('should throw a completed event if network name is wrong', function(done) {
-			hello.logout('test', function(e) {
+		it('should throw an error events in the eventCompleted handler', function(done) {
+			hello.logout('unknown', function(e) {
 				expect(e).to.have.property('error');
+				done();
+			});
+		});
+
+		it('should remove the session from the localStorage', function(done) {
+
+			hello.utils.store('test', {token:'text'});
+			console.log(hello.utils.store('test'));
+
+			hello.logout('test').then(function () {
+				console.log(hello.utils.store('test'));
+				expect(hello.utils.store('test')).to.equal(null);
 				done();
 			});
 		});

@@ -41,7 +41,7 @@ define([], function() {
 
 		});
 
-		it('should return undefined if data not found', function() {
+		it('should return null if data not found', function() {
 
 			expect(store('notfound')).to.equal(null);
 
