@@ -28,7 +28,8 @@
     "url": "https://github.com/MrSwitch/hello.js/issues"
   },
   "scripts": {
-    "test": "grunt test && node_modules/.bin/browserstack-runner"
+    "test": "grunt test && npm run test:browserstack",
+    "test:browserstack": "bash browserstack.sh"
   },
   "devDependencies": {
     "browserstack-runner": "^0.3.7",

@@ -15,7 +15,6 @@ env:
   - BS_AUTOMATE_BUILD="Travis build No. $TRAVIS_BUILD_NUMBER for $TRAVIS_REPO_SLUG"
   - secure: AIIthWLUAlwPCkEt6IRpheZUmXqJHh2n/6SC+WEBLzU9l2oCw/gaeRZFP3lKvAxSiPTNpXhXyknD7Y6cCCAX1fjw2t3qhy9yBVrwucQo/FsEsbwFw3ZBxzIbQYAsSnq2iQ6pAvCYcnE9iriYQu+VnUZabGeAjOZKx7ajH5k9edo=
   - secure: HIEWChVznK3FvyS1xiFCCd5ffzLpN7LHj7NAkR1bvFXi7sI2w+/kcKjl8wCd4eAm/SMk0liOhYPycym0BWfkkJWygEq77mJ0FhCvFj67vqOmXqawR9j6WKqGvhsUpQoJTgRfQdxdfuaYgxHx71bYzphFViZMRrdBnlvploEXtQ8=
-script: bash ./tests/run.sh
 notifications:
   webhooks:
     urls:
