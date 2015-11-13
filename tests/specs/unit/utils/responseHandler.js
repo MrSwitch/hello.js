@@ -125,7 +125,7 @@ define([], function() {
 
 			});
 
-			xit('should close the iframe window', function(done) {
+			it('should close the iframe window', function(done) {
 
 				window.testIframeCloses = function() {
 					// After the initial load we can expect this to have removed itself;

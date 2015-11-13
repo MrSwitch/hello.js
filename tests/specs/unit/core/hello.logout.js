@@ -37,7 +37,7 @@ define([
 			});
 		});
 
-		xit('should remove the session from the localStorage', function(done) {
+		it('should remove the session from the localStorage', function(done) {
 
 			hello.utils.store('test', {access_token:'text'});
 
