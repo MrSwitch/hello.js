@@ -133,7 +133,7 @@ define([], function() {
 				document.body.appendChild(frm);
 
 				window.testIframeCloses = function() {
-					// after the initial load we can expect this to have removed itself;
+					// After the initial load we can expect this to have removed itself;
 					setTimeout(function() {
 						expect(frm.parentNode).to.eql(null);
 						done();
