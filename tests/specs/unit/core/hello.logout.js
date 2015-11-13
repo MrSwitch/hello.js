@@ -37,9 +37,9 @@ define([
 			});
 		});
 
-		it('should remove the session from the localStorage', function(done) {
+		xit('should remove the session from the localStorage', function(done) {
 
-			hello.utils.store('test', {token:'text'});
+			hello.utils.store('test', {access_token:'text'});
 
 			hello.logout('test').then(function() {
 				expect(hello.utils.store('test')).to.equal(null);
