@@ -1531,10 +1531,8 @@ hello.utils.extend(hello.utils, {
 });
 
 // Events
-
 // Extend the hello object with its own event instance
 hello.utils.Event.call(hello);
-
 
 ///////////////////////////////////
 // Monitoring session state
