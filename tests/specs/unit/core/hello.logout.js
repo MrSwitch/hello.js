@@ -44,7 +44,7 @@ define([
 			hello.logout('test').then(function() {
 				expect(hello.utils.store('test')).to.equal(null);
 				done();
-			});
+			}, done);
 		});
 
 		describe('force=true', function() {

@@ -1535,14 +1535,6 @@ hello.utils.extend(hello.utils, {
 // Extend the hello object with its own event instance
 hello.utils.Event.call(hello);
 
-/////////////////////////////////////
-//
-// Save any access token that is in the current page URL
-// Handle any response solicited through iframe hash tag following an API request
-//
-/////////////////////////////////////
-
-hello.utils.responseHandler(window, window.opener || window.parent);
 
 ///////////////////////////////////
 // Monitoring session state
@@ -2718,3 +2710,12 @@ hello.utils.extend(hello.utils, {
 	};
 
 })(hello);
+
+/////////////////////////////////////
+//
+// Save any access token that is in the current page URL
+// Handle any response solicited through iframe hash tag following an API request
+//
+/////////////////////////////////////
+
+hello.utils.responseHandler(window, window.opener || window.parent);

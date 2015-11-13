@@ -127,10 +127,6 @@ define([], function() {
 
 			it('should close the iframe window', function(done) {
 
-				// In this example we load a page containing the responseHandler script on it.
-				var frm = document.createElement('iframe');
-				frm.src = 'redirect.html?state={}&network=test&callback=testIframeCloses&access_token=token';
-				document.body.appendChild(frm);
 
 				window.testIframeCloses = function() {
 					// After the initial load we can expect this to have removed itself;
@@ -139,6 +135,11 @@ define([], function() {
 						done();
 					}, 100);
 				};
+
+				// In this example we load a page containing the responseHandler script on it.
+				var frm = document.createElement('iframe');
+				frm.src = 'redirect.html?state={}&network=test&callback=testIframeCloses&access_token=token';
+				document.body.appendChild(frm);
 
 			});
 
