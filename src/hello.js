@@ -1508,8 +1508,8 @@ hello.utils.extend(hello.utils, {
 		function closeWindow() {
 
 			if (window.frameElement) {
-				// Inside an iframe, remove from parent window
-				window.parent.document.body.removeChild(window.frameElement);
+				// Inside an iframe, remove from parent
+				parent.document.body.removeChild(window.frameElement);
 			}
 			else {
 				// Close this current window

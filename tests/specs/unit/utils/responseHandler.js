@@ -125,6 +125,23 @@ define([], function() {
 
 			});
 
+			it('should close the iframe window', function(done) {
+
+				// In this example we load a page containing the responseHandler script on it.
+				var frm = document.createElement('iframe');
+				frm.src = 'redirect.html?state={}&network=test&callback=testIframeCloses&access_token=token';
+				document.body.appendChild(frm);
+
+				window.testIframeCloses = function() {
+					// after the initial load we can expect this to have removed itself;
+					setTimeout(function() {
+						expect(frm.parentNode).to.eql(null);
+						done();
+					}, 100);
+				};
+
+			});
+
 			it('should return OAuth failures', function() {
 
 				var spy = sinon.spy();
