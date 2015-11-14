@@ -511,6 +511,38 @@ var tests = [
 		}
 	},
 	{
+		title : "Get files in folder",
+		api : "api",
+		method : 'get',
+		path : 'me/files',
+		scope : ["files"],
+		data : {
+			parent : '[FOLDER_ID]'
+		},
+		setup : get_test_folder,
+		expected : {
+			data : [{
+				id : reg.string,
+				name : reg.name
+			}]
+		}
+	},
+	{
+		title : "Get file by ID",
+		api : "api",
+		method : 'get',
+		path : 'me/file',
+		scope : ["files"],
+		data : {
+			id : '[FILE_ID]'
+		},
+		setup : get_test_file,
+		expected : {
+			id : reg.string,
+			name : reg.name
+		}
+	},
+	{
 		title : "List folders",
 		api : "api",
 		method : 'get',
@@ -567,23 +599,6 @@ var tests = [
 		setup : get_test_folder,
 		expected : {
 			success : true
-		}
-	},
-	{
-		title : "Get files in folder",
-		api : "api",
-		method : 'get',
-		path : 'me/files',
-		scope : ["files"],
-		data : {
-			parent : '[FOLDER_ID]'
-		},
-		setup : get_test_folder,
-		expected : {
-			data : [{
-				id : reg.string,
-				name : reg.name
-			}]
 		}
 	},
 	{
@@ -718,7 +733,8 @@ function get_test_photo(test, callback){
 
 function get_test_folder(test, callback){
 
-	if(!("id" in test.data)&&!("parent" in test.data)){
+
+	if ( !("id" in test.data && test.data.id.match(/\_ID\]$/)) && !("parent" in test.data && test.data.parent.match(/\_ID\]$/))) {
 		callback();
 		return;
 	}
@@ -901,12 +917,12 @@ function Test(test,network,parent){
 				test.response(r);
 
 				test.status(b?'success':'failure');
-				
+
 				if(callback&&typeof(callback)==='function'){
 					callback.call(test);
 				}
 			};
-			
+
 			if(test.method === 'login'){
 				test.request( hello(network).login(test.data,cb) );
 			}
@@ -1112,7 +1128,7 @@ function Dictionary(data) {
     this.removeItem = function(item) {
         this.items.remove(item);
     }.bind(this);
-        
+
     this.itemsAsObject = ko.dependentObservable(function() {
         var result = {};
         ko.utils.arrayForEach(this.items(), function(item) {
