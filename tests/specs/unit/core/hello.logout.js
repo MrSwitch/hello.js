@@ -37,7 +37,7 @@ define([
 			});
 		});
 
-		describe("remove session from store", function() {
+		describe('remove session from store', function() {
 
 			var store = hello.utils.store;
 
@@ -51,7 +51,7 @@ define([
 
 			it('should remove the session from the localStorage', function() {
 
-				var spy = sinon.spy(function(){
+				var spy = sinon.spy(function() {
 					return {};
 				});
 
