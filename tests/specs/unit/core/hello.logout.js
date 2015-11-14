@@ -27,24 +27,40 @@ define([
 		});
 
 		it('should assign a complete event', function(done) {
-			hello.logout('unknown', function() {done();});
+			hello('unknown').logout(function() {done();});
 		});
 
 		it('should throw an error events in the eventCompleted handler', function(done) {
-			hello.logout('unknown', function(e) {
+			hello('unknown').logout(function(e) {
 				expect(e).to.have.property('error');
 				done();
 			});
 		});
 
-		it('should remove the session from the localStorage', function(done) {
+		describe("remove session from store", function() {
 
-			hello.utils.store('test', {access_token:'text'});
+			var store = hello.utils.store;
 
-			hello.logout('test').then(function() {
-				expect(hello.utils.store('test')).to.equal(null);
-				done();
-			}, done);
+			beforeEach(function() {
+				hello.utils.store = store;
+			});
+
+			afterEach(function() {
+				hello.utils.store = store;
+			});
+
+			it('should remove the session from the localStorage', function() {
+
+				var spy = sinon.spy(function(){
+					return {};
+				});
+
+				hello.utils.store = spy;
+
+				hello('test').logout();
+
+				expect(spy.calledWith('test', null)).to.be.ok();
+			});
 		});
 
 		describe('force=true', function() {
@@ -58,7 +74,7 @@ define([
 				var store = hello.utils.store;
 				var session = {};
 
-				before(function() {
+				beforeEach(function() {
 
 					// Clear all services
 					delete hello.services.testable;
@@ -73,7 +89,7 @@ define([
 
 				});
 
-				after(function() {
+				afterEach(function() {
 					// Restore... bah dum!
 					hello.utils.store = store;
 				});
