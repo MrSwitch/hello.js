@@ -79,7 +79,16 @@
 				'me/photos': 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}&start-index=@{start|1}',
 
 				// See: https://developers.google.com/drive/v2/reference/files/list
-				'me/files': 'drive/v2/files?q=%22@{parent|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}',
+				// request a single file if there is data.id
+				// otherwise request for all files under data.parent
+				'me/files': function(p, callback) {
+					if (p.query.id) {
+						callback('drive/v2/files/@{id}');
+					}
+					else {
+						callback('drive/v2/files?q=%22@{parent|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}');
+					}
+				},
 
 				// See: https://developers.google.com/drive/v2/reference/files/list
 				'me/folders': 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+mimeType+=+%22application/vnd.google-apps.folder%22+and+trashed=false&maxResults=@{limit|100}',
@@ -112,6 +121,11 @@
 			del: {
 				'me/files': 'drive/v2/files/@{id}',
 				'me/folder': 'drive/v2/files/@{id}'
+			},
+
+			// Map PATCH requests
+			patch: {
+				'me/files': 'drive/v2/files/@{id}'
 			},
 
 			wrap: {
@@ -155,6 +169,10 @@
 
 				if (p.method === 'post' || p.method === 'put') {
 					toJSON(p);
+				}
+				else if (p.method === 'patch') {
+					hello.utils.extend(p.query, p.data);
+					p.data = null;
 				}
 
 				return true;
