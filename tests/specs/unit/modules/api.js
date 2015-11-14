@@ -18,7 +18,7 @@ define(['./helper', '../../stubs/endpoints'], function(helper, endpoints) {
 			var query = m[4];
 			var errors = m[5];
 
-			// format query
+			// Format query
 			if (query) {
 				query = splitter(query, ';', '-');
 			}
