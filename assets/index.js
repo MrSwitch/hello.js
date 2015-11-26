@@ -3,6 +3,9 @@
  * @author Andrew Dodson
  */
 
+// Prevent global leaks
+(function(self) {
+
 //
 // The following properties pertain to helper objects when defining the tests
 //
@@ -681,12 +684,82 @@ var tests = [
 		expected : {
 			success : true
 		}
+	},
+
+	////////////////////////////////
+	// SCOPE
+	////////////////////////////////
+	{
+		title : "Default scope",
+		api : "scope",
+		method : "basic",
+		filter : scopeFilter
+	},
+	{
+		title : "Read Users Email",
+		api : "scope",
+		method : "email",
+		scope: ['email'],
+		filter : scopeFilter
+	},
+	{
+		title : "Read Friends List",
+		api : "scope",
+		method : "friends",
+		scope: ['friends'],
+		filter : scopeFilter
+	},
+	{
+		title : "Publish scope",
+		api : "scope",
+		method : "publish",
+		scope: ['publish'],
+		filter : scopeFilter
+	},
+	{
+		title : "Read users Photos and Albums",
+		api : "scope",
+		method : "photos",
+		scope: ['photos'],
+		filter : scopeFilter
+	},
+	{
+		title : "Read users Videos and Albums",
+		api : "scope",
+		method : "videos",
+		scope: ['videos'],
+		filter : scopeFilter
+	},
+	{
+		title : "Read Files",
+		api : "scope",
+		method : "files",
+		scope: ['files'],
+		filter : scopeFilter
+	},
+	{
+		title : "Publish Files Scope",
+		api : "scope",
+		method : "publish_files",
+		scope: ['publish_files'],
+		filter : scopeFilter
+	},
+	{
+		title : "Persist the tokens or acquire a Refresh Token for continued access",
+		api : "scope",
+		method : "offline_access",
+		scope: ['offline_access'],
+		filter : scopeFilter
 	}
 ];
 
 
 ///////////////////////////////////
 // BEFORE SETUPS
+
+function scopeFilter(test) {
+	return hello.services[test.network].scope[test.method];
+}
 
 
 //
@@ -1006,7 +1079,7 @@ function Provider(network){
 	this.online = ko.observable(false);
 }
 
-var model = new (function(){
+self.model = new (function(){
 	this.networks = ko.observableArray([]);
 	this.tests = ko.observableArray([]);
 	this.checkedScopes = ko.observableArray([]);
@@ -1187,7 +1260,7 @@ function _indexOf(a,s){
 
 
 
-function getText(path, callback){
+self.getText = function getText(path, callback){
 	// Load in the templates for API calls
 	var xhr = new XMLHttpRequest();
 	xhr.onreadystatechange = function(){
@@ -1202,3 +1275,6 @@ function getText(path, callback){
 	xhr.open("GET",path, true);
 	xhr.send();
 }
+
+
+})(window);

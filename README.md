@@ -724,48 +724,20 @@ The scope property defines which privileges an app requires from a network provi
 An app can specify multiple scopes, separated by commas - as in the example below.
 
 ```js
-hello('facebook').login({scope: 'friends,photos,publish'});
+hello('facebook').login({
+    scope: 'friends, photos, publish'
+});
 ```
 
-Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the [hello.api reference table](http://adodson.com/hello.js/#helloapi).
+Scopes are tightly coupled with API requests. Unauthorized error response from an endpoint will occur if the scope privileges have not been granted. Use the [hello.api reference table](http://adodson.com/hello.js/#helloapi) to explore the API and scopes.
 
-The table below illustrates some of the default scopes HelloJS exposes. Additional scopes may be added which are proprietary to a service, but be careful not to mix proprietary scopes with other services which don't know how to handle them.
-<table>
-	<thead>
-	<tr>
-		<th>Scope</th>
-		<th>Description</th>
-	</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<th><i>default</i></th>
-			<td>Read basic profile</td>
-		</tr>
-		<tr>
-			<th><q>friends</q></th>
-			<td>Read friends profiles</td>
-		</tr>
-		<tr>
-			<th><q>photos</q></th>
-			<td>Read users albums and photos</td>
-		</tr>
-		<tr>
-			<th><q>files</q></th>
-			<td>Read users files</td>
-		</tr>
-		<tr>
-			<th><q>publish</q></th>
-			<td>Publish status updates</td>
-		</tr>
-		<tr>
-			<th><q>publish_files</q></th>
-			<td>Publish photos and files</td>
-		</tr>
-	</tbody>
-</table>
+It's considered good practice to limit the use of scopes. The more unnessary privileges you ask for the more likely users are going to drop off. If your app has many different sections, consider re-authorizing the user with different privileges as they go.
 
-It's good practice to limit the use of scopes and also to make users aware of why your app needs certain privileges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend, include a button that the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorization.
+HelloJS modules standardises popular scope names. However you can always use proprietary scopes, e.g. to access google spreadsheets: `hello('google').login({scope: 'https://spreadsheets.google.com/feeds'});`
+
+See [Scope](http://adodson.com/hello.js/#scope) for standardised scopes.
+
+
 
 ## Error Handling
 
