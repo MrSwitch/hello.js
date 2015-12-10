@@ -936,7 +936,8 @@ hello.utils.extend(hello.utils, {
 
 			/*  provide optional information-hiding proxy  */
 			this.proxy = {
-				then: this.then.bind(this)
+				then: this.then.bind(this),
+				catch: this.catch.bind(this)
 			};
 
 			/*  support optional executor function  */
@@ -960,6 +961,9 @@ hello.utils.extend(hello.utils, {
 					resolver(onRejected,  next, "reject" ));             /*  [Promises/A+ 2.2.3/2.2.6]  */
 				execute(curr);
 				return next.proxy;                                       /*  [Promises/A+ 2.2.7, 3.3]  */
+			},
+			catch: function(onRejected) {
+				return this.then(null, onRejected);
 			}
 		};
 
