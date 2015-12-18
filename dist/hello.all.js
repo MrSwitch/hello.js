@@ -1,4 +1,4 @@
-/*! hellojs v1.9.8 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.9.9 | (c) 2012-2015 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -623,7 +623,7 @@ hello.utils.extend(hello, {
 			var callback = function(opts) {
 
 				// Remove from the store
-				utils.store(p.name, '');
+				utils.store(p.name, null);
 
 				// Emit events by default
 				promise.fulfill(hello.utils.merge({network:p.name}, opts || {}));
@@ -1660,35 +1660,32 @@ hello.utils.extend(hello.utils, {
 
 		function closeWindow() {
 
-			// Close this current window
-			try {
-				window.close();
+			if (window.frameElement) {
+				// Inside an iframe, remove from parent
+				parent.document.body.removeChild(window.frameElement);
 			}
-			catch (e) {}
-
-			// IOS bug wont let us close a popup if still loading
-			if (window.addEventListener) {
-				window.addEventListener('load', function() {
+			else {
+				// Close this current window
+				try {
 					window.close();
-				});
+				}
+				catch (e) {}
+
+				// IOS bug wont let us close a popup if still loading
+				if (window.addEventListener) {
+					window.addEventListener('load', function() {
+						window.close();
+					});
+				}
 			}
+
 		}
 	}
 });
 
 // Events
-
 // Extend the hello object with its own event instance
 hello.utils.Event.call(hello);
-
-/////////////////////////////////////
-//
-// Save any access token that is in the current page URL
-// Handle any response solicited through iframe hash tag following an API request
-//
-/////////////////////////////////////
-
-hello.utils.responseHandler(window, window.opener || window.parent);
 
 ///////////////////////////////////
 // Monitoring session state
@@ -2865,6 +2862,15 @@ hello.utils.extend(hello.utils, {
 
 })(hello);
 
+/////////////////////////////////////
+//
+// Save any access token that is in the current page URL
+// Handle any response solicited through iframe hash tag following an API request
+//
+/////////////////////////////////////
+
+hello.utils.responseHandler(window, window.opener || window.parent);
+
 // Script to support ChromeApps
 // This overides the hello.utils.popup method to support chrome.identity.launchWebAuthFlow
 // See https://developer.chrome.com/apps/app_identity#non
@@ -3264,8 +3270,8 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				share: 'user_posts',
 				birthday: 'user_birthday',
 				events: 'user_events',
-				photos: 'user_photos,user_videos',
-				videos: 'user_photos,user_videos',
+				photos: 'user_photos',
+				videos: 'user_videos',
 				friends: 'user_friends',
 				files: 'user_photos,user_videos',
 				publish_files: 'user_photos,user_videos,publish_actions',
@@ -3416,6 +3422,13 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 		if (o && 'data' in o) {
 			var token = req.query.access_token;
+
+			if (!(o.data instanceof Array)) {
+				var data = o.data;
+				delete o.data;
+				o.data = [data];
+			}
+
 			o.data.forEach(function(d) {
 
 				if (d.picture) {
@@ -3968,6 +3981,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				'me/photos': 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}&start-index=@{start|1}',
 
 				// See: https://developers.google.com/drive/v2/reference/files/list
+				'me/file': 'drive/v2/files/@{id}',
 				'me/files': 'drive/v2/files?q=%22@{parent|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}',
 
 				// See: https://developers.google.com/drive/v2/reference/files/list
@@ -4001,6 +4015,11 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			del: {
 				'me/files': 'drive/v2/files/@{id}',
 				'me/folder': 'drive/v2/files/@{id}'
+			},
+
+			// Map PATCH requests
+			patch: {
+				'me/file': 'drive/v2/files/@{id}'
 			},
 
 			wrap: {
@@ -4044,6 +4063,10 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 				if (p.method === 'post' || p.method === 'put') {
 					toJSON(p);
+				}
+				else if (p.method === 'patch') {
+					hello.utils.extend(p.query, p.data);
+					p.data = null;
 				}
 
 				return true;
@@ -4836,9 +4859,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 			get: {
 				me: 'people/~:(picture-url,first-name,last-name,id,formatted-name,email-address)',
-				'me/friends': 'people/~/connections?count=@{limit|500}',
-				'me/followers': 'people/~/connections?count=@{limit|500}',
-				'me/following': 'people/~/connections?count=@{limit|500}',
 
 				// See: http://developer.linkedin.com/documents/get-network-updates-and-statistics-api
 				'me/share': 'people/~/network/updates?count=@{limit|250}'
@@ -5706,6 +5726,13 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 	function formatFriend(contact) {
 		contact.id = null;
+
+		// #362: Reports of responses returning a single item, rather than an Array of items.
+		// Format the contact.fields to be an array.
+		if (contact.fields && !(contact.fields instanceof Array)) {
+			contact.fields = [contact.fields];
+		}
+
 		(contact.fields || []).forEach(function(field) {
 			if (field.type === 'email') {
 				contact.email = field.value;
