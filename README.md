@@ -653,6 +653,10 @@ Bind a callback to an event. An event may be triggered by a change in user state
 			<td>Triggered whenever session changes</td>
 		</tr>
 		<tr>
+			<td>auth.init</td>
+			<td>Triggered prior to requesting an authentication flow</td>
+		</tr>
+		<tr>
 			<td>auth.login</td>
 			<td>Triggered whenever a user logs in</td>
 		</tr>

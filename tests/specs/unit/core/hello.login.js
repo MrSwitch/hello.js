@@ -384,6 +384,29 @@ define([
 				hello.login('testable', options);
 			});
 		});
+
+		describe('global events', function() {
+
+			it('should trigger an auth.init event before requesting the auth flow', function(done) {
+
+				// Listen out for the auth-flow
+				hello.on('auth.init', function(e) {
+					expect(e).to.have.property('network', 'testable');
+					expect(spy.notCalled).to.be.ok();
+					done();
+				});
+
+				// Go no further
+				var spy = sinon.spy();
+				utils.popup = spy;
+
+				// Login
+				hello('testable').login({force: true});
+
+			});
+
+		});
+
 	});
 
 });

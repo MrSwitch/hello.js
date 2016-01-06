@@ -387,6 +387,9 @@ hello.utils.extend(hello, {
 			url = utils.qs(provider.oauth.auth, p.qs, encodeFunction);
 		}
 
+		// Broadcast this event as an auth:init
+		emit('auth.init', p);
+
 		// Execute
 		// Trigger how we want self displayed
 		if (opts.display === 'none') {
