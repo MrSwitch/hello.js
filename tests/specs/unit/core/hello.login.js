@@ -91,7 +91,7 @@ define([
 			hello.login('testable');
 		});
 
-		it('should by default, include the basic scope defined by the module', function(done) {
+		it('should include the basic scope defined by the module, by default', function(done) {
 
 			var spy = sinon.spy(function(url, name, optins) {
 
@@ -103,6 +103,22 @@ define([
 			utils.popup = spy;
 
 			hello.login('testable');
+		});
+
+		it('should not use "basic" as the default scope, if there is no mapping', function(done) {
+
+			// remove the basic scope
+			delete hello.services.testable.scope.basic;
+
+			// Now the response should not include the scope...
+			var spy = sinon.spy(function(url) {
+				expect(url).to.not.contain('scope=basic');
+				done();
+			});
+
+			utils.popup = spy;
+
+			hello('testable').login();
 		});
 
 		describe('options', function() {

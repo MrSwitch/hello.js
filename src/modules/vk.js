@@ -15,7 +15,6 @@
 
 			// Authorization scopes
 			scope: {
-				basic: '',
 				email: 'email',
 				offline_access: 'offline'
 			},

@@ -14,7 +14,6 @@
 			},
 
 			scope: {
-				basic: '',
 				email: 'user:email'
 			},
 

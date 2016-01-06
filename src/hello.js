@@ -247,7 +247,6 @@ hello.utils.extend(hello, {
 			response_type: encodeURIComponent(responseType),
 			redirect_uri: encodeURIComponent(redirectUri),
 			display: opts.display,
-			scope: 'basic',
 			state: {
 				client_id: provider.id,
 				network: p.network,
@@ -265,18 +264,27 @@ hello.utils.extend(hello, {
 		// Ensure this is a string - IE has a problem moving Arrays between windows
 		// Append the setup scope
 		var SCOPE_SPLIT = /[,\s]+/;
-		var scope = (opts.scope || '').toString() + ',' + p.qs.scope;
+		var scope = [];
+
+		// Add user defined scopes...
+		if (opts.scope) {
+			scope.push(opts.scope.toString());
+		}
+
+		// Add any basic scope - the default
+		if ('basic' in provider.scope) {
+			scope.push('basic');
+		}
 
 		// Append scopes from a previous session.
 		// This helps keep app credentials constant,
 		// Avoiding having to keep tabs on what scopes are authorized
 		if (session && 'scope' in session && session.scope instanceof String) {
-			scope += ',' + session.scope;
+			scope.push(session.scope);
 		}
 
-		// Convert scope to an Array
-		// - easier to manipulate
-		scope = scope.split(SCOPE_SPLIT);
+		// Join and Split again
+		scope = scope.join(',').split(SCOPE_SPLIT);
 
 		// Format remove duplicates and empty values
 		scope = utils.unique(scope).filter(filterEmpty);
