@@ -79,6 +79,7 @@
 				'me/photos': 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}&start-index=@{start|1}',
 
 				// See: https://developers.google.com/drive/v2/reference/files/list
+				'me/file': 'drive/v2/files/@{id}',
 				'me/files': 'drive/v2/files?q=%22@{parent|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}',
 
 				// See: https://developers.google.com/drive/v2/reference/files/list
@@ -112,6 +113,11 @@
 			del: {
 				'me/files': 'drive/v2/files/@{id}',
 				'me/folder': 'drive/v2/files/@{id}'
+			},
+
+			// Map PATCH requests
+			patch: {
+				'me/file': 'drive/v2/files/@{id}'
 			},
 
 			wrap: {
@@ -155,6 +161,10 @@
 
 				if (p.method === 'post' || p.method === 'put') {
 					toJSON(p);
+				}
+				else if (p.method === 'patch') {
+					hello.utils.extend(p.query, p.data);
+					p.data = null;
 				}
 
 				return true;

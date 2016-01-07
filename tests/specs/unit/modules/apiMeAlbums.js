@@ -12,7 +12,7 @@ define(['./helper'], function(helper) {
 					first: {
 						id: '1380499628920241',
 						name: 'Timeline Photos',
-						thumbnail: 'https://graph.facebook.com/1380493922254145/picture?access_token=token',
+						thumbnail: 'https://graph.facebook.com/10152107682897233/picture?access_token=token',
 						photos: undefined
 					}
 				}

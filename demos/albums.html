@@ -5,7 +5,7 @@
 <style>
 
 img.picture{
-	width:50%;
+	width:80px;
 	border:1px solid #ccc;
 	padding:1%;
 	display: inline-block;
@@ -27,10 +27,14 @@ img.picture:nth-child(3n){
 }
 .demo{
 	max-height:500px;
+	white-space: nowrap;
+	overflow: auto;
 }
 .column{
 	display:inline-block;
+	white-space: normal;
 	width:33%;
+	min-width: 200px;
 	padding:0.3%;
 }
 div.column{
@@ -116,27 +120,27 @@ function getAlbums(network){
 
 	//
 	// Setting force:false means we'll only trigger auth flow if the user is not already signed in with the correct credentials
-	hello( network ).login({
-		force:false
-	},function(auth){
+	var hi = hello(network);
 
+	hi.login({
+		force: false
+	})
+	.then(function(auth) {
 		// Get albums
-		hello.api( network+':me/albums', function(r){
+		return hi.api('me/albums');
+	})
+	.then(function(r) {
 
-			if(!r||r.error){
-				message(list, "Could not open albums from "+network+", try resigning in");
-				return;
-			}
-			else if(!r.data||r.data.length===0){
-				message(list, "There are no albums in the users account");
-				return
-			}
+		if (!r.data || r.data.length === 0) {
+			message(list, "There are no albums in the users account");
+			return
+		}
 
-			// Build buttons with the albums
-			for(var i=0;i<r.data.length;i++){
-				buildAlbumBtn( r.data[i], network );
-			}
-		});
+		// Build buttons with the albums
+		r.data.forEach(buildAlbumBtn.bind(null, network));
+	})
+	.then(null, function (e) {
+		message(list, "Could not open albums from "+network+", try resigning in");
 	});
 
 }
@@ -148,23 +152,26 @@ function getAlbums(network){
 
 
 // Create a button selecting the album
-function buildAlbumBtn(item, network){
+function buildAlbumBtn(network, item){
 
 	// Target where to put the list of albums
 	var list = document.getElementById('albums');
 
 	// construct the button
-	var o = document.createElement('button');
-	o.innerHTML = item.name;
+	var btn = document.createElement('button');
+	btn.innerHTML = item.name;
+
+	// Append the photo
+	appendPhoto(btn, item.thumbnail);
 
 	// Add the controls
-	o.onclick = function(){
-		// Trigger get 
+	btn.onclick = function(){
+		// Trigger get
 		getPhotos( network, item.id );
 	};
 
 	// Append to the list
-	list.appendChild(o);
+	list.appendChild(btn);
 }
 </script>
 
@@ -177,23 +184,23 @@ function getPhotos(network, id){
 	list.innerHTML = ''; // flush its content
 
 
-	hello( network ).api('me/album', {
+	hello(network)
+	.api('me/album', {
 		id: id,
 		limit:10
-	}, function(r){
-		if(r.error){
-			message(list, r.error.message);
-			return;
-		}
-		else if(!r.data||r.data.length===0){
+	})
+	.then(function(r) {
+
+		if (!r.data || r.data.length === 0) {
 			message(list, "There are no photos in this album");
 			return
 		}
 
 		// Create a new image in the DOM, give it some randomness and insert it into the dom.
-		for(var i=0;i<r.data.length;i++){
-			buildPhotoThumnail( r.data[i] );
-		}		
+		r.data.forEach(buildPhotoThumnail);
+
+	}, function(r) {
+		message(list, r && r.error ? r.error.message : 'something went wrong');
 	});
 }
 </script>
@@ -205,13 +212,23 @@ function buildPhotoThumnail(item){
 
 	var list = document.getElementById('photos');
 
-	var o = document.createElement('img');
-	o.className='picture';
-	o.src = item.thumbnail;
-	o.title = item.name;
-
 	// Append to the list
-	list.appendChild(o);
+	var o = appendPhoto(list, item.thumbnail);
+	o.title = item.name;
+}
+
+function appendPhoto(el, url) {
+
+	if (url) {
+		var o = document.createElement('img');
+		o.className = 'picture';
+		o.src = url;
+
+		// Append to the list
+		el.appendChild(o);
+
+		return o;
+	}
 }
 
 </script>

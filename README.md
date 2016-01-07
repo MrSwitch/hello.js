@@ -138,11 +138,6 @@ Quick start shows you how to go from zero to loading in the name and picture of 
 Register your application with at least one of the following networks. Ensure you register the correct domain as they can be quite picky.
 
 
-<!--
-- [Windows Live](http://msdn.microsoft.com/en-us/library/hh243641.aspx)
-- [Google+](http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html)
-- [Facebook](http://developers.facebook.com/docs/reference/dialogs/oauth/)
--->
 - [Facebook](https://developers.facebook.com/apps)
 - [Windows Live](https://account.live.com/developers/applications/index)
 - [Google+](https://code.google.com/apis/console/b/0/#:access)
@@ -507,6 +502,8 @@ Make calls to the API for getting and posting data.
 
 ### hello.api([path], [method], [data], [callback(json)])
 
+`hello.api([path], [method], [data], [callback(json)]).then(successHandler, errorHandler)`.
+
 <table>
 	<tr>
 		<th>name</th>
@@ -523,7 +520,7 @@ Make calls to the API for getting and posting data.
 			<q>/me</q>,
 			<q>/me/friends</q>
 		</td>
-		<td>Path or URI of the resource. See <a href="#REST API">REST API</a>, Can be prefixed with the name of the service.</td>
+		<td>A relative path to the modules <code>base</code> URI, a full URI or a mapped path defined by the module - see <a href="https://adodson.com/hello.js#REST API">REST API</a>.</td>
 		<td>
 			<em>required</em>
 		</td>
@@ -583,8 +580,45 @@ Make calls to the API for getting and posting data.
 			<em>null</em>
 		</td>
 	</tr>
-</table>
 
+	<tr>
+		<td colspan=6>More options (below) require putting the options into a 'key'=>'value' hash. I.e. <code>hello(network).api(options)</code></td>
+	</tr>
+
+	<tr>
+		<td>timeout</td>
+		<td><i>integer</i></td>
+		<td>
+			<code>3000</code> = 3 seconds.
+		</td>
+		<td>
+			Wait <em>milliseconds</em> before resolving the Promise with a reject.
+		</td>
+		<td>
+			<em>optional</em>
+		</td>
+		<td>
+			<em>60000</em>
+		</td>
+	</tr>
+
+	<tr>
+		<td>formatResponse</td>
+		<td><i>boolean</i></td>
+		<td>
+			<code>false</code>
+		</td>
+		<td>
+			<code>true</code>: format the response, <code>false</code>: return raw response.
+		</td>
+		<td>
+			<em>optional</em>
+		</td>
+		<td>
+			<em>true</em>
+		</td>
+	</tr>
+</table>
 
 ### Examples:
 
@@ -617,6 +651,10 @@ Bind a callback to an event. An event may be triggered by a change in user state
 		<tr>
 			<td>auth</td>
 			<td>Triggered whenever session changes</td>
+		</tr>
+		<tr>
+			<td>auth.init</td>
+			<td>Triggered prior to requesting an authentication flow</td>
 		</tr>
 		<tr>
 			<td>auth.login</td>
@@ -690,48 +728,20 @@ The scope property defines which privileges an app requires from a network provi
 An app can specify multiple scopes, separated by commas - as in the example below.
 
 ```js
-hello('facebook').login({scope: 'friends,photos,publish'});
+hello('facebook').login({
+    scope: 'friends, photos, publish'
+});
 ```
 
-Scopes are tightly coupled with API requests, which will break if the session scope is missing or invalid. The best way to see this is next to the API paths in the [hello.api reference table](http://adodson.com/hello.js/#helloapi).
+Scopes are tightly coupled with API requests. Unauthorized error response from an endpoint will occur if the scope privileges have not been granted. Use the [hello.api reference table](http://adodson.com/hello.js/#helloapi) to explore the API and scopes.
 
-The table below illustrates some of the default scopes HelloJS exposes. Additional scopes may be added which are proprietary to a service, but be careful not to mix proprietary scopes with other services which don't know how to handle them.
-<table>
-	<thead>
-	<tr>
-		<th>Scope</th>
-		<th>Description</th>
-	</tr>
-	</thead>
-	<tbody>
-		<tr>
-			<th><i>default</i></th>
-			<td>Read basic profile</td>
-		</tr>
-		<tr>
-			<th><q>friends</q></th>
-			<td>Read friends profiles</td>
-		</tr>
-		<tr>
-			<th><q>photos</q></th>
-			<td>Read users albums and photos</td>
-		</tr>
-		<tr>
-			<th><q>files</q></th>
-			<td>Read users files</td>
-		</tr>
-		<tr>
-			<th><q>publish</q></th>
-			<td>Publish status updates</td>
-		</tr>
-		<tr>
-			<th><q>publish_files</q></th>
-			<td>Publish photos and files</td>
-		</tr>
-	</tbody>
-</table>
+It's considered good practice to limit the use of scopes. The more unnessary privileges you ask for the more likely users are going to drop off. If your app has many different sections, consider re-authorizing the user with different privileges as they go.
 
-It's good practice to limit the use of scopes and also to make users aware of why your app needs certain privileges. Try to update the permissions as a user delves further into your app. For example: If the user would like to share a link with a friend, include a button that the user has to click to trigger the hello.login with the 'friends' scope, and then the handler triggers the API call after authorization.
+HelloJS modules standardises popular scope names. However you can always use proprietary scopes, e.g. to access google spreadsheets: `hello('google').login({scope: 'https://spreadsheets.google.com/feeds'});`
+
+See [Scope](http://adodson.com/hello.js/#scope) for standardised scopes.
+
+
 
 ## Error Handling
 
@@ -866,13 +876,23 @@ Polyfills are included in `src/hello.polyfill.js` this is to bring older browser
 
 HelloJS can also be run on PhoneGap applications. Checkout the demo [hellojs-phonegap-demo](https://github.com/MrSwitch/hellojs-phonegap-demo)
 
-## Contributing
+# Thank you
 
-**"No, it's perfect!"**.... If you believe that then give it a [star](https://github.com/MrSwitch/hello.js).
+HelloJS relies on these fantastic services for it's development and deployment, without which it would still be kicking around in a cave - not evolving very fast.
 
-Having read this far you have already invested your time, why not contribute!?
 
-HelloJS is constantly evolving, as are the services which it connects too. So if you think something could be said better, find something buggy or missing from either the code, documentation or demos then please put it in, no matter how trivial.
+- [BrowserStack](https://www.browserstack.com/) for providing a means to test across multiple devices.
+- [Github](https://github.com) for maintaining the repo and issue tracking.
+- [Travis](https://travis-ci.org/) for providing fantastic continuous integration.
+- ... and others I've forgotten to mention
+
+
+## Can I contribute?
+
+Yes, yes you can. In fact this isn't really free software, it comes with bugs and documentation errors. Moreover it tracks third party API's which just won't sit still. And it's intended for everyone to understand, so if you dont understand something then it's not fulfilling it's goal.
+
+... otherwise give it a [star](https://github.com/MrSwitch/hello.js).
+
 
 ### Changing Code?
 Ensure you setup and test your code on a variety of browsers.
@@ -896,6 +916,7 @@ python -m SimpleHTTPServer
 # 2. Then open the following URL in your web browser:
 # http://localhost:8000/tests/specs/index.html
 ```
+
 
 
 

@@ -35,6 +35,7 @@ module.exports = function(grunt) {
 					'src/hello.polyfill.js',
 					'src/hello.js',
 					'src/hello.chromeapp.js',
+					'src/hello.phonegap.js',
 					'src/hello.amd.js',
 					'src/hello.commonjs.js'
 				],
@@ -49,6 +50,7 @@ module.exports = function(grunt) {
 					'src/modules/github.js',
 					'src/modules/google.js',
 					'src/modules/instagram.js',
+					'src/modules/joinme.js',
 					'src/modules/linkedin.js',
 					'src/modules/soundcloud.js',
 					'src/modules/twitter.js',
@@ -77,8 +79,8 @@ module.exports = function(grunt) {
 			}
 		},
 		watch: {
-			files: ['src/**/*.js'],
-			tasks: ['jscs']
+			files: ['src/**/*.js', 'tests/specs/**/*'],
+			tasks: ['test']
 		}
 	});
 
@@ -88,6 +90,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-mocha-phantomjs');
 	grunt.loadNpmTasks('grunt-jscs');
+	grunt.loadNpmTasks('browserstack-runner');
 	grunt.loadNpmTasks('shunt');
 
 	grunt.registerTask('mocha', ['mocha_phantomjs']);

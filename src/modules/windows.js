@@ -65,7 +65,7 @@
 				'me/album': '@{id}/files/',
 
 				'me/folders': '@{id|me/skydrive/}',
-				'me/files': '@{parent|me/skydrive/}/files'
+				'me/files': '@{parent|me/skydrive}/files'
 			},
 
 			// Map DELETE requests

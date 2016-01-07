@@ -18,15 +18,15 @@ function login(network){
 
 	var joinme = hello(network);
 
-	joinme.login( function() {
+	joinme.login().then(function(){
 
 		// get user profile data
-		joinme.api( '/me', function(p) {
+		joinme.api('/me', function(p) {
 			document.getElementById( network ).innerHTML = "Connected to "+ network +" as " + p.name;
 		});
 
 		// Get your upcoming meetings from joinme
-		joinme.api( '/meetings', function(r) {
+		joinme.api('/meetings', function(r) {
 			if (r.meetings && r.meetings.length > 0)
 				document.getElementById('result').innerHTML = JSON.stringify(r.meetings,null,3);
 			else
@@ -40,7 +40,7 @@ function login(network){
 <script class="pre">
 hello.init({
 	joinme : JOINME_CLIENT_ID
-},{
+}, {
 	redirect_uri : '../redirect.html',
     scope : 'user,scheduler'
 });

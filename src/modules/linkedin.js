@@ -26,9 +26,6 @@
 
 			get: {
 				me: 'people/~:(picture-url,first-name,last-name,id,formatted-name,email-address)',
-				'me/friends': 'people/~/connections?count=@{limit|500}',
-				'me/followers': 'people/~/connections?count=@{limit|500}',
-				'me/following': 'people/~/connections?count=@{limit|500}',
 
 				// See: http://developer.linkedin.com/documents/get-network-updates-and-statistics-api
 				'me/share': 'people/~/network/updates?count=@{limit|250}'

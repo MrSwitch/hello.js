@@ -167,6 +167,9 @@ hello.utils.extend(hello, {
 		// Local vars
 		var url;
 
+		// Get all the custom options and store to be appended to the querystring
+		var qs = utils.diffKey(p.options, _this.settings);
+
 		// Merge/override options with app defaults
 		var opts = p.options = utils.merge(_this.settings, p.options || {});
 
@@ -239,12 +242,11 @@ hello.utils.extend(hello, {
 		}
 
 		// Query string parameters, we may pass our own arguments to form the querystring
-		p.qs = {
+		p.qs = utils.merge(qs, {
 			client_id: encodeURIComponent(provider.id),
 			response_type: encodeURIComponent(responseType),
 			redirect_uri: encodeURIComponent(redirectUri),
 			display: opts.display,
-			scope: 'basic',
 			state: {
 				client_id: provider.id,
 				network: p.network,
@@ -253,7 +255,7 @@ hello.utils.extend(hello, {
 				state: opts.state,
 				redirect_uri: redirectUri
 			}
-		};
+		});
 
 		// Get current session for merging scopes, and for quick auth response
 		var session = utils.store(p.network);
@@ -262,18 +264,27 @@ hello.utils.extend(hello, {
 		// Ensure this is a string - IE has a problem moving Arrays between windows
 		// Append the setup scope
 		var SCOPE_SPLIT = /[,\s]+/;
-		var scope = (opts.scope || '').toString() + ',' + p.qs.scope;
+		var scope = [];
+
+		// Add user defined scopes...
+		if (opts.scope) {
+			scope.push(opts.scope.toString());
+		}
+
+		// Add any basic scope - the default
+		if ('basic' in provider.scope) {
+			scope.push('basic');
+		}
 
 		// Append scopes from a previous session.
 		// This helps keep app credentials constant,
 		// Avoiding having to keep tabs on what scopes are authorized
 		if (session && 'scope' in session && session.scope instanceof String) {
-			scope += ',' + session.scope;
+			scope.push(session.scope);
 		}
 
-		// Convert scope to an Array
-		// - easier to manipulate
-		scope = scope.split(SCOPE_SPLIT);
+		// Join and Split again
+		scope = scope.join(',').split(SCOPE_SPLIT);
 
 		// Format remove duplicates and empty values
 		scope = utils.unique(scope).filter(filterEmpty);
@@ -384,11 +395,14 @@ hello.utils.extend(hello, {
 			url = utils.qs(provider.oauth.auth, p.qs, encodeFunction);
 		}
 
+		// Broadcast this event as an auth:init
+		emit('auth.init', p);
+
 		// Execute
 		// Trigger how we want self displayed
 		if (opts.display === 'none') {
 			// Sign-in in the background, iframe
-			utils.iframe(url);
+			utils.iframe(url, redirectUri);
 		}
 
 		// Triggering popup?
@@ -467,7 +481,7 @@ hello.utils.extend(hello, {
 			var callback = function(opts) {
 
 				// Remove from the store
-				utils.store(p.name, '');
+				utils.store(p.name, null);
 
 				// Emit events by default
 				promise.fulfill(hello.utils.merge({network:p.name}, opts || {}));
@@ -551,7 +565,7 @@ hello.utils.extend(hello.utils, {
 			// Override the items in the URL which already exist
 			for (var x in params) {
 				var str = '([\\?\\&])' + x + '=[^\\&]*';
-				reg = new RegExp(str);
+				var reg = new RegExp(str);
 				if (url.match(reg)) {
 					url = url.replace(reg, '$1' + x + '=' + formatFunction(params[x]));
 					delete params[x];
@@ -610,13 +624,13 @@ hello.utils.extend(hello.utils, {
 	store: (function() {
 
 		var a = ['localStorage', 'sessionStorage'];
-		var i = 0;
+		var i = -1;
 		var prefix = 'test';
 
 		// Set LocalStorage
 		var localStorage;
 
-		while (a[i++]) {
+		while (a[++i]) {
 			try {
 				// In Chrome with cookies blocked, calling localStorage throws an error
 				localStorage = window[a[i]];
@@ -842,7 +856,7 @@ hello.utils.extend(hello.utils, {
 		else {
 			var a = document.createElement('a');
 			a.href = path;
-			return a;
+			return a.cloneNode(false);
 		}
 	},
 
@@ -850,6 +864,23 @@ hello.utils.extend(hello.utils, {
 		return b.filter(function(item) {
 			return a.indexOf(item) === -1;
 		});
+	},
+
+	// Get the different hash of properties unique to `a`, and not in `b`
+	diffKey: function(a, b) {
+		if (a || !b) {
+			var r = {};
+			for (var x in a) {
+				// Does the property not exist?
+				if (!(x in b)) {
+					r[x] = a[x];
+				}
+			}
+
+			return r;
+		}
+
+		return a;
 	},
 
 	// Unique
@@ -1188,18 +1219,12 @@ hello.utils.extend(hello.utils, {
 		window[guid] = function() {
 			// Trigger the callback
 			try {
-				bool = callback.apply(this, arguments);
+				if (callback.apply(this, arguments)) {
+					delete window[guid];
+				}
 			}
 			catch (e) {
 				console.error(e);
-			}
-
-			if (bool) {
-				// Remove this handler reference
-				try {
-					delete window[guid];
-				}
-				catch (e) {}
 			}
 		};
 
@@ -1249,77 +1274,80 @@ hello.utils.extend(hello.utils, {
 			// PhoneGap support
 			// Add an event listener to listen to the change in the popup windows URL
 			// This must appear before popup.focus();
-			if (popup && popup.addEventListener) {
+			try {
+				if (popup && popup.addEventListener) {
 
-				// Get the origin of the redirect URI
+					// Get the origin of the redirect URI
 
-				var a = hello.utils.url(redirectUri);
-				var redirectUriOrigin = a.origin || (a.protocol + '//' + a.hostname);
+					var a = hello.utils.url(redirectUri);
+					var redirectUriOrigin = a.origin || (a.protocol + '//' + a.hostname);
 
-				// Listen to changes in the InAppBrowser window
+					// Listen to changes in the InAppBrowser window
 
-				popup.addEventListener('loadstart', function(e) {
+					popup.addEventListener('loadstart', function(e) {
 
-					var url = e.url;
+						var url = e.url;
 
-					// Is this the path, as given by the redirectUri?
-					// Check the new URL agains the redirectUriOrigin.
-					// According to #63 a user could click 'cancel' in some dialog boxes ....
-					// The popup redirects to another page with the same origin, yet we still wish it to close.
+						// Is this the path, as given by the redirectUri?
+						// Check the new URL agains the redirectUriOrigin.
+						// According to #63 a user could click 'cancel' in some dialog boxes ....
+						// The popup redirects to another page with the same origin, yet we still wish it to close.
 
-					if (url.indexOf(redirectUriOrigin) !== 0) {
-						return;
-					}
-
-					// Split appart the URL
-					var a = hello.utils.url(url);
-
-					// We dont have window operations on the popup so lets create some
-					// The location can be augmented in to a location object like so...
-
-					var _popup = {
-						location: {
-							// Change the location of the popup
-							assign: function(location) {
-
-								// Unfourtunatly an app is may not change the location of a InAppBrowser window.
-								// So to shim this, just open a new one.
-
-								popup.addEventListener('exit', function() {
-
-									// For some reason its failing to close the window if a new window opens too soon.
-
-									setTimeout(function() {
-										open(location);
-									}, 1000);
-								});
-							},
-
-							search: a.search,
-							hash: a.hash,
-							href: a.href
-						},
-						close: function() {
-							if (popup.close) {
-								popup.close();
-							}
+						if (url.indexOf(redirectUriOrigin) !== 0) {
+							return;
 						}
-					};
 
-					// Then this URL contains information which HelloJS must process
-					// URL string
-					// Window - any action such as window relocation goes here
-					// Opener - the parent window which opened this, aka this script
+						// Split appart the URL
+						var a = hello.utils.url(url);
 
-					hello.utils.responseHandler(_popup, window);
+						// We dont have window operations on the popup so lets create some
+						// The location can be augmented in to a location object like so...
 
-					// Always close the popup regardless of whether the hello.utils.responseHandler detects a state parameter or not in the querystring.
-					// Such situations might arise such as those in #63
+						var _popup = {
+							location: {
+								// Change the location of the popup
+								assign: function(location) {
 
-					_popup.close();
+									// Unfourtunatly an app is may not change the location of a InAppBrowser window.
+									// So to shim this, just open a new one.
 
-				});
+									popup.addEventListener('exit', function() {
+
+										// For some reason its failing to close the window if a new window opens too soon.
+
+										setTimeout(function() {
+											open(location);
+										}, 1000);
+									});
+								},
+
+								search: a.search,
+								hash: a.hash,
+								href: a.href
+							},
+							close: function() {
+								if (popup.close) {
+									popup.close();
+								}
+							}
+						};
+
+						// Then this URL contains information which HelloJS must process
+						// URL string
+						// Window - any action such as window relocation goes here
+						// Opener - the parent window which opened this, aka this script
+
+						hello.utils.responseHandler(_popup, window);
+
+						// Always close the popup regardless of whether the hello.utils.responseHandler detects a state parameter or not in the querystring.
+						// Such situations might arise such as those in #63
+
+						_popup.close();
+
+					});
+				}
 			}
+			catch (e) {}
 
 			if (popup && popup.focus) {
 				popup.focus();
@@ -1450,41 +1478,38 @@ hello.utils.extend(hello.utils, {
 		// Trigger a callback to authenticate
 		function authCallback(obj, window, parent) {
 
+			var cb = obj.callback;
+			var network = obj.network;
+
 			// Trigger the callback on the parent
-			_this.store(obj.network, obj);
+			_this.store(network, obj);
 
 			// If this is a page request it has no parent or opener window to handle callbacks
 			if (('display' in obj) && obj.display === 'page') {
 				return;
 			}
 
-			if (parent) {
-				// Call the generic listeners
-				// Win.hello.emit(network+":auth."+(obj.error?'failed':'login'), obj);
+			// Remove from session object
+			if (parent && cb && cb in parent) {
 
-				// TODO: remove from session object
-				var cb = obj.callback;
 				try {
 					delete obj.callback;
 				}
 				catch (e) {}
 
 				// Update store
-				_this.store(obj.network, obj);
+				_this.store(network, obj);
 
 				// Call the globalEvent function on the parent
-				if (cb in parent) {
+				// It's safer to pass back a string to the parent,
+				// Rather than an object/array (better for IE8)
+				var str = JSON.stringify(obj);
 
-					// It's safer to pass back a string to the parent,
-					// Rather than an object/array (better for IE8)
-					var str = JSON.stringify(obj);
-
-					try {
-						parent[cb](str);
-					}
-					catch (e) {
-						// Error thrown whilst executing parent callback
-					}
+				try {
+					parent[cb](str);
+				}
+				catch (e) {
+					// Error thrown whilst executing parent callback
 				}
 			}
 
@@ -1493,35 +1518,32 @@ hello.utils.extend(hello.utils, {
 
 		function closeWindow() {
 
-			// Close this current window
-			try {
-				window.close();
+			if (window.frameElement) {
+				// Inside an iframe, remove from parent
+				parent.document.body.removeChild(window.frameElement);
 			}
-			catch (e) {}
-
-			// IOS bug wont let us close a popup if still loading
-			if (window.addEventListener) {
-				window.addEventListener('load', function() {
+			else {
+				// Close this current window
+				try {
 					window.close();
-				});
+				}
+				catch (e) {}
+
+				// IOS bug wont let us close a popup if still loading
+				if (window.addEventListener) {
+					window.addEventListener('load', function() {
+						window.close();
+					});
+				}
 			}
+
 		}
 	}
 });
 
 // Events
-
 // Extend the hello object with its own event instance
 hello.utils.Event.call(hello);
-
-/////////////////////////////////////
-//
-// Save any access token that is in the current page URL
-// Handle any response solicited through iframe hash tag following an API request
-//
-/////////////////////////////////////
-
-hello.utils.responseHandler(window, window.opener || window.parent);
 
 ///////////////////////////////////
 // Monitoring session state
@@ -1747,6 +1769,12 @@ hello.api = function() {
 		p.timeout = _this.settings.timeout;
 	}
 
+	// Format response
+	// Whether to run the raw response through post processing.
+	if (!('formatResponse' in p)) {
+		p.formatResponse = true;
+	}
+
 	// Get the current session
 	// Append the access_token to the query
 	p.authResponse = _this.getAuthResponse(p.network);
@@ -1831,6 +1859,10 @@ hello.api = function() {
 				val = p.query[key];
 				delete p.query[key];
 			}
+			else if (p.data && key in p.data) {
+				val = p.data[key];
+				delete p.data[key];
+			}
 			else if (!defaults) {
 				promise.reject(error('missing_attribute', 'The attribute ' + key + ' is missing from the request'));
 			}
@@ -1851,6 +1883,19 @@ hello.api = function() {
 		// @ response object
 		// @ statusCode integer if available
 		utils.request(p, function(r, headers) {
+
+			// Is this a raw response?
+			if (!p.formatResponse) {
+				// Bad request? error statusCode or otherwise contains an error response vis JSONP?
+				if (typeof headers === 'object' ? (headers.statusCode >= 400) : (typeof r === 'object' && 'error' in r)) {
+					promise.reject(r);
+				}
+				else {
+					promise.fulfill(r);
+				}
+
+				return;
+			}
 
 			// Should this be an object
 			if (r === true) {
@@ -1927,7 +1972,7 @@ hello.utils.extend(hello.utils, {
 		// Check if the browser and service support CORS
 		var cors = this.request_cors(function() {
 			// If it does then run this...
-			return (!('xhr' in p) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))));
+			return ((p.xhr === undefined) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))));
 		});
 
 		if (cors) {
@@ -2282,7 +2327,7 @@ hello.utils.extend(hello.utils, {
 		// This action will be ignored if we've already called the callback handler "cb" with a successful onload event
 		if (window.navigator.userAgent.toLowerCase().indexOf('opera') > -1) {
 			operaFix = _this.append('script', {
-				text: 'document.getElementById(\'' + callbackId + '\').onerror();'
+				text: 'document.getElementById(\'' + callbackID + '\').onerror();'
 			});
 			script.async = false;
 		}
@@ -2674,3 +2719,12 @@ hello.utils.extend(hello.utils, {
 	};
 
 })(hello);
+
+/////////////////////////////////////
+//
+// Save any access token that is in the current page URL
+// Handle any response solicited through iframe hash tag following an API request
+//
+/////////////////////////////////////
+
+hello.utils.responseHandler(window, window.opener || window.parent);

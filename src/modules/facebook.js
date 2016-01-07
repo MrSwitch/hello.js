@@ -20,8 +20,8 @@
 				share: 'user_posts',
 				birthday: 'user_birthday',
 				events: 'user_events',
-				photos: 'user_photos,user_videos',
-				videos: 'user_photos,user_videos',
+				photos: 'user_photos',
+				videos: 'user_videos',
 				friends: 'user_friends',
 				files: 'user_photos,user_videos',
 				publish_files: 'user_photos,user_videos,publish_actions',
@@ -42,11 +42,6 @@
 				// https://developers.facebook.com/docs/facebook-login/reauthentication
 				if (p.options.force) {
 					p.qs.auth_type = 'reauthenticate';
-				}
-
-				// Support Facebook's unique auth_type parameter
-				if (p.options.auth_type) {
-					p.qs.auth_type = p.options.auth_type;
 				}
 
 				// The facebook login window is a different size.
@@ -73,19 +68,19 @@
 			},
 
 			// API Base URL
-			base: 'https://graph.facebook.com/v2.3/',
+			base: 'https://graph.facebook.com/v2.4/',
 
 			// Map GET requests
 			get: {
-				me: 'me',
+				me: 'me?fields=email,first_name,last_name,name,timezone,verified',
 				'me/friends': 'me/friends',
 				'me/following': 'me/friends',
 				'me/followers': 'me/friends',
 				'me/share': 'me/feed',
 				'me/like': 'me/likes',
 				'me/files': 'me/albums',
-				'me/albums': 'me/albums',
-				'me/album': '@{id}/photos',
+				'me/albums': 'me/albums?fields=cover_photo,name',
+				'me/album': '@{id}/photos?fields=picture',
 				'me/photos': 'me/photos',
 				'me/photo': '@{id}',
 				'friend/albums': '@{id}/albums',
@@ -177,6 +172,13 @@
 
 		if (o && 'data' in o) {
 			var token = req.query.access_token;
+
+			if (!(o.data instanceof Array)) {
+				var data = o.data;
+				delete o.data;
+				o.data = [data];
+			}
+
 			o.data.forEach(function(d) {
 
 				if (d.picture) {
@@ -188,8 +190,8 @@
 						return a.width - b.width;
 					});
 
-				if (d.cover_photo) {
-					d.thumbnail = base + d.cover_photo + '/picture?access_token=' + token;
+				if (d.cover_photo && d.cover_photo.id) {
+					d.thumbnail = base + d.cover_photo.id + '/picture?access_token=' + token;
 				}
 
 				if (d.type === 'album') {

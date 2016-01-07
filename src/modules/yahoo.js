@@ -37,10 +37,7 @@
 				// It might be better to loop through the social.relationship table with has unique IDs of users.
 				'me/friends': formatFriends,
 				'me/following': formatFriends,
-				'default': function(res) {
-					paging(res);
-					return res;
-				}
+				'default': paging
 			}
 		}
 	});
@@ -117,7 +114,14 @@
 
 	function formatFriend(contact) {
 		contact.id = null;
-		contact.fields.forEach(function(field) {
+
+		// #362: Reports of responses returning a single item, rather than an Array of items.
+		// Format the contact.fields to be an array.
+		if (contact.fields && !(contact.fields instanceof Array)) {
+			contact.fields = [contact.fields];
+		}
+
+		(contact.fields || []).forEach(function(field) {
 			if (field.type === 'email') {
 				contact.email = field.value;
 			}
@@ -142,6 +146,8 @@
 				next: '?start=' + (res.query.count + (+request.options.start || 1))
 			};
 		}
+
+		return res;
 	}
 
 	function yql(q) {

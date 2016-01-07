@@ -15,7 +15,7 @@
 			refresh: false,
 
 			scope: {
-				basic: '',
+				basic: 'user_info',
 				user: 'user_info',
 				scheduler: 'scheduler',
 				start: 'start_meeting'

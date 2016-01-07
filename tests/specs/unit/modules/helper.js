@@ -1,7 +1,7 @@
 define([], function() {
 
 	// Shim up IE8
-	if (!('withCredentials' in (new XMLHttpRequest()))) {
+	if ((typeof XMLHttpRequest !== 'undefined') && !('withCredentials' in (new XMLHttpRequest()))) {
 
 		XMLHttpRequest.prototype.withCredentials = true;
 		hello.utils.xhr = function(method, url, headers, body, callback) {
@@ -36,7 +36,7 @@ define([], function() {
 
 				var r = {
 					network: req.network,
-					method: req.method,
+					method: 'get',
 					url: req.url,
 					data: req.data,
 					query: {},
@@ -44,7 +44,7 @@ define([], function() {
 				};
 
 				var stubName = req.path + (req.options.stubType || '') + '.json';
-				r.url = './stubs/' + req.network + '/' + req.method + '/' + stubName;
+				r.url = './stubs/' + (req.stub || (req.network + '/' + req.method + '/' + stubName));
 				originalRequest.call(hello.utils, r, callback);
 			};
 

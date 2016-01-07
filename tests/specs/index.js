@@ -27,6 +27,7 @@ require([
 	'./unit/utils/param',
 	'./unit/utils/popup',
 	'./unit/utils/qs',
+	'./unit/utils/request',
 	'./unit/utils/responseHandler',
 	'./unit/utils/store',
 	'./unit/utils/toBlob',
@@ -40,6 +41,7 @@ require([
 	'./unit/core/hello.logout',
 	'./unit/core/hello.use',
 	'./unit/core/hello.events',
+	'./unit/core/session.monitor',
 
 	// Modules
 	'./unit/modules/index',
