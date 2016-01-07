@@ -1,7 +1,7 @@
 language: node_js
 sudo: false
 node_js:
-- 'stable'
+- stable
 cache:
   directories:
   - node_modules
@@ -26,8 +26,8 @@ deploy:
   provider: npm
   email: andrewjdodson@gmail.com
   api_key:
-    secure: ehiWCI/WzQzQpzWEslLKR2mUqwO99rU+8jo141pkhgHDv6yanD6+qNWeOt8H9qJv+6lm9eXjrPPUfybIE26cl/1Emrzbo0xgTI29xCFV+/OrIwsUHTK0npGJkhgOiCW1sO293P1SR4Iivr/JKtdp8weiUg3HC1mwx+K2YTpzVIw=
-  'on':
+    secure: ObZwvocD8+5e5CGh8fzjIZlA5tnK4Ro0/w3NmJV9zeeIDk4Tej2jTsYmNkyl1usx3cfmUciFxZZWvrrPVYuvVqU36wtsdwHE1bNSh7l/KsRTRIpCRNspOLrjYyfdarSSNMuj8PGzik6+tkR/B59XB07x6Yhz7Y1EqpQAYpIIHHo=
+  on:
     tags: true
     repo: MrSwitch/hello.js
     all_branches: true
