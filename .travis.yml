@@ -28,6 +28,5 @@ deploy:
   api_key:
     secure: ObZwvocD8+5e5CGh8fzjIZlA5tnK4Ro0/w3NmJV9zeeIDk4Tej2jTsYmNkyl1usx3cfmUciFxZZWvrrPVYuvVqU36wtsdwHE1bNSh7l/KsRTRIpCRNspOLrjYyfdarSSNMuj8PGzik6+tkR/B59XB07x6Yhz7Y1EqpQAYpIIHHo=
   on:
-    tags: true
     repo: MrSwitch/hello.js
     all_branches: true
