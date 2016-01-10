@@ -690,7 +690,7 @@ Remove a callback. Both event name and function must exist.
 hello.off('auth.login', sessionStart);
 ```
 
-# Misc
+# Concepts
 
 ## Pagination, Limit and Next Page
 Responses which are a subset of the total results should provide a `response.paging.next` property. This can be plugged back into `hello.api` in order to get the next page of results.
