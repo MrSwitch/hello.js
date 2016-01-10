@@ -352,7 +352,7 @@ hello.init({
 				<tr>
 					<td>redirect_uri</td>
 					<td><i>string</i></td>
-					<td><q><a href="redirect.html" target="_blank">redirect.html</a></q></td>
+					<td><q><a href="#redirect-page">Redirect Page</a></q></td>
 					<td>
 					A full or relative URI of a page which includes this script file hello.js</td>
 					<td>
@@ -781,6 +781,36 @@ hello('facebook').login({
 <div data-bind="template: { name: 'tests-template', data: { test: $root, filter:'scope' } }">See <a href="http://adodson.com/hello.js/#scope">Scope</a> for standardised scopes.
 </div>
 
+<h2>Redirect Page</h2>
+<p>Providers of the OAuth1/2 authorization flow must respect a Redirect URI parameter in the authorization request (also known as a Callback URL). E.g. <code>...&amp;redirect_uri=http://mydomain.com/redirect.html&amp;...</code>
+
+<p>The <code>redirect_uri</code> is always a full URL. It must point to a Redirect document which will process the authorization response and set user session data. In order for an application to communicate with this document and set the session data, the origin of the document must match that of the application - this restriction is known as the same-origin security policy.</p>
+
+<p>A successful authorisation response will append the user credentials to the Redirect URI. e.g. <code> ?access_token=12312&amp;expires_in=3600</code>. The Redirect document is responsible for interpreting the request and setting the session data.</p>
+
+<h3>Create a Redirect Page and URI</h3>
+
+<p>In HelloJS the default value of <code>redirect_uri</code> is the current page. However its recommended that you explicitly set the <code>redirect_uri</code> to a dedicated page with minimal UI and page weight.
+
+<p>Create an HTML page on your site with an instance of HelloJS e.g...</p>
+
+<pre type="html">
+&lt;script src="./hello.js"&gt;&lt;/script&gt;
+</pre>
+
+<p>Do add css animations incase there is a wait. <b>View Source</b> on <a href="./redirect.html">./redirect.html</a> for an example.</p>
+
+<p>Then within your application script where you initiate HelloJS, define the Redirect URI to point to this page. e.g.
+
+<pre type="js">
+hello.init({
+	facebook:client_id
+}, {
+	redirect_uri: '/redirect.html'
+});
+</pre>
+
+<p>Please note: The <code>redirect_uri</code> example above in <code>hello.init</code> is relative, it will be turned into an absolute path by HelloJS before being used.</p>
 
 <h2>Error Handling</h2>
 
