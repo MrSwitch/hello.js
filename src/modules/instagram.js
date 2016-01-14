@@ -18,6 +18,7 @@
 
 			scope: {
 				basic: 'basic',
+				photos: '',
 				friends: 'relationships',
 				publish: 'likes comments'
 			},
