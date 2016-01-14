@@ -1,4 +1,4 @@
-/*! hellojs v1.10.0 | (c) 2012-2016 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.10.1 | (c) 2012-2016 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -4513,6 +4513,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 			scope: {
 				basic: 'basic',
+				photos: '',
 				friends: 'relationships',
 				publish: 'likes comments'
 			},
