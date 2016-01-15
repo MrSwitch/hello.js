@@ -945,6 +945,25 @@ google.login({force: false}).then(function() {
 
 <p>HelloJS can also be run on PhoneGap applications. Checkout the demo <a href="https://github.com/MrSwitch/hellojs-phonegap-demo">hellojs-phonegap-demo</a></p>
 
+<h2>Chrome Apps</h2>
+
+<b>Demo</b> <a href="https://github.com/MrSwitch/hellojs-chromeapp-demo">hellojs-chromeapp-demo</a>
+
+<p>HelloJS module <a href="./src/hello.chromeapp.js">src/hello.chromeapp.js</a> (also bundled in dist/*) shims the library to support the unique API's of the Chrome App environment (or Chrome Extension).</p>
+
+
+<h3>Chrome manifest.json prerequisites</h3>
+
+<p>The <code>manifest.json</code> file must have the following permissions...</p>
+<pre type="json">
+...
+"permissions": [
+    "identity",
+    "storage",
+    "https://*/"],
+...
+</pre>
+
 <h1>Thank you</h1>
 
 <p>HelloJS relies on these fantastic services for it's development and deployment, without which it would still be kicking around in a cave - not evolving very fast.</p>

@@ -906,6 +906,25 @@ Polyfills are included in `src/hello.polyfill.js` this is to bring older browser
 
 HelloJS can also be run on PhoneGap applications. Checkout the demo [hellojs-phonegap-demo](https://github.com/MrSwitch/hellojs-phonegap-demo)
 
+## Chrome Apps
+
+**Demo** [hellojs-chromeapp-demo](https://github.com/MrSwitch/hellojs-chromeapp-demo)
+
+HelloJS module [src/hello.chromeapp.js](./src/hello.chromeapp.js) (also bundled in dist/*) shims the library to support the unique API's of the Chrome App environment (or Chrome Extension).
+
+
+### Chrome manifest.json prerequisites
+
+The `manifest.json` file must have the following permissions...
+```json
+...
+"permissions": [
+    "identity",
+    "storage",
+    "https://*/"],
+...
+```
+
 # Thank you
 
 HelloJS relies on these fantastic services for it's development and deployment, without which it would still be kicking around in a cave - not evolving very fast.
