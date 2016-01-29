@@ -62,6 +62,29 @@ hello.utils.extend(hello, {
 			height: 550
 		},
 
+		// Default scope
+		// Many services require atleast a profile scope,
+		// HelloJS automatially includes the value of provider.scope_map.basic
+		// If that's not required it can be removed via hello.settings.scope.length = 0;
+		scope: ['basic'],
+
+		// Scope Maps
+		// This is the default module scope, these are the defaults which each service is mapped too.
+		// This list is only the popular ones being standardized.
+		// By including them here it prevents the scopes from being applied accidentally
+		// For less common scopes its assumed the Developer knows when to use the scope.
+		scope_map: {
+			basic: '',
+			email: '',
+			files: '',
+			friends: '',
+			photos: '',
+			publish: '',
+			publish_files: '',
+			share: '',
+			videos: ''
+		},
+
 		// Default service / network
 		default_service: null,
 
@@ -127,14 +150,6 @@ hello.utils.extend(hello, {
 		// Merge services if there already exists some
 		utils.extend(this.services, services);
 
-		// Format the incoming
-		for (x in this.services) {
-			if (this.services.hasOwnProperty(x)) {
-				this.services[x].scope = this.services[x].scope || {};
-			}
-		}
-
-		//
 		// Update the default settings with this one.
 		if (options) {
 			utils.extend(this.settings, options);
@@ -264,16 +279,16 @@ hello.utils.extend(hello, {
 		// Ensure this is a string - IE has a problem moving Arrays between windows
 		// Append the setup scope
 		var SCOPE_SPLIT = /[,\s]+/;
-		var scope = [];
+
+		// Include default scope settings (cloned).
+		var scope = _this.settings.scope ? [_this.settings.scope.toString()] : [];
+
+		// Extend the providers scope list with the default
+		var scopeMap = utils.merge(_this.settings.scope_map, provider.scope || {});
 
 		// Add user defined scopes...
 		if (opts.scope) {
 			scope.push(opts.scope.toString());
-		}
-
-		// Add any basic scope - the default
-		if ('basic' in provider.scope) {
-			scope.push('basic');
 		}
 
 		// Append scopes from a previous session.
@@ -295,23 +310,7 @@ hello.utils.extend(hello, {
 		// Map scopes to the providers naming convention
 		scope = scope.map(function(item) {
 			// Does this have a mapping?
-			if (item in provider.scope) {
-				return provider.scope[item];
-			}
-			else {
-				// Loop through all services and determine whether the scope is generic
-				for (var x in _this.services) {
-					var serviceScopes = _this.services[x].scope;
-					if (serviceScopes && item in serviceScopes) {
-						// Found an instance of this scope, so lets not assume its special
-						return '';
-					}
-				}
-
-				// This is a unique scope to this service so lets in it.
-				return item;
-			}
-
+			return (item in scopeMap) ? scopeMap[item] : item;
 		});
 
 		// Stringify and Arrayify so that double mapped scopes are given the chance to be formatted
