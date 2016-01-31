@@ -14,7 +14,7 @@
 			},
 
 			// Authorization scopes
-			scope: {
+			scope_map: {
 				basic: 'public_profile',
 				email: 'email',
 				share: 'user_posts',
@@ -36,12 +36,12 @@
 			// Refresh the access_token
 			refresh: true,
 
-			login: function(p) {
+			login: function(req) {
 
 				// Reauthenticate
 				// https://developers.facebook.com/docs/facebook-login/reauthentication
-				if (p.options.force) {
-					p.qs.auth_type = 'reauthenticate';
+				if (req.force) {
+					req.query.auth_type = 'reauthenticate';
 				}
 			},
 

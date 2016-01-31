@@ -18,7 +18,7 @@ define([
 					grant: 'https://testdemo/grant',
 					version: 2
 				},
-				scope: {
+				scope_map: {
 					basic: 'basic_scope'
 				}
 			};
@@ -28,7 +28,7 @@ define([
 					auth: 'https://testdemo/access',
 					version: 2
 				},
-				scope: {
+				scope_map: {
 					another_scope: 'another_scope'
 				}
 			};
@@ -97,7 +97,7 @@ define([
 
 		it('should include the basic scope defined by the module, by default', function(done) {
 
-			var basic = hello.services.testable.scope.basic;
+			var basic = hello.services.testable.scope_map.basic;
 
 			var spy = sinon.spy(function(url, name, optins) {
 
@@ -114,7 +114,7 @@ define([
 		it('should not use "basic" as the default scope, if there is no mapping', function(done) {
 
 			// Remove the basic scope
-			delete hello.services.testable.scope.basic;
+			delete hello.services.testable.scope_map.basic;
 
 			// Now the response should not include the scope...
 			var spy = sinon.spy(function(url) {
@@ -207,7 +207,7 @@ define([
 
 				var scope = 'scope';
 				var paddedScope = ',' + scope + ',';
-				delete testable.scope.basic;
+				delete testable.scope_map.basic;
 
 				var spy = sinon.spy(function(url, name, optins) {
 
@@ -235,7 +235,7 @@ define([
 							version: 2
 						},
 						scope_delim: scopeDelim,
-						scope: {
+						scope_map: {
 							basic: basicScope
 						}
 					}

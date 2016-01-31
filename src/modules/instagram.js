@@ -16,7 +16,7 @@
 			// Refresh the access_token once expired
 			refresh: true,
 
-			scope: {
+			scope_map: {
 				basic: 'basic',
 				photos: '',
 				friends: 'relationships',
@@ -25,10 +25,10 @@
 
 			scope_delim: ' ',
 
-			login: function(p) {
+			login: function(req) {
 				// Instagram throws errors like 'JavaScript API is unsupported' if the display is 'popup'.
 				// Make the display anything but 'popup'
-				p.qs.display = '';
+				req.query.display = '';
 			},
 
 			base: 'https://api.instagram.com/v1/',

@@ -758,7 +758,8 @@ var tests = [
 // BEFORE SETUPS
 
 function scopeFilter(test) {
-	return hello.services[test.network].scope[test.method];
+	var scope = hello.services[test.network].scope;
+	return scope ? scope[test.method] : undefined;
 }
 
 

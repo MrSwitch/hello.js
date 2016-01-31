@@ -169,6 +169,14 @@ Modules are loaded into HelloJS using the hello.init() method, with a JSON objec
 			<td></td>
 		</tr>
 		<tr>
+			<td>popup</td>
+			<td><i>object</i></td>
+			<td><code>{width: 800}</code></td>
+			<td>An object to overide popup options.</td>
+			<td>optional</td>
+			<td></td>
+		</tr>
+		<tr>
 			<td>login</td>
 			<td><i>function</i></td>
 			<td></td>
@@ -185,7 +193,7 @@ Modules are loaded into HelloJS using the hello.init() method, with a JSON objec
 			<td>false</td>
 		</tr>
 		<tr>
-			<td>scope</td>
+			<td>scope_map</td>
 			<td><i>Object</i></td>
 			<td></td>
 			<td>A dictionary of key and value (the providers sudonym or name of comparative scope)</td>

@@ -186,8 +186,18 @@ hello.utils.extend(hello, {
 		// Local vars
 		var url;
 
-		// Get all the custom options and store to be appended to the querystring
-		var query = utils.diffKey(p.options, _global);
+		// Opts
+		if (p.options) {
+
+			// Get all the custom options and store to be appended to the querystring
+			var _query = utils.diffKey(p.options, _global) || {};
+
+			// Extend the query
+			if (_query) {
+				p.options.query = p.options.query || {};
+				utils.extend(p.options.query, _query);
+			}
+		}
 
 		// Network
 		var network = p.network || _global.network;
@@ -211,18 +221,23 @@ hello.utils.extend(hello, {
 
 		var provider = _this.services[network];
 
-		// Deprecated
-		if (provider.scope) {
-			console.warn('Module definition has changed the name of property "scope" to "scope_map"');
-			provider.scope_map = provider.scope;
-			delete provider.scope;
-		}
+		// Get current session for merging scopes, and for quick auth response
+		var _session = utils.store(network) || {};
 
 		// Merge/override options with app defaults
-		var req = utils.extendByPrototype({}, _global, provider, p.options || {});
+		var req = utils.extendByPrototype({
+			query: {},
+			oauth: {},
+			popup: {},
+			session: _session
+		}, _global, provider, p.options || {});
 
 		// Set network
 		req.network = network;
+
+		// Shortcuts
+		var query = req.query;
+		var session = req.session;
 
 		// Create a global listener to capture events triggered out of scope
 		var callbackId = utils.globalEvent(function(str) {
@@ -268,7 +283,7 @@ hello.utils.extend(hello, {
 		}
 
 		// Query string parameters, we may pass our own arguments to form the querystring
-		req.qs = utils.merge(query, {
+		utils.extend(query, {
 			client_id: encodeURIComponent(req.id),
 			response_type: encodeURIComponent(responseType),
 			redirect_uri: encodeURIComponent(redirectUri),
@@ -282,9 +297,6 @@ hello.utils.extend(hello, {
 				redirect_uri: redirectUri
 			}
 		});
-
-		// Get current session for merging scopes, and for quick auth response
-		var session = utils.store(network);
 
 		// Scopes (authentication permisions)
 		// Ensure this is a string - IE has a problem moving Arrays between windows
@@ -300,8 +312,8 @@ hello.utils.extend(hello, {
 		// Append scopes from a previous session.
 		// This helps keep app credentials constant,
 		// Avoiding having to keep tabs on what scopes are authorized
-		if (session && 'scope' in session && session.scope instanceof String) {
-			scope.push(session.scope);
+		if ('scope' in session) {
+			scope.push(session.scope.toString());
 		}
 
 		// Join and Split again
@@ -311,7 +323,7 @@ hello.utils.extend(hello, {
 		scope = utils.unique(scope).filter(filterEmpty);
 
 		// Save the the scopes to the state with the names that they were requested with.
-		req.qs.state.scope = scope.join(',');
+		query.state.scope = scope.join(',');
 
 		// Map scopes to the providers naming convention
 		scope = scope.map(function(item) {
@@ -327,14 +339,14 @@ hello.utils.extend(hello, {
 		scope = utils.unique(scope).filter(filterEmpty);
 
 		// Join with the expected scope delimiter into a string
-		req.qs.scope = scope.join(req.scope_delim);
+		query.scope = scope.join(req.scope_delim);
 
 		// Is the user already signed in with the appropriate scopes, valid access_token?
 		if (req.force === false) {
 
-			if (session && 'access_token' in session && session.access_token && 'expires' in session && session.expires > ((new Date()).getTime() / 1e3)) {
+			if (session.access_token && 'expires' in session && session.expires > ((new Date()).getTime() / 1e3)) {
 				// What is different about the scopes in the session vs the scopes in the new login?
-				var diff = utils.diff((session.scope || '').split(SCOPE_SPLIT), (req.qs.state.scope || '').split(SCOPE_SPLIT));
+				var diff = utils.diff((session.scope || '').split(SCOPE_SPLIT), (query.state.scope || '').split(SCOPE_SPLIT));
 				if (diff.length === 0) {
 
 					// OK trigger the callback
@@ -353,7 +365,7 @@ hello.utils.extend(hello, {
 		// Page URL
 		if (req.display === 'page' && req.page_uri) {
 			// Add a page location, place to endup after session has authenticated
-			req.qs.state.page_uri = utils.url(req.page_uri).href;
+			query.state.page_uri = utils.url(req.page_uri).href;
 		}
 
 		// Bespoke
@@ -370,34 +382,34 @@ hello.utils.extend(hello, {
 		(req.display === 'none' && req.oauth.grant && session && session.refresh_token)) {
 
 			// Add the oauth endpoints
-			req.qs.state.oauth = req.oauth;
+			query.state.oauth = req.oauth;
 
 			// Add the proxy url
-			req.qs.state.oauth_proxy = req.oauth_proxy;
+			query.state.oauth_proxy = req.oauth_proxy;
 
 		}
 
 		// Convert state to a string
-		req.qs.state = encodeURIComponent(JSON.stringify(req.qs.state));
+		query.state = encodeURIComponent(JSON.stringify(query.state));
 
 		// URL
 		if (parseInt(req.oauth.version, 10) === 1) {
 
 			// Turn the request to the OAuth Proxy for 3-legged auth
-			url = utils.qs(req.oauth_proxy, req.qs, encodeFunction);
+			url = utils.qs(req.oauth_proxy, req.query, encodeFunction);
 		}
 
 		// Refresh token
 		else if (req.display === 'none' && req.oauth.grant && session && session.refresh_token) {
 
 			// Add the refresh_token to the request
-			req.qs.refresh_token = session.refresh_token;
+			query.refresh_token = session.refresh_token;
 
 			// Define the request path
-			url = utils.qs(req.oauth_proxy, req.qs, encodeFunction);
+			url = utils.qs(req.oauth_proxy, req.query, encodeFunction);
 		}
 		else {
-			url = utils.qs(req.oauth.auth, req.qs, encodeFunction);
+			url = utils.qs(req.oauth.auth, req.query, encodeFunction);
 		}
 
 		// Broadcast this event as an auth:init
@@ -1771,15 +1783,10 @@ hello.api = function() {
 	// Request
 	// Construct the request object
 	var req = utils.extendByPrototype({
-		// Method
 		method: 'get',
-		// Headers
 		headers: {},
-		// Query
 		query: {},
-		// Data
 		data: {},
-		// Enable Formatting of response by default
 		formatResponse: true
 	}, _global, provider, p);
 
@@ -1928,7 +1935,7 @@ hello.api = function() {
 			}
 
 			// The delete callback needs a better response
-			if (p.method === 'delete') {
+			if (req.method === 'delete') {
 				res = (!res || utils.isEmpty(res)) ? {success:true} : res;
 			}
 
@@ -2632,115 +2639,6 @@ hello.utils.extend(hello.utils, {
 	}
 
 });
-
-// EXTRA: Convert FormElement to JSON for POSTing
-// Wrappers to add additional functionality to existing functions
-(function(hello) {
-
-	// Copy original function
-	var api = hello.api;
-	var utils = hello.utils;
-
-	utils.extend(utils, {
-
-		// DataToJSON
-		// This takes a FormElement|NodeList|InputElement|MixedObjects and convers the data object to JSON.
-		dataToJSON: function(p) {
-
-			var _this = this;
-			var w = window;
-			var data = p.data;
-
-			// Is data a form object
-			if (_this.domInstance('form', data)) {
-				data = _this.nodeListToJSON(data.elements);
-			}
-			else if ('NodeList' in w && data instanceof NodeList) {
-				data = _this.nodeListToJSON(data);
-			}
-			else if (_this.domInstance('input', data)) {
-				data = _this.nodeListToJSON([data]);
-			}
-
-			// Is data a blob, File, FileList?
-			if (('File' in w && data instanceof w.File) ||
-				('Blob' in w && data instanceof w.Blob) ||
-				('FileList' in w && data instanceof w.FileList)) {
-				data = {file: data};
-			}
-
-			// Loop through data if it's not form data it must now be a JSON object
-			if (!('FormData' in w && data instanceof w.FormData)) {
-
-				for (var x in data) if (data.hasOwnProperty(x)) {
-
-					if ('FileList' in w && data[x] instanceof w.FileList) {
-						if (data[x].length === 1) {
-							data[x] = data[x][0];
-						}
-					}
-					else if (_this.domInstance('input', data[x]) && data[x].type === 'file') {
-						continue;
-					}
-					else if (_this.domInstance('input', data[x]) ||
-						_this.domInstance('select', data[x]) ||
-						_this.domInstance('textArea', data[x])) {
-						data[x] = data[x].value;
-					}
-					else if (_this.domInstance(null, data[x])) {
-						data[x] = data[x].innerHTML || data[x].innerText;
-					}
-				}
-			}
-
-			p.data = data;
-			return data;
-		},
-
-		// NodeListToJSON
-		// Given a list of elements extrapolate their values and return as a json object
-		nodeListToJSON: function(nodelist) {
-
-			var json = {};
-
-			// Create a data string
-			for (var i = 0; i < nodelist.length; i++) {
-
-				var input = nodelist[i];
-
-				// If the name of the input is empty or diabled, dont add it.
-				if (input.disabled || !input.name) {
-					continue;
-				}
-
-				// Is this a file, does the browser not support 'files' and 'FormData'?
-				if (input.type === 'file') {
-					json[input.name] = input;
-				}
-				else {
-					json[input.name] = input.value || input.innerHTML;
-				}
-			}
-
-			return json;
-		}
-	});
-
-	// Replace it
-	hello.api = function() {
-
-		// Get arguments
-		var p = utils.args({path: 's!', method: 's', data:'o', timeout: 'i', callback: 'f'}, arguments);
-
-		// Change for into a data object
-		if (p.data) {
-			utils.dataToJSON(p);
-		}
-
-		return api.call(this, p);
-	};
-
-})(hello);
 
 /////////////////////////////////////
 //

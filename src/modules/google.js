@@ -16,7 +16,7 @@
 			},
 
 			// Authorization scopes
-			scope: {
+			scope_map: {
 				basic: 'https://www.googleapis.com/auth/plus.me profile',
 				email: 'email',
 				birthday: '',
@@ -33,22 +33,22 @@
 
 			scope_delim: ' ',
 
-			login: function(p) {
-				if (p.qs.display === 'none') {
+			login: function(req) {
+				if (req.display === 'none') {
 					// Google doesn't like display=none
-					p.qs.display = '';
+					req.query.display = '';
 				}
 
-				if (p.qs.response_type === 'code') {
+				if (req.response_type === 'code') {
 
 					// Let's set this to an offline access to return a refresh_token
-					p.qs.access_type = 'offline';
+					req.query.access_type = 'offline';
 				}
 
 				// Reauthenticate
 				// https://developers.google.com/identity/protocols/
-				if (p.options.force) {
-					p.qs.approval_prompt = 'force';
+				if (req.force) {
+					req.query.approval_prompt = 'force';
 				}
 			},
 

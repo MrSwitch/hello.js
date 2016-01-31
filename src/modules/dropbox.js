@@ -24,22 +24,22 @@
 
 			oauth: OAuth2Settings,
 
-			login: function(p) {
+			login: function(req) {
 				// OAuth2 non-standard adjustments
-				p.qs.scope = '';
-				delete p.qs.display;
+				req.query.scope = '';
+				delete req.query.display;
 
 				// Should this be run as OAuth1?
 				// If the redirect_uri is is HTTP (non-secure) then its required to revert to the OAuth1 endpoints
-				var redirect = decodeURIComponent(p.qs.redirect_uri);
+				var redirect = decodeURIComponent(req.query.redirect_uri);
 				if (redirect.indexOf('http:') === 0 && redirect.indexOf('http://localhost/') !== 0) {
 
 					// Override the dropbox OAuth settings.
-					hello.services.dropbox.oauth = OAuth1Settings;
+					req.oauth = OAuth1Settings;
 				}
 				else {
 					// Override the dropbox OAuth settings.
-					hello.services.dropbox.oauth = OAuth2Settings;
+					req.oauth = OAuth2Settings;
 				}
 			},
 
@@ -55,7 +55,7 @@
 
 				Follow request https://forums.dropbox.com/topic.php?id=106505
 
-				p.qs.response_type = 'code';
+				p.query.response_type = 'code';
 				oauth: {
 					version: 2,
 					auth: 'https://www.dropbox.com/1/oauth2/authorize',

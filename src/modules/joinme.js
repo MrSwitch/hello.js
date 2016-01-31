@@ -14,7 +14,7 @@
 
 			refresh: false,
 
-			scope: {
+			scope_map: {
 				basic: 'user_info',
 				user: 'user_info',
 				scheduler: 'scheduler',
