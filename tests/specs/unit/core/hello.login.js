@@ -33,6 +33,9 @@ define([
 				}
 			};
 
+			hello.services.testable = {};
+			hello.services.second = {};
+
 			// Add a network
 			hello.init({
 				testable: testable,
@@ -44,6 +47,7 @@ define([
 		// Destroy it
 		afterEach(function() {
 			delete hello.services.testable;
+			delete hello.services.second;
 		});
 
 		var utils = hello.utils;
@@ -93,9 +97,11 @@ define([
 
 		it('should include the basic scope defined by the module, by default', function(done) {
 
+			var basic = hello.services.testable.scope.basic;
+
 			var spy = sinon.spy(function(url, name, optins) {
 
-				expect(url).to.contain('scope=' + hello.services.testable.scope.basic);
+				expect(url).to.contain('scope=' + basic);
 
 				done();
 			});
@@ -304,21 +310,26 @@ define([
 
 				var spy = sinon.spy(function(url, name, options) {
 					expect(options.location).to.eql('no');
-					expect(options.toolbar).to.eql('no');
 					expect(options.hidden).to.eql(true);
+					expect(options.width).to.eql(800);
 					done();
 				});
 
 				utils.popup = spy;
 
+				hello.services.testable.popup = {
+					location: 'yes',
+					width: 800
+				};
+
 				hello.login('testable', {
 					popup: {
 						hidden: true,
-						location: 'no',
-						toolbar: 'no'
+						location: 'no'
 					}
 				});
 			});
+
 		});
 
 		describe('option.force = false', function() {

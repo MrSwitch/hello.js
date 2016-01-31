@@ -41,10 +41,12 @@
 					// Override the dropbox OAuth settings.
 					hello.services.dropbox.oauth = OAuth2Settings;
 				}
+			},
 
-				// The dropbox login window is a different size
-				p.options.popup.width = 1000;
-				p.options.popup.height = 1000;
+			// The dropbox login window is a different size
+			popup: {
+				width: 1000,
+				height: 1000
 			},
 
 			/*

@@ -43,10 +43,12 @@
 				if (p.options.force) {
 					p.qs.auth_type = 'reauthenticate';
 				}
+			},
 
-				// The facebook login window is a different size.
-				p.options.popup.width = 580;
-				p.options.popup.height = 400;
+			// The facebook login window is a different size.
+			popup: {
+				width: 580,
+				height: 400
 			},
 
 			logout: function(callback, options) {

@@ -22,8 +22,9 @@
 
 			scope_delim: ' ',
 
-			login: function(p) {
-				p.options.popup.width = 710;
+			// The amazon login window is a different size
+			popup: {
+				width: 710
 			},
 
 			base: 'https://api.amazon.com/',
