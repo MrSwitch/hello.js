@@ -224,13 +224,17 @@ hello.utils.extend(hello, {
 		// Get current session for merging scopes, and for quick auth response
 		var _session = utils.store(network) || {};
 
-		// Merge/override options with app defaults
-		var req = utils.extendByPrototype({
+		// Construct the Request object
+		// This holds the combined properties of the environment
+		var req = {
 			query: {},
 			oauth: {},
 			popup: {},
 			session: _session
-		}, _global, provider, p.options || {});
+		};
+
+		// Construct the request object
+		utils.assign(req, _global, provider, p.options || {});
 
 		// Set network
 		req.network = network;
@@ -801,32 +805,35 @@ hello.utils.extend(hello.utils, {
 		return this.extend.apply(null, args);
 	},
 
-	// Extend the first object with the properties and methods of the second
-	// If the properties dont exist append them as
-	extendByPrototype: function(r /*, a[, b[, ...]] */) {
+	// Assign the first object with the properties and methods of the others...
+	// Unlike extend this goes deep into copying entire object trees.
+	assign: function(r /*, a[, b[, ...]] */) {
+
+		var _this = this;
 
 		// Get the arguments as an array but ommit the initial item
 		Array.prototype.slice.call(arguments, 1).forEach(function(a) {
 
-			if (!Array.isArray(r) && Array.isArray(a)) {
+			if (Array.isArray(r) && Array.isArray(a)) {
+				// Merge the array
+				r = r.concat(a);
+			}
+			else if (Array.isArray(a)) {
 				// Clone the array
 				r = a.slice(0);
 			}
-			else if (r instanceof Object && a instanceof Object && r !== a) {
-				for (var x in a) {
-					r[x] = hello.utils.extendByPrototype(r[x], a[x]);
+			else if (a && typeof a === 'object' && r !== a) {
+
+				if (!r || typeof r !== 'object') {
+					r = {};
 				}
-			}
-			else if (a instanceof Object && !(a instanceof Function)) {
-				r = Object.create(a);
+
+				for (var x in a) {
+					r[x] = _this.assign(r[x], a[x]);
+				}
 			}
 			else if (Array.isArray(r)) {
-				if (Array.isArray(a)) {
-					r = r.concat(a);
-				}
-				else {
-					r.push(a);
-				}
+				r.push(a);
 			}
 			else {
 				r = a;
@@ -1782,7 +1789,8 @@ hello.api = function() {
 
 	// Request
 	// Construct the request object
-	var req = utils.extendByPrototype({
+	// Appending the values of the other objects on to the initial value
+	var req = utils.assign({
 		method: 'get',
 		headers: {},
 		query: {},
