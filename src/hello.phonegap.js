@@ -18,7 +18,7 @@
 	// Replace popup
 	hello.utils.popup = function(url, redirectUri, options) {
 
-		// utilPopup
+		// Run the standard
 		var popup = utilPopup.call(this, url, redirectUri, options);
 
 		// Create a function for reopening the popup, and assigning events to the new popup object
@@ -61,7 +61,7 @@
 
 								// Unfourtunatly an app is may not change the location of a InAppBrowser window.
 								// So to shim this, just open a new one.
-								popup.executeScript({code: 'window.location.href = "'+location+';"'});
+								popup.executeScript({code: 'window.location.href = "' + location + ';"'});
 							},
 
 							search: a.search,
@@ -71,6 +71,9 @@
 						close: function() {
 							if (popup.close) {
 								popup.close();
+								try {
+									popup.closed = true;
+								} catch (_e) {}
 							}
 						}
 					};
@@ -82,19 +85,10 @@
 
 					hello.utils.responseHandler(_popup, window);
 
-					// Always close the popup regardless of whether the hello.utils.responseHandler detects a state parameter or not in the querystring.
-					// Such situations might arise such as those in #63
-
-					_popup.close();
-
 				});
 			}
 		}
 		catch (e) {}
-
-		if (popup && popup.focus) {
-			popup.focus();
-		}
 
 		return popup;
 	};
