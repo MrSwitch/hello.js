@@ -13,7 +13,7 @@
 				var provider = services[x];
 				if (typeof provider === 'object' && provider.scope) {
 					// Deprecated
-					console.warn('HelloJS: Module definition has changed the name of property "scope" to "scope_map"');
+					console.warn('HelloJS: Module property `scope` deprecated, use `scope_map` as of 1.11.0');
 					provider.scope_map = provider.scope;
 					delete provider.scope;
 				}

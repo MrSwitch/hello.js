@@ -78,6 +78,7 @@ hello.utils.extend(hello, {
 			email: '',
 			files: '',
 			friends: '',
+			offline_access: '',
 			photos: '',
 			publish: '',
 			publish_files: '',
