@@ -823,6 +823,10 @@ hello.utils.extend(hello.utils, {
 				// Clone the array
 				r = a.slice(0);
 			}
+			else if (_this.isBinary(a)) {
+				// This is inimitable content, impossible to clone, so reference directly.
+				r = a;
+			}
 			else if (a && typeof a === 'object' && r !== a) {
 
 				if (!r || typeof r !== 'object') {
