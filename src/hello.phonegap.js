@@ -73,7 +73,8 @@
 								popup.close();
 								try {
 									popup.closed = true;
-								} catch (_e) {}
+								}
+								catch (_e) {}
 							}
 						}
 					};
