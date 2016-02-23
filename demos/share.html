@@ -35,24 +35,19 @@
 		<label>link</label> <input type="url" name="link" value="http://adodson.com/hello.js"/>
 	</form>
 
-	<button onclick="post('facebook');">Post to Facebook</button>
-	<button onclick="post('windows');">Post to Windows Live</button>
-	<button onclick="post('google');">Post to Google (will fail)</button>
-
 </blockquote>
 
 
 <script class="pre">
 function post(network){
-	hello.login(network,{scope:'publish'}, function(){
+	var fields = document.getElementById('activity_form').elements;
+	var hi = hello(network);
+	hi.login({scope:'publish'}).then(function(){
 		// Post the contents of the form
-		hello.api(network+':/me/share', 'post', document.getElementById('activity_form'), function(r){
-			if(!r||r.error){
-				alert("Whoops! "+r.error.message);
-			}
-			else{
-				alert("Your message has been published to "+ network);
-			}
+		hi.api('me/share', 'post', {message: fields.message.value, link: fields.link.value}).then(function(r) {
+			alert("Your message has been published to "+ network);
+		}, function(r) {
+			alert("Whoops! Failed." + r.error.message);
 		});
 	})
 }

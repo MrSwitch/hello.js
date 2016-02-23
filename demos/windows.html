@@ -19,14 +19,15 @@ function login(network){
 
 	windows
 	.login()
-	.then( function(r){
+	.then(function(){
 
 		// Get Profile
-		windows
-		.api('/me')
-		.then( function(p){
-			document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
-		});
+		return windows.api('me');
+
+	}).then(function(p){
+
+		// Diplay
+		document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
 	});
 
 }

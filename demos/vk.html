@@ -10,13 +10,18 @@
 <title>hello( vk )</title>
 <h1>hello( vk )</h1>
 
-<button id='login' onclick="hello.login('vk');">Vk</button>
+<button id='login' onclick="login('vk');">Vk</button>
 <div id="result"></div>
 <script class="pre">
 
-hello.on('auth.login', function(r){
+function login(network) {
 	// Get Profile
-	hello(r.network).api('/me', function(p){
+	var vk = hello(network);
+	vk.login()
+	.then(function(){
+		return vk.api('me');
+	})
+	.then(function(p){
 		document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to " + r.network+ " as " + p.name;
 	});
 });

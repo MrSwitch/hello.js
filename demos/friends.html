@@ -41,8 +41,8 @@ hello.init( {
 		yahoo : CLIENT_IDS_ALL.yahoo
 	}
 	, {
-		redirect_uri:'../redirect.html', 
-		oauth_proxy : OAUTH_PROXY_URL, 
+		redirect_uri:'../redirect.html',
+		oauth_proxy : OAUTH_PROXY_URL,
 		scope:"friends"
 	}
 );
@@ -58,14 +58,10 @@ function getFriends(network, path){
 	btn_more.style.display = 'none';
 
 	// login
-	hello.login( network, {scope:'friends'}, function(auth){
-		if(!auth||auth.error){
-			console.log("Signin aborted");
-			return;
-		}
+	hello(network).login({scope:'friends'}).then(function(auth) {
 		// Get the friends
 		// using path, me/friends or me/contacts
-		hello( network ).api( path , {limit:10}, function responseHandler(r){
+		hello(network).api(path, {limit:10}).then(function responseHandler(r) {
 			for(var i=0;i<r.data.length;i++){
 				var o = r.data[i];
 				var li = document.createElement('li');
@@ -80,6 +76,11 @@ function getFriends(network, path){
 			btn_more.innerHTML = "Next from "+network;
 			btn_more.style.display = 'block';
 		});
+	}, function() {
+		if(!auth||auth.error){
+			console.log("Signin aborted");
+			return;
+		}
 	});
 }
 </script>

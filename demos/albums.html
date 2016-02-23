@@ -57,7 +57,7 @@ div.column{
 
 	<b class="column">Provider</b>
 	<b class="column">Albums</b>
-	<b class="column">Photos</b>
+ 	<b class="column">Photos</b>
 	<br />
 	<div class="column">
 		<button id="windows" onclick="getAlbums('windows')">Get Albums from Windows</button>
@@ -84,10 +84,7 @@ div.column{
 hello.on('auth.login', function(auth){
 
 	// Get Profile
-	hello.api(auth.network+':me', function(r){
-		if(!r||r.error){
-			return;
-		}
+	hello(auth.network).api('me').then(function(r) {
 		document.getElementById(auth.network).innerHTML = "Get Albums from " + r.name + " at "+auth.network+"";
 	});
 });
@@ -102,7 +99,7 @@ hello.on('auth.login', function(auth){
 // Initiate hellojs
 hello.init( CLIENT_IDS, {
 	scope: "files, photos",
-	redirect_uri : "../redirect.html"
+	redirect_uri: "../redirect.html"
 });
 </script>
 
