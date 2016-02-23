@@ -28,7 +28,7 @@ function demo(){
 
 	dropbox.login().then(function() {
 
-		dropbox.api("me", function(p) {
+		dropbox.api("me").then(function(p) {
 			document.getElementById('profile').innerHTML = "Connected to dropbox as " + p.name;
 		});
 
@@ -40,7 +40,7 @@ function demo(){
 </script>
 <script class="pre">
 hello.init({
-	'dropbox' : DROPBOX_CLIENT_ID, 
+	'dropbox' : DROPBOX_CLIENT_ID,
 },
 {
 	redirect_uri:'../redirect.html',

@@ -1,17 +1,14 @@
 // uiFiles.js
 // Creates a common UI component for inspecting the providers filesystem
 
-function uiFiles(network, target){
+function uiFiles(network, target, parent){
+
+	parent = parent || '';
 
 	var app = hello( network );
 
 	// Get Files
-	app.api('/me/files', {parent:''}, function getfile(p, target){
-
-		if(p.error){
-			alert(p.error.message?p.error.message:p.error);
-			return;
-		}
+	app.api('me/files', {parent: parent}).then(function(p) {
 
 		var ul = document.createElement('ul');
 		(target||document.getElementById('uiFiles')).appendChild(ul);
@@ -25,7 +22,7 @@ function uiFiles(network, target){
 		// Else lets get the children
 		p.data.forEach(function(item){
 
-			
+
 			var li = document.createElement('li');
 
 			// Thumbnail
@@ -52,9 +49,7 @@ function uiFiles(network, target){
 					ul.style.display = 'none';
 				}
 				else if(item.files){
-					app.api('me/files', {parent:item.files}, function(r){
-						getfile(r, target);
-					});
+					uiFiles(network, target, item.files);
 				}
 			};
 			li.appendChild(label);
@@ -86,6 +81,13 @@ function uiFiles(network, target){
 			}
 			ul.appendChild(li);
 		});
+
+	}, function(p) {
+
+		if(p.error){
+			alert(p.error.message?p.error.message:p.error);
+			return;
+		}
 
 	});
 }

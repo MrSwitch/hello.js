@@ -15,13 +15,15 @@
 <script class="pre">
 function login(network){
 
-	hello( network ).login().then(function(){
+	var yahoo = hello(network);
+
+	yahoo.login().then(function(){
 
 		// Get Profile
-		return hello( network ).api('me');
-	}).then(function(p){
+		return yahoo.api('me');
+	}).then(function(p) {
 		document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network+" as " + p.name;
-	}).then(null, function(e){
+	}).then(null, function(e) {
 		console.error(e);
 	});
 }

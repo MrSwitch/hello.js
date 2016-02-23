@@ -36,46 +36,41 @@
 hello.on('auth.login', function(auth){
 
 	// Get Profile
-	hello.api(auth.network+':me', function(r){
-		if(!r||r.error){
-			return;
-		}
+	var hi = hello(auth.network);
+	hi.api('me').then(function(r){
 		document.getElementById(auth.network).innerHTML = "Connected to "+auth.network+" as " + r.name;
+	}, function(e){
+		console.error(e);
 	});
 
 	// Get albums
-	hello.api(auth.network+':me/albums', function(r){
-
-		if(!r||r.error){
-			console.error("Could not open albums from "+auth.network+", try resigning in");
-			return;
-		}
-
+	hi.api('me/albums').then(function(r){
 		var grp = document.createElement('optgroup');
 		grp.label = auth.network;
 		document.getElementById('albums').appendChild(grp);
 
 		for(var i=0;i<r.data.length;i++){
 			var o = document.createElement('option');
-			o.value = auth.network+":"+ ( r.data[i].upload_location || r.data[i].id );
+			o.value = auth.network+","+ ( r.data[i].upload_location || r.data[i].id );
 			o.innerHTML = r.data[i].name;
 			grp.appendChild(o);
 		}
 
+	}, function(){
+		console.error("Could not open albums from "+auth.network+", try resigning in");
 	});
 });
 </script>
 
 <script class="pre">
 function upload(){
-	hello.api(document.getElementById('albums').value, 'post', {
-		file:document.getElementById('file')
-	}, function(r){
-		if(r.error){
-			alert(r.error.message);
-			return;
-		}
-		else if(r.source){
+	var a = document.getElementById('albums').value.split(',');
+	var network = a[0];
+	var path = a[1];
+	hello(network).api(path, 'post', {
+		file: document.getElementById('file')
+	}).then(function(r){
+		if(r.source){
 			// Windows we get a reference
 			var a = document.createElement('a');
 			a.href = r.source;
@@ -91,6 +86,8 @@ function upload(){
 		}
 		a.target = "_blank";
 		document.getElementById('result').appendChild(a);
+	}, function(r) {
+		alert(r.error.message);
 	});
 }
 </script>
