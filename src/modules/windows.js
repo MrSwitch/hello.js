@@ -19,7 +19,7 @@
 			},
 
 			// Authorization scopes
-			scope: {
+			scope_map: {
 				basic: 'wl.signin,wl.basic',
 				email: 'wl.emails',
 				birthday: 'wl.birthday',

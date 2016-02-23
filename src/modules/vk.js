@@ -14,7 +14,7 @@
 			},
 
 			// Authorization scopes
-			scope: {
+			scope_map: {
 				email: 'email',
 				offline_access: 'offline'
 			},
@@ -22,8 +22,8 @@
 			// Refresh the access_token
 			refresh: true,
 
-			login: function(p) {
-				p.qs.display = window.navigator &&
+			login: function(req) {
+				req.query.display = window.navigator &&
 					window.navigator.userAgent &&
 					/ipad|phone|phone|android/.test(window.navigator.userAgent.toLowerCase()) ? 'mobile' : 'popup';
 			},

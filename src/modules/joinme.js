@@ -14,7 +14,7 @@
 
 			refresh: false,
 
-			scope: {
+			scope_map: {
 				basic: 'user_info',
 				user: 'user_info',
 				scheduler: 'scheduler',
@@ -23,9 +23,10 @@
 
 			scope_delim: ' ',
 
-			login: function(p) {
-				p.options.popup.width = 400;
-				p.options.popup.height = 700;
+			// Joinme popup window best dimensions...
+			popup: {
+				width: 400,
+				height: 700
 			},
 
 			base: 'https://api.join.me/v1/',

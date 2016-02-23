@@ -758,7 +758,8 @@ var tests = [
 // BEFORE SETUPS
 
 function scopeFilter(test) {
-	return hello.services[test.network].scope[test.method];
+	var scope = hello.services[test.network].scope_map;
+	return scope ? scope[test.method] : undefined;
 }
 
 
@@ -950,7 +951,7 @@ function Test(test,network,parent){
 			test.data = document.getElementById(parent.formId());
 
 			// Format the data now
-			hello.utils.dataToJSON(test);
+			dataToJSON(test);
 
 			/*
 			var form = document.getElementById(parent.formId());
@@ -1258,6 +1259,114 @@ function _indexOf(a,s){
 	return -1;
 }
 
+
+// DataToJSON
+// This takes a FormElement|NodeList|InputElement|MixedObjects and convers the data object to JSON.
+function dataToJSON(p) {
+
+	var _this = this;
+	var w = window;
+	var data = p.data;
+
+	// Is data a form object
+	if (domInstance('form', data)) {
+		data = nodeListToJSON(data.elements);
+	}
+	else if ('NodeList' in w && data instanceof NodeList) {
+		data = nodeListToJSON(data);
+	}
+	else if (domInstance('input', data)) {
+		data = nodeListToJSON([data]);
+	}
+
+	// Is data a blob, File, FileList?
+	if (('File' in w && data instanceof w.File) ||
+		('Blob' in w && data instanceof w.Blob) ||
+		('FileList' in w && data instanceof w.FileList)) {
+		data = {file: data};
+	}
+
+	// Loop through data if it's not form data it must now be a JSON object
+	if (!('FormData' in w && data instanceof w.FormData)) {
+
+		for (var x in data) if (data.hasOwnProperty(x)) {
+
+			if ('FileList' in w && data[x] instanceof w.FileList) {
+				if (data[x].length === 1) {
+					data[x] = data[x][0];
+				}
+			}
+			else if (domInstance('input', data[x]) && data[x].type === 'file') {
+				continue;
+			}
+			else if (domInstance('input', data[x]) ||
+				domInstance('select', data[x]) ||
+				domInstance('textArea', data[x])) {
+				data[x] = data[x].value;
+			}
+			else if (domInstance(null, data[x])) {
+				data[x] = data[x].innerHTML || data[x].innerText;
+			}
+		}
+	}
+
+	p.data = data;
+	return data;
+}
+
+// NodeListToJSON
+// Given a list of elements extrapolate their values and return as a json object
+function nodeListToJSON(nodelist) {
+
+	var json = {};
+
+	// Create a data string
+	for (var i = 0; i < nodelist.length; i++) {
+
+		var input = nodelist[i];
+
+		// If the name of the input is empty or diabled, dont add it.
+		if (input.disabled || !input.name) {
+			continue;
+		}
+
+		// Is this a file, does the browser not support 'files' and 'FormData'?
+		if (input.type === 'file') {
+			json[input.name] = input;
+		}
+		else {
+			json[input.name] = input.value || input.innerHTML;
+		}
+	}
+
+	return json;
+}
+
+
+// Return the type of DOM object
+function domInstance(type, data) {
+	var test = 'HTML' + (type || '').replace(
+		/^[a-z]/,
+		function(m) {
+			return m.toUpperCase();
+		}
+
+	) + 'Element';
+
+	if (!data) {
+		return false;
+	}
+
+	if (window[test]) {
+		return data instanceof window[test];
+	}
+	else if (window.Element) {
+		return data instanceof window.Element && (!type || (data.tagName && data.tagName.toLowerCase() === type));
+	}
+	else {
+		return (!(data instanceof Object || data instanceof Array || data instanceof String || data instanceof Number) && data.tagName && data.tagName.toLowerCase() === type);
+	}
+}
 
 
 self.getText = function getText(path, callback){

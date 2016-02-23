@@ -56,13 +56,16 @@ function login(network){
 
 <script class="pre">
 function friendsAndContacts(network){
+
+	var hi = hello(network);
+
 	// Make a login call and handle the response using promises
-	hello(network).login({scope:'friends'}).then(function(){
+	hi.login({scope:'friends'}).then(function(){
 		console.log('fullfilled', 'making api call');
 		// Reurn another promise to get the users profile.
 		return Promise.all([
-			hello( network ).api( 'me/friends' ),
-			hello( network ).api( 'me/contacts' )
+			hi.api('me/friends'),
+			hi.api('me/contacts')
 		]);
 	}).then(function(all){
 

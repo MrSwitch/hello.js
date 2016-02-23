@@ -78,6 +78,7 @@ hello.utils.extend(hello, {
 			email: '',
 			files: '',
 			friends: '',
+			offline_access: '',
 			photos: '',
 			publish: '',
 			publish_files: '',
@@ -85,8 +86,11 @@ hello.utils.extend(hello, {
 			videos: ''
 		},
 
+		// Default scope delimiter
+		scope_delim: ',',
+
 		// Default service / network
-		default_service: null,
+		network: null,
 
 		// Force authentication
 		// When hello.login is fired.
@@ -117,7 +121,7 @@ hello.utils.extend(hello, {
 
 		// Define the default service
 		if (service) {
-			self.settings.default_service = service;
+			self.settings.network = service;
 		}
 
 		// Create an instance of Events
@@ -173,6 +177,7 @@ hello.utils.extend(hello, {
 		// Create an object which inherits its parent as the prototype and constructs a new event chain.
 		var _this = this;
 		var utils = _this.utils;
+		var _global = _this.settings;
 		var error = utils.error;
 		var promise = utils.Promise();
 
@@ -182,17 +187,21 @@ hello.utils.extend(hello, {
 		// Local vars
 		var url;
 
-		// Get all the custom options and store to be appended to the querystring
-		var qs = utils.diffKey(p.options, _this.settings);
+		// Opts
+		if (p.options) {
 
-		// Merge/override options with app defaults
-		var opts = p.options = utils.merge(_this.settings, p.options || {});
+			// Get all the custom options and store to be appended to the querystring
+			var _query = utils.diffKey(p.options, _global) || {};
 
-		// Merge/override options with app defaults
-		opts.popup = utils.merge(_this.settings.popup, p.options.popup || {});
+			// Extend the query
+			if (_query) {
+				p.options.query = p.options.query || {};
+				utils.extend(p.options.query, _query);
+			}
+		}
 
 		// Network
-		p.network = p.network || _this.settings.default_service;
+		var network = p.network || _global.network;
 
 		// Bind callback to both reject and fulfill states
 		promise.proxy.then(p.callback, p.callback);
@@ -205,13 +214,35 @@ hello.utils.extend(hello, {
 		promise.proxy.then(emit.bind(this, 'auth.login auth'), emit.bind(this, 'auth.failed auth'));
 
 		// Is our service valid?
-		if (typeof (p.network) !== 'string' || !(p.network in _this.services)) {
+		if (typeof (network) !== 'string' || !(network in _this.services)) {
 			// Trigger the default login.
 			// Ahh we dont have one.
 			return promise.reject(error('invalid_network', 'The provided network was not recognized'));
 		}
 
-		var provider = _this.services[p.network];
+		var provider = _this.services[network];
+
+		// Get current session for merging scopes, and for quick auth response
+		var _session = utils.store(network) || {};
+
+		// Construct the Request object
+		// This holds the combined properties of the environment
+		var req = {
+			query: {},
+			oauth: {},
+			popup: {},
+			session: _session
+		};
+
+		// Construct the request object
+		utils.assign(req, _global, provider, p.options || {});
+
+		// Set network
+		req.network = network;
+
+		// Shortcuts
+		var query = req.query;
+		var session = req.session;
 
 		// Create a global listener to capture events triggered out of scope
 		var callbackId = utils.globalEvent(function(str) {
@@ -246,34 +277,31 @@ hello.utils.extend(hello, {
 			}
 		});
 
-		var redirectUri = utils.url(opts.redirect_uri).href;
+		var redirectUri = utils.url(req.redirect_uri).href;
 
 		// May be a space-delimited list of multiple, complementary types
-		var responseType = provider.oauth.response_type || opts.response_type;
+		var responseType = req.oauth.response_type || req.response_type;
 
 		// Fallback to token if the module hasn't defined a grant url
-		if (/\bcode\b/.test(responseType) && !provider.oauth.grant) {
+		if (/\bcode\b/.test(responseType) && !req.oauth.grant) {
 			responseType = responseType.replace(/\bcode\b/, 'token');
 		}
 
 		// Query string parameters, we may pass our own arguments to form the querystring
-		p.qs = utils.merge(qs, {
-			client_id: encodeURIComponent(provider.id),
+		utils.extend(query, {
+			client_id: encodeURIComponent(req.id),
 			response_type: encodeURIComponent(responseType),
 			redirect_uri: encodeURIComponent(redirectUri),
-			display: opts.display,
+			display: req.display,
 			state: {
-				client_id: provider.id,
-				network: p.network,
-				display: opts.display,
+				client_id: req.id,
+				network: network,
+				display: req.display,
 				callback: callbackId,
-				state: opts.state,
+				state: req.state,
 				redirect_uri: redirectUri
 			}
 		});
-
-		// Get current session for merging scopes, and for quick auth response
-		var session = utils.store(p.network);
 
 		// Scopes (authentication permisions)
 		// Ensure this is a string - IE has a problem moving Arrays between windows
@@ -281,21 +309,16 @@ hello.utils.extend(hello, {
 		var SCOPE_SPLIT = /[,\s]+/;
 
 		// Include default scope settings (cloned).
-		var scope = _this.settings.scope ? [_this.settings.scope.toString()] : [];
+		var scope = req.scope;
 
 		// Extend the providers scope list with the default
-		var scopeMap = utils.merge(_this.settings.scope_map, provider.scope || {});
-
-		// Add user defined scopes...
-		if (opts.scope) {
-			scope.push(opts.scope.toString());
-		}
+		var scopeMap = req.scope_map;
 
 		// Append scopes from a previous session.
 		// This helps keep app credentials constant,
 		// Avoiding having to keep tabs on what scopes are authorized
-		if (session && 'scope' in session && session.scope instanceof String) {
-			scope.push(session.scope);
+		if ('scope' in session) {
+			scope.push(session.scope.toString());
 		}
 
 		// Join and Split again
@@ -305,7 +328,7 @@ hello.utils.extend(hello, {
 		scope = utils.unique(scope).filter(filterEmpty);
 
 		// Save the the scopes to the state with the names that they were requested with.
-		p.qs.state.scope = scope.join(',');
+		query.state.scope = scope.join(',');
 
 		// Map scopes to the providers naming convention
 		scope = scope.map(function(item) {
@@ -321,20 +344,20 @@ hello.utils.extend(hello, {
 		scope = utils.unique(scope).filter(filterEmpty);
 
 		// Join with the expected scope delimiter into a string
-		p.qs.scope = scope.join(provider.scope_delim || ',');
+		query.scope = scope.join(req.scope_delim);
 
 		// Is the user already signed in with the appropriate scopes, valid access_token?
-		if (opts.force === false) {
+		if (req.force === false) {
 
-			if (session && 'access_token' in session && session.access_token && 'expires' in session && session.expires > ((new Date()).getTime() / 1e3)) {
+			if (session.access_token && 'expires' in session && session.expires > ((new Date()).getTime() / 1e3)) {
 				// What is different about the scopes in the session vs the scopes in the new login?
-				var diff = utils.diff((session.scope || '').split(SCOPE_SPLIT), (p.qs.state.scope || '').split(SCOPE_SPLIT));
+				var diff = utils.diff((session.scope || '').split(SCOPE_SPLIT), (query.state.scope || '').split(SCOPE_SPLIT));
 				if (diff.length === 0) {
 
 					// OK trigger the callback
 					promise.fulfill({
 						unchanged: true,
-						network: p.network,
+						network: network,
 						authResponse: session
 					});
 
@@ -345,69 +368,69 @@ hello.utils.extend(hello, {
 		}
 
 		// Page URL
-		if (opts.display === 'page' && opts.page_uri) {
+		if (req.display === 'page' && req.page_uri) {
 			// Add a page location, place to endup after session has authenticated
-			p.qs.state.page_uri = utils.url(opts.page_uri).href;
+			query.state.page_uri = utils.url(req.page_uri).href;
 		}
 
 		// Bespoke
 		// Override login querystrings from auth_options
-		if ('login' in provider && typeof (provider.login) === 'function') {
+		if ('login' in req && typeof (req.login) === 'function') {
 			// Format the paramaters according to the providers formatting function
-			provider.login(p);
+			req.login(req);
 		}
 
 		// Add OAuth to state
 		// Where the service is going to take advantage of the oauth_proxy
 		if (!/\btoken\b/.test(responseType) ||
-		parseInt(provider.oauth.version, 10) < 2 ||
-		(opts.display === 'none' && provider.oauth.grant && session && session.refresh_token)) {
+		parseInt(req.oauth.version, 10) < 2 ||
+		(req.display === 'none' && req.oauth.grant && session && session.refresh_token)) {
 
 			// Add the oauth endpoints
-			p.qs.state.oauth = provider.oauth;
+			query.state.oauth = req.oauth;
 
 			// Add the proxy url
-			p.qs.state.oauth_proxy = opts.oauth_proxy;
+			query.state.oauth_proxy = req.oauth_proxy;
 
 		}
 
 		// Convert state to a string
-		p.qs.state = encodeURIComponent(JSON.stringify(p.qs.state));
+		query.state = encodeURIComponent(JSON.stringify(query.state));
 
 		// URL
-		if (parseInt(provider.oauth.version, 10) === 1) {
+		if (parseInt(req.oauth.version, 10) === 1) {
 
 			// Turn the request to the OAuth Proxy for 3-legged auth
-			url = utils.qs(opts.oauth_proxy, p.qs, encodeFunction);
+			url = utils.qs(req.oauth_proxy, req.query, encodeFunction);
 		}
 
 		// Refresh token
-		else if (opts.display === 'none' && provider.oauth.grant && session && session.refresh_token) {
+		else if (req.display === 'none' && req.oauth.grant && session && session.refresh_token) {
 
 			// Add the refresh_token to the request
-			p.qs.refresh_token = session.refresh_token;
+			query.refresh_token = session.refresh_token;
 
 			// Define the request path
-			url = utils.qs(opts.oauth_proxy, p.qs, encodeFunction);
+			url = utils.qs(req.oauth_proxy, req.query, encodeFunction);
 		}
 		else {
-			url = utils.qs(provider.oauth.auth, p.qs, encodeFunction);
+			url = utils.qs(req.oauth.auth, req.query, encodeFunction);
 		}
 
 		// Broadcast this event as an auth:init
-		emit('auth.init', p);
+		emit('auth.init', req);
 
 		// Execute
 		// Trigger how we want self displayed
-		if (opts.display === 'none') {
+		if (req.display === 'none') {
 			// Sign-in in the background, iframe
 			utils.iframe(url, redirectUri);
 		}
 
 		// Triggering popup?
-		else if (opts.display === 'popup') {
+		else if (req.display === 'popup') {
 
-			var popup = utils.popup(url, redirectUri, opts.popup);
+			var popup = utils.popup(url, redirectUri, req.popup);
 
 			var timer = setInterval(function() {
 				if (!popup || popup.closed) {
@@ -420,7 +443,7 @@ hello.utils.extend(hello, {
 							response = error('blocked', 'Popup was blocked');
 						}
 
-						response.network = p.network;
+						response.network = network;
 
 						promise.reject(response);
 					}
@@ -466,7 +489,7 @@ hello.utils.extend(hello, {
 		promise.proxy.then(emit.bind(this, 'auth.logout auth'), emit.bind(this, 'error'));
 
 		// Network
-		p.name = p.name || this.settings.default_service;
+		p.name = p.name || this.settings.network;
 		p.authResponse = utils.store(p.name);
 
 		if (p.name && !(p.name in _this.services)) {
@@ -525,7 +548,7 @@ hello.utils.extend(hello, {
 	getAuthResponse: function(service) {
 
 		// If the service doesn't exist
-		service = service || this.settings.default_service;
+		service = service || this.settings.network;
 
 		if (!service || !(service in this.services)) {
 			return null;
@@ -781,6 +804,48 @@ hello.utils.extend(hello.utils, {
 		var args = Array.prototype.slice.call(arguments);
 		args.unshift({});
 		return this.extend.apply(null, args);
+	},
+
+	// Assign the first object with the properties and methods of the others...
+	// Unlike extend this goes deep into copying entire object trees.
+	assign: function(r /*, a[, b[, ...]] */) {
+
+		var _this = this;
+
+		// Get the arguments as an array but ommit the initial item
+		Array.prototype.slice.call(arguments, 1).forEach(function(a) {
+
+			if (Array.isArray(r) && Array.isArray(a)) {
+				// Merge the array
+				r = r.concat(a);
+			}
+			else if (Array.isArray(a)) {
+				// Clone the array
+				r = a.slice(0);
+			}
+			else if (_this.isBinary(a)) {
+				// This is inimitable content, impossible to clone, so reference directly.
+				r = a;
+			}
+			else if (a && typeof a === 'object' && r !== a) {
+
+				if (!r || typeof r !== 'object') {
+					r = {};
+				}
+
+				for (var x in a) {
+					r[x] = _this.assign(r[x], a[x]);
+				}
+			}
+			else if (Array.isArray(r)) {
+				r.push(a);
+			}
+			else {
+				r = a;
+			}
+		});
+
+		return r;
 	},
 
 	// Makes it easier to assign parameters, where some are optional
@@ -1690,29 +1755,13 @@ hello.api = function() {
 	var _this = this;
 	var utils = _this.utils;
 	var error = utils.error;
+	var _global = _this.settings;
 
 	// Construct a new Promise object
 	var promise = utils.Promise();
 
 	// Arguments
 	var p = utils.args({path: 's!', query: 'o', method: 's', data: 'o', timeout: 'i', callback: 'f'}, arguments);
-
-	// Method
-	p.method = (p.method || 'get').toLowerCase();
-
-	// Headers
-	p.headers = p.headers || {};
-
-	// Query
-	p.query = p.query || {};
-
-	// If get, put all parameters into query
-	if (p.method === 'get' || p.method === 'delete') {
-		utils.extend(p.query, p.data);
-		p.data = {};
-	}
-
-	var data = p.data = p.data || {};
 
 	// Completed event callback
 	promise.then(p.callback, p.callback);
@@ -1734,77 +1783,82 @@ hello.api = function() {
 
 	// Network & Provider
 	// Define the network that this request is made for
-	p.network = _this.settings.default_service = p.network || _this.settings.default_service;
-	var o = _this.services[p.network];
+	var network = p.network = _global.network = p.network || _global.network;
+	var provider = _this.services[network];
 
 	// INVALID
 	// Is there no service by the given network name?
-	if (!o) {
-		return promise.reject(error('invalid_network', 'Could not match the service requested: ' + p.network));
+	if (!provider) {
+		return promise.reject(error('invalid_network', 'Could not match the service requested: ' + network));
 	}
 
-	// PATH
-	// As long as the path isn't flagged as unavaiable, e.g. path == false
+	// Request
+	// Construct the request object
+	// Appending the values of the other objects on to the initial value
+	var req = utils.assign({
+		method: 'get',
+		headers: {},
+		query: {},
+		data: {},
+		formatResponse: true
+	}, _global, provider, p);
 
-	if (!(!(p.method in o) || !(p.path in o[p.method]) || o[p.method][p.path] !== false)) {
+	// Method to lower case
+	req.method = req.method.toLowerCase();
+
+	// Enforce type
+	req.query = req.query || {};
+
+	// If get, put all parameters into query
+	if (req.method === 'get' || req.method === 'delete') {
+		utils.extend(req.query, req.data);
+		req.data = {};
+	}
+
+	// Clone the data object
+	// Prevent this script overwriting the data of the incoming object.
+	// Ensure that everytime we run an iteration the callbacks haven't removed some data
+	req.data = utils.clone(req.data || {});
+
+	// Store the query as options
+	// This is used to populate the request object before the data is augmented by the prewrap handlers.
+	req.options = utils.clone(req.query);
+
+	// PATH
+	// If path == false
+	// Throw error
+	if (!(!(req.method in req) || !(req.path in req[req.method]) || req[req.method][req.path] !== false)) {
 		return promise.reject(error('invalid_path', 'The provided path is not available on the selected network'));
 	}
 
 	// PROXY
 	// OAuth1 calls always need a proxy
-
-	if (!p.oauth_proxy) {
-		p.oauth_proxy = _this.settings.oauth_proxy;
-	}
-
-	if (!('proxy' in p)) {
-		p.proxy = p.oauth_proxy && o.oauth && parseInt(o.oauth.version, 10) === 1;
-	}
-
-	// TIMEOUT
-	// Adopt timeout from global settings by default
-
-	if (!('timeout' in p)) {
-		p.timeout = _this.settings.timeout;
-	}
-
-	// Format response
-	// Whether to run the raw response through post processing.
-	if (!('formatResponse' in p)) {
-		p.formatResponse = true;
+	if (!('proxy' in req)) {
+		req.proxy = req.oauth_proxy && req.oauth && parseInt(req.oauth.version, 10) === 1;
 	}
 
 	// Get the current session
 	// Append the access_token to the query
-	p.authResponse = _this.getAuthResponse(p.network);
-	if (p.authResponse && p.authResponse.access_token) {
-		p.query.access_token = p.authResponse.access_token;
+	req.authResponse = _this.getAuthResponse(req.network);
+	if (req.authResponse && req.authResponse.access_token) {
+		req.query.access_token = req.authResponse.access_token;
 	}
 
-	var url = p.path;
+	var url = req.path;
 	var m;
-
-	// Store the query as options
-	// This is used to populate the request object before the data is augmented by the prewrap handlers.
-	p.options = utils.clone(p.query);
-
-	// Clone the data object
-	// Prevent this script overwriting the data of the incoming object.
-	// Ensure that everytime we run an iteration the callbacks haven't removed some data
-	p.data = utils.clone(data);
 
 	// URL Mapping
 	// Is there a map for the given URL?
-	var actions = o[{'delete': 'del'}[p.method] || p.method] || {};
+	var actions = req[{'delete': 'del'}[req.method] || req.method] || {};
 
 	// Extrapolate the QueryString
 	// Provide a clean path
 	// Move the querystring into the data
-	if (p.method === 'get') {
+	if (req.method === 'get') {
 
 		var query = url.split(/[\?#]/)[1];
 		if (query) {
-			utils.extend(p.query, utils.param(query));
+			utils.extend(req.query, utils.param(query));
 
 			// Remove the query part from the URL
 			url = url.replace(/\?.*?(#|$)/, '$1');
@@ -1814,53 +1868,42 @@ hello.api = function() {
 	// Is the hash fragment defined
 	if ((m = url.match(/#(.+)/, ''))) {
 		url = url.split('#')[0];
-		p.path = m[1];
+		req.path = m[1];
 	}
 	else if (url in actions) {
-		p.path = url;
+		req.path = url;
 		url = actions[url];
 	}
 	else if ('default' in actions) {
 		url = actions['default'];
 	}
 
-	// Redirect Handler
-	// This defines for the Form+Iframe+Hash hack where to return the results too.
-	p.redirect_uri = _this.settings.redirect_uri;
-
-	// Define FormatHandler
-	// The request can be procesed in a multitude of ways
-	// Here's the options - depending on the browser and endpoint
-	p.xhr = o.xhr;
-	p.jsonp = o.jsonp;
-	p.form = o.form;
-
 	// Make request
 	if (typeof (url) === 'function') {
 		// Does self have its own callback?
-		url(p, getPath);
+		url(req, pathHandler);
 	}
 	else {
 		// Else the URL is a string
-		getPath(url);
+		pathHandler(url);
 	}
 
 	return promise.proxy;
 
 	// If url needs a base
 	// Wrap everything in
-	function getPath(url) {
+	function pathHandler(url) {
 
 		// Format the string if it needs it
 		url = url.replace(/\@\{([a-z\_\-]+)(\|.*?)?\}/gi, function(m, key, defaults) {
 			var val = defaults ? defaults.replace(/^\|/, '') : '';
-			if (key in p.query) {
-				val = p.query[key];
-				delete p.query[key];
+			if (key in req.query) {
+				val = req.query[key];
+				delete req.query[key];
 			}
-			else if (p.data && key in p.data) {
-				val = p.data[key];
-				delete p.data[key];
+			else if (req.data && key in req.data) {
+				val = req.data[key];
+				delete req.data[key];
 			}
 			else if (!defaults) {
 				promise.reject(error('missing_attribute', 'The attribute ' + key + ' is missing from the request'));
@@ -1871,81 +1914,81 @@ hello.api = function() {
 
 		// Add base
 		if (!url.match(/^https?:\/\//)) {
-			url = o.base + url;
+			url = req.base + url;
 		}
 
 		// Define the request URL
-		p.url = url;
+		req.url = url;
 
 		// Make the HTTP request with the curated request object
 		// CALLBACK HANDLER
 		// @ response object
 		// @ statusCode integer if available
-		utils.request(p, function(r, headers) {
+		utils.request(req, function(res, headers) {
 
 			// Is this a raw response?
-			if (!p.formatResponse) {
+			if (!req.formatResponse) {
 				// Bad request? error statusCode or otherwise contains an error response vis JSONP?
-				if (typeof headers === 'object' ? (headers.statusCode >= 400) : (typeof r === 'object' && 'error' in r)) {
-					promise.reject(r);
+				if (typeof headers === 'object' ? (headers.statusCode >= 400) : (typeof r === 'object' && 'error' in res)) {
+					promise.reject(res);
 				}
 				else {
-					promise.fulfill(r);
+					promise.fulfill(res);
 				}
 
 				return;
 			}
 
 			// Should this be an object
-			if (r === true) {
-				r = {success:true};
+			if (res === true) {
+				res = {success:true};
 			}
-			else if (!r) {
-				r = {};
+			else if (!res) {
+				res = {};
 			}
 
 			// The delete callback needs a better response
-			if (p.method === 'delete') {
-				r = (!r || utils.isEmpty(r)) ? {success:true} : r;
+			if (req.method === 'delete') {
+				res = (!res || utils.isEmpty(res)) ? {success:true} : res;
 			}
 
 			// FORMAT RESPONSE?
 			// Does self request have a corresponding formatter
-			if (o.wrap && ((p.path in o.wrap) || ('default' in o.wrap))) {
-				var wrap = (p.path in o.wrap ? p.path : 'default');
+			if (req.wrap && ((req.path in req.wrap) || ('default' in req.wrap))) {
+				var wrap = (req.path in req.wrap ? req.path : 'default');
 				var time = (new Date()).getTime();
 
 				// FORMAT RESPONSE
-				var b = o.wrap[wrap](r, headers, p);
+				var b = req.wrap[wrap](res, headers, req);
 
 				// Has the response been utterly overwritten?
 				// Typically self augments the existing object.. but for those rare occassions
 				if (b) {
-					r = b;
+					res = b;
 				}
 			}
 
 			// Is there a next_page defined in the response?
-			if (r && 'paging' in r && r.paging.next) {
+			if (res && 'paging' in res && res.paging.next) {
 
 				// Add the relative path if it is missing from the paging/next path
-				if (r.paging.next[0] === '?') {
-					r.paging.next = p.path + r.paging.next;
+				if (res.paging.next[0] === '?') {
+					res.paging.next = req.path + res.paging.next;
 				}
 
 				// The relative path has been defined, lets markup the handler in the HashFragment
 				else {
-					r.paging.next += '#' + p.path;
+					res.paging.next += '#' + req.path;
 				}
 			}
 
 			// Dispatch to listeners
 			// Emit events which pertain to the formatted response
-			if (!r || 'error' in r) {
-				promise.reject(r);
+			if (!res || 'error' in res) {
+				promise.reject(res);
 			}
 			else {
-				promise.fulfill(r);
+				promise.fulfill(res);
 			}
 		});
 	}
@@ -2609,115 +2652,6 @@ hello.utils.extend(hello.utils, {
 	}
 
 });
-
-// EXTRA: Convert FormElement to JSON for POSTing
-// Wrappers to add additional functionality to existing functions
-(function(hello) {
-
-	// Copy original function
-	var api = hello.api;
-	var utils = hello.utils;
-
-	utils.extend(utils, {
-
-		// DataToJSON
-		// This takes a FormElement|NodeList|InputElement|MixedObjects and convers the data object to JSON.
-		dataToJSON: function(p) {
-
-			var _this = this;
-			var w = window;
-			var data = p.data;
-
-			// Is data a form object
-			if (_this.domInstance('form', data)) {
-				data = _this.nodeListToJSON(data.elements);
-			}
-			else if ('NodeList' in w && data instanceof NodeList) {
-				data = _this.nodeListToJSON(data);
-			}
-			else if (_this.domInstance('input', data)) {
-				data = _this.nodeListToJSON([data]);
-			}
-
-			// Is data a blob, File, FileList?
-			if (('File' in w && data instanceof w.File) ||
-				('Blob' in w && data instanceof w.Blob) ||
-				('FileList' in w && data instanceof w.FileList)) {
-				data = {file: data};
-			}
-
-			// Loop through data if it's not form data it must now be a JSON object
-			if (!('FormData' in w && data instanceof w.FormData)) {
-
-				for (var x in data) if (data.hasOwnProperty(x)) {
-
-					if ('FileList' in w && data[x] instanceof w.FileList) {
-						if (data[x].length === 1) {
-							data[x] = data[x][0];
-						}
-					}
-					else if (_this.domInstance('input', data[x]) && data[x].type === 'file') {
-						continue;
-					}
-					else if (_this.domInstance('input', data[x]) ||
-						_this.domInstance('select', data[x]) ||
-						_this.domInstance('textArea', data[x])) {
-						data[x] = data[x].value;
-					}
-					else if (_this.domInstance(null, data[x])) {
-						data[x] = data[x].innerHTML || data[x].innerText;
-					}
-				}
-			}
-
-			p.data = data;
-			return data;
-		},
-
-		// NodeListToJSON
-		// Given a list of elements extrapolate their values and return as a json object
-		nodeListToJSON: function(nodelist) {
-
-			var json = {};
-
-			// Create a data string
-			for (var i = 0; i < nodelist.length; i++) {
-
-				var input = nodelist[i];
-
-				// If the name of the input is empty or diabled, dont add it.
-				if (input.disabled || !input.name) {
-					continue;
-				}
-
-				// Is this a file, does the browser not support 'files' and 'FormData'?
-				if (input.type === 'file') {
-					json[input.name] = input;
-				}
-				else {
-					json[input.name] = input.value || input.innerHTML;
-				}
-			}
-
-			return json;
-		}
-	});
-
-	// Replace it
-	hello.api = function() {
-
-		// Get arguments
-		var p = utils.args({path: 's!', method: 's', data:'o', timeout: 'i', callback: 'f'}, arguments);
-
-		// Change for into a data object
-		if (p.data) {
-			utils.dataToJSON(p);
-		}
-
-		return api.call(this, p);
-	};
-
-})(hello);
 
 /////////////////////////////////////
 //

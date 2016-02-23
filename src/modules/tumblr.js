@@ -12,10 +12,10 @@
 				token: 'https://www.tumblr.com/oauth/access_token'
 			},
 
-			// Set default window height
-			login: function(p) {
-				p.options.popup.width = 600;
-				p.options.popup.height = 510;
+			// Tumblr idea popup window dimensions...
+			popup: {
+				width: 600,
+				height: 510
 			},
 
 			base: 'https://api.tumblr.com/v2/',

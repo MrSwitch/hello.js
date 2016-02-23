@@ -14,10 +14,9 @@
 
 <script class="pre">
 function login(network){
-	
+
 	var app = hello(network);
-	app.login()
-	.then(function() {
+	app.login().then(function() {
 		app.api('me', function(r) {
 			document.body.querySelector('.response').appendChild(document.createTextNode(JSON.stringify(r, true, 2)));
 		});

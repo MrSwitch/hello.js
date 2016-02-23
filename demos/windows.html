@@ -17,9 +17,7 @@
 function login(network){
 	var windows = hello(network);
 
-	windows
-	.login()
-	.then(function(){
+	windows.login().then(function(){
 
 		// Get Profile
 		return windows.api('me');
@@ -27,7 +25,7 @@ function login(network){
 	}).then(function(p){
 
 		// Diplay
-		document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
+		document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network+" as " + p.name;
 	});
 
 }

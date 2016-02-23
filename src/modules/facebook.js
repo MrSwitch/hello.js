@@ -14,7 +14,7 @@
 			},
 
 			// Authorization scopes
-			scope: {
+			scope_map: {
 				basic: 'public_profile',
 				email: 'email',
 				share: 'user_posts',
@@ -30,23 +30,25 @@
 				// Deprecated in v2.0
 				// Create_event	: 'create_event',
 
-				offline_access: 'offline_access'
+				offline_access: ''
 			},
 
 			// Refresh the access_token
 			refresh: true,
 
-			login: function(p) {
+			login: function(req) {
 
 				// Reauthenticate
 				// https://developers.facebook.com/docs/facebook-login/reauthentication
-				if (p.options.force) {
-					p.qs.auth_type = 'reauthenticate';
+				if (req.force) {
+					req.query.auth_type = 'reauthenticate';
 				}
+			},
 
-				// The facebook login window is a different size.
-				p.options.popup.width = 580;
-				p.options.popup.height = 400;
+			// The facebook login window is a different size.
+			popup: {
+				width: 580,
+				height: 400
 			},
 
 			logout: function(callback, options) {

@@ -13,7 +13,7 @@
 				grant: 'https://api.bikeindex.org/oauth/access_token'
 			},
 
-			scope: {
+			scope_map: {
 				basic: 'read_user,read_bikes',
 				email: 'read_user'
 
@@ -26,8 +26,8 @@
 			// Refresh the access_token once expired
 			refresh: true,
 
-			login: function(p) {
-				p.qs.display = '';
+			login: function(req) {
+				req.query.display = '';
 			},
 
 			base: 'https://bikeindex.org/api/v2/',

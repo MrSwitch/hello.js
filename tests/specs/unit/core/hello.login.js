@@ -18,7 +18,7 @@ define([
 					grant: 'https://testdemo/grant',
 					version: 2
 				},
-				scope: {
+				scope_map: {
 					basic: 'basic_scope'
 				}
 			};
@@ -28,10 +28,13 @@ define([
 					auth: 'https://testdemo/access',
 					version: 2
 				},
-				scope: {
+				scope_map: {
 					another_scope: 'another_scope'
 				}
 			};
+
+			hello.services.testable = {};
+			hello.services.second = {};
 
 			// Add a network
 			hello.init({
@@ -44,6 +47,7 @@ define([
 		// Destroy it
 		afterEach(function() {
 			delete hello.services.testable;
+			delete hello.services.second;
 		});
 
 		var utils = hello.utils;
@@ -93,9 +97,11 @@ define([
 
 		it('should include the basic scope defined by the module, by default', function(done) {
 
+			var basic = hello.services.testable.scope_map.basic;
+
 			var spy = sinon.spy(function(url, name, optins) {
 
-				expect(url).to.contain('scope=' + hello.services.testable.scope.basic);
+				expect(url).to.contain('scope=' + basic);
 
 				done();
 			});
@@ -108,7 +114,7 @@ define([
 		it('should not use "basic" as the default scope, if there is no mapping', function(done) {
 
 			// Remove the basic scope
-			delete hello.services.testable.scope.basic;
+			delete hello.services.testable.scope_map.basic;
 
 			// Now the response should not include the scope...
 			var spy = sinon.spy(function(url) {
@@ -201,7 +207,7 @@ define([
 
 				var scope = 'scope';
 				var paddedScope = ',' + scope + ',';
-				delete testable.scope.basic;
+				delete testable.scope_map.basic;
 
 				var spy = sinon.spy(function(url, name, optins) {
 
@@ -229,7 +235,7 @@ define([
 							version: 2
 						},
 						scope_delim: scopeDelim,
-						scope: {
+						scope_map: {
 							basic: basicScope
 						}
 					}
@@ -304,21 +310,26 @@ define([
 
 				var spy = sinon.spy(function(url, name, options) {
 					expect(options.location).to.eql('no');
-					expect(options.toolbar).to.eql('no');
 					expect(options.hidden).to.eql(true);
+					expect(options.width).to.eql(800);
 					done();
 				});
 
 				utils.popup = spy;
 
+				hello.services.testable.popup = {
+					location: 'yes',
+					width: 800
+				};
+
 				hello.login('testable', {
 					popup: {
 						hidden: true,
-						location: 'no',
-						toolbar: 'no'
+						location: 'no'
 					}
 				});
 			});
+
 		});
 
 		describe('option.force = false', function() {

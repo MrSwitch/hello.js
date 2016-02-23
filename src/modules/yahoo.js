@@ -12,14 +12,16 @@
 				token: 'https://api.login.yahoo.com/oauth/v2/get_token'
 			},
 
-			// Login handler
-			login: function(p) {
+			popup: {
 				// Change the default popup window to be at least 560
 				// Yahoo does dynamically change it on the fly for the signin screen (only, what if your already signed in)
-				p.options.popup.width = 560;
+				width: 560
+			},
 
+			// Login handler
+			login: function(req) {
 				// Yahoo throws an parameter error if for whatever reason the state.scope contains a comma, so lets remove scope
-				try {delete p.qs.state.scope;}
+				try {delete req.query.state.scope;}
 				catch (e) {}
 			},
 
