@@ -22,7 +22,7 @@ function login(network) {
 		return vk.api('me');
 	})
 	.then(function(p){
-		document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to " + r.network+ " as " + p.name;
+		document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to " + network+ " as " + p.name;
 	});
 });
 

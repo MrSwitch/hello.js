@@ -13,22 +13,20 @@
 
 <h1>HelloJS w/ OAuth 1.0&amp;1.0a</h1>
 
-<button id='yahoo' onclick="hello.login('yahoo');">yahoo</button>
-<button id='dropbox' onclick="hello.login('dropbox');">dropbox</button>
-<button id='twitter' onclick="hello.login('twitter');">twitter</button>
+<button id='yahoo' onclick="login('yahoo');">yahoo</button>
+<button id='dropbox' onclick="login('dropbox');">dropbox</button>
+<button id='twitter' onclick="login('twitter');">twitter</button>
 
 <script class="pre">
 
-hello.on('auth.login', function(r){
-	// Get Profile
-	hello(r.network).api('me', function(p){
-		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
-	});
-});
-
-hello.on('auth.failed', function(r){
-	console.log(r);
-});
+function login(network) {
+	var hi = hello(network);
+	hi.login().then(function() {
+		return hi.api('me');
+	}).then(function(p) {
+		document.getElementById(network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network+" as " + p.name;
+	}, console.error.bind(console));
+}
 
 hello.init({
 	yahoo : YAHOO_CLIENT_ID,

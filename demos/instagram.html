@@ -27,7 +27,7 @@ function getPhotos(){
 	instagram.login().then( function(){
 
 		// Get Profile
-		instagram.api('me').then( profileHandler, errorHandler);
+		instagram.api('me').then(profileHandler, errorHandler);
 
 		// Get user photos
 		instagram.api('me/photos').then( photosHandler, errorHandler );
