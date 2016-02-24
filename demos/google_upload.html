@@ -38,11 +38,12 @@ hello.init({
 <script class="pre">
 function upload(network){
 
-	hello(network).login(function(){
+	var google = hello("google");
+	google.login().then(function() {
 
-		hello("google").api('me/files', 'post', {
+		google.api('me/files', 'post', {
 			file : document.getElementById('file')
-		}).complete(function(response){
+		}).then(function(response) {
 			log(response);
 		});
 

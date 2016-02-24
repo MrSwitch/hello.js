@@ -29,7 +29,7 @@ define([
 					version: 2
 				},
 				scope: {
-					common_scope: 'common_scope'
+					another_scope: 'another_scope'
 				}
 			};
 
@@ -176,9 +176,12 @@ define([
 				hello.login('testable', {scope: customScope});
 			});
 
-			it('should discard common scope, aka scopes undefined by this module but defined by other services', function(done) {
+			it('should discard common scope, aka scopes undefined by this module but defined as a global standard in the libary', function(done) {
 
 				var commonScope = 'common_scope';
+
+				// Set this as a common scope (always set to '')
+				hello.settings.scope_map[commonScope] = '';
 
 				var spy = sinon.spy(function(url, name, optins) {
 

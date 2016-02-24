@@ -17,10 +17,11 @@
 hello.on('auth.login', function(r){
 	// Get Profile
 	console.log("auth.login");
-	hello.api(r.network+':/me', function(p){
+	var hi = hello(r.network)
+	hi.api('me').then(function(p){
 		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
 	});
-	hello.api(r.network+':/tracks', function(r){
+	hi.api('/tracks', function(r){
 		console.log(r);
 		for(var i=0;i<r.length;i++){
 			var li = document.createElement('li');

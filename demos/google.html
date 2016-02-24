@@ -20,7 +20,7 @@ function login(network){
 	// By defining response type to code, the OAuth flow that will return a refresh token to be used to refresh the access token
 	// However this will require the oauth_proxy server
 
-	hello(network).login( { response_type:'code' }, log );
+	hello(network).login({response_type: 'code'}, log);
 }
 </script>
 
@@ -30,8 +30,8 @@ function login(network){
 hello.init({
 	google : GOOGLE_CLIENT_ID
 },{
-	redirect_uri:'../redirect.html',
-	scope : 'friends'
+	redirect_uri: '../redirect.html',
+	scope: 'friends'
 });
 </script>
 
