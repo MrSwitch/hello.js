@@ -1,4 +1,4 @@
-/*! hellojs v1.10.1 | (c) 2012-2016 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.11.0 | (c) 2012-2016 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -215,6 +215,29 @@ hello.utils.extend(hello, {
 			height: 550
 		},
 
+		// Default scope
+		// Many services require atleast a profile scope,
+		// HelloJS automatially includes the value of provider.scope_map.basic
+		// If that's not required it can be removed via hello.settings.scope.length = 0;
+		scope: ['basic'],
+
+		// Scope Maps
+		// This is the default module scope, these are the defaults which each service is mapped too.
+		// This list is only the popular ones being standardized.
+		// By including them here it prevents the scopes from being applied accidentally
+		// For less common scopes its assumed the Developer knows when to use the scope.
+		scope_map: {
+			basic: '',
+			email: '',
+			files: '',
+			friends: '',
+			photos: '',
+			publish: '',
+			publish_files: '',
+			share: '',
+			videos: ''
+		},
+
 		// Default service / network
 		default_service: null,
 
@@ -280,14 +303,6 @@ hello.utils.extend(hello, {
 		// Merge services if there already exists some
 		utils.extend(this.services, services);
 
-		// Format the incoming
-		for (x in this.services) {
-			if (this.services.hasOwnProperty(x)) {
-				this.services[x].scope = this.services[x].scope || {};
-			}
-		}
-
-		//
 		// Update the default settings with this one.
 		if (options) {
 			utils.extend(this.settings, options);
@@ -417,16 +432,16 @@ hello.utils.extend(hello, {
 		// Ensure this is a string - IE has a problem moving Arrays between windows
 		// Append the setup scope
 		var SCOPE_SPLIT = /[,\s]+/;
-		var scope = [];
+
+		// Include default scope settings (cloned).
+		var scope = _this.settings.scope ? [_this.settings.scope.toString()] : [];
+
+		// Extend the providers scope list with the default
+		var scopeMap = utils.merge(_this.settings.scope_map, provider.scope || {});
 
 		// Add user defined scopes...
 		if (opts.scope) {
 			scope.push(opts.scope.toString());
-		}
-
-		// Add any basic scope - the default
-		if ('basic' in provider.scope) {
-			scope.push('basic');
 		}
 
 		// Append scopes from a previous session.
@@ -448,23 +463,7 @@ hello.utils.extend(hello, {
 		// Map scopes to the providers naming convention
 		scope = scope.map(function(item) {
 			// Does this have a mapping?
-			if (item in provider.scope) {
-				return provider.scope[item];
-			}
-			else {
-				// Loop through all services and determine whether the scope is generic
-				for (var x in _this.services) {
-					var serviceScopes = _this.services[x].scope;
-					if (serviceScopes && item in serviceScopes) {
-						// Found an instance of this scope, so lets not assume its special
-						return '';
-					}
-				}
-
-				// This is a unique scope to this service so lets in it.
-				return item;
-			}
-
+			return (item in scopeMap) ? scopeMap[item] : item;
 		});
 
 		// Stringify and Arrayify so that double mapped scopes are given the chance to be formatted
@@ -1413,102 +1412,6 @@ hello.utils.extend(hello.utils, {
 			optionsArray.push(name + (value !== null ? '=' + value : ''));
 		});
 
-		// Create a function for reopening the popup, and assigning events to the new popup object
-		// This is a fix whereby triggering the
-		var open = function(url) {
-
-			// Trigger callback
-			var popup = window.open(
-				url,
-				'_blank',
-				optionsArray.join(',')
-			);
-
-			// PhoneGap support
-			// Add an event listener to listen to the change in the popup windows URL
-			// This must appear before popup.focus();
-			try {
-				if (popup && popup.addEventListener) {
-
-					// Get the origin of the redirect URI
-
-					var a = hello.utils.url(redirectUri);
-					var redirectUriOrigin = a.origin || (a.protocol + '//' + a.hostname);
-
-					// Listen to changes in the InAppBrowser window
-
-					popup.addEventListener('loadstart', function(e) {
-
-						var url = e.url;
-
-						// Is this the path, as given by the redirectUri?
-						// Check the new URL agains the redirectUriOrigin.
-						// According to #63 a user could click 'cancel' in some dialog boxes ....
-						// The popup redirects to another page with the same origin, yet we still wish it to close.
-
-						if (url.indexOf(redirectUriOrigin) !== 0) {
-							return;
-						}
-
-						// Split appart the URL
-						var a = hello.utils.url(url);
-
-						// We dont have window operations on the popup so lets create some
-						// The location can be augmented in to a location object like so...
-
-						var _popup = {
-							location: {
-								// Change the location of the popup
-								assign: function(location) {
-
-									// Unfourtunatly an app is may not change the location of a InAppBrowser window.
-									// So to shim this, just open a new one.
-
-									popup.addEventListener('exit', function() {
-
-										// For some reason its failing to close the window if a new window opens too soon.
-
-										setTimeout(function() {
-											open(location);
-										}, 1000);
-									});
-								},
-
-								search: a.search,
-								hash: a.hash,
-								href: a.href
-							},
-							close: function() {
-								if (popup.close) {
-									popup.close();
-								}
-							}
-						};
-
-						// Then this URL contains information which HelloJS must process
-						// URL string
-						// Window - any action such as window relocation goes here
-						// Opener - the parent window which opened this, aka this script
-
-						hello.utils.responseHandler(_popup, window);
-
-						// Always close the popup regardless of whether the hello.utils.responseHandler detects a state parameter or not in the querystring.
-						// Such situations might arise such as those in #63
-
-						_popup.close();
-
-					});
-				}
-			}
-			catch (e) {}
-
-			if (popup && popup.focus) {
-				popup.focus();
-			}
-
-			return popup;
-		};
-
 		// Call the open() function with the initial path
 		//
 		// OAuth redirect, fixes URI fragments from being lost in Safari
@@ -1522,7 +1425,17 @@ hello.utils.extend(hello.utils, {
 			url = redirectUri + '#oauth_redirect=' + encodeURIComponent(encodeURIComponent(url));
 		}
 
-		return open(url);
+		var popup = window.open(
+			url,
+			'_blank',
+			optionsArray.join(',')
+		);
+
+		if (popup && popup.focus) {
+			popup.focus();
+		}
+
+		return popup;
 	},
 
 	// OAuth and API response handler
@@ -3008,6 +2921,104 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 	})();
 }
+
+// Phonegap override for hello.phonegap.js
+(function() {
+
+	// Is this a phonegap implementation?
+	if (!(/^file:\/{3}[^\/]/.test(window.location.href) && window.cordova)) {
+		// Cordova is not included.
+		return;
+	}
+
+	// Augment the hidden iframe method
+	hello.utils.iframe = function(url, redirectUri) {
+		hello.utils.popup(url, redirectUri, {hidden: 'yes'});
+	};
+
+	// Augment the popup
+	var utilPopup = hello.utils.popup;
+
+	// Replace popup
+	hello.utils.popup = function(url, redirectUri, options) {
+
+		// Run the standard
+		var popup = utilPopup.call(this, url, redirectUri, options);
+
+		// Create a function for reopening the popup, and assigning events to the new popup object
+		// PhoneGap support
+		// Add an event listener to listen to the change in the popup windows URL
+		// This must appear before popup.focus();
+		try {
+			if (popup && popup.addEventListener) {
+
+				// Get the origin of the redirect URI
+
+				var a = hello.utils.url(redirectUri);
+				var redirectUriOrigin = a.origin || (a.protocol + '//' + a.hostname);
+
+				// Listen to changes in the InAppBrowser window
+
+				popup.addEventListener('loadstart', function(e) {
+
+					var url = e.url;
+
+					// Is this the path, as given by the redirectUri?
+					// Check the new URL agains the redirectUriOrigin.
+					// According to #63 a user could click 'cancel' in some dialog boxes ....
+					// The popup redirects to another page with the same origin, yet we still wish it to close.
+
+					if (url.indexOf(redirectUriOrigin) !== 0) {
+						return;
+					}
+
+					// Split appart the URL
+					var a = hello.utils.url(url);
+
+					// We dont have window operations on the popup so lets create some
+					// The location can be augmented in to a location object like so...
+
+					var _popup = {
+						location: {
+							// Change the location of the popup
+							assign: function(location) {
+
+								// Unfourtunatly an app is may not change the location of a InAppBrowser window.
+								// So to shim this, just open a new one.
+								popup.executeScript({code: 'window.location.href = "' + location + ';"'});
+							},
+
+							search: a.search,
+							hash: a.hash,
+							href: a.href
+						},
+						close: function() {
+							if (popup.close) {
+								popup.close();
+								try {
+									popup.closed = true;
+								}
+								catch (_e) {}
+							}
+						}
+					};
+
+					// Then this URL contains information which HelloJS must process
+					// URL string
+					// Window - any action such as window relocation goes here
+					// Opener - the parent window which opened this, aka this script
+
+					hello.utils.responseHandler(_popup, window);
+
+				});
+			}
+		}
+		catch (e) {}
+
+		return popup;
+	};
+
+})();
 
 (function(hello) {
 
