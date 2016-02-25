@@ -758,7 +758,11 @@ var tests = [
 // BEFORE SETUPS
 
 function scopeFilter(test) {
-	return hello.services[test.network].scope[test.method];
+	var scopes = hello.services[test.network].scope;
+
+	if (scope) {
+		return scope[test.method];
+	}
 }
 
 
