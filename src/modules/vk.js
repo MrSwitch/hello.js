@@ -14,8 +14,13 @@
 			},
 
 			// Authorization scopes
+			// See https://vk.com/dev/permissions
 			scope: {
 				email: 'email',
+				friends: 'friends', 
+				photos: 'photos',
+				videos: 'video',
+				share: 'share',
 				offline_access: 'offline'
 			},
 
