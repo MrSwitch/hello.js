@@ -17,7 +17,7 @@
 			// See https://vk.com/dev/permissions
 			scope: {
 				email: 'email',
-				friends: 'friends', 
+				friends: 'friends',
 				photos: 'photos',
 				videos: 'video',
 				share: 'share',

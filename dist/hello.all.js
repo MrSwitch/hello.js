@@ -5374,8 +5374,13 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			// Authorization scopes
+			// See https://vk.com/dev/permissions
 			scope: {
 				email: 'email',
+				friends: 'friends',
+				photos: 'photos',
+				videos: 'video',
+				share: 'share',
 				offline_access: 'offline'
 			},
 
