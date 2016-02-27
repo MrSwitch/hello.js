@@ -1,4 +1,4 @@
-/*! hellojs v1.11.2 | (c) 2012-2016 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.12.0 | (c) 2012-2016 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -174,12 +174,21 @@ hello.utils = {
 
 		// Get the arguments as an array but ommit the initial item
 		Array.prototype.slice.call(arguments, 1).forEach(function(a) {
-			if (r instanceof Object && a instanceof Object && r !== a) {
+			if (Array.isArray(r) && Array.isArray(a)) {
+				Array.prototype.push.apply(r, a);
+			}
+			else if (r instanceof Object && a instanceof Object && r !== a) {
 				for (var x in a) {
 					r[x] = hello.utils.extend(r[x], a[x]);
 				}
 			}
 			else {
+
+				if (Array.isArray(a)) {
+					// Clone it
+					a = a.slice(0);
+				}
+
 				r = a;
 			}
 		});
@@ -223,19 +232,9 @@ hello.utils.extend(hello, {
 
 		// Scope Maps
 		// This is the default module scope, these are the defaults which each service is mapped too.
-		// This list is only the popular ones being standardized.
-		// By including them here it prevents the scopes from being applied accidentally
-		// For less common scopes its assumed the Developer knows when to use the scope.
+		// By including them here it prevents the scope from being applied accidentally
 		scope_map: {
-			basic: '',
-			email: '',
-			files: '',
-			friends: '',
-			photos: '',
-			publish: '',
-			publish_files: '',
-			share: '',
-			videos: ''
+			basic: ''
 		},
 
 		// Default service / network
