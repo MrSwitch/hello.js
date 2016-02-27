@@ -152,6 +152,28 @@ define([
 			});
 		});
 
+		describe('POST', function() {
+
+			// Not supported in IE9
+			var hasFormdata = typeof FormData === 'function';
+
+			if (hasFormdata) {
+				it('should accept FormData as the data object', function(done) {
+
+					var formData = new FormData();
+					formData.append('user', 'name');
+
+					hello('testable')
+					.api('/endpoint', 'POST', formData)
+					.then(function(res) {
+						// The formData should not be mutated, but left as is.
+						expect(res.data).to.equal(formData);
+						done();
+					});
+				});
+			}
+		});
+
 		describe('signing', function() {
 
 			it('should add the access_token to the req.query', function(done) {

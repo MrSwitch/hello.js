@@ -30,7 +30,7 @@
 				// Deprecated in v2.0
 				// Create_event	: 'create_event',
 
-				offline_access: 'offline_access'
+				offline_access: ''
 			},
 
 			// Refresh the access_token

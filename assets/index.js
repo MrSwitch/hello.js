@@ -1074,7 +1074,11 @@ function Provider(network){
 		});
 	};
 	this.login = function(){
-		hello.login(network, {scope: model.checkedScopes() });
+		hello.login(network, {scope: model.checkedScopes() }).then(function() {
+			console.log('Logged in to ' + network);
+		}, function(e) {
+			console.error('Failed to login to ' + network, e);
+		});
 	};
 	this.logout = function(){
 		this.online(false);

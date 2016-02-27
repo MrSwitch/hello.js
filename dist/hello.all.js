@@ -1,4 +1,4 @@
-/*! hellojs v1.11.1 | (c) 2012-2016 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.12.0 | (c) 2012-2016 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -174,12 +174,21 @@ hello.utils = {
 
 		// Get the arguments as an array but ommit the initial item
 		Array.prototype.slice.call(arguments, 1).forEach(function(a) {
-			if (r instanceof Object && a instanceof Object && r !== a) {
+			if (Array.isArray(r) && Array.isArray(a)) {
+				Array.prototype.push.apply(r, a);
+			}
+			else if (r instanceof Object && a instanceof Object && r !== a) {
 				for (var x in a) {
 					r[x] = hello.utils.extend(r[x], a[x]);
 				}
 			}
 			else {
+
+				if (Array.isArray(a)) {
+					// Clone it
+					a = a.slice(0);
+				}
+
 				r = a;
 			}
 		});
@@ -223,19 +232,9 @@ hello.utils.extend(hello, {
 
 		// Scope Maps
 		// This is the default module scope, these are the defaults which each service is mapped too.
-		// This list is only the popular ones being standardized.
-		// By including them here it prevents the scopes from being applied accidentally
-		// For less common scopes its assumed the Developer knows when to use the scope.
+		// By including them here it prevents the scope from being applied accidentally
 		scope_map: {
-			basic: '',
-			email: '',
-			files: '',
-			friends: '',
-			photos: '',
-			publish: '',
-			publish_files: '',
-			share: '',
-			videos: ''
+			basic: ''
 		},
 
 		// Default service / network
@@ -2211,7 +2210,7 @@ hello.utils.extend(hello.utils, {
 	// Create a clone of an object
 	clone: function(obj) {
 		// Does not clone DOM elements, nor Binary data, e.g. Blobs, Filelists
-		if (obj === null || typeof (obj) !== 'object' || obj instanceof Date || 'nodeName' in obj || this.isBinary(obj)) {
+		if (obj === null || typeof (obj) !== 'object' || obj instanceof Date || 'nodeName' in obj || this.isBinary(obj) || (typeof FormData === 'function' && obj instanceof FormData)) {
 			return obj;
 		}
 
@@ -3302,7 +3301,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				// Deprecated in v2.0
 				// Create_event	: 'create_event',
 
-				offline_access: 'offline_access'
+				offline_access: ''
 			},
 
 			// Refresh the access_token
@@ -3950,6 +3949,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				files: 'https://www.googleapis.com/auth/drive.readonly',
 				publish: '',
 				publish_files: 'https://www.googleapis.com/auth/drive',
+				share: '',
 				create_event: '',
 				offline_access: ''
 			},
@@ -4526,7 +4526,13 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				basic: 'basic',
 				photos: '',
 				friends: 'relationships',
-				publish: 'likes comments'
+				publish: 'likes comments',
+				email: '',
+				share: '',
+				publish_files: '',
+				files: '',
+				videos: '',
+				offline_access: ''
 			},
 
 			scope_delim: ' ',
@@ -4716,7 +4722,16 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				basic: 'user_info',
 				user: 'user_info',
 				scheduler: 'scheduler',
-				start: 'start_meeting'
+				start: 'start_meeting',
+				email: '',
+				friends: '',
+				share: '',
+				publish: '',
+				photos: '',
+				publish_files: '',
+				files: '',
+				videos: '',
+				offline_access: ''
 			},
 
 			scope_delim: ' ',
@@ -4872,8 +4887,14 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			scope: {
 				basic: 'r_basicprofile',
 				email: 'r_emailaddress',
+				files: '',
 				friends: '',
-				publish: 'w_share'
+				photos: '',
+				publish: 'w_share',
+				publish_files: 'w_share',
+				share: '',
+				videos: '',
+				offline_access: ''
 			},
 			scope_delim: ' ',
 
@@ -5482,6 +5503,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				files: 'wl.skydrive',
 				publish: 'wl.share',
 				publish_files: 'wl.skydrive_update',
+				share: 'wl.share',
 				create_event: 'wl.calendars_update,wl.events_create',
 				offline_access: 'wl.offline_access'
 			},

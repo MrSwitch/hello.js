@@ -18,7 +18,16 @@
 				basic: 'user_info',
 				user: 'user_info',
 				scheduler: 'scheduler',
-				start: 'start_meeting'
+				start: 'start_meeting',
+				email: '',
+				friends: '',
+				share: '',
+				publish: '',
+				photos: '',
+				publish_files: '',
+				files: '',
+				videos: '',
+				offline_access: ''
 			},
 
 			scope_delim: ' ',
