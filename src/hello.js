@@ -2058,7 +2058,7 @@ hello.utils.extend(hello.utils, {
 	// Create a clone of an object
 	clone: function(obj) {
 		// Does not clone DOM elements, nor Binary data, e.g. Blobs, Filelists
-		if (obj === null || typeof (obj) !== 'object' || obj instanceof Date || 'nodeName' in obj || this.isBinary(obj)) {
+		if (obj === null || typeof (obj) !== 'object' || obj instanceof Date || 'nodeName' in obj || this.isBinary(obj) || (typeof FormData === 'function' && obj instanceof FormData)) {
 			return obj;
 		}
 
