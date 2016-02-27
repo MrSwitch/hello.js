@@ -22,5 +22,8 @@
     "!src/**",
     "!README.md",
     "package.json"
-  ]
+  ],
+  "resolutions": {
+    "mocha": "~2.4.5"
+  }
 }
