@@ -30,6 +30,7 @@
 				files: 'wl.skydrive',
 				publish: 'wl.share',
 				publish_files: 'wl.skydrive_update',
+				share: 'wl.share',
 				create_event: 'wl.calendars_update,wl.events_create',
 				offline_access: 'wl.offline_access'
 			},

@@ -158,25 +158,39 @@ define([
 				hello.login('testable', {redirect_uri:REDIRECT_URI});
 			});
 
-			it('should permit custom scope in `options.scope` which are unique to this service', function(done) {
-
-				var customScope = 'custom_scope';
+			it('should pass through unknown scopes defined in `options.scope`', function(done) {
 
 				var spy = sinon.spy(function(url, name, optins) {
 
 					var params = hello.utils.param(url.split('?')[1]);
 
-					expect(params.scope).to.contain(customScope);
+					expect(params.scope).to.contain('email');
 
 					done();
 				});
 
 				utils.popup = spy;
 
-				hello.login('testable', {scope: customScope});
+				hello.login('testable', {scope: 'email'});
 			});
 
-			it('should discard common scope, aka scopes undefined by this module but defined as a global standard in the libary', function(done) {
+			it('should include the basic scope defined in the settings `hello.settings.scope`', function(done) {
+
+				hello.settings.scope = ['basic'];
+				testable.scope.basic = 'basic';
+
+				var spy = sinon.spy(function(url, name, optins) {
+					var params = hello.utils.param(url.split('?')[1]);
+					expect(params.scope).to.contain('basic');
+					done();
+				});
+
+				utils.popup = spy;
+
+				hello.login('testable', {scope: ['email']});
+			});
+
+			it('should discard common scope, aka scopes undefined by this module but defined as a global standard in the libary (i.e. basic)', function(done) {
 
 				var commonScope = 'common_scope';
 

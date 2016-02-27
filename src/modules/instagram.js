@@ -20,7 +20,13 @@
 				basic: 'basic',
 				photos: '',
 				friends: 'relationships',
-				publish: 'likes comments'
+				publish: 'likes comments',
+				email: '',
+				share: '',
+				publish_files: '',
+				files: '',
+				videos: '',
+				offline_access: ''
 			},
 
 			scope_delim: ' ',

@@ -27,6 +27,7 @@
 				files: 'https://www.googleapis.com/auth/drive.readonly',
 				publish: '',
 				publish_files: 'https://www.googleapis.com/auth/drive',
+				share: '',
 				create_event: '',
 				offline_access: ''
 			},

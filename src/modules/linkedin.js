@@ -17,8 +17,14 @@
 			scope: {
 				basic: 'r_basicprofile',
 				email: 'r_emailaddress',
+				files: '',
 				friends: '',
-				publish: 'w_share'
+				photos: '',
+				publish: 'w_share',
+				publish_files: 'w_share',
+				share: '',
+				videos: '',
+				offline_access: ''
 			},
 			scope_delim: ' ',
 
