@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="client_ids.js"></script>
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/modules/bitbucket.js"></script>
+
+<title>hello( bitbucket )</title>
+<h1>hello( bitbucket )</h1>
+
+<button id='bitbucket' onclick="profile('bitbucket');">Get Profile</button>
+<script class="pre">
+function profile(network) {
+	var bitbucket = hello(network);
+	bitbucket.login().then(function() {
+		// get user profile data
+		return bitbucket.api('me');
+	})
+	.then(function(p) {
+		document.getElementById(network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network +" as " + p.name;
+	});
+}
+</script>
+
+<h2>Get user email</h2>
+
+<button onclick="userEmail('bitbucket', 'email');">Get email</button>
+
+<pre id="email"></pre>
+<script class="pre">
+function userEmail(network, target) {
+	var bitbucket = hello(network)
+	bitbucket.login({
+		scope:'email'
+	})
+	.then(function() {
+		// Get a bespoke endpoint from bitbucket
+		return bitbucket.api('/user/emails');
+	}).then(function(r) {
+		document.getElementById(target).innerHTML = JSON.stringify(r, null, 2);
+	});
+}
+</script>
+
+<h2>List user repos</h2>
+
+<button onclick="userRepos('bitbucket', 'repo_list');">Get a list of repos</button>
+
+<pre id="repo_list"></pre>
+<script class="pre">
+function userRepos(network, target) {
+	var bitbucket = hello(network)
+	bitbucket.login()
+	.then(function() {
+		// Get a bespoke endpoint from bitbucket
+		return bitbucket.api('/user/repos');
+	}).then(function(r) {
+		document.getElementById(target).innerHTML = JSON.stringify(r, null, 2);
+	});
+}
+</script>
+
+<script class="pre">
+hello.init({
+	bitbucket : BITBUCKET_CLIENT_ID
+},{
+	redirect_uri : '../redirect.html',
+//	oauth_proxy : OAUTH_PROXY_URL
+});
+</script>
