@@ -4,6 +4,19 @@ module.exports = function(grunt) {
 
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
+		browserify: {
+			dist: {
+				options: {
+					banner: '// hello',
+				    browserifyOptions: {
+				    	debug: true
+				    },
+				    transform: [['babelify', {presets: ['es2015']}]]
+				},
+				src: ['src/hello.all.js'],
+				dest: 'dist/hello.all.js',
+			}
+		},
 		jshint: {
 			src: source,
 			options: {
@@ -29,42 +42,6 @@ module.exports = function(grunt) {
 		shunt: {
 			docs: {
 				'README.md': './index.html'
-			},
-			build: {
-				'dist/hello.js': [
-					'src/hello.polyfill.js',
-					'src/hello.js',
-					'src/hello.chromeapp.js',
-					'src/hello.phonegap.js',
-					'src/hello.amd.js',
-					'src/hello.commonjs.js'
-				],
-				'dist/hello.all.js': [
-					'src/hello.polyfill.js',
-					'src/hello.js',
-					'src/hello.chromeapp.js',
-					'src/hello.phonegap.js',
-					'src/modules/dropbox.js',
-					'src/modules/facebook.js',
-					'src/modules/flickr.js',
-					'src/modules/foursquare.js',
-					'src/modules/github.js',
-					'src/modules/google.js',
-					'src/modules/instagram.js',
-					'src/modules/joinme.js',
-					'src/modules/linkedin.js',
-					'src/modules/soundcloud.js',
-					'src/modules/twitter.js',
-					'src/modules/vk.js',
-					'src/modules/windows.js',
-					'src/modules/yahoo.js',
-					'src/hello.amd.js',
-					'src/hello.commonjs.js'
-				]
-			},
-			minify: {
-				'dist/hello.min.js': 'dist/hello.js',
-				'dist/hello.all.min.js': 'dist/hello.all.js'
 			}
 		},
 		usebanner: {
@@ -86,6 +63,7 @@ module.exports = function(grunt) {
 	});
 
 	grunt.loadNpmTasks('grunt-banner');
+	grunt.loadNpmTasks('grunt-browserify');
 	grunt.loadNpmTasks('grunt-bumpup');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
