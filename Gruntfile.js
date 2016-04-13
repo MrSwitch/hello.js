@@ -8,13 +8,13 @@ module.exports = function(grunt) {
 			dist: {
 				options: {
 					banner: '// hello',
-				    browserifyOptions: {
-				    	debug: true
-				    },
-				    transform: [['babelify', {presets: ['es2015']}]]
+					browserifyOptions: {
+						debug: true
+					},
+					transform: [['babelify', {presets: ['es2015']}]]
 				},
 				src: ['src/hello.all.js'],
-				dest: 'dist/hello.all.js',
+				dest: 'dist/hello.all.js'
 			}
 		},
 		jshint: {
