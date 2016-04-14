@@ -26,10 +26,6 @@
 			// Refresh the access_token once expired
 			refresh: true,
 
-			login: function(p) {
-				p.qs.display = '';
-			},
-
 			base: 'https://bikeindex.org/api/v2/',
 
 			// There aren't many routes that map to the hello.api so I included me/bikes

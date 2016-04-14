@@ -260,7 +260,6 @@ hello.utils.extend(hello, {
 			client_id: encodeURIComponent(provider.id),
 			response_type: encodeURIComponent(responseType),
 			redirect_uri: encodeURIComponent(redirectUri),
-			display: opts.display,
 			state: {
 				client_id: provider.id,
 				network: p.network,
