@@ -26,7 +26,7 @@ module.exports = function(grunt) {
 					document: true
 				},
 				sub: true,
-				es3: true
+				esversion: 6
 			}
 		},
 		jscs: {

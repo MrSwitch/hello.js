@@ -1,5 +1,4 @@
 {
-  "preset": "airbnb",
   "requireCamelCaseOrUpperCaseIdentifiers": "ignoreProperties",
   "validateIndentation": "\t",
   "disallowMultipleSpaces": true,
@@ -37,6 +36,7 @@
   "requireSpaceBetweenArguments": true,
   "requireSpacesInConditionalExpression": true,
   "requireSpacesInForStatement": true,
+  "requireTrailingComma": false,
   "validateParameterSeparator": ", ",
   "validateQuoteMarks": "'"
 }
