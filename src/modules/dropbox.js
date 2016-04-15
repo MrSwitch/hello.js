@@ -27,7 +27,6 @@
 			login: function(p) {
 				// OAuth2 non-standard adjustments
 				p.qs.scope = '';
-				delete p.qs.display;
 
 				// Should this be run as OAuth1?
 				// If the redirect_uri is is HTTP (non-secure) then its required to revert to the OAuth1 endpoints
