@@ -139,19 +139,23 @@ Download: <a class="button green" href="dist/hello.all.js" download="hello.js" t
 
 <p>Compiled source, which combines all of the modules, can be obtained from <a href="https://github.com/MrSwitch/hello.js/tree/master/dist">GitHub</a>, and source files can be found in <a href="https://github.com/MrSwitch/hello.js/tree/master/src">Source</a>.
 
-<h3>Bower Package</h3>
+<p><b>Note:</b> Some services require OAuth1 or server-side OAuth2 authorization. In such cases, HelloJS communicates with an <a href="#oauth-proxy">OAuth Proxy</a>.</p>
+
+<h3>NPM</h3>
 
 <pre type="bash">
-# Install the package manager, bower
-npm install bower
+npm i hellojs
+</pre>
 
-# Install hello
+<p>At the present time only the bundled files in the <code>/dist/hello.*</code> support CommonJS. e.g. <code>let hello = require('hello/dist/hello.all.js')</code>.</p>
+
+<h3>Bower</h3>
+
+<pre type="bash">
 bower install hello
 </pre>
 
 <p>The <a href="http://bower.io/">Bower</a> package shall install the aforementioned "/src" and "/dist" directories. The "/src" directory provides individual modules which can be packaged as desired.</p>
-
-<p><b>Note:</b> Some services require OAuth1 or server-side OAuth2 authorization. In such cases, HelloJS communicates with an <a href="#oauth-proxy">OAuth Proxy</a>.</p>
 
 <h2>Help &amp; Support</h2>
 
