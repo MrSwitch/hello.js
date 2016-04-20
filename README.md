@@ -98,19 +98,25 @@ Download: [HelloJS](dist/hello.all.js) | [HelloJS (minified)](dist/hello.all.min
 
 Compiled source, which combines all of the modules, can be obtained from [GitHub](https://github.com/MrSwitch/hello.js/tree/master/dist), and source files can be found in [Source](https://github.com/MrSwitch/hello.js/tree/master/src).
 
-### Bower Package
+**Note:** Some services require OAuth1 or server-side OAuth2 authorization. In such cases, HelloJS communicates with an [OAuth Proxy](#oauth-proxy).
+
+### NPM
 
 ```bash
-# Install the package manager, bower
-npm install bower
+npm i hellojs
+```
 
-# Install hello
+At the present time only the bundled files in the `/dist/hello.*` support CommonJS. e.g. `let hello = require('hello/dist/hello.all.js')`.
+
+### Bower
+
+```bash
 bower install hello
 ```
 
 The [Bower](http://bower.io/) package shall install the aforementioned "/src" and "/dist" directories. The "/src" directory provides individual modules which can be packaged as desired.
 
-**Note:** Some services require OAuth1 or server-side OAuth2 authorization. In such cases, HelloJS communicates with an [OAuth Proxy](#oauth-proxy).
+
 
 ## Help &amp; Support
 
