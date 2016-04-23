@@ -37,6 +37,11 @@ The table shows the services which are already documented on HelloJS. Simply inc
 			<td></td>
 	    </tr>
 		<tr>
+			<td><a href="./src/modules/bitbucket.js">bitbucket.js</a></td>
+			<td><a href="demos/bitbucket.html">Bitbucket demo</a></td>
+			<td></td>
+		</tr>
+		<tr>
 			<td><a href="./src/modules/dropbox.js">dropbox.js</a></td>
 			<td><a href="demos/dropbox.html">Dropbox demo</a></td>
 			<td></td>
