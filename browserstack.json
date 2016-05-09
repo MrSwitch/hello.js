@@ -9,7 +9,7 @@
 		"safari_latest",
 		{
 			"os": "iOS",
-			"os_version": "latest",
+			"os_version": "8.0",
 			"device": "iPad Air",
 			"real_mobile": "false"
 		},
