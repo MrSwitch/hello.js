@@ -5,10 +5,11 @@
 		"chrome_latest",
 		"firefox_latest",
 		"ie_latest",
+		"edge_latest",
 		"safari_latest",
 		{
 			"os": "iOS",
-			"os_version": "8.0",
+			"os_version": "latest",
 			"device": "iPad Air",
 			"real_mobile": "false"
 		},
