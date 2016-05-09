@@ -1,4 +1,4 @@
-/*! hellojs v1.12.0 | (c) 2012-2016 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.13.0 | (c) 2012-2016 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -413,7 +413,6 @@ hello.utils.extend(hello, {
 			client_id: encodeURIComponent(provider.id),
 			response_type: encodeURIComponent(responseType),
 			redirect_uri: encodeURIComponent(redirectUri),
-			display: opts.display,
 			state: {
 				client_id: provider.id,
 				network: p.network,
@@ -3048,7 +3047,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			login: function(p) {
 				// OAuth2 non-standard adjustments
 				p.qs.scope = '';
-				delete p.qs.display;
 
 				// Should this be run as OAuth1?
 				// If the redirect_uri is is HTTP (non-secure) then its required to revert to the OAuth1 endpoints
@@ -3957,10 +3955,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			scope_delim: ' ',
 
 			login: function(p) {
-				if (p.qs.display === 'none') {
-					// Google doesn't like display=none
-					p.qs.display = '';
-				}
 
 				if (p.qs.response_type === 'code') {
 
@@ -4536,12 +4530,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			scope_delim: ' ',
-
-			login: function(p) {
-				// Instagram throws errors like 'JavaScript API is unsupported' if the display is 'popup'.
-				// Make the display anything but 'popup'
-				p.qs.display = '';
-			},
 
 			base: 'https://api.instagram.com/v1/',
 
