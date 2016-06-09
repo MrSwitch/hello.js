@@ -26,7 +26,6 @@ title: HelloJS
 <script src="demos/client_ids.js"></script>
 <script src="./dist/hello.all.js"></script>
 </head>
-<body>
 
 {% include_relative README.md %}
 
@@ -53,4 +52,3 @@ hello.on('auth.login', function() {
 });
 
 </script>
-</body>
