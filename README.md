@@ -16,7 +16,7 @@ Here are some more demos...
 			<th>Windows</th>
 			<th>Facebook</th>
 			<th>Google</th>
-			<th><a href="#helloapi">More..</th>
+			<th><a href="#helloapi">More..</a></th>
 		</tr>
 	</thead>
 	<tbody>
