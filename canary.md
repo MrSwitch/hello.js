@@ -1,6 +1,7 @@
 ---
 title: HelloJS
 ---
+<head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 <link rel="stylesheet" href="/adorn/adorn.css" />
 <script src="/adorn/adorn.js" async></script>
@@ -24,7 +25,8 @@ title: HelloJS
 
 <script src="demos/client_ids.js"></script>
 <script src="./dist/hello.all.js"></script>
-
+</head>
+<body>
 {% include_relative README.md %}
 
 <script src="assets/knockout/dist/knockout.js"></script>
@@ -50,3 +52,4 @@ hello.on('auth.login', function() {
 });
 
 </script>
+</body>
