@@ -27,6 +27,7 @@ title: HelloJS
 <script src="./dist/hello.all.js"></script>
 </head>
 <body>
+
 {% include_relative README.md %}
 
 <script src="assets/knockout/dist/knockout.js"></script>
