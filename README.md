@@ -9,7 +9,7 @@ A client-side JavaScript SDK for authenticating with [OAuth2](http://tools.ietf.
 <button data-bind="click:function(){ hello( name ).login();}, attr:{'class': 'zocial icon ' + name, title: 'Sign in to ' + displayName}" title="Sign in"></button>
 </div>
 
-<p id="profile_done" data-bind="text: 'Hey, we got your details, test done! Checkout below what else hello.js can do"></p>
+<p id="profile_done" data-bind="text: 'Hey, we got your details, test done! Checkout below what else hello.js can do'"></p>
 
 
 ## Features
