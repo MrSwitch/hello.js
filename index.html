@@ -42,6 +42,10 @@
 <!-- /ko -->
 <br />
 </div>
+
+<p data-bind="visible: hasConnected, text: 'Hey, we got your details, test done! Checkout below what else hello.js can do'"></p>
+
+
 <p id="profile_done" style="text-align:center;display:none;">Hey, we got your details, test done! Choose another service or checkout <a href="#helloapi">what else you can do</a></P>
 
 <!--/NO-MARKDOWN-->
@@ -57,7 +61,7 @@
 			<th>Windows</th>
 			<th>Facebook</th>
 			<th>Google</th>
-			<th><a href="#helloapi">More..</th>
+			<th><a href="#helloapi">More..</a></th>
 		</tr>
 	</thead>
 	<tbody>

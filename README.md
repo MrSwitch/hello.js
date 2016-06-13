@@ -9,7 +9,7 @@ A client-side JavaScript SDK for authenticating with [OAuth2](http://tools.ietf.
 <button data-bind="click:function(){ hello( name ).login();}, attr:{'class': 'zocial icon ' + name, title: 'Sign in to ' + displayName}" title="Sign in"></button>
 </div>
 
-<p id="profile_done" data-bind="text: 'Hey, we got your details, test done! Checkout below what else hello.js can do'"></p>
+<p data-bind="visible: hasConnected, text: 'Hey, we got your details, test done! Checkout below to see what else hello.js can do'"></p>
 
 
 ## Features
@@ -177,7 +177,7 @@ Let's define a simple function, which will load a user profile into the page aft
 hello.on('auth.login', function(auth) {
 
 	// Call user information, for the given network
-	hello(auth.network).api('/me').then(function(r) {
+	hello(auth.network).api('me').then(function(r) {
 		// Inject it into the container
 		var label = document.getElementById('profile_' + auth.network);
 		if (!label) {
@@ -189,6 +189,22 @@ hello.on('auth.login', function(auth) {
 	});
 });
 ```
+<script>
+hello.on('auth.login', function(auth) {
+
+	// Call user information, for the given network
+	hello(auth.network).api('me').then(function(r) {
+		// Inject it into the container
+		var label = document.getElementById('profile_' + auth.network);
+		if (!label) {
+			label = document.createElement('div');
+			label.id = 'profile_' + auth.network;
+			document.getElementById('profile').appendChild(label);
+		}
+		label.innerHTML = '<img src="' + r.thumbnail + '" /> Hey ' + r.name;
+	});
+});
+</script>
 
 ### 5. Configure hello.js with your client IDs and initiate all listeners
 
@@ -765,7 +781,7 @@ A successful authorisation response will append the user credentials to the Redi
 
 In HelloJS the default value of `redirect_uri` is the current page. However its recommended that you explicitly set the `redirect_uri` to a dedicated page with minimal UI and page weight.
 
-Create an HTML page on your site with an instance of HelloJS e.g...
+Create an HTML page on your site which will be your redirect document. Include the HelloJS script e.g...
 
 ```html
 <script src="./hello.js"></script>;

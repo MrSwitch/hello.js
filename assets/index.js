@@ -1097,6 +1097,9 @@ self.model = new (function(){
 		});
 	};
 	this.scopes = ko.observableArray([]);
+	this.hasConnected = ko.computed(function() {
+		return ko.utils.arrayFilter(this.networks(), function(item) {return item.online();}).length > 0
+	}, this);
 });
 
 ko.utils.arrayForEach( tests, function(test){
