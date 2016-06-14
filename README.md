@@ -1,5 +1,5 @@
 
-# ![Logo](./assets/favicon.ico =64x64) hello.js
+# ![Logo](./assets/favicon.ico) hello.js
 
 A client-side JavaScript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST APIs. HelloJS standardizes paths and responses to common APIs like Google Data Services, Facebook Graph and Windows Live Connect. It's **modular**, so that list is [growing](./modules). No more spaghetti code!
 
