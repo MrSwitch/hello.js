@@ -4,8 +4,10 @@
 A client-side JavaScript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST APIs. HelloJS standardizes paths and responses to common APIs like Google Data Services, Facebook Graph and Windows Live Connect. It's **modular**, so that list is [growing](./modules). No more spaghetti code!
 
 
-<h2 data-bind="text: 'E.g.'"></h2>
+## E.g.
+
 <div id="profile">
+<div data-bind="visible:false">See demo at <a href="https://adodson.com/hello.js/">https://adodson.com/hello.js/</a>.</div>
 <div data-bind="foreach:networks">
 <button data-bind="click:function(){ hello( name ).login();}, attr:{'class': 'zocial icon ' + name, title: 'Sign in to ' + displayName}" title="Sign in"></button>
 </div>
@@ -527,7 +529,7 @@ alert((online(fb) ? 'Signed' : 'Not signed') + ' into Facebook, ' + (online(wl) 
 
 ## hello.api()
 
-<div data-bind="template: { name: 'tests-template', data: { test: $root, filter:'api' } }"></div>.
+<div data-bind="template: { name: 'tests-template', data: { test: $root, filter:'api' } }"></div>
 
 Make calls to the API for getting and posting data.
 
@@ -773,7 +775,7 @@ HelloJS modules standardises popular scope names. However you can always use pro
 <div data-bind="template: { name: 'tests-template', data: { test: $root, filter:'scope' } }">See <a href="http://adodson.com/hello.js/#scope">Scope</a> for standardised scopes.</div>
 
 ## Redirect Page
-Providers of the OAuth1/2 authorization flow must respect a Redirect URI parameter in the authorization request (also known as a Callback URL). E.g. `...&amp;redirect_uri=http://mydomain.com/redirect.html&amp;...`
+Providers of the OAuth1/2 authorization flow must respect a Redirect URI parameter in the authorization request (also known as a Callback URL). E.g. `...&redirect_uri=http://mydomain.com/redirect.html&...`
 
 The `redirect_uri` is always a full URL. It must point to a Redirect document which will process the authorization response and set user session data. In order for an application to communicate with this document and set the session data, the origin of the document must match that of the application - this restriction is known as the same-origin security policy.
 
@@ -786,6 +788,7 @@ In HelloJS the default value of `redirect_uri` is the current page. However its 
 Create an HTML page on your site which will be your redirect document. Include the HelloJS script e.g...
 
 ```html
+<!doctype html>
 <script src="./hello.js"></script>;
 ```
 
@@ -872,8 +875,9 @@ Services are added to HelloJS as "modules" for more information about creating y
 
 ## OAuth Proxy
 
-A list of the service providers OAuth* mechanisms is available at [Provider OAuth Mechanisms](http://adodson.com/hello.js/#oauth-proxy)
-
+<div data-bind="template: { name: 'tests-template', data: { test: $root, filter: 'oauth' } }">
+A list of the service providers OAuth* mechanisms is available at <a href="http://adodson.com/hello.js/#oauth-proxy">Provider OAuth Mechanisms</a>
+</div>
 
 For providers which support only OAuth1 or OAuth2 with Explicit Grant, the authentication flow needs to be signed with a secret key that may not be exposed in the browser. HelloJS gets round this problem by the use of an intermediary webservice defined by `oauth_proxy`. This service looks up the secret from a database and performs the handshake required to provision an `access_token`. In the case of OAuth1, the webservice also signs subsequent API requests.
 
@@ -951,13 +955,13 @@ HelloJS module [src/hello.chromeapp.js](./src/hello.chromeapp.js) (also bundled 
 ### Chrome manifest.json prerequisites
 
 The `manifest.json` file must have the following permissions...
+
 ```json
-...
-"permissions": [
-    "identity",
-    "storage",
-    "https://*/"],
-...
+	"permissions": [
+	    "identity",
+	    "storage",
+	    "https://*/"
+	],
 ```
 
 # Thank you
