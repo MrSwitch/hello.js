@@ -48,4 +48,8 @@ getText('assets/test_network.html', function(response) {
 	ko.applyBindings(model);
 });
 
+hello.on('auth.login', function() {
+	document.getElementById('profile_done').style.display='block';
+});
+
 </script>
