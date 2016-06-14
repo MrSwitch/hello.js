@@ -1,8 +1,7 @@
 ---
 title: HelloJS
+layout: default
 ---
-<!DOCTYPE html>
-<html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
 <link rel="stylesheet" href="/adorn/adorn.css" />
@@ -49,5 +48,8 @@ getText('assets/test_network.html', function(response) {
 	ko.applyBindings(model);
 });
 
+hello.on('auth.login', function() {
+	document.getElementById('profile_done').style.display='block';
+});
+
 </script>
-</html>
