@@ -535,7 +535,9 @@ Make calls to the API for getting and posting data.
 
 ### hello.api([path], [method], [data], [callback(json)])
 
-`hello.api([path], [method], [data], [callback(json)]).then(successHandler, errorHandler)`.
+```
+hello.api([path], [method], [data], [callback(json)]).then(successHandler, errorHandler)`
+```
 
 <table>
 	<tr>
@@ -615,7 +617,8 @@ Make calls to the API for getting and posting data.
 	</tr>
 
 	<tr>
-		<td colspan=6>More options (below) require putting the options into a 'key'=>'value' hash. I.e. <code>hello(network).api(options)</code></td>
+		<td colspan='6'>More options (below) require putting the options into a 'key'=>'value' hash. I.e. <code>hello(network).api(options)</code>
+		</td>
 	</tr>
 
 	<tr>
