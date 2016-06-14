@@ -536,7 +536,7 @@ Make calls to the API for getting and posting data.
 ### hello.api([path], [method], [data], [callback(json)])
 
 ```
-hello.api([path], [method], [data], [callback(json)]).then(successHandler, errorHandler)`
+hello.api([path], [method], [data], [callback(json)]).then(successHandler, errorHandler)
 ```
 
 <table>
@@ -782,7 +782,7 @@ Providers of the OAuth1/2 authorization flow must respect a Redirect URI paramet
 
 The `redirect_uri` is always a full URL. It must point to a Redirect document which will process the authorization response and set user session data. In order for an application to communicate with this document and set the session data, the origin of the document must match that of the application - this restriction is known as the same-origin security policy.
 
-A successful authorisation response will append the user credentials to the Redirect URI. e.g. ` ?access_token=12312&amp;expires_in=3600`. The Redirect document is responsible for interpreting the request and setting the session data.
+A successful authorisation response will append the user credentials to the Redirect URI. e.g. `?access_token=12312&amp;expires_in=3600`. The Redirect document is responsible for interpreting the request and setting the session data.
 
 ### Create a Redirect Page and URI
 
