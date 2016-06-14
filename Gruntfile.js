@@ -27,9 +27,6 @@ module.exports = function(grunt) {
 		},
 		bumpup: ['package.json'],
 		shunt: {
-			docs: {
-				'README.md': './index.html'
-			},
 			build: {
 				'dist/hello.js': [
 					'src/hello.polyfill.js',
