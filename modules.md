@@ -1,6 +1,8 @@
 ---
 title: HelloJs Modules
 ---
+<!-- adorn -->
+<link rel="source" href="modules.md"/>
 <link rel="stylesheet" href="/adorn/adorn.css" />
 <script src="/adorn/adorn.js" async></script>
 

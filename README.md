@@ -4,6 +4,17 @@
 A client-side JavaScript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST APIs. HelloJS standardizes paths and responses to common APIs like Google Data Services, Facebook Graph and Windows Live Connect. It's **modular**, so that list is [growing](./modules). No more spaghetti code!
 
 
+## E.g.
+
+<div id="profile">
+<div data-bind="visible:false">See demo at <a href="https://adodson.com/hello.js/">https://adodson.com/hello.js/</a>.</div>
+<div data-bind="foreach:networks">
+<button data-bind="click:function(){ hello( name ).login();}, attr:{'class': 'zocial icon ' + name, title: 'Sign in to ' + displayName}" title="Sign in"></button>
+</div>
+<br />
+</div>
+<p data-bind="visible: hasConnected, text: 'Hey, we got your details, test done! Checkout below to see what else hello.js can do'"></p>
+
 
 ## Features
 
@@ -16,7 +27,7 @@ Here are some more demos...
 			<th>Windows</th>
 			<th>Facebook</th>
 			<th>Google</th>
-			<th><a href="#helloapi">More..</th>
+			<th><a href="#helloapi">More..</a></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -98,19 +109,25 @@ Download: [HelloJS](dist/hello.all.js) | [HelloJS (minified)](dist/hello.all.min
 
 Compiled source, which combines all of the modules, can be obtained from [GitHub](https://github.com/MrSwitch/hello.js/tree/master/dist), and source files can be found in [Source](https://github.com/MrSwitch/hello.js/tree/master/src).
 
-### Bower Package
+**Note:** Some services require OAuth1 or server-side OAuth2 authorization. In such cases, HelloJS communicates with an [OAuth Proxy](#oauth-proxy).
+
+### NPM
 
 ```bash
-# Install the package manager, bower
-npm install bower
+npm i hellojs
+```
 
-# Install hello
+At the present time only the bundled files in the `/dist/hello.*` support CommonJS. e.g. `let hello = require('hello/dist/hello.all.js')`.
+
+### Bower
+
+```bash
 bower install hello
 ```
 
 The [Bower](http://bower.io/) package shall install the aforementioned "/src" and "/dist" directories. The "/src" directory provides individual modules which can be packaged as desired.
 
-**Note:** Some services require OAuth1 or server-side OAuth2 authorization. In such cases, HelloJS communicates with an [OAuth Proxy](#oauth-proxy).
+
 
 ## Help &amp; Support
 
@@ -146,7 +163,7 @@ Register your application with at least one of the following networks. Ensure yo
 ### 2. Include Hello.js script in your page
 
 ```html
-<script class="pre" src="./dist/hello.all.js"></script>
+<script src="./dist/hello.all.js"></script>
 ```
 
 ### 3. Create the sign-in buttons
@@ -164,7 +181,7 @@ Let's define a simple function, which will load a user profile into the page aft
 hello.on('auth.login', function(auth) {
 
 	// Call user information, for the given network
-	hello(auth.network).api('/me').then(function(r) {
+	hello(auth.network).api('me').then(function(r) {
 		// Inject it into the container
 		var label = document.getElementById('profile_' + auth.network);
 		if (!label) {
@@ -176,6 +193,22 @@ hello.on('auth.login', function(auth) {
 	});
 });
 ```
+<script>
+hello.on('auth.login', function(auth) {
+
+	// Call user information, for the given network
+	hello(auth.network).api('me').then(function(r) {
+		// Inject it into the container
+		var label = document.getElementById('profile_' + auth.network);
+		if (!label) {
+			label = document.createElement('div');
+			label.id = 'profile_' + auth.network;
+			document.getElementById('profile').appendChild(label);
+		}
+		label.innerHTML = '<img src="' + r.thumbnail + '" /> Hey ' + r.name;
+	});
+});
+</script>
 
 ### 5. Configure hello.js with your client IDs and initiate all listeners
 
@@ -260,7 +293,7 @@ hello.init({
 
 ## hello.login()
 
-
+<div data-bind="template: { name: 'tests-template', data: { test: $root, filter:'login' } }"></div>
 
 If a network string is provided: A consent window to authenticate with that network will be initiated. Else if no network is provided a prompt to select one of the networks will open. A callback will be executed if the user authenticates and or cancels the authentication flow.
 
@@ -370,7 +403,7 @@ hello('facebook').login().then(function() {
 
 ## hello.logout()
 
-
+<div data-bind="template: { name: 'tests-template', data: { test: $root, filter: 'logout' } }"></div>
 
 Remove all sessions or individual sessions.
 
@@ -455,7 +488,7 @@ hello('facebook').logout().then(function() {
 
 ## hello.getAuthResponse()
 
-
+<div data-bind="template: { name: 'tests-template', data: { test: $root, filter: 'getAuthResponse' } }"></div>
 
 Get the current status of the session. This is a synchronous request and does not validate any session cookies which may have expired.
 
@@ -496,13 +529,15 @@ alert((online(fb) ? 'Signed' : 'Not signed') + ' into Facebook, ' + (online(wl) 
 
 ## hello.api()
 
-
+<div data-bind="template: { name: 'tests-template', data: { test: $root, filter:'api' } }"></div>
 
 Make calls to the API for getting and posting data.
 
 ### hello.api([path], [method], [data], [callback(json)])
 
-`hello.api([path], [method], [data], [callback(json)]).then(successHandler, errorHandler)`.
+```
+hello.api([path], [method], [data], [callback(json)]).then(successHandler, errorHandler)
+```
 
 <table>
 	<tr>
@@ -582,7 +617,8 @@ Make calls to the API for getting and posting data.
 	</tr>
 
 	<tr>
-		<td colspan=6>More options (below) require putting the options into a 'key'=>'value' hash. I.e. <code>hello(network).api(options)</code></td>
+		<td colspan='6'>More options (below) require putting the options into a 'key'=>'value' hash. I.e. <code>hello(network).api(options)</code>
+		</td>
 	</tr>
 
 	<tr>
@@ -739,24 +775,24 @@ It's considered good practice to limit the use of scopes. The more unnessary pri
 
 HelloJS modules standardises popular scope names. However you can always use proprietary scopes, e.g. to access google spreadsheets: `hello('google').login({scope: 'https://spreadsheets.google.com/feeds'});`
 
-See [Scope](http://adodson.com/hello.js/#scope) for standardised scopes.
-
+<div data-bind="template: { name: 'tests-template', data: { test: $root, filter:'scope' } }">See <a href="http://adodson.com/hello.js/#scope">Scope</a> for standardised scopes.</div>
 
 ## Redirect Page
-Providers of the OAuth1/2 authorization flow must respect a Redirect URI parameter in the authorization request (also known as a Callback URL). E.g. `...&amp;redirect_uri=http://mydomain.com/redirect.html&amp;...`
+Providers of the OAuth1/2 authorization flow must respect a Redirect URI parameter in the authorization request (also known as a Callback URL). E.g. `...&redirect_uri=http://mydomain.com/redirect.html&...`
 
 The `redirect_uri` is always a full URL. It must point to a Redirect document which will process the authorization response and set user session data. In order for an application to communicate with this document and set the session data, the origin of the document must match that of the application - this restriction is known as the same-origin security policy.
 
-A successful authorisation response will append the user credentials to the Redirect URI. e.g. ` ?access_token=12312&amp;expires_in=3600`. The Redirect document is responsible for interpreting the request and setting the session data.
+A successful authorisation response will append the user credentials to the Redirect URI. e.g. `?access_token=12312&amp;expires_in=3600`. The Redirect document is responsible for interpreting the request and setting the session data.
 
 ### Create a Redirect Page and URI
 
 In HelloJS the default value of `redirect_uri` is the current page. However its recommended that you explicitly set the `redirect_uri` to a dedicated page with minimal UI and page weight.
 
-Create an HTML page on your site with an instance of HelloJS e.g...
+Create an HTML page on your site which will be your redirect document. Include the HelloJS script e.g...
 
 ```html
-&lt;script src="./hello.js"&gt;&lt;/script&gt;
+<!doctype html>
+<script src="./hello.js"></script>;
 ```
 
 Do add css animations incase there is a wait. **View Source** on [./redirect.html](./redirect.html) for an example.
@@ -842,9 +878,9 @@ Services are added to HelloJS as "modules" for more information about creating y
 
 ## OAuth Proxy
 
-
-A list of the service providers OAuth* mechanisms is available at [Provider OAuth Mechanisms](http://adodson.com/hello.js/#oauth-proxy)
-
+<div data-bind="template: { name: 'tests-template', data: { test: $root, filter: 'oauth' } }">
+A list of the service providers OAuth* mechanisms is available at <a href="http://adodson.com/hello.js/#oauth-proxy">Provider OAuth Mechanisms</a>
+</div>
 
 For providers which support only OAuth1 or OAuth2 with Explicit Grant, the authentication flow needs to be signed with a secret key that may not be exposed in the browser. HelloJS gets round this problem by the use of an intermediary webservice defined by `oauth_proxy`. This service looks up the secret from a database and performs the handshake required to provision an `access_token`. In the case of OAuth1, the webservice also signs subsequent API requests.
 
@@ -865,6 +901,7 @@ hello.init(
 ```
 
 ### Enforce Explicit Grant
+
 Enforcing the OAuth2 Explicit Grant is done by setting `response_type=code` in [hello.login](#hellologin) options - or globally in [hello.init](#helloinit) options. E.g...
 
 ```javascript
@@ -874,12 +911,17 @@ hello(network).login({
 ```
 
 ## Refresh Access Token
+
 Access tokens provided by services are generally short lived - typically 1 hour. Some providers allow for the token to be refreshed in the background after expiry.
-A list of services which enable silent authentication after the Implicit Grant signin [Refresh access_token](http://adodson.com/hello.js/#refresh-access-token)
+
+<div data-bind="template: { name: 'tests-template', data: { test: $root, filter:'refresh' } }">A list of services which enable silent authentication after the Implicit Grant signin <a href="http://adodson.com/hello.js/#refresh-access-token">Refresh access_token</a>
+</div>
 
 Unlike Implicit grant; Explicit grant may return the `refresh_token`. HelloJS honors the OAuth2 refresh_token, and will also request a new access_token once it has expired.
 
+
 ### Bulletproof Requests
+
 A good way to design your app is to trigger requests through a user action, you can then test for a valid access token prior to making the API request with a potentially expired token.
 
 ```javascript
@@ -916,13 +958,13 @@ HelloJS module [src/hello.chromeapp.js](./src/hello.chromeapp.js) (also bundled 
 ### Chrome manifest.json prerequisites
 
 The `manifest.json` file must have the following permissions...
+
 ```json
-...
-"permissions": [
-    "identity",
-    "storage",
-    "https://*/"],
-...
+	"permissions": [
+	    "identity",
+	    "storage",
+	    "https://*/"
+	],
 ```
 
 # Thank you

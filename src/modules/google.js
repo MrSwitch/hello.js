@@ -35,10 +35,6 @@
 			scope_delim: ' ',
 
 			login: function(p) {
-				if (p.qs.display === 'none') {
-					// Google doesn't like display=none
-					p.qs.display = '';
-				}
 
 				if (p.qs.response_type === 'code') {
 
