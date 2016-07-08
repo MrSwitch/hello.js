@@ -43,6 +43,9 @@
 				if (p.options.force) {
 					p.qs.auth_type = 'reauthenticate';
 				}
+
+				var prefix = '?display=popup';
+				this.oauth.auth = this.oauth.auth + (p.options.display === 'popup' ? prefix : '');
 			},
 
 			logout: function(callback, options) {
