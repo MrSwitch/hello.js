@@ -3312,8 +3312,21 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 					p.qs.auth_type = 'reauthenticate';
 				}
 
-				var prefix = '?display=popup';
-				this.oauth.auth = this.oauth.auth + (p.options.display === 'popup' ? prefix : '');
+				this.oauth.auth = this.oauth.auth.replace(/\?display=(\w+)/, '');
+
+				switch (p.options.display) {
+					case 'popup':
+						this.oauth.auth = this.oauth.auth.concat('?display=popup');
+						break;
+					case 'page':
+						this.oauth.auth = this.oauth.auth.concat('?display=page');
+						break;
+					case 'none':
+						this.oauth.auth = this.oauth.auth.concat('?display=iframe');
+						break;
+					default:
+						break;
+				}
 			},
 
 			logout: function(callback, options) {
