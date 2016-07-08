@@ -1,4 +1,3 @@
-/*! hellojs v1.13.1 | (c) 2012-2016 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -3313,9 +3312,21 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 					p.qs.auth_type = 'reauthenticate';
 				}
 
-				// The facebook login window is a different size.
-				p.options.popup.width = 580;
-				p.options.popup.height = 400;
+				this.oauth.auth = this.oauth.auth.replace(/\?display=(\w+)/, '');
+
+				switch (p.options.display) {
+					case 'popup':
+						this.oauth.auth = this.oauth.auth.concat('?display=popup');
+						break;
+					case 'page':
+						this.oauth.auth = this.oauth.auth.concat('?display=page');
+						break;
+					case 'none':
+						this.oauth.auth = this.oauth.auth.concat('?display=iframe');
+						break;
+					default:
+						break;
+				}
 			},
 
 			logout: function(callback, options) {
