@@ -5,6 +5,7 @@
 		"chrome_latest",
 		"firefox_latest",
 		"ie_latest",
+		"edge_latest",
 		"safari_latest",
 		{
 			"os": "iOS",
