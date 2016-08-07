@@ -1,3 +1,4 @@
+let hello = require('../../../../src/hello.js');
 describe('hello events', function() {
 
 	it('should bind handler using hello.on(eventName, handler) and trigger hello.emit', function(done) {

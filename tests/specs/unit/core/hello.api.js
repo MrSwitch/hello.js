@@ -1,8 +1,5 @@
-define([
-	'../../libs/errorResponse'
-], function(
-	errorResponse
-) {
+let hello = require('../../../../src/hello.js');
+let errorResponse = require('../../../lib/errorResponse.js');
 
 	describe('hello.api', function() {
 
@@ -423,5 +420,3 @@ define([
 		});
 
 	});
-
-});

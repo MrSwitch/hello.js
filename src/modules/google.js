@@ -1,3 +1,5 @@
+let hello = require('../hello.js');
+
 (function(hello) {
 
 	var contactsUrl = 'https://www.google.com/m8/feeds/contacts/default/full?v=3.0&alt=json&max-results=@{limit|1000}&start-index=@{start|1}';

@@ -1,4 +1,3 @@
-define([], function() {
 
 	describe('hello.getAuthResponse', function() {
 
@@ -14,4 +13,3 @@ define([], function() {
 			expect(r).to.be(null);
 		});
 	});
-});

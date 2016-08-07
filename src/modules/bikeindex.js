@@ -1,5 +1,7 @@
 // BikeIndex
 // Https://bikeindex.org/documentation/api_v2
+let hello = require('../hello.js');
+
 (function(hello) {
 
 	hello.init({

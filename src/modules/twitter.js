@@ -1,3 +1,5 @@
+let hello = require('../hello.js');
+
 (function(hello) {
 
 	var base = 'https://api.twitter.com/';

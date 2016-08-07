@@ -1,3 +1,5 @@
+let hello = require('../hello.js');
+
 // Vkontakte (vk.com)
 (function(hello) {
 

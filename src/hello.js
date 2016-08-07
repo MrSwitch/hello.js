@@ -10,47 +10,20 @@
  * @license MIT: You are free to use and modify this code for any use, on the condition that this copyright notice remains.
  */
 
-self.hello = function(name) {
+let extend = require('tricks/object/extend');
+
+let hello = function(name) {
 	return hello.use(name);
 };
 
-hello.utils = {
+module.exports = hello;
 
-	// Extend the first object with the properties and methods of the second
-	extend: function(r /*, a[, b[, ...]] */) {
-
-		// Get the arguments as an array but ommit the initial item
-		Array.prototype.slice.call(arguments, 1).forEach(function(a) {
-			if (Array.isArray(r) && Array.isArray(a)) {
-				Array.prototype.push.apply(r, a);
-			}
-			else if (r instanceof Object && a instanceof Object && r !== a) {
-				for (var x in a) {
-					r[x] = hello.utils.extend(r[x], a[x]);
-				}
-			}
-			else {
-
-				if (Array.isArray(a)) {
-					// Clone it
-					a = a.slice(0);
-				}
-
-				r = a;
-			}
-		});
-
-		return r;
-	}
-};
-
-// Core library
-hello.utils.extend(hello, {
+extend(hello, {
 
 	settings: {
 
 		// OAuth2 authentication defaults
-		redirect_uri: window.location.href.split('#')[0],
+		redirect_uri: (typeof location !== 'undefined' ? location.href.split('#')[0] : null),
 		response_type: 'token',
 		display: 'popup',
 		state: '',
@@ -98,7 +71,7 @@ hello.utils.extend(hello, {
 		// When 'display=page' this property defines where the users page should end up after redirect_uri
 		// Ths could be problematic if the redirect_uri is indeed the final place,
 		// Typically this circumvents the problem of the redirect_url being a dumb relay page.
-		page_uri: window.location.href
+		page_uri: (typeof location !== 'undefined' ? location.href : null)
 	},
 
 	// Service configuration objects
@@ -147,11 +120,11 @@ hello.utils.extend(hello, {
 		}}
 
 		// Merge services if there already exists some
-		utils.extend(this.services, services);
+		extend(this.services, services);
 
 		// Update the default settings with this one.
 		if (options) {
-			utils.extend(this.settings, options);
+			extend(this.settings, options);
 
 			// Do this immediatly incase the browser changes the current path.
 			if ('redirect_uri' in options) {
@@ -537,7 +510,7 @@ hello.utils.extend(hello, {
 });
 
 // Core utilities
-hello.utils.extend(hello.utils, {
+extend(hello.utils, {
 
 	// Error
 	error: function(code, message) {
@@ -771,14 +744,6 @@ hello.utils.extend(hello.utils, {
 	// @param string src
 	iframe: function(src) {
 		this.append('iframe', {src: src, style: {position:'absolute', left: '-1000px', bottom: 0, height: '1px', width: '1px'}}, 'body');
-	},
-
-	// Recursive merge two objects into one, second parameter overides the first
-	// @param a array
-	merge: function(/* Args: a, b, c, .. n */) {
-		var args = Array.prototype.slice.call(arguments);
-		args.unshift({});
-		return this.extend.apply(null, args);
 	},
 
 	// Makes it easier to assign parameters, where some are optional
@@ -1324,7 +1289,7 @@ hello.utils.extend(hello.utils, {
 			// E.g. p.state = 'facebook.page';
 			try {
 				var a = JSON.parse(p.state);
-				_this.extend(p, a);
+				extend(p, a);
 			}
 			catch (e) {
 				console.error('Could not decode state parameter');
@@ -1620,7 +1585,7 @@ hello.api = function() {
 
 	// If get, put all parameters into query
 	if (p.method === 'get' || p.method === 'delete') {
-		utils.extend(p.query, p.data);
+		extend(p.query, p.data);
 		p.data = {};
 	}
 
@@ -1716,7 +1681,7 @@ hello.api = function() {
 
 		var query = url.split(/[\?#]/)[1];
 		if (query) {
-			utils.extend(p.query, utils.param(query));
+			extend(p.query, utils.param(query));
 
 			// Remove the query part from the URL
 			url = url.replace(/\?.*?(#|$)/, '$1');
@@ -1864,7 +1829,7 @@ hello.api = function() {
 };
 
 // API utilities
-hello.utils.extend(hello.utils, {
+extend(hello.utils, {
 
 	// Make an HTTP request
 	request: function(p, callback) {
@@ -1996,7 +1961,7 @@ hello.utils.extend(hello.utils, {
 			// POST body to querystring
 			if (p.data && (p.method === 'get' || p.method === 'delete')) {
 				// Attach the p.data to the querystring.
-				_this.extend(p.query, p.data);
+				extend(p.query, p.data);
 				p.data = null;
 			}
 
@@ -2530,7 +2495,7 @@ hello.utils.extend(hello.utils, {
 	var api = hello.api;
 	var utils = hello.utils;
 
-	utils.extend(utils, {
+	extend(utils, {
 
 		// DataToJSON
 		// This takes a FormElement|NodeList|InputElement|MixedObjects and convers the data object to JSON.
