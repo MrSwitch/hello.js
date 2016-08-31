@@ -1,55 +1,19 @@
-// Test file
-mocha.ui('bdd');
-
-// Substitute some of the tests because this is running on a Chrome app.
-if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.identity.launchWebAuthFlow) {
-
-	// Substitute the following tests
-	require.config({
-		path: {
-			'./unit/utils/popup': './ext/chromeapp/popup'
-		}
-	});
-}
-
-// Load
-require([
-
-	// Utils
-	'./unit/utils/args',
-	'./unit/utils/clone',
-	'./unit/utils/dataToJSON',
-	'./unit/utils/diff',
-	'./unit/utils/domInstance',
-	'./unit/utils/events',
-	'./unit/utils/extend',
-	'./unit/utils/merge',
-	'./unit/utils/param',
-	'./unit/utils/popup',
-	'./unit/utils/qs',
-	'./unit/utils/request',
-	'./unit/utils/responseHandler',
-	'./unit/utils/store',
-	'./unit/utils/toBlob',
-	'./unit/utils/url',
-
-	// Core
-	'./unit/core/hello.api',
-	'./unit/core/hello.getAuthResponse',
-	'./unit/core/hello.init',
-	'./unit/core/hello.login',
-	'./unit/core/hello.logout',
-	'./unit/core/hello.use',
-	'./unit/core/hello.events',
-	'./unit/core/session.monitor',
-
-	// Modules
-	'./unit/modules/index',
-
-	// E2E
-	'./e2e/modules'
-
-], function() {
-	if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
-	else { mocha.run(); }
-});
+require('./e2e/modules.js');
+require('./index.js');
+require('./unit/core/hello.api.js');
+require('./unit/core/hello.events.js');
+require('./unit/core/hello.getAuthResponse.js');
+require('./unit/core/hello.init.js');
+require('./unit/core/hello.login.js');
+require('./unit/core/hello.logout.js');
+require('./unit/core/hello.use.js');
+require('./unit/core/session.monitor.js');
+require('./unit/ext/chromeapp/popup.js');
+require('./unit/modules/api.js');
+require('./unit/modules/apiMe.js');
+require('./unit/modules/apiMeAlbum.js');
+require('./unit/modules/apiMeAlbums.js');
+require('./unit/modules/apiMeFriends.js');
+require('./unit/modules/apiMePhotos.js');
+require('./unit/modules/helper.js');
+require('./unit/modules/index.js');

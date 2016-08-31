@@ -93,10 +93,6 @@ process.umask = function() { return 0; };
 
 },{}],2:[function(require,module,exports){
 (function (process){
-'use strict';
-
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
-
 /**
  * @hello.js
  *
@@ -109,7 +105,10 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
  * @license MIT: You are free to use and modify this code for any use, on the condition that this copyright notice remains.
  */
 
+'use strict';
+
 var extend = require('tricks/object/extend');
+var _store = require('tricks/helper/store');
 
 var hello = function hello(name) {
 	return hello.use(name);
@@ -214,7 +213,7 @@ extend(hello, {
 		// Reformat the ID field
 		for (var x in services) {
 			if (services.hasOwnProperty(x)) {
-				if (_typeof(services[x]) !== 'object') {
+				if (typeof services[x] !== 'object') {
 					services[x] = { id: services[x] };
 				}
 			}
@@ -685,93 +684,14 @@ extend(hello.utils, {
 	},
 
 	// Local storage facade
-	store: function () {
-
-		var a = ['localStorage', 'sessionStorage'];
-		var i = -1;
-		var prefix = 'test';
-
-		// Set LocalStorage
-		var localStorage;
-
-		while (a[++i]) {
-			try {
-				// In Chrome with cookies blocked, calling localStorage throws an error
-				localStorage = window[a[i]];
-				localStorage.setItem(prefix + i, i);
-				localStorage.removeItem(prefix + i);
-				break;
-			} catch (e) {
-				localStorage = null;
-			}
+	store: function store() {
+		for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+			args[_key] = arguments[_key];
 		}
 
-		if (!localStorage) {
-
-			var cache = null;
-
-			localStorage = {
-				getItem: function getItem(prop) {
-					prop = prop + '=';
-					var m = document.cookie.split(';');
-					for (var i = 0; i < m.length; i++) {
-						var _m = m[i].replace(/(^\s+|\s+$)/, '');
-						if (_m && _m.indexOf(prop) === 0) {
-							return _m.substr(prop.length);
-						}
-					}
-
-					return cache;
-				},
-
-				setItem: function setItem(prop, value) {
-					cache = value;
-					document.cookie = prop + '=' + value;
-				}
-			};
-
-			// Fill the cache up
-			cache = localStorage.getItem('hello');
-		}
-
-		function get() {
-			var json = {};
-			try {
-				json = JSON.parse(localStorage.getItem('hello')) || {};
-			} catch (e) {}
-
-			return json;
-		}
-
-		function set(json) {
-			localStorage.setItem('hello', JSON.stringify(json));
-		}
-
-		// Check if the browser support local storage
-		return function (name, value, days) {
-
-			// Local storage
-			var json = get();
-
-			if (name && value === undefined) {
-				return json[name] || null;
-			} else if (name && value === null) {
-				try {
-					delete json[name];
-				} catch (e) {
-					json[name] = null;
-				}
-			} else if (name) {
-				json[name] = value;
-			} else {
-				return json;
-			}
-
-			set(json);
-
-			return json || null;
-		};
-	}(),
+		// If this is setting a value
+		_store.apply(null, args);
+	},
 
 	// Create and Append new DOM elements
 	// @param node string
@@ -781,13 +701,13 @@ extend(hello.utils, {
 
 		var n = typeof node === 'string' ? document.createElement(node) : node;
 
-		if ((typeof attr === 'undefined' ? 'undefined' : _typeof(attr)) === 'object') {
+		if (typeof attr === 'object') {
 			if ('tagName' in attr) {
 				target = attr;
 			} else {
 				for (var x in attr) {
 					if (attr.hasOwnProperty(x)) {
-						if (_typeof(attr[x]) === 'object') {
+						if (typeof attr[x] === 'object') {
 							for (var y in attr[x]) {
 								if (attr[x].hasOwnProperty(y)) {
 									n[x][y] = attr[x][y];
@@ -816,7 +736,7 @@ extend(hello.utils, {
 					setTimeout(self, 16);
 				}
 			})();
-		} else if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) === 'object') {
+		} else if (typeof target === 'object') {
 			target.appendChild(n);
 		} else if (typeof target === 'string') {
 			document.getElementsByTagName(target)[0].appendChild(n);
@@ -850,7 +770,7 @@ extend(hello.utils, {
 
 		// Passing in hash object of arguments?
 		// Where the first argument can't be an object
-		if (_args.length === 1 && _typeof(_args[0]) === 'object' && o[x] != 'o!') {
+		if (_args.length === 1 && typeof _args[0] === 'object' && o[x] != 'o!') {
 
 			// Could this object still belong to a property?
 			// Check the object keys if they match any of the property keys
@@ -870,7 +790,7 @@ extend(hello.utils, {
 		for (x in o) {
 			if (o.hasOwnProperty(x)) {
 
-				t = _typeof(_args[i]);
+				t = typeof _args[i];
 
 				if (typeof o[x] === 'function' && o[x].test(_args[i]) || typeof o[x] === 'string' && (o[x].indexOf('s') > -1 && t === 'string' || o[x].indexOf('o') > -1 && t === 'object' || o[x].indexOf('i') > -1 && t === 'number' || o[x].indexOf('a') > -1 && t === 'object' || o[x].indexOf('f') > -1 && t === 'function')) {
 					p[x] = _args[i++];
@@ -949,7 +869,7 @@ extend(hello.utils, {
 		// Array
 		if (Array.isArray(obj)) {
 			return !obj.length;
-		} else if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object') {
+		} else if (typeof obj === 'object') {
 			// Object
 			for (var key in obj) {
 				if (obj.hasOwnProperty(key)) {
@@ -969,7 +889,7 @@ extend(hello.utils, {
   **  Licensed under The MIT License <http://opensource.org/licenses/MIT>
   **  Source-Code distributed on <http://github.com/rse/thenable>
   */
-	Promise: function () {
+	Promise: (function () {
 		/*  promise states [Promises/A+ 2.1]  */
 		var STATE_PENDING = 0; /*  [Promises/A+ 2.1.1]  */
 		var STATE_FULFILLED = 1; /*  [Promises/A+ 2.1.2]  */
@@ -1046,13 +966,11 @@ extend(hello.utils, {
 			var handlers = curr[name];
 			curr[name] = []; /*  [Promises/A+ 2.2.2.3, 2.2.3.3]  */
 			var func = function func() {
-				for (var i = 0; i < handlers.length; i++) {
-					handlers[i](value);
-				} /*  [Promises/A+ 2.2.5]  */
+				for (var i = 0; i < handlers.length; i++) handlers[i](value); /*  [Promises/A+ 2.2.5]  */
 			};
 
 			/*  execute procedure asynchronously  */ /*  [Promises/A+ 2.2.4, 3.1]  */
-			if ((typeof process === 'undefined' ? 'undefined' : _typeof(process)) === "object" && typeof process.nextTick === "function") process.nextTick(func);else if (typeof setImmediate === "function") setImmediate(func);else setTimeout(func, 0);
+			if (typeof process === "object" && typeof process.nextTick === "function") process.nextTick(func);else if (typeof setImmediate === "function") setImmediate(func);else setTimeout(func, 0);
 		};
 
 		/*  generate a resolver function  */
@@ -1085,7 +1003,7 @@ extend(hello.utils, {
 			/*  surgically check for a "then" method
    	(mainly to just call the "getter" of "then" only once)  */
 			var then;
-			if ((typeof x === 'undefined' ? 'undefined' : _typeof(x)) === "object" && x !== null || typeof x === "function") {
+			if (typeof x === "object" && x !== null || typeof x === "function") {
 				try {
 					then = x.then;
 				} /*  [Promises/A+ 2.3.3.1, 3.5]  */
@@ -1102,15 +1020,13 @@ extend(hello.utils, {
 				try {
 					/*  call retrieved "then" method */ /*  [Promises/A+ 2.3.3.3]  */
 					then.call(x,
-					/*  resolvePromise  */ /*  [Promises/A+ 2.3.3.3.1]  */
-					function (y) {
+					/*  resolvePromise  */function (y) {
 						if (resolved) return;resolved = true; /*  [Promises/A+ 2.3.3.3.3]  */
 						if (y === x) /*  [Promises/A+ 3.6]  */
 							promise.reject(new TypeError("circular thenable chain"));else resolve(promise, y);
 					},
 
-					/*  rejectPromise  */ /*  [Promises/A+ 2.3.3.3.2]  */
-					function (r) {
+					/*  rejectPromise  */function (r) {
 						if (resolved) return;resolved = true; /*  [Promises/A+ 2.3.3.3.3]  */
 						promise.reject(r);
 					});
@@ -1127,7 +1043,7 @@ extend(hello.utils, {
 
 		/*  export API  */
 		return api;
-	}(),
+	})(),
 
 	//jscs:enable
 
@@ -1501,7 +1417,7 @@ hello.utils.Event.call(hello);
 
 	// Listen to other triggers to Auth events, use these to update this
 	hello.on('auth.login, auth.logout', function (auth) {
-		if (auth && (typeof auth === 'undefined' ? 'undefined' : _typeof(auth)) === 'object' && auth.network) {
+		if (auth && typeof auth === 'object' && auth.network) {
 			oldSessions[auth.network] = hello.utils.store(auth.network) || {};
 		}
 	});
@@ -1735,7 +1651,7 @@ hello.api = function () {
 
 	// URL Mapping
 	// Is there a map for the given URL?
-	var actions = o[{ 'delete': 'del' }[p.method] || p.method] || {};
+	var actions = o[({ 'delete': 'del' })[p.method] || p.method] || {};
 
 	// Extrapolate the QueryString
 	// Provide a clean path
@@ -1821,7 +1737,7 @@ hello.api = function () {
 			// Is this a raw response?
 			if (!p.formatResponse) {
 				// Bad request? error statusCode or otherwise contains an error response vis JSONP?
-				if ((typeof headers === 'undefined' ? 'undefined' : _typeof(headers)) === 'object' ? headers.statusCode >= 400 : (typeof r === 'undefined' ? 'undefined' : _typeof(r)) === 'object' && 'error' in r) {
+				if (typeof headers === 'object' ? headers.statusCode >= 400 : typeof r === 'object' && 'error' in r) {
 					promise.reject(r);
 				} else {
 					promise.fulfill(r);
@@ -2067,7 +1983,7 @@ extend(hello.utils, {
 	// Create a clone of an object
 	clone: function clone(obj) {
 		// Does not clone DOM elements, nor Binary data, e.g. Blobs, Filelists
-		if (obj === null || (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) !== 'object' || obj instanceof Date || 'nodeName' in obj || this.isBinary(obj) || typeof FormData === 'function' && obj instanceof FormData) {
+		if (obj === null || typeof obj !== 'object' || obj instanceof Date || 'nodeName' in obj || this.isBinary(obj) || typeof FormData === 'function' && obj instanceof FormData) {
 			return obj;
 		}
 
@@ -2134,19 +2050,19 @@ extend(hello.utils, {
 		} else if (data && typeof data !== 'string' && !(data instanceof FormData) && !(data instanceof File) && !(data instanceof Blob)) {
 			// Loop through and add formData
 			var f = new FormData();
-			for (x in data) {
-				if (data.hasOwnProperty(x)) {
-					if (data[x] instanceof HTMLInputElement) {
-						if ('files' in data[x] && data[x].files.length > 0) {
-							f.append(x, data[x].files[0]);
-						}
-					} else if (data[x] instanceof Blob) {
-						f.append(x, data[x], data.name);
-					} else {
-						f.append(x, data[x]);
+			for (x in data) if (data.hasOwnProperty(x)) {
+				if (data[x] instanceof HTMLInputElement) {
+					if ('files' in data[x] && data[x].files.length > 0) {
+						f.append(x, data[x].files[0]);
 					}
+				} else if (data[x] instanceof Blob) {
+					f.append(x, data[x], data.name);
+				} else {
+					f.append(x, data[x]);
 				}
-			}data = f;
+			}
+
+			data = f;
 		}
 
 		// Open the path, async
@@ -2358,15 +2274,15 @@ extend(hello.utils, {
 			// Its not a form element,
 			// Therefore it must be a JSON object of Key=>Value or Key=>Element
 			// If anyone of those values are a input type=file we shall shall insert its siblings into the form for which it belongs.
-			for (x in data) {
-				if (data.hasOwnProperty(x)) {
-					// Is this an input Element?
-					if (_this.domInstance('input', data[x]) && data[x].type === 'file') {
-						form = data[x].form;
-						form.encoding = form.enctype = 'multipart/form-data';
-					}
+			for (x in data) if (data.hasOwnProperty(x)) {
+				// Is this an input Element?
+				if (_this.domInstance('input', data[x]) && data[x].type === 'file') {
+					form = data[x].form;
+					form.encoding = form.enctype = 'multipart/form-data';
 				}
-			} // Do If there is no defined form element, lets create one.
+			}
+
+			// Do If there is no defined form element, lets create one.
 			if (!form) {
 				// Build form
 				form = doc.createElement('form');
@@ -2377,52 +2293,52 @@ extend(hello.utils, {
 			var input;
 
 			// Add elements to the form if they dont exist
-			for (x in data) {
-				if (data.hasOwnProperty(x)) {
+			for (x in data) if (data.hasOwnProperty(x)) {
 
-					// Is this an element?
-					var el = _this.domInstance('input', data[x]) || _this.domInstance('textArea', data[x]) || _this.domInstance('select', data[x]);
+				// Is this an element?
+				var el = _this.domInstance('input', data[x]) || _this.domInstance('textArea', data[x]) || _this.domInstance('select', data[x]);
 
-					// Is this not an input element, or one that exists outside the form.
-					if (!el || data[x].form !== form) {
+				// Is this not an input element, or one that exists outside the form.
+				if (!el || data[x].form !== form) {
 
-						// Does an element have the same name?
-						var inputs = form.elements[x];
-						if (input) {
-							// Remove it.
-							if (!(inputs instanceof NodeList)) {
-								inputs = [inputs];
-							}
-
-							for (i = 0; i < inputs.length; i++) {
-								inputs[i].parentNode.removeChild(inputs[i]);
-							}
+					// Does an element have the same name?
+					var inputs = form.elements[x];
+					if (input) {
+						// Remove it.
+						if (!(inputs instanceof NodeList)) {
+							inputs = [inputs];
 						}
 
-						// Create an input element
-						input = doc.createElement('input');
-						input.setAttribute('type', 'hidden');
-						input.setAttribute('name', x);
-
-						// Does it have a value attribute?
-						if (el) {
-							input.value = data[x].value;
-						} else if (_this.domInstance(null, data[x])) {
-							input.value = data[x].innerHTML || data[x].innerText;
-						} else {
-							input.value = data[x];
+						for (i = 0; i < inputs.length; i++) {
+							inputs[i].parentNode.removeChild(inputs[i]);
 						}
-
-						form.appendChild(input);
 					}
 
-					// It is an element, which exists within the form, but the name is wrong
-					else if (el && data[x].name !== x) {
-							data[x].setAttribute('name', x);
-							data[x].name = x;
-						}
+					// Create an input element
+					input = doc.createElement('input');
+					input.setAttribute('type', 'hidden');
+					input.setAttribute('name', x);
+
+					// Does it have a value attribute?
+					if (el) {
+						input.value = data[x].value;
+					} else if (_this.domInstance(null, data[x])) {
+						input.value = data[x].innerHTML || data[x].innerText;
+					} else {
+						input.value = data[x];
+					}
+
+					form.appendChild(input);
 				}
-			} // Disable elements from within the form if they weren't specified
+
+				// It is an element, which exists within the form, but the name is wrong
+				else if (el && data[x].name !== x) {
+						data[x].setAttribute('name', x);
+						data[x].name = x;
+					}
+			}
+
+			// Disable elements from within the form if they weren't specified
 			for (i = 0; i < form.elements.length; i++) {
 
 				input = form.elements[i];
@@ -2479,13 +2395,13 @@ extend(hello.utils, {
 	// Some of the providers require that only multipart is used with non-binary forms.
 	// This function checks whether the form contains binary data
 	hasBinary: function hasBinary(data) {
-		for (var x in data) {
-			if (data.hasOwnProperty(x)) {
-				if (this.isBinary(data[x])) {
-					return true;
-				}
+		for (var x in data) if (data.hasOwnProperty(x)) {
+			if (this.isBinary(data[x])) {
+				return true;
 			}
-		}return false;
+		}
+
+		return false;
 	},
 
 	// Determines if a variable Either Is or like a FormInput has the value of a Blob
@@ -2549,20 +2465,18 @@ extend(hello.utils, {
 			// Loop through data if it's not form data it must now be a JSON object
 			if (!('FormData' in w && data instanceof w.FormData)) {
 
-				for (var x in data) {
-					if (data.hasOwnProperty(x)) {
+				for (var x in data) if (data.hasOwnProperty(x)) {
 
-						if ('FileList' in w && data[x] instanceof w.FileList) {
-							if (data[x].length === 1) {
-								data[x] = data[x][0];
-							}
-						} else if (_this.domInstance('input', data[x]) && data[x].type === 'file') {
-							continue;
-						} else if (_this.domInstance('input', data[x]) || _this.domInstance('select', data[x]) || _this.domInstance('textArea', data[x])) {
-							data[x] = data[x].value;
-						} else if (_this.domInstance(null, data[x])) {
-							data[x] = data[x].innerHTML || data[x].innerText;
+					if ('FileList' in w && data[x] instanceof w.FileList) {
+						if (data[x].length === 1) {
+							data[x] = data[x][0];
 						}
+					} else if (_this.domInstance('input', data[x]) && data[x].type === 'file') {
+						continue;
+					} else if (_this.domInstance('input', data[x]) || _this.domInstance('select', data[x]) || _this.domInstance('textArea', data[x])) {
+						data[x] = data[x].value;
+					} else if (_this.domInstance(null, data[x])) {
+						data[x] = data[x].innerHTML || data[x].innerText;
 					}
 				}
 			}
@@ -2622,9 +2536,2077 @@ extend(hello.utils, {
 /////////////////////////////////////
 
 hello.utils.responseHandler(window, window.opener || window.parent);
+/*  [Promises/A+ 2.3.3.3.1]  */
+/*  [Promises/A+ 2.3.3.3.2]  */
 
 }).call(this,require('_process'))
-},{"_process":1,"tricks/object/extend":3}],3:[function(require,module,exports){
+
+},{"_process":1,"tricks/helper/store":23,"tricks/object/extend":24}],3:[function(require,module,exports){
+'use strict';
+
+define(function () {
+
+	return function (eventCode, done) {
+		return function (data, type) {
+
+			expect(data).to.be.a('object');
+			expect(data).to.have.property('error');
+			expect(data.error).to.have.property('code');
+			expect(data.error).to.have.property('message');
+			expect(data.error.code).to.not.be.an('object');
+			expect(data.error.message).to.not.be.an('object');
+
+			if (eventCode) expect(data.error.code).to.be(eventCode);
+
+			done();
+		};
+	};
+});
+
+},{}],4:[function(require,module,exports){
+'use strict';
+
+define(['../libs/errorResponse', '../../../src/modules/box', '../../../src/modules/facebook', '../../../src/modules/flickr', '../../../src/modules/google', '../../../src/modules/windows', '../../../src/modules/dropbox', '../../../src/modules/twitter', '../../../src/modules/yahoo', '../../../src/modules/instagram', '../../../src/modules/joinme', '../../../src/modules/linkedin', '../../../src/modules/foursquare', '../../../src/modules/github', '../../../src/modules/bikeindex', '../../../src/modules/soundcloud', '../../../src/modules/vk'], function (errorResponse) {
+
+	describe('E2E modules', function () {
+
+		// Loop through all services
+		for (var name in hello.services) {
+			setupModuleTests(hello.services[name], name);
+		}
+
+		function setupModuleTests(module, name) {
+
+			describe(name, function () {
+
+				var MATCH_URL = /^https?\:\/\//;
+
+				it('should contain oauth.auth path', function () {
+					var path = module.oauth.auth;
+					expect(path).to.match(/^https?\:\/\//);
+				});
+
+				it('should specify a base url', function () {
+					// Loop through all services
+					expect(module.base).to.match(/^https?\:\/\//);
+				});
+
+				it('should be using OAuth1 contain, auth, request, token properties', function () {
+
+					// Loop through all services
+					var oauth = module.oauth;
+					if (oauth && parseInt(oauth.version, 10) === 1) {
+						expect(oauth.auth).to.match(MATCH_URL);
+						expect(oauth.token).to.match(MATCH_URL);
+						expect(oauth.request).to.match(MATCH_URL);
+					}
+				});
+
+				xit('should return error object when an api request is made with an unverified user', function (done) {
+
+					var i = 0;
+
+					this.timeout(60000);
+
+					var cb = errorResponse(null, function () {
+						if (++i === 2) done();
+					});
+
+					// Ensure user is signed out
+					hello.logout(name);
+
+					// Make a request that returns an error object
+					hello(name).api('me', cb).then(null, cb);
+				});
+			});
+		}
+	});
+});
+
+},{}],5:[function(require,module,exports){
+'use strict';
+
+require('./e2e/modules.js');
+require('./index.js');
+require('./unit/core/hello.api.js');
+require('./unit/core/hello.events.js');
+require('./unit/core/hello.getAuthResponse.js');
+require('./unit/core/hello.init.js');
+require('./unit/core/hello.login.js');
+require('./unit/core/hello.logout.js');
+require('./unit/core/hello.use.js');
+require('./unit/core/session.monitor.js');
+require('./unit/ext/chromeapp/popup.js');
+require('./unit/modules/api.js');
+require('./unit/modules/apiMe.js');
+require('./unit/modules/apiMeAlbum.js');
+require('./unit/modules/apiMeAlbums.js');
+require('./unit/modules/apiMeFriends.js');
+require('./unit/modules/apiMePhotos.js');
+require('./unit/modules/helper.js');
+require('./unit/modules/index.js');
+
+},{"./e2e/modules.js":4,"./index.js":5,"./unit/core/hello.api.js":6,"./unit/core/hello.events.js":7,"./unit/core/hello.getAuthResponse.js":8,"./unit/core/hello.init.js":9,"./unit/core/hello.login.js":10,"./unit/core/hello.logout.js":11,"./unit/core/hello.use.js":12,"./unit/core/session.monitor.js":13,"./unit/ext/chromeapp/popup.js":14,"./unit/modules/api.js":15,"./unit/modules/apiMe.js":16,"./unit/modules/apiMeAlbum.js":17,"./unit/modules/apiMeAlbums.js":18,"./unit/modules/apiMeFriends.js":19,"./unit/modules/apiMePhotos.js":20,"./unit/modules/helper.js":21,"./unit/modules/index.js":22}],6:[function(require,module,exports){
+'use strict';
+
+var hello = require('../../../../src/hello.js');
+var errorResponse = require('../../../lib/errorResponse.js');
+
+describe('hello.api', function () {
+
+	var _request = hello.utils.request;
+	var _store = hello.utils.store;
+	var _session = {
+		access_token: 'token'
+	};
+	var testable = {};
+
+	before(function () {
+
+		// Unset
+		_request = hello.utils.request;
+		_store = hello.utils.store;
+
+		// Mock request
+		hello.utils.request = function (req, callback) {
+			setTimeout(function () {
+				callback(req);
+			});
+		};
+
+		hello.utils.store = function (label, body) {
+			return _session;
+		};
+
+		// Define default network
+		hello.init({
+			testable: {
+				oauth: {
+					auth: 'https://testdemo/access',
+					version: 2
+				},
+
+				scope: {
+					basic: 'basic_scope'
+				},
+
+				base: 'https://testable/'
+			}
+		});
+
+		testable = hello.services.testable;
+	});
+
+	after(function () {
+
+		// Renew
+		hello.utils.request = _request;
+	});
+
+	it('should assign a complete event', function (done) {
+		hello('test').api('/', function () {
+			done();
+		});
+	});
+
+	it('should throw a completed event if network name is undefined', function (done) {
+		hello('test').api('/', errorResponse('invalid_network', done));
+	});
+
+	it('should throw a error event if network name is undefined', function (done) {
+		hello('test').api('/').then(null, errorResponse('invalid_network', done));
+	});
+
+	it('should throw a error event if path name is undefined', function (done) {
+		hello('test').api().then(null, errorResponse('invalid_path', done));
+	});
+
+	it('should construct the url using the base and the pathname', function (done) {
+
+		hello('testable').api('/endpoint', function (res) {
+			expect(res.url).to.eql('https://testable/endpoint');
+			done();
+		});
+	});
+
+	it('should extract the parameters from the URL', function (done) {
+
+		var session = _session;
+		_session = null;
+
+		hello('testable').api('/endpoint?a=a&b=b', function (res) {
+			_session = session;
+			expect(res.url).to.eql('https://testable/endpoint');
+			expect(res.query).to.eql({
+				a: 'a',
+				b: 'b'
+			});
+			done();
+		});
+	});
+
+	it('should attach query object to the req.query', function (done) {
+
+		hello('testable').api('/endpoint', { a: 'a' }, function (res) {
+
+			expect(res.query).to.have.property('a', 'a');
+
+			done();
+		});
+	});
+
+	it('should attach authResponse object to the req.authResponse', function (done) {
+
+		hello('testable').api('/endpoint', function (res) {
+
+			expect(res.authResponse).to.eql(_session);
+
+			done();
+		});
+	});
+
+	it('should attach data object to the req.query when `req.method = get`', function (done) {
+
+		hello('testable').api('/endpoint', 'get', { a: 'a' }, function (res) {
+
+			expect(res.query).to.have.property('a', 'a');
+			expect(res.data).to.be.empty();
+
+			done();
+		});
+	});
+
+	it('should attach post data object to the req.data', function (done) {
+
+		hello('testable').api('/endpoint', 'post', { a: 'a' }, function (res) {
+
+			expect(res.method).to.eql('post');
+			expect(res.query).to.not.have.property('a');
+			expect(res.data).to.have.property('a', 'a');
+
+			done();
+		});
+	});
+
+	describe('POST', function () {
+
+		// Not supported in IE9
+		var hasFormdata = typeof FormData === 'function';
+
+		if (hasFormdata) {
+			it('should accept FormData as the data object', function (done) {
+
+				var formData = new FormData();
+				formData.append('user', 'name');
+
+				hello('testable').api('/endpoint', 'POST', formData).then(function (res) {
+					// The formData should not be mutated, but left as is.
+					expect(res.data).to.equal(formData);
+					done();
+				});
+			});
+		}
+	});
+
+	describe('signing', function () {
+
+		it('should add the access_token to the req.query', function (done) {
+
+			hello('testable').api('/endpoint', function (res) {
+				expect(res.url).to.eql('https://testable/endpoint');
+				expect(res.query).to.eql(_session);
+				done();
+			});
+		});
+
+		it('should mark OAuth1 endpoints with req.proxy', function (done) {
+
+			// Override
+			testable.oauth.version = 1;
+
+			hello('testable').api('/endpoint', function (res) {
+
+				// Renew
+				testable.oauth.version = 2;
+
+				// Test
+				expect(res.proxy).to.be.ok();
+				expect(res.oauth_proxy).to.eql(hello.settings.oauth_proxy);
+
+				done();
+			});
+		});
+	});
+
+	describe('map', function () {
+
+		it('should process req object through the modules.get[req.path] function', function (done) {
+
+			testable.get = testable.get || {};
+			testable.get.handled = function (p) {
+				expect(p).to.have.property('path', 'handled');
+				done();
+			};
+
+			hello('testable').api('/handled', { a: 'a' });
+		});
+
+		it('should process req object through the modules.get.default function if req.path not in module.get', function (done) {
+
+			testable.get = testable.get || {};
+			testable.get['default'] = function (p) {
+				expect(p).to.have.property('path', 'unhandled');
+				delete testable.get['default'];
+				done();
+			};
+
+			hello('testable').api('/unhandled', { a: 'a' });
+		});
+
+		it('should trigger an error if the mapped value is false', function (done) {
+
+			testable.get = testable.get || {};
+			testable.get.handled = false;
+
+			hello('testable').api('/handled').then(null, function (res) {
+
+				// Should place the value of a in the parameter list
+				expect(res.error).to.have.property('code', 'invalid_path');
+
+				delete testable.get.handled;
+
+				done();
+			});
+		});
+
+		describe('Replace @{} in path with request parameters', function () {
+
+			it('should define the path using the query parameters and remove them from the query', function (done) {
+
+				testable.get = testable.get || {};
+				testable.get.handled = 'endpoint?b=@{a}';
+
+				hello('testable').api('/handled', { a: 'a' }).then(function (res) {
+
+					// Should place the value of a in the parameter list
+					expect(res.url).to.contain('endpoint?b=a');
+
+					// Should place the value of a in the parameter list
+					expect(res.path).to.eql('handled');
+
+					// Should remove the property from the req.query
+					expect(res.query).to.not.have.property('a');
+
+					delete testable.get.handled;
+
+					done();
+				}, done);
+			});
+
+			it('should define the path using the query parameters and remove them from the post data', function (done) {
+
+				testable.post = testable.post || {};
+				testable.post.handled = 'endpoint?b=@{a}';
+
+				hello('testable').api('/handled', 'post', { a: 'a' }).then(function (res) {
+
+					// Should place the value of a in the parameter list
+					expect(res.url).to.contain('endpoint?b=a');
+
+					// Should place the value of a in the parameter list
+					expect(res.path).to.eql('handled');
+
+					// Should remove the property from the req.query
+					expect(res.data).to.not.have.property('a');
+
+					delete testable.get.handled;
+
+					done();
+				}, done);
+			});
+
+			it('should trigger an error if there was no query parameter arg, i.e. @{arg}', function (done) {
+
+				testable.get = testable.get || {};
+				testable.get.handled = 'endpoint?b=@{a}';
+
+				hello('testable').api('/handled').then(null, function (res) {
+
+					// Should place the value of a in the parameter list
+					expect(res.error).to.have.property('code', 'missing_attribute');
+
+					delete testable.get.handled;
+
+					done();
+				});
+			});
+
+			it('should use the default value if one is defined i.e. @{arg|default}', function (done) {
+
+				testable.get = testable.get || {};
+				testable.get.handled = 'endpoint?empty=@{a|}&arg=@{b|default}';
+
+				hello('testable').api('/handled', function (res) {
+
+					// Should place the value of a in the parameter list
+					expect(res.url).to.contain('endpoint?empty=&arg=default');
+
+					// Should place the value of a in the parameter list
+					expect(res.path).to.eql('handled');
+
+					delete testable.get.handled;
+
+					done();
+				});
+			});
+		});
+	});
+
+	describe('wrap', function () {
+
+		it('should trigger the wrap function', function (done) {
+
+			testable.wrap = testable.wrap || {};
+			testable.wrap.handled = function (req) {
+				delete testable.wrap.handled;
+				done();
+			};
+
+			hello('testable').api('/handled');
+		});
+
+		it('should trigger the wrap.default function if none exists', function (done) {
+
+			testable.wrap = testable.wrap || {};
+			testable.wrap['default'] = function (req) {
+				delete testable.wrap['default'];
+				done();
+			};
+
+			hello('testable').api('/unhandled');
+		});
+
+		it('should not trigger the wrap function if formatResponse = false', function (done) {
+
+			testable.wrap = testable.wrap || {};
+			testable.wrap.handled = function (req) {
+				done(new Error('Wrap handler erroneously called'));
+			};
+
+			hello('testable').api({
+				path: '/handled',
+				formatResponse: false
+			}).then(function () {
+				// If the response handler was not called then we're good
+				done();
+			});
+		});
+	});
+
+	describe('paging', function () {
+
+		it('should override the path parameter with the hash fragment', function (done) {
+
+			hello('testable').api('/endpoint#formatting', function (res) {
+				expect(res.url).to.eql('https://testable/endpoint');
+				expect(res.path).to.eql('formatting');
+				done();
+			});
+		});
+
+		it('should append the req.path to the hash of the response.paging.next', function (done) {
+
+			testable.wrap = testable.wrap || {};
+			testable.wrap['default'] = function (req) {
+				req.paging = { next: 'next?page=2' };
+				delete testable.wrap['default'];
+			};
+
+			hello('testable').api('/unhandled', function (res) {
+
+				// Should place the value of a in the parameter list
+				expect(res.paging.next).to.contain('#unhandled');
+
+				done();
+			});
+		});
+	});
+});
+
+},{"../../../../src/hello.js":2,"../../../lib/errorResponse.js":3}],7:[function(require,module,exports){
+'use strict';
+
+var hello = require('../../../../src/hello.js');
+describe('hello events', function () {
+
+	it('should bind handler using hello.on(eventName, handler) and trigger hello.emit', function (done) {
+		function handler() {
+			done();
+		}
+
+		hello.on('auth.login', handler);
+		hello.emit('auth.login');
+		hello.off('auth.login', handler);
+	});
+});
+
+},{"../../../../src/hello.js":2}],8:[function(require,module,exports){
+'use strict';
+
+describe('hello.getAuthResponse', function () {
+
+	it('should return null when accessing an invalid network implicitly', function () {
+		// Make request
+		var r = hello('Facelessbook').getAuthResponse();
+		expect(r).to.be(null);
+	});
+
+	it('should return null when accessing an invalid network explicitly', function () {
+		// Make request
+		var r = hello.getAuthResponse('Facelessbook');
+		expect(r).to.be(null);
+	});
+});
+
+},{}],9:[function(require,module,exports){
+'use strict';
+
+var hello = require('../../../../src/hello.js');
+
+describe('hello.init', function () {
+
+	it('should set app credentials and options', function () {
+
+		var credentials = {
+			service: 'id'
+		};
+		var options = {
+			redirect_uri: './relative'
+		};
+
+		hello.init(credentials, options);
+		expect(hello.settings.redirect_uri).to.match(/\/relative/);
+	});
+});
+
+},{"../../../../src/hello.js":2}],10:[function(require,module,exports){
+'use strict';
+
+define(['../../libs/errorResponse'], function (errorResponse) {
+
+	describe('hello.login', function () {
+
+		var testable;
+		var second;
+
+		// Create a dummy network
+		beforeEach(function () {
+			// Create networks
+			testable = {
+				oauth: {
+					auth: 'https://testdemo/access',
+					grant: 'https://testdemo/grant',
+					version: 2
+				},
+				scope: {
+					basic: 'basic_scope'
+				}
+			};
+
+			second = {
+				oauth: {
+					auth: 'https://testdemo/access',
+					version: 2
+				},
+				scope: {
+					another_scope: 'another_scope'
+				}
+			};
+
+			// Add a network
+			hello.init({
+				testable: testable,
+				second: second
+			});
+		});
+
+		// Destroy it
+		afterEach(function () {
+			delete hello.services.testable;
+		});
+
+		var utils = hello.utils;
+		var _open = utils.popup;
+
+		after(function () {
+			hello.utils.popup = _open;
+		});
+
+		it('should assign a complete event', function (done) {
+
+			var spy = sinon.spy(function () {
+				done();
+			});
+
+			var popup = {
+				closed: false
+			};
+
+			window.open = function () {
+				return popup;
+			};
+
+			hello.login('testable', spy);
+
+			popup.closed = true;
+		});
+
+		it('should throw a completed and error event if network name is wrong', function (done) {
+			hello.login('invalidname', errorResponse('invalid_network', done));
+		});
+
+		it('should throw a error event if network name is wrong', function (done) {
+			hello.login('invalidname').then(null, errorResponse('invalid_network', done));
+		});
+
+		it('should by default, trigger window.open request', function (done) {
+
+			var spy = sinon.spy(function () {
+				done();
+			});
+
+			utils.popup = spy;
+
+			hello.login('testable');
+		});
+
+		it('should include the basic scope defined by the module, by default', function (done) {
+
+			var spy = sinon.spy(function (url, name, optins) {
+
+				expect(url).to.contain('scope=' + hello.services.testable.scope.basic);
+
+				done();
+			});
+
+			utils.popup = spy;
+
+			hello.login('testable');
+		});
+
+		it('should not use "basic" as the default scope, if there is no mapping', function (done) {
+
+			// Remove the basic scope
+			delete hello.services.testable.scope.basic;
+
+			// Now the response should not include the scope...
+			var spy = sinon.spy(function (url) {
+				expect(url).to.not.contain('scope=basic');
+				done();
+			});
+
+			utils.popup = spy;
+
+			hello('testable').login();
+		});
+
+		describe('options', function () {
+
+			it('should apply `options.redirect_uri`', function (done) {
+
+				var REDIRECT_URI = 'http://dummydomain.com/';
+
+				var spy = sinon.spy(function (url, name, options) {
+
+					var params = hello.utils.param(url.split('?')[1]);
+
+					expect(params.redirect_uri).to.equal(REDIRECT_URI);
+
+					done();
+				});
+
+				utils.popup = spy;
+
+				hello.login('testable', { redirect_uri: REDIRECT_URI });
+			});
+
+			it('should URIencode `options.redirect_uri`', function (done) {
+
+				var REDIRECT_URI = 'http://dummydomain.com/?breakdown';
+
+				var spy = sinon.spy(function (url, name, optins) {
+
+					expect(url).to.not.contain(REDIRECT_URI);
+					expect(url).to.contain(encodeURIComponent(REDIRECT_URI));
+
+					done();
+				});
+
+				utils.popup = spy;
+
+				hello.login('testable', { redirect_uri: REDIRECT_URI });
+			});
+
+			it('should pass through unknown scopes defined in `options.scope`', function (done) {
+
+				var spy = sinon.spy(function (url, name, optins) {
+
+					var params = hello.utils.param(url.split('?')[1]);
+
+					expect(params.scope).to.contain('email');
+
+					done();
+				});
+
+				utils.popup = spy;
+
+				hello.login('testable', { scope: 'email' });
+			});
+
+			it('should include the basic scope defined in the settings `hello.settings.scope`', function (done) {
+
+				hello.settings.scope = ['basic'];
+				testable.scope.basic = 'basic';
+
+				var spy = sinon.spy(function (url, name, optins) {
+					var params = hello.utils.param(url.split('?')[1]);
+					expect(params.scope).to.contain('basic');
+					done();
+				});
+
+				utils.popup = spy;
+
+				hello.login('testable', { scope: ['email'] });
+			});
+
+			it('should discard common scope, aka scopes undefined by this module but defined as a global standard in the libary (i.e. basic)', function (done) {
+
+				var commonScope = 'common_scope';
+
+				// Set this as a common scope (always set to '')
+				hello.settings.scope_map[commonScope] = '';
+
+				var spy = sinon.spy(function (url, name, optins) {
+
+					// Parse parameters
+					var params = hello.utils.param(url.split('?')[1]);
+
+					expect(params.scope).to.not.contain(commonScope);
+					done();
+				});
+
+				utils.popup = spy;
+
+				hello.login('testable', { scope: commonScope });
+			});
+
+			it('should not included empty scopes', function (done) {
+
+				var scope = 'scope';
+				var paddedScope = ',' + scope + ',';
+				delete testable.scope.basic;
+
+				var spy = sinon.spy(function (url, name, optins) {
+
+					// Parse parameters
+					var params = hello.utils.param(url.split('?')[1]);
+
+					expect(params.scope).to.eql(scope);
+					done();
+				});
+
+				utils.popup = spy;
+
+				hello.login('testable', { scope: paddedScope });
+			});
+
+			it('should use the correct and unencoded delimiter to separate scope', function (done) {
+
+				var basicScope = 'read_user,read_bikes';
+				var scopeDelim = '+';
+
+				hello.init({
+					test_delimit_scope: {
+						oauth: {
+							auth: 'https://testdemo/access',
+							version: 2
+						},
+						scope_delim: scopeDelim,
+						scope: {
+							basic: basicScope
+						}
+					}
+				});
+
+				var spy = sinon.spy(function (url, name, optins) {
+
+					expect(url).to.contain(basicScope.replace(/[\+\,\s]/, scopeDelim));
+					done();
+				});
+
+				utils.popup = spy;
+
+				hello.login('test_delimit_scope');
+			});
+
+			it('should space encode the delimiter of multiple response_type\'s', function (done) {
+
+				var opts = {
+					response_type: 'code grant_scopes'
+				};
+
+				var spy = sinon.spy(function (url, name) {
+
+					expect(url).to.contain('code%20grant_scopes');
+					done();
+				});
+
+				utils.popup = spy;
+
+				hello.login('testable', opts);
+			});
+
+			it('should substitute "token" for "code" when there is no Grant URL defined', function (done) {
+
+				var opts = {
+					response_type: 'code grant_scopes'
+				};
+
+				hello.services.testable.oauth.grant = null;
+
+				var spy = sinon.spy(function (url, name) {
+
+					expect(url).to.contain('token%20grant_scopes');
+					done();
+				});
+
+				utils.popup = spy;
+
+				hello.login('testable', opts);
+			});
+		});
+
+		describe('popup options', function () {
+
+			it('should give the popup the default options', function (done) {
+
+				var spy = sinon.spy(function (url, name, options) {
+					expect(options.resizable).to.eql('1');
+					expect(options.scrollbars).to.eql('1');
+					expect(options.width).to.eql('500');
+					expect(options.height).to.eql('550');
+					done();
+				});
+
+				utils.popup = spy;
+
+				hello.login('testable');
+			});
+
+			it('should allow the popup options to be overridden', function (done) {
+
+				var spy = sinon.spy(function (url, name, options) {
+					expect(options.location).to.eql('no');
+					expect(options.toolbar).to.eql('no');
+					expect(options.hidden).to.eql(true);
+					done();
+				});
+
+				utils.popup = spy;
+
+				hello.login('testable', {
+					popup: {
+						hidden: true,
+						location: 'no',
+						toolbar: 'no'
+					}
+				});
+			});
+		});
+
+		describe('option.force = false', function () {
+
+			var _store = hello.utils.store;
+			var session = null;
+
+			beforeEach(function () {
+
+				session = {
+					access_token: 'token',
+					expires: new Date().getTime() / 1e3 + 1000,
+					scope: 'basic'
+				};
+
+				hello.utils.store = function () {
+					return session;
+				};
+			});
+
+			afterEach(function () {
+
+				hello.utils.store = _store;
+			});
+
+			it('should not trigger the popup if there is a valid session', function (done) {
+
+				var spy = sinon.spy(done.bind(null, new Error('window.open should not be called')));
+				utils.popup = spy;
+
+				hello('testable').login({ force: false }).then(function (r) {
+					expect(spy.notCalled).to.be.ok();
+					expect(r.authResponse).to.eql(session);
+					done();
+				});
+			});
+
+			it('should trigger the popup if the token has expired', function (done) {
+
+				var spy = sinon.spy(function () {
+					done();
+				});
+
+				utils.popup = spy;
+
+				session.expires = new Date().getTime() / 1e3 - 1000;
+
+				hello('testable').login({ force: false });
+			});
+
+			it('should trigger the popup if the scopes have changed', function (done) {
+
+				var spy = sinon.spy(function () {
+					done();
+				});
+
+				utils.popup = spy;
+
+				hello('testable').login({ force: false, scope: 'not-basic' });
+			});
+		});
+
+		describe('custom query string parameters', function () {
+
+			it('should attach custom parameters to the querystring', function (done) {
+
+				var options = {
+					custom: 'custom'
+				};
+
+				var spy = sinon.spy(function (url, name, options) {
+
+					var params = hello.utils.param(url.split('?')[1]);
+
+					expect(params).to.have.property('custom', options.custom);
+
+					done();
+				});
+
+				utils.popup = spy;
+
+				hello.login('testable', options);
+			});
+		});
+
+		describe('global events', function () {
+
+			it('should trigger an auth.init event before requesting the auth flow', function (done) {
+
+				// Listen out for the auth-flow
+				hello.on('auth.init', function (e) {
+					expect(e).to.have.property('network', 'testable');
+					expect(spy.notCalled).to.be.ok();
+					done();
+				});
+
+				// Go no further
+				var spy = sinon.spy();
+				utils.popup = spy;
+
+				// Login
+				hello('testable').login({ force: true });
+			});
+		});
+	});
+});
+
+},{}],11:[function(require,module,exports){
+'use strict';
+
+define(['../../libs/errorResponse'], function (errorResponse) {
+
+	describe('hello.logout', function () {
+
+		before(function () {
+			hello.init({
+				test: {
+					name: 'test',
+					id: 'id'
+				}
+			});
+		});
+
+		after(function () {
+			delete hello.services.test;
+		});
+
+		it('should trigger an error when network is unknown', function (done) {
+			// Make request
+			hello('unknown').logout().then(null, errorResponse('invalid_network', done));
+		});
+
+		it('should assign a complete event', function (done) {
+			hello('unknown').logout(function () {
+				done();
+			});
+		});
+
+		it('should throw an error events in the eventCompleted handler', function (done) {
+			hello('unknown').logout(function (e) {
+				expect(e).to.have.property('error');
+				done();
+			});
+		});
+
+		describe('remove session from store', function () {
+
+			var store = hello.utils.store;
+
+			beforeEach(function () {
+				hello.utils.store = store;
+			});
+
+			afterEach(function () {
+				hello.utils.store = store;
+			});
+
+			it('should remove the session from the localStorage', function () {
+
+				var spy = sinon.spy(function () {
+					return {};
+				});
+
+				hello.utils.store = spy;
+
+				hello('test').logout();
+
+				expect(spy.calledWith('test', null)).to.be.ok();
+			});
+		});
+
+		describe('force=true', function () {
+
+			describe('module.logout handler', function () {
+
+				var module = {
+					logout: function logout() {}
+				};
+
+				var store = hello.utils.store;
+				var session = {};
+
+				beforeEach(function () {
+
+					// Clear all services
+					delete hello.services.testable;
+
+					hello.init({
+						testable: module
+					});
+
+					hello.utils.store = function () {
+						return session;
+					};
+				});
+
+				afterEach(function () {
+					// Restore... bah dum!
+					hello.utils.store = store;
+				});
+
+				it('should call module.logout', function (done) {
+
+					module.logout = function () {
+						done();
+					};
+
+					hello('testable').logout({ force: true });
+				});
+
+				it('should attach authResponse object to the options.authResponse', function (done) {
+
+					module.logout = function (callback, options) {
+						expect(options).to.have.property('authResponse', session);
+						done();
+					};
+
+					hello('testable').logout({ force: true });
+				});
+			});
+		});
+	});
+});
+
+},{}],12:[function(require,module,exports){
+'use strict';
+
+define([], function () {
+
+	describe('hello.use', function () {
+
+		it('should set the service on the current instance only', function () {
+			var root = hello;
+			var rootService = hello.settings.default_service;
+			var instance = hello('instance');
+			var descendent = instance.use('descendent');
+			expect(hello.settings.default_service).to.be(rootService);
+			expect(instance.settings.default_service).to.be('instance');
+			expect(descendent.settings.default_service).to.be('descendent');
+		});
+
+		it('should return a new instance', function () {
+
+			var instance = hello('instance');
+			expect(instance).to.not.be(hello);
+		});
+	});
+});
+
+},{}],13:[function(require,module,exports){
+// Session monitor
+'use strict';
+
+define([], function () {
+
+	describe('Session monitor', function () {
+
+		beforeEach(function () {
+			// Define the service
+			hello.services.test = {
+				id: 'id'
+			};
+		});
+
+		afterEach(function () {
+			// Define the service
+			delete hello.services.test;
+		});
+
+		it('should listen to changes within shared storage and trigger global callbacks where they have otherwise not been triggered', function (done) {
+
+			// Create a callback
+			var callbackName = hello.utils.globalEvent(function (obj) {
+				expect(obj).to.have.property('access_token', 'token');
+				expect(obj).to.have.property('expires_in', 3600);
+
+				// Should remove the callback from the session
+				expect(obj).to.not.have.property('callback');
+				done();
+			});
+
+			// Construct an AuthResponse
+			var obj = {
+				callback: callbackName,
+				access_token: 'token',
+				expires_in: 3600
+			};
+
+			// Store the new auth response and the global callback will be triggered
+			hello.utils.store('test', obj);
+		});
+
+		it('should ignore services which do not have an id defined', function (done) {
+			// Create a spy
+			var spy = sinon.spy(done);
+
+			// Remove the id from the test service
+			delete hello.services.test.id;
+
+			// Create a callback
+			var callbackName = hello.utils.globalEvent(spy);
+
+			// Construct an AuthResponse
+			var obj = {
+				callback: callbackName,
+				access_token: 'token',
+				expires_in: 3600
+			};
+
+			// Store the new auth response and the global callback will be triggered
+			hello.utils.store('test', obj);
+
+			// Create a timer
+			setTimeout(function () {
+				expect(spy.called).to.not.be.ok();
+				done();
+			}, 1500);
+		});
+	});
+});
+
+},{}],14:[function(require,module,exports){
+// Chrome Packaged Apps
+// The Chrome Extension redefines the "hello.utils.popup"
+
+'use strict';
+
+describe('ChromeApp hello.utils.popup', function () {
+
+	var _launch = chrome.identity.launchWebAuthFlow;
+
+	after(function () {
+		chrome.identity.launchWebAuthFlow = _launch;
+	});
+
+	it('Should launch chrome.identity.launchWebAuthFlow', function () {
+
+		var spy = sinon.spy();
+
+		chrome.identity.launchWebAuthFlow = spy;
+
+		hello.utils.popup('https://doma.in/oauth/auth', 'https://redirect.uri/path', {});
+
+		expect(spy.calledOnce).to.be.ok();
+	});
+});
+
+},{}],15:[function(require,module,exports){
+// API, A quick run through of the endpoints and their responses
+'use strict';
+
+define(['./helper', '../../stubs/endpoints'], function (helper, endpoints) {
+
+	// Endpoints is an generated array of files in the stubs directory.
+	// Here we are using it to simulate a range of API requests and responses to see how Hello.API handles them.
+
+	describe('API endpoints', function () {
+
+		helper.sharedSetup();
+
+		helper.forEach(endpoints, function (fileName) {
+
+			// Extract from the file name the endpoint request
+			var m = fileName.match(/([a-z]+)\/(get|post|del|put)\/(.*?)(;[^.]+)?(\-([a-z]+))?\.json/);
+			var network = m[1];
+			var method = m[2];
+			var path = m[3];
+			var query = m[4];
+			var errors = m[5];
+
+			// Format query
+			if (query) {
+				query = splitter(query, ';', '-');
+			}
+
+			it('should handle ' + m.slice(1, 5).join(' '), function (done) {
+
+				var req = {
+					path: path,
+					method: method,
+					query: query,
+					stub: m[0]
+				};
+
+				var promise = hello(network).api(req);
+
+				if (!errors) {
+					promise.then(function () {
+						done();
+					}, done);
+				} else {
+					promise.then(done, function () {
+						done();
+					});
+				}
+			});
+		});
+	});
+});
+
+function splitter(str, delim, sep) {
+	var q = {};
+
+	str.split(delim).forEach(function (s) {
+		if (s === '') {
+			return;
+		}
+
+		var m = s.split(sep);
+		q[m[0]] = m[1];
+	});
+
+	return q;
+}
+
+},{}],16:[function(require,module,exports){
+'use strict';
+
+define(['./helper'], function (helper) {
+
+	describe('hello.api(\'/me\')', function () {
+
+		helper.sharedSetup();
+
+		var tests = [{
+			network: 'bikeindex',
+			expect: {
+				id: '13674',
+				thumbnail: undefined
+			},
+			errorExpect: {
+				code: 'access_denied',
+				message: 'OAuth error: unauthorized'
+			}
+		}, {
+			network: 'box',
+			expect: {
+				id: '197571718',
+				name: 'Jane McGee',
+				thumbnail: 'https://app.box.com/api/avatar/large/197571718'
+			},
+			errorExpect: false
+		}, {
+			network: 'dropbox',
+			expect: {
+				id: 374434467,
+				name: 'Jane McGee',
+				thumbnail: undefined
+			},
+			errorExpect: {
+				code: 'server_error',
+				message: 'The given OAuth 2 access token doesn\'t exist or has expired.'
+			}
+		}, {
+			network: 'facebook',
+			expect: {
+				id: '100008806508341',
+				name: 'Jane McGee',
+				thumbnail: 'https://graph.facebook.com/100008806508341/picture'
+			},
+			errorExpect: {
+				code: 190,
+				message: 'Invalid OAuth access token.'
+			}
+		}, {
+			network: 'flickr',
+			expect: {
+				id: '34790912@N05',
+				name: 'Jane McGee',
+				thumbnail: 'https://farm4.staticflickr.com/3729/buddyicons/34790912@N05_l.jpg'
+			},
+			errorExpect: {
+				code: 'invalid_request',
+				message: 'User not found'
+			}
+		}, {
+			network: 'foursquare',
+			expect: {
+				id: '110649444',
+				name: 'Jane McGee',
+				thumbnail: 'https://irs0.4sqi.net/img/user/100x100/110649444-XTNO1LD24NJOW0TW.jpg'
+			},
+			errorExpect: {
+				code: 'access_denied',
+				message: 'OAuth token invalid or revoked.'
+			}
+		}, {
+			network: 'github',
+			expect: {
+				id: 10398423,
+				name: 'janemcgee35',
+				thumbnail: 'https://avatars.githubusercontent.com/u/10398423?v=3'
+			},
+			errorExpect: false
+		}, {
+			network: 'google',
+			expect: {
+				id: '115111284799080900590',
+				name: 'Jane McGee',
+				thumbnail: 'https://lh3.googleusercontent.com/-NWCgcgRDieE/AAAAAAAAAAI/AAAAAAAAABc/DCi-M8IuzMo/photo.jpg?sz=50'
+			},
+			errorExpect: {
+				code: 403,
+				message: 'Daily Limit for Unauthenticated Use Exceeded. Continued use requires signup.'
+			}
+		}, {
+			network: 'instagram',
+			expect: {
+				id: '1636340308',
+				name: 'Jane McGee',
+				thumbnail: 'https://igcdn-photos-h-a.akamaihd.net/hphotos-ak-xaf1/t51.2885-19/10919499_876030935750711_2062576510_a.jpg'
+			},
+			errorExpect: {
+				code: 'OAuthParameterException',
+				message: 'Missing client_id or access_token URL parameter.'
+			}
+		}, {
+			network: 'joinme',
+			expect: {
+				id: 'janemcgee35@join.me',
+				name: 'Jane McGee',
+				thumbnail: undefined
+			},
+			errorExpect: false
+		}, {
+			network: 'linkedin',
+			expect: {
+				id: 'sDsPqKdBkl',
+				name: 'Jane McGee',
+				thumbnail: 'https://media.licdn.com/mpr/mprx/0_oFea4Eo2n6j5ZQS2oLwg4HE7NiWQ4Qp2H_yl4dVyw6gBFGIuQ3ZGnWmtsSdZUTjhIXErcmkkxGoX'
+			},
+			errorExpect: {
+				code: 401,
+				message: 'Unknown authentication scheme'
+			}
+		}, {
+			network: 'soundcloud',
+			expect: {
+				id: 131420710,
+				name: 'janemcgee35',
+				thumbnail: 'https://i1.sndcdn.com/avatars-000123511300-upb183-large.jpg'
+			},
+			errorExpect: false
+		}, {
+			network: 'twitter',
+			expect: {
+				id: 2961707375,
+				name: 'Jane McGee',
+				thumbnail: 'https://pbs.twimg.com/profile_images/552017091583152128/a8lyS35y_normal.jpeg'
+			},
+			errorExpect: {
+				code: 'request_failed',
+				message: 'Bad Authentication data'
+			}
+		}, {
+			network: 'vk',
+			expect: {
+				id: 434460,
+				name: 'Юрий Опарин',
+				thumbnail: 'http://cs304605.vk.me/u434460/d_1acca7c0.jpg'
+			},
+			errorExpect: {
+				code: 10,
+				message: 'Internal server error: could not get application'
+			}
+		}, {
+			network: 'windows',
+			expect: {
+				id: '939f37452466502a',
+				name: 'Jane McGee',
+				thumbnail: 'https://apis.live.net/v5.0/939f37452466502a/picture?access_token=token'
+			},
+			errorExpect: {
+				code: 'request_token_invalid',
+				message: 'The access token isn\'t valid.'
+			}
+		}, {
+			network: 'yahoo',
+			expect: {
+				id: 'UKGYDRAHEWONVO35KOOBBGQ4UU',
+				name: 'Jane McGee',
+				thumbnail: 'https://socialprofiles.zenfs.com/images/805efb9485e4878f21be4d9e9e5890ca_192.png'
+			},
+			errorExpect: false
+		}];
+
+		describe('authorised requests', function () {
+
+			helper.forEach(tests, function (test) {
+
+				it('should format ' + test.network + ' correctly', function (done) {
+
+					hello(test.network).api('/me', {
+						access_token: 'token'
+					}).then(function (me) {
+						expect(me.id).to.be(test.expect.id);
+						expect(me.name).to.be(test.expect.name);
+						expect(me.thumbnail).to.be(test.expect.thumbnail);
+						done();
+					}).then(null, done);
+				});
+			});
+		});
+
+		describe('unauthorised requests', function () {
+
+			helper.forEach(tests, function (test) {
+
+				if (!test.errorExpect) {
+					return;
+				}
+
+				it('should trigger the error handler for ' + test.network, function (done) {
+
+					hello(test.network).api('/me', {
+						stubType: '-unauth',
+						access_token: null
+					}).then(done, function (data) {
+						expect(data.error).to.not.be(undefined);
+						expect(data.error.code).to.be(test.errorExpect.code);
+						expect(data.error.message).to.be(test.errorExpect.message);
+						done();
+					}).then(null, done);
+				});
+			});
+		});
+	});
+});
+
+},{}],17:[function(require,module,exports){
+'use strict';
+
+define(['./helper'], function (helper) {
+
+	describe('hello.api(\'/me/album\')', function () {
+
+		helper.sharedSetup();
+
+		var tests = [{
+			network: 'google',
+			expect: {
+				length: 6,
+				first: {
+					id: 'https://picasaweb.google.com/data/entry/api/user/115111284799080900590/albumid/6101137643479860177/photoid/6101137651261702722?alt=json',
+					name: 'bling-piggy.jpg',
+					picture: 'https://lh5.googleusercontent.com/-WYnDVp26U7k/VKuYXl03AkI/AAAAAAAAADU/nOsGBUZecRw/bling-piggy.jpg'
+				}
+			}
+		}, {
+			network: 'facebook',
+			expect: {
+				length: 7,
+				first: {
+					id: '1380486122254925',
+					name: undefined,
+					picture: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xfa1/v/t1.0-9/s130x130/10924813_1380486122254925_8328783981056301338_n.jpg?oh=d703e6d45262e4996a783dcd056dec03&oe=5531C3B7&__gda__=1429692476_20dfea8df43185ea83fd611e043f5213'
+				}
+			}
+		}, {
+			network: 'windows',
+			expect: {
+				length: 7,
+				first: {
+					id: 'file.939f37452466502a.939F37452466502A!117',
+					name: 'funeral-piggy.jpg',
+					picture: 'https://public-ch3301.files.1drv.com/y2mVoR3TWKeWdH5vzmYmYyFRaFRlj0FPPy6zAcQWY2hy9tcjqWfKc5Uqg2ctPFwuz-WmPIhp5gZKZz8SU3gFx1vNdVDmLetto8IOMRpD0wAKoQMl1IWJFPCmu-hE8-FVB2Eb4x9885zel5SRdAqfsR3OA/funeral-piggy.jpg?psid=1'
+				}
+			}
+		}];
+
+		helper.forEach(tests, function (test) {
+
+			it('should format ' + test.network + ' correctly', function (done) {
+
+				hello(test.network).api('/me/album', {
+					id: 'album-id'
+				}).then(function (album) {
+					var first = album.data[0];
+					expect(album.data.length).to.be(test.expect.length);
+					expect(first.id).to.be(test.expect.first.id);
+					expect(first.name).to.be(test.expect.first.name);
+					expect(first.picture).to.be(test.expect.first.picture);
+					done();
+				}).then(null, done);
+			});
+		});
+	});
+});
+
+},{}],18:[function(require,module,exports){
+'use strict';
+
+define(['./helper'], function (helper) {
+
+	describe('hello.api(\'/me/albums\')', function () {
+
+		helper.sharedSetup();
+
+		var tests = [{
+			network: 'facebook',
+			expect: {
+				length: 3,
+				first: {
+					id: '1380499628920241',
+					name: 'Timeline Photos',
+					thumbnail: 'https://graph.facebook.com/10152107682897233/picture?access_token=token',
+					photos: undefined
+				}
+			}
+		}, {
+			network: 'flickr',
+			expect: {
+				length: 3,
+				first: {
+					id: '72157627511003764',
+					name: 'Wales with mum and Matt - dropped in on Ozzy',
+					photos: 'https://api.flickr.com/services/rest?method=flickr.photosets.getPhotos&api_key=undefined&format=json&photoset_id=72157627511003764'
+				}
+			}
+		}, {
+			network: 'google',
+			expect: {
+				length: 2,
+				first: {
+					id: 'https://picasaweb.google.com/data/entry/api/user/115111284799080900590/albumid/6101137643479860177?alt=json',
+					name: '2015-01-06',
+					thumbnail: 'https://lh4.googleusercontent.com/-FwGrKcgx4II/VKuYXI1hg9E/AAAAAAAAADQ/_EpYdYBoAng/s160-c/20150106.jpg',
+					photos: 'https://picasaweb.google.com/data/feed/api/user/115111284799080900590/albumid/6101137643479860177?alt=json&authkey=Gv1sRgCJW1vqqlkp_74wE'
+				}
+			}
+		}, {
+			network: 'windows',
+			expect: {
+				length: 2,
+				first: {
+					id: 'folder.939f37452466502a.939F37452466502A!115',
+					name: 'More Pictures',
+					thumbnail: undefined,
+					photos: 'https://apis.live.net/v5.0/folder.939f37452466502a.939F37452466502A!115/photos'
+				}
+			}
+		}];
+
+		helper.forEach(tests, function (test) {
+
+			it('should format ' + test.network + ' correctly', function (done) {
+				hello(test.network).api('/me/albums', {
+					access_token: 'token'
+				}).then(function (albums) {
+					var first = albums.data[0];
+					expect(albums.data).not.to.be(undefined);
+					expect(albums.data.length).to.be(test.expect.length);
+					expect(first.id).to.be(test.expect.first.id);
+					expect(first.name).to.be(test.expect.first.name);
+					expect(first.thumbnail).to.be(test.expect.first.thumbnail);
+					expect(first.photos).to.be(test.expect.first.photos);
+					done();
+				}).then(null, done);
+			});
+		});
+	});
+});
+
+},{}],19:[function(require,module,exports){
+// Test GET me/friends
+
+'use strict';
+
+define(['./helper'], function (helper) {
+
+	describe('hello.api(\'/me/friends\')', function () {
+
+		helper.sharedSetup();
+
+		var tests = ['flickr', 'foursquare', 'github', 'google', 'linkedin', 'soundcloud', 'twitter', 'windows', 'yahoo'];
+
+		tests.forEach(function (network) {
+
+			it('should format ' + network + ':me/friends correctly', function (done) {
+
+				hello(network).api('/me/friends').then(function (friends) {
+					friends.data.forEach(function (friend) {
+						expect(friend.id).to.be.ok();
+						expect(friend.name).to.be.ok();
+						if (friend.thumbnail) {
+							expect(friend.thumbnail).to.match(/^https?\:\/\/[a-z0-9\.\-]+\/.*/i);
+						}
+					});
+
+					expect(friends.data.length).to.be.ok();
+
+					done();
+				}).then(null, done);
+			});
+		});
+	});
+});
+
+},{}],20:[function(require,module,exports){
+'use strict';
+
+define(['./helper'], function (helper) {
+
+	describe('hello.api(\'/me/photos\')', function () {
+
+		helper.sharedSetup();
+
+		var tests = [{
+			network: 'instagram',
+			expect: {
+				length: 5,
+				first: {
+					id: '891783660020488189_1636340308',
+					name: 'Red Carpet Piggy',
+					picture: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_n.jpg',
+					pictures: [{
+						source: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_s.jpg',
+						width: 150,
+						height: 150
+					}, {
+						source: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_a.jpg',
+						width: 306,
+						height: 306
+					}, {
+						source: 'http://scontent-a.cdninstagram.com/hphotos-xaf1/t51.2885-15/10903489_924233790922795_96516085_n.jpg',
+						width: 640,
+						height: 640
+					}]
+				}
+			}
+		}, {
+			network: 'google',
+			expect: {
+				length: 7,
+				first: {
+					id: 'https://picasaweb.google.com/data/entry/api/user/115111284799080900590/albumid/6101137643479860177/photoid/6101137679962229346?alt=json',
+					name: 'wistful-piggy.jpg',
+					picture: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/wistful-piggy.jpg',
+					pictures: [{
+						source: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/s72/wistful-piggy.jpg',
+						width: 48,
+						height: 72
+					}, {
+						source: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/s144/wistful-piggy.jpg',
+						width: 96,
+						height: 144
+					}, {
+						source: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/s288/wistful-piggy.jpg',
+						width: 192,
+						height: 288
+					}, {
+						source: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/wistful-piggy.jpg',
+						width: 300,
+						height: 450
+					}]
+				}
+			}
+		}, {
+			network: 'facebook',
+			expect: {
+				length: 5,
+				first: {
+					id: '1380493922254145',
+					name: 'LBD Piggy',
+					picture: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/v/t1.0-9/s130x130/10897962_1380493922254145_5386757285347386511_n.jpg?oh=98e30ce334bf9cb01f808c0c1134afff&oe=55291C94&__gda__=1429910956_84b3b9a2d5d9326485e630290657afcc',
+					pictures: [{
+						source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/v/t1.0-9/p130x130/10897962_1380493922254145_5386757285347386511_n.jpg?oh=c844758a0168dc0fa20106614496f20f&oe=553CD544&__gda__=1433335420_b6b78a2b6554da54741dffea139b18bf',
+						width: 130,
+						height: 147
+					}, {
+						source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/v/t1.0-9/p75x225/10897962_1380493922254145_5386757285347386511_n.jpg?oh=ea4175f2762b46d4b8b3bfb663a0cc91&oe=55361281&__gda__=1428907231_a5b7ab31f4bdf6ad829389734e4bf42b',
+						width: 198,
+						height: 225
+					}, {
+						source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/v/t1.0-9/p320x320/10897962_1380493922254145_5386757285347386511_n.jpg?oh=be66c3ee515536d73917146cfa6f7d86&oe=552CF0A3&__gda__=1428296859_6705bd7c1183d77b84a9249492334798',
+						width: 320,
+						height: 362
+					}, {
+						source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/v/t1.0-9/p180x540/10897962_1380493922254145_5386757285347386511_n.jpg?oh=a5cd1de629354d1b880133cf314408c9&oe=552BFCE8&__gda__=1430386896_07316fcb7c40fc98585837b6b33773ff',
+						width: 477,
+						height: 540
+					}, {
+						source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/v/t1.0-9/p480x480/10897962_1380493922254145_5386757285347386511_n.jpg?oh=be2c6c759107eecf58c323cfb2053492&oe=553FE4E4&__gda__=1428803548_71b51cb1f98f4eb0608bcb11df5cb8bf',
+						width: 480,
+						height: 543
+					}, {
+						source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/t31.0-8/p600x600/10896389_1380493922254145_5386757285347386511_o.jpg',
+						width: 600,
+						height: 679
+					}, {
+						source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/t31.0-8/p720x720/10896389_1380493922254145_5386757285347386511_o.jpg',
+						width: 720,
+						height: 815
+					}, {
+						source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/t31.0-8/p960x960/10896389_1380493922254145_5386757285347386511_o.jpg',
+						width: 960,
+						height: 1086
+					}, {
+						source: 'https://fbcdn-sphotos-g-a.akamaihd.net/hphotos-ak-xap1/t31.0-8/10896389_1380493922254145_5386757285347386511_o.jpg',
+						width: 1809,
+						height: 2048
+					}]
+				}
+			}
+		}, {
+			network: 'flickr',
+			expect: {
+				length: 5,
+				first: {
+					id: '6206400436',
+					name: 'DSC03367',
+					picture: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99.jpg',
+					pictures: [{
+						source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_t.jpg',
+						width: 100,
+						height: 100
+					}, {
+						source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_m.jpg',
+						width: 240,
+						height: 240
+					}, {
+						source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_n.jpg',
+						width: 320,
+						height: 320
+					}, {
+						source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99.jpg',
+						width: 500,
+						height: 500
+					}, {
+						source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_z.jpg',
+						width: 640,
+						height: 640
+					}, {
+						source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_c.jpg',
+						width: 800,
+						height: 800
+					}, {
+						source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_b.jpg',
+						width: 1024,
+						height: 1024
+					}, {
+						source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_h.jpg',
+						width: 1600,
+						height: 1600
+					}, {
+						source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_k.jpg',
+						width: 2048,
+						height: 2048
+					}, {
+						source: 'https://farm7.staticflickr.com/6162/6206400436_1d15b3aa99_o.jpg',
+						width: 2048,
+						height: 2048
+					}]
+				}
+			}
+		}, {
+			network: 'windows',
+			expect: {
+				length: 7,
+				first: {
+					id: 'file.939f37452466502a.939F37452466502A!109',
+					name: 'funeral-piggy.jpg',
+					picture: 'https://public-ch3301.files.1drv.com/y2mtE3u-1oVm7UJkYR5Ylxn2b8BR4attabxQ0AEiajowKHvlJUZBxjLpP8LWG4Pi4ZEuDyQFELhxSxoNNHxP--6kcx0Z6mCsWnYjR1_1-izBx8HkqE1ghH6I22bQtIKPjFXnXJbHtHXhFgvQwq7eKZ03Q/funeral-piggy.jpg?psid=1',
+					pictures: [{
+						source: 'https://public-ch3301.files.1drv.com/y2mtE3u-1oVm7UJkYR5Ylxn2b8BR4attabxQ0AEiajowKHvlJUZBxjLpP8LWG4Pi4ZEuDyQFELhxSxoNNHxP--6kcx0Z6mCsWnYjR1_1-izBx8HkqE1ghH6I22bQtIKPjFXnXJbHtHXhFgvQwq7eKZ03Q/funeral-piggy.jpg?psid=1',
+						width: 85,
+						height: 96
+					}, {
+						source: 'https://public-ch3301.files.1drv.com/y2mrLoEhkFAzHOjlFCyVV4ypi_TtACvF476rRuvAOBoVSsNJrt722EP9xCR_b_Z0qa8vocx8kNPlxoUFehnT_7e6LD-L8J14V-SzD5nCRiiT-Mg8J2pKgtW_pf6XD2Sg7oS/funeral-piggy.jpg?psid=1&ck=2&ex=720',
+						width: 156,
+						height: 176
+					}, {
+						source: 'https://public-ch3301.files.1drv.com/y2mqUA8S78mIJyXz1Tof4bZ8a_4CuConMxRIJ4nZ2I6QyQDjmshrQb393fB8xwt_5b_3b1-je4c_OlJbXJVF9oafdXw1t7eB4rqFTuVZAq-snGg1ksLwLM3OAJUUPGTidy6/funeral-piggy.jpg?psid=1&ck=2&ex=720',
+						width: 707,
+						height: 800
+					}, {
+						source: 'https://public-ch3301.files.1drv.com/y2mg6goRE11zDIFTJ7rokvWLucBkeD6k6ljXPP2ARkUjR2rfo5-xU13wAU23CrmaGEsIr6NIeXfetdx0htCjqUb7QYttyRnuP2BXFJ0f_7uEA5NGIeH2tk6_DjFoUUIHKg-KdFDuKWM_FHUe48vF6fr4g/funeral-piggy.jpg?psid=1',
+						width: 2000,
+						height: 2263
+					}]
+				}
+			}
+		}];
+
+		helper.forEach(tests, function (test) {
+
+			it('should format ' + test.network + ' correctly', function (done) {
+
+				hello(test.network).api('/me/photos').then(function (photos) {
+					var first = photos.data[0];
+					expect(photos.data.length).to.be(test.expect.length);
+					expect(first.id).to.be(test.expect.first.id);
+					expect(first.name).to.be(test.expect.first.name);
+					expect(first.picture).to.be(test.expect.first.picture);
+					if (test.expect.first.pictures) expect(first.pictures).to.eql(test.expect.first.pictures);
+					done();
+				}).then(null, done);
+			});
+		});
+	});
+});
+
+},{}],21:[function(require,module,exports){
+'use strict';
+
+define([], function () {
+
+	// Shim up IE8
+	if (typeof XMLHttpRequest !== 'undefined' && !('withCredentials' in new XMLHttpRequest())) {
+
+		XMLHttpRequest.prototype.withCredentials = true;
+		hello.utils.xhr = function (method, url, headers, body, callback) {
+			var x = new XMLHttpRequest();
+			x.onreadystatechange = function () {
+				if (x.readyState === 4) {
+					var r = x.responseText;
+					r = JSON.parse(r);
+					callback(r);
+				}
+			};
+
+			x.open(method, url);
+			x.send(body);
+			return x;
+		};
+	}
+
+	return {
+
+		forEach: function forEach(collection, fn) {
+			if (collection && collection.length) {
+				for (var i = 0; i < collection.length; i += 1) {
+					fn(collection[i]);
+				}
+			}
+		},
+
+		getRequestProxy: function getRequestProxy(originalRequest) {
+
+			var requestProxy = function requestProxy(req, callback) {
+
+				var r = {
+					network: req.network,
+					method: 'get',
+					url: req.url,
+					data: req.data,
+					query: {},
+					xhr: true
+				};
+
+				var stubName = req.path + (req.options.stubType || '') + '.json';
+				r.url = './stubs/' + (req.stub || req.network + '/' + req.method + '/' + stubName);
+				originalRequest.call(hello.utils, r, callback);
+			};
+
+			return requestProxy;
+		},
+
+		sharedSetup: function sharedSetup() {
+
+			var originalGetAuthResponse = hello.getAuthResponse;
+			var originalRequest = hello.utils.request;
+			var requestProxy = this.getRequestProxy(originalRequest);
+
+			before(function () {
+				hello.getAuthResponse = function (service) {
+					return {
+						access_token: 'token'
+					};
+				};
+
+				hello.utils.request = requestProxy;
+			});
+
+			after(function () {
+				hello.getAuthResponse = originalGetAuthResponse;
+				hello.utils.request = originalRequest;
+			});
+		}
+
+	};
+});
+
+},{}],22:[function(require,module,exports){
+// Load in the modules to test the endpoints
+'use strict';
+
+define(['./api', './apiMe', './apiMeAlbum', './apiMeAlbums', './apiMeFriends', './apiMePhotos'], function () {
+	// Done
+});
+
+},{}],23:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+	value: true
+});
+
+var a = ['localStorage', 'sessionStorage'];
+var i = -1;
+var prefix = 'test';
+
+var namespace = 'tricks';
+
+exports.namespace = namespace;
+// Set LocalStorage
+var localStorage;
+
+while (a[++i]) {
+	try {
+		// In Chrome with cookies blocked, calling localStorage throws an error
+		localStorage = window[a[i]];
+		localStorage.setItem(prefix + i, i);
+		localStorage.removeItem(prefix + i);
+		break;
+	} catch (e) {
+		localStorage = null;
+	}
+}
+
+if (!localStorage) {
+
+	var cache = null;
+
+	localStorage = {
+		getItem: function getItem(prop) {
+			prop += '=';
+			var m = document.cookie.split(';');
+			m.forEach(function (item) {
+				item = item.replace(/(^\s+|\s+$)/, '');
+				if (item && item.indexOf(prop) === 0) {
+					return item.substr(prop.length);
+				}
+			});
+
+			return cache;
+		},
+
+		setItem: function setItem(prop, value) {
+			cache = value;
+			document.cookie = prop + '=' + value;
+		}
+	};
+
+	// Fill the cache up
+	cache = localStorage.getItem(namespace);
+}
+
+function get() {
+	var json = {};
+	try {
+		json = JSON.parse(localStorage.getItem(namespace)) || {};
+	} catch (e) {}
+
+	return json;
+}
+
+function set(json) {
+	localStorage.setItem(namespace, JSON.stringify(json));
+}
+
+module.exports = function (name, value) {
+	// Local storage
+	var json = get();
+
+	if (name && value === undefined) {
+		return json[name] || null;
+	} else if (name && value === null) {
+		try {
+			delete json[name];
+		} catch (e) {
+			json[name] = null;
+		}
+	} else if (name) {
+		json[name] = value;
+	} else {
+		return json;
+	}
+
+	set(json);
+
+	return json || null;
+};
+
+},{}],24:[function(require,module,exports){
 'use strict';
 
 var instanceOf = require('./instanceOf.js');
@@ -2646,11 +4628,14 @@ module.exports = function extend(r) {
 	return r;
 };
 
-},{"./instanceOf.js":4}],4:[function(require,module,exports){
+},{"./instanceOf.js":25}],25:[function(require,module,exports){
 "use strict";
 
 module.exports = function (test, root) {
 	return root && test instanceof root;
 };
 
-},{}]},{},[2]);
+},{}]},{},[5])
+
+
+//# sourceMappingURL=bundle.js.map

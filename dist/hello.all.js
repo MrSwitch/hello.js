@@ -1,155 +1,127 @@
-/*! hellojs v1.13.3 | (c) 2012-2016 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
-// ES5 Object.create
-if (!Object.create) {
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+// shim for using process in browser
 
-	// Shim, Object create
-	// A shim for Object.create(), it adds a prototype to a new object
-	Object.create = (function() {
+var process = module.exports = {};
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
 
-		function F() {}
-
-		return function(o) {
-
-			if (arguments.length != 1) {
-				throw new Error('Object.create implementation only accepts one parameter.');
-			}
-
-			F.prototype = o;
-			return new F();
-		};
-
-	})();
-
+function cleanUpNextTick() {
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
 }
 
-// ES5 Object.keys
-if (!Object.keys) {
-	Object.keys = function(o, k, r) {
-		r = [];
-		for (k in o) {
-			if (r.hasOwnProperty.call(o, k))
-				r.push(k);
-		}
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = setTimeout(cleanUpNextTick);
+    draining = true;
 
-		return r;
-	};
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    clearTimeout(timeout);
 }
 
-// ES5 [].indexOf
-if (!Array.prototype.indexOf) {
-	Array.prototype.indexOf = function(s) {
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        setTimeout(drainQueue, 0);
+    }
+};
 
-		for (var j = 0; j < this.length; j++) {
-			if (this[j] === s) {
-				return j;
-			}
-		}
-
-		return -1;
-	};
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
 }
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
 
-// ES5 [].forEach
-if (!Array.prototype.forEach) {
-	Array.prototype.forEach = function(fun/*, thisArg*/) {
+function noop() {}
 
-		if (this === void 0 || this === null) {
-			throw new TypeError();
-		}
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
 
-		var t = Object(this);
-		var len = t.length >>> 0;
-		if (typeof fun !== 'function') {
-			throw new TypeError();
-		}
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
 
-		var thisArg = arguments.length >= 2 ? arguments[1] : void 0;
-		for (var i = 0; i < len; i++) {
-			if (i in t) {
-				fun.call(thisArg, t[i], i, t);
-			}
-		}
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
 
-		return this;
-	};
-}
+},{}],2:[function(require,module,exports){
+'use strict';
 
-// ES5 [].filter
-if (!Array.prototype.filter) {
-	Array.prototype.filter = function(fun, thisArg) {
+// require('./hello.polyfill.js');
+// require('./hello.chromeapp.js');
+// require('./hello.phonegap.js');
+require('./modules/dropbox.js');
+require('./modules/facebook.js');
+require('./modules/flickr.js');
+require('./modules/foursquare.js');
+require('./modules/github.js');
+require('./modules/google.js');
+require('./modules/instagram.js');
+require('./modules/joinme.js');
+require('./modules/linkedin.js');
+require('./modules/soundcloud.js');
+require('./modules/twitter.js');
+require('./modules/vk.js');
+require('./modules/windows.js');
+require('./modules/yahoo.js');
 
-		var a = [];
-		this.forEach(function(val, i, t) {
-			if (fun.call(thisArg || void 0, val, i, t)) {
-				a.push(val);
-			}
-		});
+// require('./hello.amd.js');
+// require('./hello.commonjs.js');
 
-		return a;
-	};
-}
+module.exports = require('./hello.js');
 
-// Production steps of ECMA-262, Edition 5, 15.4.4.19
-// Reference: http://es5.github.io/#x15.4.4.19
-if (!Array.prototype.map) {
+},{"./hello.js":3,"./modules/dropbox.js":4,"./modules/facebook.js":5,"./modules/flickr.js":6,"./modules/foursquare.js":7,"./modules/github.js":8,"./modules/google.js":9,"./modules/instagram.js":10,"./modules/joinme.js":11,"./modules/linkedin.js":12,"./modules/soundcloud.js":13,"./modules/twitter.js":14,"./modules/vk.js":15,"./modules/windows.js":16,"./modules/yahoo.js":17}],3:[function(require,module,exports){
+(function (process){
+'use strict';
 
-	Array.prototype.map = function(fun, thisArg) {
-
-		var a = [];
-		this.forEach(function(val, i, t) {
-			a.push(fun.call(thisArg || void 0, val, i, t));
-		});
-
-		return a;
-	};
-}
-
-// ES5 isArray
-if (!Array.isArray) {
-
-	// Function Array.isArray
-	Array.isArray = function(o) {
-		return Object.prototype.toString.call(o) === '[object Array]';
-	};
-
-}
-
-// Test for location.assign
-if (typeof window === 'object' && typeof window.location === 'object' && !window.location.assign) {
-
-	window.location.assign = function(url) {
-		window.location = url;
-	};
-
-}
-
-// Test for Function.bind
-if (!Function.prototype.bind) {
-
-	// MDN
-	// Polyfill IE8, does not support native Function.bind
-	Function.prototype.bind = function(b) {
-
-		if (typeof this !== 'function') {
-			throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
-		}
-
-		function C() {}
-
-		var a = [].slice;
-		var f = a.call(arguments, 1);
-		var _this = this;
-		var D = function() {
-			return _this.apply(this instanceof C ? this : b || window, f.concat(a.call(arguments)));
-		};
-
-		C.prototype = this.prototype;
-		D.prototype = new C();
-
-		return D;
-	};
-
-}
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
 /**
  * @hello.js
@@ -163,47 +135,20 @@ if (!Function.prototype.bind) {
  * @license MIT: You are free to use and modify this code for any use, on the condition that this copyright notice remains.
  */
 
-var hello = function(name) {
+var extend = require('tricks/object/extend');
+
+var hello = function hello(name) {
 	return hello.use(name);
 };
 
-hello.utils = {
+module.exports = hello;
 
-	// Extend the first object with the properties and methods of the second
-	extend: function(r /*, a[, b[, ...]] */) {
-
-		// Get the arguments as an array but ommit the initial item
-		Array.prototype.slice.call(arguments, 1).forEach(function(a) {
-			if (Array.isArray(r) && Array.isArray(a)) {
-				Array.prototype.push.apply(r, a);
-			}
-			else if (r instanceof Object && a instanceof Object && r !== a) {
-				for (var x in a) {
-					r[x] = hello.utils.extend(r[x], a[x]);
-				}
-			}
-			else {
-
-				if (Array.isArray(a)) {
-					// Clone it
-					a = a.slice(0);
-				}
-
-				r = a;
-			}
-		});
-
-		return r;
-	}
-};
-
-// Core library
-hello.utils.extend(hello, {
+extend(hello, {
 
 	settings: {
 
 		// OAuth2 authentication defaults
-		redirect_uri: window.location.href.split('#')[0],
+		redirect_uri: typeof location !== 'undefined' ? location.href.split('#')[0] : null,
 		response_type: 'token',
 		display: 'popup',
 		state: '',
@@ -251,7 +196,7 @@ hello.utils.extend(hello, {
 		// When 'display=page' this property defines where the users page should end up after redirect_uri
 		// Ths could be problematic if the redirect_uri is indeed the final place,
 		// Typically this circumvents the problem of the redirect_url being a dumb relay page.
-		page_uri: window.location.href
+		page_uri: typeof location !== 'undefined' ? location.href : null
 	},
 
 	// Service configuration objects
@@ -259,7 +204,7 @@ hello.utils.extend(hello, {
 
 	// Use
 	// Define a new instance of the HelloJS library with a default service
-	use: function(service) {
+	use: function use(service) {
 
 		// Create self, which inherits from its parent
 		var self = Object.create(this);
@@ -283,7 +228,7 @@ hello.utils.extend(hello, {
 	// @param object o, contains a key value pair, service => clientId
 	// @param object opts, contains a key value pair of options used for defining the authentication defaults
 	// @param number timeout, timeout in seconds
-	init: function(services, options) {
+	init: function init(services, options) {
 
 		var utils = this.utils;
 
@@ -293,18 +238,20 @@ hello.utils.extend(hello, {
 
 		// Define provider credentials
 		// Reformat the ID field
-		for (var x in services) {if (services.hasOwnProperty(x)) {
-			if (typeof (services[x]) !== 'object') {
-				services[x] = {id: services[x]};
+		for (var x in services) {
+			if (services.hasOwnProperty(x)) {
+				if (_typeof(services[x]) !== 'object') {
+					services[x] = { id: services[x] };
+				}
 			}
-		}}
+		}
 
 		// Merge services if there already exists some
-		utils.extend(this.services, services);
+		extend(this.services, services);
 
 		// Update the default settings with this one.
 		if (options) {
-			utils.extend(this.settings, options);
+			extend(this.settings, options);
 
 			// Do this immediatly incase the browser changes the current path.
 			if ('redirect_uri' in options) {
@@ -320,7 +267,7 @@ hello.utils.extend(hello, {
 	// @param network stringify       name to connect to
 	// @param options object    (optional)  {display mode, is either none|popup(default)|page, scope: email,birthday,publish, .. }
 	// @param callback  function  (optional)  fired on signin
-	login: function() {
+	login: function login() {
 
 		// Create an object which inherits its parent as the prototype and constructs a new event chain.
 		var _this = this;
@@ -329,7 +276,7 @@ hello.utils.extend(hello, {
 		var promise = utils.Promise();
 
 		// Get parameters
-		var p = utils.args({network: 's', options: 'o', callback: 'f'}, arguments);
+		var p = utils.args({ network: 's', options: 'o', callback: 'f' }, arguments);
 
 		// Local vars
 		var url;
@@ -357,7 +304,7 @@ hello.utils.extend(hello, {
 		promise.proxy.then(emit.bind(this, 'auth.login auth'), emit.bind(this, 'auth.failed auth'));
 
 		// Is our service valid?
-		if (typeof (p.network) !== 'string' || !(p.network in _this.services)) {
+		if (typeof p.network !== 'string' || !(p.network in _this.services)) {
 			// Trigger the default login.
 			// Ahh we dont have one.
 			return promise.reject(error('invalid_network', 'The provided network was not recognized'));
@@ -366,15 +313,14 @@ hello.utils.extend(hello, {
 		var provider = _this.services[p.network];
 
 		// Create a global listener to capture events triggered out of scope
-		var callbackId = utils.globalEvent(function(str) {
+		var callbackId = utils.globalEvent(function (str) {
 
 			// The responseHandler returns a string, lets save this locally
 			var obj;
 
 			if (str) {
 				obj = JSON.parse(str);
-			}
-			else {
+			} else {
 				obj = error('cancelled', 'The authentication was not completed');
 			}
 
@@ -391,8 +337,7 @@ hello.utils.extend(hello, {
 					network: obj.network,
 					authResponse: obj
 				});
-			}
-			else {
+			} else {
 				// Reject a successful login
 				promise.reject(obj);
 			}
@@ -459,9 +404,9 @@ hello.utils.extend(hello, {
 		p.qs.state.scope = scope.join(',');
 
 		// Map scopes to the providers naming convention
-		scope = scope.map(function(item) {
+		scope = scope.map(function (item) {
 			// Does this have a mapping?
-			return (item in scopeMap) ? scopeMap[item] : item;
+			return item in scopeMap ? scopeMap[item] : item;
 		});
 
 		// Stringify and Arrayify so that double mapped scopes are given the chance to be formatted
@@ -477,7 +422,7 @@ hello.utils.extend(hello, {
 		// Is the user already signed in with the appropriate scopes, valid access_token?
 		if (opts.force === false) {
 
-			if (session && 'access_token' in session && session.access_token && 'expires' in session && session.expires > ((new Date()).getTime() / 1e3)) {
+			if (session && 'access_token' in session && session.access_token && 'expires' in session && session.expires > new Date().getTime() / 1e3) {
 				// What is different about the scopes in the session vs the scopes in the new login?
 				var diff = utils.diff((session.scope || '').split(SCOPE_SPLIT), (p.qs.state.scope || '').split(SCOPE_SPLIT));
 				if (diff.length === 0) {
@@ -503,23 +448,20 @@ hello.utils.extend(hello, {
 
 		// Bespoke
 		// Override login querystrings from auth_options
-		if ('login' in provider && typeof (provider.login) === 'function') {
+		if ('login' in provider && typeof provider.login === 'function') {
 			// Format the paramaters according to the providers formatting function
 			provider.login(p);
 		}
 
 		// Add OAuth to state
 		// Where the service is going to take advantage of the oauth_proxy
-		if (!/\btoken\b/.test(responseType) ||
-		parseInt(provider.oauth.version, 10) < 2 ||
-		(opts.display === 'none' && provider.oauth.grant && session && session.refresh_token)) {
+		if (!/\btoken\b/.test(responseType) || parseInt(provider.oauth.version, 10) < 2 || opts.display === 'none' && provider.oauth.grant && session && session.refresh_token) {
 
 			// Add the oauth endpoints
 			p.qs.state.oauth = provider.oauth;
 
 			// Add the proxy url
 			p.qs.state.oauth_proxy = opts.oauth_proxy;
-
 		}
 
 		// Convert state to a string
@@ -535,15 +477,14 @@ hello.utils.extend(hello, {
 		// Refresh token
 		else if (opts.display === 'none' && provider.oauth.grant && session && session.refresh_token) {
 
-			// Add the refresh_token to the request
-			p.qs.refresh_token = session.refresh_token;
+				// Add the refresh_token to the request
+				p.qs.refresh_token = session.refresh_token;
 
-			// Define the request path
-			url = utils.qs(opts.oauth_proxy, p.qs, encodeFunction);
-		}
-		else {
-			url = utils.qs(provider.oauth.auth, p.qs, encodeFunction);
-		}
+				// Define the request path
+				url = utils.qs(opts.oauth_proxy, p.qs, encodeFunction);
+			} else {
+				url = utils.qs(provider.oauth.auth, p.qs, encodeFunction);
+			}
 
 		// Broadcast this event as an auth:init
 		emit('auth.init', p);
@@ -558,42 +499,44 @@ hello.utils.extend(hello, {
 		// Triggering popup?
 		else if (opts.display === 'popup') {
 
-			var popup = utils.popup(url, redirectUri, opts.popup);
+				var popup = utils.popup(url, redirectUri, opts.popup);
 
-			var timer = setInterval(function() {
-				if (!popup || popup.closed) {
-					clearInterval(timer);
-					if (!promise.state) {
+				var timer = setInterval(function () {
+					if (!popup || popup.closed) {
+						clearInterval(timer);
+						if (!promise.state) {
 
-						var response = error('cancelled', 'Login has been cancelled');
+							var response = error('cancelled', 'Login has been cancelled');
 
-						if (!popup) {
-							response = error('blocked', 'Popup was blocked');
+							if (!popup) {
+								response = error('blocked', 'Popup was blocked');
+							}
+
+							response.network = p.network;
+
+							promise.reject(response);
 						}
-
-						response.network = p.network;
-
-						promise.reject(response);
 					}
-				}
-			}, 100);
-		}
-
-		else {
-			window.location = url;
-		}
+				}, 100);
+			} else {
+				window.location = url;
+			}
 
 		return promise.proxy;
 
-		function encodeFunction(s) {return s;}
+		function encodeFunction(s) {
+			return s;
+		}
 
-		function filterEmpty(s) {return !!s;}
+		function filterEmpty(s) {
+			return !!s;
+		}
 	},
 
 	// Remove any data associated with a given service
 	// @param string name of the service
 	// @param function callback
-	logout: function() {
+	logout: function logout() {
 
 		var _this = this;
 		var utils = _this.utils;
@@ -602,7 +545,7 @@ hello.utils.extend(hello, {
 		// Create a new promise
 		var promise = utils.Promise();
 
-		var p = utils.args({name:'s', options: 'o', callback: 'f'}, arguments);
+		var p = utils.args({ name: 's', options: 'o', callback: 'f' }, arguments);
 
 		p.options = p.options || {};
 
@@ -623,18 +566,16 @@ hello.utils.extend(hello, {
 		if (p.name && !(p.name in _this.services)) {
 
 			promise.reject(error('invalid_network', 'The network was unrecognized'));
-
-		}
-		else if (p.name && p.authResponse) {
+		} else if (p.name && p.authResponse) {
 
 			// Define the callback
-			var callback = function(opts) {
+			var callback = function callback(opts) {
 
 				// Remove from the store
 				utils.store(p.name, null);
 
 				// Emit events by default
-				promise.fulfill(hello.utils.merge({network:p.name}, opts || {}));
+				promise.fulfill(hello.utils.merge({ network: p.name }, opts || {}));
 			};
 
 			// Run an async operation to remove the users session
@@ -644,17 +585,16 @@ hello.utils.extend(hello, {
 				if (logout) {
 					// Convert logout to URL string,
 					// If no string is returned, then this function will handle the logout async style
-					if (typeof (logout) === 'function') {
+					if (typeof logout === 'function') {
 						logout = logout(callback, p);
 					}
 
 					// If logout is a string then assume URL and open in iframe.
-					if (typeof (logout) === 'string') {
+					if (typeof logout === 'string') {
 						utils.iframe(logout);
 						_opts.force = null;
 						_opts.message = 'Logout success on providers site was indeterminate';
-					}
-					else if (logout === undefined) {
+					} else if (logout === undefined) {
 						// The callback function will handle the response.
 						return promise.proxy;
 					}
@@ -663,8 +603,7 @@ hello.utils.extend(hello, {
 
 			// Remove local credentials
 			callback(_opts);
-		}
-		else {
+		} else {
 			promise.reject(error('invalid_session', 'There was no session to remove'));
 		}
 
@@ -673,7 +612,7 @@ hello.utils.extend(hello, {
 
 	// Returns all the sessions that are subscribed too
 	// @param string optional, name of the service to get information about.
-	getAuthResponse: function(service) {
+	getAuthResponse: function getAuthResponse(service) {
 
 		// If the service doesn't exist
 		service = service || this.settings.default_service;
@@ -690,10 +629,10 @@ hello.utils.extend(hello, {
 });
 
 // Core utilities
-hello.utils.extend(hello.utils, {
+extend(hello.utils, {
 
 	// Error
-	error: function(code, message) {
+	error: function error(code, message) {
 		return {
 			error: {
 				code: code,
@@ -705,7 +644,7 @@ hello.utils.extend(hello.utils, {
 	// Append the querystring to a url
 	// @param string url
 	// @param object parameters
-	qs: function(url, params, formatFunction) {
+	qs: function qs(url, params, formatFunction) {
 
 		if (params) {
 
@@ -733,12 +672,12 @@ hello.utils.extend(hello.utils, {
 	// Param
 	// Explode/encode the parameters of an URL string/object
 	// @param string s, string to decode
-	param: function(s, formatFunction) {
+	param: function param(s, formatFunction) {
 		var b;
 		var a = {};
 		var m;
 
-		if (typeof (s) === 'string') {
+		if (typeof s === 'string') {
 
 			formatFunction = formatFunction || decodeURIComponent;
 
@@ -751,8 +690,7 @@ hello.utils.extend(hello.utils, {
 			}
 
 			return a;
-		}
-		else {
+		} else {
 
 			formatFunction = formatFunction || encodeURIComponent;
 
@@ -760,18 +698,20 @@ hello.utils.extend(hello.utils, {
 
 			a = [];
 
-			for (var x in o) {if (o.hasOwnProperty(x)) {
+			for (var x in o) {
 				if (o.hasOwnProperty(x)) {
-					a.push([x, o[x] === '?' ? '?' : formatFunction(o[x])].join('='));
+					if (o.hasOwnProperty(x)) {
+						a.push([x, o[x] === '?' ? '?' : formatFunction(o[x])].join('='));
+					}
 				}
-			}}
+			}
 
 			return a.join('&');
 		}
 	},
 
 	// Local storage facade
-	store: (function() {
+	store: function () {
 
 		var a = ['localStorage', 'sessionStorage'];
 		var i = -1;
@@ -787,8 +727,7 @@ hello.utils.extend(hello.utils, {
 				localStorage.setItem(prefix + i, i);
 				localStorage.removeItem(prefix + i);
 				break;
-			}
-			catch (e) {
+			} catch (e) {
 				localStorage = null;
 			}
 		}
@@ -798,7 +737,7 @@ hello.utils.extend(hello.utils, {
 			var cache = null;
 
 			localStorage = {
-				getItem: function(prop) {
+				getItem: function getItem(prop) {
 					prop = prop + '=';
 					var m = document.cookie.split(';');
 					for (var i = 0; i < m.length; i++) {
@@ -811,7 +750,7 @@ hello.utils.extend(hello.utils, {
 					return cache;
 				},
 
-				setItem: function(prop, value) {
+				setItem: function setItem(prop, value) {
 					cache = value;
 					document.cookie = prop + '=' + value;
 				}
@@ -825,8 +764,7 @@ hello.utils.extend(hello.utils, {
 			var json = {};
 			try {
 				json = JSON.parse(localStorage.getItem('hello')) || {};
-			}
-			catch (e) {}
+			} catch (e) {}
 
 			return json;
 		}
@@ -836,26 +774,22 @@ hello.utils.extend(hello.utils, {
 		}
 
 		// Check if the browser support local storage
-		return function(name, value, days) {
+		return function (name, value, days) {
 
 			// Local storage
 			var json = get();
 
 			if (name && value === undefined) {
 				return json[name] || null;
-			}
-			else if (name && value === null) {
+			} else if (name && value === null) {
 				try {
 					delete json[name];
-				}
-				catch (e) {
+				} catch (e) {
 					json[name] = null;
 				}
-			}
-			else if (name) {
+			} else if (name) {
 				json[name] = value;
-			}
-			else {
+			} else {
 				return json;
 			}
 
@@ -863,40 +797,40 @@ hello.utils.extend(hello.utils, {
 
 			return json || null;
 		};
-
-	})(),
+	}(),
 
 	// Create and Append new DOM elements
 	// @param node string
 	// @param attr object literal
 	// @param dom/string
-	append: function(node, attr, target) {
+	append: function append(node, attr, target) {
 
-		var n = typeof (node) === 'string' ? document.createElement(node) : node;
+		var n = typeof node === 'string' ? document.createElement(node) : node;
 
-		if (typeof (attr) === 'object') {
+		if ((typeof attr === 'undefined' ? 'undefined' : _typeof(attr)) === 'object') {
 			if ('tagName' in attr) {
 				target = attr;
-			}
-			else {
-				for (var x in attr) {if (attr.hasOwnProperty(x)) {
-					if (typeof (attr[x]) === 'object') {
-						for (var y in attr[x]) {if (attr[x].hasOwnProperty(y)) {
-							n[x][y] = attr[x][y];
-						}}
-					}
-					else if (x === 'html') {
-						n.innerHTML = attr[x];
-					}
+			} else {
+				for (var x in attr) {
+					if (attr.hasOwnProperty(x)) {
+						if (_typeof(attr[x]) === 'object') {
+							for (var y in attr[x]) {
+								if (attr[x].hasOwnProperty(y)) {
+									n[x][y] = attr[x][y];
+								}
+							}
+						} else if (x === 'html') {
+							n.innerHTML = attr[x];
+						}
 
-					// IE doesn't like us setting methods with setAttribute
-					else if (!/^on/.test(x)) {
-						n.setAttribute(x, attr[x]);
+						// IE doesn't like us setting methods with setAttribute
+						else if (!/^on/.test(x)) {
+								n.setAttribute(x, attr[x]);
+							} else {
+								n[x] = attr[x];
+							}
 					}
-					else {
-						n[x] = attr[x];
-					}
-				}}
+				}
 			}
 		}
 
@@ -904,16 +838,13 @@ hello.utils.extend(hello.utils, {
 			(function self() {
 				if (document.body) {
 					document.body.appendChild(n);
-				}
-				else {
+				} else {
 					setTimeout(self, 16);
 				}
 			})();
-		}
-		else if (typeof (target) === 'object') {
+		} else if ((typeof target === 'undefined' ? 'undefined' : _typeof(target)) === 'object') {
 			target.appendChild(n);
-		}
-		else if (typeof (target) === 'string') {
+		} else if (typeof target === 'string') {
 			document.getElementsByTagName(target)[0].appendChild(n);
 		}
 
@@ -922,22 +853,14 @@ hello.utils.extend(hello.utils, {
 
 	// An easy way to create a hidden iframe
 	// @param string src
-	iframe: function(src) {
-		this.append('iframe', {src: src, style: {position:'absolute', left: '-1000px', bottom: 0, height: '1px', width: '1px'}}, 'body');
-	},
-
-	// Recursive merge two objects into one, second parameter overides the first
-	// @param a array
-	merge: function(/* Args: a, b, c, .. n */) {
-		var args = Array.prototype.slice.call(arguments);
-		args.unshift({});
-		return this.extend.apply(null, args);
+	iframe: function iframe(src) {
+		this.append('iframe', { src: src, style: { position: 'absolute', left: '-1000px', bottom: 0, height: '1px', width: '1px' } }, 'body');
 	},
 
 	// Makes it easier to assign parameters, where some are optional
 	// @param o object
 	// @param a arguments
-	args: function(o, args) {
+	args: function args(o, _args) {
 
 		var p = {};
 		var i = 0;
@@ -945,52 +868,49 @@ hello.utils.extend(hello.utils, {
 		var x = null;
 
 		// 'x' is the first key in the list of object parameters
-		for (x in o) {if (o.hasOwnProperty(x)) {
-			break;
-		}}
+		for (x in o) {
+			if (o.hasOwnProperty(x)) {
+				break;
+			}
+		}
 
 		// Passing in hash object of arguments?
 		// Where the first argument can't be an object
-		if ((args.length === 1) && (typeof (args[0]) === 'object') && o[x] != 'o!') {
+		if (_args.length === 1 && _typeof(_args[0]) === 'object' && o[x] != 'o!') {
 
 			// Could this object still belong to a property?
 			// Check the object keys if they match any of the property keys
-			for (x in args[0]) {if (o.hasOwnProperty(x)) {
-				// Does this key exist in the property list?
-				if (x in o) {
-					// Yes this key does exist so its most likely this function has been invoked with an object parameter
-					// Return first argument as the hash of all arguments
-					return args[0];
+			for (x in _args[0]) {
+				if (o.hasOwnProperty(x)) {
+					// Does this key exist in the property list?
+					if (x in o) {
+						// Yes this key does exist so its most likely this function has been invoked with an object parameter
+						// Return first argument as the hash of all arguments
+						return _args[0];
+					}
 				}
-			}}
+			}
 		}
 
 		// Else loop through and account for the missing ones.
-		for (x in o) {if (o.hasOwnProperty(x)) {
+		for (x in o) {
+			if (o.hasOwnProperty(x)) {
 
-			t = typeof (args[i]);
+				t = _typeof(_args[i]);
 
-			if ((typeof (o[x]) === 'function' && o[x].test(args[i])) || (typeof (o[x]) === 'string' && (
-			(o[x].indexOf('s') > -1 && t === 'string') ||
-			(o[x].indexOf('o') > -1 && t === 'object') ||
-			(o[x].indexOf('i') > -1 && t === 'number') ||
-			(o[x].indexOf('a') > -1 && t === 'object') ||
-			(o[x].indexOf('f') > -1 && t === 'function')
-			))
-			) {
-				p[x] = args[i++];
+				if (typeof o[x] === 'function' && o[x].test(_args[i]) || typeof o[x] === 'string' && (o[x].indexOf('s') > -1 && t === 'string' || o[x].indexOf('o') > -1 && t === 'object' || o[x].indexOf('i') > -1 && t === 'number' || o[x].indexOf('a') > -1 && t === 'object' || o[x].indexOf('f') > -1 && t === 'function')) {
+					p[x] = _args[i++];
+				} else if (typeof o[x] === 'string' && o[x].indexOf('!') > -1) {
+					return false;
+				}
 			}
-
-			else if (typeof (o[x]) === 'string' && o[x].indexOf('!') > -1) {
-				return false;
-			}
-		}}
+		}
 
 		return p;
 	},
 
 	// Returns a URL instance
-	url: function(path) {
+	url: function url(path) {
 
 		// If the path is empty
 		if (!path) {
@@ -999,25 +919,25 @@ hello.utils.extend(hello.utils, {
 
 		// Chrome and FireFox support new URL() to extract URL objects
 		else if (window.URL && URL instanceof Function && URL.length !== 0) {
-			return new URL(path, window.location);
-		}
+				return new URL(path, window.location);
+			}
 
-		// Ugly shim, it works!
-		else {
-			var a = document.createElement('a');
-			a.href = path;
-			return a.cloneNode(false);
-		}
+			// Ugly shim, it works!
+			else {
+					var a = document.createElement('a');
+					a.href = path;
+					return a.cloneNode(false);
+				}
 	},
 
-	diff: function(a, b) {
-		return b.filter(function(item) {
+	diff: function diff(a, b) {
+		return b.filter(function (item) {
 			return a.indexOf(item) === -1;
 		});
 	},
 
 	// Get the different hash of properties unique to `a`, and not in `b`
-	diffKey: function(a, b) {
+	diffKey: function diffKey(a, b) {
 		if (a || !b) {
 			var r = {};
 			for (var x in a) {
@@ -1036,26 +956,26 @@ hello.utils.extend(hello.utils, {
 	// Unique
 	// Remove duplicate and null values from an array
 	// @param a array
-	unique: function(a) {
-		if (!Array.isArray(a)) { return []; }
+	unique: function unique(a) {
+		if (!Array.isArray(a)) {
+			return [];
+		}
 
-		return a.filter(function(item, index) {
+		return a.filter(function (item, index) {
 			// Is this the first location of item
 			return a.indexOf(item) === index;
 		});
 	},
 
-	isEmpty: function(obj) {
+	isEmpty: function isEmpty(obj) {
 
 		// Scalar
-		if (!obj)
-			return true;
+		if (!obj) return true;
 
 		// Array
 		if (Array.isArray(obj)) {
 			return !obj.length;
-		}
-		else if (typeof (obj) === 'object') {
+		} else if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) === 'object') {
 			// Object
 			for (var key in obj) {
 				if (obj.hasOwnProperty(key)) {
@@ -1070,30 +990,29 @@ hello.utils.extend(hello.utils, {
 	//jscs:disable
 
 	/*!
-	 **  Thenable -- Embeddable Minimum Strictly-Compliant Promises/A+ 1.1.1 Thenable
-	 **  Copyright (c) 2013-2014 Ralf S. Engelschall <http://engelschall.com>
-	 **  Licensed under The MIT License <http://opensource.org/licenses/MIT>
-	 **  Source-Code distributed on <http://github.com/rse/thenable>
-	 */
-	Promise: (function(){
+  **  Thenable -- Embeddable Minimum Strictly-Compliant Promises/A+ 1.1.1 Thenable
+  **  Copyright (c) 2013-2014 Ralf S. Engelschall <http://engelschall.com>
+  **  Licensed under The MIT License <http://opensource.org/licenses/MIT>
+  **  Source-Code distributed on <http://github.com/rse/thenable>
+  */
+	Promise: function () {
 		/*  promise states [Promises/A+ 2.1]  */
-		var STATE_PENDING   = 0;                                         /*  [Promises/A+ 2.1.1]  */
-		var STATE_FULFILLED = 1;                                         /*  [Promises/A+ 2.1.2]  */
-		var STATE_REJECTED  = 2;                                         /*  [Promises/A+ 2.1.3]  */
+		var STATE_PENDING = 0; /*  [Promises/A+ 2.1.1]  */
+		var STATE_FULFILLED = 1; /*  [Promises/A+ 2.1.2]  */
+		var STATE_REJECTED = 2; /*  [Promises/A+ 2.1.3]  */
 
 		/*  promise object constructor  */
-		var api = function (executor) {
+		var api = function api(executor) {
 			/*  optionally support non-constructor/plain-function call  */
-			if (!(this instanceof api))
-				return new api(executor);
+			if (!(this instanceof api)) return new api(executor);
 
 			/*  initialize object  */
-			this.id           = "Thenable/1.0.6";
-			this.state        = STATE_PENDING; /*  initial state  */
-			this.fulfillValue = undefined;     /*  initial value  */     /*  [Promises/A+ 1.3, 2.1.2.2]  */
-			this.rejectReason = undefined;     /*  initial reason */     /*  [Promises/A+ 1.5, 2.1.3.2]  */
-			this.onFulfilled  = [];            /*  initial handlers  */
-			this.onRejected   = [];            /*  initial handlers  */
+			this.id = "Thenable/1.0.6";
+			this.state = STATE_PENDING; /*  initial state  */
+			this.fulfillValue = undefined; /*  initial value  */ /*  [Promises/A+ 1.3, 2.1.2.2]  */
+			this.rejectReason = undefined; /*  initial reason */ /*  [Promises/A+ 1.5, 2.1.3.2]  */
+			this.onFulfilled = []; /*  initial handlers  */
+			this.onRejected = []; /*  initial handlers  */
 
 			/*  provide optional information-hiding proxy  */
 			this.proxy = {
@@ -1101,153 +1020,146 @@ hello.utils.extend(hello.utils, {
 			};
 
 			/*  support optional executor function  */
-			if (typeof executor === "function")
-				executor.call(this, this.fulfill.bind(this), this.reject.bind(this));
+			if (typeof executor === "function") executor.call(this, this.fulfill.bind(this), this.reject.bind(this));
 		};
 
 		/*  promise API methods  */
 		api.prototype = {
 			/*  promise resolving methods  */
-			fulfill: function (value) { return deliver(this, STATE_FULFILLED, "fulfillValue", value); },
-			reject:  function (value) { return deliver(this, STATE_REJECTED,  "rejectReason", value); },
+			fulfill: function fulfill(value) {
+				return deliver(this, STATE_FULFILLED, "fulfillValue", value);
+			},
+			reject: function reject(value) {
+				return deliver(this, STATE_REJECTED, "rejectReason", value);
+			},
 
 			/*  "The then Method" [Promises/A+ 1.1, 1.2, 2.2]  */
-			then: function (onFulfilled, onRejected) {
+			then: function then(onFulfilled, onRejected) {
 				var curr = this;
-				var next = new api();                                    /*  [Promises/A+ 2.2.7]  */
-				curr.onFulfilled.push(
-					resolver(onFulfilled, next, "fulfill"));             /*  [Promises/A+ 2.2.2/2.2.6]  */
-				curr.onRejected.push(
-					resolver(onRejected,  next, "reject" ));             /*  [Promises/A+ 2.2.3/2.2.6]  */
+				var next = new api(); /*  [Promises/A+ 2.2.7]  */
+				curr.onFulfilled.push(resolver(onFulfilled, next, "fulfill")); /*  [Promises/A+ 2.2.2/2.2.6]  */
+				curr.onRejected.push(resolver(onRejected, next, "reject")); /*  [Promises/A+ 2.2.3/2.2.6]  */
 				execute(curr);
-				return next.proxy;                                       /*  [Promises/A+ 2.2.7, 3.3]  */
+				return next.proxy; /*  [Promises/A+ 2.2.7, 3.3]  */
 			}
 		};
 
 		/*  deliver an action  */
-		var deliver = function (curr, state, name, value) {
+		var deliver = function deliver(curr, state, name, value) {
 			if (curr.state === STATE_PENDING) {
-				curr.state = state;                                      /*  [Promises/A+ 2.1.2.1, 2.1.3.1]  */
-				curr[name] = value;                                      /*  [Promises/A+ 2.1.2.2, 2.1.3.2]  */
+				curr.state = state; /*  [Promises/A+ 2.1.2.1, 2.1.3.1]  */
+				curr[name] = value; /*  [Promises/A+ 2.1.2.2, 2.1.3.2]  */
 				execute(curr);
 			}
 			return curr;
 		};
 
 		/*  execute all handlers  */
-		var execute = function (curr) {
-			if (curr.state === STATE_FULFILLED)
-				execute_handlers(curr, "onFulfilled", curr.fulfillValue);
-			else if (curr.state === STATE_REJECTED)
-				execute_handlers(curr, "onRejected",  curr.rejectReason);
+		var execute = function execute(curr) {
+			if (curr.state === STATE_FULFILLED) execute_handlers(curr, "onFulfilled", curr.fulfillValue);else if (curr.state === STATE_REJECTED) execute_handlers(curr, "onRejected", curr.rejectReason);
 		};
 
 		/*  execute particular set of handlers  */
-		var execute_handlers = function (curr, name, value) {
+		var execute_handlers = function execute_handlers(curr, name, value) {
 			/* global process: true */
 			/* global setImmediate: true */
 			/* global setTimeout: true */
 
 			/*  short-circuit processing  */
-			if (curr[name].length === 0)
-				return;
+			if (curr[name].length === 0) return;
 
 			/*  iterate over all handlers, exactly once  */
 			var handlers = curr[name];
-			curr[name] = [];                                             /*  [Promises/A+ 2.2.2.3, 2.2.3.3]  */
-			var func = function () {
-				for (var i = 0; i < handlers.length; i++)
-					handlers[i](value);                                  /*  [Promises/A+ 2.2.5]  */
+			curr[name] = []; /*  [Promises/A+ 2.2.2.3, 2.2.3.3]  */
+			var func = function func() {
+				for (var i = 0; i < handlers.length; i++) {
+					handlers[i](value);
+				} /*  [Promises/A+ 2.2.5]  */
 			};
 
-			/*  execute procedure asynchronously  */                     /*  [Promises/A+ 2.2.4, 3.1]  */
-			if (typeof process === "object" && typeof process.nextTick === "function")
-				process.nextTick(func);
-			else if (typeof setImmediate === "function")
-				setImmediate(func);
-			else
-				setTimeout(func, 0);
+			/*  execute procedure asynchronously  */ /*  [Promises/A+ 2.2.4, 3.1]  */
+			if ((typeof process === 'undefined' ? 'undefined' : _typeof(process)) === "object" && typeof process.nextTick === "function") process.nextTick(func);else if (typeof setImmediate === "function") setImmediate(func);else setTimeout(func, 0);
 		};
 
 		/*  generate a resolver function  */
-		var resolver = function (cb, next, method) {
+		var resolver = function resolver(cb, next, method) {
 			return function (value) {
-				if (typeof cb !== "function")                            /*  [Promises/A+ 2.2.1, 2.2.7.3, 2.2.7.4]  */
-					next[method].call(next, value);                      /*  [Promises/A+ 2.2.7.3, 2.2.7.4]  */
+				if (typeof cb !== "function") /*  [Promises/A+ 2.2.1, 2.2.7.3, 2.2.7.4]  */
+					next[method].call(next, value); /*  [Promises/A+ 2.2.7.3, 2.2.7.4]  */
 				else {
-					var result;
-					try { result = cb(value); }                          /*  [Promises/A+ 2.2.2.1, 2.2.3.1, 2.2.5, 3.2]  */
-					catch (e) {
-						next.reject(e);                                  /*  [Promises/A+ 2.2.7.2]  */
-						return;
+						var result;
+						try {
+							result = cb(value);
+						} /*  [Promises/A+ 2.2.2.1, 2.2.3.1, 2.2.5, 3.2]  */
+						catch (e) {
+							next.reject(e); /*  [Promises/A+ 2.2.7.2]  */
+							return;
+						}
+						resolve(next, result); /*  [Promises/A+ 2.2.7.1]  */
 					}
-					resolve(next, result);                               /*  [Promises/A+ 2.2.7.1]  */
-				}
 			};
 		};
 
-		/*  "Promise Resolution Procedure"  */                           /*  [Promises/A+ 2.3]  */
-		var resolve = function (promise, x) {
-			/*  sanity check arguments  */                               /*  [Promises/A+ 2.3.1]  */
+		/*  "Promise Resolution Procedure"  */ /*  [Promises/A+ 2.3]  */
+		var resolve = function resolve(promise, x) {
+			/*  sanity check arguments  */ /*  [Promises/A+ 2.3.1]  */
 			if (promise === x || promise.proxy === x) {
 				promise.reject(new TypeError("cannot resolve promise with itself"));
 				return;
 			}
 
 			/*  surgically check for a "then" method
-				(mainly to just call the "getter" of "then" only once)  */
+   	(mainly to just call the "getter" of "then" only once)  */
 			var then;
-			if ((typeof x === "object" && x !== null) || typeof x === "function") {
-				try { then = x.then; }                                   /*  [Promises/A+ 2.3.3.1, 3.5]  */
+			if ((typeof x === 'undefined' ? 'undefined' : _typeof(x)) === "object" && x !== null || typeof x === "function") {
+				try {
+					then = x.then;
+				} /*  [Promises/A+ 2.3.3.1, 3.5]  */
 				catch (e) {
-					promise.reject(e);                                   /*  [Promises/A+ 2.3.3.2]  */
+					promise.reject(e); /*  [Promises/A+ 2.3.3.2]  */
 					return;
 				}
 			}
 
 			/*  handle own Thenables    [Promises/A+ 2.3.2]
-				and similar "thenables" [Promises/A+ 2.3.3]  */
+   	and similar "thenables" [Promises/A+ 2.3.3]  */
 			if (typeof then === "function") {
 				var resolved = false;
 				try {
-					/*  call retrieved "then" method */                  /*  [Promises/A+ 2.3.3.3]  */
+					/*  call retrieved "then" method */ /*  [Promises/A+ 2.3.3.3]  */
 					then.call(x,
-						/*  resolvePromise  */                           /*  [Promises/A+ 2.3.3.3.1]  */
-						function (y) {
-							if (resolved) return; resolved = true;       /*  [Promises/A+ 2.3.3.3.3]  */
-							if (y === x)                                 /*  [Promises/A+ 3.6]  */
-								promise.reject(new TypeError("circular thenable chain"));
-							else
-								resolve(promise, y);
-						},
+					/*  resolvePromise  */ /*  [Promises/A+ 2.3.3.3.1]  */
+					function (y) {
+						if (resolved) return;resolved = true; /*  [Promises/A+ 2.3.3.3.3]  */
+						if (y === x) /*  [Promises/A+ 3.6]  */
+							promise.reject(new TypeError("circular thenable chain"));else resolve(promise, y);
+					},
 
-						/*  rejectPromise  */                            /*  [Promises/A+ 2.3.3.3.2]  */
-						function (r) {
-							if (resolved) return; resolved = true;       /*  [Promises/A+ 2.3.3.3.3]  */
-							promise.reject(r);
-						}
-					);
-				}
-				catch (e) {
-					if (!resolved)                                       /*  [Promises/A+ 2.3.3.3.3]  */
-						promise.reject(e);                               /*  [Promises/A+ 2.3.3.3.4]  */
+					/*  rejectPromise  */ /*  [Promises/A+ 2.3.3.3.2]  */
+					function (r) {
+						if (resolved) return;resolved = true; /*  [Promises/A+ 2.3.3.3.3]  */
+						promise.reject(r);
+					});
+				} catch (e) {
+					if (!resolved) /*  [Promises/A+ 2.3.3.3.3]  */
+						promise.reject(e); /*  [Promises/A+ 2.3.3.3.4]  */
 				}
 				return;
 			}
 
 			/*  handle other values  */
-			promise.fulfill(x);                                          /*  [Promises/A+ 2.3.4, 2.3.3.4]  */
+			promise.fulfill(x); /*  [Promises/A+ 2.3.4, 2.3.3.4]  */
 		};
 
 		/*  export API  */
 		return api;
-	})(),
+	}(),
 
 	//jscs:enable
 
 	// Event
 	// A contructor superclass for adding event menthods, on, off, emit.
-	Event: function() {
+	Event: function Event() {
 
 		var separator = /[\s\,]+/;
 
@@ -1265,9 +1177,9 @@ hello.utils.extend(hello.utils, {
 		// On, subscribe to events
 		// @param evt   string
 		// @param callback  function
-		this.on = function(evt, callback) {
+		this.on = function (evt, callback) {
 
-			if (callback && typeof (callback) === 'function') {
+			if (callback && typeof callback === 'function') {
 				var a = evt.split(separator);
 				for (var i = 0; i < a.length; i++) {
 
@@ -1282,9 +1194,9 @@ hello.utils.extend(hello.utils, {
 		// Off, unsubscribe to events
 		// @param evt   string
 		// @param callback  function
-		this.off = function(evt, callback) {
+		this.off = function (evt, callback) {
 
-			this.findEvents(evt, function(name, index) {
+			this.findEvents(evt, function (name, index) {
 				if (!callback || this.events[name][index] === callback) {
 					this.events[name][index] = null;
 				}
@@ -1295,17 +1207,17 @@ hello.utils.extend(hello.utils, {
 
 		// Emit
 		// Triggers any subscribed events
-		this.emit = function(evt /*, data, ... */) {
+		this.emit = function (evt /*, data, ... */) {
 
 			// Get arguments as an Array, knock off the first one
 			var args = Array.prototype.slice.call(arguments, 1);
 			args.push(evt);
 
 			// Handler
-			var handler = function(name, index) {
+			var handler = function handler(name, index) {
 
 				// Replace the last property with the event name
-				args[args.length - 1] = (name === '*' ? evt : name);
+				args[args.length - 1] = name === '*' ? evt : name;
 
 				// Trigger
 				this.events[name][index].apply(this, args);
@@ -1325,34 +1237,36 @@ hello.utils.extend(hello.utils, {
 
 		//
 		// Easy functions
-		this.emitAfter = function() {
+		this.emitAfter = function () {
 			var _this = this;
 			var args = arguments;
-			setTimeout(function() {
+			setTimeout(function () {
 				_this.emit.apply(_this, args);
 			}, 0);
 
 			return this;
 		};
 
-		this.findEvents = function(evt, callback) {
+		this.findEvents = function (evt, callback) {
 
 			var a = evt.split(separator);
 
-			for (var name in this.events) {if (this.events.hasOwnProperty(name)) {
+			for (var name in this.events) {
+				if (this.events.hasOwnProperty(name)) {
 
-				if (a.indexOf(name) > -1) {
+					if (a.indexOf(name) > -1) {
 
-					for (var i = 0; i < this.events[name].length; i++) {
+						for (var i = 0; i < this.events[name].length; i++) {
 
-						// Does the event handler exist?
-						if (this.events[name][i]) {
-							// Emit on the local instance of this
-							callback.call(this, name, i);
+							// Does the event handler exist?
+							if (this.events[name][i]) {
+								// Emit on the local instance of this
+								callback.call(this, name, i);
+							}
 						}
 					}
 				}
-			}}
+			}
 		};
 
 		return this;
@@ -1361,19 +1275,18 @@ hello.utils.extend(hello.utils, {
 	// Global Events
 	// Attach the callback to the window object
 	// Return its unique reference
-	globalEvent: function(callback, guid) {
+	globalEvent: function globalEvent(callback, guid) {
 		// If the guid has not been supplied then create a new one.
 		guid = guid || '_hellojs_' + parseInt(Math.random() * 1e12, 10).toString(36);
 
 		// Define the callback function
-		window[guid] = function() {
+		window[guid] = function () {
 			// Trigger the callback
 			try {
 				if (callback.apply(this, arguments)) {
 					delete window[guid];
 				}
-			}
-			catch (e) {
+			} catch (e) {
 				console.error(e);
 			}
 		};
@@ -1383,7 +1296,7 @@ hello.utils.extend(hello.utils, {
 
 	// Trigger a clientside popup
 	// This has been augmented to support PhoneGap
-	popup: function(url, redirectUri, options) {
+	popup: function popup(url, redirectUri, options) {
 
 		var documentElement = document.documentElement;
 
@@ -1405,7 +1318,7 @@ hello.utils.extend(hello.utils, {
 
 		// Convert options into an array
 		var optionsArray = [];
-		Object.keys(options).forEach(function(name) {
+		Object.keys(options).forEach(function (name) {
 			var value = options[name];
 			optionsArray.push(name + (value !== null ? '=' + value : ''));
 		});
@@ -1423,11 +1336,7 @@ hello.utils.extend(hello.utils, {
 			url = redirectUri + '#oauth_redirect=' + encodeURIComponent(encodeURIComponent(url));
 		}
 
-		var popup = window.open(
-			url,
-			'_blank',
-			optionsArray.join(',')
-		);
+		var popup = window.open(url, '_blank', optionsArray.join(','));
 
 		if (popup && popup.focus) {
 			popup.focus();
@@ -1437,7 +1346,7 @@ hello.utils.extend(hello.utils, {
 	},
 
 	// OAuth and API response handler
-	responseHandler: function(window, parent) {
+	responseHandler: function responseHandler(window, parent) {
 
 		var _this = this;
 		var p;
@@ -1477,14 +1386,13 @@ hello.utils.extend(hello.utils, {
 			// E.g. p.state = 'facebook.page';
 			try {
 				var a = JSON.parse(p.state);
-				_this.extend(p, a);
-			}
-			catch (e) {
+				extend(p, a);
+			} catch (e) {
 				console.error('Could not decode state parameter');
 			}
 
 			// Access_token?
-			if (('access_token' in p && p.access_token) && p.network) {
+			if ('access_token' in p && p.access_token && p.network) {
 
 				if (!p.expires_in || parseInt(p.expires_in, 10) === 0) {
 					// If p.expires_in is unset, set to 0
@@ -1492,7 +1400,7 @@ hello.utils.extend(hello.utils, {
 				}
 
 				p.expires_in = parseInt(p.expires_in, 10);
-				p.expires = ((new Date()).getTime() / 1e3) + (p.expires_in || (60 * 60 * 24 * 365));
+				p.expires = new Date().getTime() / 1e3 + (p.expires_in || 60 * 60 * 24 * 365);
 
 				// Lets use the "state" to assign it to one of our networks
 				authCallback(p, window, parent);
@@ -1501,28 +1409,28 @@ hello.utils.extend(hello.utils, {
 			// Error=?
 			// &error_description=?
 			// &state=?
-			else if (('error' in p && p.error) && p.network) {
+			else if ('error' in p && p.error && p.network) {
 
-				p.error = {
-					code: p.error,
-					message: p.error_message || p.error_description
-				};
+					p.error = {
+						code: p.error,
+						message: p.error_message || p.error_description
+					};
 
-				// Let the state handler handle it
-				authCallback(p, window, parent);
-			}
+					// Let the state handler handle it
+					authCallback(p, window, parent);
+				}
 
-			// API call, or a cancelled login
-			// Result is serialized JSON string
-			else if (p.callback && p.callback in parent) {
+				// API call, or a cancelled login
+				// Result is serialized JSON string
+				else if (p.callback && p.callback in parent) {
 
-				// Trigger a function in the parent
-				var res = 'result' in p && p.result ? JSON.parse(p.result) : false;
+						// Trigger a function in the parent
+						var res = 'result' in p && p.result ? JSON.parse(p.result) : false;
 
-				// Trigger the callback on the parent
-				parent[p.callback](res);
-				closeWindow();
-			}
+						// Trigger the callback on the parent
+						parent[p.callback](res);
+						closeWindow();
+					}
 
 			// If this page is still open
 			if (p.page_uri) {
@@ -1535,9 +1443,9 @@ hello.utils.extend(hello.utils, {
 		// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
 		else if ('oauth_redirect' in p) {
 
-			location.assign(decodeURIComponent(p.oauth_redirect));
-			return;
-		}
+				location.assign(decodeURIComponent(p.oauth_redirect));
+				return;
+			}
 
 		// Trigger a callback to authenticate
 		function authCallback(obj, window, parent) {
@@ -1549,7 +1457,7 @@ hello.utils.extend(hello.utils, {
 			_this.store(network, obj);
 
 			// If this is a page request it has no parent or opener window to handle callbacks
-			if (('display' in obj) && obj.display === 'page') {
+			if ('display' in obj && obj.display === 'page') {
 				return;
 			}
 
@@ -1558,8 +1466,7 @@ hello.utils.extend(hello.utils, {
 
 				try {
 					delete obj.callback;
-				}
-				catch (e) {}
+				} catch (e) {}
 
 				// Update store
 				_this.store(network, obj);
@@ -1571,8 +1478,7 @@ hello.utils.extend(hello.utils, {
 
 				try {
 					parent[cb](str);
-				}
-				catch (e) {
+				} catch (e) {
 					// Error thrown whilst executing parent callback
 				}
 			}
@@ -1585,22 +1491,19 @@ hello.utils.extend(hello.utils, {
 			if (window.frameElement) {
 				// Inside an iframe, remove from parent
 				parent.document.body.removeChild(window.frameElement);
-			}
-			else {
+			} else {
 				// Close this current window
 				try {
 					window.close();
-				}
-				catch (e) {}
+				} catch (e) {}
 
 				// IOS bug wont let us close a popup if still loading
 				if (window.addEventListener) {
-					window.addEventListener('load', function() {
+					window.addEventListener('load', function () {
 						window.close();
 					});
 				}
 			}
-
 		}
 	}
 });
@@ -1614,7 +1517,7 @@ hello.utils.Event.call(hello);
 // Check for session changes
 ///////////////////////////////////
 
-(function(hello) {
+(function (hello) {
 
 	// Monitor for a change in state and fire
 	var oldSessions = {};
@@ -1623,16 +1526,16 @@ hello.utils.Event.call(hello);
 	var expired = {};
 
 	// Listen to other triggers to Auth events, use these to update this
-	hello.on('auth.login, auth.logout', function(auth) {
-		if (auth && typeof (auth) === 'object' && auth.network) {
+	hello.on('auth.login, auth.logout', function (auth) {
+		if (auth && (typeof auth === 'undefined' ? 'undefined' : _typeof(auth)) === 'object' && auth.network) {
 			oldSessions[auth.network] = hello.utils.store(auth.network) || {};
 		}
 	});
 
 	(function self() {
 
-		var CURRENT_TIME = ((new Date()).getTime() / 1e3);
-		var emit = function(eventName) {
+		var CURRENT_TIME = new Date().getTime() / 1e3;
+		var emit = function emit(eventName) {
 			hello.emit('auth.' + eventName, {
 				network: name,
 				authResponse: session
@@ -1640,101 +1543,99 @@ hello.utils.Event.call(hello);
 		};
 
 		// Loop through the services
-		for (var name in hello.services) {if (hello.services.hasOwnProperty(name)) {
+		for (var name in hello.services) {
+			if (hello.services.hasOwnProperty(name)) {
 
-			if (!hello.services[name].id) {
-				// We haven't attached an ID so dont listen.
-				continue;
-			}
-
-			// Get session
-			var session = hello.utils.store(name) || {};
-			var provider = hello.services[name];
-			var oldSess = oldSessions[name] || {};
-
-			// Listen for globalEvents that did not get triggered from the child
-			if (session && 'callback' in session) {
-
-				// To do remove from session object...
-				var cb = session.callback;
-				try {
-					delete session.callback;
-				}
-				catch (e) {}
-
-				// Update store
-				// Removing the callback
-				hello.utils.store(name, session);
-
-				// Emit global events
-				try {
-					window[cb](session);
-				}
-				catch (e) {}
-			}
-
-			// Refresh token
-			if (session && ('expires' in session) && session.expires < CURRENT_TIME) {
-
-				// If auto refresh is possible
-				// Either the browser supports
-				var refresh = provider.refresh || session.refresh_token;
-
-				// Has the refresh been run recently?
-				if (refresh && (!(name in expired) || expired[name] < CURRENT_TIME)) {
-					// Try to resignin
-					hello.emit('notice', name + ' has expired trying to resignin');
-					hello.login(name, {display: 'none', force: false});
-
-					// Update expired, every 10 minutes
-					expired[name] = CURRENT_TIME + 600;
+				if (!hello.services[name].id) {
+					// We haven't attached an ID so dont listen.
+					continue;
 				}
 
-				// Does this provider not support refresh
-				else if (!refresh && !(name in expired)) {
-					// Label the event
-					emit('expired');
-					expired[name] = true;
+				// Get session
+				var session = hello.utils.store(name) || {};
+				var provider = hello.services[name];
+				var oldSess = oldSessions[name] || {};
+
+				// Listen for globalEvents that did not get triggered from the child
+				if (session && 'callback' in session) {
+
+					// To do remove from session object...
+					var cb = session.callback;
+					try {
+						delete session.callback;
+					} catch (e) {}
+
+					// Update store
+					// Removing the callback
+					hello.utils.store(name, session);
+
+					// Emit global events
+					try {
+						window[cb](session);
+					} catch (e) {}
 				}
 
-				// If session has expired then we dont want to store its value until it can be established that its been updated
-				continue;
-			}
+				// Refresh token
+				if (session && 'expires' in session && session.expires < CURRENT_TIME) {
 
-			// Has session changed?
-			else if (oldSess.access_token === session.access_token &&
-			oldSess.expires === session.expires) {
-				continue;
-			}
+					// If auto refresh is possible
+					// Either the browser supports
+					var refresh = provider.refresh || session.refresh_token;
 
-			// Access_token has been removed
-			else if (!session.access_token && oldSess.access_token) {
-				emit('logout');
-			}
+					// Has the refresh been run recently?
+					if (refresh && (!(name in expired) || expired[name] < CURRENT_TIME)) {
+						// Try to resignin
+						hello.emit('notice', name + ' has expired trying to resignin');
+						hello.login(name, { display: 'none', force: false });
 
-			// Access_token has been created
-			else if (session.access_token && !oldSess.access_token) {
-				emit('login');
-			}
+						// Update expired, every 10 minutes
+						expired[name] = CURRENT_TIME + 600;
+					}
 
-			// Access_token has been updated
-			else if (session.expires !== oldSess.expires) {
-				emit('update');
-			}
+					// Does this provider not support refresh
+					else if (!refresh && !(name in expired)) {
+							// Label the event
+							emit('expired');
+							expired[name] = true;
+						}
 
-			// Updated stored session
-			oldSessions[name] = session;
+					// If session has expired then we dont want to store its value until it can be established that its been updated
+					continue;
+				}
 
-			// Remove the expired flags
-			if (name in expired) {
-				delete expired[name];
+				// Has session changed?
+				else if (oldSess.access_token === session.access_token && oldSess.expires === session.expires) {
+						continue;
+					}
+
+					// Access_token has been removed
+					else if (!session.access_token && oldSess.access_token) {
+							emit('logout');
+						}
+
+						// Access_token has been created
+						else if (session.access_token && !oldSess.access_token) {
+								emit('login');
+							}
+
+							// Access_token has been updated
+							else if (session.expires !== oldSess.expires) {
+									emit('update');
+								}
+
+				// Updated stored session
+				oldSessions[name] = session;
+
+				// Remove the expired flags
+				if (name in expired) {
+					delete expired[name];
+				}
 			}
-		}}
+		}
 
 		// Check error events
 		setTimeout(self, 1000);
 	})();
-
 })(hello);
 
 // EOF CORE lib
@@ -1749,7 +1650,7 @@ hello.utils.Event.call(hello);
 // @param timeout integer (optional)
 // @param callback  function (optional)
 
-hello.api = function() {
+hello.api = function () {
 
 	// Shorthand
 	var _this = this;
@@ -1760,7 +1661,7 @@ hello.api = function() {
 	var promise = utils.Promise();
 
 	// Arguments
-	var p = utils.args({path: 's!', query: 'o', method: 's', data: 'o', timeout: 'i', callback: 'f'}, arguments);
+	var p = utils.args({ path: 's!', query: 'o', method: 's', data: 'o', timeout: 'i', callback: 'f' }, arguments);
 
 	// Method
 	p.method = (p.method || 'get').toLowerCase();
@@ -1773,7 +1674,7 @@ hello.api = function() {
 
 	// If get, put all parameters into query
 	if (p.method === 'get' || p.method === 'delete') {
-		utils.extend(p.query, p.data);
+		extend(p.query, p.data);
 		p.data = {};
 	}
 
@@ -1860,7 +1761,7 @@ hello.api = function() {
 
 	// URL Mapping
 	// Is there a map for the given URL?
-	var actions = o[{'delete': 'del'}[p.method] || p.method] || {};
+	var actions = o[{ 'delete': 'del' }[p.method] || p.method] || {};
 
 	// Extrapolate the QueryString
 	// Provide a clean path
@@ -1869,7 +1770,7 @@ hello.api = function() {
 
 		var query = url.split(/[\?#]/)[1];
 		if (query) {
-			utils.extend(p.query, utils.param(query));
+			extend(p.query, utils.param(query));
 
 			// Remove the query part from the URL
 			url = url.replace(/\?.*?(#|$)/, '$1');
@@ -1877,15 +1778,13 @@ hello.api = function() {
 	}
 
 	// Is the hash fragment defined
-	if ((m = url.match(/#(.+)/, ''))) {
+	if (m = url.match(/#(.+)/, '')) {
 		url = url.split('#')[0];
 		p.path = m[1];
-	}
-	else if (url in actions) {
+	} else if (url in actions) {
 		p.path = url;
 		url = actions[url];
-	}
-	else if ('default' in actions) {
+	} else if ('default' in actions) {
 		url = actions['default'];
 	}
 
@@ -1901,11 +1800,10 @@ hello.api = function() {
 	p.form = o.form;
 
 	// Make request
-	if (typeof (url) === 'function') {
+	if (typeof url === 'function') {
 		// Does self have its own callback?
 		url(p, getPath);
-	}
-	else {
+	} else {
 		// Else the URL is a string
 		getPath(url);
 	}
@@ -1917,17 +1815,15 @@ hello.api = function() {
 	function getPath(url) {
 
 		// Format the string if it needs it
-		url = url.replace(/\@\{([a-z\_\-]+)(\|.*?)?\}/gi, function(m, key, defaults) {
+		url = url.replace(/\@\{([a-z\_\-]+)(\|.*?)?\}/gi, function (m, key, defaults) {
 			var val = defaults ? defaults.replace(/^\|/, '') : '';
 			if (key in p.query) {
 				val = p.query[key];
 				delete p.query[key];
-			}
-			else if (p.data && key in p.data) {
+			} else if (p.data && key in p.data) {
 				val = p.data[key];
 				delete p.data[key];
-			}
-			else if (!defaults) {
+			} else if (!defaults) {
 				promise.reject(error('missing_attribute', 'The attribute ' + key + ' is missing from the request'));
 			}
 
@@ -1946,15 +1842,14 @@ hello.api = function() {
 		// CALLBACK HANDLER
 		// @ response object
 		// @ statusCode integer if available
-		utils.request(p, function(r, headers) {
+		utils.request(p, function (r, headers) {
 
 			// Is this a raw response?
 			if (!p.formatResponse) {
 				// Bad request? error statusCode or otherwise contains an error response vis JSONP?
-				if (typeof headers === 'object' ? (headers.statusCode >= 400) : (typeof r === 'object' && 'error' in r)) {
+				if ((typeof headers === 'undefined' ? 'undefined' : _typeof(headers)) === 'object' ? headers.statusCode >= 400 : (typeof r === 'undefined' ? 'undefined' : _typeof(r)) === 'object' && 'error' in r) {
 					promise.reject(r);
-				}
-				else {
+				} else {
 					promise.fulfill(r);
 				}
 
@@ -1963,22 +1858,21 @@ hello.api = function() {
 
 			// Should this be an object
 			if (r === true) {
-				r = {success:true};
-			}
-			else if (!r) {
+				r = { success: true };
+			} else if (!r) {
 				r = {};
 			}
 
 			// The delete callback needs a better response
 			if (p.method === 'delete') {
-				r = (!r || utils.isEmpty(r)) ? {success:true} : r;
+				r = !r || utils.isEmpty(r) ? { success: true } : r;
 			}
 
 			// FORMAT RESPONSE?
 			// Does self request have a corresponding formatter
-			if (o.wrap && ((p.path in o.wrap) || ('default' in o.wrap))) {
-				var wrap = (p.path in o.wrap ? p.path : 'default');
-				var time = (new Date()).getTime();
+			if (o.wrap && (p.path in o.wrap || 'default' in o.wrap)) {
+				var wrap = p.path in o.wrap ? p.path : 'default';
+				var time = new Date().getTime();
 
 				// FORMAT RESPONSE
 				var b = o.wrap[wrap](r, headers, p);
@@ -2000,16 +1894,15 @@ hello.api = function() {
 
 				// The relative path has been defined, lets markup the handler in the HashFragment
 				else {
-					r.paging.next += '#' + p.path;
-				}
+						r.paging.next += '#' + p.path;
+					}
 			}
 
 			// Dispatch to listeners
 			// Emit events which pertain to the formatted response
 			if (!r || 'error' in r) {
 				promise.reject(r);
-			}
-			else {
+			} else {
 				promise.fulfill(r);
 			}
 		});
@@ -2017,10 +1910,10 @@ hello.api = function() {
 };
 
 // API utilities
-hello.utils.extend(hello.utils, {
+extend(hello.utils, {
 
 	// Make an HTTP request
-	request: function(p, callback) {
+	request: function request(p, callback) {
 
 		var _this = this;
 		var error = _this.error;
@@ -2034,14 +1927,14 @@ hello.utils.extend(hello.utils, {
 		}
 
 		// Check if the browser and service support CORS
-		var cors = this.request_cors(function() {
+		var cors = this.request_cors(function () {
 			// If it does then run this...
-			return ((p.xhr === undefined) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))));
+			return p.xhr === undefined || p.xhr && (typeof p.xhr !== 'function' || p.xhr(p, p.query));
 		});
 
 		if (cors) {
 
-			formatUrl(p, function(url) {
+			formatUrl(p, function (url) {
 
 				var x = _this.xhr(p.method, url, p.headers, p.data, callback);
 				x.onprogress = p.onprogress || null;
@@ -2051,7 +1944,6 @@ hello.utils.extend(hello.utils, {
 				if (x.upload && p.onuploadprogress) {
 					x.upload.onprogress = p.onuploadprogress;
 				}
-
 			});
 
 			return;
@@ -2073,24 +1965,22 @@ hello.utils.extend(hello.utils, {
 			p.query.callback = p.callbackID;
 
 			// If the JSONP is a function then run it
-			if (typeof (p.jsonp) === 'function') {
+			if (typeof p.jsonp === 'function') {
 				p.jsonp(p, p.query);
 			}
 
 			// Lets use JSONP if the method is 'get'
 			if (p.method === 'get') {
 
-				formatUrl(p, function(url) {
+				formatUrl(p, function (url) {
 					_this.jsonp(url, callback, p.callbackID, p.timeout);
 				});
 
 				return;
-			}
-			else {
+			} else {
 				// It's not compatible reset query
 				p.query = _query;
 			}
-
 		}
 
 		// Otherwise we're on to the old school, iframe hacks and JSONP
@@ -2099,11 +1989,11 @@ hello.utils.extend(hello.utils, {
 			// Add some additional query parameters to the URL
 			// We're pretty stuffed if the endpoint doesn't like these
 			p.query.redirect_uri = p.redirect_uri;
-			p.query.state = JSON.stringify({callback:p.callbackID});
+			p.query.state = JSON.stringify({ callback: p.callbackID });
 
 			var opts;
 
-			if (typeof (p.form) === 'function') {
+			if (typeof p.form === 'function') {
 
 				// Format the request
 				opts = p.form(p, p.query);
@@ -2111,7 +2001,7 @@ hello.utils.extend(hello.utils, {
 
 			if (p.method === 'post' && opts !== false) {
 
-				formatUrl(p, function(url) {
+				formatUrl(p, function (url) {
 					_this.post(url, p.data, opts, callback, p.callbackID, p.timeout);
 				});
 
@@ -2149,7 +2039,7 @@ hello.utils.extend(hello.utils, {
 			// POST body to querystring
 			if (p.data && (p.method === 'get' || p.method === 'delete')) {
 				// Attach the p.data to the querystring.
-				_this.extend(p.query, p.data);
+				extend(p.query, p.data);
 				p.data = null;
 			}
 
@@ -2177,19 +2067,15 @@ hello.utils.extend(hello.utils, {
 	},
 
 	// Test whether the browser supports the CORS response
-	request_cors: function(callback) {
+	request_cors: function request_cors(callback) {
 		return 'withCredentials' in new XMLHttpRequest() && callback();
 	},
 
 	// Return the type of DOM object
-	domInstance: function(type, data) {
-		var test = 'HTML' + (type || '').replace(
-			/^[a-z]/,
-			function(m) {
-				return m.toUpperCase();
-			}
-
-		) + 'Element';
+	domInstance: function domInstance(type, data) {
+		var test = 'HTML' + (type || '').replace(/^[a-z]/, function (m) {
+			return m.toUpperCase();
+		}) + 'Element';
 
 		if (!data) {
 			return false;
@@ -2197,19 +2083,17 @@ hello.utils.extend(hello.utils, {
 
 		if (window[test]) {
 			return data instanceof window[test];
-		}
-		else if (window.Element) {
-			return data instanceof window.Element && (!type || (data.tagName && data.tagName.toLowerCase() === type));
-		}
-		else {
-			return (!(data instanceof Object || data instanceof Array || data instanceof String || data instanceof Number) && data.tagName && data.tagName.toLowerCase() === type);
+		} else if (window.Element) {
+			return data instanceof window.Element && (!type || data.tagName && data.tagName.toLowerCase() === type);
+		} else {
+			return !(data instanceof Object || data instanceof Array || data instanceof String || data instanceof Number) && data.tagName && data.tagName.toLowerCase() === type;
 		}
 	},
 
 	// Create a clone of an object
-	clone: function(obj) {
+	clone: function clone(obj) {
 		// Does not clone DOM elements, nor Binary data, e.g. Blobs, Filelists
-		if (obj === null || typeof (obj) !== 'object' || obj instanceof Date || 'nodeName' in obj || this.isBinary(obj) || (typeof FormData === 'function' && obj instanceof FormData)) {
+		if (obj === null || (typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) !== 'object' || obj instanceof Date || 'nodeName' in obj || this.isBinary(obj) || typeof FormData === 'function' && obj instanceof FormData) {
 			return obj;
 		}
 
@@ -2228,7 +2112,7 @@ hello.utils.extend(hello.utils, {
 	},
 
 	// XHR: uses CORS to make requests
-	xhr: function(method, url, headers, data, callback) {
+	xhr: function xhr(method, url, headers, data, callback) {
 
 		var r = new XMLHttpRequest();
 		var error = this.error;
@@ -2243,12 +2127,11 @@ hello.utils.extend(hello.utils, {
 		method = method.toUpperCase();
 
 		// Xhr.responseType 'json' is not supported in any of the vendors yet.
-		r.onload = function(e) {
+		r.onload = function (e) {
 			var json = r.response;
 			try {
 				json = JSON.parse(r.responseText);
-			}
-			catch (_e) {
+			} catch (_e) {
 				if (r.status === 401) {
 					json = error('access_denied', r.statusText);
 				}
@@ -2260,12 +2143,11 @@ hello.utils.extend(hello.utils, {
 			callback(json || (method === 'GET' ? error('empty_response', 'Could not get resource') : {}), headers);
 		};
 
-		r.onerror = function(e) {
+		r.onerror = function (e) {
 			var json = r.responseText;
 			try {
 				json = JSON.parse(r.responseText);
-			}
-			catch (_e) {}
+			} catch (_e) {}
 
 			callback(json || error('access_denied', 'Could not get resource'));
 		};
@@ -2275,25 +2157,22 @@ hello.utils.extend(hello.utils, {
 		// Should we add the query to the URL?
 		if (method === 'GET' || method === 'DELETE') {
 			data = null;
-		}
-		else if (data && typeof (data) !== 'string' && !(data instanceof FormData) && !(data instanceof File) && !(data instanceof Blob)) {
+		} else if (data && typeof data !== 'string' && !(data instanceof FormData) && !(data instanceof File) && !(data instanceof Blob)) {
 			// Loop through and add formData
 			var f = new FormData();
-			for (x in data) if (data.hasOwnProperty(x)) {
-				if (data[x] instanceof HTMLInputElement) {
-					if ('files' in data[x] && data[x].files.length > 0) {
-						f.append(x, data[x].files[0]);
+			for (x in data) {
+				if (data.hasOwnProperty(x)) {
+					if (data[x] instanceof HTMLInputElement) {
+						if ('files' in data[x] && data[x].files.length > 0) {
+							f.append(x, data[x].files[0]);
+						}
+					} else if (data[x] instanceof Blob) {
+						f.append(x, data[x], data.name);
+					} else {
+						f.append(x, data[x]);
 					}
 				}
-				else if (data[x] instanceof Blob) {
-					f.append(x, data[x], data.name);
-				}
-				else {
-					f.append(x, data[x]);
-				}
-			}
-
-			data = f;
+			}data = f;
 		}
 
 		// Open the path, async
@@ -2302,8 +2181,7 @@ hello.utils.extend(hello.utils, {
 		if (binary) {
 			if ('responseType' in r) {
 				r.responseType = binary;
-			}
-			else {
+			} else {
 				r.overrideMimeType('text/plain; charset=x-user-defined');
 			}
 		}
@@ -2324,7 +2202,7 @@ hello.utils.extend(hello.utils, {
 			var r = {};
 			var reg = /([a-z\-]+):\s?(.*);?/gi;
 			var m;
-			while ((m = reg.exec(s))) {
+			while (m = reg.exec(s)) {
 				r[m[1]] = m[2];
 			}
 
@@ -2336,7 +2214,7 @@ hello.utils.extend(hello.utils, {
 	// Injects a script tag into the DOM to be executed and appends a callback function to the window object
 	// @param string/function pathFunc either a string of the URL or a callback function pathFunc(querystringhash, continueFunc);
 	// @param function callback a function to call on completion;
-	jsonp: function(url, callback, callbackID, timeout) {
+	jsonp: function jsonp(url, callback, callbackID, timeout) {
 
 		var _this = this;
 		var error = _this.error;
@@ -2346,18 +2224,17 @@ hello.utils.extend(hello.utils, {
 		var head = document.getElementsByTagName('head')[0];
 		var operaFix;
 		var result = error('server_error', 'server_error');
-		var cb = function() {
-			if (!(bool++)) {
-				window.setTimeout(function() {
+		var cb = function cb() {
+			if (! bool++) {
+				window.setTimeout(function () {
 					callback(result);
 					head.removeChild(script);
 				}, 0);
 			}
-
 		};
 
 		// Add callback to the window object
-		callbackID = _this.globalEvent(function(json) {
+		callbackID = _this.globalEvent(function (json) {
 			result = json;
 			return true;
 
@@ -2376,7 +2253,7 @@ hello.utils.extend(hello.utils, {
 			async: true,
 			onload: cb,
 			onerror: cb,
-			onreadystatechange: function() {
+			onreadystatechange: function onreadystatechange() {
 				if (/loaded|complete/i.test(this.readyState)) {
 					cb();
 				}
@@ -2398,7 +2275,7 @@ hello.utils.extend(hello.utils, {
 
 		// Add timeout
 		if (timeout) {
-			window.setTimeout(function() {
+			window.setTimeout(function () {
 				result = error('timeout', 'timeout');
 				cb();
 			}, timeout);
@@ -2420,7 +2297,7 @@ hello.utils.extend(hello.utils, {
 	// @param string uri path
 	// @param object data, key value data to send
 	// @param function callback, function to execute in response
-	post: function(url, data, options, callback, callbackID, timeout) {
+	post: function post(url, data, options, callback, callbackID, timeout) {
 
 		var _this = this;
 		var error = _this.error;
@@ -2433,8 +2310,8 @@ hello.utils.extend(hello.utils, {
 		var i = 0;
 		var x = null;
 		var bool = 0;
-		var cb = function(r) {
-			if (!(bool++)) {
+		var cb = function cb(r) {
+			if (! bool++) {
 				callback(r);
 			}
 		};
@@ -2448,8 +2325,7 @@ hello.utils.extend(hello.utils, {
 		try {
 			// IE7 hack, only lets us define the name here, not later.
 			win = doc.createElement('<iframe name="' + callbackID + '">');
-		}
-		catch (e) {
+		} catch (e) {
 			win = doc.createElement('iframe');
 		}
 
@@ -2460,7 +2336,7 @@ hello.utils.extend(hello.utils, {
 		// Override callback mechanism. Triggger a response onload/onerror
 		if (options && options.callbackonload) {
 			// Onload is being fired twice
-			win.onload = function() {
+			win.onload = function () {
 				cb({
 					response: 'posted',
 					message: 'Content was posted'
@@ -2469,7 +2345,7 @@ hello.utils.extend(hello.utils, {
 		}
 
 		if (timeout) {
-			setTimeout(function() {
+			setTimeout(function () {
 				cb(error('timeout', 'The post operation timed out'));
 			}, timeout);
 		}
@@ -2504,20 +2380,19 @@ hello.utils.extend(hello.utils, {
 					form.elements[i].setAttribute('name', 'file');
 				}
 			}
-		}
-		else {
+		} else {
 			// Its not a form element,
 			// Therefore it must be a JSON object of Key=>Value or Key=>Element
 			// If anyone of those values are a input type=file we shall shall insert its siblings into the form for which it belongs.
-			for (x in data) if (data.hasOwnProperty(x)) {
-				// Is this an input Element?
-				if (_this.domInstance('input', data[x]) && data[x].type === 'file') {
-					form = data[x].form;
-					form.encoding = form.enctype = 'multipart/form-data';
+			for (x in data) {
+				if (data.hasOwnProperty(x)) {
+					// Is this an input Element?
+					if (_this.domInstance('input', data[x]) && data[x].type === 'file') {
+						form = data[x].form;
+						form.encoding = form.enctype = 'multipart/form-data';
+					}
 				}
-			}
-
-			// Do If there is no defined form element, lets create one.
+			} // Do If there is no defined form element, lets create one.
 			if (!form) {
 				// Build form
 				form = doc.createElement('form');
@@ -2528,55 +2403,52 @@ hello.utils.extend(hello.utils, {
 			var input;
 
 			// Add elements to the form if they dont exist
-			for (x in data) if (data.hasOwnProperty(x)) {
+			for (x in data) {
+				if (data.hasOwnProperty(x)) {
 
-				// Is this an element?
-				var el = (_this.domInstance('input', data[x]) || _this.domInstance('textArea', data[x]) || _this.domInstance('select', data[x]));
+					// Is this an element?
+					var el = _this.domInstance('input', data[x]) || _this.domInstance('textArea', data[x]) || _this.domInstance('select', data[x]);
 
-				// Is this not an input element, or one that exists outside the form.
-				if (!el || data[x].form !== form) {
+					// Is this not an input element, or one that exists outside the form.
+					if (!el || data[x].form !== form) {
 
-					// Does an element have the same name?
-					var inputs = form.elements[x];
-					if (input) {
-						// Remove it.
-						if (!(inputs instanceof NodeList)) {
-							inputs = [inputs];
+						// Does an element have the same name?
+						var inputs = form.elements[x];
+						if (input) {
+							// Remove it.
+							if (!(inputs instanceof NodeList)) {
+								inputs = [inputs];
+							}
+
+							for (i = 0; i < inputs.length; i++) {
+								inputs[i].parentNode.removeChild(inputs[i]);
+							}
 						}
 
-						for (i = 0; i < inputs.length; i++) {
-							inputs[i].parentNode.removeChild(inputs[i]);
+						// Create an input element
+						input = doc.createElement('input');
+						input.setAttribute('type', 'hidden');
+						input.setAttribute('name', x);
+
+						// Does it have a value attribute?
+						if (el) {
+							input.value = data[x].value;
+						} else if (_this.domInstance(null, data[x])) {
+							input.value = data[x].innerHTML || data[x].innerText;
+						} else {
+							input.value = data[x];
 						}
 
+						form.appendChild(input);
 					}
 
-					// Create an input element
-					input = doc.createElement('input');
-					input.setAttribute('type', 'hidden');
-					input.setAttribute('name', x);
-
-					// Does it have a value attribute?
-					if (el) {
-						input.value = data[x].value;
-					}
-					else if (_this.domInstance(null, data[x])) {
-						input.value = data[x].innerHTML || data[x].innerText;
-					}
-					else {
-						input.value = data[x];
-					}
-
-					form.appendChild(input);
+					// It is an element, which exists within the form, but the name is wrong
+					else if (el && data[x].name !== x) {
+							data[x].setAttribute('name', x);
+							data[x].name = x;
+						}
 				}
-
-				// It is an element, which exists within the form, but the name is wrong
-				else if (el && data[x].name !== x) {
-					data[x].setAttribute('name', x);
-					data[x].name = x;
-				}
-			}
-
-			// Disable elements from within the form if they weren't specified
+			} // Disable elements from within the form if they weren't specified
 			for (i = 0; i < form.elements.length; i++) {
 
 				input = form.elements[i];
@@ -2602,10 +2474,10 @@ hello.utils.extend(hello.utils, {
 
 		// Submit the form
 		// Some reason this needs to be offset from the current window execution
-		setTimeout(function() {
+		setTimeout(function () {
 			form.submit();
 
-			setTimeout(function() {
+			setTimeout(function () {
 				try {
 					// Remove the iframe from the page.
 					//win.parentNode.removeChild(win);
@@ -2613,12 +2485,10 @@ hello.utils.extend(hello.utils, {
 					if (newform) {
 						newform.parentNode.removeChild(newform);
 					}
-				}
-				catch (e) {
+				} catch (e) {
 					try {
 						console.error('HelloJS: could not remove iframe');
-					}
-					catch (ee) {}
+					} catch (ee) {}
 				}
 
 				// Reenable the disabled form
@@ -2634,30 +2504,25 @@ hello.utils.extend(hello.utils, {
 
 	// Some of the providers require that only multipart is used with non-binary forms.
 	// This function checks whether the form contains binary data
-	hasBinary: function(data) {
-		for (var x in data) if (data.hasOwnProperty(x)) {
-			if (this.isBinary(data[x])) {
-				return true;
+	hasBinary: function hasBinary(data) {
+		for (var x in data) {
+			if (data.hasOwnProperty(x)) {
+				if (this.isBinary(data[x])) {
+					return true;
+				}
 			}
-		}
-
-		return false;
+		}return false;
 	},
 
 	// Determines if a variable Either Is or like a FormInput has the value of a Blob
 
-	isBinary: function(data) {
+	isBinary: function isBinary(data) {
 
-		return data instanceof Object && (
-		(this.domInstance('input', data) && data.type === 'file') ||
-		('FileList' in window && data instanceof window.FileList) ||
-		('File' in window && data instanceof window.File) ||
-		('Blob' in window && data instanceof window.Blob));
-
+		return data instanceof Object && (this.domInstance('input', data) && data.type === 'file' || 'FileList' in window && data instanceof window.FileList || 'File' in window && data instanceof window.File || 'Blob' in window && data instanceof window.Blob);
 	},
 
 	// Convert Data-URI to Blob string
-	toBlob: function(dataURI) {
+	toBlob: function toBlob(dataURI) {
 		var reg = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
 		var m = dataURI.match(reg);
 		if (!m) {
@@ -2670,24 +2535,24 @@ hello.utils.extend(hello.utils, {
 			array.push(binary.charCodeAt(i));
 		}
 
-		return new Blob([new Uint8Array(array)], {type: m[1]});
+		return new Blob([new Uint8Array(array)], { type: m[1] });
 	}
 
 });
 
 // EXTRA: Convert FormElement to JSON for POSTing
 // Wrappers to add additional functionality to existing functions
-(function(hello) {
+(function (hello) {
 
 	// Copy original function
 	var api = hello.api;
 	var utils = hello.utils;
 
-	utils.extend(utils, {
+	extend(utils, {
 
 		// DataToJSON
 		// This takes a FormElement|NodeList|InputElement|MixedObjects and convers the data object to JSON.
-		dataToJSON: function(p) {
+		dataToJSON: function dataToJSON(p) {
 
 			var _this = this;
 			var w = window;
@@ -2696,41 +2561,34 @@ hello.utils.extend(hello.utils, {
 			// Is data a form object
 			if (_this.domInstance('form', data)) {
 				data = _this.nodeListToJSON(data.elements);
-			}
-			else if ('NodeList' in w && data instanceof NodeList) {
+			} else if ('NodeList' in w && data instanceof NodeList) {
 				data = _this.nodeListToJSON(data);
-			}
-			else if (_this.domInstance('input', data)) {
+			} else if (_this.domInstance('input', data)) {
 				data = _this.nodeListToJSON([data]);
 			}
 
 			// Is data a blob, File, FileList?
-			if (('File' in w && data instanceof w.File) ||
-				('Blob' in w && data instanceof w.Blob) ||
-				('FileList' in w && data instanceof w.FileList)) {
-				data = {file: data};
+			if ('File' in w && data instanceof w.File || 'Blob' in w && data instanceof w.Blob || 'FileList' in w && data instanceof w.FileList) {
+				data = { file: data };
 			}
 
 			// Loop through data if it's not form data it must now be a JSON object
 			if (!('FormData' in w && data instanceof w.FormData)) {
 
-				for (var x in data) if (data.hasOwnProperty(x)) {
+				for (var x in data) {
+					if (data.hasOwnProperty(x)) {
 
-					if ('FileList' in w && data[x] instanceof w.FileList) {
-						if (data[x].length === 1) {
-							data[x] = data[x][0];
+						if ('FileList' in w && data[x] instanceof w.FileList) {
+							if (data[x].length === 1) {
+								data[x] = data[x][0];
+							}
+						} else if (_this.domInstance('input', data[x]) && data[x].type === 'file') {
+							continue;
+						} else if (_this.domInstance('input', data[x]) || _this.domInstance('select', data[x]) || _this.domInstance('textArea', data[x])) {
+							data[x] = data[x].value;
+						} else if (_this.domInstance(null, data[x])) {
+							data[x] = data[x].innerHTML || data[x].innerText;
 						}
-					}
-					else if (_this.domInstance('input', data[x]) && data[x].type === 'file') {
-						continue;
-					}
-					else if (_this.domInstance('input', data[x]) ||
-						_this.domInstance('select', data[x]) ||
-						_this.domInstance('textArea', data[x])) {
-						data[x] = data[x].value;
-					}
-					else if (_this.domInstance(null, data[x])) {
-						data[x] = data[x].innerHTML || data[x].innerText;
 					}
 				}
 			}
@@ -2741,7 +2599,7 @@ hello.utils.extend(hello.utils, {
 
 		// NodeListToJSON
 		// Given a list of elements extrapolate their values and return as a json object
-		nodeListToJSON: function(nodelist) {
+		nodeListToJSON: function nodeListToJSON(nodelist) {
 
 			var json = {};
 
@@ -2758,8 +2616,7 @@ hello.utils.extend(hello.utils, {
 				// Is this a file, does the browser not support 'files' and 'FormData'?
 				if (input.type === 'file') {
 					json[input.name] = input;
-				}
-				else {
+				} else {
 					json[input.name] = input.value || input.innerHTML;
 				}
 			}
@@ -2769,10 +2626,10 @@ hello.utils.extend(hello.utils, {
 	});
 
 	// Replace it
-	hello.api = function() {
+	hello.api = function () {
 
 		// Get arguments
-		var p = utils.args({path: 's!', method: 's', data:'o', timeout: 'i', callback: 'f'}, arguments);
+		var p = utils.args({ path: 's!', method: 's', data: 'o', timeout: 'i', callback: 'f' }, arguments);
 
 		// Change for into a data object
 		if (p.data) {
@@ -2781,7 +2638,6 @@ hello.utils.extend(hello.utils, {
 
 		return api.call(this, p);
 	};
-
 })(hello);
 
 /////////////////////////////////////
@@ -2793,232 +2649,15 @@ hello.utils.extend(hello.utils, {
 
 hello.utils.responseHandler(window, window.opener || window.parent);
 
-// Script to support ChromeApps
-// This overides the hello.utils.popup method to support chrome.identity.launchWebAuthFlow
-// See https://developer.chrome.com/apps/app_identity#non
+}).call(this,require('_process'))
+},{"_process":1,"tricks/object/extend":18}],4:[function(require,module,exports){
+'use strict';
 
-// Is this a chrome app?
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
-if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.identity.launchWebAuthFlow) {
+var hello = require('../hello.js');
 
-	(function() {
-
-		// Swap the popup method
-		hello.utils.popup = function(url) {
-
-			return _open(url, true);
-
-		};
-
-		// Swap the hidden iframe method
-		hello.utils.iframe = function(url) {
-
-			_open(url, false);
-
-		};
-
-		// Swap the request_cors method
-		hello.utils.request_cors = function(callback) {
-
-			callback();
-
-			// Always run as CORS
-
-			return true;
-		};
-
-		// Swap the storage method
-		var _cache = {};
-		chrome.storage.local.get('hello', function(r) {
-			// Update the cache
-			_cache = r.hello || {};
-		});
-
-		hello.utils.store = function(name, value) {
-
-			// Get all
-			if (arguments.length === 0) {
-				return _cache;
-			}
-
-			// Get
-			if (arguments.length === 1) {
-				return _cache[name] || null;
-			}
-
-			// Set
-			if (value) {
-				_cache[name] = value;
-				chrome.storage.local.set({hello: _cache});
-				return value;
-			}
-
-			// Delete
-			if (value === null) {
-				delete _cache[name];
-				chrome.storage.local.set({hello: _cache});
-				return null;
-			}
-		};
-
-		// Open function
-		function _open(url, interactive) {
-
-			// Launch
-			var ref = {
-				closed: false
-			};
-
-			// Launch the webAuthFlow
-			chrome.identity.launchWebAuthFlow({
-				url: url,
-				interactive: interactive
-			}, function(responseUrl) {
-
-				// Did the user cancel this prematurely
-				if (responseUrl === undefined) {
-					ref.closed = true;
-					return;
-				}
-
-				// Split appart the URL
-				var a = hello.utils.url(responseUrl);
-
-				// The location can be augmented in to a location object like so...
-				// We dont have window operations on the popup so lets create some
-				var _popup = {
-					location: {
-
-						// Change the location of the popup
-						assign: function(url) {
-
-							// If there is a secondary reassign
-							// In the case of OAuth1
-							// Trigger this in non-interactive mode.
-							_open(url, false);
-						},
-
-						search: a.search,
-						hash: a.hash,
-						href: a.href
-					},
-					close: function() {}
-				};
-
-				// Then this URL contains information which HelloJS must process
-				// URL string
-				// Window - any action such as window relocation goes here
-				// Opener - the parent window which opened this, aka this script
-
-				hello.utils.responseHandler(_popup, window);
-			});
-
-			// Return the reference
-			return ref;
-		}
-
-	})();
-}
-
-// Phonegap override for hello.phonegap.js
-(function() {
-
-	// Is this a phonegap implementation?
-	if (!(/^file:\/{3}[^\/]/.test(window.location.href) && window.cordova)) {
-		// Cordova is not included.
-		return;
-	}
-
-	// Augment the hidden iframe method
-	hello.utils.iframe = function(url, redirectUri) {
-		hello.utils.popup(url, redirectUri, {hidden: 'yes'});
-	};
-
-	// Augment the popup
-	var utilPopup = hello.utils.popup;
-
-	// Replace popup
-	hello.utils.popup = function(url, redirectUri, options) {
-
-		// Run the standard
-		var popup = utilPopup.call(this, url, redirectUri, options);
-
-		// Create a function for reopening the popup, and assigning events to the new popup object
-		// PhoneGap support
-		// Add an event listener to listen to the change in the popup windows URL
-		// This must appear before popup.focus();
-		try {
-			if (popup && popup.addEventListener) {
-
-				// Get the origin of the redirect URI
-
-				var a = hello.utils.url(redirectUri);
-				var redirectUriOrigin = a.origin || (a.protocol + '//' + a.hostname);
-
-				// Listen to changes in the InAppBrowser window
-
-				popup.addEventListener('loadstart', function(e) {
-
-					var url = e.url;
-
-					// Is this the path, as given by the redirectUri?
-					// Check the new URL agains the redirectUriOrigin.
-					// According to #63 a user could click 'cancel' in some dialog boxes ....
-					// The popup redirects to another page with the same origin, yet we still wish it to close.
-
-					if (url.indexOf(redirectUriOrigin) !== 0) {
-						return;
-					}
-
-					// Split appart the URL
-					var a = hello.utils.url(url);
-
-					// We dont have window operations on the popup so lets create some
-					// The location can be augmented in to a location object like so...
-
-					var _popup = {
-						location: {
-							// Change the location of the popup
-							assign: function(location) {
-
-								// Unfourtunatly an app is may not change the location of a InAppBrowser window.
-								// So to shim this, just open a new one.
-								popup.executeScript({code: 'window.location.href = "' + location + ';"'});
-							},
-
-							search: a.search,
-							hash: a.hash,
-							href: a.href
-						},
-						close: function() {
-							if (popup.close) {
-								popup.close();
-								try {
-									popup.closed = true;
-								}
-								catch (_e) {}
-							}
-						}
-					};
-
-					// Then this URL contains information which HelloJS must process
-					// URL string
-					// Window - any action such as window relocation goes here
-					// Opener - the parent window which opened this, aka this script
-
-					hello.utils.responseHandler(_popup, window);
-
-				});
-			}
-		}
-		catch (e) {}
-
-		return popup;
-	};
-
-})();
-
-(function(hello) {
+(function (hello) {
 
 	// OAuth1
 	var OAuth1Settings = {
@@ -3044,7 +2683,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 			oauth: OAuth2Settings,
 
-			login: function(p) {
+			login: function login(p) {
 				// OAuth2 non-standard adjustments
 				p.qs.scope = '';
 
@@ -3055,8 +2694,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 					// Override the dropbox OAuth settings.
 					hello.services.dropbox.oauth = OAuth1Settings;
-				}
-				else {
+				} else {
 					// Override the dropbox OAuth settings.
 					hello.services.dropbox.oauth = OAuth2Settings;
 				}
@@ -3067,18 +2705,16 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			/*
-				Dropbox does not allow insecure HTTP URI's in the redirect_uri field
-				...otherwise I'd love to use OAuth2
-
-				Follow request https://forums.dropbox.com/topic.php?id=106505
-
-				p.qs.response_type = 'code';
-				oauth: {
-					version: 2,
-					auth: 'https://www.dropbox.com/1/oauth2/authorize',
-					grant: 'https://api.dropbox.com/1/oauth2/token'
-				}
-			*/
+   	Dropbox does not allow insecure HTTP URI's in the redirect_uri field
+   	...otherwise I'd love to use OAuth2
+   		Follow request https://forums.dropbox.com/topic.php?id=106505
+   		p.qs.response_type = 'code';
+   	oauth: {
+   		version: 2,
+   		auth: 'https://www.dropbox.com/1/oauth2/authorize',
+   		grant: 'https://api.dropbox.com/1/oauth2/token'
+   	}
+   */
 
 			// API Base URL
 			base: 'https://api.dropbox.com/1/',
@@ -3096,7 +2732,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				'me/folder': req('metadata/auto/@{id}'),
 				'me/folders': req('metadata/auto/'),
 
-				'default': function(p, callback) {
+				'default': function _default(p, callback) {
 					if (p.path.match('https://api-content.dropbox.com/1/files/')) {
 						// This is a file, return binary data
 						p.method = 'blob';
@@ -3107,7 +2743,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			post: {
-				'me/files': function(p, callback) {
+				'me/files': function meFiles(p, callback) {
 
 					var path = p.data.parent;
 					var fileName = p.data.name;
@@ -3117,14 +2753,14 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 					};
 
 					// Does this have a data-uri to upload as a file?
-					if (typeof (p.data.file) === 'string') {
+					if (typeof p.data.file === 'string') {
 						p.data.file = hello.utils.toBlob(p.data.file);
 					}
 
 					callback('https://api-content.dropbox.com/1/files_put/auto/' + path + '/' + fileName);
 				},
 
-				'me/folders': function(p, callback) {
+				'me/folders': function meFolders(p, callback) {
 
 					var name = p.data.name;
 					p.data = {};
@@ -3142,7 +2778,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			wrap: {
-				me: function(o) {
+				me: function me(o) {
 					formatError(o);
 					if (!o.uid) {
 						return o;
@@ -3158,13 +2794,13 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 					return o;
 				},
 
-				'default': function(o, headers, req) {
+				'default': function _default(o, headers, req) {
 					formatError(o);
 					if (o.is_dir && o.contents) {
 						o.data = o.contents;
 						delete o.contents;
 
-						o.data.forEach(function(item) {
+						o.data.forEach(function (item) {
 							item.root = o.root;
 							formatFile(item, headers, req);
 						});
@@ -3181,7 +2817,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			// Doesn't return the CORS headers
-			xhr: function(p) {
+			xhr: function xhr(p) {
 
 				// The proxy supports allow-cross-origin-resource
 				// Alas that's the only thing we're using.
@@ -3190,8 +2826,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 					if (file) {
 						if (file.files) {
 							p.data = file.files[0];
-						}
-						else {
+						} else {
 							p.data = file;
 						}
 					}
@@ -3204,7 +2839,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				return true;
 			},
 
-			form: function(p, qs) {
+			form: function form(p, qs) {
 				delete qs.state;
 				delete qs.redirect_uri;
 			}
@@ -3222,9 +2857,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 	function formatFile(o, headers, req) {
 
-		if (typeof o !== 'object' ||
-			(typeof Blob !== 'undefined' && o instanceof Blob) ||
-			(typeof ArrayBuffer !== 'undefined' && o instanceof ArrayBuffer)) {
+		if ((typeof o === 'undefined' ? 'undefined' : _typeof(o)) !== 'object' || typeof Blob !== 'undefined' && o instanceof Blob || typeof ArrayBuffer !== 'undefined' && o instanceof ArrayBuffer) {
 			// This is a file, let it through unformatted
 			return;
 		}
@@ -3236,18 +2869,15 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 		var path = (o.root !== 'app_folder' ? o.root : '') + o.path.replace(/\&/g, '%26');
 		path = path.replace(/^\//, '');
 		if (o.thumb_exists) {
-			o.thumbnail = req.oauth_proxy + '?path=' +
-			encodeURIComponent('https://api-content.dropbox.com/1/thumbnails/auto/' + path + '?format=jpeg&size=m') + '&access_token=' + req.options.access_token;
+			o.thumbnail = req.oauth_proxy + '?path=' + encodeURIComponent('https://api-content.dropbox.com/1/thumbnails/auto/' + path + '?format=jpeg&size=m') + '&access_token=' + req.options.access_token;
 		}
 
-		o.type = (o.is_dir ? 'folder' : o.mime_type);
+		o.type = o.is_dir ? 'folder' : o.mime_type;
 		o.name = o.path.replace(/.*\//g, '');
 		if (o.is_dir) {
 			o.files = path.replace(/^\//, '');
-		}
-		else {
-			o.downloadLink = hello.settings.oauth_proxy + '?path=' +
-			encodeURIComponent('https://api-content.dropbox.com/1/files/auto/' + path) + '&access_token=' + req.options.access_token;
+		} else {
+			o.downloadLink = hello.settings.oauth_proxy + '?path=' + encodeURIComponent('https://api-content.dropbox.com/1/files/auto/' + path) + '&access_token=' + req.options.access_token;
 			o.file = 'https://api-content.dropbox.com/1/files/auto/' + path;
 		}
 
@@ -3259,15 +2889,19 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 	function req(str) {
-		return function(p, cb) {
+		return function (p, cb) {
 			delete p.query.limit;
 			cb(str);
 		};
 	}
-
 })(hello);
 
-(function(hello) {
+},{"../hello.js":3}],5:[function(require,module,exports){
+'use strict';
+
+var hello = require('../hello.js');
+
+(function (hello) {
 
 	hello.init({
 
@@ -3305,7 +2939,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			// Refresh the access_token
 			refresh: true,
 
-			login: function(p) {
+			login: function login(p) {
 
 				// Reauthenticate
 				// https://developers.facebook.com/docs/facebook-login/reauthentication
@@ -3314,10 +2948,10 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				}
 			},
 
-			logout: function(callback, options) {
+			logout: function logout(callback, options) {
 				// Assign callback to a global handler
 				var callbackID = hello.utils.globalEvent(callback);
-				var redirect = encodeURIComponent(hello.settings.redirect_uri + '?' + hello.utils.param({callback:callbackID, result: JSON.stringify({force:true}), state: '{}'}));
+				var redirect = encodeURIComponent(hello.settings.redirect_uri + '?' + hello.utils.param({ callback: callbackID, result: JSON.stringify({ force: true }), state: '{}' }));
 				var token = (options.authResponse || {}).access_token;
 				hello.utils.iframe('https://www.facebook.com/logout.php?next=' + redirect + '&access_token=' + token);
 
@@ -3375,13 +3009,13 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			// Special requirements for handling XHR
-			xhr: function(p, qs) {
+			xhr: function xhr(p, qs) {
 				if (p.method === 'get' || p.method === 'post') {
 					qs.suppress_response_codes = true;
 				}
 
 				// Is this a post with a data-uri?
-				if (p.method === 'post' && p.data && typeof (p.data.file) === 'string') {
+				if (p.method === 'post' && p.data && typeof p.data.file === 'string') {
 					// Convert the Data-URI to a Blob
 					p.data.file = hello.utils.toBlob(p.data.file);
 				}
@@ -3390,20 +3024,19 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			// Special requirements for handling JSONP fallback
-			jsonp: function(p, qs) {
+			jsonp: function jsonp(p, qs) {
 				var m = p.method;
 				if (m !== 'get' && !hello.utils.hasBinary(p.data)) {
 					p.data.method = m;
 					p.method = 'get';
-				}
-				else if (p.method === 'delete') {
+				} else if (p.method === 'delete') {
 					qs.method = 'delete';
 					p.method = 'post';
 				}
 			},
 
 			// Special requirements for iframe form hack
-			form: function(p) {
+			form: function form(p) {
 				return {
 					// Fire the callback onload
 					callbackonload: true
@@ -3432,7 +3065,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 	function format(o, headers, req) {
 		if (typeof o === 'boolean') {
-			o = {success: o};
+			o = { success: o };
 		}
 
 		if (o && 'data' in o) {
@@ -3444,16 +3077,15 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				o.data = [data];
 			}
 
-			o.data.forEach(function(d) {
+			o.data.forEach(function (d) {
 
 				if (d.picture) {
 					d.thumbnail = d.picture;
 				}
 
-				d.pictures = (d.images || [])
-					.sort(function(a, b) {
-						return a.width - b.width;
-					});
+				d.pictures = (d.images || []).sort(function (a, b) {
+					return a.width - b.width;
+				});
 
 				if (d.cover_photo && d.cover_photo.id) {
 					d.thumbnail = base + d.cover_photo.id + '/picture?access_token=' + token;
@@ -3471,10 +3103,14 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 		return o;
 	}
-
 })(hello);
 
-(function(hello) {
+},{"../hello.js":3}],6:[function(require,module,exports){
+'use strict';
+
+var hello = require('../hello.js');
+
+(function (hello) {
 
 	hello.init({
 
@@ -3496,16 +3132,16 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			// Map GET resquests
 			get: {
 				me: sign('flickr.people.getInfo'),
-				'me/friends': sign('flickr.contacts.getList', {per_page:'@{limit|50}'}),
-				'me/following': sign('flickr.contacts.getList', {per_page:'@{limit|50}'}),
-				'me/followers': sign('flickr.contacts.getList', {per_page:'@{limit|50}'}),
-				'me/albums': sign('flickr.photosets.getList', {per_page:'@{limit|50}'}),
-				'me/album': sign('flickr.photosets.getPhotos', {photoset_id: '@{id}'}),
-				'me/photos': sign('flickr.people.getPhotos', {per_page:'@{limit|50}'})
+				'me/friends': sign('flickr.contacts.getList', { per_page: '@{limit|50}' }),
+				'me/following': sign('flickr.contacts.getList', { per_page: '@{limit|50}' }),
+				'me/followers': sign('flickr.contacts.getList', { per_page: '@{limit|50}' }),
+				'me/albums': sign('flickr.photosets.getList', { per_page: '@{limit|50}' }),
+				'me/album': sign('flickr.photosets.getPhotos', { photoset_id: '@{id}' }),
+				'me/photos': sign('flickr.people.getPhotos', { per_page: '@{limit|50}' })
 			},
 
 			wrap: {
-				me: function(o) {
+				me: function me(o) {
 					formatError(o);
 					o = checkResponse(o, 'person');
 					if (o.id) {
@@ -3526,15 +3162,15 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				'me/friends': formatFriends,
 				'me/followers': formatFriends,
 				'me/following': formatFriends,
-				'me/albums': function(o) {
+				'me/albums': function meAlbums(o) {
 					formatError(o);
 					o = checkResponse(o, 'photosets');
 					paging(o);
 					if (o.photoset) {
 						o.data = o.photoset;
-						o.data.forEach(function(item) {
+						o.data.forEach(function (item) {
 							item.name = item.title._content;
-							item.photos = 'https://api.flickr.com/services/rest' + getApiUrl('flickr.photosets.getPhotos', {photoset_id: item.id}, true);
+							item.photos = 'https://api.flickr.com/services/rest' + getApiUrl('flickr.photosets.getPhotos', { photoset_id: item.id }, true);
 						});
 
 						delete o.photoset;
@@ -3543,12 +3179,12 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 					return o;
 				},
 
-				'me/photos': function(o) {
+				'me/photos': function mePhotos(o) {
 					formatError(o);
 					return formatPhotos(o);
 				},
 
-				'default': function(o) {
+				'default': function _default(o) {
 					formatError(o);
 					return formatPhotos(o);
 				}
@@ -3556,7 +3192,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 			xhr: false,
 
-			jsonp: function(p, qs) {
+			jsonp: function jsonp(p, qs) {
 				if (p.method == 'get') {
 					delete qs.callback;
 					qs.jsoncallback = p.callbackID;
@@ -3566,10 +3202,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	});
 
 	function getApiUrl(method, extraParams, skipNetwork) {
-		var url = ((skipNetwork) ? '' : 'flickr:') +
-			'?method=' + method +
-			'&api_key=' + hello.services.flickr.id +
-			'&format=json';
+		var url = (skipNetwork ? '' : 'flickr:') + '?method=' + method + '&api_key=' + hello.services.flickr.id + '&format=json';
 		for (var param in extraParams) {
 			if (extraParams.hasOwnProperty(param)) {
 				url += '&' + param + '=' + extraParams[param];
@@ -3592,8 +3225,8 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			params = {};
 		}
 
-		return function(p, callback) {
-			withUser(function(userId) {
+		return function (p, callback) {
+			withUser(function (userId) {
 				params.user_id = userId;
 				callback(getApiUrl(url, params, true));
 			});
@@ -3603,10 +3236,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	function getBuddyIcon(profile, size) {
 		var url = 'https://www.flickr.com/images/buddyicon.gif';
 		if (profile.nsid && profile.iconserver && profile.iconfarm) {
-			url = 'https://farm' + profile.iconfarm + '.staticflickr.com/' +
-				profile.iconserver + '/' +
-				'buddyicons/' + profile.nsid +
-				((size) ? '_' + size : '') + '.jpg';
+			url = 'https://farm' + profile.iconfarm + '.staticflickr.com/' + profile.iconserver + '/' + 'buddyicons/' + profile.nsid + (size ? '_' + size : '') + '.jpg';
 		}
 
 		return url;
@@ -3614,12 +3244,11 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 	// See: https://www.flickr.com/services/api/misc.urls.html
 	function createPhotoUrl(id, farm, server, secret, size) {
-		size = (size) ? '_' + size : '';
+		size = size ? '_' + size : '';
 		return 'https://farm' + farm + '.staticflickr.com/' + server + '/' + id + '_' + secret + size + '.jpg';
 	}
 
-	function formatUser(o) {
-	}
+	function formatUser(o) {}
 
 	function formatError(o) {
 		if (o && o.stat && o.stat.toLowerCase() != 'ok') {
@@ -3632,7 +3261,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 	function formatPhotos(o) {
 		if (o.photoset || o.photos) {
-			var set = ('photoset' in o) ? 'photoset' : 'photos';
+			var set = 'photoset' in o ? 'photoset' : 'photos';
 			o = checkResponse(o, set);
 			paging(o);
 			o.data = o.photo;
@@ -3654,20 +3283,9 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	function createPictures(id, farm, server, secret) {
 
 		var NO_LIMIT = 2048;
-		var sizes = [
-			{id: 't', max: 100},
-			{id: 'm', max: 240},
-			{id: 'n', max: 320},
-			{id: '', max: 500},
-			{id: 'z', max: 640},
-			{id: 'c', max: 800},
-			{id: 'b', max: 1024},
-			{id: 'h', max: 1600},
-			{id: 'k', max: 2048},
-			{id: 'o', max: NO_LIMIT}
-		];
+		var sizes = [{ id: 't', max: 100 }, { id: 'm', max: 240 }, { id: 'n', max: 320 }, { id: '', max: 500 }, { id: 'z', max: 640 }, { id: 'c', max: 800 }, { id: 'b', max: 1024 }, { id: 'h', max: 1600 }, { id: 'k', max: 2048 }, { id: 'o', max: NO_LIMIT }];
 
-		return sizes.map(function(size) {
+		return sizes.map(function (size) {
 			return {
 				source: createPhotoUrl(id, farm, server, secret, size.id),
 
@@ -3682,8 +3300,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 		if (key in o) {
 			o = o[key];
-		}
-		else if (!('error' in o)) {
+		} else if (!('error' in o)) {
 			o.error = {
 				code: 'invalid_request',
 				message: o.message || 'Failed to get data from Flickr'
@@ -3714,14 +3331,18 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	function paging(res) {
 		if (res.page && res.pages && res.page !== res.pages) {
 			res.paging = {
-				next: '?page=' + (++res.page)
+				next: '?page=' + ++res.page
 			};
 		}
 	}
-
 })(hello);
 
-(function(hello) {
+},{"../hello.js":3}],7:[function(require,module,exports){
+'use strict';
+
+var hello = require('../hello.js');
+
+(function (hello) {
 
 	hello.init({
 
@@ -3749,7 +3370,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			wrap: {
-				me: function(o) {
+				me: function me(o) {
 					formatError(o);
 					if (o && o.response) {
 						o = o.response.user;
@@ -3759,7 +3380,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 					return o;
 				},
 
-				'default': function(o) {
+				'default': function _default(o) {
 					formatError(o);
 
 					// Format friends
@@ -3808,10 +3429,16 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 		qs.v = 20121125;
 		return true;
 	}
-
 })(hello);
 
-(function(hello) {
+},{"../hello.js":3}],8:[function(require,module,exports){
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var hello = require('../hello.js');
+
+(function (hello) {
 
 	hello.init({
 
@@ -3841,7 +3468,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			wrap: {
-				me: function(o, headers) {
+				me: function me(o, headers) {
 
 					formatError(o, headers);
 					formatUser(o);
@@ -3849,12 +3476,12 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 					return o;
 				},
 
-				'default': function(o, headers, req) {
+				'default': function _default(o, headers, req) {
 
 					formatError(o, headers);
 
 					if (Array.isArray(o)) {
-						o = {data:o};
+						o = { data: o };
 					}
 
 					if (o.data) {
@@ -3866,14 +3493,14 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				}
 			},
 
-			xhr: function(p) {
+			xhr: function xhr(p) {
 
 				if (p.method !== 'get' && p.data) {
 
 					// Serialize payload as JSON
 					p.headers = p.headers || {};
 					p.headers['Content-Type'] = 'application/json';
-					if (typeof (p.data) === 'object') {
+					if (_typeof(p.data) === 'object') {
 						p.data = JSON.stringify(p.data);
 					}
 				}
@@ -3884,8 +3511,8 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	});
 
 	function formatError(o, headers) {
-		var code = headers ? headers.statusCode : (o && 'meta' in o && 'status' in o.meta && o.meta.status);
-		if ((code === 401 || code === 403)) {
+		var code = headers ? headers.statusCode : o && 'meta' in o && 'status' in o.meta && o.meta.status;
+		if (code === 401 || code === 403) {
 			o.error = {
 				code: 'access_denied',
 				message: o.message || (o.data ? o.data.message : 'Could not get response')
@@ -3911,10 +3538,16 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			}
 		}
 	}
-
 })(hello);
 
-(function(hello) {
+},{"../hello.js":3}],9:[function(require,module,exports){
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var hello = require('../hello.js');
+
+(function (hello) {
 
 	var contactsUrl = 'https://www.google.com/m8/feeds/contacts/default/full?v=3.0&alt=json&max-results=@{limit|1000}&start-index=@{start|1}';
 
@@ -3950,7 +3583,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 			scope_delim: ' ',
 
-			login: function(p) {
+			login: function login(p) {
 
 				if (p.qs.response_type === 'code') {
 
@@ -3983,7 +3616,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				'me/share': 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
 				'me/feed': 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
 				'me/albums': 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}&start-index=@{start|1}',
-				'me/album': function(p, callback) {
+				'me/album': function meAlbum(p, callback) {
 					var key = p.query.id;
 					delete p.query.id;
 					callback(key.replace('/entry/', '/feed/'));
@@ -4007,10 +3640,10 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 				// Google Drive
 				'me/files': uploadDrive,
-				'me/folders': function(p, callback) {
+				'me/folders': function meFolders(p, callback) {
 					p.data = {
 						title: p.data.name,
-						parents: [{id: p.data.parent || 'root'}],
+						parents: [{ id: p.data.parent || 'root' }],
 						mimeType: 'application/vnd.google-apps.folder'
 					};
 					callback('drive/v2/files');
@@ -4034,7 +3667,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			wrap: {
-				me: function(o) {
+				me: function me(o) {
 					if (o.id) {
 						o.last_name = o.family_name || (o.name ? o.name.familyName : null);
 						o.first_name = o.given_name || (o.name ? o.name.givenName : null);
@@ -4049,7 +3682,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 					return o;
 				},
 
-				'me/friends': function(o) {
+				'me/friends': function meFriends(o) {
 					if (o.items) {
 						paging(o);
 						o.data = o.items;
@@ -4070,12 +3703,11 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				'default': gEntry
 			},
 
-			xhr: function(p) {
+			xhr: function xhr(p) {
 
 				if (p.method === 'post' || p.method === 'put') {
 					toJSON(p);
-				}
-				else if (p.method === 'patch') {
+				} else if (p.method === 'patch') {
 					hello.utils.extend(p.query, p.data);
 					p.data = null;
 				}
@@ -4150,17 +3782,16 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 		// Old style: Picasa, etc.
 		else if ('entry' in o) {
-			return formatEntry(o.entry);
-		}
+				return formatEntry(o.entry);
+			}
 
-		// New style: Google Drive & Plus
-		else if ('items' in o) {
-			o.data = o.items.map(formatItem);
-			delete o.items;
-		}
-		else {
-			formatItem(o);
-		}
+			// New style: Google Drive & Plus
+			else if ('items' in o) {
+					o.data = o.items.map(formatItem);
+					delete o.items;
+				} else {
+					formatItem(o);
+				}
 
 		return o;
 	}
@@ -4179,11 +3810,11 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			for (var i = 0; i < o.feed.entry.length; i++) {
 				var a = o.feed.entry[i];
 
-				a.id	= a.id.$t;
-				a.name	= a.title.$t;
+				a.id = a.id.$t;
+				a.name = a.title.$t;
 				delete a.title;
 				if (a.gd$email) {
-					a.email	= (a.gd$email && a.gd$email.length > 0) ? a.gd$email[0].address : null;
+					a.email = a.gd$email && a.gd$email.length > 0 ? a.gd$email[0].address : null;
 					a.emails = a.gd$email;
 					delete a.gd$email;
 				}
@@ -4194,7 +3825,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 				if (a.link) {
 
-					var pic = (a.link.length > 0) ? a.link[0].href : null;
+					var pic = a.link.length > 0 ? a.link[0].href : null;
 					if (pic && a.link[0].gd$etag) {
 						pic += (pic.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + token;
 						a.picture = pic;
@@ -4223,12 +3854,9 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 		var mediaContent = group.media$content || [];
 		var mediaThumbnail = group.media$thumbnail || [];
 
-		var pictures = mediaContent
-			.concat(mediaThumbnail)
-			.map(formatImage)
-			.sort(function(a, b) {
-				return a.width - b.width;
-			});
+		var pictures = mediaContent.concat(mediaThumbnail).map(formatImage).sort(function (a, b) {
+			return a.width - b.width;
+		});
 
 		var i = 0;
 		var _a;
@@ -4291,13 +3919,12 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			var start = toInt(res.feed.openSearch$startIndex.$t);
 			var total = toInt(res.feed.openSearch$totalResults.$t);
 
-			if ((start + limit) < total) {
+			if (start + limit < total) {
 				res.paging = {
 					next: '?start=' + (start + limit)
 				};
 			}
-		}
-		else if ('nextPageToken' in res) {
+		} else if ('nextPageToken' in res) {
 			res.paging = {
 				next: '?pageToken=' + res.nextPageToken
 			};
@@ -4313,14 +3940,14 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 		var counter = 0;
 		var lineBreak = '\r\n';
 		var delim = lineBreak + '--' + boundary;
-		var ready = function() {};
+		var ready = function ready() {};
 
 		var dataUri = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
 
 		// Add file
 		function addFile(item) {
 			var fr = new FileReader();
-			fr.onload = function(e) {
+			fr.onload = function (e) {
 				addContent(btoa(e.target.result), item.type + lineBreak + 'Content-Transfer-Encoding: base64');
 			};
 
@@ -4335,10 +3962,10 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 		}
 
 		// Add new things to the object
-		this.append = function(content, type) {
+		this.append = function (content, type) {
 
 			// Does the content have an array
-			if (typeof (content) === 'string' || !('length' in Object(content))) {
+			if (typeof content === 'string' || !('length' in Object(content))) {
 				// Converti to multiples
 				content = [content];
 			}
@@ -4351,10 +3978,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 				// Is this a file?
 				// Files can be either Blobs or File types
-				if (
-					(typeof (File) !== 'undefined' && item instanceof File) ||
-					(typeof (Blob) !== 'undefined' && item instanceof Blob)
-				) {
+				if (typeof File !== 'undefined' && item instanceof File || typeof Blob !== 'undefined' && item instanceof Blob) {
 					// Read the file in
 					addFile(item);
 				}
@@ -4362,20 +3986,20 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				// Data-URI?
 				// Data:[<mime type>][;charset=<charset>][;base64],<encoded data>
 				// /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i
-				else if (typeof (item) === 'string' && item.match(dataUri)) {
-					var m = item.match(dataUri);
-					addContent(item.replace(dataUri, ''), m[1] + lineBreak + 'Content-Transfer-Encoding: base64');
-				}
+				else if (typeof item === 'string' && item.match(dataUri)) {
+						var m = item.match(dataUri);
+						addContent(item.replace(dataUri, ''), m[1] + lineBreak + 'Content-Transfer-Encoding: base64');
+					}
 
-				// Regular string
-				else {
-					addContent(item, type);
-				}
+					// Regular string
+					else {
+							addContent(item, type);
+						}
 			}
 		};
 
-		this.onready = function(fn) {
-			ready = function() {
+		this.onready = function (fn) {
+			ready = function ready() {
 				if (counter === 0) {
 					// Trigger ready
 					body.unshift('');
@@ -4398,10 +4022,8 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 		var data = {};
 
 		// Test for DOM element
-		if (p.data &&
-			(typeof (HTMLInputElement) !== 'undefined' && p.data instanceof HTMLInputElement)
-		) {
-			p.data = {file: p.data};
+		if (p.data && typeof HTMLInputElement !== 'undefined' && p.data instanceof HTMLInputElement) {
+			p.data = { file: p.data };
 		}
 
 		if (!p.data.name && Object(Object(p.data.file).files).length && p.method === 'post') {
@@ -4411,11 +4033,10 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 		if (p.method === 'post') {
 			p.data = {
 				title: p.data.name,
-				parents: [{id: p.data.parent || 'root'}],
+				parents: [{ id: p.data.parent || 'root' }],
 				file: p.data.file
 			};
-		}
-		else {
+		} else {
 
 			// Make a reference
 			data = p.data;
@@ -4423,7 +4044,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 			// Add the parts to change as required
 			if (data.parent) {
-				p.data.parents = [{id: p.data.parent || 'root'}];
+				p.data.parents = [{ id: p.data.parent || 'root' }];
 			}
 
 			if (data.file) {
@@ -4442,7 +4063,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			file = p.data.file;
 			delete p.data.file;
 
-			if (typeof (file) === 'object' && 'files' in file) {
+			if ((typeof file === 'undefined' ? 'undefined' : _typeof(file)) === 'object' && 'files' in file) {
 				// Assign the NodeList
 				file = file.files;
 			}
@@ -4471,30 +4092,32 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			parts.append(file);
 		}
 
-		parts.onready(function(body, boundary) {
+		parts.onready(function (body, boundary) {
 
 			p.headers['content-type'] = 'multipart/related; boundary="' + boundary + '"';
 			p.data = body;
 
 			callback('upload/drive/v2/files' + (data.id ? '/' + data.id : '') + '?uploadType=multipart');
 		});
-
 	}
 
 	function toJSON(p) {
-		if (typeof (p.data) === 'object') {
+		if (_typeof(p.data) === 'object') {
 			// Convert the POST into a javascript object
 			try {
 				p.data = JSON.stringify(p.data);
 				p.headers['content-type'] = 'application/json';
-			}
-			catch (e) {}
+			} catch (e) {}
 		}
 	}
-
 })(hello);
 
-(function(hello) {
+},{"../hello.js":3}],10:[function(require,module,exports){
+'use strict';
+
+var hello = require('../hello.js');
+
+(function (hello) {
 
 	hello.init({
 
@@ -4540,7 +4163,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			post: {
-				'me/like': function(p, callback) {
+				'me/like': function meLike(p, callback) {
 					var id = p.data.id;
 					p.data = {};
 					callback('media/' + id + '/likes');
@@ -4552,7 +4175,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			wrap: {
-				me: function(o) {
+				me: function me(o) {
 
 					formatError(o);
 
@@ -4568,35 +4191,33 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				'me/friends': formatFriends,
 				'me/following': formatFriends,
 				'me/followers': formatFriends,
-				'me/photos': function(o) {
+				'me/photos': function mePhotos(o) {
 
 					formatError(o);
 					paging(o);
 
 					if ('data' in o) {
-						o.data = o.data.filter(function(d) {
+						o.data = o.data.filter(function (d) {
 							return d.type === 'image';
 						});
 
-						o.data.forEach(function(d) {
+						o.data.forEach(function (d) {
 							d.name = d.caption ? d.caption.text : null;
 							d.thumbnail = d.images.thumbnail.url;
 							d.picture = d.images.standard_resolution.url;
-							d.pictures = Object.keys(d.images)
-								.map(function(key) {
-									var image = d.images[key];
-									return formatImage(image);
-								})
-								.sort(function(a, b) {
-									return a.width - b.width;
-								});
+							d.pictures = Object.keys(d.images).map(function (key) {
+								var image = d.images[key];
+								return formatImage(image);
+							}).sort(function (a, b) {
+								return a.width - b.width;
+							});
 						});
 					}
 
 					return o;
 				},
 
-				'default': function(o) {
+				'default': function _default(o) {
 					o = formatError(o);
 					paging(o);
 					return o;
@@ -4605,7 +4226,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 			// Instagram does not return any CORS Headers
 			// So besides JSONP we're stuck with proxy
-			xhr: function(p, qs) {
+			xhr: function xhr(p, qs) {
 
 				var method = p.method;
 				var proxy = method !== 'get';
@@ -4683,10 +4304,16 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			delete res.pagination;
 		}
 	}
-
 })(hello);
 
-(function(hello) {
+},{"../hello.js":3}],11:[function(require,module,exports){
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+
+var hello = require('../hello.js');
+
+(function (hello) {
 
 	hello.init({
 
@@ -4720,7 +4347,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 			scope_delim: ' ',
 
-			login: function(p) {
+			login: function login(p) {
 				p.options.popup.width = 400;
 				p.options.popup.height = 700;
 			},
@@ -4734,23 +4361,23 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			post: {
-				'meetings/start/adhoc': function(p, callback) {
+				'meetings/start/adhoc': function meetingsStartAdhoc(p, callback) {
 					callback('meetings/start');
 				},
 
-				'meetings/start/scheduled': function(p, callback) {
+				'meetings/start/scheduled': function meetingsStartScheduled(p, callback) {
 					var meetingId = p.data.meetingId;
 					p.data = {};
 					callback('meetings/' + meetingId + '/start');
 				},
 
-				'meetings/schedule': function(p, callback) {
+				'meetings/schedule': function meetingsSchedule(p, callback) {
 					callback('meetings');
 				}
 			},
 
 			patch: {
-				'meetings/update': function(p, callback) {
+				'meetings/update': function meetingsUpdate(p, callback) {
 					callback('meetings/' + p.data.meetingId);
 				}
 			},
@@ -4760,7 +4387,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			wrap: {
-				me: function(o, headers) {
+				me: function me(o, headers) {
 					formatError(o, headers);
 
 					if (!o.email) {
@@ -4775,7 +4402,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 					return o;
 				},
 
-				'default': function(o, headers) {
+				'default': function _default(o, headers) {
 					formatError(o, headers);
 
 					return o;
@@ -4792,15 +4419,14 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 		var message;
 		var details;
 
-		if (o && ('Message' in o)) {
+		if (o && 'Message' in o) {
 			message = o.Message;
 			delete o.Message;
 
 			if ('ErrorCode' in o) {
 				errorCode = o.ErrorCode;
 				delete o.ErrorCode;
-			}
-			else {
+			} else {
 				errorCode = getErrorCode(headers);
 			}
 
@@ -4823,7 +4449,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 		// Format non-get requests to indicate json body
 		if (p.method !== 'get' && p.data) {
 			p.headers['Content-Type'] = 'application/json';
-			if (typeof (p.data) === 'object') {
+			if (_typeof(p.data) === 'object') {
 				p.data = JSON.stringify(p.data);
 			}
 		}
@@ -4849,10 +4475,14 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				return 'server_error';
 		}
 	}
+})(hello);
 
-}(hello));
+},{"../hello.js":3}],12:[function(require,module,exports){
+'use strict';
 
-(function(hello) {
+var hello = require('../hello.js');
+
+(function (hello) {
 
 	hello.init({
 
@@ -4894,7 +4524,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			post: {
 
 				// See: https://developer.linkedin.com/documents/api-requests-json
-				'me/share': function(p, callback) {
+				'me/share': function meShare(p, callback) {
 					var data = {
 						visibility: {
 							code: 'anyone'
@@ -4908,9 +4538,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 								id: p.data.id
 							}
 						};
-
-					}
-					else {
+					} else {
 						data.comment = p.data.message;
 						if (p.data.picture && p.data.link) {
 							data.content = {
@@ -4928,12 +4556,12 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				'me/like': like
 			},
 
-			del:{
+			del: {
 				'me/like': like
 			},
 
 			wrap: {
-				me: function(o) {
+				me: function me(o) {
 					formatError(o);
 					formatUser(o);
 					return o;
@@ -4942,12 +4570,12 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				'me/friends': formatFriends,
 				'me/following': formatFriends,
 				'me/followers': formatFriends,
-				'me/share': function(o) {
+				'me/share': function meShare(o) {
 					formatError(o);
 					paging(o);
 					if (o.values) {
 						o.data = o.values.map(formatUser);
-						o.data.forEach(function(item) {
+						o.data.forEach(function (item) {
 							item.message = item.headline;
 						});
 
@@ -4957,14 +4585,14 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 					return o;
 				},
 
-				'default': function(o, headers) {
+				'default': function _default(o, headers) {
 					formatError(o);
 					empty(o, headers);
 					paging(o);
 				}
 			},
 
-			jsonp: function(p, qs) {
+			jsonp: function jsonp(p, qs) {
 				formatQuery(qs);
 				if (p.method === 'get') {
 					qs.format = 'jsonp';
@@ -4972,7 +4600,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				}
 			},
 
-			xhr: function(p, qs) {
+			xhr: function xhr(p, qs) {
 				if (p.method !== 'get') {
 					formatQuery(qs);
 					p.headers['Content-Type'] = 'application/json';
@@ -5004,7 +4632,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 		o.first_name = o.firstName;
 		o.last_name = o.lastName;
-		o.name = o.formattedName || (o.first_name + ' ' + o.last_name);
+		o.name = o.formattedName || o.first_name + ' ' + o.last_name;
 		o.thumbnail = o.pictureUrl;
 		o.email = o.emailAddress;
 		return o;
@@ -5022,7 +4650,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 	function paging(res) {
-		if ('_count' in res && '_start' in res && (res._count + res._start) < res._total) {
+		if ('_count' in res && '_start' in res && res._count + res._start < res._total) {
 			res.paging = {
 				next: '?start=' + (res._start + res._count) + '&count=' + res._count
 			};
@@ -5051,11 +4679,15 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 		p.method = 'put';
 		callback('people/~/network/updates/key=' + id + '/is-liked');
 	}
-
 })(hello);
 
+},{"../hello.js":3}],13:[function(require,module,exports){
+'use strict';
+
+var hello = require('../hello.js');
+
 // See: https://developers.soundcloud.com/docs/api/reference
-(function(hello) {
+(function (hello) {
 
 	hello.init({
 
@@ -5079,7 +4711,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				'me/following': 'me/followings.json',
 
 				// See: http://developers.soundcloud.com/docs/api/reference#activities
-				'default': function(p, callback) {
+				'default': function _default(p, callback) {
 
 					// Include '.json at the end of each request'
 					callback(p.path + '.json');
@@ -5088,12 +4720,12 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 			// Response handlers
 			wrap: {
-				me: function(o) {
+				me: function me(o) {
 					formatUser(o);
 					return o;
 				},
 
-				'default': function(o) {
+				'default': function _default(o) {
 					if (Array.isArray(o)) {
 						o = {
 							data: o.map(formatUser)
@@ -5137,10 +4769,14 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			};
 		}
 	}
-
 })(hello);
 
-(function(hello) {
+},{"../hello.js":3}],14:[function(require,module,exports){
+'use strict';
+
+var hello = require('../hello.js');
+
+(function (hello) {
 
 	var base = 'https://api.twitter.com/';
 
@@ -5156,7 +4792,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				token: base + 'oauth/access_token'
 			},
 
-			login: function(p) {
+			login: function login(p) {
 				// Reauthenticate
 				// https://dev.twitter.com/oauth/reference/get/oauth/authenticate
 				var prefix = '?force_login=true';
@@ -5179,7 +4815,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			post: {
-				'me/share': function(p, callback) {
+				'me/share': function meShare(p, callback) {
 
 					var data = p.data;
 					p.data = null;
@@ -5218,19 +4854,19 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 					// Retweet?
 					else if ('id' in data) {
-						callback('statuses/retweet/' + data.id + '.json');
-					}
+							callback('statuses/retweet/' + data.id + '.json');
+						}
 
-					// Tweet
-					else {
-						// Assign the post body to the query parameters
-						hello.utils.extend(p.query, data);
-						callback('statuses/update.json?include_entities=1');
-					}
+						// Tweet
+						else {
+								// Assign the post body to the query parameters
+								hello.utils.extend(p.query, data);
+								callback('statuses/update.json?include_entities=1');
+							}
 				},
 
 				// See: https://dev.twitter.com/rest/reference/post/favorites/create
-				'me/like': function(p, callback) {
+				'me/like': function meLike(p, callback) {
 					var id = p.data.id;
 					p.data = null;
 					callback('favorites/create.json?id=' + id);
@@ -5240,7 +4876,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			del: {
 
 				// See: https://dev.twitter.com/rest/reference/post/favorites/destroy
-				'me/like': function() {
+				'me/like': function meLike() {
 					p.method = 'post';
 					var id = p.data.id;
 					p.data = null;
@@ -5249,7 +4885,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			wrap: {
-				me: function(res) {
+				me: function me(res) {
 					formatError(res);
 					formatUser(res);
 					return res;
@@ -5259,26 +4895,26 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				'me/followers': formatFriends,
 				'me/following': formatFriends,
 
-				'me/share': function(res) {
+				'me/share': function meShare(res) {
 					formatError(res);
 					paging(res);
 					if (!res.error && 'length' in res) {
-						return {data: res};
+						return { data: res };
 					}
 
 					return res;
 				},
 
-				'default': function(res) {
+				'default': function _default(res) {
 					res = arrayToDataResponse(res);
 					paging(res);
 					return res;
 				}
 			},
-			xhr: function(p) {
+			xhr: function xhr(p) {
 
 				// Rely on the proxy for non-GET requests.
-				return (p.method !== 'get');
+				return p.method !== 'get';
 			}
 		}
 	});
@@ -5331,40 +4967,41 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 	function arrayToDataResponse(res) {
-		return Array.isArray(res) ? {data: res} : res;
+		return Array.isArray(res) ? { data: res } : res;
 	}
 
 	/**
-	// The documentation says to define user in the request
-	// Although its not actually required.
-
-	var user_id;
-
-	function withUserId(callback){
-		if(user_id){
-			callback(user_id);
-		}
-		else{
-			hello.api('twitter:/me', function(o){
-				user_id = o.id;
-				callback(o.id);
-			});
-		}
-	}
-
-	function sign(url){
-		return function(p, callback){
-			withUserId(function(user_id){
-				callback(url+'?user_id='+user_id);
-			});
-		};
-	}
-	*/
-
+ // The documentation says to define user in the request
+ // Although its not actually required.
+ 	var user_id;
+ 	function withUserId(callback){
+ 	if(user_id){
+ 		callback(user_id);
+ 	}
+ 	else{
+ 		hello.api('twitter:/me', function(o){
+ 			user_id = o.id;
+ 			callback(o.id);
+ 		});
+ 	}
+ }
+ 	function sign(url){
+ 	return function(p, callback){
+ 		withUserId(function(user_id){
+ 			callback(url+'?user_id='+user_id);
+ 		});
+ 	};
+ }
+ */
 })(hello);
 
+},{"../hello.js":3}],15:[function(require,module,exports){
+'use strict';
+
+var hello = require('../hello.js');
+
 // Vkontakte (vk.com)
-(function(hello) {
+(function (hello) {
 
 	hello.init({
 
@@ -5392,10 +5029,8 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			// Refresh the access_token
 			refresh: true,
 
-			login: function(p) {
-				p.qs.display = window.navigator &&
-					window.navigator.userAgent &&
-					/ipad|phone|phone|android/.test(window.navigator.userAgent.toLowerCase()) ? 'mobile' : 'popup';
+			login: function login(p) {
+				p.qs.display = window.navigator && window.navigator.userAgent && /ipad|phone|phone|android/.test(window.navigator.userAgent.toLowerCase()) ? 'mobile' : 'popup';
 			},
 
 			// API Base URL
@@ -5403,14 +5038,14 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 			// Map GET requests
 			get: {
-				me: function(p, callback) {
+				me: function me(p, callback) {
 					p.query.fields = 'id,first_name,last_name,photo_max';
 					callback('users.get');
 				}
 			},
 
 			wrap: {
-				me: function(res, headers, req) {
+				me: function me(res, headers, req) {
 					formatError(res);
 					return formatUser(res, req);
 				}
@@ -5435,8 +5070,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			o.thumbnail = o.picture = o.photo_max;
 			o.name = o.first_name + ' ' + o.last_name;
 
-			if (req.authResponse && req.authResponse.email !== null)
-				o.email = req.authResponse.email;
+			if (req.authResponse && req.authResponse.email !== null) o.email = req.authResponse.email;
 		}
 
 		return o;
@@ -5452,10 +5086,14 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			};
 		}
 	}
-
 })(hello);
 
-(function(hello) {
+},{"../hello.js":3}],16:[function(require,module,exports){
+'use strict';
+
+var hello = require('../hello.js');
+
+(function (hello) {
 
 	hello.init({
 		windows: {
@@ -5471,8 +5109,8 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			// Refresh the access_token once expired
 			refresh: true,
 
-			logout: function() {
-				return 'http://login.live.com/oauth20_logout.srf?ts=' + (new Date()).getTime();
+			logout: function logout() {
+				return 'http://login.live.com/oauth20_logout.srf?ts=' + new Date().getTime();
 			},
 
 			// Authorization scopes
@@ -5547,14 +5185,13 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				'default': formatDefault
 			},
 
-			xhr: function(p) {
+			xhr: function xhr(p) {
 				if (p.method !== 'get' && p.method !== 'delete' && !hello.utils.hasBinary(p.data)) {
 
 					// Does this have a data-uri to upload as a file?
-					if (typeof (p.data.file) === 'string') {
+					if (typeof p.data.file === 'string') {
 						p.data.file = hello.utils.toBlob(p.data.file);
-					}
-					else {
+					} else {
 						p.data = JSON.stringify(p.data);
 						p.headers = {
 							'Content-Type': 'application/json'
@@ -5565,7 +5202,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				return true;
 			},
 
-			jsonp: function(p) {
+			jsonp: function jsonp(p) {
 				if (p.method !== 'get' && !hello.utils.hasBinary(p.data)) {
 					p.data.method = p.method;
 					p.method = 'get';
@@ -5576,17 +5213,15 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 	function formatDefault(o) {
 		if ('data' in o) {
-			o.data.forEach(function(d) {
+			o.data.forEach(function (d) {
 				if (d.picture) {
 					d.thumbnail = d.picture;
 				}
 
 				if (d.images) {
-					d.pictures = d.images
-						.map(formatImage)
-						.sort(function(a, b) {
-							return a.width - b.width;
-						});
+					d.pictures = d.images.map(formatImage).sort(function (a, b) {
+						return a.width - b.width;
+					});
 				}
 			});
 		}
@@ -5604,7 +5239,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 	function formatAlbums(o) {
 		if ('data' in o) {
-			o.data.forEach(function(d) {
+			o.data.forEach(function (d) {
 				d.photos = d.files = 'https://apis.live.net/v5.0/' + d.id + '/photos';
 			});
 		}
@@ -5622,7 +5257,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			// If this is not an non-network friend
 			if (o.is_friend !== false) {
 				// Use the id of the user_id if available
-				var id = (o.user_id || o.id);
+				var id = o.user_id || o.id;
 				o.thumbnail = o.picture = 'https://apis.live.net/v5.0/' + id + '/picture?access_token=' + token;
 			}
 		}
@@ -5632,17 +5267,21 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 	function formatFriends(o, headers, req) {
 		if ('data' in o) {
-			o.data.forEach(function(d) {
+			o.data.forEach(function (d) {
 				formatUser(d, headers, req);
 			});
 		}
 
 		return o;
 	}
-
 })(hello);
 
-(function(hello) {
+},{"../hello.js":3}],17:[function(require,module,exports){
+'use strict';
+
+var hello = require('../hello.js');
+
+(function (hello) {
 
 	hello.init({
 
@@ -5657,14 +5296,15 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			// Login handler
-			login: function(p) {
+			login: function login(p) {
 				// Change the default popup window to be at least 560
 				// Yahoo does dynamically change it on the fly for the signin screen (only, what if your already signed in)
 				p.options.popup.width = 560;
 
 				// Yahoo throws an parameter error if for whatever reason the state.scope contains a comma, so lets remove scope
-				try {delete p.qs.state.scope;}
-				catch (e) {}
+				try {
+					delete p.qs.state.scope;
+				} catch (e) {}
 			},
 
 			base: 'https://social.yahooapis.com/v1/',
@@ -5687,21 +5327,20 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	});
 
 	/*
-		// Auto-refresh fix: bug in Yahoo can't get this to work with node-oauth-shim
-		login : function(o){
-			// Is the user already logged in
-			var auth = hello('yahoo').getAuthResponse();
-
-			// Is this a refresh token?
-			if(o.options.display==='none'&&auth&&auth.access_token&&auth.refresh_token){
-				// Add the old token and the refresh token, including path to the query
-				// See http://developer.yahoo.com/oauth/guide/oauth-refreshaccesstoken.html
-				o.qs.access_token = auth.access_token;
-				o.qs.refresh_token = auth.refresh_token;
-				o.qs.token_url = 'https://api.login.yahoo.com/oauth/v2/get_token';
-			}
-		},
-	*/
+ 	// Auto-refresh fix: bug in Yahoo can't get this to work with node-oauth-shim
+ 	login : function(o){
+ 		// Is the user already logged in
+ 		var auth = hello('yahoo').getAuthResponse();
+ 			// Is this a refresh token?
+ 		if(o.options.display==='none'&&auth&&auth.access_token&&auth.refresh_token){
+ 			// Add the old token and the refresh token, including path to the query
+ 			// See http://developer.yahoo.com/oauth/guide/oauth-refreshaccesstoken.html
+ 			o.qs.access_token = auth.access_token;
+ 			o.qs.refresh_token = auth.refresh_token;
+ 			o.qs.token_url = 'https://api.login.yahoo.com/oauth/v2/get_token';
+ 		}
+ 	},
+ */
 
 	function formatError(o) {
 		if (o && 'meta' in o && 'error_type' in o.meta) {
@@ -5730,7 +5369,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			}
 
 			o.name = a.join(' ');
-			o.email = (o.emails && o.emails[0]) ? o.emails[0].handle : null;
+			o.email = o.emails && o.emails[0] ? o.emails[0].handle : null;
 			o.thumbnail = o.image ? o.image.imageUrl : null;
 		}
 
@@ -5765,7 +5404,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			contact.fields = [contact.fields];
 		}
 
-		(contact.fields || []).forEach(function(field) {
+		(contact.fields || []).forEach(function (field) {
 			if (field.type === 'email') {
 				contact.email = field.value;
 			}
@@ -5797,17 +5436,35 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	function yql(q) {
 		return 'https://query.yahooapis.com/v1/yql?q=' + (q + ' limit @{limit|100} offset @{start|0}').replace(/\s/g, '%20') + '&format=json';
 	}
-
 })(hello);
 
-// Register as anonymous AMD module
-if (typeof define === 'function' && define.amd) {
-	define(function() {
-		return hello;
-	});
-}
+},{"../hello.js":3}],18:[function(require,module,exports){
+'use strict';
 
-// CommonJS module for browserify
-if (typeof module === 'object' && module.exports) {
-	module.exports = hello;
-}
+var instanceOf = require('./instanceOf.js');
+
+module.exports = function extend(r) {
+	for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+		args[_key - 1] = arguments[_key];
+	}
+
+	args.forEach(function (o) {
+		if (instanceOf(r, Object) && instanceOf(o, Object) && r !== o) {
+			for (var x in o) {
+				r[x] = extend(r[x], o[x]);
+			}
+		} else {
+			r = o;
+		}
+	});
+	return r;
+};
+
+},{"./instanceOf.js":19}],19:[function(require,module,exports){
+"use strict";
+
+module.exports = function (test, root) {
+	return root && test instanceof root;
+};
+
+},{}]},{},[2]);
