@@ -40,7 +40,7 @@ define([], function() {
 				_accessToken = '1234';
 
 				_state = {
-					callback: 'callbackTestFunc',
+					callback: '_hellojs_callbackTestFunc',
 					network: 'network'
 				};
 
@@ -52,7 +52,7 @@ define([], function() {
 				};
 
 				_parent = {
-					callbackTestFunc: function() {
+					_hellojs_callbackTestFunc: function() {
 						// This is the callback function on the parent
 					}
 				};
@@ -82,7 +82,7 @@ define([], function() {
 				_window.close = spy;
 
 				var spy2 = sinon.spy();
-				_parent.callbackTestFunc = spy2;
+				_parent._hellojs_callbackTestFunc = spy2;
 
 				utils.responseHandler(_window, _parent);
 
@@ -108,7 +108,7 @@ define([], function() {
 					throw 'Error';
 				});
 
-				_parent.callbackTestFunc = spy2;
+				_parent._hellojs_callbackTestFunc = spy2;
 
 				utils.responseHandler(_window, _parent);
 
@@ -127,7 +127,7 @@ define([], function() {
 
 			it('should close the iframe window', function(done) {
 
-				window.testIframeCloses = function() {
+				window._hellojs_testIframeCloses = function() {
 					// After the initial load we can expect this to have removed itself;
 					setTimeout(function() {
 						expect(frm.parentNode).to.eql(null);
@@ -137,7 +137,7 @@ define([], function() {
 
 				// In this example we load a page containing the responseHandler script on it.
 				var frm = document.createElement('iframe');
-				frm.src = 'redirect.html?state={}&network=test&callback=testIframeCloses&access_token=token';
+				frm.src = 'redirect.html?state={}&network=test&callback=_hellojs_testIframeCloses&access_token=token';
 				document.body.appendChild(frm);
 
 			});
@@ -149,7 +149,7 @@ define([], function() {
 				_window.location = mockLocation('http://adodson.com/redirect.html?error=error&error_description=description&state=' + JSON.stringify(_state));
 
 				var spy2 = sinon.spy();
-				_parent.callbackTestFunc = spy2;
+				_parent._hellojs_callbackTestFunc = spy2;
 
 				utils.responseHandler(_window, _parent);
 
@@ -173,7 +173,7 @@ define([], function() {
 				_window.close = spy;
 
 				// Remove the global callback function
-				delete _parent.callbackTestFunc;
+				delete _parent._hellojs_callbackTestFunc;
 
 				// Spy on the store function
 				var spy2 = sinon.spy();
@@ -186,7 +186,7 @@ define([], function() {
 				expect(spy2.calledOnce).to.be.ok();
 
 				// Should set the callback name along with the auth response.
-				expect(spy2.args[0][1]).to.have.property('callback', 'callbackTestFunc');
+				expect(spy2.args[0][1]).to.have.property('callback', '_hellojs_callbackTestFunc');
 			});
 
 		});
