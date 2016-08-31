@@ -1,4 +1,4 @@
-/*! hellojs v1.13.4 | (c) 2012-2016 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.13.5 | (c) 2012-2016 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -1520,7 +1520,7 @@ hello.utils.extend(hello.utils, {
 				var res = 'result' in p && p.result ? JSON.parse(p.result) : false;
 
 				// Trigger the callback on the parent
-				parent[p.callback](res);
+				callback(parent, p.callback)(res);
 				closeWindow();
 			}
 
@@ -1570,7 +1570,7 @@ hello.utils.extend(hello.utils, {
 				var str = JSON.stringify(obj);
 
 				try {
-					parent[cb](str);
+					callback(parent, cb)(str);
 				}
 				catch (e) {
 					// Error thrown whilst executing parent callback
@@ -1578,6 +1578,16 @@ hello.utils.extend(hello.utils, {
 			}
 
 			closeWindow();
+		}
+
+		function callback(parent, callbackID) {
+			if (callbackID.indexOf('_hellojs_') !== 0) {
+				return function() {
+					throw 'Could not execute callback ' + callbackID;
+				};
+			}
+
+			return parent[callbackID];
 		}
 
 		function closeWindow() {
