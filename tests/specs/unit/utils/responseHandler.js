@@ -40,7 +40,7 @@ define([], function() {
 				_accessToken = '1234';
 
 				_state = {
-					callback: 'callbackTestFunc',
+					callback: '_hellojs_callbackTestFunc',
 					network: 'network'
 				};
 
@@ -52,7 +52,7 @@ define([], function() {
 				};
 
 				_parent = {
-					callbackTestFunc: function() {
+					_hellojs_callbackTestFunc: function() {
 						// This is the callback function on the parent
 					}
 				};
@@ -82,7 +82,7 @@ define([], function() {
 				_window.close = spy;
 
 				var spy2 = sinon.spy();
-				_parent.callbackTestFunc = spy2;
+				_parent._hellojs_callbackTestFunc = spy2;
 
 				utils.responseHandler(_window, _parent);
 
@@ -108,7 +108,7 @@ define([], function() {
 					throw 'Error';
 				});
 
-				_parent.callbackTestFunc = spy2;
+				_parent._hellojs_callbackTestFunc = spy2;
 
 				utils.responseHandler(_window, _parent);
 
@@ -132,7 +132,7 @@ define([], function() {
 				_window.location = mockLocation('http://adodson.com/redirect.html?error=error&error_description=description&state=' + JSON.stringify(_state));
 
 				var spy2 = sinon.spy();
-				_parent.callbackTestFunc = spy2;
+				_parent._hellojs_callbackTestFunc = spy2;
 
 				utils.responseHandler(_window, _parent);
 
@@ -156,7 +156,7 @@ define([], function() {
 				_window.close = spy;
 
 				// Remove the global callback function
-				delete _parent.callbackTestFunc;
+				delete _parent._hellojs_callbackTestFunc;
 
 				// Spy on the store function
 				var spy2 = sinon.spy();
@@ -169,7 +169,7 @@ define([], function() {
 				expect(spy2.calledOnce).to.be.ok();
 
 				// Should set the callback name along with the auth response.
-				expect(spy2.args[0][1]).to.have.property('callback', 'callbackTestFunc');
+				expect(spy2.args[0][1]).to.have.property('callback', '_hellojs_callbackTestFunc');
 			});
 
 		});
