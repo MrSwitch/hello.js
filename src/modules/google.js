@@ -41,6 +41,9 @@
 					// Let's set this to an offline access to return a refresh_token
 					p.qs.access_type = 'offline';
 				}
+				else if (p.qs.response_type.indexOf('id_token') > -1) {
+					p.qs.nonce = parseInt(Math.random() * 1e12, 10).toString(36);
+				}
 
 				// Reauthenticate
 				// https://developers.google.com/identity/protocols/
