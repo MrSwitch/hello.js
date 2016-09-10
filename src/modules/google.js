@@ -11,8 +11,8 @@
 			// See: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
 			oauth: {
 				version: 2,
-				auth: 'https://accounts.google.com/o/oauth2/auth',
-				grant: 'https://accounts.google.com/o/oauth2/token'
+				auth: 'https://accounts.google.com/o/oauth2/v2/auth',
+				grant: 'https://www.googleapis.com/oauth2/v4/token'
 			},
 
 			// Authorization scopes
