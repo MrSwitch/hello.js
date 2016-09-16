@@ -34,7 +34,7 @@
 			},
 
 			// Refresh the access_token
-			refresh: true,
+			refresh: false,
 
 			login: function(p) {
 
@@ -67,7 +67,7 @@
 			},
 
 			// API Base URL
-			base: 'https://graph.facebook.com/v2.4/',
+			base: 'https://graph.facebook.com/v2.7/',
 
 			// Map GET requests
 			get: {
