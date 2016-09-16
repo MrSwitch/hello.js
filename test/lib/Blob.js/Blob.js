@@ -1,25 +1,34 @@
-/**
- * Blob.js
+/* Blob.js
  * A Blob implementation.
- * 2013-06-20
+ * 2014-07-24
  *
  * By Eli Grey, http://eligrey.com
- * By Devin Samarin, https://github.com/eboyjr
- * License: X11/MIT
- *   See LICENSE.md
+ * By Devin Samarin, https://github.com/dsamarin
+ * License: MIT
+ *   See https://github.com/eligrey/Blob.js/blob/master/LICENSE.md
  */
 
-/*global unescape */
+/*global self, unescape */
 /*jslint bitwise: true, regexp: true, confusion: true, es5: true, vars: true, white: true,
   plusplus: true */
 
 /*! @source http://purl.eligrey.com/github/Blob.js/blob/master/Blob.js */
 
-if ((typeof Blob !== "function" && typeof Blob !== "object") || (Blob && Blob.toString() === '[object BlobConstructor]'))
-this.Blob = (function(view) {
+(function (view) {
 	"use strict";
 
-	var BlobBuilder = view.BlobBuilder || view.WebKitBlobBuilder || view.MozBlobBuilder || view.MSBlobBuilder || (function(view) {
+	view.URL = view.URL || view.webkitURL;
+
+	if (view.Blob && view.URL) {
+		try {
+			new Blob;
+			return;
+		} catch (e) {}
+	}
+
+	// Internally we use a BlobBuilder implementation to base Blob off of
+	// in order to support older browsers that only have BlobBuilder
+	var BlobBuilder = view.BlobBuilder || view.WebKitBlobBuilder || view.MozBlobBuilder || (function(view) {
 		var
 			  get_class = function(object) {
 				return Object.prototype.toString.call(object).match(/^\[object\s(.*)\]$/)[1];
@@ -53,13 +62,31 @@ this.Blob = (function(view) {
 
 			, ArrayBuffer = view.ArrayBuffer
 			, Uint8Array = view.Uint8Array
+
+			, origin = /^[\w-]+:\/*\[?[\w\.:-]+\]?(?::[0-9]+)?/
 		;
 		FakeBlob.fake = FB_proto.fake = true;
 		while (file_ex_code--) {
 			FileException.prototype[file_ex_codes[file_ex_code]] = file_ex_code + 1;
 		}
+		// Polyfill URL
 		if (!real_URL.createObjectURL) {
-			URL = view.URL = {};
+			URL = view.URL = function(uri) {
+				var
+					  uri_info = document.createElementNS("http://www.w3.org/1999/xhtml", "a")
+					, uri_origin
+				;
+				uri_info.href = uri;
+				if (!("origin" in uri_info)) {
+					if (uri_info.protocol.toLowerCase() === "data:") {
+						uri_info.origin = null;
+					} else {
+						uri_origin = uri.match(origin);
+						uri_info.origin = uri_origin && uri_origin[1];
+					}
+				}
+				return uri_info;
+			};
 		}
 		URL.createObjectURL = function(blob) {
 			var
@@ -91,7 +118,7 @@ this.Blob = (function(view) {
 		};
 		FBB_proto.append = function(data/*, endings*/) {
 			var bb = this.data;
-			// Decode data to a binary string
+			// decode data to a binary string
 			if (Uint8Array && (data instanceof ArrayBuffer || data instanceof Uint8Array)) {
 				var
 					  str = ""
@@ -108,7 +135,7 @@ this.Blob = (function(view) {
 					var fr = new FileReaderSync;
 					bb.push(fr.readAsBinaryString(data));
 				} else {
-					// Async FileReader won't work as BlobBuilder is sync
+					// async FileReader won't work as BlobBuilder is sync
 					throw new FileException("NOT_READABLE_ERR");
 				}
 			} else if (data instanceof FakeBlob) {
@@ -121,9 +148,9 @@ this.Blob = (function(view) {
 				}
 			} else {
 				if (typeof data !== "string") {
-					data += ""; // Convert unsupported types to strings
+					data += ""; // convert unsupported types to strings
 				}
-				// Decode UTF-16 to binary string
+				// decode UTF-16 to binary string
 				bb.push(unescape(encodeURIComponent(data)));
 			}
 		};
@@ -150,10 +177,14 @@ this.Blob = (function(view) {
 		FB_proto.toString = function() {
 			return "[object Blob]";
 		};
+		FB_proto.close = function() {
+			this.size = 0;
+			delete this.data;
+		};
 		return FakeBlobBuilder;
 	}(view));
 
-	var Blob = function(blobParts, options) {
+	view.Blob = function(blobParts, options) {
 		var type = options ? (options.type || "") : "";
 		var builder = new BlobBuilder();
 		if (blobParts) {
@@ -172,18 +203,9 @@ this.Blob = (function(view) {
 		}
 		return blob;
 	};
+
 	var getPrototypeOf = Object.getPrototypeOf || function(object) {
 		return object.__proto__;
 	};
-	Blob.prototype = getPrototypeOf(new Blob());
-	return Blob;
-}(this));
-
-var supportsBlob = false;
-if (this.Blob) {
-	try{
-		new Blob([new Int8Array([17, -45.3])], {type: 'image/jpeg'});
-		supportsBlob = true;
-	}
-	catch(e) {}
-}
+	view.Blob.prototype = getPrototypeOf(new view.Blob());
+}(typeof self !== "undefined" && self || typeof window !== "undefined" && window || this.content || this));
