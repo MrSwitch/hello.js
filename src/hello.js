@@ -1485,7 +1485,20 @@ hello.utils.extend(hello.utils, {
 			}
 
 			// Remove from session object
-			if (parent && cb && cb in parent) {
+			if (obj.chrome_ext_id && typeof chrome === 'object' && typeof chrome.runtime === 'object') {
+				// If we have a chrome extension ID, try using the chrome APIs
+				try {
+					delete obj.callback;
+				}
+				catch (e) {}
+
+				message = {};
+				message.message_type = 'google_auth_response';
+				message.callback = cb;
+				message.obj = JSON.stringify(obj);
+				chrome.runtime.sendMessage(obj.chrome_ext_id, message);
+			}
+			else if (parent && cb && cb in parent) {
 
 				try {
 					delete obj.callback;
@@ -1506,19 +1519,6 @@ hello.utils.extend(hello.utils, {
 				catch (e) {
 					// Error thrown whilst executing parent callback
 				}
-			}
-			else if (obj.chrome_ext_id && typeof chrome === 'object' && typeof chrome.runtime === 'object') {
-				// If we have a chrome extension ID, try using the chrome APIs
-				try {
-					delete obj.callback;
-				}
-				catch (e) {}
-
-				message = {};
-				message.message_type = 'google_auth_response';
-				message.callback = cb;
-				message.obj = JSON.stringify(obj);
-				chrome.runtime.sendMessage(obj.chrome_ext_id, message);
 			}
 
 			closeWindow();
