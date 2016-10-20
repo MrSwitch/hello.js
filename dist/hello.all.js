@@ -3978,7 +3978,7 @@ if (typeof chrome === 'object' && typeof chrome.extension === 'object') {
 				}
 				else if (p.method === 'patch') {
 					hello.utils.extend(p.query, p.data);
-					p.data = null;
+					toJSON(p);
 				}
 
 				return true;
