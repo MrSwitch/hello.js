@@ -24,7 +24,7 @@ hello.utils = {
 			if (Array.isArray(r) && Array.isArray(a)) {
 				Array.prototype.push.apply(r, a);
 			}
-			else if ((r instanceof Object || typeof r === 'object') && (a instanceof Object || typeof a === 'object') && r !== a) {
+			else if (r && (r instanceof Object || typeof r === 'object') && a && (a instanceof Object || typeof a === 'object') && r !== a) {
 				for (var x in a) {
 					r[x] = hello.utils.extend(r[x], a[x]);
 				}
