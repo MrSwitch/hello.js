@@ -21,7 +21,6 @@ gulp.task('localhost', () => {
 	util.log('Listening on port', util.colors.cyan(port));
 });
 
-gulp.task('test', testSpecs('test/index.html'));
 gulp.task('test_bundle', ['bundle'], testSpecs('test/bundle.html'));
 
 gulp.task('index_tests', () => {
@@ -36,11 +35,11 @@ gulp.task('index_tests', () => {
 	});
 });
 
-gulp.task('watch', ['localhost'], () => gulp.watch(scripts_to_watch, {interval: 500}, ['test']));
+gulp.task('watch', ['localhost'], () => gulp.watch(scripts_to_watch, {interval: 500}, ['test_bundle']));
 
 gulp.task('close', () => localhost.close());
 
-gulp.task('bundle', ['index_tests'], () => {
+gulp.task('bundle', () => {
 
 	// Package up the specs directory into a single file called config.js
 	return browserify('./test/specs/index.js', {debug: true, paths: './'})
@@ -56,10 +55,12 @@ gulp.task('bundle', ['index_tests'], () => {
 
 gulp.task('watch_bundle', () => gulp.watch(scripts_to_watch, {interval: 500}, ['bundle']));
 
-gulp.task('default', ['localhost', 'test_bundle'], () => {
+gulp.task('test', ['localhost', 'test_bundle'], () => {
 	util.log('Closing localhost:' + port);
 	localhost.close();
 });
+
+gulp.task('default', ['test']);
 
 function testSpecs(path) {
 	return () => {

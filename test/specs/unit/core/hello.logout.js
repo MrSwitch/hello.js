@@ -1,8 +1,6 @@
-define([
-	'../../libs/errorResponse'
-], function(
-	errorResponse
-) {
+let hello = require('../../../../src/hello.js');
+let errorResponse = require('../../../lib/errorResponse.js');
+
 
 	describe('hello.logout', function() {
 
@@ -22,16 +20,19 @@ define([
 		it('should trigger an error when network is unknown', function(done) {
 			// Make request
 			hello('unknown')
-				.logout()
-				.then(null, errorResponse('invalid_network', done));
+			.logout()
+			.then(null, errorResponse('invalid_network', done))
+			.catch(done);
 		});
 
 		it('should assign a complete event', function(done) {
-			hello('unknown').logout(function() {done();});
+			hello('unknown')
+			.logout(function() {done();});
 		});
 
 		it('should throw an error events in the eventCompleted handler', function(done) {
-			hello('unknown').logout(function(e) {
+			hello('unknown')
+			.logout(function(e) {
 				expect(e).to.have.property('error');
 				done();
 			});
@@ -51,13 +52,12 @@ define([
 
 			it('should remove the session from the localStorage', function() {
 
-				var spy = sinon.spy(function() {
-					return {};
-				});
+				var spy = sinon.spy(() => ({}));
 
 				hello.utils.store = spy;
 
-				hello('test').logout();
+				hello('test')
+				.logout();
 
 				expect(spy.calledWith('test', null)).to.be.ok();
 			});
@@ -96,11 +96,11 @@ define([
 
 				it('should call module.logout', function(done) {
 
-					module.logout = function() {
-						done();
-					};
+					module.logout = () => done();
 
-					hello('testable').logout({force:true});
+					hello('testable')
+					.logout({force:true})
+					.catch(done);
 				});
 
 				it('should attach authResponse object to the options.authResponse', function(done) {
@@ -110,10 +110,10 @@ define([
 						done();
 					};
 
-					hello('testable').logout({force:true});
+					hello('testable')
+					.logout({force:true})
+					.catch(done);
 				});
 			});
 		});
 	});
-
-});

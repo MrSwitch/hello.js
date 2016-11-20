@@ -1,29 +1,27 @@
-define([
-	'../libs/errorResponse',
-	'../../../src/modules/box',
-	'../../../src/modules/facebook',
-	'../../../src/modules/flickr',
-	'../../../src/modules/google',
-	'../../../src/modules/windows',
-	'../../../src/modules/dropbox',
-	'../../../src/modules/twitter',
-	'../../../src/modules/yahoo',
-	'../../../src/modules/instagram',
-	'../../../src/modules/joinme',
-	'../../../src/modules/linkedin',
-	'../../../src/modules/foursquare',
-	'../../../src/modules/github',
-	'../../../src/modules/bikeindex',
-	'../../../src/modules/soundcloud',
-	'../../../src/modules/vk'
-], function(
-	errorResponse
-) {
+const hello = require('../../../src/hello.js');
+const errorResponse = require('../../lib/errorResponse.js');
 
-	describe('E2E modules', function() {
+require('../../../src/modules/box.js');
+require('../../../src/modules/facebook.js');
+require('../../../src/modules/flickr.js');
+require('../../../src/modules/google.js');
+require('../../../src/modules/windows.js');
+require('../../../src/modules/dropbox.js');
+require('../../../src/modules/twitter.js');
+require('../../../src/modules/yahoo.js');
+require('../../../src/modules/instagram.js');
+require('../../../src/modules/joinme.js');
+require('../../../src/modules/linkedin.js');
+require('../../../src/modules/foursquare.js');
+require('../../../src/modules/github.js');
+require('../../../src/modules/bikeindex.js');
+require('../../../src/modules/soundcloud.js');
+require('../../../src/modules/vk.js');
+
+	describe('E2E modules', () => {
 
 		// Loop through all services
-		for (var name in hello.services) {
+		for (const name in hello.services) {
 			setupModuleTests(hello.services[name], name);
 		}
 
@@ -33,17 +31,17 @@ define([
 
 				var MATCH_URL = /^https?\:\/\//;
 
-				it('should contain oauth.auth path', function() {
+				it('should contain oauth.auth path', () => {
 					var path = module.oauth.auth;
 					expect(path).to.match(/^https?\:\/\//);
 				});
 
-				it('should specify a base url', function() {
+				it('should specify a base url', () => {
 					// Loop through all services
 					expect(module.base).to.match(/^https?\:\/\//);
 				});
 
-				it('should be using OAuth1 contain, auth, request, token properties', function() {
+				it('should be using OAuth1 contain, auth, request, token properties', () => {
 
 					// Loop through all services
 					var oauth = module.oauth;
@@ -76,4 +74,3 @@ define([
 			});
 		}
 	});
-});

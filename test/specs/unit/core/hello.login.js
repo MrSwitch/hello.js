@@ -1,8 +1,7 @@
-define([
-	'../../libs/errorResponse'
-], function(
-	errorResponse
-) {
+const hello = require('../../../../src/hello.js');
+const errorResponse = require('../../../lib/errorResponse.js');
+const queryparse = require('tricks/string/queryparse');
+
 
 	describe('hello.login', function() {
 
@@ -65,7 +64,8 @@ define([
 				return popup;
 			};
 
-			hello.login('testable', spy);
+			hello
+			.login('testable', spy);
 
 			popup.closed = true;
 
@@ -73,22 +73,24 @@ define([
 
 		it('should throw a completed and error event if network name is wrong', function(done) {
 			hello
-				.login('invalidname', errorResponse('invalid_network', done));
+			.login('invalidname', errorResponse('invalid_network', done));
 		});
 
 		it('should throw a error event if network name is wrong', function(done) {
 			hello
-				.login('invalidname')
-				.then(null, errorResponse('invalid_network', done));
+			.login('invalidname')
+			.then(null, errorResponse('invalid_network', done));
 		});
 
 		it('should by default, trigger window.open request', function(done) {
 
-			var spy = sinon.spy(function() {done();});
+			var spy = sinon.spy(() => done());
 
 			utils.popup = spy;
 
-			hello.login('testable');
+			hello
+			.login('testable');
+
 		});
 
 		it('should include the basic scope defined by the module, by default', function(done) {
@@ -102,7 +104,8 @@ define([
 
 			utils.popup = spy;
 
-			hello.login('testable');
+			hello
+			.login('testable');
 		});
 
 		it('should not use "basic" as the default scope, if there is no mapping', function(done) {
@@ -118,7 +121,8 @@ define([
 
 			utils.popup = spy;
 
-			hello('testable').login();
+			hello('testable')
+			.login();
 		});
 
 		describe('options', function() {
@@ -129,7 +133,7 @@ define([
 
 				var spy = sinon.spy(function(url, name, options) {
 
-					var params = hello.utils.param(url.split('?')[1]);
+					var params = queryparse(url.split('?')[1]);
 
 					expect(params.redirect_uri).to.equal(REDIRECT_URI);
 
@@ -138,7 +142,8 @@ define([
 
 				utils.popup = spy;
 
-				hello.login('testable', {redirect_uri:REDIRECT_URI});
+				hello
+				.login('testable', {redirect_uri:REDIRECT_URI});
 			});
 
 			it('should URIencode `options.redirect_uri`', function(done) {
@@ -155,14 +160,15 @@ define([
 
 				utils.popup = spy;
 
-				hello.login('testable', {redirect_uri:REDIRECT_URI});
+				hello
+				.login('testable', {redirect_uri:REDIRECT_URI});
 			});
 
 			it('should pass through unknown scopes defined in `options.scope`', function(done) {
 
 				var spy = sinon.spy(function(url, name, optins) {
 
-					var params = hello.utils.param(url.split('?')[1]);
+					var params = queryparse(url.split('?')[1]);
 
 					expect(params.scope).to.contain('email');
 
@@ -171,7 +177,8 @@ define([
 
 				utils.popup = spy;
 
-				hello.login('testable', {scope: 'email'});
+				hello
+				.login('testable', {scope: 'email'});
 			});
 
 			it('should include the basic scope defined in the settings `hello.settings.scope`', function(done) {
@@ -180,14 +187,15 @@ define([
 				testable.scope.basic = 'basic';
 
 				var spy = sinon.spy(function(url, name, optins) {
-					var params = hello.utils.param(url.split('?')[1]);
+					var params = queryparse(url.split('?')[1]);
 					expect(params.scope).to.contain('basic');
 					done();
 				});
 
 				utils.popup = spy;
 
-				hello.login('testable', {scope: ['email']});
+				hello
+				.login('testable', {scope: ['email']});
 			});
 
 			it('should discard common scope, aka scopes undefined by this module but defined as a global standard in the libary (i.e. basic)', function(done) {
@@ -200,7 +208,7 @@ define([
 				var spy = sinon.spy(function(url, name, optins) {
 
 					// Parse parameters
-					var params = hello.utils.param(url.split('?')[1]);
+					var params = queryparse(url.split('?')[1]);
 
 					expect(params.scope).to.not.contain(commonScope);
 					done();
@@ -208,7 +216,8 @@ define([
 
 				utils.popup = spy;
 
-				hello.login('testable', {scope: commonScope});
+				hello
+				.login('testable', {scope: commonScope});
 			});
 
 			it('should not included empty scopes', function(done) {
@@ -220,7 +229,7 @@ define([
 				var spy = sinon.spy(function(url, name, optins) {
 
 					// Parse parameters
-					var params = hello.utils.param(url.split('?')[1]);
+					var params = queryparse(url.split('?')[1]);
 
 					expect(params.scope).to.eql(scope);
 					done();
@@ -228,7 +237,8 @@ define([
 
 				utils.popup = spy;
 
-				hello.login('testable', {scope: paddedScope});
+				hello
+				.login('testable', {scope: paddedScope});
 			});
 
 			it('should use the correct and unencoded delimiter to separate scope', function(done) {
@@ -257,7 +267,8 @@ define([
 
 				utils.popup = spy;
 
-				hello.login('test_delimit_scope');
+				hello
+				.login('test_delimit_scope');
 			});
 
 			it('should space encode the delimiter of multiple response_type\'s', function(done) {
@@ -274,7 +285,8 @@ define([
 
 				utils.popup = spy;
 
-				hello.login('testable', opts);
+				hello
+				.login('testable', opts);
 			});
 
 			it('should substitute "token" for "code" when there is no Grant URL defined', function(done) {
@@ -293,7 +305,8 @@ define([
 
 				utils.popup = spy;
 
-				hello.login('testable', opts);
+				hello
+				.login('testable', opts);
 			});
 		});
 
@@ -311,7 +324,8 @@ define([
 
 				utils.popup = spy;
 
-				hello.login('testable');
+				hello
+				.login('testable');
 			});
 
 			it('should allow the popup options to be overridden', function(done) {
@@ -325,7 +339,8 @@ define([
 
 				utils.popup = spy;
 
-				hello.login('testable', {
+				hello
+				.login('testable', {
 					popup: {
 						hidden: true,
 						location: 'no',
@@ -363,11 +378,14 @@ define([
 				var spy = sinon.spy(done.bind(null, new Error('window.open should not be called')));
 				utils.popup = spy;
 
-				hello('testable').login({force: false}).then(function(r) {
+				hello('testable')
+				.login({force: false})
+				.then(function(r) {
 					expect(spy.notCalled).to.be.ok();
 					expect(r.authResponse).to.eql(session);
 					done();
-				});
+				})
+				.catch(done);
 			});
 
 			it('should trigger the popup if the token has expired', function(done) {
@@ -380,7 +398,8 @@ define([
 
 				session.expires = ((new Date()).getTime() / 1e3) - 1000;
 
-				hello('testable').login({force: false});
+				hello('testable')
+				.login({force: false});
 			});
 
 			it('should trigger the popup if the scopes have changed', function(done) {
@@ -391,7 +410,8 @@ define([
 
 				utils.popup = spy;
 
-				hello('testable').login({force: false, scope: 'not-basic'});
+				hello('testable')
+				.login({force: false, scope: 'not-basic'});
 			});
 		});
 
@@ -405,7 +425,7 @@ define([
 
 				var spy = sinon.spy(function(url, name, options) {
 
-					var params = hello.utils.param(url.split('?')[1]);
+					var params = queryparse(url.split('?')[1]);
 
 					expect(params).to.have.property('custom', options.custom);
 
@@ -414,7 +434,8 @@ define([
 
 				utils.popup = spy;
 
-				hello.login('testable', options);
+				hello
+				.login('testable', options);
 			});
 		});
 
@@ -434,12 +455,11 @@ define([
 				utils.popup = spy;
 
 				// Login
-				hello('testable').login({force: true});
+				hello('testable')
+				.login({force: true});
 
 			});
 
 		});
 
 	});
-
-});

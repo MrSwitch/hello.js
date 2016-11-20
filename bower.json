@@ -10,7 +10,7 @@
     "dist/hello.all.min.js"
   ],
   "devDependencies": {
-    "mocha": "~1.21.5",
+    "mocha": "^3.1.2",
     "json2": "*",
     "requirejs": "~2.1.15",
     "expect": "~0.3.1",
@@ -27,5 +27,6 @@
   ],
   "resolutions": {
     "mocha": "~2.4.5"
-  }
+  },
+  "dependencies": {}
 }

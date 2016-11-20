@@ -1,26 +1,6 @@
-define([], function() {
+let hello = require('../../../../src/hello.js');
 
-	// Shim up IE8
-	if ((typeof XMLHttpRequest !== 'undefined') && !('withCredentials' in (new XMLHttpRequest()))) {
-
-		XMLHttpRequest.prototype.withCredentials = true;
-		hello.utils.xhr = function(method, url, headers, body, callback) {
-			var x = new XMLHttpRequest();
-			x.onreadystatechange = function() {
-				if (x.readyState === 4) {
-					var r = x.responseText;
-					r = JSON.parse(r);
-					callback(r);
-				}
-			};
-
-			x.open(method, url);
-			x.send(body);
-			return x;
-		};
-	}
-
-	return {
+	module.exports = {
 
 		forEach: function(collection, fn) {
 			if (collection && collection.length) {
@@ -35,10 +15,8 @@ define([], function() {
 			var requestProxy = function(req, callback) {
 
 				var r = {
-					network: req.network,
+					...req,
 					method: 'get',
-					url: req.url,
-					data: req.data,
 					query: {},
 					xhr: true
 				};
@@ -76,4 +54,3 @@ define([], function() {
 
 	};
 
-});

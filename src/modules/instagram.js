@@ -182,7 +182,7 @@ let hello = require('../hello.js');
 
 	// See: http://instagram.com/developer/endpoints/
 	function paging(res) {
-		if ('pagination' in res) {
+		if (res && 'pagination' in res) {
 			res.paging = {
 				next: res.pagination.next_url
 			};

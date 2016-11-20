@@ -1,4 +1,5 @@
-define(['./helper'], function(helper) {
+let hello = require('../../../../src/hello.js');
+let helper = require('./helper.js');
 
 	describe('hello.api(\'/me/photos\')', function() {
 
@@ -245,5 +246,3 @@ define(['./helper'], function(helper) {
 		});
 
 	});
-
-});

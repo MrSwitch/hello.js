@@ -1,3 +1,4 @@
+let hello = require('../../../../src/hello.js');
 
 	describe('hello.getAuthResponse', function() {
 

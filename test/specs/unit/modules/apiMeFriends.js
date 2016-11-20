@@ -1,6 +1,6 @@
 // Test GET me/friends
-
-define(['./helper'], function(helper) {
+let hello = require('../../../../src/hello.js');
+let helper = require('./helper.js');
 
 	describe('hello.api(\'/me/friends\')', function() {
 
@@ -35,4 +35,3 @@ define(['./helper'], function(helper) {
 
 	});
 
-});

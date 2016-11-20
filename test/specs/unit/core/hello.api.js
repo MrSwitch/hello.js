@@ -56,7 +56,7 @@ let errorResponse = require('../../../lib/errorResponse.js');
 
 		it('should assign a complete event', function(done) {
 			hello('test')
-			.api('/', function() {done();});
+			.api('/', () => done());
 		});
 
 		it('should throw a completed event if network name is undefined', function(done) {
@@ -82,7 +82,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 			.api('/endpoint', function(res) {
 				expect(res.url).to.eql('https://testable/endpoint');
 				done();
-			});
+			})
+			.catch(done);
 		});
 
 		it('should extract the parameters from the URL', function(done) {
@@ -99,7 +100,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 					b: 'b'
 				});
 				done();
-			});
+			})
+			.catch(done);
 		});
 
 		it('should attach query object to the req.query', function(done) {
@@ -110,7 +112,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 				expect(res.query).to.have.property('a', 'a');
 
 				done();
-			});
+			})
+			.catch(done);
 		});
 
 		it('should attach authResponse object to the req.authResponse', function(done) {
@@ -121,7 +124,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 				expect(res.authResponse).to.eql(_session);
 
 				done();
-			});
+			})
+			.catch(done);
 		});
 
 		it('should attach data object to the req.query when `req.method = get`', function(done) {
@@ -133,7 +137,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 				expect(res.data).to.be.empty();
 
 				done();
-			});
+			})
+			.catch(done);
 		});
 
 		it('should attach post data object to the req.data', function(done) {
@@ -146,7 +151,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 				expect(res.data).to.have.property('a', 'a');
 
 				done();
-			});
+			})
+			.catch(done);
 		});
 
 		describe('POST', function() {
@@ -166,7 +172,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 						// The formData should not be mutated, but left as is.
 						expect(res.data).to.equal(formData);
 						done();
-					});
+					})
+					.catch(done);
 				});
 			}
 		});
@@ -180,7 +187,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 					expect(res.url).to.eql('https://testable/endpoint');
 					expect(res.query).to.eql(_session);
 					done();
-				});
+				})
+				.catch(done);
 			});
 
 			it('should mark OAuth1 endpoints with req.proxy', function(done) {
@@ -199,7 +207,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 					expect(res.oauth_proxy).to.eql(hello.settings.oauth_proxy);
 
 					done();
-				});
+				})
+				.catch(done);
 			});
 
 		});
@@ -215,7 +224,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 				};
 
 				hello('testable')
-				.api('/handled', {a: 'a'});
+				.api('/handled', {a: 'a'})
+				.catch(done);
 			});
 
 			it('should process req object through the modules.get.default function if req.path not in module.get', function(done) {
@@ -228,7 +238,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 				};
 
 				hello('testable')
-				.api('/unhandled', {a: 'a'});
+				.api('/unhandled', {a: 'a'})
+				.catch(done);
 			});
 
 			it('should trigger an error if the mapped value is false', function(done) {
@@ -246,7 +257,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 					delete testable.get.handled;
 
 					done();
-				});
+				})
+				.catch(done);
 			});
 
 			describe('Replace @{} in path with request parameters', function() {
@@ -272,7 +284,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 						delete testable.get.handled;
 
 						done();
-					}, done);
+					})
+					.catch(done);
 				});
 
 				it('should define the path using the query parameters and remove them from the post data', function(done) {
@@ -296,7 +309,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 						delete testable.get.handled;
 
 						done();
-					}, done);
+					})
+					.catch(done);
 				});
 
 				it('should trigger an error if there was no query parameter arg, i.e. @{arg}', function(done) {
@@ -314,7 +328,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 						delete testable.get.handled;
 
 						done();
-					});
+					})
+					.catch(done);
 				});
 
 				it('should use the default value if one is defined i.e. @{arg|default}', function(done) {
@@ -334,7 +349,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 						delete testable.get.handled;
 
 						done();
-					});
+					})
+					.catch(done);
 				});
 
 			});
@@ -351,7 +367,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 				};
 
 				hello('testable')
-				.api('/handled');
+				.api('/handled')
+				.catch(done);
 			});
 
 			it('should trigger the wrap.default function if none exists', function(done) {
@@ -363,7 +380,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 				};
 
 				hello('testable')
-				.api('/unhandled');
+				.api('/unhandled')
+				.catch(done);
 			});
 
 			it('should not trigger the wrap function if formatResponse = false', function(done) {
@@ -380,7 +398,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 				}).then(function() {
 					// If the response handler was not called then we're good
 					done();
-				});
+				})
+				.catch(done);
 			});
 
 		});
@@ -394,7 +413,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 					expect(res.url).to.eql('https://testable/endpoint');
 					expect(res.path).to.eql('formatting');
 					done();
-				});
+				})
+				.catch(done);
 			});
 
 			it('should append the req.path to the hash of the response.paging.next', function(done) {
@@ -413,7 +433,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 
 					done();
 
-				});
+				})
+				.catch(done);
 
 			});
 

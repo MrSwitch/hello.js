@@ -32,7 +32,7 @@
     "compile:hello": "browserify src/hello.js -t [babelify --sourceMap] -o dist/hello.js",
     "compile:hello.all": "browserify src/hello.all.js -t [babelify --sourceMap] -o dist/hello.all.js",
     "compile:hello.all.min": "browserify src/hello.all.js -d -t [babelify --sourceMap] | exorcist dist/hello.all.js.map > dist/hello.all.js",
-    "test": "grunt test && npm run test:browserstack",
+    "test": "gulp test && npm run test:browserstack",
     "test:browserstack": "bash browserstack.sh",
     "test:browserstack:env": "source .env.sh && npm run test:browserstack"
   },
@@ -48,14 +48,15 @@
     "gulp-sourcemaps": "^1.5.2",
     "gulp-util": "^3.0.6",
     "localhost": "^0.1.2",
-    "mocha": "^2.5.3",
+    "mocha": "^3.1.2",
     "shunt": "^0.1.6",
     "sinon": "^1.17.4",
     "vinyl-buffer": "^1.0.0",
     "vinyl-source-stream": "^1.1.0"
   },
   "dependencies": {
+    "es6-promise": "^4.0.5",
     "exorcist": "^0.4.0",
-    "tricks": "^1.1.8"
+    "tricks": "^1.5.1"
   }
 }

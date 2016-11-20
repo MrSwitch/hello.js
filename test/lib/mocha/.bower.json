@@ -1,6 +1,11 @@
 {
   "name": "mocha",
-  "version": "1.21.5",
+  "homepage": "https://mochajs.org",
+  "description": "simple, flexible, fun test framework",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mochajs/mocha.git"
+  },
   "main": [
     "mocha.js",
     "mocha.css"
@@ -10,24 +15,35 @@
     "editors",
     "images",
     "lib",
-    "support",
+    "scripts",
     "test",
-    ".gitignore",
-    ".npmignore",
-    ".travis.yml",
-    "component.json",
+    "assets",
+    "media",
+    ".*",
     "index.js",
+    "karma.conf.js",
+    "browser-entry.js",
     "Makefile",
-    "package.json"
+    "package.json",
+    "appveyor.yml"
   ],
-  "homepage": "https://github.com/mochajs/mocha",
-  "_release": "1.21.5",
+  "keywords": [
+    "mocha",
+    "test",
+    "bdd",
+    "tdd",
+    "tap"
+  ],
+  "license": "MIT",
+  "version": "3.1.2",
+  "_release": "3.1.2",
   "_resolution": {
     "type": "version",
-    "tag": "1.21.5",
-    "commit": "185dc5a30ea436662d3c6bf096c793a775b99a36"
+    "tag": "v3.1.2",
+    "commit": "0fb9280df9f4a267c77aac222a6378a63fa96d8e"
   },
   "_source": "https://github.com/mochajs/mocha.git",
-  "_target": "~1.21.5",
-  "_originalSource": "mocha"
+  "_target": "^3.1.2",
+  "_originalSource": "mocha",
+  "_direct": true
 }

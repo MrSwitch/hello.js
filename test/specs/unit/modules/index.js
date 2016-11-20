@@ -1,11 +1,7 @@
 // Load in the modules to test the endpoints
-define([
-	'./api',
-	'./apiMe',
-	'./apiMeAlbum',
-	'./apiMeAlbums',
-	'./apiMeFriends',
-	'./apiMePhotos'
-], function() {
-	// Done
-});
+require('./api.js');
+require('./apiMe.js');
+require('./apiMeAlbum.js');
+require('./apiMeAlbums.js');
+require('./apiMeFriends.js');
+require('./apiMePhotos.js');

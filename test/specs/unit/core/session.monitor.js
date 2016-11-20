@@ -1,5 +1,6 @@
 // Session monitor
-define([], function() {
+const hello = require('../../../../src/hello.js');
+const globalCallback = require('tricks/events/globalCallback');
 
 	describe('Session monitor', function() {
 
@@ -18,7 +19,7 @@ define([], function() {
 		it('should listen to changes within shared storage and trigger global callbacks where they have otherwise not been triggered', function(done) {
 
 			// Create a callback
-			var callbackName = hello.utils.globalEvent(function(obj) {
+			var callbackName = globalCallback(function(obj) {
 				expect(obj).to.have.property('access_token', 'token');
 				expect(obj).to.have.property('expires_in', 3600);
 
@@ -46,7 +47,7 @@ define([], function() {
 			delete hello.services.test.id;
 
 			// Create a callback
-			var callbackName = hello.utils.globalEvent(spy);
+			var callbackName = globalCallback(spy);
 
 			// Construct an AuthResponse
 			var obj = {
@@ -65,5 +66,3 @@ define([], function() {
 			}, 1500);
 		});
 	});
-
-});

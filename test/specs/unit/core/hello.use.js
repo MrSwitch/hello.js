@@ -1,4 +1,4 @@
-define([], function() {
+let hello = require('../../../../src/hello.js');
 
 	describe('hello.use', function() {
 
@@ -19,5 +19,3 @@ define([], function() {
 		});
 
 	});
-
-});
