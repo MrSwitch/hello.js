@@ -14,12 +14,11 @@ let hello = require('../../../../src/hello.js');
 
 			var requestProxy = function(req, callback) {
 
-				var r = {
-					...req,
+				var r = Object.assign(req || {}, {
 					method: 'get',
 					query: {},
 					xhr: true
-				};
+				});
 
 				var stubName = req.path + (req.options.stubType || '') + '.json';
 				r.url = './stubs/' + (req.stub || (req.network + '/' + req.method + '/' + stubName));

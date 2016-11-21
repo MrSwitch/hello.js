@@ -159,7 +159,7 @@ let hello = require('../hello.js');
 
 	function formatUser(o, headers, req) {
 		if (o.id) {
-			var token = req.query.access_token;
+			var token = req.authResponse.access_token;
 			if (o.emails) {
 				o.email = o.emails.preferred;
 			}

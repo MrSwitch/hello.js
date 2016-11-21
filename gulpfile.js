@@ -35,7 +35,7 @@ gulp.task('index_tests', () => {
 	});
 });
 
-gulp.task('watch', ['localhost'], () => gulp.watch(scripts_to_watch, {interval: 500}, ['test_bundle']));
+gulp.task('watch', ['localhost', 'test_bundle'], () => gulp.watch(scripts_to_watch, {interval: 500}, ['test_bundle']));
 
 gulp.task('close', () => localhost.close());
 

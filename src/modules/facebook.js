@@ -169,7 +169,7 @@ let hello = require('../hello.js');
 		}
 
 		if (o && 'data' in o) {
-			var token = req.query.access_token;
+			var token = req.authResponse.access_token;
 
 			if (!(o.data instanceof Array)) {
 				var data = o.data;
