@@ -1,6 +1,6 @@
 {
 	"test_framework" : "mocha",
-	"test_path": "tests/bundle.html",
+	"test_path": "test/bundle.html",
 	"browsers": [
 		"chrome_latest",
 		"firefox_latest",
