@@ -1,6 +1,6 @@
 {
   "name": "hellojs",
-  "version": "1.13.3",
+  "version": "1.14.0",
   "description": "A clientside Javascript library for standardizing requests to OAuth2 web services (and OAuth1 - with a shim)",
   "homepage": "https://adodson.com/hello.js",
   "main": "dist/hello.all.js",
@@ -44,10 +44,11 @@
   },
   "scripts": {
     "debug": "gulp watch",
-    "start": "npm run compile:hello && npm run compile:hello.all",
+    "start": "npm run compile:hello && npm run compile:hello.all && npm run compile:hello.min && npm run compile:hello.all.min",
     "compile:hello": "browserify src/hello.js -t [babelify --sourceMap] -o dist/hello.js",
+    "compile:hello.min": "browserify src/hello.js -d -t [babelify --sourceMap] | exorcist dist/hello.min.js.map > dist/hello.min.js",
     "compile:hello.all": "browserify src/hello.all.js -t [babelify --sourceMap] -o dist/hello.all.js",
-    "compile:hello.all.min": "browserify src/hello.all.js -d -t [babelify --sourceMap] | exorcist dist/hello.all.js.map > dist/hello.all.js",
+    "compile:hello.all.min": "browserify src/hello.all.js -d -t [babelify --sourceMap] | exorcist dist/hello.all.min.js.map > dist/hello.all.min.js",
     "test": "gulp test && npm run test:browserstack",
     "test:browserstack": "bash browserstack.sh",
     "test:browserstack:env": "source .env.sh && npm run test:browserstack"
@@ -75,6 +76,6 @@
   "dependencies": {
     "es6-promise": "^4.0.5",
     "exorcist": "^0.4.0",
-    "tricks": "^1.5.2"
+    "tricks": "^1.5.3"
   }
 }

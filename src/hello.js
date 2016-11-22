@@ -12,6 +12,7 @@
 
 const argmap = require('tricks/object/args');
 const clone = require('tricks/object/clone');
+const closeWindow = require('tricks/window/close');
 const createUrl = require('tricks/string/createUrl');
 const diffKey = require('tricks/object/diffKey');
 const diff = require('tricks/array/diff');
@@ -217,7 +218,7 @@ extend(hello, {
 				// Reject a successful login
 				reject(obj);
 			}
-		});
+		}, null, '_hellojs_');
 
 		var redirectUri = Url(opts.redirect_uri).href;
 
@@ -614,7 +615,7 @@ extend(hello.utils, {
 				var res = 'result' in p && p.result ? JSON.parse(p.result) : false;
 
 				// Trigger the callback on the parent
-				parent[p.callback](res);
+				callback(parent, p.callback)(res);
 				closeWindow(window);
 			}
 
@@ -664,7 +665,7 @@ extend(hello.utils, {
 				var str = JSON.stringify(obj);
 
 				try {
-					parent[cb](str);
+					callback(parent, cb)(str);
 				}
 				catch (e) {
 					// Error thrown whilst executing parent callback
@@ -673,13 +674,23 @@ extend(hello.utils, {
 
 			closeWindow(window);
 		}
+
+		function callback(parent, callbackID) {
+			if (callbackID.indexOf('_hellojs_') !== 0) {
+				return function() {
+					throw 'Could not execute callback ' + callbackID;
+				};
+			}
+
+			return parent[callbackID];
+		}
 	}
 });
+
 
 // Events
 // Extend the hello object with its own event instance
 pubsub.call(hello);
-
 
 ///////////////////////////////////
 // Monitoring session state
@@ -687,8 +698,6 @@ pubsub.call(hello);
 ///////////////////////////////////
 
 (function(hello) {
-
-	const utils = hello.utils;
 
 	// Monitor for a change in state and fire
 	var oldSessions = {};
@@ -699,7 +708,7 @@ pubsub.call(hello);
 	// Listen to other triggers to Auth events, use these to update this
 	hello.on('auth.login, auth.logout', function(auth) {
 		if (auth && typeof (auth) === 'object' && auth.network) {
-			oldSessions[auth.network] = utils.store(auth.network) || {};
+			oldSessions[auth.network] = hello.utils.store(auth.network) || {};
 		}
 	});
 
@@ -722,7 +731,7 @@ pubsub.call(hello);
 			}
 
 			// Get session
-			var session = utils.store(name) || {};
+			var session = hello.utils.store(name) || {};
 			var provider = hello.services[name];
 			var oldSess = oldSessions[name] || {};
 
@@ -738,7 +747,7 @@ pubsub.call(hello);
 
 				// Update store
 				// Removing the callback
-				utils.store(name, session);
+				hello.utils.store(name, session);
 
 				// Emit global events
 				try {
