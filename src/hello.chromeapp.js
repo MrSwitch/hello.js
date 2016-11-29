@@ -2,11 +2,11 @@
 // This overides the hello.utils.popup method to support chrome.identity.launchWebAuthFlow
 // See https://developer.chrome.com/apps/app_identity#non
 
+const URL = require('tricks/window/url');
+const hello = require('./hello');
+
 // Is this a chrome app?
-
 if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.identity.launchWebAuthFlow) {
-
-	(function() {
 
 		// Swap the popup method
 		hello.utils.popup = function(url) {
@@ -87,7 +87,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				}
 
 				// Split appart the URL
-				var a = hello.utils.url(responseUrl);
+				var a = URL(responseUrl);
 
 				// The location can be augmented in to a location object like so...
 				// We dont have window operations on the popup so lets create some
@@ -121,6 +121,4 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			// Return the reference
 			return ref;
 		}
-
-	})();
 }

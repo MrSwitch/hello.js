@@ -1,4 +1,4 @@
-let hello = require('../hello.js');
+const hello = require('../hello.js');
 
 (function(hello) {
 
@@ -162,7 +162,7 @@ let hello = require('../hello.js');
 					toJSON(p);
 				}
 				else if (p.method === 'patch') {
-					hello.utils.extend(p.query, p.data);
+					Object.assign(p.query, p.data);
 					p.data = null;
 				}
 

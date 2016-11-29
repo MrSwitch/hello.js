@@ -1,4 +1,4 @@
-let hello = require('../hello.js');
+const hello = require('../hello.js');
 
 (function(hello) {
 
@@ -84,7 +84,7 @@ let hello = require('../hello.js');
 					// Tweet
 					else {
 						// Assign the post body to the query parameters
-						hello.utils.extend(p.query, data);
+						Object.assign(p.query, data);
 						callback('statuses/update.json?include_entities=1');
 					}
 				},

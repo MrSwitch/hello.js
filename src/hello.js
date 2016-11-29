@@ -374,7 +374,7 @@ extend(hello, {
 		// Trigger how we want self displayed
 		if (opts.display === 'none') {
 			// Sign-in in the background, iframe
-			iframe(url, redirectUri);
+			utils.iframe(url, redirectUri);
 		}
 
 		// Triggering popup?
@@ -465,7 +465,7 @@ extend(hello, {
 
 					// If logout is a string then assume URL and open in iframe.
 					if (typeof (logout) === 'string') {
-						iframe(logout);
+						utils.iframe(logout);
 						_opts.force = null;
 						_opts.message = 'Logout success on providers site was indeterminate';
 					}
@@ -522,6 +522,7 @@ function error(code, message) {
 }
 
 hello.utils = {
+	iframe,
 	popup,
 	request,
 	store
@@ -532,11 +533,14 @@ extend(hello.utils, {
 
 	// OAuth and API response handler
 	responseHandler: function(window, parent) {
-
 		const utils = this;
 		var _this = this;
 		var p;
 		var location = window.location;
+
+		const redirect = (location.assign && location.assign.bind(location)) || (url => {
+			window.location = url;
+		});
 
 		// Is this an auth relay message which needs to call the proxy?
 		p = param(location.search);
@@ -552,7 +556,7 @@ extend(hello.utils, {
 			// Redirect to the host
 			var path = state.oauth_proxy + '?' + param(p);
 
-			location.assign(path);
+			redirect(path);
 
 			return;
 		}
@@ -621,7 +625,7 @@ extend(hello.utils, {
 
 			// If this page is still open
 			if (p.page_uri) {
-				location.assign(p.page_uri);
+				redirect(p.page_uri);
 			}
 		}
 
@@ -630,7 +634,7 @@ extend(hello.utils, {
 		// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
 		else if ('oauth_redirect' in p) {
 
-			location.assign(decodeURIComponent(p.oauth_redirect));
+			redirect(decodeURIComponent(p.oauth_redirect));
 			return;
 		}
 

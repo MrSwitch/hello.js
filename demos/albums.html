@@ -72,10 +72,7 @@ div.column{
 <h2>Source</h2>
 
 <p>Include hello.js + modules</p>
-<script class="pre" src="../src/hello.js"></script>
-<script class="pre" src="../src/modules/windows.js"></script>
-<script class="pre" src="../src/modules/facebook.js"></script>
-<script class="pre" src="../src/modules/google.js"></script>
+<script class="pre" src="../dist/hello.all.js"></script>
 
 <p>Setup a listener</p>
 
@@ -97,7 +94,11 @@ hello.on('auth.login', function(auth){
 <script class="pre">
 
 // Initiate hellojs
-hello.init( CLIENT_IDS, {
+hello.init({
+	windows: CLIENT_IDS.windows,
+	google: CLIENT_IDS.google,
+	facebook: CLIENT_IDS.facebook
+}, {
 	scope: "files, photos",
 	redirect_uri: "../redirect.html"
 });

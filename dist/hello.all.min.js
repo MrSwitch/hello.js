@@ -410,7 +410,7 @@ extend(hello, {
 			// Trigger how we want self displayed
 			if (opts.display === 'none') {
 				// Sign-in in the background, iframe
-				iframe(url, redirectUri);
+				utils.iframe(url, redirectUri);
 			}
 
 			// Triggering popup?
@@ -509,7 +509,7 @@ extend(hello, {
 
 						// If logout is a string then assume URL and open in iframe.
 						if (typeof logout === 'string') {
-							iframe(logout);
+							utils.iframe(logout);
 							_opts.force = null;
 							_opts.message = 'Logout success on providers site was indeterminate';
 						} else if (logout === undefined) {
@@ -566,6 +566,7 @@ function error(code, message) {
 }
 
 hello.utils = {
+	iframe: iframe,
 	popup: popup,
 	request: request,
 	store: store
@@ -1189,12 +1190,14 @@ hello.api = function () {
 
 hello.utils.responseHandler(window, window.opener || window.parent);
 
-},{"tricks/array/diff":17,"tricks/array/unique":20,"tricks/browser/agent/localStorage":23,"tricks/dom/hiddenFrame":35,"tricks/events/globalCallback":39,"tricks/http/request":28,"tricks/object/args":41,"tricks/object/clone":42,"tricks/object/diffKey":43,"tricks/object/extend":44,"tricks/object/isEmpty":47,"tricks/object/merge":48,"tricks/object/pubsub":49,"tricks/object/then":51,"tricks/string/createUrl":53,"tricks/string/queryparse":57,"tricks/window/close":62,"tricks/window/popup":63,"tricks/window/url":64}],3:[function(require,module,exports){
+},{"tricks/array/diff":17,"tricks/array/unique":20,"tricks/browser/agent/localStorage":23,"tricks/dom/hiddenFrame":35,"tricks/events/globalCallback":39,"tricks/http/request":28,"tricks/object/args":41,"tricks/object/clone":42,"tricks/object/diffKey":43,"tricks/object/extend":44,"tricks/object/isEmpty":48,"tricks/object/merge":49,"tricks/object/pubsub":50,"tricks/object/then":52,"tricks/string/createUrl":55,"tricks/string/queryparse":59,"tricks/window/close":64,"tricks/window/popup":65,"tricks/window/url":66}],3:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var hello = require('../hello.js');
+var toBlob = require('tricks/object/toBlob');
+var querystringify = require('tricks/string/querystringify');
 
 (function (hello) {
 
@@ -1293,7 +1296,7 @@ var hello = require('../hello.js');
 
 					// Does this have a data-uri to upload as a file?
 					if (typeof p.data.file === 'string') {
-						p.data.file = hello.utils.toBlob(p.data.file);
+						p.data.file = toBlob(p.data.file);
 					}
 
 					callback('https://api-content.dropbox.com/1/files_put/auto/' + path + '/' + fileName);
@@ -1304,7 +1307,7 @@ var hello = require('../hello.js');
 					var name = p.data.name;
 					p.data = {};
 
-					callback('fileops/create_folder?root=@{root|sandbox}&' + hello.utils.param({
+					callback('fileops/create_folder?root=@{root|sandbox}&' + querystringify({
 						path: name
 					}));
 				}
@@ -1435,10 +1438,15 @@ var hello = require('../hello.js');
 	}
 })(hello);
 
-},{"../hello.js":2}],4:[function(require,module,exports){
+},{"../hello.js":2,"tricks/object/toBlob":53,"tricks/string/querystringify":60}],4:[function(require,module,exports){
 'use strict';
 
 var hello = require('../hello.js');
+
+var globalCallback = require('tricks/events/globalCallback');
+var hasBinary = require('tricks/object/hasBinary');
+var querystringify = require('tricks/string/querystringify');
+var toBlob = require('tricks/object/toBlob');
 
 (function (hello) {
 
@@ -1492,8 +1500,8 @@ var hello = require('../hello.js');
 
 			logout: function logout(callback, options) {
 				// Assign callback to a global handler
-				var callbackID = hello.utils.globalEvent(callback);
-				var redirect = encodeURIComponent(hello.settings.redirect_uri + '?' + hello.utils.param({ callback: callbackID, result: JSON.stringify({ force: true }), state: '{}' }));
+				var callbackID = globalCallback(callback);
+				var redirect = encodeURIComponent(hello.settings.redirect_uri + '?' + querystringify({ callback: callbackID, result: JSON.stringify({ force: true }), state: '{}' }));
 				var token = (options.authResponse || {}).access_token;
 				hello.utils.iframe('https://www.facebook.com/logout.php?next=' + redirect + '&access_token=' + token);
 
@@ -1559,7 +1567,7 @@ var hello = require('../hello.js');
 				// Is this a post with a data-uri?
 				if (p.method === 'post' && p.data && typeof p.data.file === 'string') {
 					// Convert the Data-URI to a Blob
-					p.data.file = hello.utils.toBlob(p.data.file);
+					p.data.file = toBlob(p.data.file);
 				}
 
 				return true;
@@ -1568,7 +1576,7 @@ var hello = require('../hello.js');
 			// Special requirements for handling JSONP fallback
 			jsonp: function jsonp(p, qs) {
 				var m = p.method;
-				if (m !== 'get' && !hello.utils.hasBinary(p.data)) {
+				if (m !== 'get' && !hasBinary(p.data)) {
 					p.data.method = m;
 					p.method = 'get';
 				} else if (p.method === 'delete') {
@@ -1647,7 +1655,7 @@ var hello = require('../hello.js');
 	}
 })(hello);
 
-},{"../hello.js":2}],5:[function(require,module,exports){
+},{"../hello.js":2,"tricks/events/globalCallback":39,"tricks/object/hasBinary":45,"tricks/object/toBlob":53,"tricks/string/querystringify":60}],5:[function(require,module,exports){
 'use strict';
 
 var hello = require('../hello.js');
@@ -2087,6 +2095,8 @@ var hello = require('../hello.js');
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var hello = require('../hello.js');
 
 (function (hello) {
@@ -2250,7 +2260,7 @@ var hello = require('../hello.js');
 				if (p.method === 'post' || p.method === 'put') {
 					toJSON(p);
 				} else if (p.method === 'patch') {
-					hello.utils.extend(p.query, p.data);
+					_extends(p.query, p.data);
 					p.data = null;
 				}
 
@@ -3316,6 +3326,8 @@ var hello = require('../hello.js');
 },{"../hello.js":2}],13:[function(require,module,exports){
 'use strict';
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var hello = require('../hello.js');
 
 (function (hello) {
@@ -3402,7 +3414,7 @@ var hello = require('../hello.js');
 						// Tweet
 						else {
 								// Assign the post body to the query parameters
-								hello.utils.extend(p.query, data);
+								_extends(p.query, data);
 								callback('statuses/update.json?include_entities=1');
 							}
 				},
@@ -3635,6 +3647,9 @@ var hello = require('../hello.js');
 
 var hello = require('../hello.js');
 
+var hasBinary = require('tricks/object/hasBinary');
+var toBlob = require('tricks/object/toBlob');
+
 (function (hello) {
 
 	hello.init({
@@ -3728,11 +3743,11 @@ var hello = require('../hello.js');
 			},
 
 			xhr: function xhr(p) {
-				if (p.method !== 'get' && p.method !== 'delete' && !hello.utils.hasBinary(p.data)) {
+				if (p.method !== 'get' && p.method !== 'delete' && !hasBinary(p.data)) {
 
 					// Does this have a data-uri to upload as a file?
 					if (typeof p.data.file === 'string') {
-						p.data.file = hello.utils.toBlob(p.data.file);
+						p.data.file = toBlob(p.data.file);
 					} else {
 						p.data = JSON.stringify(p.data);
 						p.headers = {
@@ -3745,7 +3760,7 @@ var hello = require('../hello.js');
 			},
 
 			jsonp: function jsonp(p) {
-				if (p.method !== 'get' && !hello.utils.hasBinary(p.data)) {
+				if (p.method !== 'get' && !hasBinary(p.data)) {
 					p.data.method = p.method;
 					p.method = 'get';
 				}
@@ -3818,7 +3833,7 @@ var hello = require('../hello.js');
 	}
 })(hello);
 
-},{"../hello.js":2}],16:[function(require,module,exports){
+},{"../hello.js":2,"tricks/object/hasBinary":45,"tricks/object/toBlob":53}],16:[function(require,module,exports){
 'use strict';
 
 var hello = require('../hello.js');
@@ -4077,7 +4092,7 @@ Storage.prototype.removeItem = function (name) {
 	this.native.removeItem(name);
 };
 
-},{"../../object/extend.js":44,"../../string/jsonParse.js":55}],22:[function(require,module,exports){
+},{"../../object/extend.js":44,"../../string/jsonParse.js":57}],22:[function(require,module,exports){
 'use strict';
 
 // Provide an API for setting and retrieving cookies
@@ -4411,7 +4426,7 @@ function createFormFromData(data) {
 	return form;
 }
 
-},{"../../array/toArray.js":19,"../../dom/append.js":30,"../../dom/attr.js":31,"../../dom/createElement.js":32,"../../dom/domInstance.js":33,"../../events/emit.js":38,"../../events/globalCallback.js":39,"../../events/on.js":40,"../../object/instanceOf.js":45,"../../time/setImmediate.js":61}],26:[function(require,module,exports){
+},{"../../array/toArray.js":19,"../../dom/append.js":30,"../../dom/attr.js":31,"../../dom/createElement.js":32,"../../dom/domInstance.js":33,"../../events/emit.js":38,"../../events/globalCallback.js":39,"../../events/on.js":40,"../../object/instanceOf.js":46,"../../time/setImmediate.js":63}],26:[function(require,module,exports){
 'use strict';
 
 var createElement = require('../../dom/createElement.js');
@@ -4613,7 +4628,7 @@ module.exports = function (p, callback) {
 	callback({ error: 'invalid_request' });
 };
 
-},{"../../events/globalCallback.js":39,"../../object/extend.js":44,"../../string/createUrl.js":53,"../../support/cors.js":60,"./formpost.js":25,"./jsonp.js":27,"./xhr.js":29}],29:[function(require,module,exports){
+},{"../../events/globalCallback.js":39,"../../object/extend.js":44,"../../string/createUrl.js":55,"../../support/cors.js":62,"./formpost.js":25,"./jsonp.js":27,"./xhr.js":29}],29:[function(require,module,exports){
 'use strict';
 
 // XHR: uses CORS to make requests
@@ -4712,7 +4727,7 @@ function toFormData(data) {
 	return f;
 }
 
-},{"../../object/instanceOf.js":45,"../../object/rewire.js":50,"../../object/tryCatch.js":52,"../../string/extract.js":54,"../../string/jsonParse.js":55}],30:[function(require,module,exports){
+},{"../../object/instanceOf.js":46,"../../object/rewire.js":51,"../../object/tryCatch.js":54,"../../string/extract.js":56,"../../string/jsonParse.js":57}],30:[function(require,module,exports){
 'use strict';
 
 var createElement = require('./createElement.js');
@@ -4777,7 +4792,7 @@ module.exports = function (type, data) {
 	}
 };
 
-},{"../object/instanceOf.js":45}],34:[function(require,module,exports){
+},{"../object/instanceOf.js":46}],34:[function(require,module,exports){
 'use strict';
 
 var isDom = require('./isDom.js');
@@ -4805,7 +4820,7 @@ module.exports = function (matches) {
 	return matches;
 };
 
-},{"../array/toArray.js":19,"../object/instanceOf.js":45,"./isDom.js":36}],35:[function(require,module,exports){
+},{"../array/toArray.js":19,"../object/instanceOf.js":46,"./isDom.js":36}],35:[function(require,module,exports){
 'use strict';
 
 var append = require('./append.js');
@@ -4824,7 +4839,7 @@ module.exports = function (src) {
 	return append('iframe', { src: src, style: style });
 };
 
-},{"../string/param.js":56,"./append.js":30}],36:[function(require,module,exports){
+},{"../string/param.js":58,"./append.js":30}],36:[function(require,module,exports){
 'use strict';
 
 var instanceOf = require('../object/instanceOf.js');
@@ -4837,7 +4852,7 @@ module.exports = function (test) {
 	return instanceOf(test, _HTMLElement) || instanceOf(test, _HTMLDocument) || instanceOf(test, _Window);
 };
 
-},{"../object/instanceOf.js":45}],37:[function(require,module,exports){
+},{"../object/instanceOf.js":46}],37:[function(require,module,exports){
 'use strict';
 
 // IE does not support `new Event()`
@@ -4907,7 +4922,7 @@ function handle(guid, callback) {
 	callback.apply(undefined, args) && delete window[guid];
 }
 
-},{"../string/random.js":59}],40:[function(require,module,exports){
+},{"../string/random.js":61}],40:[function(require,module,exports){
 'use strict';
 
 // on.js
@@ -5012,7 +5027,7 @@ module.exports = function clone(obj) {
 	return _clone;
 };
 
-},{"./isBinary.js":46}],43:[function(require,module,exports){
+},{"./isBinary.js":47}],43:[function(require,module,exports){
 "use strict";
 
 // Return all the properties in 'a' which aren't in 'b';
@@ -5057,14 +5072,33 @@ module.exports = function extend(r) {
 	return r;
 };
 
-},{"./instanceOf.js":45}],45:[function(require,module,exports){
+},{"./instanceOf.js":46}],45:[function(require,module,exports){
+'use strict';
+
+var isBinary = require('./isBinary.js');
+
+// Some of the providers require that only multipart is used with non-binary forms.
+// This function checks whether the form contains binary data
+module.exports = function (data) {
+	for (var x in data) {
+		if (data.hasOwnProperty(x)) {
+			if (isBinary(data[x])) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+};
+
+},{"./isBinary.js":47}],46:[function(require,module,exports){
 "use strict";
 
 module.exports = function (test, root) {
   return root && test instanceof root;
 };
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 'use strict';
 
 var instanceOf = require('./instanceOf.js');
@@ -5073,7 +5107,7 @@ module.exports = function (data) {
 	return instanceOf(data, Object) && (instanceOf(data, typeof HTMLInputElement !== 'undefined' ? HTMLInputElement : undefined) && data.type === 'file' || instanceOf(data, typeof HTMLInput !== 'undefined' ? HTMLInput : undefined) && data.type === 'file' || instanceOf(data, typeof FileList !== 'undefined' ? FileList : undefined) || instanceOf(data, typeof File !== 'undefined' ? File : undefined) || instanceOf(data, typeof Blob !== 'undefined' ? Blob : undefined));
 };
 
-},{"./instanceOf.js":45}],47:[function(require,module,exports){
+},{"./instanceOf.js":46}],48:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -5098,7 +5132,7 @@ module.exports = function (obj) {
 	return true;
 };
 
-},{}],48:[function(require,module,exports){
+},{}],49:[function(require,module,exports){
 'use strict';
 
 // Extend an object
@@ -5113,7 +5147,7 @@ module.exports = function () {
 	return extend.apply(undefined, args);
 };
 
-},{"./extend.js":44}],49:[function(require,module,exports){
+},{"./extend.js":44}],50:[function(require,module,exports){
 'use strict';
 
 // Pubsub extension
@@ -5244,7 +5278,7 @@ function triggerCallback(name, callback, handler, i) {
 	}
 }
 
-},{"../time/setImmediate.js":61}],50:[function(require,module,exports){
+},{"../time/setImmediate.js":63}],51:[function(require,module,exports){
 "use strict";
 
 // Rewire functions
@@ -5260,7 +5294,7 @@ module.exports = function (fn) {
 	return f;
 };
 
-},{}],51:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
@@ -5434,7 +5468,31 @@ var resolve = function resolve(promise, x) {
 	promise.fulfill(x); /*  [Promises/A+ 2.3.4, 2.3.3.4]  */
 };
 
-},{"../time/setImmediate.js":61}],52:[function(require,module,exports){
+},{"../time/setImmediate.js":63}],53:[function(require,module,exports){
+'use strict';
+
+// Convert Data-URI to Blob string
+
+var reg = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
+
+module.exports = function (dataURI) {
+	var m = dataURI.match(reg);
+	if (!m) {
+		return dataURI;
+	}
+
+	var binary = atob(dataURI.replace(reg, ''));
+	var len = binary.length;
+	var arr = new Uint8Array(len);
+
+	for (var i = 0; i < len; i++) {
+		arr[i] = binary.charCodeAt(i);
+	}
+
+	return new Blob([arr], { type: m[1] });
+};
+
+},{}],54:[function(require,module,exports){
 "use strict";
 
 module.exports = function (fn) {
@@ -5445,7 +5503,7 @@ module.exports = function (fn) {
 	}
 };
 
-},{}],53:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 'use strict';
 
 var querystringify = require('./querystringify.js');
@@ -5477,7 +5535,7 @@ module.exports = function (url, params, formatFunction) {
 	return url;
 };
 
-},{"../object/isEmpty.js":47,"./querystringify.js":58}],54:[function(require,module,exports){
+},{"../object/isEmpty.js":48,"./querystringify.js":60}],56:[function(require,module,exports){
 "use strict";
 
 // Extract
@@ -5497,7 +5555,7 @@ module.exports = function (str, match_params) {
 	return a;
 };
 
-},{}],55:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 'use strict';
 
 var tryCatch = require('../object/tryCatch.js');
@@ -5507,7 +5565,7 @@ module.exports = function (str) {
   });
 };
 
-},{"../object/tryCatch.js":52}],56:[function(require,module,exports){
+},{"../object/tryCatch.js":54}],58:[function(require,module,exports){
 'use strict';
 
 // Param
@@ -5525,7 +5583,7 @@ module.exports = function (hash) {
 	}).join(delimiter);
 };
 
-},{}],57:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 'use strict';
 
 // Create a Query string
@@ -5541,7 +5599,7 @@ module.exports = function (str) {
 	return extract(str, match_params, formatFunction);
 };
 
-},{"./extract.js":54}],58:[function(require,module,exports){
+},{"./extract.js":56}],60:[function(require,module,exports){
 'use strict';
 
 // Create a Query string
@@ -5555,26 +5613,26 @@ module.exports = function (o) {
   return param(o, '&', '=', formatter);
 };
 
-},{"./param.js":56}],59:[function(require,module,exports){
+},{"./param.js":58}],61:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
   return parseInt(Math.random() * 1e12, 10).toString(36);
 };
 
-},{}],60:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 'use strict';
 
 module.exports = 'withCredentials' in new XMLHttpRequest();
 
-},{}],61:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 'use strict';
 
 module.exports = typeof setImmediate === 'function' ? setImmediate : function (cb) {
   return setTimeout(cb, 0);
 };
 
-},{}],62:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 'use strict';
 
 // Close a window
@@ -5600,7 +5658,7 @@ module.exports = function (window) {
 	}
 };
 
-},{}],63:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 'use strict';
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
@@ -5638,7 +5696,7 @@ function generatePosition(_ref) {
 	}
 }
 
-},{"../string/param.js":56}],64:[function(require,module,exports){
+},{"../string/param.js":58}],66:[function(require,module,exports){
 'use strict';
 
 module.exports = function (path) {

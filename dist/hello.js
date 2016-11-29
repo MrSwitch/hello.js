@@ -384,7 +384,7 @@ extend(hello, {
 			// Trigger how we want self displayed
 			if (opts.display === 'none') {
 				// Sign-in in the background, iframe
-				iframe(url, redirectUri);
+				utils.iframe(url, redirectUri);
 			}
 
 			// Triggering popup?
@@ -483,7 +483,7 @@ extend(hello, {
 
 						// If logout is a string then assume URL and open in iframe.
 						if (typeof logout === 'string') {
-							iframe(logout);
+							utils.iframe(logout);
 							_opts.force = null;
 							_opts.message = 'Logout success on providers site was indeterminate';
 						} else if (logout === undefined) {
@@ -540,6 +540,7 @@ function error(code, message) {
 }
 
 hello.utils = {
+	iframe: iframe,
 	popup: popup,
 	request: request,
 	store: store

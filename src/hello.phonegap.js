@@ -1,4 +1,7 @@
 // Phonegap override for hello.phonegap.js
+const URL = require('tricks/window/url');
+const hello = require('./hello');
+
 (function() {
 
 	// Is this a phonegap implementation?
@@ -30,7 +33,7 @@
 
 				// Get the origin of the redirect URI
 
-				var a = hello.utils.url(redirectUri);
+				var a = URL(redirectUri);
 				var redirectUriOrigin = a.origin || (a.protocol + '//' + a.hostname);
 
 				// Listen to changes in the InAppBrowser window
@@ -49,7 +52,7 @@
 					}
 
 					// Split appart the URL
-					var a = hello.utils.url(url);
+					var a = URL(url);
 
 					// We dont have window operations on the popup so lets create some
 					// The location can be augmented in to a location object like so...

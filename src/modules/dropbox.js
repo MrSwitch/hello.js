@@ -1,4 +1,6 @@
-let hello = require('../hello.js');
+const hello = require('../hello.js');
+let toBlob = require('tricks/object/toBlob');
+let querystringify = require('tricks/string/querystringify');
 
 (function(hello) {
 
@@ -100,7 +102,7 @@ let hello = require('../hello.js');
 
 					// Does this have a data-uri to upload as a file?
 					if (typeof (p.data.file) === 'string') {
-						p.data.file = hello.utils.toBlob(p.data.file);
+						p.data.file = toBlob(p.data.file);
 					}
 
 					callback('https://api-content.dropbox.com/1/files_put/auto/' + path + '/' + fileName);
@@ -111,7 +113,7 @@ let hello = require('../hello.js');
 					var name = p.data.name;
 					p.data = {};
 
-					callback('fileops/create_folder?root=@{root|sandbox}&' + hello.utils.param({
+					callback('fileops/create_folder?root=@{root|sandbox}&' + querystringify({
 						path: name
 					}));
 				}

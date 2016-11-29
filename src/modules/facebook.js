@@ -1,4 +1,9 @@
-let hello = require('../hello.js');
+const hello = require('../hello.js');
+
+const globalCallback = require('tricks/events/globalCallback');
+const hasBinary = require('tricks/object/hasBinary');
+const querystringify = require('tricks/string/querystringify');
+const toBlob = require('tricks/object/toBlob');
 
 (function(hello) {
 
@@ -52,8 +57,8 @@ let hello = require('../hello.js');
 
 			logout: function(callback, options) {
 				// Assign callback to a global handler
-				var callbackID = hello.utils.globalEvent(callback);
-				var redirect = encodeURIComponent(hello.settings.redirect_uri + '?' + hello.utils.param({callback:callbackID, result: JSON.stringify({force:true}), state: '{}'}));
+				var callbackID = globalCallback(callback);
+				var redirect = encodeURIComponent(hello.settings.redirect_uri + '?' + querystringify({callback:callbackID, result: JSON.stringify({force:true}), state: '{}'}));
 				var token = (options.authResponse || {}).access_token;
 				hello.utils.iframe('https://www.facebook.com/logout.php?next=' + redirect + '&access_token=' + token);
 
@@ -119,7 +124,7 @@ let hello = require('../hello.js');
 				// Is this a post with a data-uri?
 				if (p.method === 'post' && p.data && typeof (p.data.file) === 'string') {
 					// Convert the Data-URI to a Blob
-					p.data.file = hello.utils.toBlob(p.data.file);
+					p.data.file = toBlob(p.data.file);
 				}
 
 				return true;
@@ -128,7 +133,7 @@ let hello = require('../hello.js');
 			// Special requirements for handling JSONP fallback
 			jsonp: function(p, qs) {
 				var m = p.method;
-				if (m !== 'get' && !hello.utils.hasBinary(p.data)) {
+				if (m !== 'get' && !hasBinary(p.data)) {
 					p.data.method = m;
 					p.method = 'get';
 				}

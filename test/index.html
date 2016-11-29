@@ -14,39 +14,8 @@
 <script src="/adorn/adorn.js" async></script>
 
 <!-- AUTHENTICATION -->
-<script src="../src/hello.polyfill.js"></script>
-<script src="../src/hello.js"></script>
+<script src="../dist/hello.all.js"></script>
 <script src="../demos/client_ids.js"></script>
-<script>
-
-	//
-	// hello.all.js
-	// Load all modules
-	function loadModule(a){
-		for(var i=0;i<a.length;i++){
-			document.write('<script src="../src/modules/'+a[i]+'"><\/script>');
-		}
-	}
-
-	loadModule([
-		'facebook.js',
-		'flickr.js',
-		'google.js',
-		'windows.js',
-		'dropbox.js',
-		'twitter.js',
-		'yahoo.js',
-		'instagram.js',
-		'joinme.js',
-		'linkedin.js',
-		'foursquare.js',
-		'github.js',
-		'soundcloud.js',
-		'joinme.js',
-		'vk.js'
-	]);
-
-</script>
 </head>
 <body class="adorn-fullscreen">
 

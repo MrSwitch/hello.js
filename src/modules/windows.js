@@ -1,4 +1,7 @@
-let hello = require('../hello.js');
+const hello = require('../hello.js');
+
+const hasBinary = require('tricks/object/hasBinary');
+const toBlob = require('tricks/object/toBlob');
 
 (function(hello) {
 
@@ -93,11 +96,11 @@ let hello = require('../hello.js');
 			},
 
 			xhr: function(p) {
-				if (p.method !== 'get' && p.method !== 'delete' && !hello.utils.hasBinary(p.data)) {
+				if (p.method !== 'get' && p.method !== 'delete' && !hasBinary(p.data)) {
 
 					// Does this have a data-uri to upload as a file?
 					if (typeof (p.data.file) === 'string') {
-						p.data.file = hello.utils.toBlob(p.data.file);
+						p.data.file = toBlob(p.data.file);
 					}
 					else {
 						p.data = JSON.stringify(p.data);
@@ -111,7 +114,7 @@ let hello = require('../hello.js');
 			},
 
 			jsonp: function(p) {
-				if (p.method !== 'get' && !hello.utils.hasBinary(p.data)) {
+				if (p.method !== 'get' && !hasBinary(p.data)) {
 					p.data.method = p.method;
 					p.method = 'get';
 				}

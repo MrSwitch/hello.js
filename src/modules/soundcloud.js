@@ -1,4 +1,4 @@
-let hello = require('../hello.js');
+const hello = require('../hello.js');
 
 // See: https://developers.soundcloud.com/docs/api/reference
 (function(hello) {

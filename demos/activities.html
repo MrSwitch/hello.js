@@ -8,10 +8,7 @@
 	<script src="client_ids.js"></script>
 	<style>ul:empty:after{content:'empty';font-weight:bold;color:#aaa;}</style>
 
-	<script src="../src/hello.polyfill.js"></script>
-	<script src="../src/hello.js"></script>
-	<script src="../src/modules/facebook.js"></script>
-	<script src="../src/modules/google.js"></script>
+	<script src="../dist/hello.all.js"></script>
 </head>
 <body>
 	<h1>hello.js - me/share</h1>
@@ -37,7 +34,12 @@ function getActivities(network){
 		});
 	});
 }
-hello.init( CLIENT_IDS, {redirect_uri:'../redirect.html'} );
+hello.init({
+	google: CLIENT_IDS.google,
+	facebook: CLIENT_IDS.facebook
+}, {
+	redirect_uri:'../redirect.html'
+});
 
 </script>
 

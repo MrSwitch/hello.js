@@ -1,6 +1,6 @@
 // BikeIndex
 // Https://bikeindex.org/documentation/api_v2
-let hello = require('../hello.js');
+const hello = require('../hello.js');
 
 (function(hello) {
 
@@ -94,7 +94,7 @@ let hello = require('../hello.js');
 		}
 
 		if (o.user) {
-			hello.utils.extend(o, o.user);
+			Object.assign(o, o.user);
 			delete o.user;
 		}
 

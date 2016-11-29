@@ -1,4 +1,4 @@
-let hello = require('../hello.js');
+const hello = require('../hello.js');
 
 (function(hello) {
 	var baseUrl = 'https://api.vimeo.com/';

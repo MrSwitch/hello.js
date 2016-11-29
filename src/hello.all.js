@@ -1,6 +1,5 @@
-// require('./hello.polyfill.js');
-// require('./hello.chromeapp.js');
-// require('./hello.phonegap.js');
+
+// Services
 require('./modules/dropbox.js');
 require('./modules/facebook.js');
 require('./modules/flickr.js');
@@ -16,7 +15,12 @@ require('./modules/vk.js');
 require('./modules/windows.js');
 require('./modules/yahoo.js');
 
-// require('./hello.amd.js');
-// require('./hello.commonjs.js');
+// Environment tweaks
+require('./hello.phonegap.js');
+require('./hello.chromeapp.js');
 
+// Build environments
+require('./hello.amd.js');
+
+// Export HelloJS
 module.exports = require('./hello.js');
