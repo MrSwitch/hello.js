@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="client_ids.js"></script>
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/modules/gitlab.js"></script>
+
+<title>hello( gitlab )</title>
+<h1>hello( gitlab )</h1>
+
+<button id='gitlab' onclick="profile('gitlab');">Get Profile</button>
+<script class="pre">
+function profile(network) {
+	var gitlab = hello(network);
+	gitlab.login().then(function() {
+		// get user profile data
+		return gitlab.api('me');
+	})
+	.then(function(p) {
+		document.getElementById(network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network +" as " + p.name;
+	});
+}
+</script>
+
+<h2>Get user email</h2>
+
+<button onclick="userEmail('gitlab', 'email');">Get email</button>
+
+<pre id="email"></pre>
+<script class="pre">
+function userEmail(network, target) {
+	var gitlab = hello(network)
+	gitlab.login()
+	.then(function() {
+		// Get a bespoke endpoint from gitlab
+		return gitlab.api('/user/emails');
+	}).then(function(r) {
+		document.getElementById(target).innerHTML = JSON.stringify(r, null, 2);
+	});
+}
+</script>
+
+<h2>List user repos</h2>
+
+<button onclick="userProjects('gitlab', 'project_list');">Get a list of projects</button>
+
+<pre id="project_list"></pre>
+<script class="pre">
+function userProjects(network, target) {
+	var gitlab = hello(network)
+	gitlab.login()
+	.then(function() {
+		// Get a bespoke endpoint from gitlab
+		return gitlab.api('/projects');
+	}).then(function(r) {
+		document.getElementById(target).innerHTML = JSON.stringify(r, null, 2);
+	});
+}
+</script>
+
+<script class="pre">
+hello.init({
+	gitlab : GITLAB_CLIENT_ID
+},{
+	redirect_uri : '../redirect.html',
+	oauth_proxy : 'http://localhost:5500/proxy'
+});
+</script>
