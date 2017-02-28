@@ -175,6 +175,12 @@
 					toJSON(p);
 				}
 
+				// Add the authorization header as well
+				var token = p.query.access_token;
+				if (token) {
+					p.headers.Authorization = 'Bearer ' + token;
+				}
+
 				return true;
 			},
 
