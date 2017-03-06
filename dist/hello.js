@@ -202,6 +202,9 @@ hello.utils.extend(hello, {
 
 	settings: {
 
+		// Automatically emit login/logout/update events
+		autoemit: true,
+
 		// OAuth2 authentication defaults
 		redirect_uri: window.location.href.split('#')[0],
 		response_type: 'token',
@@ -1718,17 +1721,17 @@ hello.utils.Event.call(hello);
 			}
 
 			// Access_token has been removed
-			else if (!session.access_token && oldSess.access_token) {
+			else if (hello.settings.autoemit && !session.access_token && oldSess.access_token) {
 				emit('logout');
 			}
 
 			// Access_token has been created
-			else if (session.access_token && !oldSess.access_token) {
+			else if (hello.settings.autoemit && session.access_token && !oldSess.access_token) {
 				emit('login');
 			}
 
 			// Access_token has been updated
-			else if (session.expires !== oldSess.expires) {
+			else if (hello.settings.autoemit && session.expires !== oldSess.expires) {
 				emit('update');
 			}
 
