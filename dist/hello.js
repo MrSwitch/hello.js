@@ -1,4 +1,4 @@
-/*! hellojs v1.14.0 | (c) 2012-2016 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.14.1 | (c) 2012-2017 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -177,7 +177,7 @@ hello.utils = {
 			if (Array.isArray(r) && Array.isArray(a)) {
 				Array.prototype.push.apply(r, a);
 			}
-			else if (r instanceof Object && a instanceof Object && r !== a) {
+			else if (r && (r instanceof Object || typeof r === 'object') && a && (a instanceof Object || typeof a === 'object') && r !== a) {
 				for (var x in a) {
 					r[x] = hello.utils.extend(r[x], a[x]);
 				}
