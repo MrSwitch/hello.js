@@ -4874,8 +4874,8 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			oauth: {
 				version: 2,
 				response_type: 'code',
-				auth: 'https://www.linkedin.com/uas/oauth2/authorization',
-				grant: 'https://www.linkedin.com/uas/oauth2/accessToken'
+				auth: 'https://www.linkedin.com/oauth/v2/authorization',
+				grant: 'https://www.linkedin.com/oauth/v2/accessToken'
 			},
 
 			// Refresh the access_token once expired
