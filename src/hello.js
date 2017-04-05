@@ -1380,7 +1380,12 @@ hello.utils.extend(hello.utils, {
 
 			// If this page is still open
 			if (p.page_uri) {
-				location.assign(p.page_uri);
+				if (location.href.replace(/#.*/, '') === p.page_uri) {
+					location.hash = '';
+				}
+				else {
+					location.assign(p.page_uri);
+				}
 			}
 		}
 
