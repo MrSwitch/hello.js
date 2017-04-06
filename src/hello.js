@@ -1380,8 +1380,15 @@ hello.utils.extend(hello.utils, {
 
 			// If this page is still open
 			if (p.page_uri) {
-				if (location.href.replace(/#.*/, '') === p.page_uri) {
-					location.hash = '';
+
+				// If we would redirect to the same page, just without the hash, don't do a full reload
+				if (window.location.href.replace(/#.*/, '') === p.page_uri) {
+					if ('replaceState' in window.history) {
+						window.history.replaceState('', document.title, window.location.pathname + window.location.search);
+					}
+					else {
+						window.location.hash = '';
+					}
 				}
 				else {
 					location.assign(p.page_uri);
