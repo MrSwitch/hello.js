@@ -195,6 +195,7 @@ hello.on('auth.login', function(auth) {
 	});
 });
 ```
+```
 <script>
 hello.on('auth.login', function(auth) {
 
@@ -211,6 +212,7 @@ hello.on('auth.login', function(auth) {
 	});
 });
 </script>
+```
 
 ### 5. Configure hello.js with your client IDs and initiate all listeners
 
