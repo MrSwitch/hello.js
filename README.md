@@ -994,5 +994,3 @@ python -m SimpleHTTPServer
 # http://localhost:8000/tests/specs/index.html
 ```
 
-<script src="assets/home.js" async=true></script>
-
