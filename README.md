@@ -860,7 +860,7 @@ The first parameter of a failed request to the *errorHandler* may be either *boo
 
 
 ## Extending the services
-Services are added to HelloJS as "modules" for more information about creating your own modules and examples, go to [Modules](./modules)
+Services are added to HelloJS as "modules" for more information about creating your own modules and examples, go to [Modules](./modules.md)
 
 ## OAuth Proxy
 
