@@ -93,6 +93,8 @@ var JOINME_CLIENT_ID = {
 }[window.location.hostname];
 
 
+var SMUGMUG_CLIENT_ID = 'NFfNfAK47ZfnkMl4EjO48pgEQQWCMFJu';
+
 // To make it a little easier
 var CLIENT_IDS_ALL = {
 	windows : WINDOWS_CLIENT_ID,
@@ -108,7 +110,8 @@ var CLIENT_IDS_ALL = {
 	foursquare : FOURSQUARE_CLIENT_ID,
 	github : GITHUB_CLIENT_ID,
 	flickr: FLICKR_CLIENT_ID,
-	vk: VK_CLIENT_ID
+	vk: VK_CLIENT_ID,
+	smugmug:SMUGMUG_CLIENT_ID
 };
 
 
