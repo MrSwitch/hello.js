@@ -67,7 +67,7 @@
 			},
 
 			// API Base URL
-			base: 'https://graph.facebook.com/v2.7/',
+			base: 'https://graph.facebook.com/v2.9/',
 
 			// Map GET requests
 			get: {
