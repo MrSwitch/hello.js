@@ -62,6 +62,11 @@ var GITHUB_CLIENT_ID = {
 	'adodson.com' : location_https ? 'c379ed1ef504fccfa85c' : 'd934ef34e2e40cf9b00a'
 }[window.location.hostname];
 
+// GitLab applications - https://gitlab.com/profile/applications
+var GITLAB_CLIENT_ID = {
+  'localhost' : '6db78f1dd9f165f82b493274e5b16f77533b4c95e1d3244012c6d35591fae7f3'
+}[window.location.hostname];
+
 // Instagram Register - http://instagram.com/developer/clients/manage/
 var INSTAGRAM_CLIENT_ID = {
 	'local.knarly.com' : 'bfbbf362ac3148aeb1150e5b8256bbe9',
@@ -107,6 +112,7 @@ var CLIENT_IDS_ALL = {
 	soundcloud : SOUNDCLOUD_CLIENT_ID,
 	foursquare : FOURSQUARE_CLIENT_ID,
 	github : GITHUB_CLIENT_ID,
+	gitlab : GITLAB_CLIENT_ID,
 	flickr: FLICKR_CLIENT_ID,
 	vk: VK_CLIENT_ID
 };

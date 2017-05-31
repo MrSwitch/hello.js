@@ -83,6 +83,17 @@ define(['./helper'], function(helper) {
 				errorExpect: false
 			},
 			{
+				network: 'gitlab',
+				expect: {
+					id: 10398423,
+					name: 'janemcgee35',
+					thumbnail: 'https://gitlab.com/uploads/user/avatar/10398423/avatar.png'
+				},
+				errorExpect: {
+					message: '401 Unauthorized'
+				}
+			},
+			{
 				network: 'google',
 				expect: {
 					id: '115111284799080900590',

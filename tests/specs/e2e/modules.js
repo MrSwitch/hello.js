@@ -13,6 +13,7 @@ define([
 	'../../../src/modules/linkedin',
 	'../../../src/modules/foursquare',
 	'../../../src/modules/github',
+	'../../../src/modules/gitlab',
 	'../../../src/modules/bikeindex',
 	'../../../src/modules/soundcloud',
 	'../../../src/modules/vk'
