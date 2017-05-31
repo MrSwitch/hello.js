@@ -1,4 +1,4 @@
-/*! hellojs v1.14.1 | (c) 2012-2017 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.14.1-tuomassalo | (c) 2012-2017 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -1480,7 +1480,14 @@ hello.utils.extend(hello.utils, {
 				_this.extend(p, a);
 			}
 			catch (e) {
-				console.error('Could not decode state parameter');
+				var stateDecoded = decodeURIComponent(p.state);
+				try {
+					var b = JSON.parse(stateDecoded);
+					_this.extend(p, b);
+				}
+				catch (e) {
+					console.error('Could not decode state parameter');
+				}
 			}
 
 			// Access_token?
@@ -1526,7 +1533,19 @@ hello.utils.extend(hello.utils, {
 
 			// If this page is still open
 			if (p.page_uri) {
-				location.assign(p.page_uri);
+
+				// If we would redirect to the same page, just without the hash, don't do a full reload
+				if (window.location.href.replace(/#.*/, '') === p.page_uri) {
+					if ('replaceState' in window.history) {
+						window.history.replaceState('', document.title, window.location.pathname + window.location.search);
+					}
+					else {
+						window.location.hash = '';
+					}
+				}
+				else {
+					location.assign(p.page_uri);
+				}
 			}
 		}
 
