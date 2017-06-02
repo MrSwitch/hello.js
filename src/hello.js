@@ -369,6 +369,12 @@ hello.utils.extend(hello, {
 
 		}
 
+		// If we are running as a chrome ext, add the extension ID to the state so the popup can
+		// post a message back to us
+		if (typeof chrome === 'object' && typeof chrome.extension === 'object') {
+			p.qs.state.chrome_ext_id = opts.chrome_ext_id;
+		}
+
 		// Convert state to a string
 		p.qs.state = encodeURIComponent(JSON.stringify(p.qs.state));
 
@@ -1429,6 +1435,19 @@ hello.utils.extend(hello.utils, {
 				catch (e) {
 					// Error thrown whilst executing parent callback
 				}
+			}
+			else if (obj.chrome_ext_id && typeof chrome === 'object' && typeof chrome.runtime === 'object') {
+				// If we have a chrome extension ID, try using the chrome APIs
+				try {
+					delete obj.callback;
+				}
+				catch (e) {}
+
+				message = {};
+				message.message_type = 'google_auth_response';
+				message.callback = cb;
+				message.obj = JSON.stringify(obj);
+				chrome.runtime.sendMessage(obj.chrome_ext_id, message);
 			}
 
 			closeWindow();
