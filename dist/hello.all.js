@@ -1480,7 +1480,14 @@ hello.utils.extend(hello.utils, {
 				_this.extend(p, a);
 			}
 			catch (e) {
-				console.error('Could not decode state parameter');
+				var stateDecoded = decodeURIComponent(p.state);
+				try {
+					var b = JSON.parse(stateDecoded);
+					_this.extend(p, b);
+				}
+				catch (e) {
+					console.error('Could not decode state parameter');
+				}
 			}
 
 			// Access_token?
@@ -3346,7 +3353,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			// API Base URL
-			base: 'https://graph.facebook.com/v2.7/',
+			base: 'https://graph.facebook.com/v2.9/',
 
 			// Map GET requests
 			get: {

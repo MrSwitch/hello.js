@@ -1480,7 +1480,14 @@ hello.utils.extend(hello.utils, {
 				_this.extend(p, a);
 			}
 			catch (e) {
-				console.error('Could not decode state parameter');
+				var stateDecoded = decodeURIComponent(p.state);
+				try {
+					var b = JSON.parse(stateDecoded);
+					_this.extend(p, b);
+				}
+				catch (e) {
+					console.error('Could not decode state parameter');
+				}
 			}
 
 			// Access_token?
