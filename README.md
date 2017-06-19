@@ -1,6 +1,8 @@
 
 # hello.js
 
+[![CDNJS](https://img.shields.io/cdnjs/v/hellojs.svg)](https://cdnjs.com/libraries/hellojs/)
+
 A client-side JavaScript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST APIs. HelloJS standardizes paths and responses to common APIs like Google Data Services, Facebook Graph and Windows Live Connect. It's **modular**, so that list is [growing](./modules). No more spaghetti code!
 
 
@@ -193,22 +195,6 @@ hello.on('auth.login', function(auth) {
 	});
 });
 ```
-<script>
-hello.on('auth.login', function(auth) {
-
-	// Call user information, for the given network
-	hello(auth.network).api('me').then(function(r) {
-		// Inject it into the container
-		var label = document.getElementById('profile_' + auth.network);
-		if (!label) {
-			label = document.createElement('div');
-			label.id = 'profile_' + auth.network;
-			document.getElementById('profile').appendChild(label);
-		}
-		label.innerHTML = '<img src="' + r.thumbnail + '" /> Hey ' + r.name;
-	});
-});
-</script>
 
 ### 5. Configure hello.js with your client IDs and initiate all listeners
 
@@ -1007,7 +993,4 @@ python -m SimpleHTTPServer
 # 2. Then open the following URL in your web browser:
 # http://localhost:8000/tests/specs/index.html
 ```
-
-
-
 

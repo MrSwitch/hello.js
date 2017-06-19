@@ -1,9 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-// require('./hello.polyfill.js');
-// require('./hello.chromeapp.js');
-// require('./hello.phonegap.js');
+// Services
 require('./modules/dropbox.js');
 require('./modules/facebook.js');
 require('./modules/flickr.js');
@@ -19,12 +17,160 @@ require('./modules/vk.js');
 require('./modules/windows.js');
 require('./modules/yahoo.js');
 
-// require('./hello.amd.js');
-// require('./hello.commonjs.js');
+// Environment tweaks
+require('./hello.phonegap.js');
+require('./hello.chromeapp.js');
 
+// Build environments
+require('./hello.amd.js');
+
+// Export HelloJS
 module.exports = require('./hello.js');
 
-},{"./hello.js":2,"./modules/dropbox.js":3,"./modules/facebook.js":4,"./modules/flickr.js":5,"./modules/foursquare.js":6,"./modules/github.js":7,"./modules/google.js":8,"./modules/instagram.js":9,"./modules/joinme.js":10,"./modules/linkedin.js":11,"./modules/soundcloud.js":12,"./modules/twitter.js":13,"./modules/vk.js":14,"./modules/windows.js":15,"./modules/yahoo.js":16}],2:[function(require,module,exports){
+},{"./hello.amd.js":2,"./hello.chromeapp.js":3,"./hello.js":4,"./hello.phonegap.js":5,"./modules/dropbox.js":6,"./modules/facebook.js":7,"./modules/flickr.js":8,"./modules/foursquare.js":9,"./modules/github.js":10,"./modules/google.js":11,"./modules/instagram.js":12,"./modules/joinme.js":13,"./modules/linkedin.js":14,"./modules/soundcloud.js":15,"./modules/twitter.js":16,"./modules/vk.js":17,"./modules/windows.js":18,"./modules/yahoo.js":19}],2:[function(require,module,exports){
+'use strict';
+
+// Register as anonymous AMD module
+if (typeof define === 'function' && define.amd) {
+	define(function () {
+		return hello;
+	});
+}
+
+},{}],3:[function(require,module,exports){
+'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+// Script to support ChromeApps
+// This overides the hello.utils.popup method to support chrome.identity.launchWebAuthFlow
+// See https://developer.chrome.com/apps/app_identity#non
+
+var URL = require('tricks/window/url');
+var hello = require('./hello');
+
+// Is this a chrome app?
+if ((typeof chrome === 'undefined' ? 'undefined' : _typeof(chrome)) === 'object' && _typeof(chrome.identity) === 'object' && chrome.identity.launchWebAuthFlow) {
+	var _cache;
+
+	(function () {
+
+		// Open function
+		var _open = function _open(url, interactive) {
+
+			// Launch
+			var ref = {
+				closed: false
+			};
+
+			// Launch the webAuthFlow
+			chrome.identity.launchWebAuthFlow({
+				url: url,
+				interactive: interactive
+			}, function (responseUrl) {
+
+				// Did the user cancel this prematurely
+				if (responseUrl === undefined) {
+					ref.closed = true;
+					return;
+				}
+
+				// Split appart the URL
+				var a = URL(responseUrl);
+
+				// The location can be augmented in to a location object like so...
+				// We dont have window operations on the popup so lets create some
+				var _popup = {
+					location: {
+
+						// Change the location of the popup
+						assign: function assign(url) {
+
+							// If there is a secondary reassign
+							// In the case of OAuth1
+							// Trigger this in non-interactive mode.
+							_open(url, false);
+						},
+
+						search: a.search,
+						hash: a.hash,
+						href: a.href
+					},
+					close: function close() {}
+				};
+
+				// Then this URL contains information which HelloJS must process
+				// URL string
+				// Window - any action such as window relocation goes here
+				// Opener - the parent window which opened this, aka this script
+
+				hello.utils.responseHandler(_popup, window);
+			});
+
+			// Return the reference
+			return ref;
+		};
+
+		// Swap the popup method
+		hello.utils.popup = function (url) {
+
+			return _open(url, true);
+		};
+
+		// Swap the hidden iframe method
+		hello.utils.iframe = function (url) {
+
+			_open(url, false);
+		};
+
+		// Swap the request_cors method
+		hello.utils.request_cors = function (callback) {
+
+			callback();
+
+			// Always run as CORS
+
+			return true;
+		};
+
+		// Swap the storage method
+		_cache = {};
+
+		chrome.storage.local.get('hello', function (r) {
+			// Update the cache
+			_cache = r.hello || {};
+		});
+
+		hello.utils.store = function (name, value) {
+
+			// Get all
+			if (arguments.length === 0) {
+				return _cache;
+			}
+
+			// Get
+			if (arguments.length === 1) {
+				return _cache[name] || null;
+			}
+
+			// Set
+			if (value) {
+				_cache[name] = value;
+				chrome.storage.local.set({ hello: _cache });
+				return value;
+			}
+
+			// Delete
+			if (value === null) {
+				delete _cache[name];
+				chrome.storage.local.set({ hello: _cache });
+				return null;
+			}
+		};
+	})();
+}
+
+},{"./hello":4,"tricks/window/url":69}],4:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -577,11 +723,14 @@ extend(hello.utils, {
 
 	// OAuth and API response handler
 	responseHandler: function responseHandler(window, parent) {
-
 		var utils = this;
 		var _this = this;
 		var p;
 		var location = window.location;
+
+		var redirect = location.assign && location.assign.bind(location) || function (url) {
+			window.location = url;
+		};
 
 		// Is this an auth relay message which needs to call the proxy?
 		p = param(location.search);
@@ -597,7 +746,7 @@ extend(hello.utils, {
 			// Redirect to the host
 			var path = state.oauth_proxy + '?' + param(p);
 
-			location.assign(path);
+			redirect(path);
 
 			return;
 		}
@@ -665,7 +814,7 @@ extend(hello.utils, {
 
 			// If this page is still open
 			if (p.page_uri) {
-				location.assign(p.page_uri);
+				redirect(p.page_uri);
 			}
 		}
 
@@ -674,7 +823,7 @@ extend(hello.utils, {
 		// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
 		else if ('oauth_redirect' in p) {
 
-				location.assign(decodeURIComponent(p.oauth_redirect));
+				redirect(decodeURIComponent(p.oauth_redirect));
 				return;
 			}
 
@@ -1190,7 +1339,107 @@ hello.api = function () {
 
 hello.utils.responseHandler(window, window.opener || window.parent);
 
-},{"tricks/array/diff":17,"tricks/array/unique":20,"tricks/browser/agent/localStorage":23,"tricks/dom/hiddenFrame":35,"tricks/events/globalCallback":39,"tricks/http/request":28,"tricks/object/args":41,"tricks/object/clone":42,"tricks/object/diffKey":43,"tricks/object/extend":44,"tricks/object/isEmpty":48,"tricks/object/merge":49,"tricks/object/pubsub":50,"tricks/object/then":52,"tricks/string/createUrl":55,"tricks/string/queryparse":59,"tricks/window/close":64,"tricks/window/popup":65,"tricks/window/url":66}],3:[function(require,module,exports){
+},{"tricks/array/diff":20,"tricks/array/unique":23,"tricks/browser/agent/localStorage":26,"tricks/dom/hiddenFrame":38,"tricks/events/globalCallback":42,"tricks/http/request":31,"tricks/object/args":44,"tricks/object/clone":45,"tricks/object/diffKey":46,"tricks/object/extend":47,"tricks/object/isEmpty":51,"tricks/object/merge":52,"tricks/object/pubsub":53,"tricks/object/then":55,"tricks/string/createUrl":58,"tricks/string/queryparse":62,"tricks/window/close":67,"tricks/window/popup":68,"tricks/window/url":69}],5:[function(require,module,exports){
+'use strict';
+
+// Phonegap override for hello.phonegap.js
+var URL = require('tricks/window/url');
+var hello = require('./hello');
+
+(function () {
+
+	// Is this a phonegap implementation?
+	if (!(/^file:\/{3}[^\/]/.test(window.location.href) && window.cordova)) {
+		// Cordova is not included.
+		return;
+	}
+
+	// Augment the hidden iframe method
+	hello.utils.iframe = function (url, redirectUri) {
+		hello.utils.popup(url, redirectUri, { hidden: 'yes' });
+	};
+
+	// Augment the popup
+	var utilPopup = hello.utils.popup;
+
+	// Replace popup
+	hello.utils.popup = function (url, redirectUri, options) {
+
+		// Run the standard
+		var popup = utilPopup.call(this, url, redirectUri, options);
+
+		// Create a function for reopening the popup, and assigning events to the new popup object
+		// PhoneGap support
+		// Add an event listener to listen to the change in the popup windows URL
+		// This must appear before popup.focus();
+		try {
+			if (popup && popup.addEventListener) {
+
+				// Get the origin of the redirect URI
+
+				var a = URL(redirectUri);
+				var redirectUriOrigin = a.origin || a.protocol + '//' + a.hostname;
+
+				// Listen to changes in the InAppBrowser window
+
+				popup.addEventListener('loadstart', function (e) {
+
+					var url = e.url;
+
+					// Is this the path, as given by the redirectUri?
+					// Check the new URL agains the redirectUriOrigin.
+					// According to #63 a user could click 'cancel' in some dialog boxes ....
+					// The popup redirects to another page with the same origin, yet we still wish it to close.
+
+					if (url.indexOf(redirectUriOrigin) !== 0) {
+						return;
+					}
+
+					// Split appart the URL
+					var a = URL(url);
+
+					// We dont have window operations on the popup so lets create some
+					// The location can be augmented in to a location object like so...
+
+					var _popup = {
+						location: {
+							// Change the location of the popup
+							assign: function assign(location) {
+
+								// Unfourtunatly an app is may not change the location of a InAppBrowser window.
+								// So to shim this, just open a new one.
+								popup.executeScript({ code: 'window.location.href = "' + location + ';"' });
+							},
+
+							search: a.search,
+							hash: a.hash,
+							href: a.href
+						},
+						close: function close() {
+							if (popup.close) {
+								popup.close();
+								try {
+									popup.closed = true;
+								} catch (_e) {}
+							}
+						}
+					};
+
+					// Then this URL contains information which HelloJS must process
+					// URL string
+					// Window - any action such as window relocation goes here
+					// Opener - the parent window which opened this, aka this script
+
+					hello.utils.responseHandler(_popup, window);
+				});
+			}
+		} catch (e) {}
+
+		return popup;
+	};
+})();
+
+},{"./hello":4,"tricks/window/url":69}],6:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -1438,7 +1687,7 @@ var querystringify = require('tricks/string/querystringify');
 	}
 })(hello);
 
-},{"../hello.js":2,"tricks/object/toBlob":53,"tricks/string/querystringify":60}],4:[function(require,module,exports){
+},{"../hello.js":4,"tricks/object/toBlob":56,"tricks/string/querystringify":63}],7:[function(require,module,exports){
 'use strict';
 
 var hello = require('../hello.js');
@@ -1449,6 +1698,9 @@ var querystringify = require('tricks/string/querystringify');
 var toBlob = require('tricks/object/toBlob');
 
 (function (hello) {
+	// For APIs, once a version is no longer usable, any calls made to it will be defaulted to the next oldest usable version.
+	// So we explicitly state it.
+	var version = 'v2.9';
 
 	hello.init({
 
@@ -1456,10 +1708,10 @@ var toBlob = require('tricks/object/toBlob');
 
 			name: 'Facebook',
 
-			// SEE https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/v2.1
+			// SEE https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow
 			oauth: {
 				version: 2,
-				auth: 'https://www.facebook.com/dialog/oauth/',
+				auth: 'https://www.facebook.com/' + version + '/dialog/oauth/',
 				grant: 'https://graph.facebook.com/oauth/access_token'
 			},
 
@@ -1517,7 +1769,7 @@ var toBlob = require('tricks/object/toBlob');
 			},
 
 			// API Base URL
-			base: 'https://graph.facebook.com/v2.7/',
+			base: 'https://graph.facebook.com/' + version + '/',
 
 			// Map GET requests
 			get: {
@@ -1655,7 +1907,7 @@ var toBlob = require('tricks/object/toBlob');
 	}
 })(hello);
 
-},{"../hello.js":2,"tricks/events/globalCallback":39,"tricks/object/hasBinary":45,"tricks/object/toBlob":53,"tricks/string/querystringify":60}],5:[function(require,module,exports){
+},{"../hello.js":4,"tricks/events/globalCallback":42,"tricks/object/hasBinary":48,"tricks/object/toBlob":56,"tricks/string/querystringify":63}],8:[function(require,module,exports){
 'use strict';
 
 var hello = require('../hello.js');
@@ -1887,7 +2139,7 @@ var hello = require('../hello.js');
 	}
 })(hello);
 
-},{"../hello.js":2}],6:[function(require,module,exports){
+},{"../hello.js":4}],9:[function(require,module,exports){
 'use strict';
 
 var hello = require('../hello.js');
@@ -1981,7 +2233,7 @@ var hello = require('../hello.js');
 	}
 })(hello);
 
-},{"../hello.js":2}],7:[function(require,module,exports){
+},{"../hello.js":4}],10:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -2090,7 +2342,7 @@ var hello = require('../hello.js');
 	}
 })(hello);
 
-},{"../hello.js":2}],8:[function(require,module,exports){
+},{"../hello.js":4}],11:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -2664,7 +2916,7 @@ var hello = require('../hello.js');
 	}
 })(hello);
 
-},{"../hello.js":2}],9:[function(require,module,exports){
+},{"../hello.js":4}],12:[function(require,module,exports){
 'use strict';
 
 var hello = require('../hello.js');
@@ -2858,7 +3110,7 @@ var hello = require('../hello.js');
 	}
 })(hello);
 
-},{"../hello.js":2}],10:[function(require,module,exports){
+},{"../hello.js":4}],13:[function(require,module,exports){
 'use strict';
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
@@ -3029,7 +3281,7 @@ var hello = require('../hello.js');
 	}
 })(hello);
 
-},{"../hello.js":2}],11:[function(require,module,exports){
+},{"../hello.js":4}],14:[function(require,module,exports){
 'use strict';
 
 var hello = require('../hello.js');
@@ -3233,7 +3485,7 @@ var hello = require('../hello.js');
 	}
 })(hello);
 
-},{"../hello.js":2}],12:[function(require,module,exports){
+},{"../hello.js":4}],15:[function(require,module,exports){
 'use strict';
 
 var hello = require('../hello.js');
@@ -3323,7 +3575,7 @@ var hello = require('../hello.js');
 	}
 })(hello);
 
-},{"../hello.js":2}],13:[function(require,module,exports){
+},{"../hello.js":4}],16:[function(require,module,exports){
 'use strict';
 
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
@@ -3549,7 +3801,7 @@ var hello = require('../hello.js');
  */
 })(hello);
 
-},{"../hello.js":2}],14:[function(require,module,exports){
+},{"../hello.js":4}],17:[function(require,module,exports){
 'use strict';
 
 var hello = require('../hello.js');
@@ -3642,7 +3894,7 @@ var hello = require('../hello.js');
 	}
 })(hello);
 
-},{"../hello.js":2}],15:[function(require,module,exports){
+},{"../hello.js":4}],18:[function(require,module,exports){
 'use strict';
 
 var hello = require('../hello.js');
@@ -3833,7 +4085,7 @@ var toBlob = require('tricks/object/toBlob');
 	}
 })(hello);
 
-},{"../hello.js":2,"tricks/object/hasBinary":45,"tricks/object/toBlob":53}],16:[function(require,module,exports){
+},{"../hello.js":4,"tricks/object/hasBinary":48,"tricks/object/toBlob":56}],19:[function(require,module,exports){
 'use strict';
 
 var hello = require('../hello.js');
@@ -3995,7 +4247,7 @@ var hello = require('../hello.js');
 	}
 })(hello);
 
-},{"../hello.js":2}],17:[function(require,module,exports){
+},{"../hello.js":4}],20:[function(require,module,exports){
 "use strict";
 
 module.exports = function (a, b) {
@@ -4004,7 +4256,7 @@ module.exports = function (a, b) {
   });
 };
 
-},{}],18:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 "use strict";
 
 // Array find
@@ -4021,14 +4273,14 @@ module.exports = function (arr, callback) {
 	}
 };
 
-},{}],19:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 "use strict";
 
 module.exports = function (obj) {
   return Array.prototype.slice.call(obj);
 };
 
-},{}],20:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 "use strict";
 
 module.exports = function (a) {
@@ -4042,10 +4294,10 @@ module.exports = function (a) {
 	});
 };
 
-},{}],21:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var jsonParse = require('../../string/jsonParse.js');
 var extend = require('../../object/extend.js');
@@ -4092,7 +4344,7 @@ Storage.prototype.removeItem = function (name) {
 	this.native.removeItem(name);
 };
 
-},{"../../object/extend.js":44,"../../string/jsonParse.js":57}],22:[function(require,module,exports){
+},{"../../object/extend.js":47,"../../string/jsonParse.js":60}],25:[function(require,module,exports){
 'use strict';
 
 // Provide an API for setting and retrieving cookies
@@ -4121,7 +4373,7 @@ module.exports = new Storage({
 	}
 });
 
-},{"../../array/find.js":18,"./Storage.js":21}],23:[function(require,module,exports){
+},{"../../array/find.js":21,"./Storage.js":24}],26:[function(require,module,exports){
 'use strict';
 
 // sessionStorage
@@ -4142,7 +4394,7 @@ try {
 	module.exports = sessionStorage;
 }
 
-},{"./Storage.js":21,"./sessionStorage.js":24}],24:[function(require,module,exports){
+},{"./Storage.js":24,"./sessionStorage.js":27}],27:[function(require,module,exports){
 'use strict';
 
 // sessionStorage
@@ -4163,7 +4415,7 @@ try {
 	module.exports = cookieStorage;
 }
 
-},{"./Storage.js":21,"./cookieStorage.js":22}],25:[function(require,module,exports){
+},{"./Storage.js":24,"./cookieStorage.js":25}],28:[function(require,module,exports){
 'use strict';
 
 // Post
@@ -4426,7 +4678,7 @@ function createFormFromData(data) {
 	return form;
 }
 
-},{"../../array/toArray.js":19,"../../dom/append.js":30,"../../dom/attr.js":31,"../../dom/createElement.js":32,"../../dom/domInstance.js":33,"../../events/emit.js":38,"../../events/globalCallback.js":39,"../../events/on.js":40,"../../object/instanceOf.js":46,"../../time/setImmediate.js":63}],26:[function(require,module,exports){
+},{"../../array/toArray.js":22,"../../dom/append.js":33,"../../dom/attr.js":34,"../../dom/createElement.js":35,"../../dom/domInstance.js":36,"../../events/emit.js":41,"../../events/globalCallback.js":42,"../../events/on.js":43,"../../object/instanceOf.js":49,"../../time/setImmediate.js":66}],29:[function(require,module,exports){
 'use strict';
 
 var createElement = require('../../dom/createElement.js');
@@ -4477,7 +4729,7 @@ module.exports = function (url, callback) {
 	return script;
 };
 
-},{"../../dom/createElement.js":32,"../../events/createEvent.js":37}],27:[function(require,module,exports){
+},{"../../dom/createElement.js":35,"../../events/createEvent.js":40}],30:[function(require,module,exports){
 'use strict';
 
 // JSONP
@@ -4511,10 +4763,10 @@ module.exports = function (url, callback, callback_name) {
 	return script;
 };
 
-},{"../../events/globalCallback.js":39,"./getScript.js":26}],28:[function(require,module,exports){
+},{"../../events/globalCallback.js":42,"./getScript.js":29}],31:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 // Request
 // Makes an REST request given an object which describes how (aka, xhr, jsonp, formpost)
@@ -4628,7 +4880,7 @@ module.exports = function (p, callback) {
 	callback({ error: 'invalid_request' });
 };
 
-},{"../../events/globalCallback.js":39,"../../object/extend.js":44,"../../string/createUrl.js":55,"../../support/cors.js":62,"./formpost.js":25,"./jsonp.js":27,"./xhr.js":29}],29:[function(require,module,exports){
+},{"../../events/globalCallback.js":42,"../../object/extend.js":47,"../../string/createUrl.js":58,"../../support/cors.js":65,"./formpost.js":28,"./jsonp.js":30,"./xhr.js":32}],32:[function(require,module,exports){
 'use strict';
 
 // XHR: uses CORS to make requests
@@ -4727,7 +4979,7 @@ function toFormData(data) {
 	return f;
 }
 
-},{"../../object/instanceOf.js":46,"../../object/rewire.js":51,"../../object/tryCatch.js":54,"../../string/extract.js":56,"../../string/jsonParse.js":57}],30:[function(require,module,exports){
+},{"../../object/instanceOf.js":49,"../../object/rewire.js":54,"../../object/tryCatch.js":57,"../../string/extract.js":59,"../../string/jsonParse.js":60}],33:[function(require,module,exports){
 'use strict';
 
 var createElement = require('./createElement.js');
@@ -4740,7 +4992,7 @@ module.exports = function (tagName, prop) {
 	return elm;
 };
 
-},{"./createElement.js":32}],31:[function(require,module,exports){
+},{"./createElement.js":35}],34:[function(require,module,exports){
 'use strict';
 
 var each = require('./each.js');
@@ -4758,7 +5010,7 @@ module.exports = function (elements, props) {
 	});
 };
 
-},{"./each.js":34}],32:[function(require,module,exports){
+},{"./each.js":37}],35:[function(require,module,exports){
 'use strict';
 
 var attr = require('./attr.js');
@@ -4769,7 +5021,7 @@ module.exports = function (tagName, attrs) {
 	return elm;
 };
 
-},{"./attr.js":31}],33:[function(require,module,exports){
+},{"./attr.js":34}],36:[function(require,module,exports){
 'use strict';
 
 var instanceOf = require('../object/instanceOf.js');
@@ -4792,7 +5044,7 @@ module.exports = function (type, data) {
 	}
 };
 
-},{"../object/instanceOf.js":46}],34:[function(require,module,exports){
+},{"../object/instanceOf.js":49}],37:[function(require,module,exports){
 'use strict';
 
 var isDom = require('./isDom.js');
@@ -4820,7 +5072,7 @@ module.exports = function (matches) {
 	return matches;
 };
 
-},{"../array/toArray.js":19,"../object/instanceOf.js":46,"./isDom.js":36}],35:[function(require,module,exports){
+},{"../array/toArray.js":22,"../object/instanceOf.js":49,"./isDom.js":39}],38:[function(require,module,exports){
 'use strict';
 
 var append = require('./append.js');
@@ -4839,7 +5091,7 @@ module.exports = function (src) {
 	return append('iframe', { src: src, style: style });
 };
 
-},{"../string/param.js":58,"./append.js":30}],36:[function(require,module,exports){
+},{"../string/param.js":61,"./append.js":33}],39:[function(require,module,exports){
 'use strict';
 
 var instanceOf = require('../object/instanceOf.js');
@@ -4852,7 +5104,7 @@ module.exports = function (test) {
 	return instanceOf(test, _HTMLElement) || instanceOf(test, _HTMLDocument) || instanceOf(test, _Window);
 };
 
-},{"../object/instanceOf.js":46}],37:[function(require,module,exports){
+},{"../object/instanceOf.js":49}],40:[function(require,module,exports){
 'use strict';
 
 // IE does not support `new Event()`
@@ -4878,7 +5130,7 @@ try {
 
 module.exports = createEvent;
 
-},{}],38:[function(require,module,exports){
+},{}],41:[function(require,module,exports){
 'use strict';
 
 // on.js
@@ -4893,7 +5145,7 @@ module.exports = function (elements, eventname) {
   });
 };
 
-},{"../dom/each.js":34,"./createEvent.js":37}],39:[function(require,module,exports){
+},{"../dom/each.js":37,"./createEvent.js":40}],42:[function(require,module,exports){
 'use strict';
 
 // Global Events
@@ -4922,8 +5174,10 @@ function handle(guid, callback) {
 	callback.apply(undefined, args) && delete window[guid];
 }
 
-},{"../string/random.js":61}],40:[function(require,module,exports){
+},{"../string/random.js":64}],43:[function(require,module,exports){
 'use strict';
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 // on.js
 // Listen to events, this is a wrapper for addEventListener
@@ -4931,21 +5185,40 @@ function handle(guid, callback) {
 var each = require('../dom/each.js');
 var SEPERATOR = /[\s\,]+/;
 
+// See https://github.com/WICG/EventListenerOptions/blob/gh-pages/explainer.md#feature-detection
+var supportsPassive = false;
+try {
+	var opts = Object.defineProperty({}, 'passive', {
+		get: function get() {
+			supportsPassive = true;
+		}
+	});
+	window.addEventListener('test', null, opts);
+} catch (e) {
+	// Continue
+}
+
 module.exports = function (elements, eventnames, callback) {
-	var useCapture = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
+	var options = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
+
+
+	if ((typeof options === 'undefined' ? 'undefined' : _typeof(options)) === 'object' && options.passive && !supportsPassive) {
+		// Override the passive mark
+		options = false;
+	}
 
 	eventnames = eventnames.split(SEPERATOR);
 	return each(elements, function (el) {
 		return eventnames.forEach(function (eventname) {
-			return el.addEventListener(eventname, callback, useCapture);
+			return el.addEventListener(eventname, callback, options);
 		});
 	});
 };
 
-},{"../dom/each.js":34}],41:[function(require,module,exports){
+},{"../dom/each.js":37}],44:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 // Makes it easier to assign parameters, where some are optional
 // @param o object
@@ -4999,10 +5272,10 @@ module.exports = function (o, args) {
 	return p;
 };
 
-},{}],42:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var isBinary = require('./isBinary.js');
 
@@ -5027,7 +5300,7 @@ module.exports = function clone(obj) {
 	return _clone;
 };
 
-},{"./isBinary.js":47}],43:[function(require,module,exports){
+},{"./isBinary.js":50}],46:[function(require,module,exports){
 "use strict";
 
 // Return all the properties in 'a' which aren't in 'b';
@@ -5045,7 +5318,7 @@ module.exports = function (a, b) {
 	return a;
 };
 
-},{}],44:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 'use strict';
 
 var instanceOf = require('./instanceOf.js');
@@ -5072,7 +5345,7 @@ module.exports = function extend(r) {
 	return r;
 };
 
-},{"./instanceOf.js":46}],45:[function(require,module,exports){
+},{"./instanceOf.js":49}],48:[function(require,module,exports){
 'use strict';
 
 var isBinary = require('./isBinary.js');
@@ -5091,14 +5364,14 @@ module.exports = function (data) {
 	return false;
 };
 
-},{"./isBinary.js":47}],46:[function(require,module,exports){
+},{"./isBinary.js":50}],49:[function(require,module,exports){
 "use strict";
 
 module.exports = function (test, root) {
   return root && test instanceof root;
 };
 
-},{}],47:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 'use strict';
 
 var instanceOf = require('./instanceOf.js');
@@ -5107,10 +5380,10 @@ module.exports = function (data) {
 	return instanceOf(data, Object) && (instanceOf(data, typeof HTMLInputElement !== 'undefined' ? HTMLInputElement : undefined) && data.type === 'file' || instanceOf(data, typeof HTMLInput !== 'undefined' ? HTMLInput : undefined) && data.type === 'file' || instanceOf(data, typeof FileList !== 'undefined' ? FileList : undefined) || instanceOf(data, typeof File !== 'undefined' ? File : undefined) || instanceOf(data, typeof Blob !== 'undefined' ? Blob : undefined));
 };
 
-},{"./instanceOf.js":46}],48:[function(require,module,exports){
+},{"./instanceOf.js":49}],51:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 module.exports = function (obj) {
 
@@ -5132,7 +5405,7 @@ module.exports = function (obj) {
 	return true;
 };
 
-},{}],49:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 'use strict';
 
 // Extend an object
@@ -5147,7 +5420,7 @@ module.exports = function () {
 	return extend.apply(undefined, args);
 };
 
-},{"./extend.js":44}],50:[function(require,module,exports){
+},{"./extend.js":47}],53:[function(require,module,exports){
 'use strict';
 
 // Pubsub extension
@@ -5278,7 +5551,7 @@ function triggerCallback(name, callback, handler, i) {
 	}
 }
 
-},{"../time/setImmediate.js":63}],51:[function(require,module,exports){
+},{"../time/setImmediate.js":66}],54:[function(require,module,exports){
 "use strict";
 
 // Rewire functions
@@ -5294,10 +5567,10 @@ module.exports = function (fn) {
 	return f;
 };
 
-},{}],52:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 // Then
 // Create a Promise instance which can be returned by a function
@@ -5468,7 +5741,7 @@ var resolve = function resolve(promise, x) {
 	promise.fulfill(x); /*  [Promises/A+ 2.3.4, 2.3.3.4]  */
 };
 
-},{"../time/setImmediate.js":63}],53:[function(require,module,exports){
+},{"../time/setImmediate.js":66}],56:[function(require,module,exports){
 'use strict';
 
 // Convert Data-URI to Blob string
@@ -5492,7 +5765,7 @@ module.exports = function (dataURI) {
 	return new Blob([arr], { type: m[1] });
 };
 
-},{}],54:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 "use strict";
 
 module.exports = function (fn) {
@@ -5503,7 +5776,7 @@ module.exports = function (fn) {
 	}
 };
 
-},{}],55:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 'use strict';
 
 var querystringify = require('./querystringify.js');
@@ -5535,7 +5808,7 @@ module.exports = function (url, params, formatFunction) {
 	return url;
 };
 
-},{"../object/isEmpty.js":48,"./querystringify.js":60}],56:[function(require,module,exports){
+},{"../object/isEmpty.js":51,"./querystringify.js":63}],59:[function(require,module,exports){
 "use strict";
 
 // Extract
@@ -5555,7 +5828,7 @@ module.exports = function (str, match_params) {
 	return a;
 };
 
-},{}],57:[function(require,module,exports){
+},{}],60:[function(require,module,exports){
 'use strict';
 
 var tryCatch = require('../object/tryCatch.js');
@@ -5565,7 +5838,7 @@ module.exports = function (str) {
   });
 };
 
-},{"../object/tryCatch.js":54}],58:[function(require,module,exports){
+},{"../object/tryCatch.js":57}],61:[function(require,module,exports){
 'use strict';
 
 // Param
@@ -5583,7 +5856,7 @@ module.exports = function (hash) {
 	}).join(delimiter);
 };
 
-},{}],59:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 'use strict';
 
 // Create a Query string
@@ -5599,7 +5872,7 @@ module.exports = function (str) {
 	return extract(str, match_params, formatFunction);
 };
 
-},{"./extract.js":56}],60:[function(require,module,exports){
+},{"./extract.js":59}],63:[function(require,module,exports){
 'use strict';
 
 // Create a Query string
@@ -5613,26 +5886,26 @@ module.exports = function (o) {
   return param(o, '&', '=', formatter);
 };
 
-},{"./param.js":58}],61:[function(require,module,exports){
+},{"./param.js":61}],64:[function(require,module,exports){
 "use strict";
 
 module.exports = function () {
   return parseInt(Math.random() * 1e12, 10).toString(36);
 };
 
-},{}],62:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 'use strict';
 
 module.exports = 'withCredentials' in new XMLHttpRequest();
 
-},{}],63:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 'use strict';
 
 module.exports = typeof setImmediate === 'function' ? setImmediate : function (cb) {
   return setTimeout(cb, 0);
 };
 
-},{}],64:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 'use strict';
 
 // Close a window
@@ -5658,7 +5931,7 @@ module.exports = function (window) {
 	}
 };
 
-},{}],65:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 'use strict';
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
@@ -5696,7 +5969,7 @@ function generatePosition(_ref) {
 	}
 }
 
-},{"../string/param.js":58}],66:[function(require,module,exports){
+},{"../string/param.js":61}],69:[function(require,module,exports){
 'use strict';
 
 module.exports = function (path) {

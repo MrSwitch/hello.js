@@ -551,11 +551,14 @@ extend(hello.utils, {
 
 	// OAuth and API response handler
 	responseHandler: function responseHandler(window, parent) {
-
 		var utils = this;
 		var _this = this;
 		var p;
 		var location = window.location;
+
+		var redirect = location.assign && location.assign.bind(location) || function (url) {
+			window.location = url;
+		};
 
 		// Is this an auth relay message which needs to call the proxy?
 		p = param(location.search);
@@ -571,7 +574,7 @@ extend(hello.utils, {
 			// Redirect to the host
 			var path = state.oauth_proxy + '?' + param(p);
 
-			location.assign(path);
+			redirect(path);
 
 			return;
 		}
@@ -639,7 +642,7 @@ extend(hello.utils, {
 
 			// If this page is still open
 			if (p.page_uri) {
-				location.assign(p.page_uri);
+				redirect(p.page_uri);
 			}
 		}
 
@@ -648,7 +651,7 @@ extend(hello.utils, {
 		// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
 		else if ('oauth_redirect' in p) {
 
-				location.assign(decodeURIComponent(p.oauth_redirect));
+				redirect(decodeURIComponent(p.oauth_redirect));
 				return;
 			}
 
@@ -1214,7 +1217,7 @@ module.exports = function (a) {
 },{}],6:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var jsonParse = require('../../string/jsonParse.js');
 var extend = require('../../object/extend.js');
@@ -1683,7 +1686,7 @@ module.exports = function (url, callback, callback_name) {
 },{"../../events/globalCallback.js":24,"./getScript.js":11}],13:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 // Request
 // Makes an REST request given an object which describes how (aka, xhr, jsonp, formpost)
@@ -2094,19 +2097,40 @@ function handle(guid, callback) {
 },{"../string/random.js":44}],25:[function(require,module,exports){
 'use strict';
 
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
 // on.js
 // Listen to events, this is a wrapper for addEventListener
 
 var each = require('../dom/each.js');
 var SEPERATOR = /[\s\,]+/;
 
+// See https://github.com/WICG/EventListenerOptions/blob/gh-pages/explainer.md#feature-detection
+var supportsPassive = false;
+try {
+	var opts = Object.defineProperty({}, 'passive', {
+		get: function get() {
+			supportsPassive = true;
+		}
+	});
+	window.addEventListener('test', null, opts);
+} catch (e) {
+	// Continue
+}
+
 module.exports = function (elements, eventnames, callback) {
-	var useCapture = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
+	var options = arguments.length <= 3 || arguments[3] === undefined ? false : arguments[3];
+
+
+	if ((typeof options === 'undefined' ? 'undefined' : _typeof(options)) === 'object' && options.passive && !supportsPassive) {
+		// Override the passive mark
+		options = false;
+	}
 
 	eventnames = eventnames.split(SEPERATOR);
 	return each(elements, function (el) {
 		return eventnames.forEach(function (eventname) {
-			return el.addEventListener(eventname, callback, useCapture);
+			return el.addEventListener(eventname, callback, options);
 		});
 	});
 };
@@ -2114,7 +2138,7 @@ module.exports = function (elements, eventnames, callback) {
 },{"../dom/each.js":19}],26:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 // Makes it easier to assign parameters, where some are optional
 // @param o object
@@ -2171,7 +2195,7 @@ module.exports = function (o, args) {
 },{}],27:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var isBinary = require('./isBinary.js');
 
@@ -2260,7 +2284,7 @@ module.exports = function (data) {
 },{"./instanceOf.js":30}],32:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 module.exports = function (obj) {
 
@@ -2447,7 +2471,7 @@ module.exports = function (fn) {
 },{}],36:[function(require,module,exports){
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 // Then
 // Create a Promise instance which can be returned by a function
