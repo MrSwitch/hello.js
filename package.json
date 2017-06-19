@@ -44,6 +44,7 @@
   },
   "scripts": {
     "debug": "gulp watch",
+    "lint": "eslint ./",
     "start": "npm run compile:hello && npm run compile:hello.all && npm run compile:hello.min && npm run compile:hello.all.min",
     "compile:hello": "browserify src/hello.js -t [babelify --sourceMap] -o dist/hello.js",
     "compile:hello.min": "browserify src/hello.js -d -t [babelify --sourceMap] | exorcist dist/hello.min.js.map > dist/hello.min.js",
@@ -60,7 +61,7 @@
     "babelify": "^7.3.0",
     "browserify": "^13.1.1",
     "browserstack-runner": "^0.4.4",
-    "eslint": "^3.10.2",
+    "eslint": "^4.0.0",
     "expect.js": "^0.3.1",
     "gulp": "^3.9.0",
     "gulp-mocha-phantomjs": "^0.10.1",

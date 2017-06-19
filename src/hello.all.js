@@ -19,8 +19,5 @@ require('./modules/yahoo.js');
 require('./hello.phonegap.js');
 require('./hello.chromeapp.js');
 
-// Build environments
-require('./hello.amd.js');
-
 // Export HelloJS
 module.exports = require('./hello.js');
