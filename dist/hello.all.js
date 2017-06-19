@@ -1,4 +1,4 @@
-/*! hellojs v1.14.1 | (c) 2012-2017 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.15.1 | (c) 2012-2017 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -3285,6 +3285,9 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 })(hello);
 
 (function(hello) {
+	// For APIs, once a version is no longer usable, any calls made to it will be defaulted to the next oldest usable version.
+	// So we explicitly state it.
+	var version = 'v2.9';
 
 	hello.init({
 
@@ -3292,10 +3295,10 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 			name: 'Facebook',
 
-			// SEE https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/v2.1
+			// SEE https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow
 			oauth: {
 				version: 2,
-				auth: 'https://www.facebook.com/dialog/oauth/',
+				auth: 'https://www.facebook.com/' + version + '/dialog/oauth/',
 				grant: 'https://graph.facebook.com/oauth/access_token'
 			},
 
@@ -3353,7 +3356,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			},
 
 			// API Base URL
-			base: 'https://graph.facebook.com/v2.9/',
+			base: 'https://graph.facebook.com/' + version + '/',
 
 			// Map GET requests
 			get: {
