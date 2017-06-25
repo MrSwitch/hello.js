@@ -5,6 +5,9 @@
 		"browser": true,
 		"node": true
 	},
+	"parserOptions": {
+		"ecmaVersion": 8
+	},
 	"root": true,
 	"extends": "eslint:recommended",
 	"rules": {

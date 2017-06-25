@@ -1,3 +1,4 @@
-assets/
-demos/
-dist/
+assets/*
+demos/*
+dist/*
+test/*

@@ -2,7 +2,7 @@
 // Https://bikeindex.org/documentation/api_v2
 const hello = require('../hello.js');
 
-(function(hello) {
+{
 
 	hello.init({
 
@@ -42,7 +42,7 @@ const hello = require('../hello.js');
 			del: {},
 
 			wrap: {
-				me: function(o, headers) {
+				me(o, headers) {
 
 					formatError(o, headers);
 					formatUser(o);
@@ -50,12 +50,12 @@ const hello = require('../hello.js');
 					return o;
 				},
 
-				'default': function(o, headers, req) {
+				default(o, headers, req) {
 
 					formatError(o, headers);
 
 					if (Array.isArray(o)) {
-						o = {data:o};
+						o = {data: o};
 						paging(o, headers, req);
 						o.data.forEach(formatUser);
 					}
@@ -64,7 +64,7 @@ const hello = require('../hello.js');
 				}
 			},
 
-			xhr: function(p) {
+			xhr(p) {
 				if (p.method !== 'get' && p.data) {
 					// Serialize payload as JSON
 					p.headers = p.headers || {};
@@ -105,9 +105,9 @@ const hello = require('../hello.js');
 		return o;
 	}
 
-	function paging(res, headers, req) {
+	function paging(res, headers) {
 		if (res.data && res.data.length && headers && headers.Link) {
-			var next = headers.Link.match(/<(.*?)>;\s*rel=\"next\"/);
+			const next = headers.Link.match(/<(.*?)>;\s*rel="next"/);
 			if (next) {
 				res.paging = {
 					next: next[1]
@@ -116,4 +116,4 @@ const hello = require('../hello.js');
 		}
 	}
 
-})(hello);
+}

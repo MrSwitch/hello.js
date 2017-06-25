@@ -1,3 +1,4 @@
+require('babel-polyfill');
 
 // Services
 require('./modules/dropbox.js');

@@ -1,7 +1,7 @@
 const hello = require('../hello.js');
 
 // See: https://developers.soundcloud.com/docs/api/reference
-(function(hello) {
+{
 
 	hello.init({
 
@@ -25,21 +25,21 @@ const hello = require('../hello.js');
 				'me/following': 'me/followings.json',
 
 				// See: http://developers.soundcloud.com/docs/api/reference#activities
-				'default': function(p, callback) {
+				default(p, callback) {
 
 					// Include '.json at the end of each request'
-					callback(p.path + '.json');
+					callback(`${p.path  }.json`);
 				}
 			},
 
 			// Response handlers
 			wrap: {
-				me: function(o) {
+				me(o) {
 					formatUser(o);
 					return o;
 				},
 
-				'default': function(o) {
+				default(o) {
 					if (Array.isArray(o)) {
 						o = {
 							data: o.map(formatUser)
@@ -58,7 +58,7 @@ const hello = require('../hello.js');
 
 	function formatRequest(p, qs) {
 		// Alter the querystring
-		var token = qs.access_token;
+		const token = qs.access_token;
 		delete qs.access_token;
 		qs.oauth_token = token;
 		qs['_status_code_map[302]'] = 200;
@@ -84,4 +84,4 @@ const hello = require('../hello.js');
 		}
 	}
 
-})(hello);
+}

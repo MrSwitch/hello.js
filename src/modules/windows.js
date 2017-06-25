@@ -3,7 +3,7 @@ const hello = require('../hello.js');
 const hasBinary = require('tricks/object/hasBinary');
 const toBlob = require('tricks/object/toBlob');
 
-(function(hello) {
+{
 
 	hello.init({
 		windows: {
@@ -19,8 +19,8 @@ const toBlob = require('tricks/object/toBlob');
 			// Refresh the access_token once expired
 			refresh: true,
 
-			logout: function() {
-				return 'http://login.live.com/oauth20_logout.srf?ts=' + (new Date()).getTime();
+			logout() {
+				return `http://login.live.com/oauth20_logout.srf?ts=${(new Date()).getTime()}`;
 			},
 
 			// Authorization scopes
@@ -92,10 +92,10 @@ const toBlob = require('tricks/object/toBlob');
 				'me/following': formatFriends,
 				'me/albums': formatAlbums,
 				'me/photos': formatDefault,
-				'default': formatDefault
+				default: formatDefault
 			},
 
-			xhr: function(p) {
+			xhr(p) {
 				if (p.method !== 'get' && p.method !== 'delete' && !hasBinary(p.data)) {
 
 					// Does this have a data-uri to upload as a file?
@@ -113,7 +113,7 @@ const toBlob = require('tricks/object/toBlob');
 				return true;
 			},
 
-			jsonp: function(p) {
+			jsonp(p) {
 				if (p.method !== 'get' && !hasBinary(p.data)) {
 					p.data.method = p.method;
 					p.method = 'get';
@@ -124,7 +124,7 @@ const toBlob = require('tricks/object/toBlob');
 
 	function formatDefault(o) {
 		if ('data' in o) {
-			o.data.forEach(function(d) {
+			o.data.forEach(d => {
 				if (d.picture) {
 					d.thumbnail = d.picture;
 				}
@@ -132,9 +132,7 @@ const toBlob = require('tricks/object/toBlob');
 				if (d.images) {
 					d.pictures = d.images
 						.map(formatImage)
-						.sort(function(a, b) {
-							return a.width - b.width;
-						});
+						.sort((a, b) => a.width - b.width);
 				}
 			});
 		}
@@ -152,8 +150,8 @@ const toBlob = require('tricks/object/toBlob');
 
 	function formatAlbums(o) {
 		if ('data' in o) {
-			o.data.forEach(function(d) {
-				d.photos = d.files = 'https://apis.live.net/v5.0/' + d.id + '/photos';
+			o.data.forEach(d => {
+				d.photos = d.files = `https://apis.live.net/v5.0/${  d.id  }/photos`;
 			});
 		}
 
@@ -162,7 +160,7 @@ const toBlob = require('tricks/object/toBlob');
 
 	function formatUser(o, headers, req) {
 		if (o.id) {
-			var token = req.authResponse.access_token;
+			const token = req.authResponse.access_token;
 			if (o.emails) {
 				o.email = o.emails.preferred;
 			}
@@ -170,8 +168,8 @@ const toBlob = require('tricks/object/toBlob');
 			// If this is not an non-network friend
 			if (o.is_friend !== false) {
 				// Use the id of the user_id if available
-				var id = (o.user_id || o.id);
-				o.thumbnail = o.picture = 'https://apis.live.net/v5.0/' + id + '/picture?access_token=' + token;
+				const id = (o.user_id || o.id);
+				o.thumbnail = o.picture = `https://apis.live.net/v5.0/${  id  }/picture?access_token=${  token}`;
 			}
 		}
 
@@ -180,7 +178,7 @@ const toBlob = require('tricks/object/toBlob');
 
 	function formatFriends(o, headers, req) {
 		if ('data' in o) {
-			o.data.forEach(function(d) {
+			o.data.forEach(d => {
 				formatUser(d, headers, req);
 			});
 		}
@@ -188,4 +186,4 @@ const toBlob = require('tricks/object/toBlob');
 		return o;
 	}
 
-})(hello);
+}

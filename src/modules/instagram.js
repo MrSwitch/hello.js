@@ -1,6 +1,6 @@
 const hello = require('../hello.js');
 
-(function(hello) {
+{
 
 	hello.init({
 
@@ -46,10 +46,10 @@ const hello = require('../hello.js');
 			},
 
 			post: {
-				'me/like': function(p, callback) {
-					var id = p.data.id;
+				'me/like'(p, callback) {
+					const id = p.data.id;
 					p.data = {};
-					callback('media/' + id + '/likes');
+					callback(`media/${  id  }/likes`);
 				}
 			},
 
@@ -58,7 +58,7 @@ const hello = require('../hello.js');
 			},
 
 			wrap: {
-				me: function(o) {
+				me(o) {
 
 					formatError(o);
 
@@ -74,35 +74,31 @@ const hello = require('../hello.js');
 				'me/friends': formatFriends,
 				'me/following': formatFriends,
 				'me/followers': formatFriends,
-				'me/photos': function(o) {
+				'me/photos'(o) {
 
 					formatError(o);
 					paging(o);
 
 					if ('data' in o) {
-						o.data = o.data.filter(function(d) {
-							return d.type === 'image';
-						});
+						o.data = o.data.filter(d => d.type === 'image');
 
-						o.data.forEach(function(d) {
+						o.data.forEach(d => {
 							d.name = d.caption ? d.caption.text : null;
 							d.thumbnail = d.images.thumbnail.url;
 							d.picture = d.images.standard_resolution.url;
 							d.pictures = Object.keys(d.images)
-								.map(function(key) {
-									var image = d.images[key];
+								.map(key => {
+									const image = d.images[key];
 									return formatImage(image);
 								})
-								.sort(function(a, b) {
-									return a.width - b.width;
-								});
+								.sort((a, b) => a.width - b.width);
 						});
 					}
 
 					return o;
 				},
 
-				'default': function(o) {
+				default(o) {
 					o = formatError(o);
 					paging(o);
 					return o;
@@ -111,10 +107,10 @@ const hello = require('../hello.js');
 
 			// Instagram does not return any CORS Headers
 			// So besides JSONP we're stuck with proxy
-			xhr: function(p, qs) {
+			xhr(p) {
 
-				var method = p.method;
-				var proxy = method !== 'get';
+				const method = p.method;
+				const proxy = method !== 'get';
 
 				if (proxy) {
 
@@ -190,4 +186,4 @@ const hello = require('../hello.js');
 		}
 	}
 
-})(hello);
+}

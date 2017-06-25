@@ -1,14 +1,9 @@
-// Phonegap override for hello.phonegap.js
+// Override's for phonegap environment
 const URL = require('tricks/window/url');
 const hello = require('./hello');
 
-(function() {
-
-	// Is this a phonegap implementation?
-	if (!(/^file:\/{3}[^\/]/.test(window.location.href) && window.cordova)) {
-		// Cordova is not included.
-		return;
-	}
+// Is this a phonegap implementation?
+if (/^file:\/{3}[^/]/.test(window.location.href) && window.cordova) {
 
 	// Augment the hidden iframe method
 	hello.utils.iframe = function(url, redirectUri) {
@@ -16,13 +11,13 @@ const hello = require('./hello');
 	};
 
 	// Augment the popup
-	var utilPopup = hello.utils.popup;
+	const utilPopup = hello.utils.popup;
 
 	// Replace popup
 	hello.utils.popup = function(url, redirectUri, options) {
 
 		// Run the standard
-		var popup = utilPopup.call(this, url, redirectUri, options);
+		const popup = utilPopup.call(this, url, redirectUri, options);
 
 		// Create a function for reopening the popup, and assigning events to the new popup object
 		// PhoneGap support
@@ -33,14 +28,14 @@ const hello = require('./hello');
 
 				// Get the origin of the redirect URI
 
-				var a = URL(redirectUri);
-				var redirectUriOrigin = a.origin || (a.protocol + '//' + a.hostname);
+				const a = URL(redirectUri);
+				const redirectUriOrigin = a.origin || `${a.protocol}//{a.hostname}`;
 
 				// Listen to changes in the InAppBrowser window
 
-				popup.addEventListener('loadstart', function(e) {
+				popup.addEventListener('loadstart', e => {
 
-					var url = e.url;
+					const url = e.url;
 
 					// Is this the path, as given by the redirectUri?
 					// Check the new URL agains the redirectUriOrigin.
@@ -52,32 +47,34 @@ const hello = require('./hello');
 					}
 
 					// Split appart the URL
-					var a = URL(url);
+					const a = URL(url);
 
 					// We dont have window operations on the popup so lets create some
 					// The location can be augmented in to a location object like so...
 
-					var _popup = {
+					const _popup = {
 						location: {
 							// Change the location of the popup
-							assign: function(location) {
+							assign(location) {
 
 								// Unfourtunatly an app is may not change the location of a InAppBrowser window.
 								// So to shim this, just open a new one.
-								popup.executeScript({code: 'window.location.href = "' + location + ';"'});
+								popup.executeScript({code: `${window.location.href} = "${location};"`});
 							},
 
 							search: a.search,
 							hash: a.hash,
 							href: a.href
 						},
-						close: function() {
+						close() {
 							if (popup.close) {
 								popup.close();
 								try {
 									popup.closed = true;
 								}
-								catch (_e) {}
+								catch (_e) {
+									// Continue
+								}
 							}
 						}
 					};
@@ -92,9 +89,11 @@ const hello = require('./hello');
 				});
 			}
 		}
-		catch (e) {}
+		catch (e) {
+			// Continue
+		}
 
 		return popup;
 	};
 
-})();
+}

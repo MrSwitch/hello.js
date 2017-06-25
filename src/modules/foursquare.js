@@ -1,6 +1,6 @@
 const hello = require('../hello.js');
 
-(function(hello) {
+{
 
 	hello.init({
 
@@ -28,7 +28,7 @@ const hello = require('../hello.js');
 			},
 
 			wrap: {
-				me: function(o) {
+				me(o) {
 					formatError(o);
 					if (o && o.response) {
 						o = o.response.user;
@@ -38,7 +38,7 @@ const hello = require('../hello.js');
 					return o;
 				},
 
-				'default': function(o) {
+				default(o) {
 					formatError(o);
 
 					// Format friends
@@ -68,8 +68,8 @@ const hello = require('../hello.js');
 
 	function formatUser(o) {
 		if (o && o.id) {
-			o.thumbnail = o.photo.prefix + '100x100' + o.photo.suffix;
-			o.name = o.firstName + ' ' + o.lastName;
+			o.thumbnail = `${o.photo.prefix}100x100${o.photo.suffix}`;
+			o.name = `${o.firstName} ${o.lastName}`;
 			o.first_name = o.firstName;
 			o.last_name = o.lastName;
 			if (o.contact) {
@@ -81,11 +81,11 @@ const hello = require('../hello.js');
 	}
 
 	function formatRequest(p, qs) {
-		var token = qs.access_token;
+		const token = qs.access_token;
 		delete qs.access_token;
 		qs.oauth_token = token;
 		qs.v = 20121125;
 		return true;
 	}
 
-})(hello);
+}

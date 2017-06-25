@@ -1,8 +1,8 @@
 const hello = require('../hello.js');
 
-(function(hello) {
+{
 
-	var contactsUrl = 'https://www.google.com/m8/feeds/contacts/default/full?v=3.0&alt=json&max-results=@{limit|1000}&start-index=@{start|1}';
+	const contactsUrl = 'https://www.google.com/m8/feeds/contacts/default/full?v=3.0&alt=json&max-results=@{limit|1000}&start-index=@{start|1}';
 
 	hello.init({
 
@@ -36,7 +36,7 @@ const hello = require('../hello.js');
 
 			scope_delim: ' ',
 
-			login: function(p) {
+			login(p) {
 
 				if (p.qs.response_type === 'code') {
 
@@ -69,8 +69,8 @@ const hello = require('../hello.js');
 				'me/share': 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
 				'me/feed': 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
 				'me/albums': 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}&start-index=@{start|1}',
-				'me/album': function(p, callback) {
-					var key = p.query.id;
+				'me/album'(p, callback) {
+					const key = p.query.id;
 					delete p.query.id;
 					callback(key.replace('/entry/', '/feed/'));
 				},
@@ -93,7 +93,7 @@ const hello = require('../hello.js');
 
 				// Google Drive
 				'me/files': uploadDrive,
-				'me/folders': function(p, callback) {
+				'me/folders'(p, callback) {
 					p.data = {
 						title: p.data.name,
 						parents: [{id: p.data.parent || 'root'}],
@@ -120,7 +120,7 @@ const hello = require('../hello.js');
 			},
 
 			wrap: {
-				me: function(o) {
+				me(o) {
 					if (o.id) {
 						o.last_name = o.family_name || (o.name ? o.name.familyName : null);
 						o.first_name = o.given_name || (o.name ? o.name.givenName : null);
@@ -135,7 +135,7 @@ const hello = require('../hello.js');
 					return o;
 				},
 
-				'me/friends': function(o) {
+				'me/friends'(o) {
 					if (o.items) {
 						paging(o);
 						o.data = o.items;
@@ -153,10 +153,10 @@ const hello = require('../hello.js');
 				'me/feed': formatFeed,
 				'me/albums': gEntry,
 				'me/photos': formatPhotos,
-				'default': gEntry
+				default: gEntry
 			},
 
-			xhr: function(p) {
+			xhr(p) {
 
 				if (p.method === 'post' || p.method === 'put') {
 					toJSON(p);
@@ -206,7 +206,7 @@ const hello = require('../hello.js');
 
 		if (o.mimeType === 'application/vnd.google-apps.folder') {
 			o.type = 'folder';
-			o.files = 'https://www.googleapis.com/drive/v2/files?q=%22' + o.id + '%22+in+parents';
+			o.files = `https://www.googleapis.com/drive/v2/files?q=%22${  o.id  }%22+in+parents`;
 		}
 
 		return o;
@@ -259,11 +259,10 @@ const hello = require('../hello.js');
 
 	function formatFriends(o, headers, req) {
 		paging(o);
-		var r = [];
 		if ('feed' in o && 'entry' in o.feed) {
-			var token = req.query.access_token;
-			for (var i = 0; i < o.feed.entry.length; i++) {
-				var a = o.feed.entry[i];
+			const token = req.query.access_token;
+			for (let i = 0; i < o.feed.entry.length; i++) {
+				const a = o.feed.entry[i];
 
 				a.id	= a.id.$t;
 				a.name	= a.title.$t;
@@ -280,9 +279,9 @@ const hello = require('../hello.js');
 
 				if (a.link) {
 
-					var pic = (a.link.length > 0) ? a.link[0].href : null;
+					let pic = (a.link.length > 0) ? a.link[0].href : null;
 					if (pic && a.link[0].gd$etag) {
-						pic += (pic.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + token;
+						pic += `${pic.indexOf('?') > -1 ? '&' : '?'  }access_token=${  token}`;
 						a.picture = pic;
 						a.thumbnail = pic;
 					}
@@ -304,28 +303,26 @@ const hello = require('../hello.js');
 
 	function formatEntry(a) {
 
-		var group = a.media$group;
-		var photo = group.media$content.length ? group.media$content[0] : {};
-		var mediaContent = group.media$content || [];
-		var mediaThumbnail = group.media$thumbnail || [];
+		const group = a.media$group;
+		const photo = group.media$content.length ? group.media$content[0] : {};
+		const mediaContent = group.media$content || [];
+		const mediaThumbnail = group.media$thumbnail || [];
 
-		var pictures = mediaContent
+		const pictures = mediaContent
 			.concat(mediaThumbnail)
 			.map(formatImage)
-			.sort(function(a, b) {
-				return a.width - b.width;
-			});
+			.sort((a, b) => a.width - b.width);
 
-		var i = 0;
-		var _a;
-		var p = {
+		let i = 0;
+		let _a;
+		const p = {
 			id: a.id.$t,
 			name: a.title.$t,
 			description: a.summary.$t,
 			updated_time: a.updated.$t,
 			created_time: a.published.$t,
 			picture: photo ? photo.url : null,
-			pictures: pictures,
+			pictures,
 			images: [],
 			thumbnail: photo ? photo.url : null,
 			width: photo.width,
@@ -335,8 +332,8 @@ const hello = require('../hello.js');
 		// Get feed/children
 		if ('link' in a) {
 			for (i = 0; i < a.link.length; i++) {
-				var d = a.link[i];
-				if (d.rel.match(/\#feed$/)) {
+				const d = a.link[i];
+				if (d.rel.match(/#feed$/)) {
 					p.upload_location = p.files = p.photos = d.href;
 					break;
 				}
@@ -347,8 +344,8 @@ const hello = require('../hello.js');
 		if ('category' in a && a.category.length) {
 			_a = a.category;
 			for (i = 0; i < _a.length; i++) {
-				if (_a[i].scheme && _a[i].scheme.match(/\#kind$/)) {
-					p.type = _a[i].term.replace(/^.*?\#/, '');
+				if (_a[i].scheme && _a[i].scheme.match(/#kind$/)) {
+					p.type = _a[i].term.replace(/^.*?#/, '');
 				}
 			}
 		}
@@ -373,19 +370,19 @@ const hello = require('../hello.js');
 
 		// Contacts V2
 		if ('feed' in res && res.feed.openSearch$itemsPerPage) {
-			var limit = toInt(res.feed.openSearch$itemsPerPage.$t);
-			var start = toInt(res.feed.openSearch$startIndex.$t);
-			var total = toInt(res.feed.openSearch$totalResults.$t);
+			const limit = toInt(res.feed.openSearch$itemsPerPage.$t);
+			const start = toInt(res.feed.openSearch$startIndex.$t);
+			const total = toInt(res.feed.openSearch$totalResults.$t);
 
 			if ((start + limit) < total) {
 				res.paging = {
-					next: '?start=' + (start + limit)
+					next: `?start=${  start + limit}`
 				};
 			}
 		}
 		else if ('nextPageToken' in res) {
 			res.paging = {
-				next: '?pageToken=' + res.nextPageToken
+				next: `?pageToken=${  res.nextPageToken}`
 			};
 		}
 	}
@@ -394,20 +391,20 @@ const hello = require('../hello.js');
 	function Multipart() {
 
 		// Internal body
-		var body = [];
-		var boundary = (Math.random() * 1e10).toString(32);
-		var counter = 0;
-		var lineBreak = '\r\n';
-		var delim = lineBreak + '--' + boundary;
-		var ready = function() {};
+		let body = [];
+		const boundary = (Math.random() * 1e10).toString(32);
+		let counter = 0;
+		const lineBreak = '\r\n';
+		const delim = `${lineBreak  }--${  boundary}`;
+		let ready = function() {};
 
-		var dataUri = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
+		const dataUri = /^data:([^;,]+(;charset=[^;,]+)?)(;base64)?,/i;
 
 		// Add file
 		function addFile(item) {
-			var fr = new FileReader();
+			const fr = new FileReader();
 			fr.onload = function(e) {
-				addContent(btoa(e.target.result), item.type + lineBreak + 'Content-Transfer-Encoding: base64');
+				addContent(btoa(e.target.result), `${item.type + lineBreak}Content-Transfer-Encoding: base64`);
 			};
 
 			fr.readAsBinaryString(item);
@@ -415,7 +412,7 @@ const hello = require('../hello.js');
 
 		// Add content
 		function addContent(content, type) {
-			body.push(lineBreak + 'Content-Type: ' + type + lineBreak + lineBreak + content);
+			body.push(`${lineBreak}Content-Type: ${type}${lineBreak}${lineBreak}${content}`);
 			counter--;
 			ready();
 		}
@@ -429,11 +426,11 @@ const hello = require('../hello.js');
 				content = [content];
 			}
 
-			for (var i = 0; i < content.length; i++) {
+			for (let i = 0; i < content.length; i++) {
 
 				counter++;
 
-				var item = content[i];
+				const item = content[i];
 
 				// Is this a file?
 				// Files can be either Blobs or File types
@@ -449,8 +446,8 @@ const hello = require('../hello.js');
 				// Data:[<mime type>][;charset=<charset>][;base64],<encoded data>
 				// /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i
 				else if (typeof (item) === 'string' && item.match(dataUri)) {
-					var m = item.match(dataUri);
-					addContent(item.replace(dataUri, ''), m[1] + lineBreak + 'Content-Transfer-Encoding: base64');
+					const m = item.match(dataUri);
+					addContent(item.replace(dataUri, ''), `${m[1] + lineBreak  }Content-Transfer-Encoding: base64`);
 				}
 
 				// Regular string
@@ -481,7 +478,7 @@ const hello = require('../hello.js');
 	// POST https://developers.google.com/drive/manage-uploads
 	function uploadDrive(p, callback) {
 
-		var data = {};
+		let data = {};
 
 		// Test for DOM element
 		if (p.data &&
@@ -523,7 +520,7 @@ const hello = require('../hello.js');
 
 		// Extract the file, if it exists from the data object
 		// If the File is an INPUT element lets just concern ourselves with the NodeList
-		var file;
+		let file;
 		if ('file' in p.data) {
 			file = p.data.file;
 			delete p.data.file;
@@ -547,7 +544,7 @@ const hello = require('../hello.js');
 		// Set type p.data.mimeType = Object(file[0]).type || 'application/octet-stream';
 
 		// Construct a multipart message
-		var parts = new Multipart();
+		const parts = new Multipart();
 		parts.append(JSON.stringify(p.data), 'application/json');
 
 		// Read the file into a  base64 string... yep a hassle, i know
@@ -557,12 +554,12 @@ const hello = require('../hello.js');
 			parts.append(file);
 		}
 
-		parts.onready(function(body, boundary) {
+		parts.onready((body, boundary) => {
 
-			p.headers['content-type'] = 'multipart/related; boundary="' + boundary + '"';
+			p.headers['content-type'] = `multipart/related; boundary="${boundary}"`;
 			p.data = body;
 
-			callback('upload/drive/v2/files' + (data.id ? '/' + data.id : '') + '?uploadType=multipart');
+			callback(`upload/drive/v2/files${data.id ? `/${data.id}` : ''}?uploadType=multipart`);
 		});
 
 	}
@@ -574,8 +571,10 @@ const hello = require('../hello.js');
 				p.data = JSON.stringify(p.data);
 				p.headers['content-type'] = 'application/json';
 			}
-			catch (e) {}
+			catch (e) {
+				// Continue
+			}
 		}
 	}
 
-})(hello);
+}

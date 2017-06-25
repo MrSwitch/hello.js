@@ -1,7 +1,7 @@
 const hello = require('../hello.js');
 
-(function(hello) {
-	var baseUrl = 'https://api.vimeo.com/';
+{
+	const base = 'https://api.vimeo.com/';
 
 	hello.init({
 		vimeo: {
@@ -9,19 +9,19 @@ const hello = require('../hello.js');
 
 			oauth: {
 				version: 2,
-				auth: baseUrl + 'oauth/authorize',
-				grant: baseUrl + 'oauth/access_token',
+				auth: `${base}oauth/authorize`,
+				grant: `${base}oauth/access_token`,
 				response_type: 'code'
 			},
 
-			login: function(p) {
+			login(p) {
 				// Instruct node-oauth-shim to pass an extra Authorization header when granting
 				// Authorization: basic base64(client_id:cient_secret)
 				// https://developer.vimeo.com/api/authentication#generate-redirect
 				p.qs.state.authorisation = 'header';
 			},
 
-			xhr: function(p) {
+			xhr(p) {
 				if (p.method !== 'get' && p.data) {
 
 					// Serialize payload as JSON
@@ -43,7 +43,7 @@ const hello = require('../hello.js');
 				publish_files: 'create edit delete interact upload'
 			},
 
-			base: baseUrl
+			base
 		}
 	});
-})(hello);
+}

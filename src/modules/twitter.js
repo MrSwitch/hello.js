@@ -1,8 +1,8 @@
 const hello = require('../hello.js');
 
-(function(hello) {
+{
 
-	var base = 'https://api.twitter.com/';
+	const base = 'https://api.twitter.com/';
 
 	hello.init({
 
@@ -11,19 +11,19 @@ const hello = require('../hello.js');
 			// Ensure that you define an oauth_proxy
 			oauth: {
 				version: '1.0a',
-				auth: base + 'oauth/authenticate',
-				request: base + 'oauth/request_token',
-				token: base + 'oauth/access_token'
+				auth: `${base}oauth/authenticate`,
+				request: `${base}oauth/request_token`,
+				token: `${base}oauth/access_token`
 			},
 
-			login: function(p) {
+			login(p) {
 				// Reauthenticate
 				// https://dev.twitter.com/oauth/reference/get/oauth/authenticate
-				var prefix = '?force_login=true';
+				const prefix = '?force_login=true';
 				this.oauth.auth = this.oauth.auth.replace(prefix, '') + (p.options.force ? prefix : '');
 			},
 
-			base: base + '1.1/',
+			base: `${base}1.1/`,
 
 			get: {
 				me: 'account/verify_credentials.json',
@@ -39,12 +39,12 @@ const hello = require('../hello.js');
 			},
 
 			post: {
-				'me/share': function(p, callback) {
+				'me/share'(p, callback) {
 
-					var data = p.data;
+					const data = p.data;
 					p.data = null;
 
-					var status = [];
+					const status = [];
 
 					// Change message to status
 					if (data.message) {
@@ -78,7 +78,7 @@ const hello = require('../hello.js');
 
 					// Retweet?
 					else if ('id' in data) {
-						callback('statuses/retweet/' + data.id + '.json');
+						callback(`statuses/retweet/${  data.id  }.json`);
 					}
 
 					// Tweet
@@ -90,26 +90,26 @@ const hello = require('../hello.js');
 				},
 
 				// See: https://dev.twitter.com/rest/reference/post/favorites/create
-				'me/like': function(p, callback) {
-					var id = p.data.id;
+				'me/like'(p, callback) {
+					const id = p.data.id;
 					p.data = null;
-					callback('favorites/create.json?id=' + id);
+					callback(`favorites/create.json?id=${id}`);
 				}
 			},
 
 			del: {
 
 				// See: https://dev.twitter.com/rest/reference/post/favorites/destroy
-				'me/like': function() {
+				'me/like'(p, callback) {
 					p.method = 'post';
-					var id = p.data.id;
+					const id = p.data.id;
 					p.data = null;
-					callback('favorites/destroy.json?id=' + id);
+					callback(`favorites/destroy.json?id=${id}`);
 				}
 			},
 
 			wrap: {
-				me: function(res) {
+				me(res) {
 					formatError(res);
 					formatUser(res);
 					return res;
@@ -119,7 +119,7 @@ const hello = require('../hello.js');
 				'me/followers': formatFriends,
 				'me/following': formatFriends,
 
-				'me/share': function(res) {
+				'me/share'(res) {
 					formatError(res);
 					paging(res);
 					if (!res.error && 'length' in res) {
@@ -129,13 +129,13 @@ const hello = require('../hello.js');
 					return res;
 				},
 
-				'default': function(res) {
+				default(res) {
 					res = arrayToDataResponse(res);
 					paging(res);
 					return res;
 				}
 			},
-			xhr: function(p) {
+			xhr(p) {
 
 				// Rely on the proxy for non-GET requests.
 				return (p.method !== 'get');
@@ -146,7 +146,7 @@ const hello = require('../hello.js');
 	function formatUser(o) {
 		if (o.id) {
 			if (o.name) {
-				var m = o.name.split(' ');
+				const m = o.name.split(' ');
 				o.first_name = m.shift();
 				o.last_name = m.join(' ');
 			}
@@ -171,7 +171,7 @@ const hello = require('../hello.js');
 
 	function formatError(o) {
 		if (o.errors) {
-			var e = o.errors[0];
+			const e = o.errors[0];
 			o.error = {
 				code: 'request_failed',
 				message: e.message
@@ -185,7 +185,7 @@ const hello = require('../hello.js');
 		if ('next_cursor_str' in res) {
 			// See: https://dev.twitter.com/docs/misc/cursoring
 			res.paging = {
-				next: '?cursor=' + res.next_cursor_str
+				next: `?cursor=${res.next_cursor_str}`
 			};
 		}
 	}
@@ -221,4 +221,4 @@ const hello = require('../hello.js');
 	}
 	*/
 
-})(hello);
+}

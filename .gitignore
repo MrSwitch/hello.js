@@ -4,3 +4,4 @@ coverage/
 src/*.html
 src/**/*.html
 .idea
+.env.sh

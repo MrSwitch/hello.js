@@ -1,7 +1,7 @@
 const hello = require('../hello.js');
 
 // Vkontakte (vk.com)
-(function(hello) {
+{
 
 	hello.init({
 
@@ -29,7 +29,7 @@ const hello = require('../hello.js');
 			// Refresh the access_token
 			refresh: true,
 
-			login: function(p) {
+			login(p) {
 				p.qs.display = window.navigator &&
 					window.navigator.userAgent &&
 					/ipad|phone|phone|android/.test(window.navigator.userAgent.toLowerCase()) ? 'mobile' : 'popup';
@@ -40,14 +40,14 @@ const hello = require('../hello.js');
 
 			// Map GET requests
 			get: {
-				me: function(p, callback) {
+				me(p, callback) {
 					p.query.fields = 'id,first_name,last_name,photo_max';
 					callback('users.get');
 				}
 			},
 
 			wrap: {
-				me: function(res, headers, req) {
+				me(res, headers, req) {
 					formatError(res);
 					return formatUser(res, req);
 				}
@@ -70,10 +70,11 @@ const hello = require('../hello.js');
 			o = o.response[0];
 			o.id = o.uid;
 			o.thumbnail = o.picture = o.photo_max;
-			o.name = o.first_name + ' ' + o.last_name;
+			o.name = `${o.first_name} ${o.last_name}`;
 
-			if (req.authResponse && req.authResponse.email !== null)
+			if (req.authResponse && req.authResponse.email !== null) {
 				o.email = req.authResponse.email;
+			}
 		}
 
 		return o;
@@ -82,7 +83,7 @@ const hello = require('../hello.js');
 	function formatError(o) {
 
 		if (o.error) {
-			var e = o.error;
+			const e = o.error;
 			o.error = {
 				code: e.error_code,
 				message: e.error_msg
@@ -90,4 +91,4 @@ const hello = require('../hello.js');
 		}
 	}
 
-})(hello);
+}
