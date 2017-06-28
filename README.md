@@ -119,7 +119,7 @@ Compiled source, which combines all of the modules, can be obtained from [GitHub
 npm i hellojs
 ```
 
-At the present time only the bundled files in the `/dist/hello.*` support CommonJS. e.g. `let hello = require('hello/dist/hello.all.js')`.
+At the present time only the bundled files in the `/dist/hello.*` support CommonJS. e.g. `let hello = require('hellojs/dist/hello.all.js')`.
 
 ### Bower
 
