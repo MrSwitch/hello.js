@@ -54,7 +54,13 @@ gulp.task('bundle', () =>
 		debug: true,
 		paths: './'
 	})
-		.transform(babelify)
+		.transform(babelify, {
+			presets: ['es2015', 'stage-0', 'stage-2'], //es2015-node5 allows mixing of commonJs and ES6 exports
+			plugins: [
+				'add-module-exports' //add-module-exports allows mixing of commonJs and ES6 exports
+			],
+			sourceMaps: true
+		})
 		.bundle()
 		.on('error', util.log.bind(util, 'Browserify Error'))
 		.pipe(source('./bundle.js'))

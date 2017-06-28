@@ -1,3 +1,4 @@
+require('babel-polyfill');
 require('../setup.js');
 require('./e2e/modules.js');
 require('./unit/core/hello.api.js');

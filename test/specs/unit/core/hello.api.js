@@ -54,32 +54,25 @@ let errorResponse = require('../../../lib/errorResponse.js');
 
 		});
 
-		it('should assign a complete event', function(done) {
-			hello('test')
-			.api('/', () => done());
-		});
-
-		it('should throw a completed event if network name is undefined', function(done) {
-			hello('test')
-			.api('/', errorResponse('invalid_network', done));
-		});
-
 		it('should throw a error event if network name is undefined', function(done) {
 			hello('test')
 			.api('/')
-			.then(null, errorResponse('invalid_network', done));
+			.then(null, errorResponse('invalid_network', done))
+			.catch(done);
 		});
 
 		it('should throw a error event if path name is undefined', function(done) {
 			hello('test')
 			.api()
-			.then(null, errorResponse('invalid_path', done));
+			.then(null, errorResponse('invalid_path', done))
+			.catch(done);
 		});
 
 		it('should construct the url using the base and the pathname', function(done) {
 
 			hello('testable')
-			.api('/endpoint', function(res) {
+			.api('/endpoint')
+			.then(function(res) {
 				expect(res.url).to.eql('https://testable/endpoint');
 				done();
 			})
@@ -92,7 +85,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 			_session = null;
 
 			hello('testable')
-			.api('/endpoint?a=a&b=b', function(res) {
+			.api('/endpoint?a=a&b=b')
+			.then(function(res) {
 				_session = session;
 				expect(res.url).to.eql('https://testable/endpoint');
 				expect(res.query).to.eql({
@@ -107,7 +101,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 		it('should attach query object to the req.query', function(done) {
 
 			hello('testable')
-			.api('/endpoint', {a: 'a'}, function(res) {
+			.api('/endpoint', {a: 'a'})
+			.then(function(res) {
 
 				expect(res.query).to.have.property('a', 'a');
 
@@ -119,7 +114,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 		it('should attach authResponse object to the req.authResponse', function(done) {
 
 			hello('testable')
-			.api('/endpoint', function(res) {
+			.api('/endpoint')
+			.then(function(res) {
 
 				expect(res.authResponse).to.eql(_session);
 
@@ -131,7 +127,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 		it('should attach data object to the req.query when `req.method = get`', function(done) {
 
 			hello('testable')
-			.api('/endpoint', 'get', {a: 'a'}, function(res) {
+			.api('/endpoint', 'get', {a: 'a'})
+			.then(function(res) {
 
 				expect(res.query).to.have.property('a', 'a');
 				expect(res.data).to.be.empty();
@@ -144,7 +141,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 		it('should attach post data object to the req.data', function(done) {
 
 			hello('testable')
-			.api('/endpoint', 'post', {a: 'a'}, function(res) {
+			.api('/endpoint', 'post', {a: 'a'})
+			.then(function(res) {
 
 				expect(res.method).to.eql('post');
 				expect(res.query).to.not.have.property('a');
@@ -183,7 +181,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 			it('should add the access_token to the req.query', function(done) {
 
 				hello('testable')
-				.api('/endpoint', function(res) {
+				.api('/endpoint')
+				.then(function(res) {
 					expect(res.url).to.eql('https://testable/endpoint');
 					expect(res.query).to.eql(_session);
 					done();
@@ -197,7 +196,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 				testable.oauth.version = 1;
 
 				hello('testable')
-				.api('/endpoint', function(res) {
+				.api('/endpoint')
+				.then(function(res) {
 
 					// Renew
 					testable.oauth.version = 2;
@@ -338,7 +338,8 @@ let errorResponse = require('../../../lib/errorResponse.js');
 					testable.get.handled = 'endpoint?empty=@{a|}&arg=@{b|default}';
 
 					hello('testable')
-					.api('/handled', function(res) {
+					.api('/handled')
+					.then(function(res) {
 
 						// Should place the value of a in the parameter list
 						expect(res.url).to.contain('endpoint?empty=&arg=default');

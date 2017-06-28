@@ -25,19 +25,6 @@ let errorResponse = require('../../../lib/errorResponse.js');
 			.catch(done);
 		});
 
-		it('should assign a complete event', function(done) {
-			hello('unknown')
-			.logout(function() {done();});
-		});
-
-		it('should throw an error events in the eventCompleted handler', function(done) {
-			hello('unknown')
-			.logout(function(e) {
-				expect(e).to.have.property('error');
-				done();
-			});
-		});
-
 		describe('remove session from store', function() {
 
 			var store = hello.utils.store;
@@ -50,16 +37,20 @@ let errorResponse = require('../../../lib/errorResponse.js');
 				hello.utils.store = store;
 			});
 
-			it('should remove the session from the localStorage', function() {
+			it('should remove the session from the localStorage', function(done) {
 
 				var spy = sinon.spy(() => ({}));
 
 				hello.utils.store = spy;
 
 				hello('test')
-				.logout();
+				.logout()
+				.then(() => {
+					expect(spy.calledWith('test', null)).to.be.ok();
+					done();
+				})
+				.catch(done);
 
-				expect(spy.calledWith('test', null)).to.be.ok();
 			});
 		});
 

@@ -1,7 +1,7 @@
 const hello = require('../../../../src/hello.js');
 const errorResponse = require('../../../lib/errorResponse.js');
 const queryparse = require('tricks/string/queryparse');
-
+const closed = true;
 
 	describe('hello.login', function() {
 
@@ -52,9 +52,7 @@ const queryparse = require('tricks/string/queryparse');
 			hello.utils.popup = _open;
 		});
 
-		it('should assign a complete event', function(done) {
-
-			var spy = sinon.spy(function() {done();});
+		it('should throw an error if the popup reference is marked as closed', function(done) {
 
 			var popup = {
 				closed: false
@@ -65,21 +63,20 @@ const queryparse = require('tricks/string/queryparse');
 			};
 
 			hello
-			.login('testable', spy);
+			.login('testable')
+			.then(done, errorResponse('cancelled', done))
+			.catch(done);
 
 			popup.closed = true;
 
 		});
 
-		it('should throw a completed and error event if network name is wrong', function(done) {
-			hello
-			.login('invalidname', errorResponse('invalid_network', done));
-		});
-
 		it('should throw a error event if network name is wrong', function(done) {
 			hello
 			.login('invalidname')
-			.then(null, errorResponse('invalid_network', done));
+			.then(done, errorResponse('invalid_network', done))
+			.catch(done);
+
 		});
 
 		it('should by default, trigger window.open request', function(done) {
@@ -95,17 +92,21 @@ const queryparse = require('tricks/string/queryparse');
 
 		it('should include the basic scope defined by the module, by default', function(done) {
 
-			var spy = sinon.spy(function(url, name, optins) {
+			var spy = sinon.spy(function(url, name) {
 
 				expect(url).to.contain('scope=' + hello.services.testable.scope.basic);
-
-				done();
+				return {closed};
 			});
 
 			utils.popup = spy;
 
 			hello
-			.login('testable');
+			.login('testable')
+			.then(done, (err) => {
+				expect(spy.called).to.be.ok();
+				errorResponse('cancelled', done)(err);
+			})
+			.catch(done);
 		});
 
 		it('should not use "basic" as the default scope, if there is no mapping', function(done) {
@@ -116,13 +117,18 @@ const queryparse = require('tricks/string/queryparse');
 			// Now the response should not include the scope...
 			var spy = sinon.spy(function(url) {
 				expect(url).to.not.contain('scope=basic');
-				done();
+				return {closed};
 			});
 
 			utils.popup = spy;
 
 			hello('testable')
-			.login();
+			.login()
+			.then(done, (err) => {
+				expect(spy.called).to.be.ok();
+				errorResponse('cancelled', done)(err);
+			})
+			.catch(done);
 		});
 
 		describe('options', function() {
@@ -137,13 +143,18 @@ const queryparse = require('tricks/string/queryparse');
 
 					expect(params.redirect_uri).to.equal(REDIRECT_URI);
 
-					done();
+					return {closed};
 				});
 
 				utils.popup = spy;
 
 				hello
-				.login('testable', {redirect_uri:REDIRECT_URI});
+				.login('testable', {redirect_uri:REDIRECT_URI})
+				.then(done, (err) => {
+					expect(spy.called).to.be.ok();
+					errorResponse('cancelled', done)(err);
+				})
+				.catch(done);
 			});
 
 			it('should URIencode `options.redirect_uri`', function(done) {
@@ -155,13 +166,18 @@ const queryparse = require('tricks/string/queryparse');
 					expect(url).to.not.contain(REDIRECT_URI);
 					expect(url).to.contain(encodeURIComponent(REDIRECT_URI));
 
-					done();
+					return {closed};
 				});
 
 				utils.popup = spy;
 
 				hello
-				.login('testable', {redirect_uri:REDIRECT_URI});
+				.login('testable', {redirect_uri:REDIRECT_URI})
+				.then(done, (err) => {
+					expect(spy.called).to.be.ok();
+					errorResponse('cancelled', done)(err);
+				})
+				.catch(done);
 			});
 
 			it('should pass through unknown scopes defined in `options.scope`', function(done) {
@@ -172,13 +188,18 @@ const queryparse = require('tricks/string/queryparse');
 
 					expect(params.scope).to.contain('email');
 
-					done();
+					return {closed};
 				});
 
 				utils.popup = spy;
 
 				hello
-				.login('testable', {scope: 'email'});
+				.login('testable', {scope: 'email'})
+				.then(done, (err) => {
+					expect(spy.called).to.be.ok();
+					errorResponse('cancelled', done)(err);
+				})
+				.catch(done);
 			});
 
 			it('should include the basic scope defined in the settings `hello.settings.scope`', function(done) {
@@ -189,13 +210,18 @@ const queryparse = require('tricks/string/queryparse');
 				var spy = sinon.spy(function(url, name, optins) {
 					var params = queryparse(url.split('?')[1]);
 					expect(params.scope).to.contain('basic');
-					done();
+					return {closed};
 				});
 
 				utils.popup = spy;
 
 				hello
-				.login('testable', {scope: ['email']});
+				.login('testable', {scope: ['email']})
+				.then(done, (err) => {
+					expect(spy.called).to.be.ok();
+					errorResponse('cancelled', done)(err);
+				})
+				.catch(done);
 			});
 
 			it('should discard common scope, aka scopes undefined by this module but defined as a global standard in the libary (i.e. basic)', function(done) {
@@ -211,13 +237,18 @@ const queryparse = require('tricks/string/queryparse');
 					var params = queryparse(url.split('?')[1]);
 
 					expect(params.scope).to.not.contain(commonScope);
-					done();
+					return {closed};
 				});
 
 				utils.popup = spy;
 
 				hello
-				.login('testable', {scope: commonScope});
+				.login('testable', {scope: commonScope})
+				.then(done, (err) => {
+					expect(spy.called).to.be.ok();
+					errorResponse('cancelled', done)(err);
+				})
+				.catch(done);
 			});
 
 			it('should not included empty scopes', function(done) {
@@ -232,13 +263,18 @@ const queryparse = require('tricks/string/queryparse');
 					var params = queryparse(url.split('?')[1]);
 
 					expect(params.scope).to.eql(scope);
-					done();
+					return {closed};
 				});
 
 				utils.popup = spy;
 
 				hello
-				.login('testable', {scope: paddedScope});
+				.login('testable', {scope: paddedScope})
+				.then(done, (err) => {
+					expect(spy.called).to.be.ok();
+					errorResponse('cancelled', done)(err);
+				})
+				.catch(done);
 			});
 
 			it('should use the correct and unencoded delimiter to separate scope', function(done) {
@@ -262,13 +298,18 @@ const queryparse = require('tricks/string/queryparse');
 				var spy = sinon.spy(function(url, name, optins) {
 
 					expect(url).to.contain(basicScope.replace(/[\+\,\s]/, scopeDelim));
-					done();
+					return {closed};
 				});
 
 				utils.popup = spy;
 
 				hello
-				.login('test_delimit_scope');
+				.login('test_delimit_scope')
+				.then(done, (err) => {
+					expect(spy.called).to.be.ok();
+					errorResponse('cancelled', done)(err);
+				})
+				.catch(done);
 			});
 
 			it('should space encode the delimiter of multiple response_type\'s', function(done) {
@@ -280,13 +321,18 @@ const queryparse = require('tricks/string/queryparse');
 				var spy = sinon.spy(function(url, name) {
 
 					expect(url).to.contain('code%20grant_scopes');
-					done();
+					return {closed};
 				});
 
 				utils.popup = spy;
 
 				hello
-				.login('testable', opts);
+				.login('testable', opts)
+				.then(done, (err) => {
+					expect(spy.called).to.be.ok();
+					errorResponse('cancelled', done)(err);
+				})
+				.catch(done);
 			});
 
 			it('should substitute "token" for "code" when there is no Grant URL defined', function(done) {
@@ -300,13 +346,18 @@ const queryparse = require('tricks/string/queryparse');
 				var spy = sinon.spy(function(url, name) {
 
 					expect(url).to.contain('token%20grant_scopes');
-					done();
+					return {closed};
 				});
 
 				utils.popup = spy;
 
 				hello
-				.login('testable', opts);
+				.login('testable', opts)
+				.then(done, (err) => {
+					expect(spy.called).to.be.ok();
+					errorResponse('cancelled', done)(err);
+				})
+				.catch(done);
 			});
 		});
 
@@ -319,13 +370,18 @@ const queryparse = require('tricks/string/queryparse');
 					expect(options.scrollbars).to.eql('1');
 					expect(options.width).to.eql('500');
 					expect(options.height).to.eql('550');
-					done();
+					return {closed};
 				});
 
 				utils.popup = spy;
 
 				hello
-				.login('testable');
+				.login('testable')
+				.then(done, (err) => {
+					expect(spy.called).to.be.ok();
+					errorResponse('cancelled', done)(err);
+				})
+				.catch(done);
 			});
 
 			it('should allow the popup options to be overridden', function(done) {
@@ -334,7 +390,7 @@ const queryparse = require('tricks/string/queryparse');
 					expect(options.location).to.eql('no');
 					expect(options.toolbar).to.eql('no');
 					expect(options.hidden).to.eql(true);
-					done();
+					return {closed};
 				});
 
 				utils.popup = spy;
@@ -346,7 +402,12 @@ const queryparse = require('tricks/string/queryparse');
 						location: 'no',
 						toolbar: 'no'
 					}
-				});
+				})
+				.then(done, (err) => {
+					expect(spy.called).to.be.ok();
+					errorResponse('cancelled', done)(err);
+				})
+				.catch(done);
 			});
 		});
 
@@ -391,7 +452,7 @@ const queryparse = require('tricks/string/queryparse');
 			it('should trigger the popup if the token has expired', function(done) {
 
 				var spy = sinon.spy(function() {
-					done();
+					return {closed: true};
 				});
 
 				utils.popup = spy;
@@ -399,19 +460,29 @@ const queryparse = require('tricks/string/queryparse');
 				session.expires = ((new Date()).getTime() / 1e3) - 1000;
 
 				hello('testable')
-				.login({force: false});
+				.login({force: false})
+				.then(done, (err) => {
+					expect(spy.called).to.be.ok();
+					errorResponse('cancelled', done)(err);
+				})
+				.catch(done);
 			});
 
 			it('should trigger the popup if the scopes have changed', function(done) {
 
 				var spy = sinon.spy(function() {
-					done();
+					return {closed: true};
 				});
 
 				utils.popup = spy;
 
 				hello('testable')
-				.login({force: false, scope: 'not-basic'});
+				.login({force: false, scope: 'not-basic'})
+				.then(done, (err) => {
+					expect(spy.called).to.be.ok();
+					errorResponse('cancelled', done)(err);
+				})
+				.catch(done);
 			});
 		});
 
@@ -429,13 +500,18 @@ const queryparse = require('tricks/string/queryparse');
 
 					expect(params).to.have.property('custom', options.custom);
 
-					done();
+					return {closed: true};
 				});
 
 				utils.popup = spy;
 
 				hello
-				.login('testable', options);
+				.login('testable', options)
+				.then(done, (err) => {
+					expect(spy.called).to.be.ok();
+					errorResponse('cancelled', done)(err);
+				})
+				.catch(done);
 			});
 		});
 
@@ -443,20 +519,27 @@ const queryparse = require('tricks/string/queryparse');
 
 			it('should trigger an auth.init event before requesting the auth flow', function(done) {
 
-				// Listen out for the auth-flow
-				hello.on('auth.init', function(e) {
+				const spyGlobal = sinon.spy(function(e) {
 					expect(e).to.have.property('network', 'testable');
-					expect(spy.notCalled).to.be.ok();
-					done();
+					expect(spyPop.notCalled).to.be.ok();
 				});
 
+				// Listen out for the auth-flow
+				hello.on('auth.init', spyGlobal);
+
 				// Go no further
-				var spy = sinon.spy();
-				utils.popup = spy;
+				var spyPop = sinon.spy(() => ({closed}));
+				utils.popup = spyPop;
 
 				// Login
 				hello('testable')
-				.login({force: true});
+				.login({force: true})
+				.then(done, (err) => {
+					expect(spyPop.called).to.be.ok();
+					expect(spyGlobal.called).to.be.ok();
+					errorResponse('cancelled', done)(err);
+				})
+				.catch(done);
 
 			});
 

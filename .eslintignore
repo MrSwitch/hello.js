@@ -1,4 +1,5 @@
 assets/*
 demos/*
 dist/*
-test/*
+test/
+!test/specs/
