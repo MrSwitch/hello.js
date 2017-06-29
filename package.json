@@ -1,6 +1,6 @@
 {
   "name": "hellojs",
-  "version": "1.15.1",
+  "version": "2.0.0",
   "description": "A clientside Javascript library for standardizing requests to OAuth2 web services (and OAuth1 - with a shim)",
   "homepage": "https://adodson.com/hello.js",
   "main": "dist/hello.all.js",
@@ -69,6 +69,7 @@
     "eslint": "^4.1.1",
     "expect.js": "^0.3.1",
     "gulp": "^3.9.0",
+    "gulp-header": "^1.8.8",
     "gulp-mocha-phantomjs": "^0.12.1",
     "gulp-sourcemaps": "^2.6.0",
     "gulp-uglify": "^3.0.0",

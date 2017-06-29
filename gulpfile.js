@@ -8,10 +8,12 @@ const browserify = require('browserify');
 const babelify = require('babelify');
 const buffer = require('vinyl-buffer');
 const collapse = require('bundle-collapser/plugin');
+const header = require('gulp-header');
 const source = require('vinyl-source-stream');
 const sourcemaps = require('gulp-sourcemaps');
 const util = require('gulp-util');
 const uglify = require('gulp-uglify');
+const pkg = require('./package.json');
 
 const port = 8080;
 const localhost = require('localhost')('./');
@@ -100,6 +102,7 @@ function buildJS(name) {
 				drop_debugger: true
 			}
 		}))
+		.pipe(header(`/*! ${pkg.name} v${pkg.version} | (c) 2012-${(new Date()).getFullYear()} ${pkg.author.name} | ${pkg.license} ${pkg.homepage}/LICENSE */`))
 		.on('error', util.log)
 		.pipe(sourcemaps.write('./'))
 		.pipe(gulp.dest('dist/'));
