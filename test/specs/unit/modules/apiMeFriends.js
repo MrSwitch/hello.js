@@ -1,25 +1,25 @@
 // Test GET me/friends
-let hello = require('../../../../src/hello.js');
-let helper = require('./helper.js');
+const hello = require('../../../../src/hello.js');
+const helper = require('./helper.js');
 
-	describe('hello.api(\'/me/friends\')', function() {
+describe('hello.api(\'/me/friends\')', () => {
 
-		helper.sharedSetup();
+	helper.sharedSetup();
 
-		var tests = ['flickr', 'foursquare', 'github', 'google', 'linkedin', 'soundcloud', 'twitter', 'windows', 'yahoo'];
+	const tests = ['flickr', 'foursquare', 'github', 'google', 'linkedin', 'soundcloud', 'twitter', 'windows', 'yahoo'];
 
-		tests.forEach(function(network) {
+	tests.forEach(network => {
 
-			it('should format ' + network + ':me/friends correctly', function(done) {
+		it(`should format ${  network  }:me/friends correctly`, done => {
 
-				hello(network)
+			hello(network)
 				.api('/me/friends')
-				.then(function(friends) {
-					friends.data.forEach(function(friend) {
+				.then(friends => {
+					friends.data.forEach(friend => {
 						expect(friend.id).to.be.ok();
 						expect(friend.name).to.be.ok();
 						if (friend.thumbnail) {
-							expect(friend.thumbnail).to.match(/^https?\:\/\/[a-z0-9\.\-]+\/.*/i);
+							expect(friend.thumbnail).to.match(/^https?:\/\/[a-z0-9.-]+\/.*/i);
 						}
 					});
 
@@ -29,9 +29,9 @@ let helper = require('./helper.js');
 				})
 				.then(null, done);
 
-			});
-
 		});
 
 	});
+
+});
 

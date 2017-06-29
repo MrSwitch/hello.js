@@ -18,59 +18,59 @@ require('../../../src/modules/bikeindex.js');
 require('../../../src/modules/soundcloud.js');
 require('../../../src/modules/vk.js');
 
-	describe('E2E modules', () => {
+describe('E2E modules', () => {
 
-		// Loop through all services
-		for (const name in hello.services) {
-			setupModuleTests(hello.services[name], name);
-		}
+	// Loop through all services
+	for (const name in hello.services) {
+		setupModuleTests(hello.services[name], name);
+	}
 
-		function setupModuleTests(module, name) {
+	function setupModuleTests(module, name) {
 
-			describe(name, function() {
+		describe(name, () => {
 
-				var MATCH_URL = /^https?\:\/\//;
+			const MATCH_URL = /^https?:\/\//;
 
-				it('should contain oauth.auth path', () => {
-					var path = module.oauth.auth;
-					expect(path).to.match(/^https?\:\/\//);
+			it('should contain oauth.auth path', () => {
+				const path = module.oauth.auth;
+				expect(path).to.match(/^https?:\/\//);
+			});
+
+			it('should specify a base url', () => {
+				// Loop through all services
+				expect(module.base).to.match(/^https?:\/\//);
+			});
+
+			it('should be using OAuth1 contain, auth, request, token properties', () => {
+
+				// Loop through all services
+				const oauth = module.oauth;
+				if (oauth && parseInt(oauth.version, 10) === 1) {
+					expect(oauth.auth).to.match(MATCH_URL);
+					expect(oauth.token).to.match(MATCH_URL);
+					expect(oauth.request).to.match(MATCH_URL);
+				}
+			});
+
+			xit('should return error object when an api request is made with an unverified user', function(done) {
+
+				let i = 0;
+
+				this.timeout(60000);
+
+				const cb = errorResponse(null, () => {
+					if (++i === 2)
+						done();
 				});
-
-				it('should specify a base url', () => {
-					// Loop through all services
-					expect(module.base).to.match(/^https?\:\/\//);
-				});
-
-				it('should be using OAuth1 contain, auth, request, token properties', () => {
-
-					// Loop through all services
-					var oauth = module.oauth;
-					if (oauth && parseInt(oauth.version, 10) === 1) {
-						expect(oauth.auth).to.match(MATCH_URL);
-						expect(oauth.token).to.match(MATCH_URL);
-						expect(oauth.request).to.match(MATCH_URL);
-					}
-				});
-
-				xit('should return error object when an api request is made with an unverified user', function(done) {
-
-					var i = 0;
-
-					this.timeout(60000);
-
-					var cb = errorResponse(null, function() {
-						if (++i === 2)
-							done();
-					});
 
 					// Ensure user is signed out
-					hello.logout(name);
+				hello.logout(name);
 
-					// Make a request that returns an error object
-					hello(name)
+				// Make a request that returns an error object
+				hello(name)
 					.api('me', cb)
 					.then(null, cb);
-				});
 			});
-		}
-	});
+		});
+	}
+});

@@ -1,7 +1,7 @@
-let hello = require('../../../../src/hello.js');
-describe('hello events', function() {
+const hello = require('../../../../src/hello.js');
+describe('hello events', () => {
 
-	it('should bind handler using hello.on(eventName, handler) and trigger hello.emit', function(done) {
+	it('should bind handler using hello.on(eventName, handler) and trigger hello.emit', done => {
 		function handler() {
 			done();
 		}

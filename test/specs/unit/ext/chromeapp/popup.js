@@ -1,22 +1,25 @@
+/* globals chrome */
 // Chrome Packaged Apps
 // The Chrome Extension redefines the "hello.utils.popup"
 
-describe('ChromeApp hello.utils.popup', function() {
+const hello = require('../../../../../src/hello.js');
+
+describe('ChromeApp hello.utils.popup', () => {
 
 	if (!(typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.identity.launchWebAuthFlow)) {
 		// dont run tests for chrome
 		return;
 	}
 
-	var _launch = chrome.identity.launchWebAuthFlow;
+	const _launch = chrome.identity.launchWebAuthFlow;
 
-	after(function() {
+	after(() => {
 		chrome.identity.launchWebAuthFlow = _launch;
 	});
 
-	it('Should launch chrome.identity.launchWebAuthFlow', function() {
+	it('Should launch chrome.identity.launchWebAuthFlow', () => {
 
-		var spy = sinon.spy();
+		const spy = sinon.spy();
 
 		chrome.identity.launchWebAuthFlow = spy;
 

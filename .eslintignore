@@ -1,5 +1,6 @@
 assets/*
 demos/*
 dist/*
-test/
-!test/specs/
+test/stubs/
+test/lib/
+test/*.js

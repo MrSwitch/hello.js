@@ -16,12 +16,6 @@ const uglify = require('gulp-uglify');
 const port = 8080;
 const localhost = require('localhost')('./');
 
-let DEBUG = false;
-
-gulp.task('debug', () => {
-	DEBUG = true;
-});
-
 const scripts_to_watch = ['**/*.js', '!node_modules/**/*', '!test/components/**/*', '!test/bundle.js', '!test/specs/index.js'];
 
 gulp.task('localhost', () => {
@@ -99,13 +93,13 @@ function buildJS(name) {
 		.pipe(sourcemaps.init({
 			loadMaps: true
 		}))
-		// .pipe(uglify({
-		// 	mangle: true,
-		// 	compress: {
-		// 		drop_console: true,
-		// 		drop_debugger: true
-		// 	}
-		// }))
+		.pipe(uglify({
+			mangle: true,
+			compress: {
+				drop_console: true,
+				drop_debugger: true
+			}
+		}))
 		.on('error', util.log)
 		.pipe(sourcemaps.write('./'))
 		.pipe(gulp.dest('dist/'));

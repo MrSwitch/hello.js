@@ -1,6 +1,6 @@
 module.exports = function(grunt) {
 
-	var source = ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js', '!tests/specs/libs/**/*'];
+	const source = ['Gruntfile.js', 'src/**/*.js', 'tests/**/*.js', '!tests/specs/libs/**/*'];
 
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
@@ -71,7 +71,7 @@ module.exports = function(grunt) {
 	grunt.registerTask('deploy', ['test', 'bumpup', 'updateInitConfig', 'usebanner:build']);
 	grunt.registerTask('default', ['test', 'usebanner:build']);
 
-	grunt.registerTask('updateInitConfig', 'Redefine pkg after change in package.json', function() {
+	grunt.registerTask('updateInitConfig', 'Redefine pkg after change in package.json', () => {
 		grunt.config.set('pkg', grunt.file.readJSON('package.json'));
 	});
 };
