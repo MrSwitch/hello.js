@@ -68,6 +68,10 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	};
 }
 
+// Export HelloJS
+module.exports = hello;
+
+
 // Open function
 function _open(url, interactive) {
 

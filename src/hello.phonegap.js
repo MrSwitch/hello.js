@@ -97,3 +97,7 @@ if (/^file:\/{3}[^/]/.test(window.location.href) && window.cordova) {
 	};
 
 }
+
+// Export HelloJS
+module.exports = hello;
+

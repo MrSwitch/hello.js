@@ -1,6 +1,7 @@
 require('babel-polyfill');
 require('../setup.js');
 require('./e2e/modules.js');
+require('./e2e/requireable.js');
 require('./unit/core/hello.api.js');
 require('./unit/core/hello.events.js');
 require('./unit/core/hello.getAuthResponse.js');
