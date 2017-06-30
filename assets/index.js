@@ -354,10 +354,11 @@ var tests = [
 					callback();
 					return;
 				}
-				callback("Failed to setup: the user has no albums");
+				throw "Failed to setup: the user has no albums";
 			},function(){
-				callback("Failed to setup: could not open me/albums");
-			});
+				throw "Failed to setup: could not open me/albums";
+			})
+			.catch(callback);
 		},
 		expected : {
 			data : [{
@@ -394,29 +395,29 @@ var tests = [
 		setup : function(test, callback){
 			hello(test.network)
 			.api("me/albums")
-			.then( function(r){
-				if("data" in r && r.data.length > 0){
+			.then(function(r){
 
-					// Pick one randomly
-					var i = Math.floor(Math.random()*r.data.length);
+				if(!("data" in r) || !r.data.length) {
+					throw "Failed to setup: The user has no albums yet";
+				}
 
-					hello(test.network).api( "me/album", {
-						id : r.data[i].id
-					}, function(r){
-						if("data" in r && r.data.length > 0){
-							test.data.id = r.data[0].id;
-							callback();
-							return;
-						}
-						callback("Failed to setup: the user has no images in the album");
-					});
-				}
-				else{
-					callback("Failed to setup: The user has no albums yet");
-				}
-			},function(){
-				callback("Failed to setup: Error connecting to me/albums");
-			});
+				// Pick one randomly
+				var i = Math.floor(Math.random() * r.data.length);
+
+				return hello(test.network).api( "me/album", {
+					id : r.data[i].id
+				}).then(function(r) {
+					if("data" in r && r.data.length > 0){
+						test.data.id = r.data[0].id;
+						callback();
+						return;
+					}
+					throw "Failed to setup: the user has no images in the album"
+				})
+			}, function() {
+				throw "Failed to setup: Error connecting to me/albums";
+			})
+			.catch(callback);
 		},
 		expected : {
 //			name : /^.+$/, // FaceBook doesn't always return a name
@@ -780,31 +781,34 @@ function before_photo_post(test, callback){
 				return callback();
 			}
 		}
-		callback("Failed to setup: Could not find the album 'TestAlbum'");
-	}, function(){
-		callback("Failed to setup: could not access me/albums");
-	});
+
+		throw "Failed to setup: Could not find the album 'TestAlbum'";
+	}, function() {
+		throw "Failed to setup: could not access me/albums";
+	})
+	.catch(callback);
 }
 
 function get_test_photo(test, callback){
 
 	before_photo_post(test, function(s){
-		if(s){
+		if(s) {
 			callback(s);
 			return;
 		}
 		hello(test.network)
-		.api( "me/album", { id : test.data.id } )
+		.api( "me/album", {id: test.data.id})
 		.then(function(r){
 			for(var i=0;i<r.data.length;i++){
 				var file = r.data[i];
 				test.data.id = file.id;
 				return callback();
 			}
-			callback("Failed to setup: Create file 'TestFile.png' (there's a test above which does this)");
-		},function(){
-			callback("Failed to setup, could not access me/files");
-		});
+			throw "Failed to setup: Create file 'TestFile.png' (there's a test above which does this)";
+		},function() {
+			throw "Failed to setup, could not access me/files";
+		})
+		.catch(callback);
 	});
 }
 
@@ -832,10 +836,11 @@ function get_test_folder(test, callback){
 				return callback();
 			}
 		}
-		callback("Failed to setup: First create a folder called 'TestFolder' (there's a test above which does this)");
-	},function(){
-		callback("Failed to setup, could not access me/folders, ensure your signed in with the 'files' scope");
-	});
+		throw "Failed to setup: First create a folder called 'TestFolder' (there's a test above which does this)";
+	},function() {
+		throw "Failed to setup, could not access me/folders, ensure your signed in with the 'files' scope";
+	})
+	.catch(callback);
 }
 
 function get_test_file(test, callback){
@@ -977,14 +982,15 @@ function Test(test,network,parent){
 		var action = function(r){
 
 			var cb = function(r,next){
+
 				// update the test
 				var b = test.validate(r);
 
 				// Next enabled
-				test.next(r.paging && r.paging.next?function(){
+				test.next(r && r.paging && r.paging.next ? function(){
 					// Call hello.api
 					// Save the request information
-					test.request( hello( network ).api( r.paging.next, test.method, test.data, cb) );
+					test.request( hello(network).api( r.paging.next, test.method, test.data).then(cb, cb) );
 				}:null);
 
 				// passed?
@@ -1001,10 +1007,10 @@ function Test(test,network,parent){
 			};
 
 			if(test.method === 'login'){
-				test.request( hello(network).login(test.data,cb) );
+				test.request( hello(network).login(test.data).then(cb, cb) );
 			}
 			else if(test.method === 'logout'){
-				test.request( hello(network).logout(network,test.data,cb) );
+				test.request( hello(network).logout(network,test.data).then(cb, cb) );
 			}
 			else if(test.method === 'getAuthResponse'){
 				test.request({});
@@ -1013,7 +1019,7 @@ function Test(test,network,parent){
 			else{
 				// Call hello.api
 				// Save the request information
-				test.request( hello(network).api( test.path, test.method, test.data, cb) );
+				test.request( hello(network).api( test.path, test.method, test.data).then(cb, cb) );
 			}
 		};
 
@@ -1040,7 +1046,7 @@ function Provider(network){
 		return m.toUpperCase();
 	});
 	this.runAll = function(){
-		hello.login(network, {scope: model.checkedScopes() }, function(r){
+		hello.login(network, {scope: model.checkedScopes() }).catch(e => e).then(function(r){
 			if(!r||r.error){
 				alert("Login error: "+r.error.message);
 				return;
@@ -1074,7 +1080,8 @@ function Provider(network){
 		});
 	};
 	this.login = function(){
-		hello.login(network, {scope: model.checkedScopes() }).then(function() {
+		hello.login(network, {scope: model.checkedScopes()})
+		.then(function() {
 			console.log('Logged in to ' + network);
 		}, function(e) {
 			console.error('Failed to login to ' + network, e);
