@@ -29,6 +29,7 @@ const request = require('tricks/http/request');
 const store = require('tricks/browser/agent/localStorage');
 const unique = require('tricks/array/unique');
 const Url = require('tricks/window/url');
+const Until = require('tricks/object/until');
 
 const hello = function(name) {
 	return hello.use(name);
@@ -384,25 +385,21 @@ extend(hello, {
 
 			const win = utils.popup(url, redirectUri, opts.popup);
 
-			prs.push(new Promise((accept, reject) => {
+			// Monitor the state of the popup...
+			prs.push(Until((accept, reject) => {
+				if (!win || win.closed) {
 
-				const timer = setInterval(() => {
-					if (!win || win.closed) {
-						clearInterval(timer);
+					let response = error('cancelled', 'Login has been cancelled');
 
-						let response = error('cancelled', 'Login has been cancelled');
-
-						if (!popup) {
-							response = error('blocked', 'Popup was blocked');
-						}
-
-						response.network = p.network;
-
-						reject(response);
+					if (!popup) {
+						response = error('blocked', 'Popup was blocked');
 					}
-				}, 100);
 
-			}));
+					response.network = p.network;
+
+					reject(response);
+				}
+			}, 100));
 		}
 
 		else {
