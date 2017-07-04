@@ -5,9 +5,8 @@
 <script src="/adorn/adorn.js" async></script>
 
 <script src="client_ids.js"></script>
-<script src="../src/hello.polyfill.js"></script>
-<script src="../src/hello.js"></script>
-<script src="../src/modules/amazon.js"></script>
+
+<script src="../dist/hello.js"></script>
 
 <title>hello( amazon )</title>
 <h1>hello( amazon )</h1>
@@ -27,12 +26,12 @@ function login(network){
 	var amazon = hello(network);
 
 	amazon.login()
-	.then( function(){
+	.then(function() {
 		// get user profile data
 		return amazon.api( '/me' );
 	})
-	.then( function(p){
-		document.getElementById( network ).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network +" as " + p.name;
+	.then(function(p) {
+		document.getElementById(network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network +" as " + p.name;
 	})
 	.then( 
 		null,
@@ -43,10 +42,50 @@ function login(network){
 </script>
 
 <script class="pre">
+
+hello.init({
+
+	amazon: {
+		name: 'Amazon',
+
+		oauth: {
+			version: 2,
+			auth: 'https://www.amazon.com/ap/oa',
+			grant: 'https://api.amazon.com/auth/o2/token'
+		},
+
+		// Refresh the access_token once expired
+		refresh: true,
+
+		scope: {
+			basic: 'profile'
+		},
+
+		scope_delim: ' ',
+
+		login: function(p) {
+			p.options.popup.width = 710;
+		},
+
+		base: 'https://api.amazon.com/',
+
+		// There aren't many routes that map to the hello.api so I included me/bikes
+		// ... because, bikes
+		get: {
+			me: 'user/profile'
+		},
+		wrap: {
+			me: function() {}
+		}
+	}
+});
+</script>
+
+<script class="pre">
 hello.init({
 	// Register app https://sellercentral.amazon.com/gp/homepage.html
-	amazon : 'amzn1.application-oa2-client.5ac60070ee744ae7a241e10e48eae7ff'
-},{
-	redirect_uri : '../redirect.html'
+	amazon: 'amzn1.application-oa2-client.5ac60070ee744ae7a241e10e48eae7ff'
+}, {
+	redirect_uri: '../redirect.html'
 });
 </script>

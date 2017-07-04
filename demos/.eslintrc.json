@@ -1,0 +1,14 @@
+{
+	"env": {
+		"browser": true,
+		"es6": false
+	},
+	"globals": {
+		"hello": true
+	},
+	"root": true,
+	"extends": "eslint:recommended",
+	"rules": {
+		"no-console": 0
+	}
+}

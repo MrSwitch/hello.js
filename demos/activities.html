@@ -23,7 +23,7 @@
 <script class="pre">
 function getActivities(network){
 	var hi = hello(network);
-	hi.login({scope:'share'}).then(function(){
+	hi.login({scope:'share'}).then(function() {
 		// Get the friends
 		hi.api('me/share').then(function(r){
 			r.data.forEach(function(o){

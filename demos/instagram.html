@@ -4,9 +4,7 @@
 <script src="/adorn/adorn.js" async></script>
 
 <script src="client_ids.js"></script>
-<script src="../src/hello.polyfill.js"></script>
-<script src="../src/hello.js"></script>
-<script src="../src/modules/instagram.js"></script>
+<script src="../dist/hello.all.js"></script>
 
 <title>hello( instagram )</title>
 <h1>hello( instagram )</h1>
@@ -18,21 +16,21 @@
 <p>The button above executes <code>getPhotos()</code></p>
 
 <script class="pre">
-function getPhotos(){
+function getPhotos() {
 
 	// Define an instagram instance
 	var instagram = hello( 'instagram' );
 
 	// Trigger login to instagram
-	instagram.login().then( function(){
+	instagram.login().then(function() {
 
 		// Get Profile
-		instagram.api('me').then( profileHandler, errorHandler);
+		instagram.api('me').then(profileHandler, errorHandler);
 
 		// Get user photos
-		instagram.api('me/photos').then( photosHandler, errorHandler );
+		instagram.api('me/photos').then(photosHandler, errorHandler);
 
-	},errorHandler);
+	}, errorHandler);
 }
 
 
@@ -141,7 +139,7 @@ function likePic(img){
 			img.className = ( pic.user_has_liked ? 'liked' : '' );
 		}
 	}, console.error.bind(console));
-};
+}
 
 
 </script>

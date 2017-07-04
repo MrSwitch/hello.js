@@ -26,11 +26,7 @@
 
 <h2>Include hello.js and the modules</h2>
 <p>One should merge these for performance.</p>
-<script class="pre" src="../src/hello.js"></script>
-<script class="pre" src="../src/modules/windows.js"></script>
-<script class="pre" src="../src/modules/facebook.js"></script>
-<script class="pre" src="../src/modules/google.js"></script>
-<script class="pre" src="../src/modules/yahoo.js"></script>
+<script class="pre" src="../dist/hello.all.js"></script>
 
 <h2>Initiate</h2>
 <script class="pre">
@@ -58,7 +54,7 @@ function getFriends(network, path){
 	btn_more.style.display = 'none';
 
 	// login
-	hello(network).login({scope:'friends'}).then(function(auth) {
+	hello(network).login({scope:'friends'}).then(function() {
 		// Get the friends
 		// using path, me/friends or me/contacts
 		hello(network).api(path, {limit:10}).then(function responseHandler(r) {
@@ -67,7 +63,7 @@ function getFriends(network, path){
 				var li = document.createElement('li');
 				li.innerHTML = o.name + (o.thumbnail?" <img src="+o.thumbnail+" />":'');
 				list.appendChild(li);
-			};
+			}
 
 			btn_more.onclick = function(){
 				// Make another request and handle is in the same way
@@ -77,10 +73,7 @@ function getFriends(network, path){
 			btn_more.style.display = 'block';
 		});
 	}, function() {
-		if(!auth||auth.error){
-			console.log("Signin aborted");
-			return;
-		}
+		console.log("Signin aborted");
 	});
 }
 </script>

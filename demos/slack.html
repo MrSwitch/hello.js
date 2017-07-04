@@ -14,64 +14,64 @@
 
 <button onclick="login();" id="profile">Login Slack</button>
 
-<script src="../src/hello.js" class="pre"></script>
+<script src="../dist/hello.all.js" class="pre"></script>
 <script class="pre">
 hello.init({
-    slack: {
-        name: 'Slack',
-        oauth: {
-            version: 2,
-            auth: 'https://slack.com/oauth/authorize',
-            grant: 'https://slack.com/api/oauth.access',
-            response_type: 'code'
-        },
-        refresh: false,
-        scope: {
-            basic: 'identify, read'
-        },
-        scope_delim: ',',
-        base: 'https://slack.com/api/',
-        get: {
-            me: function(p, callback) {
-            	// The identity profile does not include the picture
-            	if (p.query.id) {
-            		callback('users.info?user=@{id}');
-            	}
-            	else {
-            		// Get the user id
-            		hello('slack').api('auth.test').then(function(r) {
-            			callback('users.info?user=' + r.user_id);
-            		});
-            	}
-            }
-        },
-        wrap: {
-        	me: function(o) {
+	slack: {
+		name: 'Slack',
+		oauth: {
+			version: 2,
+			auth: 'https://slack.com/oauth/authorize',
+			grant: 'https://slack.com/api/oauth.access',
+			response_type: 'code'
+		},
+		refresh: false,
+		scope: {
+			basic: 'identify, read'
+		},
+		scope_delim: ',',
+		base: 'https://slack.com/api/',
+		get: {
+			me: function(p, callback) {
+				// The identity profile does not include the picture
+				if (p.query.id) {
+					callback('users.info?user=@{id}');
+				}
+				else {
+					// Get the user id
+					hello('slack').api('auth.test').then(function(r) {
+						callback('users.info?user=' + r.user_id);
+					});
+				}
+			}
+		},
+		wrap: {
+			me: function(o) {
 
-        		// A basic identity profile as provided by 'auth.test'
-        		if (typeof(o.user) === 'string') {
-	        		o.name = o.user;
-	        		o.id = o.user_id;
-        		}
-        		// A more elaborate user profile as provided by 'users.info'
-        		else if (typeof(o.user) === 'object') {
-        			var _ = o.user;
-        			o.name = _.name;
-        			o.id = _.id;
-        			o.email = _.profile.email;
-        			o.thumbnail = _.profile.image_48;
-        			o.picture = _.profile.image_512;
-        		}
-        	}
-        },
-        xhr: function (p, qs) {
-            qs.token = qs.access_token;
-            delete qs.access_token
-            return true;
-        },
-        form: false,
-        jsonp: false
-    }
+				// A basic identity profile as provided by 'auth.test'
+				if (typeof(o.user) === 'string') {
+					o.name = o.user;
+					o.id = o.user_id;
+				}
+				// A more elaborate user profile as provided by 'users.info'
+				else if (typeof(o.user) === 'object') {
+					var _ = o.user;
+					o.name = _.name;
+					o.id = _.id;
+					o.email = _.profile.email;
+					o.thumbnail = _.profile.image_48;
+					o.picture = _.profile.image_512;
+				}
+			}
+		},
+		xhr: function (p, qs) {
+			qs.token = qs.access_token;
+			delete qs.access_token
+			return true;
+		},
+		form: false,
+		jsonp: false
+	}
 });
 </script>
 

@@ -6,12 +6,7 @@
 	<script src="/adorn/adorn.js" async></script>
 
 	<script src="client_ids.js"></script>
-	<script src="../src/hello.js"></script>
-	<script src="../src/modules/windows.js"></script>
-	<script src="../src/modules/facebook.js"></script>
-	<script src="../src/modules/google.js"></script>
-	<script src="../src/modules/github.js"></script>
-	<script src="../src/modules/twitter.js"></script>
+	<script src="../dist/hello.all.js"></script>
 
 </head>
 <body>
@@ -30,7 +25,7 @@
 <script class="pre">
 // Signin button click handler
 function login(network){
-	hello( network ).login(function(e){
+	hello( network ).login().then(function(e){
 		log("login",e);
 	});
 }
@@ -65,7 +60,7 @@ hello.init( {
 <script class="pre">
 // Signin button click handler
 function loginPage(network){
-	hello( network ).login({display:'page'},function(e){
+	hello( network ).login({display:'page'}).then(function(e){
 		// This will never get called unless with failure
 		log("login-page",e);
 	});
@@ -108,7 +103,7 @@ function loginPageUrl(network){
 <script class="pre">
 // Signin button click handler
 function logout(network){
-	hello( network ).logout(function(e){
+	hello( network ).logout().then(function(e){
 		log("logout",e);
 	});
 }
@@ -130,7 +125,7 @@ function logout(network){
 <script class="pre">
 // Signin button click handler
 function logoutForce(network){
-	hello( network ).logout({force:true},function(e){
+	hello( network ).logout({force:true}).then(function(e){
 		log("logout-force",e);
 	});
 }
@@ -153,7 +148,7 @@ function logoutForce(network){
 <script class="pre">
 // Signin button click handler
 function loginScope(network){
-	hello( network ).login({scope:'email'},function(e){
+	hello( network ).login({scope:'email'}).then(function(e){
 		log("login-scope",e);
 	});
 }

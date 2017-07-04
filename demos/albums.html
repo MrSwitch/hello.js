@@ -123,7 +123,7 @@ function getAlbums(network){
 	hi.login({
 		force: false
 	})
-	.then(function(auth) {
+	.then(function() {
 		// Get albums
 		return hi.api('me/albums');
 	})
