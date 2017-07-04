@@ -364,6 +364,14 @@ If a network string is provided: A consent window to authenticate with that netw
 					<td><em>optional</em></td>
 					<td>See <code>hello.settings.popup</code></td>
 				</tr>
+				<tr>
+					<td>state</td>
+					<td><i>string</i></td>
+					<td><q>ijustsetthis</q></td>
+					<td>Honours the state parameter, by storing it withing its own state object</td>
+					<td><em>optional</em></td>
+					<td></td>
+				</tr>
 			</table>
 		</td>
 	</tr>
