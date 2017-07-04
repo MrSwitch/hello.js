@@ -1,4 +1,9 @@
-(function(hello) {
+const hello = require('../hello.js');
+
+const hasBinary = require('tricks/object/hasBinary');
+const toBlob = require('tricks/object/toBlob');
+
+{
 
 	hello.init({
 		windows: {
@@ -14,8 +19,8 @@
 			// Refresh the access_token once expired
 			refresh: true,
 
-			logout: function() {
-				return 'http://login.live.com/oauth20_logout.srf?ts=' + (new Date()).getTime();
+			logout() {
+				return `http://login.live.com/oauth20_logout.srf?ts=${(new Date()).getTime()}`;
 			},
 
 			// Authorization scopes
@@ -87,15 +92,15 @@
 				'me/following': formatFriends,
 				'me/albums': formatAlbums,
 				'me/photos': formatDefault,
-				'default': formatDefault
+				default: formatDefault
 			},
 
-			xhr: function(p) {
-				if (p.method !== 'get' && p.method !== 'delete' && !hello.utils.hasBinary(p.data)) {
+			xhr(p) {
+				if (p.method !== 'get' && p.method !== 'delete' && !hasBinary(p.data)) {
 
 					// Does this have a data-uri to upload as a file?
 					if (typeof (p.data.file) === 'string') {
-						p.data.file = hello.utils.toBlob(p.data.file);
+						p.data.file = toBlob(p.data.file);
 					}
 					else {
 						p.data = JSON.stringify(p.data);
@@ -108,8 +113,8 @@
 				return true;
 			},
 
-			jsonp: function(p) {
-				if (p.method !== 'get' && !hello.utils.hasBinary(p.data)) {
+			jsonp(p) {
+				if (p.method !== 'get' && !hasBinary(p.data)) {
 					p.data.method = p.method;
 					p.method = 'get';
 				}
@@ -119,7 +124,7 @@
 
 	function formatDefault(o) {
 		if ('data' in o) {
-			o.data.forEach(function(d) {
+			o.data.forEach(d => {
 				if (d.picture) {
 					d.thumbnail = d.picture;
 				}
@@ -127,9 +132,7 @@
 				if (d.images) {
 					d.pictures = d.images
 						.map(formatImage)
-						.sort(function(a, b) {
-							return a.width - b.width;
-						});
+						.sort((a, b) => a.width - b.width);
 				}
 			});
 		}
@@ -147,8 +150,8 @@
 
 	function formatAlbums(o) {
 		if ('data' in o) {
-			o.data.forEach(function(d) {
-				d.photos = d.files = 'https://apis.live.net/v5.0/' + d.id + '/photos';
+			o.data.forEach(d => {
+				d.photos = d.files = `https://apis.live.net/v5.0/${  d.id  }/photos`;
 			});
 		}
 
@@ -157,7 +160,7 @@
 
 	function formatUser(o, headers, req) {
 		if (o.id) {
-			var token = req.query.access_token;
+			const token = req.authResponse.access_token;
 			if (o.emails) {
 				o.email = o.emails.preferred;
 			}
@@ -165,8 +168,8 @@
 			// If this is not an non-network friend
 			if (o.is_friend !== false) {
 				// Use the id of the user_id if available
-				var id = (o.user_id || o.id);
-				o.thumbnail = o.picture = 'https://apis.live.net/v5.0/' + id + '/picture?access_token=' + token;
+				const id = (o.user_id || o.id);
+				o.thumbnail = o.picture = `https://apis.live.net/v5.0/${  id  }/picture?access_token=${  token}`;
 			}
 		}
 
@@ -175,7 +178,7 @@
 
 	function formatFriends(o, headers, req) {
 		if ('data' in o) {
-			o.data.forEach(function(d) {
+			o.data.forEach(d => {
 				formatUser(d, headers, req);
 			});
 		}
@@ -183,4 +186,4 @@
 		return o;
 	}
 
-})(hello);
+}

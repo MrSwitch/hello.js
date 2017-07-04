@@ -1,4 +1,6 @@
-(function(hello) {
+const hello = require('../hello.js');
+
+{
 
 	hello.init({
 
@@ -32,7 +34,7 @@
 
 			scope_delim: ' ',
 
-			login: function(p) {
+			login(p) {
 				p.options.popup.width = 400;
 				p.options.popup.height = 700;
 			},
@@ -46,24 +48,24 @@
 			},
 
 			post: {
-				'meetings/start/adhoc': function(p, callback) {
+				'meetings/start/adhoc'(p, callback) {
 					callback('meetings/start');
 				},
 
-				'meetings/start/scheduled': function(p, callback) {
-					var meetingId = p.data.meetingId;
+				'meetings/start/scheduled'(p, callback) {
+					const meetingId = p.data.meetingId;
 					p.data = {};
-					callback('meetings/' + meetingId + '/start');
+					callback(`meetings/${  meetingId  }/start`);
 				},
 
-				'meetings/schedule': function(p, callback) {
+				'meetings/schedule'(p, callback) {
 					callback('meetings');
 				}
 			},
 
 			patch: {
-				'meetings/update': function(p, callback) {
-					callback('meetings/' + p.data.meetingId);
+				'meetings/update'(p, callback) {
+					callback(`meetings/${  p.data.meetingId}`);
 				}
 			},
 
@@ -72,7 +74,7 @@
 			},
 
 			wrap: {
-				me: function(o, headers) {
+				me(o, headers) {
 					formatError(o, headers);
 
 					if (!o.email) {
@@ -87,7 +89,7 @@
 					return o;
 				},
 
-				'default': function(o, headers) {
+				default(o, headers) {
 					formatError(o, headers);
 
 					return o;
@@ -100,9 +102,8 @@
 	});
 
 	function formatError(o, headers) {
-		var errorCode;
-		var message;
-		var details;
+		let errorCode;
+		let message;
 
 		if (o && ('Message' in o)) {
 			message = o.Message;
@@ -118,7 +119,7 @@
 
 			o.error = {
 				code: errorCode,
-				message: message,
+				message,
 				details: o
 			};
 		}
@@ -128,9 +129,9 @@
 
 	function formatRequest(p, qs) {
 		// Move the access token from the request body to the request header
-		var token = qs.access_token;
+		const token = qs.access_token;
 		delete qs.access_token;
-		p.headers.Authorization = 'Bearer ' + token;
+		p.headers.Authorization = `Bearer ${  token}`;
 
 		// Format non-get requests to indicate json body
 		if (p.method !== 'get' && p.data) {
@@ -162,4 +163,4 @@
 		}
 	}
 
-}(hello));
+}

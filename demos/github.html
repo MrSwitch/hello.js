@@ -4,9 +4,7 @@
 <script src="/adorn/adorn.js" async></script>
 
 <script src="client_ids.js"></script>
-<script src="../src/hello.polyfill.js"></script>
-<script src="../src/hello.js"></script>
-<script src="../src/modules/github.js"></script>
+<script src="../dist/hello.all.js"></script>
 
 <title>hello( github )</title>
 <h1>hello( github )</h1>
@@ -65,8 +63,8 @@ function userRepos(network, target) {
 
 <script class="pre">
 hello.init({
-	github : GITHUB_CLIENT_ID
-},{
+	github: GITHUB_CLIENT_ID
+}, {
 	redirect_uri : '../redirect.html',
 //	oauth_proxy : OAUTH_PROXY_URL
 });

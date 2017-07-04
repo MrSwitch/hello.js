@@ -4,9 +4,7 @@
 <script src="/adorn/adorn.js" async></script>
 
 <script src="client_ids.js"></script>
-<script src="../src/hello.polyfill.js"></script>
-<script src="../src/hello.js"></script>
-<script src="../src/modules/soundcloud.js"></script>
+<script src="../dist/hello.all.js"></script>
 
 <title>hello( soundcloud )</title>
 <h1>hello( soundcloud )</h1>
@@ -21,7 +19,7 @@ hello.on('auth.login', function(r){
 	hi.api('me').then(function(p){
 		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
 	});
-	hi.api('/tracks', function(r){
+	hi.api('/tracks').then(function(r){
 		console.log(r);
 		for(var i=0;i<r.length;i++){
 			var li = document.createElement('li');

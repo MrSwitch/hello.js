@@ -1,0 +1,6 @@
+assets/*
+demos/*
+dist/*
+test/stubs/
+test/lib/
+test/*.js

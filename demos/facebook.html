@@ -4,9 +4,7 @@
 <script src="/adorn/adorn.js" async></script>
 
 <script src="client_ids.js"></script>
-<script src="../src/hello.polyfill.js"></script>
-<script src="../src/hello.js"></script>
-<script src="../src/modules/facebook.js"></script>
+<script src="../dist/hello.all.js"></script>
 
 <title>hello( facebook )</title>
 <h1>hello( facebook )</h1>
@@ -22,6 +20,9 @@ function login(network) {
 		return facebook.api('me');
 	}).then(function(p) {
 		document.getElementById('profile').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network +" as " + p.name;
+	})
+	.catch(function(err) {
+		console.log(err);
 	});
 }
 </script>

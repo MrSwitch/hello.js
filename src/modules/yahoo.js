@@ -1,4 +1,6 @@
-(function(hello) {
+const hello = require('../hello.js');
+
+{
 
 	hello.init({
 
@@ -13,14 +15,18 @@
 			},
 
 			// Login handler
-			login: function(p) {
+			login(p) {
 				// Change the default popup window to be at least 560
 				// Yahoo does dynamically change it on the fly for the signin screen (only, what if your already signed in)
 				p.options.popup.width = 560;
 
 				// Yahoo throws an parameter error if for whatever reason the state.scope contains a comma, so lets remove scope
-				try {delete p.qs.state.scope;}
-				catch (e) {}
+				try {
+					delete p.qs.state.scope;
+				}
+				catch (e) {
+					// Continue
+				}
 			},
 
 			base: 'https://social.yahooapis.com/v1/',
@@ -37,7 +43,7 @@
 				// It might be better to loop through the social.relationship table with has unique IDs of users.
 				'me/friends': formatFriends,
 				'me/following': formatFriends,
-				'default': paging
+				default: paging
 			}
 		}
 	});
@@ -76,7 +82,7 @@
 			o.id = o.guid;
 			o.last_name = o.familyName;
 			o.first_name = o.givenName || o.nickname;
-			var a = [];
+			const a = [];
 			if (o.first_name) {
 				a.push(o.first_name);
 			}
@@ -96,8 +102,6 @@
 	function formatFriends(o, headers, request) {
 		formatError(o);
 		paging(o, headers, request);
-		var contact;
-		var field;
 		if (o.query && o.query.results && o.query.results.contact) {
 			o.data = o.query.results.contact;
 			delete o.query;
@@ -121,7 +125,7 @@
 			contact.fields = [contact.fields];
 		}
 
-		(contact.fields || []).forEach(function(field) {
+		(contact.fields || []).forEach(field => {
 			if (field.type === 'email') {
 				contact.email = field.value;
 			}
@@ -129,7 +133,7 @@
 			if (field.type === 'name') {
 				contact.first_name = field.value.givenName;
 				contact.last_name = field.value.familyName;
-				contact.name = field.value.givenName + ' ' + field.value.familyName;
+				contact.name = `${field.value.givenName  } ${  field.value.familyName}`;
 			}
 
 			if (field.type === 'yahooid') {
@@ -143,7 +147,7 @@
 		// See: http://developer.yahoo.com/yql/guide/paging.html#local_limits
 		if (res.query && res.query.count && request.options) {
 			res.paging = {
-				next: '?start=' + (res.query.count + (+request.options.start || 1))
+				next: `?start=${res.query.count + (+request.options.start || 1)}`
 			};
 		}
 
@@ -151,7 +155,7 @@
 	}
 
 	function yql(q) {
-		return 'https://query.yahooapis.com/v1/yql?q=' + (q + ' limit @{limit|100} offset @{start|0}').replace(/\s/g, '%20') + '&format=json';
+		return `https://query.yahooapis.com/v1/yql?q=${(`${q} limit @{limit|100} offset @{start|0}`).replace(/\s/g, '%20')}&format=json`;
 	}
 
-})(hello);
+}

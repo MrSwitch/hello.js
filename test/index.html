@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>hello.js testing</title>
+	<link rel="stylesheet" href="/adorn/adorn.css" />
+
+<link rel="stylesheet" href="../assets/css-social-buttons/css/zocial.css"/>
+<link rel="stylesheet" href="../assets/index.css"/>
+
+<!-- IE7 support -->
+<script src="../assets/json2/json2.js"></script>
+
+<script src="../assets/knockout/dist/knockout.js"></script>
+<script src="/adorn/adorn.js" async></script>
+
+<!-- AUTHENTICATION -->
+<script src="../dist/hello.all.js"></script>
+<script src="../demos/client_ids.js"></script>
+</head>
+<body class="adorn-fullscreen">
+
+	<header>
+		<h1>hello.js endpoint tests</h1>
+	</header>
+	<blockquote>
+	<ol>
+		<li>Select the scope of the services you want to test
+		<li>Click the sign-in buttons along the top of the table, and give consent to the application
+		<li>Click the <button class="run"></button> to run a test
+		<li>Click on the <button class="response passed"></button> or <button class="response error"></button> response buttons to view the data
+	</ol>
+	</blockquote>
+
+	<h2>hello( x ).<b>login</b>( [ options ] [, callback] )</h2>
+	<div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'login' } }"></div>
+
+	<h2>hello( x ).<b>logout</b>([ callback ])</h2>
+	<div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'logout' } }"></div>
+
+	<h2>hello( x ).<b>getAuthResponse</b>()</h2>
+	<div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'getAuthResponse' } }"></div>
+
+	<h2>hello( x ).<b>api</b>( path [, method ][, data ][, callback ] )</h2>
+	<div data-bind="template: { name: 'tests-template', data: { test : $root, filter:'api' } }"></div>
+
+	<!-- Tests -->
+	<script src="../assets/index.js"></script>
+
+	<script type="text/html" id="tests-template"></script>
+
+	<script type="text/javascript">
+
+	// Initiate the library
+	hello.init(CLIENT_IDS_ALL,{
+		redirect_uri: '../redirect.html',
+		oauth_proxy: OAUTH_PROXY_URL
+	});
+
+	getText('../assets/test_network.html', function(response){
+		document.getElementById('tests-template').text = response;
+		ko.applyBindings(model);
+	});
+
+	</script>
+
+</body>
+</html>

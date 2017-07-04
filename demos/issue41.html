@@ -3,11 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>DEMO</title>
-        <script src="../src/hello.polyfill.js"></script>
-        <script src="../src/hello.js"></script>
-        <script src="../src/modules/google.js"></script>
-        <script src="../src/modules/facebook.js"></script>
-        <script src="../src/modules/windows.js"></script>
+        <script src="../dist/hello.all.js"></script>
         <script src="./client_ids.js"></script>
     </head>
     <body>
@@ -45,7 +41,7 @@
                 });
             };
             function sair(service) {
-                hello(service).logout(function() {
+                hello(service).logout().then(function() {
                     console.log("hello(\"" + service + "\").logout callback: You are signed in to " + service);
                 });
             };

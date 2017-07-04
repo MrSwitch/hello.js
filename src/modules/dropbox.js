@@ -1,7 +1,11 @@
-(function(hello) {
+const hello = require('../hello.js');
+const toBlob = require('tricks/object/toBlob');
+const querystringify = require('tricks/string/querystringify');
+
+{
 
 	// OAuth1
-	var OAuth1Settings = {
+	const OAuth1Settings = {
 		version: '1.0',
 		auth: 'https://www.dropbox.com/1/oauth/authorize',
 		request: 'https://api.dropbox.com/1/oauth/request_token',
@@ -9,7 +13,7 @@
 	};
 
 	// OAuth2 Settings
-	var OAuth2Settings = {
+	const OAuth2Settings = {
 		version: 2,
 		auth: 'https://www.dropbox.com/1/oauth2/authorize',
 		grant: 'https://api.dropbox.com/1/oauth2/token'
@@ -24,13 +28,13 @@
 
 			oauth: OAuth2Settings,
 
-			login: function(p) {
+			login(p) {
 				// OAuth2 non-standard adjustments
 				p.qs.scope = '';
 
 				// Should this be run as OAuth1?
 				// If the redirect_uri is is HTTP (non-secure) then its required to revert to the OAuth1 endpoints
-				var redirect = decodeURIComponent(p.qs.redirect_uri);
+				const redirect = decodeURIComponent(p.qs.redirect_uri);
 				if (redirect.indexOf('http:') === 0 && redirect.indexOf('http://localhost/') !== 0) {
 
 					// Override the dropbox OAuth settings.
@@ -76,7 +80,7 @@
 				'me/folder': req('metadata/auto/@{id}'),
 				'me/folders': req('metadata/auto/'),
 
-				'default': function(p, callback) {
+				default(p, callback) {
 					if (p.path.match('https://api-content.dropbox.com/1/files/')) {
 						// This is a file, return binary data
 						p.method = 'blob';
@@ -87,10 +91,10 @@
 			},
 
 			post: {
-				'me/files': function(p, callback) {
+				'me/files'(p, callback) {
 
-					var path = p.data.parent;
-					var fileName = p.data.name;
+					const path = p.data.parent;
+					const fileName = p.data.name;
 
 					p.data = {
 						file: p.data.file
@@ -98,20 +102,20 @@
 
 					// Does this have a data-uri to upload as a file?
 					if (typeof (p.data.file) === 'string') {
-						p.data.file = hello.utils.toBlob(p.data.file);
+						p.data.file = toBlob(p.data.file);
 					}
 
-					callback('https://api-content.dropbox.com/1/files_put/auto/' + path + '/' + fileName);
+					callback(`https://api-content.dropbox.com/1/files_put/auto/${path}/${fileName}`);
 				},
 
-				'me/folders': function(p, callback) {
+				'me/folders'(p, callback) {
 
-					var name = p.data.name;
+					const path = p.data.name;
 					p.data = {};
 
-					callback('fileops/create_folder?root=@{root|sandbox}&' + hello.utils.param({
-						path: name
-					}));
+					const qs = querystringify({path});
+
+					callback(`fileops/create_folder?root=@{root|sandbox}&${qs}`);
 				}
 			},
 
@@ -122,14 +126,14 @@
 			},
 
 			wrap: {
-				me: function(o) {
+				me(o) {
 					formatError(o);
 					if (!o.uid) {
 						return o;
 					}
 
 					o.name = o.display_name;
-					var m = o.name.split(' ');
+					const m = o.name.split(' ');
 					o.first_name = m.shift();
 					o.last_name = m.join(' ');
 					o.id = o.uid;
@@ -138,13 +142,13 @@
 					return o;
 				},
 
-				'default': function(o, headers, req) {
+				default(o, headers, req) {
 					formatError(o);
 					if (o.is_dir && o.contents) {
 						o.data = o.contents;
 						delete o.contents;
 
-						o.data.forEach(function(item) {
+						o.data.forEach(item => {
 							item.root = o.root;
 							formatFile(item, headers, req);
 						});
@@ -161,12 +165,12 @@
 			},
 
 			// Doesn't return the CORS headers
-			xhr: function(p) {
+			xhr(p) {
 
 				// The proxy supports allow-cross-origin-resource
 				// Alas that's the only thing we're using.
 				if (p.data && p.data.file) {
-					var file = p.data.file;
+					const file = p.data.file;
 					if (file) {
 						if (file.files) {
 							p.data = file.files[0];
@@ -184,7 +188,7 @@
 				return true;
 			},
 
-			form: function(p, qs) {
+			form(p, qs) {
 				delete qs.state;
 				delete qs.redirect_uri;
 			}
@@ -213,11 +217,11 @@
 			return;
 		}
 
-		var path = (o.root !== 'app_folder' ? o.root : '') + o.path.replace(/\&/g, '%26');
+		let path = (o.root !== 'app_folder' ? o.root : '') + o.path.replace(/&/g, '%26');
 		path = path.replace(/^\//, '');
 		if (o.thumb_exists) {
-			o.thumbnail = req.oauth_proxy + '?path=' +
-			encodeURIComponent('https://api-content.dropbox.com/1/thumbnails/auto/' + path + '?format=jpeg&size=m') + '&access_token=' + req.options.access_token;
+			const full_path = encodeURIComponent(`https://api-content.dropbox.com/1/thumbnails/auto/${path}?format=jpeg&size=m`);
+			o.thumbnail = `${req.oauth_proxy}?path=${full_path}&access_token=${req.options.access_token}`;
 		}
 
 		o.type = (o.is_dir ? 'folder' : o.mime_type);
@@ -226,9 +230,9 @@
 			o.files = path.replace(/^\//, '');
 		}
 		else {
-			o.downloadLink = hello.settings.oauth_proxy + '?path=' +
-			encodeURIComponent('https://api-content.dropbox.com/1/files/auto/' + path) + '&access_token=' + req.options.access_token;
-			o.file = 'https://api-content.dropbox.com/1/files/auto/' + path;
+			const full_path = `https://api-content.dropbox.com/1/files/auto/${path}`;
+			o.downloadLink = `${hello.settings.oauth_proxy}?path=${encodeURIComponent(full_path)}&access_token=${req.options.access_token}`;
+			o.file = full_path;
 		}
 
 		if (!o.id) {
@@ -245,4 +249,4 @@
 		};
 	}
 
-})(hello);
+}

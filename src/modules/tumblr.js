@@ -1,4 +1,6 @@
-(function(hello) {
+const hello = require('../hello.js');
+
+{
 
 	hello.init({
 
@@ -13,7 +15,7 @@
 			},
 
 			// Set default window height
-			login: function(p) {
+			login(p) {
 				p.options.popup.width = 600;
 				p.options.popup.height = 510;
 			},
@@ -23,7 +25,7 @@
 			get: {
 				me: 'user/info',
 				'me/like': 'user/likes',
-				'default': function(p, callback) {
+				default(p, callback) {
 					if (p.path.match(/(^|\/)blog\//)) {
 						delete p.query.access_token;
 						p.query.api_key = hello.services.tumblr.id;
@@ -34,14 +36,14 @@
 			},
 
 			post: {
-				'me/like': function(p, callback) {
+				'me/like'(p, callback) {
 					p.path = 'user/like';
 					query(p, callback);
 				}
 			},
 
 			del: {
-				'me/like': function(p, callback) {
+				'me/like'(p, callback) {
 					p.method = 'post';
 					p.path = 'user/unlike';
 					query(p, callback);
@@ -49,7 +51,7 @@
 			},
 
 			wrap: {
-				me: function(o) {
+				me(o) {
 					if (o && o.response && o.response.user) {
 						o = o.response.user;
 					}
@@ -57,7 +59,7 @@
 					return o;
 				},
 
-				'me/like': function(o) {
+				'me/like'(o) {
 					if (o && o.response && o.response.liked_posts) {
 						o.data = o.response.liked_posts;
 						delete o.response;
@@ -66,10 +68,10 @@
 					return o;
 				},
 
-				'default': function(o) {
+				default(o) {
 
 					if (o.response) {
-						var r = o.response;
+						const r = o.response;
 						if (r.posts) {
 							o.data = r.posts;
 						}
@@ -79,7 +81,7 @@
 				}
 			},
 
-			xhr: function(p, qs) {
+			xhr(p) {
 				if (p.method !== 'get') {
 					return true;
 				}
@@ -100,11 +102,11 @@
 	}
 
 	function extend(a, b) {
-		for (var x in b) {
+		for (const x in b) {
 			if (b.hasOwnProperty(x)) {
 				a[x] = b[x];
 			}
 		}
 	}
 
-})(hello);
+}

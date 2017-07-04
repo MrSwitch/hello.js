@@ -3,9 +3,7 @@
 <script src="/adorn/adorn.js" async></script>
 
 <script src="client_ids.js"></script>
-<script src="../src/hello.polyfill.js"></script>
-<script src="../src/hello.js"></script>
-<script src="../src/modules/vk.js"></script>
+<script src="../src/hello.all.js"></script>
 
 <title>hello( vk )</title>
 <h1>hello( vk )</h1>
@@ -22,9 +20,9 @@ function login(network) {
 		return vk.api('me');
 	})
 	.then(function(p){
-		document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to " + r.network+ " as " + p.name;
+		document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to " + network+ " as " + p.name;
 	});
-});
+}
 
 hello.init({
 	'vk' : VK_CLIENT_ID

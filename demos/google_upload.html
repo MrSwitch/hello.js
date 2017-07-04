@@ -4,8 +4,8 @@
 <script src="client_ids.js"></script>
 <script>
 // DEBUGGING
-window.addEventListener('message', function(){
-	console.debug(arguments[0].origin, arguments[0].data);
+window.addEventListener('message', function(e){
+	console.debug(e.origin, e.data);
 });
 </script>
 
@@ -19,8 +19,7 @@ window.addEventListener('message', function(){
 <pre class="response"></pre>
 
 <p>Include the SDK's</p>
-<script src="../src/hello.js" class="pre"></script>
-<script src="../src/modules/google.js" class="pre"></script>
+<script src="../dist/hello.all.js" class="pre"></script>
 
 <p>Add event listeners for the login completed event and make a request for the users profile. Once that's loaded push it to the page. </p>
 
@@ -36,7 +35,7 @@ hello.init({
 <p>The function called when the above form is submitted</p>
 
 <script class="pre">
-function upload(network){
+function upload(network) {
 
 	var google = hello("google");
 	google.login().then(function() {

@@ -1,4 +1,6 @@
-(function(hello) {
+const hello = require('../hello.js');
+
+{
 
 	hello.init({
 
@@ -40,8 +42,8 @@
 			post: {
 
 				// See: https://developer.linkedin.com/documents/api-requests-json
-				'me/share': function(p, callback) {
-					var data = {
+				'me/share'(p, callback) {
+					const data = {
 						visibility: {
 							code: 'anyone'
 						}
@@ -74,12 +76,12 @@
 				'me/like': like
 			},
 
-			del:{
+			del: {
 				'me/like': like
 			},
 
 			wrap: {
-				me: function(o) {
+				me(o) {
 					formatError(o);
 					formatUser(o);
 					return o;
@@ -88,12 +90,12 @@
 				'me/friends': formatFriends,
 				'me/following': formatFriends,
 				'me/followers': formatFriends,
-				'me/share': function(o) {
+				'me/share'(o) {
 					formatError(o);
 					paging(o);
 					if (o.values) {
 						o.data = o.values.map(formatUser);
-						o.data.forEach(function(item) {
+						o.data.forEach(item => {
 							item.message = item.headline;
 						});
 
@@ -103,14 +105,14 @@
 					return o;
 				},
 
-				'default': function(o, headers) {
+				default(o, headers) {
 					formatError(o);
 					empty(o, headers);
 					paging(o);
 				}
 			},
 
-			jsonp: function(p, qs) {
+			jsonp(p, qs) {
 				formatQuery(qs);
 				if (p.method === 'get') {
 					qs.format = 'jsonp';
@@ -118,7 +120,7 @@
 				}
 			},
 
-			xhr: function(p, qs) {
+			xhr(p, qs) {
 				if (p.method !== 'get') {
 					formatQuery(qs);
 					p.headers['Content-Type'] = 'application/json';
@@ -150,7 +152,7 @@
 
 		o.first_name = o.firstName;
 		o.last_name = o.lastName;
-		o.name = o.formattedName || (o.first_name + ' ' + o.last_name);
+		o.name = o.formattedName || (`${o.first_name  } ${  o.last_name}`);
 		o.thumbnail = o.pictureUrl;
 		o.email = o.emailAddress;
 		return o;
@@ -170,7 +172,7 @@
 	function paging(res) {
 		if ('_count' in res && '_start' in res && (res._count + res._start) < res._total) {
 			res.paging = {
-				next: '?start=' + (res._start + res._count) + '&count=' + res._count
+				next: `?start=${  res._start + res._count  }&count=${  res._count}`
 			};
 		}
 	}
@@ -192,10 +194,10 @@
 
 	function like(p, callback) {
 		p.headers['x-li-format'] = 'json';
-		var id = p.data.id;
+		const id = p.data.id;
 		p.data = (p.method !== 'delete').toString();
 		p.method = 'put';
-		callback('people/~/network/updates/key=' + id + '/is-liked');
+		callback(`people/~/network/updates/key=${  id  }/is-liked`);
 	}
 
-})(hello);
+}
