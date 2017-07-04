@@ -119,7 +119,7 @@ Compiled source, which combines all of the modules, can be obtained from [GitHub
 npm i hellojs
 ```
 
-At the present time only the bundled files in the `/dist/hello.*` support CommonJS. e.g. `let hello = require('hello/dist/hello.all.js')`.
+At the present time only the bundled files in the `/dist/hello.*` support CommonJS. e.g. `let hello = require('hellojs/dist/hello.all.js')`.
 
 ### Bower
 
@@ -363,6 +363,14 @@ If a network string is provided: A consent window to authenticate with that netw
 					<td>Overrides the <a href="http://www.w3schools.com/jsref/met_win_open.asp">popups specs</a></td>
 					<td><em>optional</em></td>
 					<td>See <code>hello.settings.popup</code></td>
+				</tr>
+				<tr>
+					<td>state</td>
+					<td><i>string</i></td>
+					<td><q>ijustsetthis</q></td>
+					<td>Honours the state parameter, by storing it withing its own state object</td>
+					<td><em>optional</em></td>
+					<td></td>
 				</tr>
 			</table>
 		</td>

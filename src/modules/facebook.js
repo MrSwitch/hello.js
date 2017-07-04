@@ -1,4 +1,7 @@
 (function(hello) {
+	// For APIs, once a version is no longer usable, any calls made to it will be defaulted to the next oldest usable version.
+	// So we explicitly state it.
+	var version = 'v2.9';
 
 	hello.init({
 
@@ -6,10 +9,10 @@
 
 			name: 'Facebook',
 
-			// SEE https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow/v2.1
+			// SEE https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow
 			oauth: {
 				version: 2,
-				auth: 'https://www.facebook.com/dialog/oauth/',
+				auth: 'https://www.facebook.com/' + version + '/dialog/oauth/',
 				grant: 'https://graph.facebook.com/oauth/access_token'
 			},
 
@@ -67,7 +70,7 @@
 			},
 
 			// API Base URL
-			base: 'https://graph.facebook.com/v2.7/',
+			base: 'https://graph.facebook.com/' + version + '/',
 
 			// Map GET requests
 			get: {
