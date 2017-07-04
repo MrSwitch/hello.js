@@ -601,12 +601,10 @@ hello.api([path], [method], [data], [callback(json)]).then(successHandler, error
 			<em>null</em>
 		</td>
 	</tr>
-
 	<tr>
 		<td colspan='6'>More options (below) require putting the options into a 'key'=>'value' hash. I.e. <code>hello(network).api(options)</code>
 		</td>
 	</tr>
-
 	<tr>
 		<td>timeout</td>
 		<td><i>integer</i></td>
@@ -623,7 +621,6 @@ hello.api([path], [method], [data], [callback(json)]).then(successHandler, error
 			<em>60000</em>
 		</td>
 	</tr>
-
 	<tr>
 		<td>formatResponse</td>
 		<td><i>boolean</i></td>
