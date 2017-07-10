@@ -21,7 +21,8 @@ const globalCallback = require('tricks/events/globalCallback');
 const iframe = require('tricks/dom/hiddenFrame');
 const isEmpty = require('tricks/object/isEmpty');
 const merge = require('tricks/object/merge');
-const param = require('tricks/string/queryparse');
+const queryparse = require('tricks/string/queryparse');
+const param = require('tricks/string/param');
 const popup = require('tricks/window/popup');
 const pubsub = require('tricks/object/pubsub');
 const random = require('tricks/string/random');
@@ -564,7 +565,7 @@ extend(hello.utils, {
 		});
 
 		// Is this an auth relay message which needs to call the proxy?
-		p = param(location.search);
+		p = queryparse(location.search);
 
 		// OAuth2 or OAuth1 server response?
 		if (p && p.state && (p.code || p.oauth_token)) {
@@ -588,7 +589,7 @@ extend(hello.utils, {
 		// FACEBOOK is returning auth errors within as a query_string... thats a stickler for consistency.
 		// SoundCloud is the state in the querystring and the token in the hashtag, so we'll mix the two together
 
-		p = merge(param(location.search || ''), param(location.hash || ''));
+		p = merge(queryparse(location.search || ''), queryparse(location.hash || ''));
 
 		// If p.state
 		if (p && 'state' in p) {
@@ -978,7 +979,7 @@ hello.api = async function(...args) {
 
 		const query = url.split(/[?#]/)[1];
 		if (query) {
-			extend(p.query, param(query));
+			extend(p.query, queryparse(query));
 
 			// Remove the query part from the URL
 			url = url.replace(/\?.*?(#|$)/, '$1');
