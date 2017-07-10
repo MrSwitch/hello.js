@@ -22,7 +22,7 @@ const iframe = require('tricks/dom/hiddenFrame');
 const isEmpty = require('tricks/object/isEmpty');
 const merge = require('tricks/object/merge');
 const queryparse = require('tricks/string/queryparse');
-const param = require('tricks/string/param');
+const querystringify = require('tricks/string/querystringify');
 const popup = require('tricks/window/popup');
 const pubsub = require('tricks/object/pubsub');
 const random = require('tricks/string/random');
@@ -570,13 +570,14 @@ extend(hello.utils, {
 		// OAuth2 or OAuth1 server response?
 		if (p && p.state && (p.code || p.oauth_token)) {
 
+			// State
 			const state = JSON.parse(p.state);
 
 			// Add this path as the redirect_uri
 			p.redirect_uri = state.redirect_uri || location.href.replace(/[?#].*$/, '');
 
 			// Redirect to the host
-			const path = `${state.oauth_proxy}?${param(p)}`;
+			const path = `${state.oauth_proxy}?${querystringify(p)}`;
 
 			redirect(path);
 

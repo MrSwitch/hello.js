@@ -192,8 +192,31 @@ describe('utils.responseHandler', () => {
 
 	});
 
-	xdescribe('POST Response', () => {
+	describe('OAuth Server Response', () => {
+		it('should handle Authorization Code response and redirect to state.oauth_proxy', () => {
 
+			const state = JSON.stringify(Object.assign(_state, {
+				redirect_uri: 'https://redirect/',
+				oauth_proxy: 'https://auth-proxy/'
+			}));
+			const code = 'code';
+
+			const qs = `?state=${encodeURIComponent(state)}&code=${code}`;
+
+			// Mock up _window and _parent objects for the tests
+			_window.location = mockLocation(`http://adodson.com/redirect.html${qs}`);
+
+			const spy = sinon.spy();
+			_window.location.assign = spy;
+
+			// Trigger the response handler
+			utils.responseHandler(_window, _parent);
+
+			// Trigger Spy called
+			expect(spy.calledOnce).to.be.ok();
+			expect(spy.args[0][0]).to.eql(`${_state.oauth_proxy}${qs}&redirect_uri=${encodeURIComponent(_state.redirect_uri)}`);
+
+		});
 	});
 
 });
