@@ -29,11 +29,13 @@ module.exports = {
 	sharedSetup() {
 
 		const originalGetAuthResponse = hello.getAuthResponse;
+		const originalProxyHandler = hello.utils.proxyHandler;
 		const originalRequest = hello.utils.request;
 		const requestProxy = this.getRequestProxy(originalRequest);
 
 		before(() => {
 			hello.getAuthResponse = () => ({access_token: 'token'});
+			hello.utils.proxyHandler = (p, cb) => cb();
 
 			hello.utils.request = requestProxy;
 		});
@@ -41,6 +43,7 @@ module.exports = {
 		after(() => {
 			hello.getAuthResponse = originalGetAuthResponse;
 			hello.utils.request = originalRequest;
+			hello.utils.proxyHandler = originalProxyHandler;
 		});
 
 	}

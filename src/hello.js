@@ -1012,54 +1012,7 @@ hello.api = async function(...args) {
 	p.form = o.form;
 
 	// Define Proxy handler
-	p.proxyHandler = (p, callback) => {
-
-		// Are we signing the request?
-		let sign;
-
-		// OAuth1
-		// Remove the token from the query before signing
-		if (p.authResponse && p.authResponse.oauth && parseInt(p.authResponse.oauth.version, 10) === 1) {
-
-			// OAUTH SIGNING PROXY
-			sign = p.query.access_token;
-
-			// Remove the access_token
-			delete p.query.access_token;
-
-			// Enfore use of Proxy
-			p.proxy = true;
-		}
-
-		// POST body to querystring
-		if (p.data && (p.method === 'get' || p.method === 'delete')) {
-			// Attach the p.data to the querystring.
-			extend(p.query, p.data);
-			p.data = null;
-		}
-
-		// Construct the path
-		let path = createUrl(p.url, p.query);
-
-		// Proxy the request through a server
-		// Used for signing OAuth1
-		// And circumventing services without Access-Control Headers
-		if (p.proxy) {
-			// Use the proxy as a path
-			path = createUrl(p.oauth_proxy, {
-				path,
-				access_token: sign || '',
-
-				// This will prompt the request to be signed as though it is OAuth1
-				then: p.proxy_response_type || (p.method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
-				method: p.method.toLowerCase(),
-				suppress_response_codes: true
-			});
-		}
-
-		callback(path);
-	};
-
+	p.proxyHandler = hello.utils.proxyHandler;
 
 	// If url needs a base
 	// Wrap everything in
@@ -1180,6 +1133,65 @@ hello.api = async function(...args) {
 	promise.then(p.callback, p.callback);
 
 	return promise;
+};
+
+/**
+ * ProxyHandler
+ * Defines any post protocol handling
+ * e.g. manipulating the request to route via a thirdparty service
+ */
+
+hello.utils.proxyHandler = (p, callback) => {
+
+	const authResponse = p.authResponse;
+
+	// Are we signing the request?
+	let access_token = '';
+
+	// OAuth1
+	// Remove the token from the query before signing
+	if (authResponse && authResponse.oauth && parseInt(authResponse.oauth.version, 10) === 1) {
+
+		// OAUTH SIGNING PROXY
+		access_token = p.query.access_token || '';
+
+		// Remove the access_token
+		delete p.query.access_token;
+
+		// Enfore use of Proxy
+		p.proxy = true;
+	}
+
+	// POST body to querystring
+	if (p.data && (p.method === 'get' || p.method === 'delete')) {
+		// Attach the p.data to the querystring.
+		extend(p.query, p.data);
+		p.data = null;
+	}
+
+	// Proxy the request through a server
+	// Used for signing OAuth1
+	// And circumventing services without Access-Control Headers
+	if (p.proxy) {
+
+		// Construct the path
+		const path = createUrl(p.url, p.query);
+
+		p.url = p.oauth_proxy;
+		p.query = {
+			path,
+			access_token,
+
+			// This will prompt the request to be signed as though it is OAuth1
+			then: p.proxy_response_type || (p.method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
+			method: p.method.toLowerCase(),
+			suppress_response_codes: true
+		};
+
+		console.log(path);
+	}
+
+	callback();
 };
 
 

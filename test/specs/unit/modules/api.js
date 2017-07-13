@@ -25,7 +25,7 @@ describe('API endpoints', () => {
 			query = splitter(query, ';', '-');
 		}
 
-		it(`should handle ${  m.slice(1, 5).join(' ')}`, done => {
+		it(`should handle ${m.slice(1, 5).join(' ')}`, done => {
 
 			const req = {
 				path,
