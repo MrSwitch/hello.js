@@ -1187,8 +1187,6 @@ hello.utils.proxyHandler = (p, callback) => {
 			method: p.method.toLowerCase(),
 			suppress_response_codes: true
 		};
-
-		console.log(path);
 	}
 
 	callback();
