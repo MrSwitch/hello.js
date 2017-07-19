@@ -1,4 +1,4 @@
-<img src="assets/logo.svg" width=64 height=64/>
+<img src="./assets/logo.svg?raw=true" width=64 height=64/>
 
 # hello.js
 
