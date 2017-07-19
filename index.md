@@ -15,7 +15,7 @@ layout: default
 <meta property="og:url" content="http://adodson.com/hello.js" />
 <meta property="og:type" content="website" />
 <meta property="og:description" content="A client-side JavaScript SDK for authenticating with OAuth2 (and OAuth 1 with an 'oauth proxy') web services and querying their REST APIs. HelloJS standardizes paths and responses to common APIs like Google Data Services, Facebook Graph and Windows Live Connect. It's modular, so that list is growing. No more spaghetti code!" />
-<meta property="og:image" content="assets/favicon.ico" />
+<meta property="og:image" content="assets/logo-w64.png" />
 
 <!-- Twitter Card -->
 <meta name="twitter:hashtag" content="hellojs" /><!-- i made this up -->
@@ -23,7 +23,7 @@ layout: default
 <meta name="twitter:site" content="@setData" />
 <meta name="twitter:creator" content="@setData" />
 
-<link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" href="../assets/logo-w64.png" type="image/x-icon" />
 <link rel="stylesheet" href="assets/css-social-buttons/css/zocial.css"/>
 <link rel="stylesheet" href="assets/index.css"/>
 
