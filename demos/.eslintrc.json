@@ -4,11 +4,17 @@
 		"es6": false
 	},
 	"globals": {
-		"hello": true
+		"hello": true,
+		"chrome": true,
+		"CLIENT_IDS": true,
+		"CLIENT_IDS_ALL": true,
+		"REDIRECT_URI": true,
+		"Uint8Array": true
 	},
 	"root": true,
 	"extends": "eslint:recommended",
 	"rules": {
-		"no-console": 0
+		"no-console": 0,
+		"no-unused-vars": 0
 	}
 }
