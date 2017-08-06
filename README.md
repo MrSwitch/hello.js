@@ -1,4 +1,4 @@
-<img src="assets/logo.svg" width=64 height=64/>
+![HelloJS](./assets/logo-w64.png?raw=true)
 
 # hello.js
 
