@@ -18,7 +18,7 @@ A client-side JavaScript SDK for authenticating with [OAuth2](http://tools.ietf.
 <p data-bind="visible: hasConnected, text: 'Hey, we got your details, test done! Checkout below to see what else hello.js can do'"></p>
 
 ## Try out the next version
-The `next` version is a full modern rewrite.
+The `next` version is a modern rewrite of hellojs, please support this development in the `v2` branch.
 
 	npm i hellojs@next
 
