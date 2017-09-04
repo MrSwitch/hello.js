@@ -13,7 +13,8 @@ module.exports = function(grunt) {
 					document: true
 				},
 				sub: true,
-				es3: true
+				es3: true,
+				reporterOutput: ''
 			}
 		},
 		jscs: {

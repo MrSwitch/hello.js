@@ -1,3 +1,4 @@
+/*! hellojs v1.9.8 | (c) 2012-2017 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -3898,18 +3899,18 @@ if (typeof chrome === 'object' && typeof chrome.extension === 'object') {
 				// otherwise request for all files under data.parent
 				'me/files': function(p, callback) {
 					if (p.query.id) {
-						callback('drive/v2/files/@{id}');
+						callback('drive/v2/files/@{id}?supportsTeamDrives=true');
 					}
 					else {
-						callback('drive/v2/files?q=%22@{parent|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}');
+						callback('drive/v2/files?q=%22@{parent|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}&supportsTeamDrives=true');
 					}
 				},
 
 				// See: https://developers.google.com/drive/v2/reference/files/list
-				'me/folders': 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+mimeType+=+%22application/vnd.google-apps.folder%22+and+trashed=false&maxResults=@{limit|100}',
+				'me/folders': 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+mimeType+=+%22application/vnd.google-apps.folder%22+and+trashed=false&maxResults=@{limit|100}&supportsTeamDrives=true',
 
 				// See: https://developers.google.com/drive/v2/reference/files/list
-				'me/folder': 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}'
+				'me/folder': 'drive/v2/files?q=%22@{id|root}%22+in+parents+and+trashed=false&maxResults=@{limit|100}&supportsTeamDrives=true'
 			},
 
 			// Map POST requests
@@ -3923,7 +3924,7 @@ if (typeof chrome === 'object' && typeof chrome.extension === 'object') {
 						parents: [{id: p.data.parent || 'root'}],
 						mimeType: 'application/vnd.google-apps.folder'
 					};
-					callback('drive/v2/files');
+					callback('drive/v2/files?supportsTeamDrives=true');
 				}
 			},
 
@@ -3934,13 +3935,13 @@ if (typeof chrome === 'object' && typeof chrome.extension === 'object') {
 
 			// Map DELETE requests
 			del: {
-				'me/files': 'drive/v2/files/@{id}',
-				'me/folder': 'drive/v2/files/@{id}'
+				'me/files': 'drive/v2/files/@{id}?supportsTeamDrives=true',
+				'me/folder': 'drive/v2/files/@{id}?supportsTeamDrives=true'
 			},
 
 			// Map PATCH requests
 			patch: {
-				'me/files': 'drive/v2/files/@{id}'
+				'me/files': 'drive/v2/files/@{id}?supportsTeamDrives=true'
 			},
 
 			wrap: {
@@ -4036,7 +4037,7 @@ if (typeof chrome === 'object' && typeof chrome.extension === 'object') {
 
 		if (o.mimeType === 'application/vnd.google-apps.folder') {
 			o.type = 'folder';
-			o.files = 'https://www.googleapis.com/drive/v2/files?q=%22' + o.id + '%22+in+parents';
+			o.files = 'https://www.googleapis.com/drive/v2/files?q=%22' + o.id + '%22+in+parents&supportsTeamDrives=true';
 		}
 
 		return o;
@@ -4392,7 +4393,7 @@ if (typeof chrome === 'object' && typeof chrome.extension === 'object') {
 			p.headers['content-type'] = 'multipart/related; boundary="' + boundary + '"';
 			p.data = body;
 
-			callback('upload/drive/v2/files' + (data.id ? '/' + data.id : '') + '?uploadType=multipart');
+			callback('upload/drive/v2/files' + (data.id ? '/' + data.id : '') + '?uploadType=multipart&supportsTeamDrives=true');
 		});
 
 	}
