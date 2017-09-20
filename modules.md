@@ -164,6 +164,11 @@ Modules are loaded into HelloJS using the hello.init() method, with a JSON objec
 							<td>url</td>
 							<td>Path to get the Access token, OAuth2 only</td>
 						</tr>
+						<tr>
+							<td>response_type</td>
+							<td>string</td>
+							<td>Implicit (token) or Explicit (code) Grant flow</td>
+						</tr>
 					</tbody>
 				</table>
 			</td>

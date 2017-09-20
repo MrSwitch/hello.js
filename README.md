@@ -17,6 +17,10 @@ A client-side JavaScript SDK for authenticating with [OAuth2](http://tools.ietf.
 </div>
 <p data-bind="visible: hasConnected, text: 'Hey, we got your details, test done! Checkout below to see what else hello.js can do'"></p>
 
+## Try out the next version
+The `next` version is a modern rewrite of hellojs, please support this development in the `v2` branch.
+
+	npm i hellojs@next
 
 ## Features
 
@@ -119,7 +123,7 @@ Compiled source, which combines all of the modules, can be obtained from [GitHub
 npm i hellojs
 ```
 
-At the present time only the bundled files in the `/dist/hello.*` support CommonJS. e.g. `let hello = require('hello/dist/hello.all.js')`.
+At the present time only the bundled files in the `/dist/hello.*` support CommonJS. e.g. `let hello = require('hellojs/dist/hello.all.js')`.
 
 ### Bower
 
@@ -364,6 +368,14 @@ If a network string is provided: A consent window to authenticate with that netw
 					<td><em>optional</em></td>
 					<td>See <code>hello.settings.popup</code></td>
 				</tr>
+				<tr>
+					<td>state</td>
+					<td><i>string</i></td>
+					<td><q>ijustsetthis</q></td>
+					<td>Honours the state parameter, by storing it withing its own state object</td>
+					<td><em>optional</em></td>
+					<td></td>
+				</tr>
 			</table>
 		</td>
 	</tr>
@@ -601,12 +613,10 @@ hello.api([path], [method], [data], [callback(json)]).then(successHandler, error
 			<em>null</em>
 		</td>
 	</tr>
-
 	<tr>
 		<td colspan='6'>More options (below) require putting the options into a 'key'=>'value' hash. I.e. <code>hello(network).api(options)</code>
 		</td>
 	</tr>
-
 	<tr>
 		<td>timeout</td>
 		<td><i>integer</i></td>
@@ -623,7 +633,6 @@ hello.api([path], [method], [data], [callback(json)]).then(successHandler, error
 			<em>60000</em>
 		</td>
 	</tr>
-
 	<tr>
 		<td>formatResponse</td>
 		<td><i>boolean</i></td>

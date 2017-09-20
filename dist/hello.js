@@ -1,4 +1,4 @@
-/*! hellojs v1.15.0 | (c) 2012-2017 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.15.1 | (c) 2012-2017 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -1394,13 +1394,13 @@ hello.utils.extend(hello.utils, {
 		if (options.height) {
 			var dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
 			var height = screen.height || window.innerHeight || documentElement.clientHeight;
-			options.top = (options.top) ? options.top : parseInt((height - options.height) / 2, 10) + dualScreenTop;
+			options.top = parseInt((height - options.height) / 2, 10) + dualScreenTop;
 		}
 
 		if (options.width) {
 			var dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
 			var width = screen.width || window.innerWidth || documentElement.clientWidth;
-			options.left = (options.left) ? options.left : parseInt((width - options.width) / 2, 10) + dualScreenLeft;
+			options.left = parseInt((width - options.width) / 2, 10) + dualScreenLeft;
 		}
 
 		// Convert options into an array
