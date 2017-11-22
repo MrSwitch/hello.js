@@ -13,6 +13,7 @@
 			},
 
 			// See: https://developer.spotify.com/web-api/using-scopes/
+			scope_delim: ' ',
 			scope: {
 				basic: '',
 				photos: '',
@@ -32,7 +33,7 @@
 			// See: https://developer.spotify.com/web-api/endpoint-reference/
 			get: {
 				me: '/v1/me',
-				'me/following': '/v1/me/following',
+				'me/following': '/v1/me/following?type=artist', // Only 'artist' is supported
 
 				// Because tracks, albums and playlist exist on spotify, the tracks are considered
 				// the resource for the 'me/likes' endpoint
@@ -42,7 +43,7 @@
 			// Response handlers
 			wrap: {
 				me: formatUser,
-				'me/following': formatFollowees(),
+				'me/following': formatFollowees,
 				'me/like': formatTracks
 			},
 
@@ -63,9 +64,8 @@
 	function formatUser(o) {
 		if (o.id) {
 			o.name = o.display_name;
-			o.thumbnail = o.images[0].url;
+			o.thumbnail = o.images.length ? o.images[0].url : null;
 			o.picture = o.thumbnail;
-			o.email = o.emailAddress;
 		}
 
 		return o;
@@ -88,7 +88,7 @@
 	}
 
 	function paging(res) {
-		if ('next' in res) {
+		if (res && 'next' in res) {
 			res.paging = {
 				next: res.next
 			};
