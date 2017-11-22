@@ -51,6 +51,7 @@ module.exports = function(grunt) {
 					'src/modules/joinme.js',
 					'src/modules/linkedin.js',
 					'src/modules/soundcloud.js',
+					'src/modules/spotify.js',
 					'src/modules/twitter.js',
 					'src/modules/vk.js',
 					'src/modules/windows.js',
