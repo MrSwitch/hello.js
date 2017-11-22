@@ -48,10 +48,7 @@ var TWITTER_CLIENT_ID = {
 var SOUNDCLOUD_CLIENT_ID = {
 	'local.knarly.com' : '8a4a19f86cdab097fa71a15ab26a01d6',
 	'adodson.com' : location_https ? 'eacfb4d662e046c19e53c9e44bf7f7b7' : '47a386647dadf913e559c12ef6db4292'
-}[window.location.hostname];0561613da0214b339781fd2c5c005382
-
-// Spotify Register - https://developer.spotify.com/my-applications/#!/applications/create
-var SOUNDCLOUD_CLIENT_ID = '0561613da0214b339781fd2c5c005382';
+}[window.location.hostname];
 
 // FourSquare Register - https://foursquare.com/developers/apps
 var FOURSQUARE_CLIENT_ID = {
