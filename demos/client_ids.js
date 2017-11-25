@@ -50,6 +50,9 @@ var SOUNDCLOUD_CLIENT_ID = {
 	'adodson.com' : location_https ? 'eacfb4d662e046c19e53c9e44bf7f7b7' : '47a386647dadf913e559c12ef6db4292'
 }[window.location.hostname];
 
+// Spotify - Register https://beta.developer.spotify.com/dashboard/applications/create 
+var SPOTIFY_CLIENT_ID = '79f269bb5e804ffda7b2eca80477f6cc';
+
 // FourSquare Register - https://foursquare.com/developers/apps
 var FOURSQUARE_CLIENT_ID = {
 	'local.knarly.com' : '3HEXMBQVH2SV0VXUKXOGQRPWH1PUTEIZN4KBDY5L54ZDXCDP',
