@@ -76,6 +76,23 @@ define([], function() {
 
 			});
 
+			it('should redirect to oauth proxy and preserve the query string', function() {
+				_state.oauth_proxy = 'http://adodson.com/oauth_proxy?foo=bar';
+				_state.redirect_uri = 'http://adodson.com/';
+
+				_window.location = mockLocation('http://adodson.com/redirect.html?code=abc&state=' + JSON.stringify(_state));
+
+				var spy = sinon.spy();
+				_window.location.assign = spy;
+
+				utils.responseHandler(_window, _parent);
+
+				// Using regex, instead of eq comparison, because the order
+				// of query string parameters is not guaranteed
+				expect(spy.args[0][0]).to.match(/foo=bar/);
+				expect(spy.args[0][0]).to.match(/redirect_uri=/);
+			});
+
 			it('should return the access_token to the parent if the current window location contains a access_token and a state parameter containing a callback and network', function() {
 
 				var spy = sinon.spy();

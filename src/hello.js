@@ -1302,7 +1302,7 @@ hello.utils.extend(hello.utils, {
 			p.redirect_uri = state.redirect_uri || location.href.replace(/[\?\#].*$/, '');
 
 			// Redirect to the host
-			var path = state.oauth_proxy + '?' + _this.param(p);
+			var path = _this.qs(state.oauth_proxy, p);
 
 			location.assign(path);
 
