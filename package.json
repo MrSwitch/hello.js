@@ -1,6 +1,6 @@
 {
   "name": "hellojs",
-  "version": "1.16.0",
+  "version": "1.16.1",
   "description": "A clientside Javascript library for standardizing requests to OAuth2 web services (and OAuth1 - with a shim)",
   "homepage": "https://adodson.com/hello.js",
   "main": "dist/hello.all.js",
@@ -38,6 +38,7 @@
     "grunt-banner": "^0.4.0",
     "grunt-bumpup": "^0.6.1",
     "grunt-contrib-jshint": "^1.0.0",
+    "grunt-contrib-uglify": "^3.2.1",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-jscs": "^1.8.0",
     "grunt-mocha-phantomjs": "~0.4.3",

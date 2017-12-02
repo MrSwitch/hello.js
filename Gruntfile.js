@@ -59,10 +59,14 @@ module.exports = function(grunt) {
 					'src/hello.amd.js',
 					'src/hello.commonjs.js'
 				]
-			},
+			}
+		},
+		uglify: {
 			minify: {
-				'dist/hello.min.js': 'dist/hello.js',
-				'dist/hello.all.min.js': 'dist/hello.all.js'
+				files: {
+					'dist/hello.min.js': ['dist/hello.js'],
+					'dist/hello.all.min.js': ['dist/hello.all.js']
+				}
 			}
 		},
 		usebanner: {
@@ -87,6 +91,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-bumpup');
 	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
+	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-mocha-phantomjs');
 	grunt.loadNpmTasks('grunt-jscs');
 	grunt.loadNpmTasks('browserstack-runner');
@@ -94,8 +99,8 @@ module.exports = function(grunt) {
 
 	grunt.registerTask('mocha', ['mocha_phantomjs']);
 	grunt.registerTask('test', ['jscs', 'jshint', 'mocha']);
-	grunt.registerTask('deploy', ['test', 'shunt:build', 'shunt:minify', 'bumpup', 'updateInitConfig', 'usebanner:build']);
-	grunt.registerTask('default', ['test', 'shunt:build', 'shunt:minify', 'usebanner:build']);
+	grunt.registerTask('deploy', ['test', 'shunt:build', 'uglify:minify', 'bumpup', 'updateInitConfig', 'usebanner:build']);
+	grunt.registerTask('default', ['test', 'shunt:build', 'uglify:minify', 'usebanner:build']);
 
 	grunt.registerTask('updateInitConfig', 'Redefine pkg after change in package.json', function() {
 		grunt.config.set('pkg', grunt.file.readJSON('package.json'));
