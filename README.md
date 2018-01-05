@@ -18,6 +18,10 @@ A client-side JavaScript SDK for authenticating with [OAuth2](http://tools.ietf.
 </div>
 <p data-bind="visible: hasConnected, text: 'Hey, we got your details, test done! Checkout below to see what else hello.js can do'"></p>
 
+## Try out the next version
+The `next` version is a modern rewrite of hellojs, please support this development in the `v2` branch.
+
+	npm i hellojs@next
 
 ## Features
 
@@ -557,6 +561,18 @@ hello.api([path], [method], [data], [callback(json)]).then(successHandler, error
 		<td>null</td>
 	</tr>
 	<tr>
+		<td>query</td>
+		<td><i>object</i></td>
+		<td>
+			<code>{name:<q>Hello</q>}</code>
+		</td>
+		<td>HTTP query string parameters.</td>
+		<td>
+			<em>optional</em>
+		</td>
+		<td>null</td>
+	</tr>
+	<tr>
 		<td>method</td>
 		<td>
 			<q>get</q>,
@@ -595,6 +611,22 @@ hello.api([path], [method], [data], [callback(json)]).then(successHandler, error
 		</td>
 	</tr>
 	<tr>
+		<td>timeout</td>
+		<td><i>integer</i></td>
+		<td>
+			<code>3000</code> = 3 seconds.
+		</td>
+		<td>
+			Wait <em>milliseconds</em> before resolving the Promise with a reject.
+		</td>
+		<td>
+			<em>optional</em>
+		</td>
+		<td>
+			<em>60000</em>
+		</td>
+	</tr>
+	<tr>
 		<td>callback</td>
 		<td><i>function</i></td>
 		<td>
@@ -612,22 +644,6 @@ hello.api([path], [method], [data], [callback(json)]).then(successHandler, error
 	</tr>
 	<tr>
 		<td colspan='6'>More options (below) require putting the options into a 'key'=>'value' hash. I.e. <code>hello(network).api(options)</code>
-		</td>
-	</tr>
-	<tr>
-		<td>timeout</td>
-		<td><i>integer</i></td>
-		<td>
-			<code>3000</code> = 3 seconds.
-		</td>
-		<td>
-			Wait <em>milliseconds</em> before resolving the Promise with a reject.
-		</td>
-		<td>
-			<em>optional</em>
-		</td>
-		<td>
-			<em>60000</em>
 		</td>
 	</tr>
 	<tr>

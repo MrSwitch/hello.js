@@ -577,7 +577,7 @@ extend(hello.utils, {
 			p.redirect_uri = state.redirect_uri || location.href.replace(/[?#].*$/, '');
 
 			// Redirect to the host
-			const path = `${state.oauth_proxy}?${querystringify(p)}`;
+			const path = createUrl(state.oauth_proxy, p);
 
 			redirect(path);
 
@@ -602,7 +602,14 @@ extend(hello.utils, {
 				extend(p, a);
 			}
 			catch (e) {
-				hello.emit('error', 'Could not decode state parameter');
+				var stateDecoded = decodeURIComponent(p.state);
+				try {
+					var b = JSON.parse(stateDecoded);
+					extend(p, b);
+				}
+				catch (e) {
+					console.error('Could not decode state parameter');
+				}
 			}
 
 			// Access_token?
@@ -820,8 +827,7 @@ pubsub.call(hello);
 				}
 
 				// Has session changed?
-				else if (oldSess.access_token === session.access_token &&
-			oldSess.expires === session.expires) {
+				else if (oldSess.access_token === session.access_token && oldSess.expires === session.expires) {
 					continue;
 				}
 
