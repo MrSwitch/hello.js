@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <link rel="stylesheet" href="/adorn/adorn.css"/>
 <script src="/adorn/adorn.js" async></script>
-<script src="/_packages/atob.js"></script>
-<script src="/_packages/toBlob.js"></script>
 <script src="client_ids.js"></script>
 
 <style>
@@ -37,10 +35,7 @@
 </blockquote>
 
 <p>Include hello.js</p>
-<script src="../src/hello.js" class="pre"></script>
-<script src="../src/modules/windows.js" class="pre"></script>
-<script src="../src/modules/facebook.js" class="pre"></script>
-<script src="../src/modules/google.js" class="pre"></script>
+<script src="../dist/hello.all.js" class="pre"></script>
 
 <p>Add event listeners for the login completed event and make a request for the users profile. Once that's loaded push it to the page. </p>
 
@@ -58,7 +53,7 @@ function uploadAsBlob(path, canvasElement){
 	hello(network).api('me/album', 'post', {
 		id :  album_id,
 		file: canvasToBlob(canvasElement)
-	}, log);
+	}).then(log, log);
 }
 </script>
 
@@ -113,10 +108,15 @@ function canvasToBlob(o,name){
 
 function login(network){
 
-	hello(network).login( function(auth){
+	var hi = hello(network);
+
+	hi.login()
+	.then(function(auth){
 
 		// Get Profile
-		hello( network ).api('me', function(r){
+		hi
+		.api('me')
+		.then(function(r){
 			if(!r||r.error){
 				return;
 			}
@@ -124,12 +124,9 @@ function login(network){
 		});
 
 		// Get albums
-		hello( network ).api('me/albums', function(r){
-
-			if(!r||r.error){
-				log(r);
-				return;
-			}
+		hi
+		.api('me/albums')
+		.then(function(r) {
 
 			var grp = document.createElement('optgroup');
 			grp.label = network;
@@ -142,7 +139,8 @@ function login(network){
 				grp.appendChild(o);
 			}
 
-		});
+		})
+		.catch(log);
 	});
 }
 </script>

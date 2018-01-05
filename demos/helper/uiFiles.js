@@ -39,8 +39,9 @@ function uiFiles(network, target, parent){
 			label.innerHTML = item.name;
 			label.onclick = function(){
 				var target = this.parentNode;
-				var ul = target.getElementsByTagName('ul'),
-					ul = ul.length>0?ul[0]:false;
+				var ul = target.getElementsByTagName('ul');
+
+				ul = ul.length>0?ul[0]:false;
 
 				if( ul && ul.style.display === 'none' ){
 					ul.style.display = 'block';
@@ -73,8 +74,7 @@ function uiFiles(network, target, parent){
 				file.onclick = function(){
 					// Get a raw file
 					app.api(item.downloadLink, function(a){
-						var a = window.URL.createObjectURL(a);
-						window.open(a);
+						window.open(window.URL.createObjectURL(a));
 					});
 				};
 				li.appendChild(file);

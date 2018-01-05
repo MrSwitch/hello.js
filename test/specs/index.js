@@ -1,0 +1,16 @@
+require('babel-polyfill');
+require('../setup.js');
+require('./e2e/modules.js');
+require('./e2e/requireable.js');
+require('./unit/core/hello.api.js');
+require('./unit/core/hello.events.js');
+require('./unit/core/hello.getAuthResponse.js');
+require('./unit/core/hello.init.js');
+require('./unit/core/hello.login.js');
+require('./unit/core/hello.logout.js');
+require('./unit/core/hello.use.js');
+require('./unit/core/session.monitor.js');
+require('./unit/core/responseHandler.js');
+require('./unit/core/proxyHandler.js');
+require('./unit/ext/chromeapp/popup.js');
+require('./unit/modules/');

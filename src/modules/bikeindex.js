@@ -1,6 +1,8 @@
 // BikeIndex
 // Https://bikeindex.org/documentation/api_v2
-(function(hello) {
+const hello = require('../hello.js');
+
+{
 
 	hello.init({
 
@@ -40,7 +42,7 @@
 			del: {},
 
 			wrap: {
-				me: function(o, headers) {
+				me(o, headers) {
 
 					formatError(o, headers);
 					formatUser(o);
@@ -48,12 +50,12 @@
 					return o;
 				},
 
-				'default': function(o, headers, req) {
+				default(o, headers, req) {
 
 					formatError(o, headers);
 
 					if (Array.isArray(o)) {
-						o = {data:o};
+						o = {data: o};
 						paging(o, headers, req);
 						o.data.forEach(formatUser);
 					}
@@ -62,7 +64,7 @@
 				}
 			},
 
-			xhr: function(p) {
+			xhr(p) {
 				if (p.method !== 'get' && p.data) {
 					// Serialize payload as JSON
 					p.headers = p.headers || {};
@@ -92,7 +94,7 @@
 		}
 
 		if (o.user) {
-			hello.utils.extend(o, o.user);
+			Object.assign(o, o.user);
 			delete o.user;
 		}
 
@@ -103,9 +105,9 @@
 		return o;
 	}
 
-	function paging(res, headers, req) {
+	function paging(res, headers) {
 		if (res.data && res.data.length && headers && headers.Link) {
-			var next = headers.Link.match(/<(.*?)>;\s*rel=\"next\"/);
+			const next = headers.Link.match(/<(.*?)>;\s*rel="next"/);
 			if (next) {
 				res.paging = {
 					next: next[1]
@@ -114,4 +116,4 @@
 		}
 	}
 
-})(hello);
+}

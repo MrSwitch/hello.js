@@ -106,7 +106,7 @@ hello.ui.filePicker = function(options, callback){
 		}, nav_el);
 
 		if(x.indexOf(":")>-1){
-			btn.className = x.replace(/\:.*$/,'');
+			btn.className = x.replace(/:.*$/,'');
 		}
 	}}
 
@@ -222,19 +222,19 @@ hello.ui.filePicker = function(options, callback){
 	};
 
 	if(camera_el){
-		var video_el = camera_el.getElementsByTagName('video')[0],
-			snap_el = video_el.nextSibling;
-		addEvent( video_el, 'click', function(){
+		var video = camera_el.getElementsByTagName('video')[0],
+			snap_el = video.nextSibling;
+		addEvent( video, 'click', function(){
 			win.navigator.getUserMedia({video:true}, function(stream){
 				// Create Object
-				video_el.src = win.URL ? win.URL.createObjectURL(stream) : stream;
+				video.src = win.URL ? win.URL.createObjectURL(stream) : stream;
 			}, function(e){
 				console.log(e);
 			});
 		});
 
 		addEvent(snap_el, 'click', function(){
-			var blob = elementToBlob(video_el, "snapshot.png");
+			var blob = elementToBlob(video, "snapshot.png");
 			// Create a new fileRef
 			var pointer = new fileRef({
 				name : "snapshot.png",
@@ -285,7 +285,7 @@ hello.ui.filePicker = function(options, callback){
 			label = doc.getElementById("label"+id);
 
 		// Network
-		var network = path.replace(/\:.*/, '');
+		var network = path.replace(/:.*/, '');
 
 		// Set current path
 		if(!label&&name){
@@ -613,7 +613,7 @@ hello.ui.filePicker = function(options, callback){
 
 		var binary;
 
-		if(typeof(o)==='string'&&o.match(/^data\:/)){
+		if(typeof(o)==='string'&&o.match(/^data:/)){
 			name = name || "DataURI";
 			binary = atob(o.split(',')[1]);
 			type = o.slice(o.indexOf(':')+1, o.indexOf(';') );

@@ -11,16 +11,15 @@
 
 <pre class="response"></pre>
 
-<script src="../src/hello.js" class="pre"></script>
-<script src="../src/modules/google.js" class="pre"></script>
+<script src="../dist/hello.all.js" class="pre"></script>
 
 <script class="pre">
-function login(network){
+function login(network) {
 
 	// By defining response type to code, the OAuth flow that will return a refresh token to be used to refresh the access token
 	// However this will require the oauth_proxy server
 
-	hello(network).login({response_type: 'code'}, log);
+	hello(network).login({response_type: 'code'}).then(log, log);
 }
 </script>
 
@@ -28,8 +27,8 @@ function login(network){
 
 <script class="pre">
 hello.init({
-	google : GOOGLE_CLIENT_ID
-},{
+	google: GOOGLE_CLIENT_ID
+}, {
 	redirect_uri: '../redirect.html',
 	scope: 'friends'
 });

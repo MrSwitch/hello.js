@@ -1,3 +1,4 @@
+![HelloJS](./assets/logo-w64.png?raw=true)
 
 # hello.js
 

@@ -3,9 +3,7 @@
 <script src="/adorn/adorn.js" async></script>
 
 <script src="client_ids.js"></script>
-<script src="../src/hello.polyfill.js"></script>
-<script src="../src/hello.js"></script>
-<script src="../src/modules/yahoo.js"></script>
+<script src="../dist/hello.all.js"></script>
 
 <title>hello( yahoo )</title>
 <h1>hello( yahoo )</h1>
@@ -17,7 +15,7 @@ function login(network){
 
 	var yahoo = hello(network);
 
-	yahoo.login().then(function(){
+	yahoo.login().then(function() {
 
 		// Get Profile
 		return yahoo.api('me');

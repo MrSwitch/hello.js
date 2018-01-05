@@ -1,3 +1,5 @@
+const hello = require('../hello.js');
+
 hello.init({
 
 	box: {
@@ -19,7 +21,7 @@ hello.init({
 		},
 
 		wrap: {
-			me: function(o) {
+			me(o) {
 				if (o.id) {
 					o.picture = o.thumbnail = o.avatar_url;
 					if (o.login.match('@')) {
@@ -30,16 +32,16 @@ hello.init({
 				return o;
 			},
 
-			'me/files': function(o) {
+			'me/files': o => {
 				if (Array.isArray(o)) {
-					return {data:o};
+					return {data: o};
 				}
 
 				return o;
 			}
 		},
 
-		xhr: function(p) {
+		xhr(p) {
 
 			p.proxy = true;
 			p.proxy_response_type = 'proxy';

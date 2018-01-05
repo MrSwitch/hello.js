@@ -1,6 +1,8 @@
 // Amazon
 // Amazon services
-(function(hello) {
+const hello = require('../hello.js');
+
+{
 
 	hello.init({
 
@@ -22,7 +24,7 @@
 
 			scope_delim: ' ',
 
-			login: function(p) {
+			login(p) {
 				p.options.popup.width = 710;
 			},
 
@@ -34,9 +36,9 @@
 				me: 'user/profile'
 			},
 			wrap: {
-				me: function(o, headers) {}
+				me() {}
 			}
 		}
 	});
 
-})(hello);
+}
