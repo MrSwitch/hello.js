@@ -1,0 +1,11 @@
+{
+	"msg": "insufficient scopes.",
+	"code": -402,
+	"api_type": "USER_ME",
+	"required_scopes": [
+	  "kaccount_email"
+	],
+	"allowed_scopes": [
+	  "profile"
+	]
+}
