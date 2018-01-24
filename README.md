@@ -976,6 +976,15 @@ The `manifest.json` file must have the following permissions...
 
 # Thank you
 
+## Sponsor
+
+|   |   |
+|---|---|
+| [![auth0-logo](https://user-images.githubusercontent.com/83319/31722733-de95bbde-b3ea-11e7-96bf-4f4e8f915588.png)](https://auth0.com/overview?utm_source=GHsponsor&utm_medium=GHsponsor&utm_campaign=hello.js&utm_content=auth) | If you want to quickly add authentication, feel free to check out Auth0's JS SDK and free plan at [auth0.com/overview](https://auth0.com/overview?utm_source=GHsponsor&utm_medium=GHsponsor&utm_campaign=hello.js&utm_content=auth). 
+
+
+## SaaS
+
 HelloJS relies on these fantastic services for it's development and deployment, without which it would still be kicking around in a cave - not evolving very fast.
 
 
