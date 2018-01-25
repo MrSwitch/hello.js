@@ -1,4 +1,4 @@
-/*! hellojs v1.9.8 | (c) 2012-2017 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.9.8 | (c) 2012-2018 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -350,6 +350,21 @@ hello.utils.extend(hello, {
 		}
 
 		var provider = _this.services[p.network];
+
+		/// Listen for messages back from the popup to invoke callbacks
+		if (!window.hellojs_listener) {
+			window.hellojs_listener = true;
+
+			window.addEventListener('message', function(event) {
+				if (event.origin !== window.location.origin) {
+					return;
+				}
+
+				if (event.data.hellojs_callback && event.data.hellojs_callback.indexOf('_hellojs_') === 0) {
+					window[event.data.hellojs_callback](event.data.message);
+				}
+			}, false);
+		}
 
 		// Create a global listener to capture events triggered out of scope
 		var callbackId = utils.globalEvent(function(str) {
@@ -1667,7 +1682,10 @@ hello.utils.extend(hello.utils, {
 				var str = JSON.stringify(obj);
 
 				try {
-					callback(parent, cb)(str);
+					parent.postMessage({
+						message: str,
+						hellojs_callback: cb
+					}, window.location.origin);
 				}
 				catch (e) {
 					// Error thrown whilst executing parent callback
@@ -2906,7 +2924,7 @@ hello.utils.extend(hello.utils, {
 // Is this a chrome extension?
 if (typeof chrome === 'object' && typeof chrome.extension === 'object') {
 	chrome.runtime.onMessageExternal.addListener(function(data) {
-		if (data.message_type == 'google_auth_response') {
+		if (data.message_type == 'google_auth_response' && data.callback.indexOf('_hellojs_') === 0) {
 			window[data.callback](data.obj);
 		}
 	});
