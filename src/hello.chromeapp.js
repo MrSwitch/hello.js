@@ -3,7 +3,7 @@
 // Is this a chrome extension?
 if (typeof chrome === 'object' && typeof chrome.extension === 'object') {
 	chrome.runtime.onMessageExternal.addListener(function(data) {
-		if (data.message_type == 'google_auth_response') {
+		if (data.message_type == 'google_auth_response' && data.callback.indexOf('_hellojs_') === 0) {
 			window[data.callback](data.obj);
 		}
 	});
