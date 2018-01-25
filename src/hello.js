@@ -1513,7 +1513,7 @@ hello.utils.extend(hello.utils, {
 				message.obj = JSON.stringify(obj);
 				chrome.runtime.sendMessage(obj.chrome_ext_id, message);
 			}
-			else if (parent && cb && cb in parent) {
+			else if (parent) {
 
 				try {
 					delete obj.callback;
