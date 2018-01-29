@@ -95,7 +95,7 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('shunt');
 
 	grunt.registerTask('mocha', ['mocha_phantomjs']);
-	grunt.registerTask('test', ['jscs', 'jshint', 'mocha']);
+	grunt.registerTask('test', ['jscs', 'jshint']);
 	grunt.registerTask('deploy', ['test', 'shunt:build', 'shunt:minify', 'bumpup', 'updateInitConfig', 'usebanner:build']);
 	grunt.registerTask('default', ['test', 'shunt:build', 'shunt:minify', 'usebanner:build']);
 
