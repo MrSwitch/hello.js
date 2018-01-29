@@ -1692,7 +1692,9 @@ hello.utils.extend(hello.utils, {
 				}
 			}
 
-			closeWindow();
+			setTimeout(function() {
+				closeWindow();
+			}, 300);
 		}
 
 		function callback(parent, callbackID) {
