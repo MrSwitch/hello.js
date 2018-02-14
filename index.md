@@ -2,13 +2,7 @@
 title: HelloJS
 layout: default
 ---
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-
-<!-- adorn -->
 <link rel="source" href="README.md"/>
-<link rel="stylesheet" href="/adorn/adorn.css" />
-<script src="/adorn/adorn.js" async></script>
 
 <!-- Open Graph -->
 <meta property="og:title" content="hello.js - JavaScript API for OAuth2 authentication and RESTful services" />
@@ -23,13 +17,8 @@ layout: default
 <meta name="twitter:site" content="@setData" />
 <meta name="twitter:creator" content="@setData" />
 
-<link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon" />
-<link rel="stylesheet" href="assets/css-social-buttons/css/zocial.css"/>
-<link rel="stylesheet" href="assets/index.css"/>
-
 <script src="demos/client_ids.js"></script>
 <script src="./dist/hello.all.js"></script>
-</head>
 
 {% include_relative README.md %}
 
