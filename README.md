@@ -112,8 +112,8 @@ Here are some more demos...
 <table>
 	<tbody>
 		<tr>
-			<td><a href="https://auth0.com/overview?utm_source=GHsponsor&amp;utm_medium=GHsponsor&amp;utm_campaign=hello.js&amp;utm_content=auth" rel="nofollow"><img src="https://user-images.githubusercontent.com/83319/31722733-de95bbde-b3ea-11e7-96bf-4f4e8f915588.png" alt="auth0-logo" style="max-width:100%;"></a></td>
-			<td>If you want to quickly add authentication, feel free to check out Auth0's JS SDK and free plan at <a href="https://auth0.com/overview?utm_source=GHsponsor&amp;utm_medium=GHsponsor&amp;utm_campaign=hello.js&amp;utm_content=auth" rel="nofollow">auth0.com/overview</a>.
+			<td><a href="https://auth0.com/overview?utm_source=GHsponsor&amp;utm_medium=GHsponsor&amp;utm_campaign=hello.js&amp;utm_content=auth" rel="nofollow"><img src="./assets/auth0-logo.png" alt="auth0-logo" style="max-width:90px;"></a></td>
+			<td style="vertical-align: middle;">If you want to quickly add authentication, feel free to check out Auth0's JS SDK and free plan at <a href="https://auth0.com/overview?utm_source=GHsponsor&amp;utm_medium=GHsponsor&amp;utm_campaign=hello.js&amp;utm_content=auth" rel="nofollow">auth0.com/overview</a>.
 			</td>
 		</tr>
 	</tbody>
