@@ -219,8 +219,12 @@
 	}
 
 	function formatPhotos(o) {
-		o.data = o.feed.entry.map(formatEntry);
-		delete o.feed;
+		if ('feed' in o) {
+			o.data = 'entry' in o.feed ? o.feed.entry.map(formatEntry) : [];
+			delete o.feed;
+		}
+
+		return o;
 	}
 
 	// Google has a horrible JSON API
