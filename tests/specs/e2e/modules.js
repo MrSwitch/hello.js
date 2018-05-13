@@ -15,8 +15,7 @@ define([
 	'../../../src/modules/github',
 	'../../../src/modules/bikeindex',
 	'../../../src/modules/soundcloud',
-	'../../../src/modules/vk',
-	'../../../src/modules/kakao'
+	'../../../src/modules/vk'
 ], function(
 	errorResponse
 ) {
