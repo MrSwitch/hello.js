@@ -1,4 +1,3 @@
-/*! hellojs v1.9.8 | (c) 2012-2018 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -565,7 +564,21 @@ hello.utils.extend(hello, {
 		// Trigger how we want self displayed
 		if (opts.display === 'none') {
 			// Sign-in in the background, iframe
-			utils.iframe(url, redirectUri);
+			var iframe = utils.iframe(url, redirectUri);
+
+			// If promise doesn't resolve after x seconds timeout, reject promise and remove the iframe
+			// If the promise has already resolved, this code does nothing
+			setTimeout(function() {
+				if(!promise.state) {
+					var response = error('timeout', 'Login has been cancelled due to network latency');
+					promise.reject(response);
+					try {
+						iframe.parentNode.removeChild(iframe);
+					} catch(e) {
+						console.error(e);
+					}
+				}
+			}, p.options.timeout);
 		}
 
 		// Triggering popup?
@@ -936,7 +949,7 @@ hello.utils.extend(hello.utils, {
 	// An easy way to create a hidden iframe
 	// @param string src
 	iframe: function(src) {
-		this.append('iframe', {src: src, style: {position:'absolute', left: '-1000px', bottom: 0, height: '1px', width: '1px'}}, 'body');
+		return this.append('iframe', {src: src, style: {position:'absolute', left: '-1000px', bottom: 0, height: '1px', width: '1px'}}, 'body');
 	},
 
 	// Recursive merge two objects into one, second parameter overides the first
