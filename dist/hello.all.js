@@ -1,3 +1,4 @@
+/*! hellojs v1.9.9 | (c) 2012-2018 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -437,7 +438,7 @@ hello.utils.extend(hello, {
 		// Append scopes from a previous session.
 		// This helps keep app credentials constant,
 		// Avoiding having to keep tabs on what scopes are authorized
-		if (session && 'scope' in session && session.scope instanceof String) {
+		if (session && 'scope' in session && typeof session.scope === 'string') {
 			scope += ',' + session.scope;
 		}
 
@@ -569,12 +570,13 @@ hello.utils.extend(hello, {
 			// If promise doesn't resolve after x seconds timeout, reject promise and remove the iframe
 			// If the promise has already resolved, this code does nothing
 			setTimeout(function() {
-				if(!promise.state) {
+				if (!promise.state) {
 					var response = error('timeout', 'Login has been cancelled due to network latency');
 					promise.reject(response);
 					try {
 						iframe.parentNode.removeChild(iframe);
-					} catch(e) {
+					}
+					catch (e) {
 						console.error(e);
 					}
 				}

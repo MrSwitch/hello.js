@@ -417,12 +417,13 @@ hello.utils.extend(hello, {
 			// If promise doesn't resolve after x seconds timeout, reject promise and remove the iframe
 			// If the promise has already resolved, this code does nothing
 			setTimeout(function() {
-				if(!promise.state) {
+				if (!promise.state) {
 					var response = error('timeout', 'Login has been cancelled due to network latency');
 					promise.reject(response);
 					try {
 						iframe.parentNode.removeChild(iframe);
-					} catch(e) {
+					}
+					catch (e) {
 						console.error(e);
 					}
 				}
