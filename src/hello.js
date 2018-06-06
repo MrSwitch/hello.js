@@ -285,7 +285,7 @@ hello.utils.extend(hello, {
 		// Append scopes from a previous session.
 		// This helps keep app credentials constant,
 		// Avoiding having to keep tabs on what scopes are authorized
-		if (session && 'scope' in session && session.scope instanceof String) {
+		if (session && 'scope' in session && typeof session.scope === 'string') {
 			scope += ',' + session.scope;
 		}
 
