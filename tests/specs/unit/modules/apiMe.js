@@ -95,6 +95,18 @@ define(['./helper'], function(helper) {
 				}
 			},
 			{
+				network: 'google_oauth2',
+				expect: {
+					id: '115111284799080900590',
+					name: 'Jane McGee',
+					thumbnail: 'https://lh3.googleusercontent.com/-NWCgcgRDieE/AAAAAAAAAAI/AAAAAAAAABc/DCi-M8IuzMo/photo.jpg?sz=50'
+				},
+				errorExpect: {
+					code: 403,
+					message: 'Daily Limit for Unauthenticated Use Exceeded. Continued use requires signup.'
+				}
+			},
+			{
 				network: 'instagram',
 				expect: {
 					id: '1636340308',

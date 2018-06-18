@@ -68,6 +68,11 @@ The table shows the services which are already documented on HelloJS. Simply inc
 			<td></td>
 		</tr>
 		<tr>
+			<td><a href="./src/modules/google_oauth2.js">google_oauth2.js</a></td>
+			<td><a href="demos/google_oauth2.html">Google (OAuth2-only) demo</a></td>
+			<td></td>
+		</tr>
+		<tr>
 			<td><a href="./src/modules/instagram.js">instagram.js</a></td>
 			<td><a href="demos/instagram.html">Instagram demo</a></td>
 			<td></td>

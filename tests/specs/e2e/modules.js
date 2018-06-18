@@ -4,6 +4,7 @@ define([
 	'../../../src/modules/facebook',
 	'../../../src/modules/flickr',
 	'../../../src/modules/google',
+	'../../../src/modules/google_oauth2',
 	'../../../src/modules/windows',
 	'../../../src/modules/dropbox',
 	'../../../src/modules/twitter',
@@ -21,6 +22,40 @@ define([
 ) {
 
 	describe('E2E modules', function() {
+
+		var expectedServices = [
+			'bikeindex',
+			'box',
+			'dropbox',
+			'facebook',
+			'flickr',
+			'foursquare',
+			'google',
+			'google_oauth2',
+			'instagram',
+			'joinme',
+			'linkedin',
+			'twitter',
+			'windows',
+			'yahoo',
+			'github',
+			'soundcloud',
+			'vk'
+		];
+
+		// This check verifies that the module's initializer does not throw:
+		// This is important since hello.js currently swallows this exception and
+		// simply silently fails to register the module.
+		var actualKeys = Object.keys(hello.services);
+		for (var i = 0; i < expectedServices.length; ++i) {
+			checkMembership(actualKeys, expectedServices[i]);
+		}
+
+		function checkMembership(actualKeys, expectedService) {
+			it('should load module ' + expectedService, function() {
+				expect(actualKeys.includes(expectedService)).to.equal(true);
+			});
+		}
 
 		// Loop through all services
 		for (var name in hello.services) {
