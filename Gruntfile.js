@@ -47,6 +47,7 @@ module.exports = function(grunt) {
 					'src/modules/foursquare.js',
 					'src/modules/github.js',
 					'src/modules/google.js',
+					'src/modules/google_oauth2.js',
 					'src/modules/instagram.js',
 					'src/modules/joinme.js',
 					'src/modules/linkedin.js',
