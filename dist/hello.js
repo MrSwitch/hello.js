@@ -1,4 +1,4 @@
-/*! hellojs v1.17.0 | (c) 2012-2018 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.17.1 | (c) 2012-2018 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
