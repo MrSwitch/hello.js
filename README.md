@@ -107,17 +107,6 @@ Here are some more demos...
 - Blank items are a work in progress, but there is good evidence that they can be done.
 - I have no knowledge of anything unlisted and would appreciate input.
 
-## Sponsor
-
-<table>
-	<tbody>
-		<tr>
-			<td><a href="https://auth0.com/overview?utm_source=GHsponsor&amp;utm_medium=GHsponsor&amp;utm_campaign=hello.js&amp;utm_content=auth" rel="nofollow"><img src="./assets/auth0-logo.png" alt="auth0-logo" style="max-width:90px;"></a></td>
-			<td style="vertical-align: middle;">If you want to quickly add authentication, feel free to check out Auth0's JS SDK and free plan at <a href="https://auth0.com/overview?utm_source=GHsponsor&amp;utm_medium=GHsponsor&amp;utm_campaign=hello.js&amp;utm_content=auth" rel="nofollow">auth0.com/overview</a>.
-			</td>
-		</tr>
-	</tbody>
-</table>
 
 ## Install
 

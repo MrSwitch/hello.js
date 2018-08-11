@@ -31,6 +31,5 @@
 	"github" : "MrSwitch",
 	"twitter:creator" : "@setData",
 	"author" : "Andrew Dodson, https://adodson.com",
-	"shoutout": "<a class='adorn-shoutout' href='https://auth0.com/overview?utm_source=GHsponsor&utm_medium=GHsponsor&utm_campaign=hello.js&utm_content=auth'>Sponsored by Auth0</a>",
 	"ga:tracking" : "UA-35317561-1"
 }
