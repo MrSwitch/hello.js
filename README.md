@@ -3,7 +3,7 @@
 
 [![CDNJS](https://img.shields.io/cdnjs/v/hellojs.svg)](https://cdnjs.com/libraries/hellojs/)
 
-A client-side JavaScript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST APIs. HelloJS standardizes paths and responses to common APIs like Google Data Services, Facebook Graph and Windows Live Connect. It's **modular**, so that list is [growing](./modules). No more spaghetti code!
+A client-side JavaScript SDK for authenticating with [OAuth2](http://tools.ietf.org/pdf/draft-ietf-oauth-v2-12.pdf) (and **OAuth1** with a [oauth proxy](#oauth-proxy)) web services and querying their REST APIs. HelloJS standardizes paths and responses to common APIs like Google Data Services, Facebook Graph and Windows Live Connect. It's **modular**, so that list is [growing](./src/modules). No more spaghetti code!
 
 
 ## E.g.
@@ -880,7 +880,7 @@ The first parameter of a failed request to the *errorHandler* may be either *boo
 
 
 ## Extending the services
-Services are added to HelloJS as "modules" for more information about creating your own modules and examples, go to [Modules](./modules)
+Services are added to HelloJS as "modules" for more information about creating your own modules and examples, go to [Modules](./src/modules)
 
 ## OAuth Proxy
 
