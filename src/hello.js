@@ -217,7 +217,7 @@ hello.utils.extend(hello, {
 
 			// The responseHandler returns a string, lets save this locally
 			if (obj) {
-				if (typeof(obj) == "string") {
+				if (typeof (obj) == 'string') {
 					obj = JSON.parse(obj);
 				}
 			}
