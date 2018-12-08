@@ -213,13 +213,13 @@ hello.utils.extend(hello, {
 		var provider = _this.services[p.network];
 
 		// Create a global listener to capture events triggered out of scope
-		var callbackId = utils.globalEvent(function(str) {
+		var callbackId = utils.globalEvent(function(obj) {
 
 			// The responseHandler returns a string, lets save this locally
-			var obj;
-
-			if (str) {
-				obj = JSON.parse(str);
+			if (obj) {
+				if (typeof (obj) == 'string') {
+					obj = JSON.parse(obj);
+				}
 			}
 			else {
 				obj = error('cancelled', 'The authentication was not completed');
