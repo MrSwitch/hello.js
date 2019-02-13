@@ -1,4 +1,4 @@
-/*! hellojs v1.17.1 | (c) 2012-2018 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.18.0 | (c) 2012-2019 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -366,13 +366,13 @@ hello.utils.extend(hello, {
 		var provider = _this.services[p.network];
 
 		// Create a global listener to capture events triggered out of scope
-		var callbackId = utils.globalEvent(function(str) {
+		var callbackId = utils.globalEvent(function(obj) {
 
 			// The responseHandler returns a string, lets save this locally
-			var obj;
-
-			if (str) {
-				obj = JSON.parse(str);
+			if (obj) {
+				if (typeof (obj) == 'string') {
+					obj = JSON.parse(obj);
+				}
 			}
 			else {
 				obj = error('cancelled', 'The authentication was not completed');
@@ -3945,24 +3945,23 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 		google: {
 
-			name: 'Google Plus',
+			name: 'Google Sign-In',
 
 			// See: http://code.google.com/apis/accounts/docs/OAuth2UserAgent.html
 			oauth: {
 				version: 2,
-				auth: 'https://accounts.google.com/o/oauth2/auth',
-				grant: 'https://accounts.google.com/o/oauth2/token'
+				auth: 'https://accounts.google.com/o/oauth2/v2/auth',
+				grant: 'https://www.googleapis.com/oauth2/v4/token'
 			},
 
 			// Authorization scopes
 			scope: {
-				basic: 'https://www.googleapis.com/auth/plus.me profile',
+				basic: 'openid profile',
 				email: 'email',
 				birthday: '',
 				events: '',
 				photos: 'https://picasaweb.google.com/data/',
 				videos: 'http://gdata.youtube.com',
-				friends: 'https://www.google.com/m8/feeds, https://www.googleapis.com/auth/plus.login',
 				files: 'https://www.googleapis.com/auth/drive.readonly',
 				publish: '',
 				publish_files: 'https://www.googleapis.com/auth/drive',
@@ -3980,6 +3979,9 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 					// Let's set this to an offline access to return a refresh_token
 					p.qs.access_type = 'offline';
 				}
+				else if (p.qs.response_type.indexOf('id_token') > -1) {
+					p.qs.nonce = parseInt(Math.random() * 1e12, 10).toString(36);
+				}
 
 				// Reauthenticate
 				// https://developers.google.com/identity/protocols/
@@ -3993,18 +3995,15 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 			// Map GET requests
 			get: {
-				me: 'plus/v1/people/me',
+				me: 'oauth2/v3/userinfo?alt=json',
 
 				// Deprecated Sept 1, 2014
 				//'me': 'oauth2/v1/userinfo?alt=json',
 
 				// See: https://developers.google.com/+/api/latest/people/list
-				'me/friends': 'plus/v1/people/me/people/visible?maxResults=@{limit|100}',
 				'me/following': contactsUrl,
 				'me/followers': contactsUrl,
 				'me/contacts': contactsUrl,
-				'me/share': 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
-				'me/feed': 'plus/v1/people/me/activities/public?maxResults=@{limit|100}',
 				'me/albums': 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}&start-index=@{start|1}',
 				'me/album': function(p, callback) {
 					var key = p.query.id;
@@ -4058,6 +4057,10 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 			wrap: {
 				me: function(o) {
+					if (o.sub) {
+						o.id = o.sub;
+					}
+
 					if (o.id) {
 						o.last_name = o.family_name || (o.name ? o.name.familyName : null);
 						o.first_name = o.given_name || (o.name ? o.name.givenName : null);
@@ -4180,7 +4183,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			return formatEntry(o.entry);
 		}
 
-		// New style: Google Drive & Plus
+		// New style: Google Drive
 		else if ('items' in o) {
 			o.data = o.items.map(formatItem);
 			delete o.items;
