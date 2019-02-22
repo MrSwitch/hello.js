@@ -33,10 +33,10 @@ define(['./helper'], function(helper) {
 				expect: {
 					length: 2,
 					first: {
-						id: 'https://picasaweb.google.com/data/entry/api/user/115111284799080900590/albumid/6101137643479860177?alt=json',
-						name: '2015-01-06',
-						thumbnail: 'https://lh4.googleusercontent.com/-FwGrKcgx4II/VKuYXI1hg9E/AAAAAAAAADQ/_EpYdYBoAng/s160-c/20150106.jpg',
-						photos: 'https://picasaweb.google.com/data/feed/api/user/115111284799080900590/albumid/6101137643479860177?alt=json&authkey=Gv1sRgCJW1vqqlkp_74wE'
+						id: 'album1',
+						name: 'Test album 1',
+						thumbnail: 'https://via.placeholder.com/150=w150-h150',
+						photos: undefined
 					}
 				}
 			},

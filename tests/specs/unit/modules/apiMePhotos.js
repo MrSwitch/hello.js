@@ -7,6 +7,7 @@ define(['./helper'], function(helper) {
 		var tests = [
 			{
 				network: 'instagram',
+				method: 'get',
 				expect: {
 					length: 5,
 					first: {
@@ -35,32 +36,18 @@ define(['./helper'], function(helper) {
 			},
 			{
 				network: 'google',
+				method: 'post',
 				expect: {
-					length: 7,
+					length: 2,
 					first: {
-						id: 'https://picasaweb.google.com/data/entry/api/user/115111284799080900590/albumid/6101137643479860177/photoid/6101137679962229346?alt=json',
-						name: 'wistful-piggy.jpg',
-						picture: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/wistful-piggy.jpg',
+						id: 'test_file_1',
+						name: 'test_file_1.jpg',
+						picture: 'https://via.placeholder.com/300',
 						pictures: [
 							{
-								source: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/s72/wistful-piggy.jpg',
-								width: 48,
-								height: 72
-							},
-							{
-								source: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/s144/wistful-piggy.jpg',
-								width: 96,
-								height: 144
-							},
-							{
-								source: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/s288/wistful-piggy.jpg',
-								width: 192,
-								height: 288
-							},
-							{
-								source: 'https://lh3.googleusercontent.com/-A9K1HZCyma8/VKuYZQvmSmI/AAAAAAAAADU/9AvsN7uNS2Y/wistful-piggy.jpg',
-								width: 300,
-								height: 450
+								source: 'https://via.placeholder.com/300=w1440-h1920',
+								width: 1440,
+								height: 1920
 							}
 						]
 					}
@@ -68,6 +55,7 @@ define(['./helper'], function(helper) {
 			},
 			{
 				network: 'facebook',
+				method: 'get',
 				expect: {
 					length: 5,
 					first: {
@@ -126,6 +114,7 @@ define(['./helper'], function(helper) {
 			},
 			{
 				network: 'flickr',
+				method: 'get',
 				expect: {
 					length: 5,
 					first: {
@@ -189,6 +178,7 @@ define(['./helper'], function(helper) {
 			},
 			{
 				network: 'windows',
+				method: 'get',
 				expect: {
 					length: 7,
 					first: {
@@ -227,7 +217,7 @@ define(['./helper'], function(helper) {
 			it('should format ' + test.network + ' correctly', function(done) {
 
 				hello(test.network)
-				.api('/me/photos')
+				.api('/me/photos', test.method)
 				.then(function(photos) {
 					var first = photos.data[0];
 					expect(photos.data.length).to.be(test.expect.length);

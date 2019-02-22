@@ -7,17 +7,19 @@ define(['./helper'], function(helper) {
 		var tests = [
 			{
 				network: 'google',
+				method: 'post',
 				expect: {
-					length: 6,
+					length: 2,
 					first: {
-						id: 'https://picasaweb.google.com/data/entry/api/user/115111284799080900590/albumid/6101137643479860177/photoid/6101137651261702722?alt=json',
-						name: 'bling-piggy.jpg',
-						picture: 'https://lh5.googleusercontent.com/-WYnDVp26U7k/VKuYXl03AkI/AAAAAAAAADU/nOsGBUZecRw/bling-piggy.jpg'
+						id: 'test_file_1',
+						name: 'test_file_1.jpg',
+						picture: 'https://via.placeholder.com/300'
 					}
 				}
 			},
 			{
 				network: 'facebook',
+				method: 'get',
 				expect: {
 					length: 7,
 					first: {
@@ -29,6 +31,7 @@ define(['./helper'], function(helper) {
 			},
 			{
 				network: 'windows',
+				method: 'get',
 				expect: {
 					length: 7,
 					first: {
@@ -45,7 +48,7 @@ define(['./helper'], function(helper) {
 			it('should format ' + test.network + ' correctly', function(done) {
 
 				hello(test.network)
-				.api('/me/album', {
+				.api('/me/album', test.method, {
 					id: 'album-id'
 				})
 				.then(function(album) {

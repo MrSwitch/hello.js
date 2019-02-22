@@ -1,6 +1,7 @@
 (function(hello) {
 
 	var contactsUrl = 'https://www.google.com/m8/feeds/contacts/default/full?v=3.0&alt=json&max-results=@{limit|1000}&start-index=@{start|1}';
+	var mediaItemsSearchUrl = 'https://photoslibrary.googleapis.com/v1/mediaItems:search';
 
 	hello.init({
 
@@ -21,7 +22,7 @@
 				email: 'email',
 				birthday: '',
 				events: '',
-				photos: 'https://picasaweb.google.com/data/',
+				photos: 'https://www.googleapis.com/auth/photoslibrary.readonly',
 				videos: 'http://gdata.youtube.com',
 				files: 'https://www.googleapis.com/auth/drive.readonly',
 				publish: '',
@@ -58,21 +59,15 @@
 			get: {
 				me: 'oauth2/v3/userinfo?alt=json',
 
-				// Deprecated Sept 1, 2014
-				//'me': 'oauth2/v1/userinfo?alt=json',
-
-				// See: https://developers.google.com/+/api/latest/people/list
 				'me/following': contactsUrl,
 				'me/followers': contactsUrl,
 				'me/contacts': contactsUrl,
-				'me/albums': 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}&start-index=@{start|1}',
-				'me/album': function(p, callback) {
-					var key = p.query.id;
-					delete p.query.id;
-					callback(key.replace('/entry/', '/feed/'));
-				},
 
-				'me/photos': 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&kind=photo&max-results=@{limit|100}&start-index=@{start|1}',
+				// See: https://developers.google.com/photos/library/reference/rest/v1/albums
+				'me/albums': 'https://photoslibrary.googleapis.com/v1/albums?pageSize=@{limit|20}',
+
+				// See: https://developers.google.com/photos/library/reference/rest/v1/mediaItems
+				'me/photos': 'https://photoslibrary.googleapis.com/v1/mediaItems?pageSize=@{limit|25}',
 
 				// See: https://developers.google.com/drive/v2/reference/files/list
 				'me/file': 'drive/v2/files/@{id}',
@@ -87,6 +82,23 @@
 
 			// Map POST requests
 			post: {
+				// See: https://developers.google.com/photos/library/reference/rest/v1/mediaItems/search
+				'me/album': function(p, callback) {
+					p.data = {
+						pageSize: p.data.limit,
+						albumId: p.data.id
+					};
+					callback(mediaItemsSearchUrl);
+				},
+
+				// See: https://developers.google.com/photos/library/reference/rest/v1/mediaItems/search
+				'me/photo': function(p, callback) {
+					p.data = {
+						pageSize: p.data.limit,
+						photoId: p.data.id
+					};
+					callback(mediaItemsSearchUrl);
+				},
 
 				// Google Drive
 				'me/files': uploadDrive,
@@ -152,8 +164,9 @@
 				'me/following': formatFriends,
 				'me/share': formatFeed,
 				'me/feed': formatFeed,
-				'me/albums': gEntry,
-				'me/photos': formatPhotos,
+				'me/albums': formatAlbums,
+				'me/album': formatMediaItems,
+				'me/photos': formatMediaItems,
 				'default': gEntry
 			},
 
@@ -213,39 +226,11 @@
 		return o;
 	}
 
-	function formatImage(image) {
-		return {
-			source: image.url,
-			width: image.width,
-			height: image.height
-		};
-	}
-
-	function formatPhotos(o) {
-		if ('feed' in o) {
-			o.data = 'entry' in o.feed ? o.feed.entry.map(formatEntry) : [];
-			delete o.feed;
-		}
-
-		return o;
-	}
-
-	// Google has a horrible JSON API
 	function gEntry(o) {
 		paging(o);
 
-		if ('feed' in o && 'entry' in o.feed) {
-			o.data = o.feed.entry.map(formatEntry);
-			delete o.feed;
-		}
-
-		// Old style: Picasa, etc.
-		else if ('entry' in o) {
-			return formatEntry(o.entry);
-		}
-
 		// New style: Google Drive
-		else if ('items' in o) {
+		if ('items' in o) {
 			o.data = o.items.map(formatItem);
 			delete o.items;
 		}
@@ -256,6 +241,61 @@
 		return o;
 	}
 
+	function formatImage(image) {
+		return {
+			//Google returns a baseUrl only, we need to append the original dimensions to get the full size image
+			source: image.baseUrl + '=w' + image.mediaMetadata.width + '-h' + image.mediaMetadata.height,
+			width: image.mediaMetadata.width,
+			height: image.mediaMetadata.height
+		};
+	}
+
+	function formatMediaItems(o) {
+		if ('mediaItems' in o) {
+			paging(o);
+			o.data = o.mediaItems.map(formatMediaItem);
+			delete o.mediaItems;
+		}
+
+		return o;
+	}
+
+	function formatMediaItem(o) {
+		var formattedImage = formatImage(o);
+		return {
+			id: o.id,
+			name: o.filename,
+			description: '',
+			updated_time: o.mediaMetadata.creationTime,
+			created_time: o.mediaMetadata.creationTime,
+			picture: o.baseUrl,
+			pictures: [formattedImage],
+			images: [formattedImage],
+			thumbnail: o.baseUrl + '=w150-h150',
+			width: o.mediaMetadata.width,
+			height: o.mediaMetadata.height
+		};
+	}
+
+	function formatAlbums(o) {
+		paging(o);
+
+		if ('albums' in o) {
+			o.data = o.albums.map(formatAlbum);
+			delete o.albums;
+		}
+
+		return o;
+	}
+
+	function formatAlbum(o) {
+		return {
+			id: o.id,
+			name: o.title,
+			thumbnail: o.coverPhotoBaseUrl + '=w150-h150'
+		};
+	}
+
 	function formatPerson(o) {
 		o.name = o.displayName || o.name;
 		o.picture = o.picture || (o.image ? o.image.url : null);
@@ -264,7 +304,6 @@
 
 	function formatFriends(o, headers, req) {
 		paging(o);
-		var r = [];
 		if ('feed' in o && 'entry' in o.feed) {
 			var token = req.query.access_token;
 			for (var i = 0; i < o.feed.entry.length; i++) {
@@ -307,75 +346,7 @@
 		return o;
 	}
 
-	function formatEntry(a) {
-
-		var group = a.media$group;
-		var photo = group.media$content.length ? group.media$content[0] : {};
-		var mediaContent = group.media$content || [];
-		var mediaThumbnail = group.media$thumbnail || [];
-
-		var pictures = mediaContent
-			.concat(mediaThumbnail)
-			.map(formatImage)
-			.sort(function(a, b) {
-				return a.width - b.width;
-			});
-
-		var i = 0;
-		var _a;
-		var p = {
-			id: a.id.$t,
-			name: a.title.$t,
-			description: a.summary.$t,
-			updated_time: a.updated.$t,
-			created_time: a.published.$t,
-			picture: photo ? photo.url : null,
-			pictures: pictures,
-			images: [],
-			thumbnail: photo ? photo.url : null,
-			width: photo.width,
-			height: photo.height
-		};
-
-		// Get feed/children
-		if ('link' in a) {
-			for (i = 0; i < a.link.length; i++) {
-				var d = a.link[i];
-				if (d.rel.match(/\#feed$/)) {
-					p.upload_location = p.files = p.photos = d.href;
-					break;
-				}
-			}
-		}
-
-		// Get images of different scales
-		if ('category' in a && a.category.length) {
-			_a = a.category;
-			for (i = 0; i < _a.length; i++) {
-				if (_a[i].scheme && _a[i].scheme.match(/\#kind$/)) {
-					p.type = _a[i].term.replace(/^.*?\#/, '');
-				}
-			}
-		}
-
-		// Get images of different scales
-		if ('media$thumbnail' in group && group.media$thumbnail.length) {
-			_a = group.media$thumbnail;
-			p.thumbnail = _a[0].url;
-			p.images = _a.map(formatImage);
-		}
-
-		_a = group.media$content;
-
-		if (_a && _a.length) {
-			p.images.push(formatImage(_a[0]));
-		}
-
-		return p;
-	}
-
 	function paging(res) {
-
 		// Contacts V2
 		if ('feed' in res && res.feed.openSearch$itemsPerPage) {
 			var limit = toInt(res.feed.openSearch$itemsPerPage.$t);
