@@ -82,23 +82,8 @@
 
 			// Map POST requests
 			post: {
-				// See: https://developers.google.com/photos/library/reference/rest/v1/mediaItems/search
-				'me/album': function(p, callback) {
-					p.data = {
-						pageSize: p.data.limit,
-						albumId: p.data.id
-					};
-					callback(mediaItemsSearchUrl);
-				},
-
-				// See: https://developers.google.com/photos/library/reference/rest/v1/mediaItems/search
-				'me/photo': function(p, callback) {
-					p.data = {
-						pageSize: p.data.limit,
-						photoId: p.data.id
-					};
-					callback(mediaItemsSearchUrl);
-				},
+				'me/album': searchMediaItemsByAlbumId,
+				'me/photo': searchMediaItemsByPhotoId,
 
 				// Google Drive
 				'me/files': uploadDrive,
@@ -188,6 +173,27 @@
 			form: false
 		}
 	});
+
+	function searchMediaItemsByPhotoId(p, callback) {
+		searchMediaItems(p, callback, {
+			photoId: p.data.id
+		});
+	}
+
+	function searchMediaItemsByAlbumId(p, callback) {
+		searchMediaItems(p, callback, {
+			albumId: p.data.id
+		});
+	}
+
+	// See: https://developers.google.com/photos/library/reference/rest/v1/mediaItems/search
+	function searchMediaItems(p, callback, filterData) {
+		p.data = hello.utils.extend(filterData, {
+			pageSize: p.data.limit || 25
+		});
+
+		callback(mediaItemsSearchUrl);
+	}
 
 	function toInt(s) {
 		return parseInt(s, 10);
