@@ -41,21 +41,23 @@ module.exports = function(grunt) {
 					'src/hello.js',
 					'src/hello.chromeapp.js',
 					'src/hello.phonegap.js',
-					'src/modules/dropbox.js',
 					'src/modules/facebook.js',
+					'src/modules/instagram.js',
+					'src/modules/twitter.js',
+					/*
+					'src/modules/dropbox.js',
 					'src/modules/flickr.js',
 					'src/modules/foursquare.js',
 					'src/modules/github.js',
 					'src/modules/google.js',
-					'src/modules/instagram.js',
 					'src/modules/joinme.js',
 					'src/modules/linkedin.js',
 					'src/modules/soundcloud.js',
 					'src/modules/spotify.js',
-					'src/modules/twitter.js',
 					'src/modules/vk.js',
 					'src/modules/windows.js',
 					'src/modules/yahoo.js',
+					*/
 					'src/hello.amd.js',
 					'src/hello.commonjs.js'
 				]

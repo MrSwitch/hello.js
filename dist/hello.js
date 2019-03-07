@@ -1,4 +1,4 @@
-/*! hellojs v1.18.0 | (c) 2012-2019 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.18.1 | (c) 2012-2019 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -2185,7 +2185,7 @@ hello.utils.extend(hello.utils, {
 					// This will prompt the request to be signed as though it is OAuth1
 					then: p.proxy_response_type || (p.method.toLowerCase() === 'get' ? 'redirect' : 'proxy'),
 					method: p.method.toLowerCase(),
-					suppress_response_codes: true
+					suppress_response_codes: p.suppress_response_codes || true
 				});
 			}
 

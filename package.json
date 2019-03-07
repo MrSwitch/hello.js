@@ -3,7 +3,7 @@
   "version": "1.18.1",
   "description": "A clientside Javascript library for standardizing requests to OAuth2 web services (and OAuth1 - with a shim)",
   "homepage": "https://adodson.com/hello.js",
-  "main": "dist/hello.all.js",
+  "main": "dist/hello.all.min.js",
   "repository": {
     "type": "git",
     "url": "git@github.com/MrSwitch/hello.js"
