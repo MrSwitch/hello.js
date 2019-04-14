@@ -20,13 +20,15 @@
 	
 */
 
+
+
 (function(hello) {
 
 	hello.init({
 
-		fusionauth: {
+		trustmaster: {
 
-			name: 'fusionauth',
+			name: 'Trustmaster',
 
 			oauth: {
 				version: "2",
@@ -113,3 +115,5 @@
 	}
 
 })(hello);
+
+
