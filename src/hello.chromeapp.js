@@ -4,7 +4,7 @@
 
 // Is this a chrome app?
 if (typeof window !== 'undefined') {
-	if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.identity.launchWebAuthFlow) {
+	if (typeof window !== 'undefined' && typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.identity.launchWebAuthFlow) {
 
 		(function() {
 
