@@ -6,7 +6,7 @@
   "main": "dist/hello.all.js",
   "repository": {
     "type": "git",
-    "url": "git@github.com/MrSwitch/hello.js"
+    "url": "https://github.com/MrSwitch/hello.js.git"
   },
   "keywords": [
     "oauth",
