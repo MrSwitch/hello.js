@@ -87,7 +87,7 @@ function canvasToBlob(o,name){
 
 	var binary,type;
 
-	if(typeof(o)==='string'&&o.match(/^data\:/)){
+	if (typeof(o)==='string'&&o.match(/^data\:/)){
 		name = name || "DataURI";
 		binary = atob(o.split(',')[1]);
 		type = o.slice(o.indexOf(':')+1, o.indexOf(';') );
@@ -222,7 +222,7 @@ if(!("sendAsBinary" in new XMLHttpRequest())){
 
 <script>
 function log(s){
-	if(typeof(s)==='string'){
+	if (typeof(s)==='string'){
 		s = document.createTextNode(s);
 	}else if(!s.tagName){
 		s = document.createTextNode(JSON.stringify(s, true, 2));

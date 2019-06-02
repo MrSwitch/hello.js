@@ -42,7 +42,8 @@
     "grunt-contrib-uglify": "^3.2.1",
     "grunt-contrib-watch": "^0.6.1",
     "grunt-jscs": "^1.8.0",
-    "grunt-mocha-phantomjs": "^0.4.3",
+    "grunt-mocha-phantomjs": "0.4.3",
+    "phantomjs-prebuilt": "^2.1.8",
     "mocha": "^1.18.2",
     "shunt": "^0.1.4",
     "sinon": "~1.7.3"

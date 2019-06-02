@@ -15,7 +15,7 @@ hello.ui.filePicker = function(options, callback){
 		i=0;
 
 	// Sanitize input vars
-	if(typeof(options)==='function'){
+	if (typeof(options)==='function'){
 		callback = options;
 		options = {};
 	}
@@ -613,7 +613,7 @@ hello.ui.filePicker = function(options, callback){
 
 		var binary;
 
-		if(typeof(o)==='string'&&o.match(/^data\:/)){
+		if (typeof(o)==='string'&&o.match(/^data\:/)){
 			name = name || "DataURI";
 			binary = atob(o.split(',')[1]);
 			type = o.slice(o.indexOf(':')+1, o.indexOf(';') );
