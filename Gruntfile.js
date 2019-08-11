@@ -50,6 +50,7 @@ module.exports = function(grunt) {
 					'src/modules/instagram.js',
 					'src/modules/joinme.js',
 					'src/modules/linkedin.js',
+					'src/modules/simplelogin.js',
 					'src/modules/soundcloud.js',
 					'src/modules/spotify.js',
 					'src/modules/twitter.js',

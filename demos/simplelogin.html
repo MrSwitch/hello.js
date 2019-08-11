@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<link rel="stylesheet" href="./helper/alert.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="client_ids.js"></script>
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/modules/simplelogin.js"></script>
+
+<title>hello( simplelogin )</title>
+<h1>hello( simplelogin )</h1>
+
+<!--simplelogin whitelists localhost development, we don't need to display https alert-->
+<!--<script src="./helper/alert-https.js"></script>-->
+
+<blockquote>
+	<a href="https://docs.simplelogin.io">SimpleLogin Documentation</a>
+	<a href="https://app.simplelogin.io/developer/new_client">Register App</a>
+</blockquote>
+
+<button id='simplelogin' onclick="login('simplelogin');">Connect with SimpleLogin</button>
+<pre id="result">Signin to connect with simplelogin</pre>
+
+<script class="pre">
+function login(network){
+
+	var simplelogin = hello(network);
+
+	simplelogin.login()
+	.then( function(){
+		// get user profile data
+		return simplelogin.api( '/me' );
+	})
+	.then( function(p){
+		document.getElementById( network ).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network +" as " + p.name;
+	})
+	.then( 
+		null,
+		console.error.bind(console)
+	);
+
+}
+</script>
+
+<script class="pre">
+hello.init({
+	// Register app https://app.simplelogin.io/developer/new_client
+	simplelogin : 'client-id'
+},{
+	redirect_uri : '../redirect.html'
+});
+</script>
