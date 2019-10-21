@@ -1,4 +1,4 @@
-/*! hellojs v1.9.9 | (c) 2012-2018 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.9.9 | (c) 2012-2019 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -860,6 +860,19 @@ hello.utils.extend(hello.utils, {
 		}
 
 		function set(json) {
+			var jsonString = JSON.stringify(json);
+			try {// TEMP DEBUGGING CODE
+				if (window.bugsnagClient) {
+					window.bugsnagClient.leaveBreadcrumb('hello.js - store', {
+						jsonString: jsonString
+					});
+					console.trace('store');
+				}
+			}
+			catch (error) {
+				console.error(error);
+			}
+
 			localStorage.setItem('hello', JSON.stringify(json));
 		}
 

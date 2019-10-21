@@ -43,5 +43,8 @@
     "mocha": "^1.18.2",
     "shunt": "^0.1.4",
     "sinon": "~1.7.3"
+  },
+  "dependencies": {
+    "grunt-cli": "^1.3.2"
   }
 }
