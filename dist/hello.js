@@ -864,9 +864,9 @@ hello.utils.extend(hello.utils, {
 			try {// TEMP DEBUGGING CODE
 				if (window.bugsnagClient) {
 					window.bugsnagClient.leaveBreadcrumb('hello.js - store', {
-						jsonString: jsonString
+						jsonString: jsonString,
+						stacktrace: (new Error()).stack
 					});
-					console.trace('store');
 				}
 			}
 			catch (error) {
