@@ -1379,7 +1379,7 @@ hello.utils.extend(hello.utils, {
 			}
 
 			// If this page is still open
-			if (p.page_uri) {
+			if (p.page_uri && isValidUrl(p.page_uri)) {
 				location.assign(p.page_uri);
 			}
 		}
@@ -1391,6 +1391,11 @@ hello.utils.extend(hello.utils, {
 
 			location.assign(decodeURIComponent(p.oauth_redirect));
 			return;
+		}
+
+		function isValidUrl(url) {
+			var regexp = /^https?:/;
+			return regexp.test(url);
 		}
 
 		// Trigger a callback to authenticate
