@@ -1378,8 +1378,10 @@ hello.utils.extend(hello.utils, {
 				closeWindow();
 			}
 
+			var matchPageUri = _this.settings.page_uri ? p.page_uri.indexOf(_this.settings.page_uri) > -1 : true;
+
 			// If this page is still open
-			if (p.page_uri && isValidUrl(p.page_uri)) {
+			if (p.page_uri && isValidUrl(p.page_uri) && matchPageUri) {
 				location.assign(p.page_uri);
 			}
 		}
@@ -1394,8 +1396,8 @@ hello.utils.extend(hello.utils, {
 		}
 
 		function isValidUrl(url) {
-			var regexp = /^https?:/;
-			return regexp.test(url);
+			var pattern = /^http:\/\/\w+(\.\w+)*(:[0-9]+)?\/?(\/[.\-?=#{}:öäü"\w]*)*$/i;
+			return !!pattern.test(url);
 		}
 
 		// Trigger a callback to authenticate
