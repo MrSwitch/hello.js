@@ -98,7 +98,13 @@ hello.utils.extend(hello, {
 		// When 'display=page' this property defines where the users page should end up after redirect_uri
 		// Ths could be problematic if the redirect_uri is indeed the final place,
 		// Typically this circumvents the problem of the redirect_url being a dumb relay page.
-		page_uri: window.location.href
+		page_uri: window.location.href,
+
+
+		// Match Page URL
+		// If url is provided in the head as #state={"page_uri": "abc.com"} to check if page_uri is valid to you
+		// If not specified, it's always returning true;
+		matchPageUri: () => { return true; },
 	},
 
 	// Service configuration objects
@@ -1378,10 +1384,8 @@ hello.utils.extend(hello.utils, {
 				closeWindow();
 			}
 
-			var matchPageUri = _this.settings.page_uri ? p.page_uri.indexOf(_this.settings.page_uri) > -1 : true;
-
 			// If this page is still open
-			if (p.page_uri && isValidUrl(p.page_uri) && matchPageUri) {
+			if (p.page_uri && isValidUrl(p.page_uri) && _this.settings.matchPageUri(p.page_uri)) {
 				location.assign(p.page_uri);
 			}
 		}
@@ -1396,8 +1400,8 @@ hello.utils.extend(hello.utils, {
 		}
 
 		function isValidUrl(url) {
-			var pattern = /^http:\/\/\w+(\.\w+)*(:[0-9]+)?\/?(\/[.\-?=#{}:öäü"\w]*)*$/i;
-			return !!pattern.test(url);
+			var regexp = /^https?:/;
+			return regexp.test(url);
 		}
 
 		// Trigger a callback to authenticate
