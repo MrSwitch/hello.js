@@ -100,7 +100,6 @@ hello.utils.extend(hello, {
 		// Typically this circumvents the problem of the redirect_url being a dumb relay page.
 		page_uri: window.location.href,
 
-
 		// Match Page URI
 		// If url is provided in the head as #state={"page_uri": "abc.com"}, this functions checks page_uri to be valid
 		// If not specified, it's always returning true;
