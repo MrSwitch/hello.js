@@ -103,7 +103,7 @@ hello.utils.extend(hello, {
 		// Match Page URI
 		// If url is provided in the head as #state={"page_uri": "abc.com"}, this functions checks page_uri to be valid
 		// If not specified, it's always returning true;
-		match_page_uri: () => { return true; },
+		match_page_uri: function() { return true; }
 	},
 
 	// Service configuration objects
