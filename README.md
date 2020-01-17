@@ -375,6 +375,14 @@ If a network string is provided: A consent window to authenticate with that netw
 					<td><em>optional</em></td>
 					<td></td>
 				</tr>
+				<tr>
+					<td>match_page_uri</td>
+					<td><i>function</i></td>
+					<td><code>function(page_uri){regex = /xyz.com/i; regex.test(page_uri);}</code></td>
+					<td>If url is provided in the head as #state={"page_uri": "abc.com"}, this functions checks page_uri to be valid</td>
+					<td><em>optional</em></td>
+					<td>See <code>hello.settings.match_page_uri</code></td>
+				</tr>
 			</table>
 		</td>
 	</tr>

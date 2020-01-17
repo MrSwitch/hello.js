@@ -101,10 +101,10 @@ hello.utils.extend(hello, {
 		page_uri: window.location.href,
 
 
-		// Match Page URL
-		// If url is provided in the head as #state={"page_uri": "abc.com"} to check if page_uri is valid to you
+		// Match Page URI
+		// If url is provided in the head as #state={"page_uri": "abc.com"}, this functions checks page_uri to be valid
 		// If not specified, it's always returning true;
-		matchPageUri: () => { return true; },
+		match_page_uri: () => { return true; },
 	},
 
 	// Service configuration objects
@@ -1385,7 +1385,7 @@ hello.utils.extend(hello.utils, {
 			}
 
 			// If this page is still open
-			if (p.page_uri && isValidUrl(p.page_uri) && _this.settings.matchPageUri(p.page_uri)) {
+			if (p.page_uri && isValidUrl(p.page_uri) && _this.settings.match_page_uri(p.page_uri)) {
 				location.assign(p.page_uri);
 			}
 		}
