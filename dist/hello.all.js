@@ -257,7 +257,7 @@ hello.utils.extend(hello, {
 		// If url is provided in the head as #state={"page_uri": "abc.com"}, this functions checks page_uri to be valid
 		// Default: checks if pattern is correct uri and is equal to hostname
 		match_page_uri: function(pageURI) {
-			var pattern = /^http:\/\/\w+(\.\w+)*(:[0-9]+)?\/?(\/[.\-?=#{}:öäü\%"\w]*)*$/i;
+			var pattern = /^http:\/\/\w+(\.\w+)*(:[0-9]+)?\/?(\/[.\-?=#{}:öäü%"\w]*)*$/i;
 			return !!pattern.test(pageURI) && pageURI.indexOf(window.location.hostname) > -1;
 		}
 	},
