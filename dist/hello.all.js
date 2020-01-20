@@ -255,8 +255,11 @@ hello.utils.extend(hello, {
 
 		// Match Page URI
 		// If url is provided in the head as #state={"page_uri": "abc.com"}, this functions checks page_uri to be valid
-		// If not specified, it's always returning true;
-		match_page_uri: function() { return true; }
+		// Default: checks if pattern is correct uri and is equal to hostname
+		match_page_uri: function(pageURI) {
+			var pattern = /^http:\/\/\w+(\.\w+)*(:[0-9]+)?\/?(\/[.\-?=#{}:öäü\%"\w]*)*$/i;
+			return !!pattern.test(pageURI) && pageURI.indexOf(window.location.hostname) > -1;
+		}
 	},
 
 	// Service configuration objects
@@ -1537,7 +1540,7 @@ hello.utils.extend(hello.utils, {
 			}
 
 			// If this page is still open
-			if (p.page_uri && isValidUrl(p.page_uri) && _this.settings.match_page_uri(p.page_uri)) {
+			if (p.page_uri && isValidUrl(p.page_uri) && hello.settings.match_page_uri(p.page_uri)) {
 				location.assign(p.page_uri);
 			}
 		}
