@@ -107,7 +107,7 @@ hello.utils.extend(hello, {
 			// matches localhost, ip adresses and web urls
 			var basicPattern = /^https?:\/\/\w+(\.\w+)*(:[0-9]+)?\/?(\/[.\-?=#{}:öäü%"\w]*)*([.\-?=#{}:öäü%"\w])*$/i;
 			// matches only web urls
-			var webUrlExpression = /^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z()]{1,6}\b([-a-zA-Z0-9(){}"öäü@:%_\+.~#?&//=]*)$/i;
+			var webUrlExpression = /^https?:\/\/[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z()]{1,6}\b([-a-zA-Z0-9(){}"öäü@:%_+.~#?&//=]*)$/i;
 
 			if (!basicPattern.test(pageURI)) return false;
 
