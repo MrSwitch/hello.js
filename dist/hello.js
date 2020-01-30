@@ -269,7 +269,7 @@ hello.utils.extend(hello, {
 			// If the the url is a web url, e.g. my.example.com, sub.sub.example.com, hostname will be check directly
 			if (!!webUrlExpression.test(pageURI)) {
 				var pageURLObject = new URL(pageURI);
-				return pageURLObject.hostname.indexOf(window.location.hostname) > -1;
+				return pageURLObject.host === window.location.host && pageURLObject.protocol === window.location.protocol;
 			}
 
 			return pageURI.indexOf(window.location.hostname) > -1;
