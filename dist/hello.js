@@ -257,22 +257,15 @@ hello.utils.extend(hello, {
 		// If url is provided in the head as #state={"page_uri": "abc.com"}, this functions checks page_uri to be valid
 		// Default: checks if pattern is correct uri and is equal to hostname
 		match_page_uri: function(pageURI) {
-
-			// Matches localhost, ip adresses and web urls
-			var basicPattern = /^https?:\/\/\w+(\.\w+)*(:[0-9]+)?\/?(\/[.\-?=#{}:öäü%"\w]*)*([.\-?=#{}:öäü%"\w])*$/i;
-
-			// Matches only web urls
-			var webUrlExpression = /^https?:\/\/[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z()]{1,6}\b([-a-zA-Z0-9(){}"öäü@:%_+.~#?&//=]*)$/i;
-
-			if (!basicPattern.test(pageURI)) return false;
-
-			// If the the url is a web url, e.g. my.example.com, sub.sub.example.com, hostname will be check directly
-			if (!!webUrlExpression.test(pageURI)) {
+			try {
 				var pageURLObject = new URL(pageURI);
-				return pageURLObject.host === window.location.host && pageURLObject.protocol === window.location.protocol;
-			}
 
-			return pageURI.indexOf(window.location.hostname) > -1;
+				return pageURLObject.host === window.location.host && pageURLObject.protocol === window.location.protocol;
+
+			}
+			catch (e) {
+				return false;
+			}
 		}
 	},
 

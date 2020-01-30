@@ -109,7 +109,8 @@ hello.utils.extend(hello, {
 
 				return pageURLObject.host === window.location.host && pageURLObject.protocol === window.location.protocol;
 
-			} catch (e) {
+			}
+			catch (e) {
 				return false;
 			}
 		}
