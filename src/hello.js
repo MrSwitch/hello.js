@@ -1308,7 +1308,8 @@ hello.utils.extend(hello.utils, {
 				location.assign(path);
 
 				return;
-			} catch (e) {
+			}
+			catch (e) {
 				console.error('Could not decode state parameter', e);
 				return;
 			}
