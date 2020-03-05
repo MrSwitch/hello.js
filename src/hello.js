@@ -435,6 +435,11 @@ hello.utils.extend(hello, {
 
 			var popup = utils.popup(url, redirectUri, opts.popup);
 
+			// Provide a reference to the popup
+			if (opts.popupOpenedCallback) {
+				opts.popupOpenedCallback(popup);
+			}
+
 			var timer = setInterval(function() {
 				if (!popup || popup.closed) {
 					clearInterval(timer);

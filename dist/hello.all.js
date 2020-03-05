@@ -1,4 +1,4 @@
-/*! hellojs v1.9.9 | (c) 2012-2019 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.9.9 | (c) 2012-2020 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -587,6 +587,11 @@ hello.utils.extend(hello, {
 		else if (opts.display === 'popup') {
 
 			var popup = utils.popup(url, redirectUri, opts.popup);
+
+			// Provide a reference to the popup
+			if (opts.popupOpenedCallback) {
+				opts.popupOpenedCallback(popup);
+			}
 
 			var timer = setInterval(function() {
 				if (!popup || popup.closed) {
