@@ -1284,13 +1284,13 @@ hello.utils.extend(hello.utils, {
 		// Credit: http://www.xtf.dk/2011/08/center-new-popup-window-even-on.html
 		// Fixes dual-screen position                         Most browsers      Firefox
 
-		if (options.height) {
+		if (options.height && options.top === null || options.top === undefined) {
 			var dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
 			var height = screen.height || window.innerHeight || documentElement.clientHeight;
 			options.top = parseInt((height - options.height) / 2, 10) + dualScreenTop;
 		}
 
-		if (options.width) {
+		if (options.width && options.left === null || options.left === undefined) {
 			var dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
 			var width = screen.width || window.innerWidth || documentElement.clientWidth;
 			options.left = parseInt((width - options.width) / 2, 10) + dualScreenLeft;
