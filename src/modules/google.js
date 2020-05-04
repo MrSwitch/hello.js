@@ -17,7 +17,7 @@
 
 			// Authorization scopes
 			scope: {
-				basic: 'openid profile',
+				basic: 'profile',
 				email: 'email',
 				birthday: '',
 				events: '',

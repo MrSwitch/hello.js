@@ -3886,7 +3886,7 @@ if (typeof chrome === 'object' && typeof chrome.extension === 'object') {
 
 			// Authorization scopes
 			scope: {
-				basic: 'openid profile',
+				basic: 'profile',
 				email: 'email',
 				birthday: '',
 				events: '',
