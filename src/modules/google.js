@@ -17,7 +17,7 @@
 
 			// Authorization scopes
 			scope: {
-				basic: 'https://www.googleapis.com/auth/plus.me profile',
+				basic: 'openid profile',
 				email: 'email',
 				birthday: '',
 				events: '',
