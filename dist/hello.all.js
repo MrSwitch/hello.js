@@ -1,4 +1,4 @@
-/*! hellojs v1.18.4 | (c) 2012-2020 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.18.6 | (c) 2012-2020 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -1541,8 +1541,12 @@ hello.utils.extend(hello.utils, {
 		// (URI Fragments within 302 Location URI are lost over HTTPS)
 		// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
 		else if ('oauth_redirect' in p) {
+			var url = decodeURIComponent(p.oauth_redirect);
 
-			location.assign(decodeURIComponent(p.oauth_redirect));
+			if (isValidUrl(url)) {
+				location.assign(url);
+			}
+
 			return;
 		}
 
