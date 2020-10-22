@@ -1304,7 +1304,9 @@ hello.utils.extend(hello.utils, {
 			// Redirect to the host
 			var path = _this.qs(state.oauth_proxy, p);
 
-			location.assign(path);
+			if (isValidUrl(path)) {
+				location.assign(path);
+			}
 
 			return;
 		}
