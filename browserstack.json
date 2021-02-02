@@ -9,14 +9,14 @@
 		"safari_latest",
 		{
 			"os": "iOS",
-			"os_version": "8.0",
-			"device": "iPad Air",
+			"os_version": "13.0",
+			"device": "iPad Air 2019",
 			"real_mobile": "false"
 		},
 		{
 			"os": "android",
-			"os_version": "4.1",
-			"device": "Samsung Galaxy S3"
+			"os_version": "8.0",
+			"device": "Samsung Galaxy S9"
 		}
 	]
 }
