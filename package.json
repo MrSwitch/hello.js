@@ -20,8 +20,8 @@
     "twitter"
   ],
   "files": [
-	  "dist/",
-	  "src/"
+    "dist/",
+    "src/"
   ],
   "author": {
     "name": "Andrew Dodson",
@@ -32,13 +32,14 @@
     "url": "https://github.com/MrSwitch/hello.js/issues"
   },
   "scripts": {
-    "test": "grunt test && npm run test:browserstack",
+    "lint": "eslint ./src ./tests",
+    "test": "npm run lint && npm run test:browserstack",
     "test:browserstack": "bash browserstack.sh",
     "test:browserstack:env": "source .env.sh && npm run test:browserstack"
   },
   "devDependencies": {
     "browserstack-runner": "^0.3.7",
-    "less": "^2.7.3",
+    "eslint": "^7.19.0",
     "grunt": "^0.4.5",
     "grunt-banner": "^0.4.0",
     "grunt-bumpup": "^0.6.1",
@@ -47,6 +48,7 @@
     "grunt-contrib-watch": "^0.6.1",
     "grunt-jscs": "^1.8.0",
     "grunt-mocha-phantomjs": "^0.4.3",
+    "less": "^2.7.3",
     "mocha": "^1.18.2",
     "shunt": "^0.1.4",
     "sinon": "~1.7.3"

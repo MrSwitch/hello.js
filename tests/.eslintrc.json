@@ -1,0 +1,10 @@
+{
+	"env": {
+		"jasmine": true,
+		"mocha": true
+	},
+	"globals": {
+		"sinon": "readonly",
+		"supportsBlob": "writable"
+	}
+}

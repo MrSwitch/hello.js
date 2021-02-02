@@ -1,0 +1,21 @@
+{
+	"root": true,
+	"env": {
+		"browser": true,
+		"amd": true,
+		"commonjs": true,
+		"webextensions": true,
+		"es6": true
+	},
+	"globals": {
+		"hello": "writable"
+	},
+	"extends": "eslint:recommended",
+	"rules": {
+		"no-prototype-builtins": 0,
+		"no-useless-escape": 0,
+		"no-empty": 0,
+		"no-redeclare": 0,
+		"no-unused-vars": 0
+	}
+}
