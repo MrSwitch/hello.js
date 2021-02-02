@@ -26,6 +26,11 @@ hello.utils = {
 			}
 			else if (r && (r instanceof Object || typeof r === 'object') && a && (a instanceof Object || typeof a === 'object') && r !== a) {
 				for (var x in a) {
+					// Prevent prototype pollution
+					if (x === '__proto__' || x === 'constructor') {
+						continue;
+					}
+
 					r[x] = hello.utils.extend(r[x], a[x]);
 				}
 			}
