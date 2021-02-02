@@ -1,4 +1,4 @@
-/*! hellojs v1.18.7 | (c) 2012-2020 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.18.8 | (c) 2012-2021 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -179,6 +179,11 @@ hello.utils = {
 			}
 			else if (r && (r instanceof Object || typeof r === 'object') && a && (a instanceof Object || typeof a === 'object') && r !== a) {
 				for (var x in a) {
+					// Prevent prototype pollution
+					if (x === '__proto__' || x === 'constructor') {
+						continue;
+					}
+
 					r[x] = hello.utils.extend(r[x], a[x]);
 				}
 			}
