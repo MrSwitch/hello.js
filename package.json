@@ -19,6 +19,10 @@
     "linkedin",
     "twitter"
   ],
+  "files": [
+	  "dist/",
+	  "src/"
+  ],
   "author": {
     "name": "Andrew Dodson",
     "email": "andrewjdodson@gmail.com"
