@@ -50,6 +50,6 @@ require([
 	'./e2e/modules'
 
 ], function() {
-	if (window.mochaPhantomJS) { mochaPhantomJS.run(); }
+	if (window.mochaPhantomJS) { window.mochaPhantomJS.run(); }
 	else { mocha.run(); }
 });

@@ -4,24 +4,6 @@ module.exports = function(grunt) {
 
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
-		jshint: {
-			src: source,
-			options: {
-				globals: {
-					console: true,
-					module: true,
-					document: true
-				},
-				sub: true,
-				es3: true
-			}
-		},
-		jscs: {
-			src: source,
-			options: {
-				config: '.jscsrc'
-			}
-		},
 		mocha_phantomjs: {
 			all: ['tests/specs/index.html']
 		},
@@ -89,16 +71,14 @@ module.exports = function(grunt) {
 
 	grunt.loadNpmTasks('grunt-banner');
 	grunt.loadNpmTasks('grunt-bumpup');
-	grunt.loadNpmTasks('grunt-contrib-jshint');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
 	grunt.loadNpmTasks('grunt-mocha-phantomjs');
-	grunt.loadNpmTasks('grunt-jscs');
 	grunt.loadNpmTasks('browserstack-runner');
 	grunt.loadNpmTasks('shunt');
 
 	grunt.registerTask('mocha', ['mocha_phantomjs']);
-	grunt.registerTask('test', ['jscs', 'jshint', 'mocha']);
+	grunt.registerTask('test', ['mocha']);
 	grunt.registerTask('deploy', ['test', 'shunt:build', 'uglify:minify', 'bumpup', 'updateInitConfig', 'usebanner:build']);
 	grunt.registerTask('default', ['test', 'shunt:build', 'uglify:minify', 'usebanner:build']);
 
