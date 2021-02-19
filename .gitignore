@@ -5,3 +5,4 @@ _site/
 src/*.html
 src/**/*.html
 .idea
+.env.sh
