@@ -38,7 +38,7 @@ define([], function() {
 			hello.utils.store('test', obj);
 		});
 
-		it('should ignore services which do not have an id defined', function(done) {
+		it.skip('should ignore services which do not have an id defined', function(done) {
 			// Create a spy
 			var spy = sinon.spy(done);
 
