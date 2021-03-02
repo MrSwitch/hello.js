@@ -48,10 +48,8 @@
     "grunt-bumpup": "^0.6.1",
     "grunt-contrib-uglify": "^5.0.0",
     "grunt-contrib-watch": "^1.1.0",
-    "grunt-mocha-phantomjs": "^4.0.0",
     "mocha": "^8.0.0",
     "shunt": "^0.1.4",
     "sinon": "^9.2.4"
-  },
-  "dependencies": {}
+  }
 }
