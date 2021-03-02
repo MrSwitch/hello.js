@@ -1,4 +1,4 @@
-define(['./helper'], function(helper) {
+import helper from './helper';
 
 	describe('hello.api(\'/me\')', function() {
 
@@ -236,4 +236,3 @@ define(['./helper'], function(helper) {
 
 	});
 
-});

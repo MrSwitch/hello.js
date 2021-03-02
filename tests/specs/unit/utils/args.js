@@ -1,4 +1,4 @@
-define([], function() {
+
 
 	var args = hello.utils.args;
 
@@ -61,5 +61,3 @@ define([], function() {
 		});
 
 	});
-
-});

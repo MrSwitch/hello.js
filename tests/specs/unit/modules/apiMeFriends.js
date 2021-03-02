@@ -1,6 +1,6 @@
 // Test GET me/friends
 
-define(['./helper'], function(helper) {
+import helper from './helper';
 
 	describe('hello.api(\'/me/friends\')', function() {
 
@@ -35,4 +35,3 @@ define(['./helper'], function(helper) {
 
 	});
 
-});

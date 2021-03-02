@@ -1,6 +1,4 @@
 // Session monitor
-define([], function() {
-
 	describe('Session monitor', function() {
 
 		beforeEach(function() {
@@ -66,4 +64,3 @@ define([], function() {
 		});
 	});
 
-});

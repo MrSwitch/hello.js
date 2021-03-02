@@ -1,4 +1,3 @@
-define([], function() {
 
 	// Shim up IE8
 	if ((typeof XMLHttpRequest !== 'undefined') && !('withCredentials' in (new XMLHttpRequest()))) {
@@ -20,7 +19,7 @@ define([], function() {
 		};
 	}
 
-	return {
+	var exp = {
 
 		forEach: function(collection, fn) {
 			if (collection && collection.length) {
@@ -76,4 +75,4 @@ define([], function() {
 
 	};
 
-});
+	export default exp;

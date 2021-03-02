@@ -1,24 +1,21 @@
-define([
-	'../libs/errorResponse',
-	'../../../src/modules/box',
-	'../../../src/modules/facebook',
-	'../../../src/modules/flickr',
-	'../../../src/modules/google',
-	'../../../src/modules/windows',
-	'../../../src/modules/dropbox',
-	'../../../src/modules/twitter',
-	'../../../src/modules/yahoo',
-	'../../../src/modules/instagram',
-	'../../../src/modules/joinme',
-	'../../../src/modules/linkedin',
-	'../../../src/modules/foursquare',
-	'../../../src/modules/github',
-	'../../../src/modules/bikeindex',
-	'../../../src/modules/soundcloud',
-	'../../../src/modules/vk'
-], function(
-	errorResponse
-) {
+
+import errorResponse from '../libs/errorResponse';
+import '../../../src/modules/box';
+import '../../../src/modules/facebook';
+import '../../../src/modules/flickr';
+import '../../../src/modules/google';
+import '../../../src/modules/windows';
+import '../../../src/modules/dropbox';
+import '../../../src/modules/twitter';
+import '../../../src/modules/yahoo';
+import '../../../src/modules/instagram';
+import '../../../src/modules/joinme';
+import '../../../src/modules/linkedin';
+import '../../../src/modules/foursquare';
+import '../../../src/modules/github';
+import '../../../src/modules/bikeindex';
+import '../../../src/modules/soundcloud';
+import '../../../src/modules/vk';
 
 	describe('E2E modules', function() {
 
@@ -76,4 +73,3 @@ define([
 			});
 		}
 	});
-});

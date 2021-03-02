@@ -1,6 +1,4 @@
-define(function() {
-
-	return function(eventCode, done) {
+export default function(eventCode, done) {
 		return function(data, type) {
 
 			expect(data).to.be.a('object');
@@ -15,6 +13,4 @@ define(function() {
 
 			done();
 		};
-	};
-
-});
+	}

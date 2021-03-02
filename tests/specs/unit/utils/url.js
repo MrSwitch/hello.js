@@ -1,4 +1,3 @@
-define([], function() {
 
 	var Url = hello.utils.url;
 
@@ -62,5 +61,3 @@ define([], function() {
 		});
 
 	});
-
-});

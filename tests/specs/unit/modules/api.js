@@ -1,5 +1,7 @@
+
 // API, A quick run through of the endpoints and their responses
-define(['./helper', '../../stubs/endpoints'], function(helper, endpoints) {
+import helper from './helper';
+import endpoints from '../../stubs/endpoints';
 
 	// Endpoints is an generated array of files in the stubs directory.
 	// Here we are using it to simulate a range of API requests and responses to see how Hello.API handles them.
@@ -49,7 +51,6 @@ define(['./helper', '../../stubs/endpoints'], function(helper, endpoints) {
 		});
 
 	});
-});
 
 function splitter(str, delim, sep) {
 	var q = {};

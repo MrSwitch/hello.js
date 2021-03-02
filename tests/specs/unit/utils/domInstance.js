@@ -1,4 +1,4 @@
-define([], function() {
+
 
 	var domInstance = hello.utils.domInstance;
 
@@ -48,4 +48,3 @@ define([], function() {
 
 	});
 
-});

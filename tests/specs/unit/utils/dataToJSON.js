@@ -1,4 +1,3 @@
-define([], function() {
 
 	var utils = hello.utils;
 
@@ -51,5 +50,3 @@ define([], function() {
 		});
 
 	});
-
-});

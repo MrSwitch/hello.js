@@ -1,4 +1,3 @@
-define([], function() {
 
 	describe('hello.use', function() {
 
@@ -19,5 +18,3 @@ define([], function() {
 		});
 
 	});
-
-});
