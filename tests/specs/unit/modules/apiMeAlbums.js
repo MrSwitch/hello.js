@@ -1,4 +1,4 @@
-define(['./helper'], function(helper) {
+import helper from './helper';
 
 	describe('hello.api(\'/me/albums\')', function() {
 
@@ -75,4 +75,3 @@ define(['./helper'], function(helper) {
 			});
 		});
 	});
-});

@@ -5386,7 +5386,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			del: {
 
 				// See: https://dev.twitter.com/rest/reference/post/favorites/destroy
-				'me/like': function() {
+				'me/like': function(p, callback) {
 					p.method = 'post';
 					var id = p.data.id;
 					p.data = null;

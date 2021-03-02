@@ -1,6 +1,5 @@
 // Qs
 // Binds arguments to a URL string.
-define([], function() {
 	var u = hello.utils;
 
 	describe('utils.qs', function() {
@@ -28,4 +27,3 @@ define([], function() {
 
 	});
 
-});

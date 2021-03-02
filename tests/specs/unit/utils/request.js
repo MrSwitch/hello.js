@@ -1,4 +1,3 @@
-define([], function() {
 
 	var utils = hello.utils;
 
@@ -26,7 +25,9 @@ define([], function() {
 			utils.request(p);
 			expect(spy.called).to.be.ok();
 
-			spy.reset();
+			spy = sinon.spy(function() {
+				return {};
+			});
 
 			// Explicitly undefined
 			p.xhr = undefined;
@@ -37,4 +38,3 @@ define([], function() {
 
 	});
 
-});

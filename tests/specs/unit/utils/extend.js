@@ -1,4 +1,3 @@
-define([], function() {
 
 	var extend = hello.utils.extend;
 
@@ -70,5 +69,3 @@ define([], function() {
 		});
 
 	});
-
-});

@@ -1,4 +1,3 @@
-define([], function() {
 
 	var store = hello.utils.store;
 
@@ -48,5 +47,3 @@ define([], function() {
 		});
 
 	});
-
-});

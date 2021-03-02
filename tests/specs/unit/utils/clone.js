@@ -1,4 +1,3 @@
-define([], function() {
 
 	var utils = hello.utils;
 
@@ -118,5 +117,3 @@ define([], function() {
 			expect(clone).to.be.eql(orig).and.to.not.be.equal(orig);
 		});
 	});
-
-});

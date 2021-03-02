@@ -4,9 +4,6 @@ module.exports = function(grunt) {
 
 	grunt.initConfig({
 		pkg: grunt.file.readJSON('package.json'),
-		mocha_phantomjs: {
-			all: ['tests/specs/index.html']
-		},
 		bumpup: ['package.json'],
 		shunt: {
 			build: {
@@ -73,14 +70,10 @@ module.exports = function(grunt) {
 	grunt.loadNpmTasks('grunt-bumpup');
 	grunt.loadNpmTasks('grunt-contrib-watch');
 	grunt.loadNpmTasks('grunt-contrib-uglify');
-	grunt.loadNpmTasks('grunt-mocha-phantomjs');
-	grunt.loadNpmTasks('browserstack-runner');
 	grunt.loadNpmTasks('shunt');
 
-	grunt.registerTask('mocha', ['mocha_phantomjs']);
-	grunt.registerTask('test', ['mocha']);
-	grunt.registerTask('deploy', ['test', 'shunt:build', 'uglify:minify', 'bumpup', 'updateInitConfig', 'usebanner:build']);
-	grunt.registerTask('default', ['test', 'shunt:build', 'uglify:minify', 'usebanner:build']);
+	grunt.registerTask('deploy', ['shunt:build', 'uglify:minify', 'bumpup', 'updateInitConfig', 'usebanner:build']);
+	grunt.registerTask('default', ['shunt:build', 'uglify:minify', 'usebanner:build']);
 
 	grunt.registerTask('updateInitConfig', 'Redefine pkg after change in package.json', function() {
 		grunt.config.set('pkg', grunt.file.readJSON('package.json'));

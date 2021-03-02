@@ -1,8 +1,4 @@
-define([
-	'../../libs/errorResponse'
-], function(
-	errorResponse
-) {
+import errorResponse from '../../libs/errorResponse';
 
 	describe('hello.login', function() {
 
@@ -441,5 +437,3 @@ define([
 		});
 
 	});
-
-});
