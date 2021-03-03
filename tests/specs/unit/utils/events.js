@@ -10,7 +10,7 @@ describe('utils.event', function() {
 	beforeEach(function() {
 
 		// Pass an arbitary piece of data around
-		arbitaryData = {boom:true};
+		arbitaryData = {boom: true};
 
 		eventName = 'custom';
 

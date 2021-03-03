@@ -50,7 +50,7 @@ describe('utils.param', function() {
 
 		// Convert there and back
 
-		var obj = Object.create({ignore:'this should be excluded'});
+		var obj = Object.create({ignore: 'this should be excluded'});
 		obj.included = 'this is included';
 
 		var value = util(util(obj));

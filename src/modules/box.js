@@ -32,7 +32,7 @@ hello.init({
 
 			'me/files': function(o) {
 				if (Array.isArray(o)) {
-					return {data:o};
+					return {data: o};
 				}
 
 				return o;

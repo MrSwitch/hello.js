@@ -454,7 +454,7 @@ hello.utils.extend(hello, {
 		// Create a new promise
 		var promise = utils.Promise();
 
-		var p = utils.args({name:'s', options: 'o', callback: 'f'}, arguments);
+		var p = utils.args({name: 's', options: 'o', callback: 'f'}, arguments);
 
 		p.options = p.options || {};
 
@@ -486,7 +486,7 @@ hello.utils.extend(hello, {
 				utils.store(p.name, null);
 
 				// Emit events by default
-				promise.fulfill(hello.utils.merge({network:p.name}, opts || {}));
+				promise.fulfill(hello.utils.merge({network: p.name}, opts || {}));
 			};
 
 			// Run an async operation to remove the users session
@@ -775,7 +775,7 @@ hello.utils.extend(hello.utils, {
 	// An easy way to create a hidden iframe
 	// @param string src
 	iframe: function(src) {
-		this.append('iframe', {src: src, style: {position:'absolute', left: '-1000px', bottom: 0, height: '1px', width: '1px'}}, 'body');
+		this.append('iframe', {src: src, style: {position: 'absolute', left: '-1000px', bottom: 0, height: '1px', width: '1px'}}, 'body');
 	},
 
 	// Recursive merge two objects into one, second parameter overides the first
@@ -961,7 +961,7 @@ hello.utils.extend(hello.utils, {
 		api.prototype = {
 			/*  promise resolving methods  */
 			fulfill: function (value) { return deliver(this, STATE_FULFILLED, "fulfillValue", value); },
-			reject:  function (value) { return deliver(this, STATE_REJECTED,  "rejectReason", value); },
+			reject: function (value) { return deliver(this, STATE_REJECTED,  "rejectReason", value); },
 
 			/*  "The then Method" [Promises/A+ 1.1, 1.2, 2.2]  */
 			then: function (onFulfilled, onRejected) {
@@ -1843,7 +1843,7 @@ hello.api = function() {
 
 			// Should this be an object
 			if (r === true) {
-				r = {success:true};
+				r = {success: true};
 			}
 			else if (!r) {
 				r = {};
@@ -1851,7 +1851,7 @@ hello.api = function() {
 
 			// The delete callback needs a better response
 			if (p.method === 'delete') {
-				r = (!r || utils.isEmpty(r)) ? {success:true} : r;
+				r = (!r || utils.isEmpty(r)) ? {success: true} : r;
 			}
 
 			// FORMAT RESPONSE?
@@ -1979,7 +1979,7 @@ hello.utils.extend(hello.utils, {
 			// Add some additional query parameters to the URL
 			// We're pretty stuffed if the endpoint doesn't like these
 			p.query.redirect_uri = p.redirect_uri;
-			p.query.state = JSON.stringify({callback:p.callbackID});
+			p.query.state = JSON.stringify({callback: p.callbackID});
 
 			var opts;
 
@@ -2652,7 +2652,7 @@ hello.utils.extend(hello.utils, {
 	hello.api = function() {
 
 		// Get arguments
-		var p = utils.args({path: 's!', method: 's', data:'o', timeout: 'i', callback: 'f'}, arguments);
+		var p = utils.args({path: 's!', method: 's', data: 'o', timeout: 'i', callback: 'f'}, arguments);
 
 		// Change for into a data object
 		if (p.data) {

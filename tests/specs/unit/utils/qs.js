@@ -11,7 +11,7 @@ describe('utils.qs', function() {
 
 	it('should append arguments to a url', function() {
 
-		var value = u.qs('https://api.com/path?q=%22root%22+in+parents+and+trashed=false&maxResults=5', {access_token:'token', path: 'path'});
+		var value = u.qs('https://api.com/path?q=%22root%22+in+parents+and+trashed=false&maxResults=5', {access_token: 'token', path: 'path'});
 
 		expect(value).to.eql('https://api.com/path?q=%22root%22+in+parents+and+trashed=false&maxResults=5&access_token=token&path=path');
 
@@ -19,7 +19,7 @@ describe('utils.qs', function() {
 
 	it('should overwrite existing arguments in a url', function() {
 
-		var value = u.qs('https://api.com/path?q=%22root%22+in+parents+and+trashed=false&maxResults=5', {q:'word', access_token:'token'});
+		var value = u.qs('https://api.com/path?q=%22root%22+in+parents+and+trashed=false&maxResults=5', {q: 'word', access_token: 'token'});
 
 		expect(value).to.eql('https://api.com/path?q=word&maxResults=5&access_token=token');
 

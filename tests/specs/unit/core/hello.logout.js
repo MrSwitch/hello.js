@@ -96,7 +96,7 @@ describe('hello.logout', function() {
 					done();
 				};
 
-				hello('testable').logout({force:true});
+				hello('testable').logout({force: true});
 			});
 
 			it('should attach authResponse object to the options.authResponse', function(done) {
@@ -106,7 +106,7 @@ describe('hello.logout', function() {
 					done();
 				};
 
-				hello('testable').logout({force:true});
+				hello('testable').logout({force: true});
 			});
 		});
 	});

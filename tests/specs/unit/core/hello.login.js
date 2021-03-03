@@ -134,7 +134,7 @@ describe('hello.login', function() {
 
 			utils.popup = spy;
 
-			hello.login('testable', {redirect_uri:REDIRECT_URI});
+			hello.login('testable', {redirect_uri: REDIRECT_URI});
 		});
 
 		it('should URIencode `options.redirect_uri`', function(done) {
@@ -151,7 +151,7 @@ describe('hello.login', function() {
 
 			utils.popup = spy;
 
-			hello.login('testable', {redirect_uri:REDIRECT_URI});
+			hello.login('testable', {redirect_uri: REDIRECT_URI});
 		});
 
 		it('should pass through unknown scopes defined in `options.scope`', function(done) {

@@ -401,7 +401,7 @@ describe('hello.api', function() {
 
 			testable.wrap = testable.wrap || {};
 			testable.wrap['default'] = function(req) {
-				req.paging = {next:'next?page=2'};
+				req.paging = {next: 'next?page=2'};
 				delete testable.wrap['default'];
 			};
 
