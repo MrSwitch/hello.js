@@ -823,7 +823,7 @@ hello.utils.extend(hello.utils, {
 			t = typeof (args[i]);
 
 			if ((typeof (o[x]) === 'function' && o[x].test(args[i])) || (typeof (o[x]) === 'string' && (
-			(o[x].indexOf('s') > -1 && t === 'string') ||
+				(o[x].indexOf('s') > -1 && t === 'string') ||
 			(o[x].indexOf('o') > -1 && t === 'object') ||
 			(o[x].indexOf('i') > -1 && t === 'number') ||
 			(o[x].indexOf('a') > -1 && t === 'object') ||
@@ -2529,7 +2529,7 @@ hello.utils.extend(hello.utils, {
 	isBinary: function(data) {
 
 		return data instanceof Object && (
-		(this.domInstance('input', data) && data.type === 'file') ||
+			(this.domInstance('input', data) && data.type === 'file') ||
 		('FileList' in window && data instanceof window.FileList) ||
 		('File' in window && data instanceof window.File) ||
 		('Blob' in window && data instanceof window.Blob));

@@ -20,7 +20,6 @@
 		"brace-style": 0,
 		"dot-notation": [2, {"allowKeywords": false}],
 		"eqeqeq": 0,
-		"indent": 0,
 		"jsdoc/check-tag-names": 0,
 		"key-spacing": 0,
 		"no-console": 0,
