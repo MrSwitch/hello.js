@@ -927,14 +927,14 @@ hello.utils.extend(hello.utils, {
 	 **  Licensed under The MIT License <http://opensource.org/licenses/MIT>
 	 **  Source-Code distributed on <http://github.com/rse/thenable>
 	 */
-	Promise: (function(){
+	Promise: (function() {
 		/*  promise states [Promises/A+ 2.1]  */
 		var STATE_PENDING = 0; /*  [Promises/A+ 2.1.1]  */
 		var STATE_FULFILLED = 1; /*  [Promises/A+ 2.1.2]  */
 		var STATE_REJECTED = 2; /*  [Promises/A+ 2.1.3]  */
 
 		/*  promise object constructor  */
-		var api = function (executor) {
+		var api = function(executor) {
 			/*  optionally support non-constructor/plain-function call  */
 			if (!(this instanceof api))
 				return new api(executor);
@@ -960,24 +960,24 @@ hello.utils.extend(hello.utils, {
 		/*  promise API methods  */
 		api.prototype = {
 			/*  promise resolving methods  */
-			fulfill: function (value) { return deliver(this, STATE_FULFILLED, "fulfillValue", value); },
-			reject: function (value) { return deliver(this, STATE_REJECTED, "rejectReason", value); },
+			fulfill: function(value) { return deliver(this, STATE_FULFILLED, "fulfillValue", value); },
+			reject: function(value) { return deliver(this, STATE_REJECTED, "rejectReason", value); },
 
 			/*  "The then Method" [Promises/A+ 1.1, 1.2, 2.2]  */
-			then: function (onFulfilled, onRejected) {
+			then: function(onFulfilled, onRejected) {
 				var curr = this;
 				var next = new api(); /*  [Promises/A+ 2.2.7]  */
 				curr.onFulfilled.push(
 					resolver(onFulfilled, next, "fulfill")); /*  [Promises/A+ 2.2.2/2.2.6]  */
 				curr.onRejected.push(
-					resolver(onRejected, next, "reject" )); /*  [Promises/A+ 2.2.3/2.2.6]  */
+					resolver(onRejected, next, "reject")); /*  [Promises/A+ 2.2.3/2.2.6]  */
 				execute(curr);
 				return next.proxy; /*  [Promises/A+ 2.2.7, 3.3]  */
 			}
 		};
 
 		/*  deliver an action  */
-		var deliver = function (curr, state, name, value) {
+		var deliver = function(curr, state, name, value) {
 			if (curr.state === STATE_PENDING) {
 				curr.state = state; /*  [Promises/A+ 2.1.2.1, 2.1.3.1]  */
 				curr[name] = value; /*  [Promises/A+ 2.1.2.2, 2.1.3.2]  */
@@ -987,7 +987,7 @@ hello.utils.extend(hello.utils, {
 		};
 
 		/*  execute all handlers  */
-		var execute = function (curr) {
+		var execute = function(curr) {
 			if (curr.state === STATE_FULFILLED)
 				execute_handlers(curr, "onFulfilled", curr.fulfillValue);
 			else if (curr.state === STATE_REJECTED)
@@ -995,7 +995,7 @@ hello.utils.extend(hello.utils, {
 		};
 
 		/*  execute particular set of handlers  */
-		var execute_handlers = function (curr, name, value) {
+		var execute_handlers = function(curr, name, value) {
 			/* global process: true */
 			/* global setImmediate: true */
 			/* global setTimeout: true */
@@ -1007,7 +1007,7 @@ hello.utils.extend(hello.utils, {
 			/*  iterate over all handlers, exactly once  */
 			var handlers = curr[name];
 			curr[name] = []; /*  [Promises/A+ 2.2.2.3, 2.2.3.3]  */
-			var func = function () {
+			var func = function() {
 				for (var i = 0; i < handlers.length; i++)
 					handlers[i](value); /*  [Promises/A+ 2.2.5]  */
 			};
@@ -1022,8 +1022,8 @@ hello.utils.extend(hello.utils, {
 		};
 
 		/*  generate a resolver function  */
-		var resolver = function (cb, next, method) {
-			return function (value) {
+		var resolver = function(cb, next, method) {
+			return function(value) {
 				if (typeof cb !== "function") /*  [Promises/A+ 2.2.1, 2.2.7.3, 2.2.7.4]  */
 					next[method].call(next, value); /*  [Promises/A+ 2.2.7.3, 2.2.7.4]  */
 				else {
@@ -1039,7 +1039,7 @@ hello.utils.extend(hello.utils, {
 		};
 
 		/*  "Promise Resolution Procedure"  */ /*  [Promises/A+ 2.3]  */
-		var resolve = function (promise, x) {
+		var resolve = function(promise, x) {
 			/*  sanity check arguments  */ /*  [Promises/A+ 2.3.1]  */
 			if (promise === x || promise.proxy === x) {
 				promise.reject(new TypeError("cannot resolve promise with itself"));
@@ -1065,7 +1065,7 @@ hello.utils.extend(hello.utils, {
 					/*  call retrieved "then" method */ /*  [Promises/A+ 2.3.3.3]  */
 					then.call(x,
 						/*  resolvePromise  */ /*  [Promises/A+ 2.3.3.3.1]  */
-						function (y) {
+						function(y) {
 							if (resolved) return; resolved = true; /*  [Promises/A+ 2.3.3.3.3]  */
 							if (y === x) /*  [Promises/A+ 3.6]  */
 								promise.reject(new TypeError("circular thenable chain"));
@@ -1074,7 +1074,7 @@ hello.utils.extend(hello.utils, {
 						},
 
 						/*  rejectPromise  */ /*  [Promises/A+ 2.3.3.3.2]  */
-						function (r) {
+						function(r) {
 							if (resolved) return; resolved = true; /*  [Promises/A+ 2.3.3.3.3]  */
 							promise.reject(r);
 						}

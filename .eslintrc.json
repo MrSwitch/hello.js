@@ -43,9 +43,6 @@
 		"quotes": 0,
 		"quote-props": [2, "as-needed", {"keywords": true}],
 		"radix": 0,
-		"space-before-blocks": 0,
-		"space-before-function-paren": 0,
-		"space-in-parens": 0,
 		"spaced-comment": 0
 	}
 }
