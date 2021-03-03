@@ -20,13 +20,10 @@
 		"brace-style": 0,
 		"dot-notation": [2, {"allowKeywords": false}],
 		"eqeqeq": 0,
-		"indent": 0,
 		"jsdoc/check-tag-names": 0,
-		"key-spacing": 0,
 		"no-console": 0,
 		"no-empty": 0,
 		"no-extend-native": 0,
-		"no-multi-spaces": 0,
 		"no-param-reassign": 0,
 		"no-prototype-builtins": 0,
 		"no-redeclare": 0,
@@ -46,9 +43,6 @@
 		"quotes": 0,
 		"quote-props": [2, "as-needed", {"keywords": true}],
 		"radix": 0,
-		"space-before-blocks": 0,
-		"space-before-function-paren": 0,
-		"space-in-parens": 0,
 		"spaced-comment": 0
 	}
 }

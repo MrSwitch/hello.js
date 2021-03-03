@@ -1,214 +1,214 @@
 
-	var utils = hello.utils;
+var utils = hello.utils;
 
-	function mockLocation(url) {
-		var a = document.createElement('a');
-		a.href = url;
+function mockLocation(url) {
+	var a = document.createElement('a');
+	a.href = url;
 
-		var mock = {
-			assign: function() {
+	var mock = {
+		assign: function() {
 
-			}
-		};
-
-		var props = ['hash', 'host', 'hostname', 'href', 'pathname', 'port', 'protocol', 'search'];
-		for (var i = 0; i < props.length; i++) {
-			var x = props[i];
-			mock[x] = a[x];
 		}
+	};
 
-		return mock;
+	var props = ['hash', 'host', 'hostname', 'href', 'pathname', 'port', 'protocol', 'search'];
+	for (var i = 0; i < props.length; i++) {
+		var x = props[i];
+		mock[x] = a[x];
 	}
 
-	describe('utils.responseHandler', function() {
+	return mock;
+}
 
-		// Window denotes the current window which is operating the script.
-		// Parent refers to that windows parent.
+describe('utils.responseHandler', function() {
 
-		var _window;
-		var _parent;
-		var _state;
-		var _accessToken;
+	// Window denotes the current window which is operating the script.
+	// Parent refers to that windows parent.
 
-		describe('OAuth handler', function() {
+	var _window;
+	var _parent;
+	var _state;
+	var _accessToken;
 
-			var _store = utils.store;
+	describe('OAuth handler', function() {
 
-			beforeEach(function() {
+		var _store = utils.store;
 
-				_accessToken = '1234';
+		beforeEach(function() {
 
-				_state = {
-					callback: '_hellojs_callbackTestFunc',
-					network: 'network'
-				};
+			_accessToken = '1234';
 
-				// Mock up _window and _parent objects for the tests
-				_window = {
-					location: mockLocation('http://adodson.com/redirect.html?state=' + JSON.stringify(_state) + '&access_token=' + _accessToken),
-					close: function() {
-					}
-				};
+			_state = {
+				callback: '_hellojs_callbackTestFunc',
+				network: 'network'
+			};
 
-				_parent = {
-					_hellojs_callbackTestFunc: function() {
-						// This is the callback function on the parent
-					}
-				};
-			});
+			// Mock up _window and _parent objects for the tests
+			_window = {
+				location: mockLocation('http://adodson.com/redirect.html?state=' + JSON.stringify(_state) + '&access_token=' + _accessToken),
+				close: function() {
+				}
+			};
 
-			afterEach(function() {
-				utils.store = _store;
-			});
+			_parent = {
+				_hellojs_callbackTestFunc: function() {
+					// This is the callback function on the parent
+				}
+			};
+		});
 
-			it('should do nothing if the current window has no state parameter', function() {
+		afterEach(function() {
+			utils.store = _store;
+		});
 
-				_window.location = mockLocation('http://adodson.com/redirect.html');
+		it('should do nothing if the current window has no state parameter', function() {
 
-				var spy = sinon.spy();
+			_window.location = mockLocation('http://adodson.com/redirect.html');
 
-				_window.close = spy;
+			var spy = sinon.spy();
 
-				utils.responseHandler(_window, _parent);
+			_window.close = spy;
 
-				expect(spy.callCount).to.be(0);
+			utils.responseHandler(_window, _parent);
 
-			});
-
-			it('should redirect to oauth proxy and preserve the query string', function() {
-				_state.oauth_proxy = 'http://adodson.com/oauth_proxy?foo=bar';
-				_state.redirect_uri = 'http://adodson.com/';
-
-				_window.location = mockLocation('http://adodson.com/redirect.html?code=abc&state=' + JSON.stringify(_state));
-
-				var spy = sinon.spy();
-				_window.location.assign = spy;
-
-				utils.responseHandler(_window, _parent);
-
-				// Using regex, instead of eq comparison, because the order
-				// of query string parameters is not guaranteed
-				expect(spy.args[0][0]).to.match(/foo=bar/);
-				expect(spy.args[0][0]).to.match(/redirect_uri=/);
-			});
-
-			it('should return the access_token to the parent if the current window location contains a access_token and a state parameter containing a callback and network', function() {
-
-				var spy = sinon.spy();
-				_window.close = spy;
-
-				var spy2 = sinon.spy();
-				_parent._hellojs_callbackTestFunc = spy2;
-
-				utils.responseHandler(_window, _parent);
-
-				expect(spy.calledOnce).to.be.ok();
-				expect(spy2.calledOnce).to.be.ok();
-
-				var response = spy2.args[0][0];
-
-				expect(response).to.be.a('string');
-				response = JSON.parse(response);
-
-				expect(response).to.have.property('network', _state.network);
-				expect(response).to.have.property('access_token', _accessToken);
-
-			});
-
-			it('should always close window despite a parent handler which throws an exception', function() {
-
-				var spy = sinon.spy();
-				_window.close = spy;
-
-				var spy2 = sinon.spy(function() {
-					throw 'Error';
-				});
-
-				_parent._hellojs_callbackTestFunc = spy2;
-
-				utils.responseHandler(_window, _parent);
-
-				expect(spy.calledOnce).to.be.ok();
-				expect(spy2.calledOnce).to.be.ok();
-
-				var response = spy2.args[0][0];
-
-				expect(response).to.be.a('string');
-				response = JSON.parse(response);
-
-				expect(response).to.have.property('network', _state.network);
-				expect(response).to.have.property('access_token', _accessToken);
-
-			});
-
-			it('should close the iframe window', function(done) {
-
-				window._hellojs_testIframeCloses = function() {
-					// After the initial load we can expect this to have removed itself;
-					setTimeout(function() {
-						expect(frm.parentNode).to.eql(null);
-						done();
-					}, 100);
-				};
-
-				// In this example we load a page containing the responseHandler script on it.
-				var frm = document.createElement('iframe');
-				frm.src = 'redirect.html?state={}&network=test&callback=_hellojs_testIframeCloses&access_token=token';
-				document.body.appendChild(frm);
-
-			});
-
-			it('should return OAuth failures', function() {
-
-				var spy = sinon.spy();
-				_window.close = spy;
-				_window.location = mockLocation('http://adodson.com/redirect.html?error=error&error_description=description&state=' + JSON.stringify(_state));
-
-				var spy2 = sinon.spy();
-				_parent._hellojs_callbackTestFunc = spy2;
-
-				utils.responseHandler(_window, _parent);
-
-				expect(spy.calledOnce).to.be.ok();
-				expect(spy2.calledOnce).to.be.ok();
-
-				var response = spy2.args[0][0];
-
-				expect(response).to.be.a('string');
-				response = JSON.parse(response);
-
-				expect(response).to.have.property('error');
-				expect(response.error).to.have.property('code', 'error')
-					.and.to.have.property('message', 'description');
-
-			});
-
-			it('should call hello.utils.store with the authResponse including callback property, if the callback was not found on the parent', function() {
-
-				var spy = sinon.spy();
-				_window.close = spy;
-
-				// Remove the global callback function
-				delete _parent._hellojs_callbackTestFunc;
-
-				// Spy on the store function
-				var spy2 = sinon.spy();
-				utils.store = spy2;
-
-				// Trigger the response handler
-				utils.responseHandler(_window, _parent);
-
-				expect(spy.calledOnce).to.be.ok();
-				expect(spy2.calledOnce).to.be.ok();
-
-				// Should set the callback name along with the auth response.
-				expect(spy2.args[0][1]).to.have.property('callback', '_hellojs_callbackTestFunc');
-			});
+			expect(spy.callCount).to.be(0);
 
 		});
 
-		xdescribe('POST Response', function() {
+		it('should redirect to oauth proxy and preserve the query string', function() {
+			_state.oauth_proxy = 'http://adodson.com/oauth_proxy?foo=bar';
+			_state.redirect_uri = 'http://adodson.com/';
 
+			_window.location = mockLocation('http://adodson.com/redirect.html?code=abc&state=' + JSON.stringify(_state));
+
+			var spy = sinon.spy();
+			_window.location.assign = spy;
+
+			utils.responseHandler(_window, _parent);
+
+			// Using regex, instead of eq comparison, because the order
+			// of query string parameters is not guaranteed
+			expect(spy.args[0][0]).to.match(/foo=bar/);
+			expect(spy.args[0][0]).to.match(/redirect_uri=/);
+		});
+
+		it('should return the access_token to the parent if the current window location contains a access_token and a state parameter containing a callback and network', function() {
+
+			var spy = sinon.spy();
+			_window.close = spy;
+
+			var spy2 = sinon.spy();
+			_parent._hellojs_callbackTestFunc = spy2;
+
+			utils.responseHandler(_window, _parent);
+
+			expect(spy.calledOnce).to.be.ok();
+			expect(spy2.calledOnce).to.be.ok();
+
+			var response = spy2.args[0][0];
+
+			expect(response).to.be.a('string');
+			response = JSON.parse(response);
+
+			expect(response).to.have.property('network', _state.network);
+			expect(response).to.have.property('access_token', _accessToken);
+
+		});
+
+		it('should always close window despite a parent handler which throws an exception', function() {
+
+			var spy = sinon.spy();
+			_window.close = spy;
+
+			var spy2 = sinon.spy(function() {
+				throw 'Error';
+			});
+
+			_parent._hellojs_callbackTestFunc = spy2;
+
+			utils.responseHandler(_window, _parent);
+
+			expect(spy.calledOnce).to.be.ok();
+			expect(spy2.calledOnce).to.be.ok();
+
+			var response = spy2.args[0][0];
+
+			expect(response).to.be.a('string');
+			response = JSON.parse(response);
+
+			expect(response).to.have.property('network', _state.network);
+			expect(response).to.have.property('access_token', _accessToken);
+
+		});
+
+		it('should close the iframe window', function(done) {
+
+			window._hellojs_testIframeCloses = function() {
+				// After the initial load we can expect this to have removed itself;
+				setTimeout(function() {
+					expect(frm.parentNode).to.eql(null);
+					done();
+				}, 100);
+			};
+
+			// In this example we load a page containing the responseHandler script on it.
+			var frm = document.createElement('iframe');
+			frm.src = 'redirect.html?state={}&network=test&callback=_hellojs_testIframeCloses&access_token=token';
+			document.body.appendChild(frm);
+
+		});
+
+		it('should return OAuth failures', function() {
+
+			var spy = sinon.spy();
+			_window.close = spy;
+			_window.location = mockLocation('http://adodson.com/redirect.html?error=error&error_description=description&state=' + JSON.stringify(_state));
+
+			var spy2 = sinon.spy();
+			_parent._hellojs_callbackTestFunc = spy2;
+
+			utils.responseHandler(_window, _parent);
+
+			expect(spy.calledOnce).to.be.ok();
+			expect(spy2.calledOnce).to.be.ok();
+
+			var response = spy2.args[0][0];
+
+			expect(response).to.be.a('string');
+			response = JSON.parse(response);
+
+			expect(response).to.have.property('error');
+			expect(response.error).to.have.property('code', 'error')
+				.and.to.have.property('message', 'description');
+
+		});
+
+		it('should call hello.utils.store with the authResponse including callback property, if the callback was not found on the parent', function() {
+
+			var spy = sinon.spy();
+			_window.close = spy;
+
+			// Remove the global callback function
+			delete _parent._hellojs_callbackTestFunc;
+
+			// Spy on the store function
+			var spy2 = sinon.spy();
+			utils.store = spy2;
+
+			// Trigger the response handler
+			utils.responseHandler(_window, _parent);
+
+			expect(spy.calledOnce).to.be.ok();
+			expect(spy2.calledOnce).to.be.ok();
+
+			// Should set the callback name along with the auth response.
+			expect(spy2.args[0][1]).to.have.property('callback', '_hellojs_callbackTestFunc');
 		});
 
 	});
+
+	xdescribe('POST Response', function() {
+
+	});
+
+});
