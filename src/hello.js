@@ -1745,7 +1745,7 @@ hello.api = function() {
 	// Extrapolate the QueryString
 	// Provide a clean path
 	// Move the querystring into the data
-	if (p.method === 'get') {
+	if (p.method === 'get' || p.method === 'post') {
 
 		var query = url.split(/[\?#]/)[1];
 		if (query) {

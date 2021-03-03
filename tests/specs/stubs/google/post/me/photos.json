@@ -1,0 +1,30 @@
+{
+  "mediaItems": [
+    {
+      "id": "test_file_1",
+      "productUrl": "https://via.placeholder.com/150",
+      "baseUrl": "https://via.placeholder.com/300",
+      "mimeType": "image/jpeg",
+      "mediaMetadata": {
+        "creationTime": "2017-08-04T15:34:56Z",
+        "width": "1440",
+        "height": "1920",
+        "photo": {}
+      },
+      "filename": "test_file_1.jpg"
+    },
+    {
+      "id": "test_file_2",
+      "productUrl": "https://via.placeholder.com/400",
+      "baseUrl": "https://via.placeholder.com/800",
+      "mimeType": "image/jpeg",
+      "mediaMetadata": {
+        "creationTime": "2018-04-25T14:19:18Z",
+        "width": "3265",
+        "height": "4898",
+        "photo": {}
+      },
+      "filename": "test_file_2.jpg"
+    }
+  ]
+}

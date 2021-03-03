@@ -169,6 +169,24 @@ import errorResponse from '../../libs/errorResponse';
 					});
 				});
 			}
+
+			it('should post to the base path', function(done) {
+
+				hello('testable')
+					.api('/endpoint?pageToken=page2', 'post', {}, function(res) {
+						expect(res.url).to.eql('https://testable/endpoint');
+						done();
+					});
+			});
+
+			it('should attach query parameters to req.query', function(done) {
+
+				hello('testable')
+					.api('/endpoint?pageToken=page2', 'post', {}, function(res) {
+						expect(res.query).to.have.property('pageToken', 'page2');
+						done();
+					});
+			});
 		});
 
 		describe('signing', function() {
