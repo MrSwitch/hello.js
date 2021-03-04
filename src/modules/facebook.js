@@ -31,7 +31,7 @@
 				publish: 'publish_actions',
 
 				// Deprecated in v2.0
-				// Create_event	: 'create_event',
+				// Create_event: 'create_event',
 
 				offline_access: ''
 			},
@@ -59,8 +59,8 @@
 				hello.utils.iframe('https://www.facebook.com/logout.php?next=' + redirect + '&access_token=' + token);
 
 				// Possible responses:
-				// String URL	- hello.logout should handle the logout
-				// Undefined	- this function will handle the callback
+				// String URL - hello.logout should handle the logout
+				// Undefined - this function will handle the callback
 				// True - throw a success, this callback isn't handling the callback
 				// False - throw a error
 				if (!token) {

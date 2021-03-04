@@ -919,7 +919,7 @@ hello.utils.extend(hello.utils, {
 		return true;
 	},
 
-	//jscs:disable
+	/* eslint-disable */
 
 	/*!
 	 **  Thenable -- Embeddable Minimum Strictly-Compliant Promises/A+ 1.1.1 Thenable
@@ -1095,7 +1095,7 @@ hello.utils.extend(hello.utils, {
 		return api;
 	})(),
 
-	//jscs:enable
+	/* eslint-enable */
 
 	// Event
 	// A contructor superclass for adding event menthods, on, off, emit.
