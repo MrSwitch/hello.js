@@ -33,7 +33,7 @@ if (!Object.keys) {
 		return r;
 	};
 }
-
+/* eslint-disable no-extend-native */
 // ES5 [].indexOf
 if (!Array.prototype.indexOf) {
 	Array.prototype.indexOf = function(s) {
@@ -92,6 +92,8 @@ if (!Array.prototype.filter) {
 // Reference: http://es5.github.io/#x15.4.4.19
 if (!Array.prototype.map) {
 
+	var a;
+
 	Array.prototype.map = function(fun, thisArg) {
 
 		var a = [];
@@ -149,3 +151,4 @@ if (!Function.prototype.bind) {
 	};
 
 }
+/* eslint-enable no-extend-native */
