@@ -32,7 +32,7 @@
     "url": "https://github.com/MrSwitch/hello.js/issues"
   },
   "scripts": {
-    "build": "grunt",
+    "build": "bash ./build.sh",
     "lint": "eslint ./",
     "test": "npm run lint && npm run test:build && npm run test:browserstack",
     "test:build": "npx rollup tests/specs/index.js --file tests/specs/bundle.js --format iife",
@@ -50,6 +50,7 @@
     "grunt-contrib-watch": "^1.1.0",
     "mocha": "^8.0.0",
     "shunt": "^0.1.4",
-    "sinon": "^9.2.4"
+    "sinon": "^9.2.4",
+    "uglify-js": "^3.13.1"
   }
 }
