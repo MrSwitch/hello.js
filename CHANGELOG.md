@@ -1,3 +1,10 @@
+## [1.19.1](https://github.com/MrSwitch/hello.js/compare/v1.19.0...v1.19.1) (2021-03-20)
+
+
+### Bug Fixes
+
+* **ci:** build dist ([8b56eb5](https://github.com/MrSwitch/hello.js/commit/8b56eb539b7cd533b79d56764ea2038519cbbc3d))
+
 # [1.19.0](https://github.com/MrSwitch/hello.js/compare/v1.18.8...v1.19.0) (2021-03-20)
 
 
