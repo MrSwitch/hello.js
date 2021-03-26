@@ -34,10 +34,11 @@
   "scripts": {
     "build": "bash ./build.sh",
     "lint": "eslint ./",
-    "test": "npm run lint && npm run test:build && npm run test:browserstack",
+    "test": "npm run lint && npm run test:build && npm run test:headless",
     "test:build": "npx rollup tests/specs/index.js --file tests/specs/bundle.js --format iife",
     "test:browserstack": "node_modules/.bin/browserstack-runner",
-    "test:browserstack:env": "source .env.sh && npm run test:browserstack"
+    "test:browserstack:env": "source .env.sh && npm run test:browserstack",
+    "test:headless": "node ./tests/headless.js"
   },
   "devDependencies": {
     "@semantic-release/changelog": "^5.0.1",
@@ -46,7 +47,9 @@
     "browserstack-runner": "^0.9.0",
     "eslint": "^7.21.0",
     "eslint-config-5app": "^0.14.2",
+    "localhost": "^0.3.0",
     "mocha": "^8.0.0",
+    "mocha-headless-chrome": "^3.1.0",
     "semantic-release": "^17.4.2",
     "sinon": "^9.2.4",
     "uglify-js": "^3.13.1"
