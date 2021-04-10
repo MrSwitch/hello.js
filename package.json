@@ -44,15 +44,15 @@
     "@semantic-release/changelog": "^5.0.1",
     "@semantic-release/exec": "^5.0.0",
     "@semantic-release/git": "^9.0.0",
-    "browserstack-runner": "^0.9.0",
-    "eslint": "^7.23.0",
+    "browserstack-runner": "^0.9.4",
+    "eslint": "^7.24.0",
     "eslint-config-5app": "^0.14.2",
     "localhost": "^0.3.0",
     "mocha": "^8.3.2",
     "mocha-headless-chrome": "^3.1.0",
     "semantic-release": "^17.4.2",
-    "sinon": "^10.0.0",
-    "uglify-js": "^3.13.1"
+    "sinon": "^10.0.1",
+    "uglify-js": "^3.13.3"
   },
   "release": {
     "branches": [
