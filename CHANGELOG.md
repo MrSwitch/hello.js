@@ -1,3 +1,10 @@
+## [1.19.3](https://github.com/MrSwitch/hello.js/compare/v1.19.2...v1.19.3) (2021-04-13)
+
+
+### Bug Fixes
+
+* **deps:** npm audit localhost ([384bf14](https://github.com/MrSwitch/hello.js/commit/384bf14b87b36028ed1876f9092bde1352ebaa89))
+
 ## [1.19.2](https://github.com/MrSwitch/hello.js/compare/v1.19.1...v1.19.2) (2021-03-20)
 
 
