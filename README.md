@@ -977,11 +977,7 @@ The `manifest.json` file must have the following permissions...
 
 HelloJS relies on these fantastic services for it's development and deployment, without which it would still be kicking around in a cave - not evolving very fast.
 
-
 - [BrowserStack](https://www.browserstack.com/) for providing a means to test across multiple devices.
-- [Github](https://github.com) for maintaining the repo and issue tracking.
-- [Travis](https://travis-ci.org/) for providing fantastic continuous integration.
-- ... and others I've forgotten to mention
 
 
 ## Can I contribute?

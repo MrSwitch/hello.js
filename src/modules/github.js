@@ -41,7 +41,7 @@
 					formatError(o, headers);
 
 					if (Array.isArray(o)) {
-						o = {data:o};
+						o = {data: o};
 					}
 
 					if (o.data) {

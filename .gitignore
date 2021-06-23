@@ -4,4 +4,5 @@ coverage/
 _site/
 src/*.html
 src/**/*.html
-.idea
+tests/specs/bundle.js
+.env.sh

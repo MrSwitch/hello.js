@@ -53,7 +53,7 @@
 					formatError(o, headers);
 
 					if (Array.isArray(o)) {
-						o = {data:o};
+						o = {data: o};
 						paging(o, headers, req);
 						o.data.forEach(formatUser);
 					}

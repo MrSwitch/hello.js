@@ -10,11 +10,7 @@
     "dist/hello.all.js"
   ],
   "devDependencies": {
-    "mocha": "~1.21.5",
-    "json2": "*",
-    "requirejs": "~2.1.15",
     "expect": "~0.3.1",
-    "sinonjs": "~1.10.2",
     "css-social-buttons": "^1.2.0",
     "knockout": "^3.4.0"
   },
@@ -24,8 +20,5 @@
     "!src/**",
     "!README.md",
     "package.json"
-  ],
-  "resolutions": {
-    "mocha": "~2.4.5"
-  }
+  ]
 }

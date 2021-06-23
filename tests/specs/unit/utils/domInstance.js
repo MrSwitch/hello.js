@@ -1,51 +1,50 @@
-define([], function() {
 
-	var domInstance = hello.utils.domInstance;
 
-	describe('utils.domInstance', function() {
+var domInstance = hello.utils.domInstance;
 
-		it('should return true, if type is an HTMLInputElement matches "input"', function() {
+describe('utils.domInstance', function() {
 
-			var type = 'input';
+	it('should return true, if type is an HTMLInputElement matches "input"', function() {
 
-			var value = domInstance(type, document.createElement(type));
+		var type = 'input';
 
-			expect(value).to.equal(true);
+		var value = domInstance(type, document.createElement(type));
 
-		});
+		expect(value).to.equal(true);
 
-		it('should return false, if type is an HTMLInputElement matches "form"', function() {
+	});
 
-			var type = 'input';
+	it('should return false, if type is an HTMLInputElement matches "form"', function() {
 
-			var value = domInstance('form', document.createElement(type));
+		var type = 'input';
 
-			expect(value).to.equal(false);
+		var value = domInstance('form', document.createElement(type));
 
-		});
+		expect(value).to.equal(false);
 
-		it('should return false, if an object posess as an HTMLInputElement', function() {
+	});
 
-			var type = 'input';
+	it('should return false, if an object posess as an HTMLInputElement', function() {
 
-			var value = domInstance('input', {tagName: type});
+		var type = 'input';
 
-			expect(value).to.equal(false);
+		var value = domInstance('input', {tagName: type});
 
-		});
+		expect(value).to.equal(false);
 
-		it('should return false, if second parameter is ommited or null', function() {
+	});
 
-			expect(domInstance('input')).to.equal(false);
+	it('should return false, if second parameter is ommited or null', function() {
 
-			expect(domInstance('input', false)).to.equal(false);
+		expect(domInstance('input')).to.equal(false);
 
-			expect(domInstance('input', true)).to.equal(false);
+		expect(domInstance('input', false)).to.equal(false);
 
-			expect(domInstance('input', null)).to.equal(false);
+		expect(domInstance('input', true)).to.equal(false);
 
-		});
+		expect(domInstance('input', null)).to.equal(false);
 
 	});
 
 });
+

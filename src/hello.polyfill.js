@@ -33,7 +33,7 @@ if (!Object.keys) {
 		return r;
 	};
 }
-
+/* eslint-disable no-extend-native */
 // ES5 [].indexOf
 if (!Array.prototype.indexOf) {
 	Array.prototype.indexOf = function(s) {
@@ -149,3 +149,4 @@ if (!Function.prototype.bind) {
 	};
 
 }
+/* eslint-enable no-extend-native */

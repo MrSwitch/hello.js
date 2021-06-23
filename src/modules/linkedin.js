@@ -74,7 +74,7 @@
 				'me/like': like
 			},
 
-			del:{
+			del: {
 				'me/like': like
 			},
 

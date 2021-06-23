@@ -1,11 +1,6 @@
-// Load in the modules to test the endpoints
-define([
-	'./api',
-	'./apiMe',
-	'./apiMeAlbum',
-	'./apiMeAlbums',
-	'./apiMeFriends',
-	'./apiMePhotos'
-], function() {
-	// Done
-});
+import './api';
+import './apiMe';
+import './apiMeAlbum';
+import './apiMeAlbums';
+import './apiMeFriends';
+import './apiMePhotos';

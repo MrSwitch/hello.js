@@ -1,51 +1,48 @@
-define([], function() {
 
-	var store = hello.utils.store;
+var store = hello.utils.store;
 
-	describe('utils.store', function() {
+describe('utils.store', function() {
 
-		var data = {
-			key: 'value',
-			key1: 'value1'
+	var data = {
+		key: 'value',
+		key1: 'value1'
+	};
+	var label = 'test';
+
+	// Store data for retrieval
+	beforeEach(function() {
+		store(label, data);
+	});
+
+	it('should return the data placed into the store', function() {
+
+		expect(store(label)).to.eql(data);
+
+	});
+
+	it('should update data placed into the store', function() {
+
+		var update = {
+			updated: 'update'
 		};
-		var label = 'test';
 
-		// Store data for retrieval
-		beforeEach(function() {
-			store(label, data);
-		});
+		store(label, update);
 
-		it('should return the data placed into the store', function() {
+		expect(store(label)).to.eql(update);
 
-			expect(store(label)).to.eql(data);
+	});
 
-		});
+	it('should delete data placed into the store', function() {
 
-		it('should update data placed into the store', function() {
+		store(label, null);
 
-			var update = {
-				updated: 'update'
-			};
+		expect(store(label)).to.equal(null);
 
-			store(label, update);
+	});
 
-			expect(store(label)).to.eql(update);
+	it('should return null if data not found', function() {
 
-		});
-
-		it('should delete data placed into the store', function() {
-
-			store(label, null);
-
-			expect(store(label)).to.equal(null);
-
-		});
-
-		it('should return null if data not found', function() {
-
-			expect(store('notfound')).to.equal(null);
-
-		});
+		expect(store('notfound')).to.equal(null);
 
 	});
 

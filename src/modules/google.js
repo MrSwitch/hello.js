@@ -47,7 +47,7 @@
 				// Reauthenticate
 				// https://developers.google.com/identity/protocols/
 				if (p.options.force) {
-					p.qs.approval_prompt = 'force';
+					p.qs.prompt = 'consent';
 				}
 			},
 
@@ -270,11 +270,11 @@
 			for (var i = 0; i < o.feed.entry.length; i++) {
 				var a = o.feed.entry[i];
 
-				a.id	= a.id.$t;
-				a.name	= a.title.$t;
+				a.id = a.id.$t;
+				a.name = a.title.$t;
 				delete a.title;
 				if (a.gd$email) {
-					a.email	= (a.gd$email && a.gd$email.length > 0) ? a.gd$email[0].address : null;
+					a.email = (a.gd$email && a.gd$email.length > 0) ? a.gd$email[0].address : null;
 					a.emails = a.gd$email;
 					delete a.gd$email;
 				}

@@ -1,18 +1,18 @@
 // Test GET me/friends
 
-define(['./helper'], function(helper) {
+import helper from './helper';
 
-	describe('hello.api(\'/me/friends\')', function() {
+describe('hello.api(\'/me/friends\')', function() {
 
-		helper.sharedSetup();
+	helper.sharedSetup();
 
-		var tests = ['flickr', 'foursquare', 'github', 'google', 'linkedin', 'soundcloud', 'twitter', 'windows', 'yahoo'];
+	var tests = ['flickr', 'foursquare', 'github', 'google', 'linkedin', 'soundcloud', 'twitter', 'windows', 'yahoo'];
 
-		tests.forEach(function(network) {
+	tests.forEach(function(network) {
 
-			it('should format ' + network + ':me/friends correctly', function(done) {
+		it('should format ' + network + ':me/friends correctly', function(done) {
 
-				hello(network)
+			hello(network)
 				.api('/me/friends')
 				.then(function(friends) {
 					friends.data.forEach(function(friend) {
@@ -29,10 +29,9 @@ define(['./helper'], function(helper) {
 				})
 				.then(null, done);
 
-			});
-
 		});
 
 	});
 
 });
+

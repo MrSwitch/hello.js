@@ -1,28 +1,25 @@
-define([], function() {
 
-	var utils = hello.utils;
+var utils = hello.utils;
 
-	describe('utils.merge', function() {
+describe('utils.merge', function() {
 
-		it('should merge arguments into one new object', function() {
+	it('should merge arguments into one new object', function() {
 
-			var a = {
-				key: 'valueA'
-			};
+		var a = {
+			key: 'valueA'
+		};
 
-			var b = {
-				key: 'valueB'
-			};
+		var b = {
+			key: 'valueB'
+		};
 
-			var value = utils.merge(a, b);
+		var value = utils.merge(a, b);
 
-			// Check: a is like b
-			expect(value).to.eql(b);
+		// Check: a is like b
+		expect(value).to.eql(b);
 
-			// But a is not b
-			expect(value).to.not.equal(b);
-
-		});
+		// But a is not b
+		expect(value).to.not.equal(b);
 
 	});
 

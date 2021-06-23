@@ -1,4 +1,4 @@
-;(function () {
+(function () {
 
   var object = typeof exports != 'undefined' ? exports : this; // #8: web workers
   var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
@@ -45,6 +45,7 @@
       // Initialize result and counters
       var bc = 0, bs, buffer, idx = 0, output = '';
       // Get next character
+      // eslint-disable-next-line no-cond-assign
       buffer = str.charAt(idx++);
       // Character found in table? initialize bit storage and add its ascii value;
       ~buffer && (bs = bc % 4 ? bs * 64 + buffer : buffer,

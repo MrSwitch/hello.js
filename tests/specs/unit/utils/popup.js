@@ -49,7 +49,7 @@ describe('utils.popup', function() {
 
 		window.open = spy;
 
-		hello.utils.popup(url, 'https://redirect.uri/path', {width:500, height:500});
+		hello.utils.popup(url, 'https://redirect.uri/path', {width: 500, height: 500});
 
 		expect(spy.calledOnce).to.be.ok();
 	});

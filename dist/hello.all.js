@@ -1,4 +1,4 @@
-/*! hellojs v1.18.4 | (c) 2012-2020 Andrew Dodson | MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.19.3 - (c) 2012-2021 Andrew Dodson - MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -34,7 +34,7 @@ if (!Object.keys) {
 		return r;
 	};
 }
-
+/* eslint-disable no-extend-native */
 // ES5 [].indexOf
 if (!Array.prototype.indexOf) {
 	Array.prototype.indexOf = function(s) {
@@ -150,7 +150,7 @@ if (!Function.prototype.bind) {
 	};
 
 }
-
+/* eslint-enable no-extend-native */
 /**
  * @hello.js
  *
@@ -179,6 +179,11 @@ hello.utils = {
 			}
 			else if (r && (r instanceof Object || typeof r === 'object') && a && (a instanceof Object || typeof a === 'object') && r !== a) {
 				for (var x in a) {
+					// Prevent prototype pollution
+					if (x === '__proto__' || x === 'constructor') {
+						continue;
+					}
+
 					r[x] = hello.utils.extend(r[x], a[x]);
 				}
 			}
@@ -602,7 +607,7 @@ hello.utils.extend(hello, {
 		// Create a new promise
 		var promise = utils.Promise();
 
-		var p = utils.args({name:'s', options: 'o', callback: 'f'}, arguments);
+		var p = utils.args({name: 's', options: 'o', callback: 'f'}, arguments);
 
 		p.options = p.options || {};
 
@@ -634,7 +639,7 @@ hello.utils.extend(hello, {
 				utils.store(p.name, null);
 
 				// Emit events by default
-				promise.fulfill(hello.utils.merge({network:p.name}, opts || {}));
+				promise.fulfill(hello.utils.merge({network: p.name}, opts || {}));
 			};
 
 			// Run an async operation to remove the users session
@@ -923,7 +928,7 @@ hello.utils.extend(hello.utils, {
 	// An easy way to create a hidden iframe
 	// @param string src
 	iframe: function(src) {
-		this.append('iframe', {src: src, style: {position:'absolute', left: '-1000px', bottom: 0, height: '1px', width: '1px'}}, 'body');
+		this.append('iframe', {src: src, style: {position: 'absolute', left: '-1000px', bottom: 0, height: '1px', width: '1px'}}, 'body');
 	},
 
 	// Recursive merge two objects into one, second parameter overides the first
@@ -971,7 +976,7 @@ hello.utils.extend(hello.utils, {
 			t = typeof (args[i]);
 
 			if ((typeof (o[x]) === 'function' && o[x].test(args[i])) || (typeof (o[x]) === 'string' && (
-			(o[x].indexOf('s') > -1 && t === 'string') ||
+				(o[x].indexOf('s') > -1 && t === 'string') ||
 			(o[x].indexOf('o') > -1 && t === 'object') ||
 			(o[x].indexOf('i') > -1 && t === 'number') ||
 			(o[x].indexOf('a') > -1 && t === 'object') ||
@@ -1067,7 +1072,7 @@ hello.utils.extend(hello.utils, {
 		return true;
 	},
 
-	//jscs:disable
+	/* eslint-disable */
 
 	/*!
 	 **  Thenable -- Embeddable Minimum Strictly-Compliant Promises/A+ 1.1.1 Thenable
@@ -1075,25 +1080,25 @@ hello.utils.extend(hello.utils, {
 	 **  Licensed under The MIT License <http://opensource.org/licenses/MIT>
 	 **  Source-Code distributed on <http://github.com/rse/thenable>
 	 */
-	Promise: (function(){
+	Promise: (function() {
 		/*  promise states [Promises/A+ 2.1]  */
-		var STATE_PENDING   = 0;                                         /*  [Promises/A+ 2.1.1]  */
-		var STATE_FULFILLED = 1;                                         /*  [Promises/A+ 2.1.2]  */
-		var STATE_REJECTED  = 2;                                         /*  [Promises/A+ 2.1.3]  */
+		var STATE_PENDING = 0; /*  [Promises/A+ 2.1.1]  */
+		var STATE_FULFILLED = 1; /*  [Promises/A+ 2.1.2]  */
+		var STATE_REJECTED = 2; /*  [Promises/A+ 2.1.3]  */
 
 		/*  promise object constructor  */
-		var api = function (executor) {
+		var api = function(executor) {
 			/*  optionally support non-constructor/plain-function call  */
 			if (!(this instanceof api))
 				return new api(executor);
 
 			/*  initialize object  */
-			this.id           = "Thenable/1.0.6";
-			this.state        = STATE_PENDING; /*  initial state  */
-			this.fulfillValue = undefined;     /*  initial value  */     /*  [Promises/A+ 1.3, 2.1.2.2]  */
-			this.rejectReason = undefined;     /*  initial reason */     /*  [Promises/A+ 1.5, 2.1.3.2]  */
-			this.onFulfilled  = [];            /*  initial handlers  */
-			this.onRejected   = [];            /*  initial handlers  */
+			this.id = "Thenable/1.0.6";
+			this.state = STATE_PENDING; /*  initial state  */
+			this.fulfillValue = undefined; /*  initial value  */ /*  [Promises/A+ 1.3, 2.1.2.2]  */
+			this.rejectReason = undefined; /*  initial reason */ /*  [Promises/A+ 1.5, 2.1.3.2]  */
+			this.onFulfilled = []; /*  initial handlers  */
+			this.onRejected = []; /*  initial handlers  */
 
 			/*  provide optional information-hiding proxy  */
 			this.proxy = {
@@ -1108,42 +1113,42 @@ hello.utils.extend(hello.utils, {
 		/*  promise API methods  */
 		api.prototype = {
 			/*  promise resolving methods  */
-			fulfill: function (value) { return deliver(this, STATE_FULFILLED, "fulfillValue", value); },
-			reject:  function (value) { return deliver(this, STATE_REJECTED,  "rejectReason", value); },
+			fulfill: function(value) { return deliver(this, STATE_FULFILLED, "fulfillValue", value); },
+			reject: function(value) { return deliver(this, STATE_REJECTED, "rejectReason", value); },
 
 			/*  "The then Method" [Promises/A+ 1.1, 1.2, 2.2]  */
-			then: function (onFulfilled, onRejected) {
+			then: function(onFulfilled, onRejected) {
 				var curr = this;
-				var next = new api();                                    /*  [Promises/A+ 2.2.7]  */
+				var next = new api(); /*  [Promises/A+ 2.2.7]  */
 				curr.onFulfilled.push(
-					resolver(onFulfilled, next, "fulfill"));             /*  [Promises/A+ 2.2.2/2.2.6]  */
+					resolver(onFulfilled, next, "fulfill")); /*  [Promises/A+ 2.2.2/2.2.6]  */
 				curr.onRejected.push(
-					resolver(onRejected,  next, "reject" ));             /*  [Promises/A+ 2.2.3/2.2.6]  */
+					resolver(onRejected, next, "reject")); /*  [Promises/A+ 2.2.3/2.2.6]  */
 				execute(curr);
-				return next.proxy;                                       /*  [Promises/A+ 2.2.7, 3.3]  */
+				return next.proxy; /*  [Promises/A+ 2.2.7, 3.3]  */
 			}
 		};
 
 		/*  deliver an action  */
-		var deliver = function (curr, state, name, value) {
+		var deliver = function(curr, state, name, value) {
 			if (curr.state === STATE_PENDING) {
-				curr.state = state;                                      /*  [Promises/A+ 2.1.2.1, 2.1.3.1]  */
-				curr[name] = value;                                      /*  [Promises/A+ 2.1.2.2, 2.1.3.2]  */
+				curr.state = state; /*  [Promises/A+ 2.1.2.1, 2.1.3.1]  */
+				curr[name] = value; /*  [Promises/A+ 2.1.2.2, 2.1.3.2]  */
 				execute(curr);
 			}
 			return curr;
 		};
 
 		/*  execute all handlers  */
-		var execute = function (curr) {
+		var execute = function(curr) {
 			if (curr.state === STATE_FULFILLED)
 				execute_handlers(curr, "onFulfilled", curr.fulfillValue);
 			else if (curr.state === STATE_REJECTED)
-				execute_handlers(curr, "onRejected",  curr.rejectReason);
+				execute_handlers(curr, "onRejected", curr.rejectReason);
 		};
 
 		/*  execute particular set of handlers  */
-		var execute_handlers = function (curr, name, value) {
+		var execute_handlers = function(curr, name, value) {
 			/* global process: true */
 			/* global setImmediate: true */
 			/* global setTimeout: true */
@@ -1154,13 +1159,13 @@ hello.utils.extend(hello.utils, {
 
 			/*  iterate over all handlers, exactly once  */
 			var handlers = curr[name];
-			curr[name] = [];                                             /*  [Promises/A+ 2.2.2.3, 2.2.3.3]  */
-			var func = function () {
+			curr[name] = []; /*  [Promises/A+ 2.2.2.3, 2.2.3.3]  */
+			var func = function() {
 				for (var i = 0; i < handlers.length; i++)
-					handlers[i](value);                                  /*  [Promises/A+ 2.2.5]  */
+					handlers[i](value); /*  [Promises/A+ 2.2.5]  */
 			};
 
-			/*  execute procedure asynchronously  */                     /*  [Promises/A+ 2.2.4, 3.1]  */
+			/*  execute procedure asynchronously  */ /*  [Promises/A+ 2.2.4, 3.1]  */
 			if (typeof process === "object" && typeof process.nextTick === "function")
 				process.nextTick(func);
 			else if (typeof setImmediate === "function")
@@ -1170,25 +1175,25 @@ hello.utils.extend(hello.utils, {
 		};
 
 		/*  generate a resolver function  */
-		var resolver = function (cb, next, method) {
-			return function (value) {
-				if (typeof cb !== "function")                            /*  [Promises/A+ 2.2.1, 2.2.7.3, 2.2.7.4]  */
-					next[method].call(next, value);                      /*  [Promises/A+ 2.2.7.3, 2.2.7.4]  */
+		var resolver = function(cb, next, method) {
+			return function(value) {
+				if (typeof cb !== "function") /*  [Promises/A+ 2.2.1, 2.2.7.3, 2.2.7.4]  */
+					next[method].call(next, value); /*  [Promises/A+ 2.2.7.3, 2.2.7.4]  */
 				else {
 					var result;
-					try { result = cb(value); }                          /*  [Promises/A+ 2.2.2.1, 2.2.3.1, 2.2.5, 3.2]  */
+					try { result = cb(value); } /*  [Promises/A+ 2.2.2.1, 2.2.3.1, 2.2.5, 3.2]  */
 					catch (e) {
-						next.reject(e);                                  /*  [Promises/A+ 2.2.7.2]  */
+						next.reject(e); /*  [Promises/A+ 2.2.7.2]  */
 						return;
 					}
-					resolve(next, result);                               /*  [Promises/A+ 2.2.7.1]  */
+					resolve(next, result); /*  [Promises/A+ 2.2.7.1]  */
 				}
 			};
 		};
 
-		/*  "Promise Resolution Procedure"  */                           /*  [Promises/A+ 2.3]  */
-		var resolve = function (promise, x) {
-			/*  sanity check arguments  */                               /*  [Promises/A+ 2.3.1]  */
+		/*  "Promise Resolution Procedure"  */ /*  [Promises/A+ 2.3]  */
+		var resolve = function(promise, x) {
+			/*  sanity check arguments  */ /*  [Promises/A+ 2.3.1]  */
 			if (promise === x || promise.proxy === x) {
 				promise.reject(new TypeError("cannot resolve promise with itself"));
 				return;
@@ -1198,9 +1203,9 @@ hello.utils.extend(hello.utils, {
 				(mainly to just call the "getter" of "then" only once)  */
 			var then;
 			if ((typeof x === "object" && x !== null) || typeof x === "function") {
-				try { then = x.then; }                                   /*  [Promises/A+ 2.3.3.1, 3.5]  */
+				try { then = x.then; } /*  [Promises/A+ 2.3.3.1, 3.5]  */
 				catch (e) {
-					promise.reject(e);                                   /*  [Promises/A+ 2.3.3.2]  */
+					promise.reject(e); /*  [Promises/A+ 2.3.3.2]  */
 					return;
 				}
 			}
@@ -1210,40 +1215,40 @@ hello.utils.extend(hello.utils, {
 			if (typeof then === "function") {
 				var resolved = false;
 				try {
-					/*  call retrieved "then" method */                  /*  [Promises/A+ 2.3.3.3]  */
+					/*  call retrieved "then" method */ /*  [Promises/A+ 2.3.3.3]  */
 					then.call(x,
-						/*  resolvePromise  */                           /*  [Promises/A+ 2.3.3.3.1]  */
-						function (y) {
-							if (resolved) return; resolved = true;       /*  [Promises/A+ 2.3.3.3.3]  */
-							if (y === x)                                 /*  [Promises/A+ 3.6]  */
+						/*  resolvePromise  */ /*  [Promises/A+ 2.3.3.3.1]  */
+						function(y) {
+							if (resolved) return; resolved = true; /*  [Promises/A+ 2.3.3.3.3]  */
+							if (y === x) /*  [Promises/A+ 3.6]  */
 								promise.reject(new TypeError("circular thenable chain"));
 							else
 								resolve(promise, y);
 						},
 
-						/*  rejectPromise  */                            /*  [Promises/A+ 2.3.3.3.2]  */
-						function (r) {
-							if (resolved) return; resolved = true;       /*  [Promises/A+ 2.3.3.3.3]  */
+						/*  rejectPromise  */ /*  [Promises/A+ 2.3.3.3.2]  */
+						function(r) {
+							if (resolved) return; resolved = true; /*  [Promises/A+ 2.3.3.3.3]  */
 							promise.reject(r);
 						}
 					);
 				}
 				catch (e) {
-					if (!resolved)                                       /*  [Promises/A+ 2.3.3.3.3]  */
-						promise.reject(e);                               /*  [Promises/A+ 2.3.3.3.4]  */
+					if (!resolved) /*  [Promises/A+ 2.3.3.3.3]  */
+						promise.reject(e); /*  [Promises/A+ 2.3.3.3.4]  */
 				}
 				return;
 			}
 
 			/*  handle other values  */
-			promise.fulfill(x);                                          /*  [Promises/A+ 2.3.4, 2.3.3.4]  */
+			promise.fulfill(x); /*  [Promises/A+ 2.3.4, 2.3.3.4]  */
 		};
 
 		/*  export API  */
 		return api;
 	})(),
 
-	//jscs:enable
+	/* eslint-enable */
 
 	// Event
 	// A contructor superclass for adding event menthods, on, off, emit.
@@ -1457,7 +1462,9 @@ hello.utils.extend(hello.utils, {
 			// Redirect to the host
 			var path = _this.qs(state.oauth_proxy, p);
 
-			location.assign(path);
+			if (isValidUrl(path)) {
+				location.assign(path);
+			}
 
 			return;
 		}
@@ -1541,8 +1548,12 @@ hello.utils.extend(hello.utils, {
 		// (URI Fragments within 302 Location URI are lost over HTTPS)
 		// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
 		else if ('oauth_redirect' in p) {
+			var url = decodeURIComponent(p.oauth_redirect);
 
-			location.assign(decodeURIComponent(p.oauth_redirect));
+			if (isValidUrl(url)) {
+				location.assign(url);
+			}
+
 			return;
 		}
 
@@ -1985,7 +1996,7 @@ hello.api = function() {
 
 			// Should this be an object
 			if (r === true) {
-				r = {success:true};
+				r = {success: true};
 			}
 			else if (!r) {
 				r = {};
@@ -1993,7 +2004,7 @@ hello.api = function() {
 
 			// The delete callback needs a better response
 			if (p.method === 'delete') {
-				r = (!r || utils.isEmpty(r)) ? {success:true} : r;
+				r = (!r || utils.isEmpty(r)) ? {success: true} : r;
 			}
 
 			// FORMAT RESPONSE?
@@ -2121,7 +2132,7 @@ hello.utils.extend(hello.utils, {
 			// Add some additional query parameters to the URL
 			// We're pretty stuffed if the endpoint doesn't like these
 			p.query.redirect_uri = p.redirect_uri;
-			p.query.state = JSON.stringify({callback:p.callbackID});
+			p.query.state = JSON.stringify({callback: p.callbackID});
 
 			var opts;
 
@@ -2671,7 +2682,7 @@ hello.utils.extend(hello.utils, {
 	isBinary: function(data) {
 
 		return data instanceof Object && (
-		(this.domInstance('input', data) && data.type === 'file') ||
+			(this.domInstance('input', data) && data.type === 'file') ||
 		('FileList' in window && data instanceof window.FileList) ||
 		('File' in window && data instanceof window.File) ||
 		('Blob' in window && data instanceof window.Blob));
@@ -2794,7 +2805,7 @@ hello.utils.extend(hello.utils, {
 	hello.api = function() {
 
 		// Get arguments
-		var p = utils.args({path: 's!', method: 's', data:'o', timeout: 'i', callback: 'f'}, arguments);
+		var p = utils.args({path: 's!', method: 's', data: 'o', timeout: 'i', callback: 'f'}, arguments);
 
 		// Change for into a data object
 		if (p.data) {
@@ -2814,7 +2825,6 @@ hello.utils.extend(hello.utils, {
 /////////////////////////////////////
 
 hello.utils.responseHandler(window, window.opener || window.parent);
-
 // Script to support ChromeApps
 // This overides the hello.utils.popup method to support chrome.identity.launchWebAuthFlow
 // See https://developer.chrome.com/apps/app_identity#non
@@ -2941,7 +2951,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 
 	})();
 }
-
 // Phonegap override for hello.phonegap.js
 (function() {
 
@@ -3039,7 +3048,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	};
 
 })();
-
 (function(hello) {
 
 	// OAuth1
@@ -3288,7 +3296,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 })(hello);
-
 (function(hello) {
 	// For APIs, once a version is no longer usable, any calls made to it will be defaulted to the next oldest usable version.
 	// So we explicitly state it.
@@ -3322,7 +3329,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				publish: 'publish_actions',
 
 				// Deprecated in v2.0
-				// Create_event	: 'create_event',
+				// Create_event: 'create_event',
 
 				offline_access: ''
 			},
@@ -3345,13 +3352,13 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			logout: function(callback, options) {
 				// Assign callback to a global handler
 				var callbackID = hello.utils.globalEvent(callback);
-				var redirect = encodeURIComponent(hello.settings.redirect_uri + '?' + hello.utils.param({callback:callbackID, result: JSON.stringify({force:true}), state: '{}'}));
+				var redirect = encodeURIComponent(hello.settings.redirect_uri + '?' + hello.utils.param({callback: callbackID, result: JSON.stringify({force: true}), state: '{}'}));
 				var token = (options.authResponse || {}).access_token;
 				hello.utils.iframe('https://www.facebook.com/logout.php?next=' + redirect + '&access_token=' + token);
 
 				// Possible responses:
-				// String URL	- hello.logout should handle the logout
-				// Undefined	- this function will handle the callback
+				// String URL - hello.logout should handle the logout
+				// Undefined - this function will handle the callback
 				// True - throw a success, this callback isn't handling the callback
 				// False - throw a error
 				if (!token) {
@@ -3501,7 +3508,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 })(hello);
-
 (function(hello) {
 
 	hello.init({
@@ -3524,12 +3530,12 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			// Map GET resquests
 			get: {
 				me: sign('flickr.people.getInfo'),
-				'me/friends': sign('flickr.contacts.getList', {per_page:'@{limit|50}'}),
-				'me/following': sign('flickr.contacts.getList', {per_page:'@{limit|50}'}),
-				'me/followers': sign('flickr.contacts.getList', {per_page:'@{limit|50}'}),
-				'me/albums': sign('flickr.photosets.getList', {per_page:'@{limit|50}'}),
+				'me/friends': sign('flickr.contacts.getList', {per_page: '@{limit|50}'}),
+				'me/following': sign('flickr.contacts.getList', {per_page: '@{limit|50}'}),
+				'me/followers': sign('flickr.contacts.getList', {per_page: '@{limit|50}'}),
+				'me/albums': sign('flickr.photosets.getList', {per_page: '@{limit|50}'}),
 				'me/album': sign('flickr.photosets.getPhotos', {photoset_id: '@{id}'}),
-				'me/photos': sign('flickr.people.getPhotos', {per_page:'@{limit|50}'})
+				'me/photos': sign('flickr.people.getPhotos', {per_page: '@{limit|50}'})
 			},
 
 			wrap: {
@@ -3748,7 +3754,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 })(hello);
-
 (function(hello) {
 
 	hello.init({
@@ -3838,7 +3843,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 })(hello);
-
 (function(hello) {
 
 	hello.init({
@@ -3882,7 +3886,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 					formatError(o, headers);
 
 					if (Array.isArray(o)) {
-						o = {data:o};
+						o = {data: o};
 					}
 
 					if (o.data) {
@@ -3941,7 +3945,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 })(hello);
-
 (function(hello) {
 
 	var contactsUrl = 'https://www.google.com/m8/feeds/contacts/default/full?v=3.0&alt=json&max-results=@{limit|1000}&start-index=@{start|1}';
@@ -3991,7 +3994,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				// Reauthenticate
 				// https://developers.google.com/identity/protocols/
 				if (p.options.force) {
-					p.qs.approval_prompt = 'force';
+					p.qs.prompt = 'consent';
 				}
 			},
 
@@ -4214,11 +4217,11 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			for (var i = 0; i < o.feed.entry.length; i++) {
 				var a = o.feed.entry[i];
 
-				a.id	= a.id.$t;
-				a.name	= a.title.$t;
+				a.id = a.id.$t;
+				a.name = a.title.$t;
 				delete a.title;
 				if (a.gd$email) {
-					a.email	= (a.gd$email && a.gd$email.length > 0) ? a.gd$email[0].address : null;
+					a.email = (a.gd$email && a.gd$email.length > 0) ? a.gd$email[0].address : null;
 					a.emails = a.gd$email;
 					delete a.gd$email;
 				}
@@ -4528,7 +4531,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 })(hello);
-
 (function(hello) {
 
 	hello.init({
@@ -4720,7 +4722,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 })(hello);
-
 (function(hello) {
 
 	hello.init({
@@ -4886,7 +4887,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 }(hello));
-
 (function(hello) {
 
 	hello.init({
@@ -4963,7 +4963,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				'me/like': like
 			},
 
-			del:{
+			del: {
 				'me/like': like
 			},
 
@@ -5088,7 +5088,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 })(hello);
-
 // See: https://developers.soundcloud.com/docs/api/reference
 (function(hello) {
 
@@ -5174,7 +5173,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 })(hello);
-
 // See: https://developer.spotify.com/web-api/
 (function(hello) {
 
@@ -5274,7 +5272,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 })(hello);
-
 (function(hello) {
 
 	var base = 'https://api.twitter.com/';
@@ -5375,7 +5372,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 			del: {
 
 				// See: https://dev.twitter.com/rest/reference/post/favorites/destroy
-				'me/like': function() {
+				'me/like': function(p, callback) {
 					p.method = 'post';
 					var id = p.data.id;
 					p.data = null;
@@ -5497,7 +5494,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	*/
 
 })(hello);
-
 // Vkontakte (vk.com)
 (function(hello) {
 
@@ -5589,7 +5585,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 })(hello);
-
 (function(hello) {
 
 	hello.init({
@@ -5776,7 +5771,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 })(hello);
-
 (function(hello) {
 
 	hello.init({
@@ -5934,14 +5928,12 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	}
 
 })(hello);
-
 // Register as anonymous AMD module
 if (typeof define === 'function' && define.amd) {
 	define(function() {
 		return hello;
 	});
 }
-
 // CommonJS module for browserify
 if (typeof module === 'object' && module.exports) {
 	module.exports = hello;
