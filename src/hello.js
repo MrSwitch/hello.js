@@ -1311,9 +1311,9 @@ hello.utils.extend(hello.utils, {
 				var path = _this.qs(state.oauth_proxy, p);
 
 
-			if (isValidUrl(path)) {
-				location.assign(path);
-			}
+				if (isValidUrl(path)) {
+					location.assign(path);
+				}
 
 				return;
 			}
