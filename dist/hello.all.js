@@ -1,4 +1,4 @@
-/*! hellojs v1.19.3 - (c) 2012-2021 Andrew Dodson - MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.19.4 - (c) 2012-2021 Andrew Dodson - MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -1454,19 +1454,26 @@ hello.utils.extend(hello.utils, {
 		// OAuth2 or OAuth1 server response?
 		if (p && p.state && (p.code || p.oauth_token)) {
 
-			var state = JSON.parse(p.state);
+			try {
+				var state = JSON.parse(p.state);
 
-			// Add this path as the redirect_uri
-			p.redirect_uri = state.redirect_uri || location.href.replace(/[\?\#].*$/, '');
+				// Add this path as the redirect_uri
+				p.redirect_uri = state.redirect_uri || location.href.replace(/[\?\#].*$/, '');
 
-			// Redirect to the host
-			var path = _this.qs(state.oauth_proxy, p);
+				// Redirect to the host
+				var path = _this.qs(state.oauth_proxy, p);
 
-			if (isValidUrl(path)) {
-				location.assign(path);
+
+				if (isValidUrl(path)) {
+					location.assign(path);
+				}
+
+				return;
 			}
-
-			return;
+			catch (e) {
+				console.error('Could not decode state parameter', e);
+				return;
+			}
 		}
 
 		// Save session, from redirected authentication

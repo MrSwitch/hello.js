@@ -1,3 +1,10 @@
+## [1.19.4](https://github.com/MrSwitch/hello.js/compare/v1.19.3...v1.19.4) (2021-06-24)
+
+
+### Bug Fixes
+
+* **lint:** lint and publish [#622](https://github.com/MrSwitch/hello.js/issues/622) ([c3988b6](https://github.com/MrSwitch/hello.js/commit/c3988b649b18f2d83d80c1ebb9819fd48359484a))
+
 ## [1.19.3](https://github.com/MrSwitch/hello.js/compare/v1.19.2...v1.19.3) (2021-04-13)
 
 
