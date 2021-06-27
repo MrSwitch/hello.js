@@ -1,0 +1,10 @@
+{
+	"id": 123456789,
+	"kaccount_email": "eks012@gmail.com",
+	"kaccount_email_verified": true,
+	"properties": {
+		"nickname": "Graceful Light",
+		"profile_image": "https://dummyimage.com/640x640/fff/f58d16",
+		"thumbnail_image": "https://dummyimage.com/110x110/fff/893724"
+	}
+}
