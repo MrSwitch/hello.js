@@ -92,6 +92,67 @@ describe('utils.responseHandler', function() {
 			expect(spy.args[0][0]).to.match(/redirect_uri=/);
 		});
 
+		it('should redirect to page_uri', function() {
+			_state.page_uri = 'https://example.com';
+
+			_window.location = mockLocation('http://adodson.com/redirect.html?state=' + JSON.stringify(_state));
+
+			var spy = sinon.spy();
+			_window.location.assign = spy;
+
+			utils.responseHandler(_window, _parent);
+
+			// Should redirect to page_uri
+			expect(spy.args[0][0]).to.match(/https:\/\/example.com/);
+		});
+
+		// Prevent Client Side redirects using HELLOJS_REDIRECT_URL
+		[undefined, 'https://', 'https://example.com', /^https:\/\/(www.)?example.com/].forEach(HELLOJS_REDIRECT_URL => {
+
+			var PAGE_URI = 'https://example.com/path';
+
+			it(`should redirect to page_uri ${PAGE_URI} if 'HELLOJS_REDIRECT_URL=${HELLOJS_REDIRECT_URL}'`, function() {
+
+				_state.page_uri = PAGE_URI;
+
+				_window.location = mockLocation('http://adodson.com/redirect.html?state=' + JSON.stringify(_state));
+
+				var spy = sinon.spy();
+				_window.location.assign = spy;
+
+				if (HELLOJS_REDIRECT_URL !== undefined) {
+					_window.HELLOJS_REDIRECT_URL = HELLOJS_REDIRECT_URL;
+				}
+
+				utils.responseHandler(_window, _parent);
+
+				// Should redirect to page_uri
+				expect(spy.args[0][0]).to.eql(PAGE_URI);
+			});
+		});
+
+		[false, 'http://', 'https://anotherdomain.com'].forEach(HELLOJS_REDIRECT_URL => {
+
+			var PAGE_URI = 'https://example.com/path';
+
+			it(`should not redirect to page_uri ${PAGE_URI} if 'HELLOJS_REDIRECT_URL=${HELLOJS_REDIRECT_URL}'`, function() {
+				_state.page_uri = PAGE_URI;
+
+				_window.location = mockLocation('http://adodson.com/redirect.html?state=' + JSON.stringify(_state));
+
+				var spy = sinon.spy();
+				_window.location.assign = spy;
+
+				_window.HELLOJS_REDIRECT_URL = HELLOJS_REDIRECT_URL;
+
+				utils.responseHandler(_window, _parent);
+
+				// Should not redirect to anywhere
+				expect(spy.notCalled);
+			});
+		});
+
+
 		it('should return the access_token to the parent if the current window location contains a access_token and a state parameter containing a callback and network', function() {
 
 			var spy = sinon.spy();
