@@ -1,3 +1,10 @@
+## [1.19.5](https://github.com/MrSwitch/hello.js/compare/v1.19.4...v1.19.5) (2021-09-19)
+
+
+### Bug Fixes
+
+* **redirects:** lock down redirect attempts, fixes [#619](https://github.com/MrSwitch/hello.js/issues/619) ([544e5ea](https://github.com/MrSwitch/hello.js/commit/544e5ea3876116d93689e26b2c6a0b9ad9052e14))
+
 ## [1.19.4](https://github.com/MrSwitch/hello.js/compare/v1.19.3...v1.19.4) (2021-06-24)
 
 

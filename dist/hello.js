@@ -1,4 +1,4 @@
-/*! hellojs v1.19.4 - (c) 2012-2021 Andrew Dodson - MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.19.5 - (c) 2012-2021 Andrew Dodson - MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -1566,7 +1566,14 @@ hello.utils.extend(hello.utils, {
 
 		function isValidUrl(url) {
 			var regexp = /^https?:/;
-			return regexp.test(url);
+			return regexp.test(url)
+
+				// If `HELLOJS_REDIRECT_URL` is defined in the window context, validate that the URL matches it.
+				&& (
+					!Object.prototype.hasOwnProperty.call(window, 'HELLOJS_REDIRECT_URL')
+					||
+					url.match(window.HELLOJS_REDIRECT_URL)
+				);
 		}
 
 		// Trigger a callback to authenticate
