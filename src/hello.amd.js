@@ -1,6 +1,5 @@
 // Register as anonymous AMD module
-if (typeof define === 'function' && define.amd) {
-	define(function() {
-		return hello;
-	});
-}
+
+
+
+typeof define === "function" && define.amd ? define (() => hello) : "";
