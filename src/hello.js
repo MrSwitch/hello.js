@@ -375,8 +375,6 @@ hello.utils.extend(hello, {
 		}
 
 		// Convert state to a string
-		// Yahoo requires the state param to be base 64 encoded and the flag base64_state is set to true for Yahoo.
-		// Else uri encoding is used for all the other providers.
 		if (provider.oauth.base64_state) {
 			p.qs.state = window.btoa(JSON.stringify(p.qs.state));
 		}
