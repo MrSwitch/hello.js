@@ -9,7 +9,8 @@
 				version: '1.0a',
 				auth: 'https://api.login.yahoo.com/oauth/v2/request_auth',
 				request: 'https://api.login.yahoo.com/oauth/v2/get_request_token',
-				token: 'https://api.login.yahoo.com/oauth/v2/get_token'
+				token: 'https://api.login.yahoo.com/oauth/v2/get_token',
+				base64_state: true
 			},
 
 			// Login handler
