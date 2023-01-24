@@ -154,6 +154,52 @@ describe('hello.login', function() {
 			hello.login('testable', {redirect_uri: REDIRECT_URI});
 		});
 
+		it('should base 64 encode the state if oauth.base64_state is true', function(done) {
+
+			hello.services.testable.oauth.base64_state = true;
+
+			var spy = sinon.spy(function(url, name, optins) {
+				// The url should not contain uri encoded characters
+				expect(url).to.not.contain('state=%7B%22');
+
+				done();
+			});
+
+			utils.popup = spy;
+
+			hello.login('testable');
+		});
+
+		it('should uri encode the state if oauth.base64_state is false', function(done) {
+
+			hello.services.testable.oauth.base64_state = false;
+
+			var spy = sinon.spy(function(url, name, optins) {
+				// The url should contain uri encoded characters
+				expect(url).to.contain('state=%7B%22');
+
+				done();
+			});
+
+			utils.popup = spy;
+
+			hello.login('testable');
+		});
+
+		it('should uri encode the state by default', function(done) {
+
+			var spy = sinon.spy(function(url, name, optins) {
+				// The url should contain uri encoded characters
+				expect(url).to.contain('state=%7B%22');
+
+				done();
+			});
+
+			utils.popup = spy;
+
+			hello.login('testable');
+		});
+
 		it('should pass through unknown scopes defined in `options.scope`', function(done) {
 
 			var spy = sinon.spy(function(url, name, optins) {
