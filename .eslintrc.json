@@ -14,7 +14,7 @@
 		"eslint:recommended"
 	],
 	"parserOptions": {
-        "ecmaVersion": 2015
+        "ecmaVersion": 2021
 	},
 	"rules": {
 		"brace-style": 0,
