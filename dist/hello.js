@@ -1,4 +1,4 @@
-/*! hellojs v1.19.5 - (c) 2012-2021 Andrew Dodson - MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.20.0 - (c) 2012-2023 Andrew Dodson - MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -528,7 +528,12 @@ hello.utils.extend(hello, {
 		}
 
 		// Convert state to a string
-		p.qs.state = encodeURIComponent(JSON.stringify(p.qs.state));
+		if (provider.oauth.base64_state) {
+			p.qs.state = window.btoa(JSON.stringify(p.qs.state));
+		}
+		else {
+			p.qs.state = encodeURIComponent(JSON.stringify(p.qs.state));
+		}
 
 		// URL
 		if (parseInt(provider.oauth.version, 10) === 1) {

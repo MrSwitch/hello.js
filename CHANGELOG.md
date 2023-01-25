@@ -1,3 +1,10 @@
+# [1.20.0](https://github.com/MrSwitch/hello.js/compare/v1.19.5...v1.20.0) (2023-01-25)
+
+
+### Features
+
+* **state:** Base64 encoding instead of uri encoding of state param for yahoo ([#658](https://github.com/MrSwitch/hello.js/issues/658)) ([b196a7b](https://github.com/MrSwitch/hello.js/commit/b196a7b72c265280d16e1296be6b39619c23169c))
+
 ## [1.19.5](https://github.com/MrSwitch/hello.js/compare/v1.19.4...v1.19.5) (2021-09-19)
 
 

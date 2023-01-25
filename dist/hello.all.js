@@ -1,4 +1,4 @@
-/*! hellojs v1.19.5 - (c) 2012-2021 Andrew Dodson - MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.20.0 - (c) 2012-2023 Andrew Dodson - MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -528,7 +528,12 @@ hello.utils.extend(hello, {
 		}
 
 		// Convert state to a string
-		p.qs.state = encodeURIComponent(JSON.stringify(p.qs.state));
+		if (provider.oauth.base64_state) {
+			p.qs.state = window.btoa(JSON.stringify(p.qs.state));
+		}
+		else {
+			p.qs.state = encodeURIComponent(JSON.stringify(p.qs.state));
+		}
 
 		// URL
 		if (parseInt(provider.oauth.version, 10) === 1) {
@@ -5796,7 +5801,10 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				version: '1.0a',
 				auth: 'https://api.login.yahoo.com/oauth/v2/request_auth',
 				request: 'https://api.login.yahoo.com/oauth/v2/get_request_token',
-				token: 'https://api.login.yahoo.com/oauth/v2/get_token'
+				token: 'https://api.login.yahoo.com/oauth/v2/get_token',
+				// Yahoo requires the state param to be base 64 encoded, hence the flag base64_state is set to true for Yahoo.
+				// Else uri encoding is used for all the other providers.
+				base64_state: true
 			},
 
 			// Login handler
