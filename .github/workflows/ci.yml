@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 18
       - run: npm i
       - run: npm run lint
 
@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 18
       # Browserstack fix https://github.com/browserstack/browserstack-runner/issues/224#issuecomment-803409764
       - run: rm ./package-lock.json
       - run: npm i
@@ -39,7 +39,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
-          node-version: 14
+          node-version: 18
       - run: npm i
       - name: Release
         env:
