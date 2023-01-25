@@ -2,9 +2,10 @@
  * npx localhost -p 8080;
  * npx mocha-headless-chrome -f http://localhost:8080/tests/specs/index.html
  */
-const localhost = require('localhost')('./');
+import localhost from 'localhost';
+import {runner} from 'mocha-headless-chrome';
 
-const {runner} = require('mocha-headless-chrome');
+const server = localhost('./');
 
 const options = {
 	file: 'http://localhost:8080/tests/specs/index.html',
@@ -13,7 +14,7 @@ const options = {
 	timeout: 120000,
 };
 
-localhost.listen(8080, async () => {
+server.listen(8080, async () => {
 	try {
 		const {result} = await runner(options);
 		if (result.stats.failures) {
@@ -23,7 +24,7 @@ localhost.listen(8080, async () => {
 		console.error(e);
 		process.exit(1);
 	} finally {
-		localhost.close();
+		server.close();
 	}
 });
 
