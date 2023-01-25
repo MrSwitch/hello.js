@@ -50,6 +50,7 @@
     "localhost": "^0.3.4",
     "mocha": "^9.0.1",
     "mocha-headless-chrome": "^3.1.0",
+    "rollup": "^3.10.1",
     "semantic-release": "^17.4.2",
     "sinon": "^9.2.4",
     "uglify-js": "^3.13.3"
