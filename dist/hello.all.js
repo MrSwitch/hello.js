@@ -1657,9 +1657,10 @@ hello.utils.extend(hello.utils, {
 			}
 
 			// If this page is still open
-			if (p.page_uri) {
-				location.assign(p.page_uri);
-			}
+			// Commenting this out because we want to use the access info and then handle redirect ourselves
+			// if (p.page_uri) {
+			// 	location.assign(p.page_uri);
+			// }
 		}
 
 		// OAuth redirect, fixes URI fragments from being lost in Safari
