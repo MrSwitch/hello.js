@@ -16,6 +16,8 @@
 			// Refresh the access_token once expired
 			refresh: true,
 
+			carousel_as_images: true,
+
 			scope: {
 				basic: 'basic',
 				photos: '',
@@ -31,6 +33,11 @@
 
 			scope_delim: ' ',
 
+			logout: function(callback, options) {
+				//Logout from instagram too
+				hello.utils.iframe('https://instagram.com/accounts/logout/');
+			},
+
 			base: 'https://api.instagram.com/v1/',
 
 			get: {
@@ -40,7 +47,8 @@
 				'me/friends': 'users/self/follows?count=@{limit|100}',
 				'me/following': 'users/self/follows?count=@{limit|100}',
 				'me/followers': 'users/self/followed-by?count=@{limit|100}',
-				'friend/photos': 'users/@{id}/media/recent?min_id=0&count=@{limit|100}'
+				'friend/photos': 'users/@{id}/media/recent?',
+				'friend/search': 'users/search?q=@{search}'
 			},
 
 			post: {
@@ -72,33 +80,9 @@
 				'me/friends': formatFriends,
 				'me/following': formatFriends,
 				'me/followers': formatFriends,
-				'me/photos': function(o) {
-
-					formatError(o);
-					paging(o);
-
-					if ('data' in o) {
-						o.data = o.data.filter(function(d) {
-							return d.type === 'image';
-						});
-
-						o.data.forEach(function(d) {
-							d.name = d.caption ? d.caption.text : null;
-							d.thumbnail = d.images.thumbnail.url;
-							d.picture = d.images.standard_resolution.url;
-							d.pictures = Object.keys(d.images)
-								.map(function(key) {
-									var image = d.images[key];
-									return formatImage(image);
-								})
-								.sort(function(a, b) {
-									return a.width - b.width;
-								});
-						});
-					}
-
-					return o;
-				},
+				'friend/search': formatFriends,
+				'me/photos': formatPhotos,
+				'friend/photos': formatPhotos,
 
 				'default': function(o) {
 					o = formatError(o);
@@ -133,6 +117,57 @@
 			form: false
 		}
 	});
+
+	function formatPhotos(o) {
+
+		formatError(o);
+		paging(o);
+
+		if ('data' in o) {
+
+			o.data = o.data.filter(function(d) {
+				return d.type === 'image' || d.type === 'carousel';
+			});
+
+			if (hello.services.instagram.carousel_as_images) {
+				o.data.forEach(function(d, i) {
+					if (d.type != 'carousel') return;
+					var j = 1;
+					d.carousel_media.forEach(function(c) {
+						if (c.type != 'image') return;
+
+						var clone = hello.utils.clone(d);
+						delete clone.carousel_media;
+						clone.images = c.images;
+						clone.users_in_photo = c.users_in_photo;
+						clone.type = 'image';
+						o.data.splice(i + j, 0, clone);
+						j++;
+					});
+
+					// Remove carousel
+					o.data.splice(i, 1);
+				});
+
+			}
+
+			o.data.forEach(function(d, i) {
+				d.name = d.caption ? d.caption.text : null;
+				d.thumbnail = d.images.thumbnail.url;
+				d.picture = d.images.standard_resolution.url;
+				d.pictures = Object.keys(d.images)
+					.map(function(key) {
+						var image = d.images[key];
+						return formatImage(image);
+					})
+					.sort(function(a, b) {
+						return a.width - b.width;
+					});
+			});
+		}
+
+		return o;
+	}
 
 	function formatImage(image) {
 		return {
