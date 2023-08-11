@@ -2013,9 +2013,9 @@ hello.api = function() {
 	// Get the current session
 	// Append the access_token to the query
 	p.authResponse = _this.getAuthResponse(p.network);
-	if (p.authResponse && p.authResponse.access_token) {
-		p.query.access_token = p.authResponse.access_token;
-	}
+	// if (p.authResponse && p.authResponse.access_token) {
+	// 	p.query.access_token = p.authResponse.access_token;
+	// }
 
 	var url = p.path;
 	var m;
@@ -4046,7 +4046,8 @@ if (typeof chrome === 'object' && typeof chrome.extension === 'object') {
 				}
 
 				// Add the authorization header as well
-				var token = p.query.access_token;
+				// var token = p.query.access_token;
+				var token = p.authResponse && p.authResponse.access_token
 				if (token) {
 					p.headers.Authorization = 'Bearer ' + token;
 				}
