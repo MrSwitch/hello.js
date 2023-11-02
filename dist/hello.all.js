@@ -1779,7 +1779,7 @@ hello.utils.Event.call(hello);
 //
 /////////////////////////////////////
 
-hello.utils.responseHandler(window, window.opener || window.parent);
+// hello.utils.responseHandler(window, window.opener || window.parent);
 
 ///////////////////////////////////
 // Monitoring session state
