@@ -1386,7 +1386,20 @@ hello.utils.extend(hello.utils, {
 			if (isValidUrl(url)) {
 				location.assign(url);
 			}
+
 			return;
+		}
+
+		function isValidUrl(url) {
+			var regexp = /^https?:/;
+			return regexp.test(url)
+
+				// If `HELLOJS_REDIRECT_URL` is defined in the window context, validate that the URL matches it.
+				&& (
+					!Object.prototype.hasOwnProperty.call(window, 'HELLOJS_REDIRECT_URL')
+					||
+					url.match(window.HELLOJS_REDIRECT_URL)
+				);
 		}
 
 		// Trigger a callback to authenticate
