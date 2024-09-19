@@ -1669,8 +1669,16 @@ hello.utils.extend(hello.utils, {
 		// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
 		else if ('oauth_redirect' in p) {
 
-			location.assign(decodeURIComponent(p.oauth_redirect));
+			var url = decodeURIComponent(p.oauth_redirect);
+			if (isValidUrl(url)) {
+				location.assign(url);
+			}
 			return;
+		}
+
+		function isValidUrl(url) {
+			var regexp = /^https?:/;
+			return regexp.test(url);
 		}
 
 		// Trigger a callback to authenticate
