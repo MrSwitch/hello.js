@@ -1456,6 +1456,7 @@ hello.utils.extend(hello.utils, {
 			// E.g. p.state = 'facebook.page';
 			try {
 				var a = JSON.parse(p.state);
+				delete a.scope;
 				_this.extend(p, a);
 			}
 			catch (e) {
