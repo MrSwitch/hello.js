@@ -1,44 +1,50 @@
 // ES5 Object.create
 if (!Object.create) {
-
-	// Shim, Object create
+	// Shim, Object.create
 	// A shim for Object.create(), it adds a prototype to a new object
-	Object.create = (function() {
-
+	Object.create = (function () {
 		function F() {}
 
-		return function(o) {
-
-			if (arguments.length != 1) {
-				throw new Error('Object.create implementation only accepts one parameter.');
+		return function (o) {
+			if (arguments.length !== 1 || typeof o !== 'object' || o === null) {
+				throw new TypeError('Object.create implementation only accepts a non-null object.');
 			}
 
 			F.prototype = o;
 			return new F();
 		};
-
 	})();
-
 }
 
 // ES5 Object.keys
 if (!Object.keys) {
-	Object.keys = function(o, k, r) {
-		r = [];
-		for (k in o) {
-			if (r.hasOwnProperty.call(o, k))
-				r.push(k);
+	Object.keys = function (o) {
+		if (o === null || typeof o !== 'object') {
+			throw new TypeError('Object.keys called on a non-object');
 		}
 
+		var r = [];
+		for (var k in o) {
+			if (Object.prototype.hasOwnProperty.call(o, k)) {
+				r.push(k);
+			}
+		}
 		return r;
 	};
 }
+
 /* eslint-disable no-extend-native */
 // ES5 [].indexOf
 if (!Array.prototype.indexOf) {
-	Array.prototype.indexOf = function(s) {
+	Array.prototype.indexOf = function (s, fromIndex) {
+		var len = this.length >>> 0;
+		var start = fromIndex | 0;
 
-		for (var j = 0; j < this.length; j++) {
+		if (len === 0) return -1;
+
+		start = Math.max(start >= 0 ? start : len - Math.abs(start), 0);
+
+		for (var j = start; j < len; j++) {
 			if (this[j] === s) {
 				return j;
 			}
@@ -50,35 +56,39 @@ if (!Array.prototype.indexOf) {
 
 // ES5 [].forEach
 if (!Array.prototype.forEach) {
-	Array.prototype.forEach = function(fun/*, thisArg*/) {
+	Array.prototype.forEach = function (fun, thisArg) {
+		if (this == null) {
+			throw new TypeError('Array.prototype.forEach called on null or undefined');
+		}
 
-		if (this === void 0 || this === null) {
-			throw new TypeError();
+		if (typeof fun !== 'function') {
+			throw new TypeError(fun + ' is not a function');
 		}
 
 		var t = Object(this);
 		var len = t.length >>> 0;
-		if (typeof fun !== 'function') {
-			throw new TypeError();
-		}
 
-		var thisArg = arguments.length >= 2 ? arguments[1] : void 0;
 		for (var i = 0; i < len; i++) {
 			if (i in t) {
 				fun.call(thisArg, t[i], i, t);
 			}
 		}
-
-		return this;
 	};
 }
 
 // ES5 [].filter
 if (!Array.prototype.filter) {
-	Array.prototype.filter = function(fun, thisArg) {
+	Array.prototype.filter = function (fun, thisArg) {
+		if (this == null) {
+			throw new TypeError('Array.prototype.filter called on null or undefined');
+		}
+
+		if (typeof fun !== 'function') {
+			throw new TypeError(fun + ' is not a function');
+		}
 
 		var a = [];
-		this.forEach(function(val, i, t) {
+		this.forEach(function (val, i, t) {
 			if (fun.call(thisArg || void 0, val, i, t)) {
 				a.push(val);
 			}
@@ -88,14 +98,19 @@ if (!Array.prototype.filter) {
 	};
 }
 
-// Production steps of ECMA-262, Edition 5, 15.4.4.19
-// Reference: http://es5.github.io/#x15.4.4.19
+// ES5 [].map
 if (!Array.prototype.map) {
+	Array.prototype.map = function (fun, thisArg) {
+		if (this == null) {
+			throw new TypeError('Array.prototype.map called on null or undefined');
+		}
 
-	Array.prototype.map = function(fun, thisArg) {
+		if (typeof fun !== 'function') {
+			throw new TypeError(fun + ' is not a function');
+		}
 
 		var a = [];
-		this.forEach(function(val, i, t) {
+		this.forEach(function (val, i, t) {
 			a.push(fun.call(thisArg || void 0, val, i, t));
 		});
 
@@ -105,48 +120,43 @@ if (!Array.prototype.map) {
 
 // ES5 isArray
 if (!Array.isArray) {
-
-	// Function Array.isArray
-	Array.isArray = function(o) {
+	Array.isArray = function (o) {
 		return Object.prototype.toString.call(o) === '[object Array]';
 	};
-
 }
 
 // Test for location.assign
 if (typeof window === 'object' && typeof window.location === 'object' && !window.location.assign) {
-
-	window.location.assign = function(url) {
-		window.location = url;
+	window.location.assign = function (url) {
+		if (typeof url !== 'string') {
+			throw new TypeError('URL must be a string');
+		}
+		window.location.href = url;
 	};
-
 }
 
 // Test for Function.bind
 if (!Function.prototype.bind) {
-
 	// MDN
 	// Polyfill IE8, does not support native Function.bind
-	Function.prototype.bind = function(b) {
-
+	Function.prototype.bind = function (context) {
 		if (typeof this !== 'function') {
 			throw new TypeError('Function.prototype.bind - what is trying to be bound is not callable');
 		}
 
-		function C() {}
-
-		var a = [].slice;
-		var f = a.call(arguments, 1);
-		var _this = this;
-		var D = function() {
-			return _this.apply(this instanceof C ? this : b || window, f.concat(a.call(arguments)));
+		var args = Array.prototype.slice.call(arguments, 1);
+		var self = this;
+		var bound = function () {
+			return self.apply(this instanceof bound ? this : context, args.concat(Array.prototype.slice.call(arguments)));
 		};
 
-		C.prototype = this.prototype;
-		D.prototype = new C();
+		function EmptyFunction() {}
+		if (this.prototype) {
+			EmptyFunction.prototype = this.prototype;
+		}
+		bound.prototype = new EmptyFunction();
 
-		return D;
+		return bound;
 	};
-
 }
 /* eslint-enable no-extend-native */
