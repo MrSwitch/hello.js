@@ -1,126 +1,99 @@
 // Script to support ChromeApps
-// This overides the hello.utils.popup method to support chrome.identity.launchWebAuthFlow
-// See https://developer.chrome.com/apps/app_identity#non
+// Overrides hello.utils.popup to support chrome.identity.launchWebAuthFlow
+// Reference: https://developer.chrome.com/apps/app_identity#non
 
-// Is this a chrome app?
-
+// Check if the environment is a Chrome App
 if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.identity.launchWebAuthFlow) {
 
 	(function() {
-
-		// Swap the popup method
-		hello.utils.popup = function(url) {
-
-			return _open(url, true);
-
-		};
-
-		// Swap the hidden iframe method
-		hello.utils.iframe = function(url) {
-
-			_open(url, false);
-
-		};
-
-		// Swap the request_cors method
-		hello.utils.request_cors = function(callback) {
-
-			callback();
-
-			// Always run as CORS
-
-			return true;
-		};
-
-		// Swap the storage method
-		var _cache = {};
-		chrome.storage.local.get('hello', function(r) {
-			// Update the cache
-			_cache = r.hello || {};
-		});
-
-		hello.utils.store = function(name, value) {
-
-			// Get all
-			if (arguments.length === 0) {
-				return _cache;
-			}
-
-			// Get
-			if (arguments.length === 1) {
-				return _cache[name] || null;
-			}
-
-			// Set
-			if (value) {
-				_cache[name] = value;
-				chrome.storage.local.set({hello: _cache});
-				return value;
-			}
-
-			// Delete
-			if (value === null) {
-				delete _cache[name];
-				chrome.storage.local.set({hello: _cache});
-				return null;
-			}
-		};
-
-		// Open function
-		function _open(url, interactive) {
-
-			// Launch
-			var ref = {
-				closed: false
-			};
-
-			// Launch the webAuthFlow
-			chrome.identity.launchWebAuthFlow({
-				url: url,
-				interactive: interactive
-			}, function(responseUrl) {
-
-				// Did the user cancel this prematurely
-				if (responseUrl === undefined) {
-					ref.closed = true;
-					return;
-				}
-
-				// Split appart the URL
-				var a = hello.utils.url(responseUrl);
-
-				// The location can be augmented in to a location object like so...
-				// We dont have window operations on the popup so lets create some
-				var _popup = {
-					location: {
-
-						// Change the location of the popup
-						assign: function(url) {
-
-							// If there is a secondary reassign
-							// In the case of OAuth1
-							// Trigger this in non-interactive mode.
-							_open(url, false);
-						},
-
-						search: a.search,
-						hash: a.hash,
-						href: a.href
-					},
-					close: function() {}
-				};
-
-				// Then this URL contains information which HelloJS must process
-				// URL string
-				// Window - any action such as window relocation goes here
-				// Opener - the parent window which opened this, aka this script
-
-				hello.utils.responseHandler(_popup, window);
-			});
-
-			// Return the reference
-			return ref;
+  
+	  // Swap the popup method to use _open with interactive flag as true
+	  hello.utils.popup = function(url) {
+		return _open(url, true);
+	  };
+  
+	  // Swap the hidden iframe method to use _open with interactive flag as false
+	  hello.utils.iframe = function(url) {
+		_open(url, false);
+	  };
+  
+	  // Swap the request_cors method to always run as CORS
+	  hello.utils.request_cors = function(callback) {
+		callback();
+		return true;  // Always run as CORS
+	  };
+  
+	  // Initialize cache from chrome.storage.local
+	  var _cache = {};
+	  chrome.storage.local.get('hello', function(r) {
+		_cache = r.hello || {};  // Update cache with stored data
+	  });
+  
+	  // Custom store method to handle storage operations
+	  hello.utils.store = function(name, value) {
+		if (arguments.length === 0) {
+		  return _cache;  // Return all stored data
 		}
-
+  
+		if (arguments.length === 1) {
+		  return _cache[name] || null;  // Get stored value by name
+		}
+  
+		if (value !== undefined) {
+		  _cache[name] = value;  // Set a new value
+		  chrome.storage.local.set({ hello: _cache });
+		  return value;
+		}
+  
+		// Delete a value from storage
+		if (value === null) {
+		  delete _cache[name];
+		  chrome.storage.local.set({ hello: _cache });
+		  return null;
+		}
+	  };
+  
+	  // Helper function to handle the OAuth flow using chrome.identity.launchWebAuthFlow
+	  function _open(url, interactive) {
+		var ref = { closed: false };
+  
+		// Launch the WebAuthFlow
+		chrome.identity.launchWebAuthFlow({
+		  url: url,
+		  interactive: interactive
+		}, function(responseUrl) {
+  
+		  // Check if the user canceled the flow
+		  if (responseUrl === undefined) {
+			ref.closed = true;
+			return;
+		  }
+  
+		  // Process the response URL
+		  var a = hello.utils.url(responseUrl);
+  
+		  // Define the popup object to simulate window operations
+		  var _popup = {
+			location: {
+			  assign: function(url) {
+				// Handle URL reassignment in case of OAuth1 (non-interactive mode)
+				_open(url, false);
+			  },
+			  search: a.search,
+			  hash: a.hash,
+			  href: a.href
+			},
+			close: function() {}
+		  };
+  
+		  // Call the HelloJS response handler with the simulated popup and current window
+		  hello.utils.responseHandler(_popup, window);
+		});
+  
+		return ref;  // Return reference to the caller
+	  }
+  
 	})();
-}
+  
+  }
+  
