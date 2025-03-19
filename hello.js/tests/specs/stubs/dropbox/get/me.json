@@ -1,0 +1,22 @@
+{
+  "referral_link": "https://db.tt/jYpsaKlM",
+  "display_name": "Jane McGee",
+  "uid": 374434467,
+  "locale": "en",
+  "email_verified": false,
+  "team": null,
+  "quota_info": {
+    "datastores": 0,
+    "shared": 0,
+    "quota": 2147483648,
+    "normal": 249159
+  },
+  "is_paired": false,
+  "country": "GB",
+  "name_details": {
+    "familiar_name": "Jane",
+    "surname": "McGee",
+    "given_name": "Jane"
+  },
+  "email": "janemcgee35@gmail.com"
+}

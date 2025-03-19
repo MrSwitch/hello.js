@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+<script src="client_ids.js"></script>
+<h1>Upload Photo w/ hello.js</h1>
+
+<h2>Please signin to gather a list of Albums you already have created</h2>
+
+<button id="windows" onclick="hello.login('windows');">Login Windows</button>
+<button id="facebook" onclick="hello.login('facebook');">Login Facebook</button>
+<button id="google" onclick="hello.login('google');">Login Google</button>
+
+<h2>Upload form</h2>
+
+<form>
+
+	<label>Please select an album from the dropdown<select id="albums"></select></label>
+
+	<input type="file" id="file"/>
+
+	<button type="button" onclick="upload()">Upload</button>
+
+</form>
+
+<div id="result"></div>
+
+<p>Include hello.js + modules</p>
+<script class="pre" src="../src/hello.js"></script>
+<script class="pre" src="../src/modules/windows.js"></script>
+<script class="pre" src="../src/modules/facebook.js"></script>
+<script class="pre" src="../src/modules/google.js"></script>
+
+<p>Add event listeners for the login completed event and make a request for the users profile. Once that's loaded push it to the page. </p>
+<script class="pre">
+// Windows Live
+hello.on('auth.login', function(auth){
+
+	// Get Profile
+	var hi = hello(auth.network);
+	hi.api('me').then(function(r){
+		document.getElementById(auth.network).innerHTML = "Connected to "+auth.network+" as " + r.name;
+	}, function(e){
+		console.error(e);
+	});
+
+	// Get albums
+	hi.api('me/albums').then(function(r){
+		var grp = document.createElement('optgroup');
+		grp.label = auth.network;
+		document.getElementById('albums').appendChild(grp);
+
+		for(var i=0;i<r.data.length;i++){
+			var o = document.createElement('option');
+			o.value = auth.network+","+ ( r.data[i].upload_location || r.data[i].id );
+			o.innerHTML = r.data[i].name;
+			grp.appendChild(o);
+		}
+
+	}, function(){
+		console.error("Could not open albums from "+auth.network+", try resigning in");
+	});
+});
+</script>
+
+<script class="pre">
+function upload(){
+	var a = document.getElementById('albums').value.split(',');
+	var network = a[0];
+	var path = a[1];
+	hello(network).api(path, 'post', {
+		file: document.getElementById('file')
+	}).then(function(r){
+		if(r.source){
+			// Windows we get a reference
+			var a = document.createElement('a');
+			a.href = r.source;
+			a.innerHTML = r.name;
+		}
+		else{
+			// Facebook we dont get a response.
+			var a = document.createElement('a');
+			a.innerHTML = "Uploaded "+document.getElementById('file').value;
+			if(r.picture){
+				a.href = r.picture;
+			}
+		}
+		a.target = "_blank";
+		document.getElementById('result').appendChild(a);
+	}, function(r) {
+		alert(r.error.message);
+	});
+}
+</script>
+
+
+<p>Plug the app keys (client_id') and voila</p>
+<script class="pre">
+
+// Initiate hellojs
+hello.init( CLIENT_IDS, {
+	scope: "publish_files, photos",
+	redirect_uri : "../redirect.html"
+});
+</script>

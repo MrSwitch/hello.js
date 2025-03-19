@@ -1,0 +1,8 @@
+.DS_Store
+node_modules/
+coverage/
+_site/
+src/*.html
+src/**/*.html
+tests/specs/bundle.js
+.env.sh

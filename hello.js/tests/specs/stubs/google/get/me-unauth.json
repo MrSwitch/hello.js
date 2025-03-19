@@ -1,0 +1,14 @@
+{
+  "error": {
+    "errors": [
+      {
+        "domain": "usageLimits",
+        "reason": "dailyLimitExceededUnreg",
+        "message": "Daily Limit for Unauthenticated Use Exceeded. Continued use requires signup.",
+        "extendedHelp": "https://code.google.com/apis/console"
+      }
+    ],
+    "code": 403,
+    "message": "Daily Limit for Unauthenticated Use Exceeded. Continued use requires signup."
+  }
+}

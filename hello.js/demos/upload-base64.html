@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+<script src="/_packages/atob.js"></script>
+<script src="/_packages/toBlob.js"></script>
+<script src="client_ids.js"></script>
+
+<style>
+
+</style>
+<h1>Upload drawing w/ hello.js</h1>
+<!--
+<button id="google" onclick="hello.login('google');">Login Google</button>
+-->
+<blockquote>
+
+	<h3>1. Select canvas</h3>
+
+	<canvas id="canvas" width="150" height="100"></canvas> ... here's one i created earlier
+
+
+	<h3>2. Choose a place to put it.</h3>
+
+	<button id="windows" onclick="login('windows')">Load albums from Windows</button>
+	<button id="facebook" onclick="login('facebook');">Load albums from Facebook</button>
+
+	Albums -> <select id="albums"></select><br />
+
+
+	<h3>3. Upload</h3>
+
+	<button type="button" onclick="uploadAsBlob(document.getElementById('albums').value, document.getElementById('canvas'))">Upload as Blob</button>
+	<button type="button" onclick="uploadAsDataURI(document.getElementById('albums').value, document.getElementById('canvas'))">Upload as DataURL</button>
+
+	<pre class="result"></pre>
+
+</blockquote>
+
+<p>Include hello.js</p>
+<script src="../src/hello.js" class="pre"></script>
+<script src="../src/modules/windows.js" class="pre"></script>
+<script src="../src/modules/facebook.js" class="pre"></script>
+<script src="../src/modules/google.js" class="pre"></script>
+
+<p>Add event listeners for the login completed event and make a request for the users profile. Once that's loaded push it to the page. </p>
+
+<script class="pre">
+function uploadAsBlob(path, canvasElement){
+
+	var network = path.split(':')[0],
+		album_id = path.split(':')[1];
+
+	if(!album_id||!network){
+		log("Please select an album");
+		return;
+	}
+
+	hello(network).api('me/album', 'post', {
+		id :  album_id,
+		file: canvasToBlob(canvasElement)
+	}, log);
+}
+</script>
+
+
+<script class="pre">
+function uploadAsDataURI(path, canvasElement){
+	var network = path.split(':')[0],
+		album_id = path.split(':')[1];
+
+	// API
+	hello(network).api('me/album', 'post', {
+		id : album_id,
+		file : canvasElement.toDataURL()
+	}, log);
+}
+</script>
+
+<script class="pre">
+function canvasToBlob(o,name){
+	// is canvas
+	if(o instanceof HTMLCanvasElement){
+		// turn into DataURL
+		o = o.toDataURL();
+		name = name || "Canvas";
+	}
+
+	var binary,type;
+
+	if(typeof(o)==='string'&&o.match(/^data\:/)){
+		name = name || "DataURI";
+		binary = atob(o.split(',')[1]);
+		type = o.slice(o.indexOf(':')+1, o.indexOf(';') );
+	}
+
+	// Does the browser support the native Blob interface and Typed Arrays'?
+	if("Blob" in window && "Uint8Array" in window){
+		// convert the item to a native Blob object.
+		var a = [];
+		for(var i = 0; i < binary.length; i++) {
+			a.push(binary.charCodeAt(i));
+		}
+		return new Blob([new Uint8Array(a)], {type: type});
+	}
+	else 
+		log( "Cannot create blob" );
+}
+</script>
+
+<script class="pre">
+// Windows Live
+
+
+function login(network){
+
+	hello(network).login( function(auth){
+
+		// Get Profile
+		hello( network ).api('me', function(r){
+			if(!r||r.error){
+				return;
+			}
+			document.getElementById( network ).innerHTML = "Connected to "+auth.network+" as " + r.name;
+		});
+
+		// Get albums
+		hello( network ).api('me/albums', function(r){
+
+			if(!r||r.error){
+				log(r);
+				return;
+			}
+
+			var grp = document.createElement('optgroup');
+			grp.label = network;
+			document.getElementById('albums').appendChild(grp);
+
+			for(var i=0;i<r.data.length;i++){
+				var o = document.createElement('option');
+				o.value = network+":"+ r.data[i].id;
+				o.innerHTML = r.data[i].name;
+				grp.appendChild(o);
+			}
+
+		});
+	});
+}
+</script>
+
+
+<p>Plug the app keys (client_id') and voila</p>
+<script class="pre">
+
+// Initiate hellojs
+hello.init( CLIENT_IDS, {
+	scope: "publish_files,photos",
+	redirect_uri : "../redirect.html"
+});
+</script>
+
+<script>
+
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
+
+var img = new Image();
+img.onload = function(){
+	// Draw on the canvas
+	ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+}
+img.src = "../assets/favicon.ico";
+
+
+</script>
+
+
+<script>
+
+// shim FormData
+window.FormData || function FormData() {
+	this.fake = true;
+	this._fields = [];
+	this.append = function(k, v) {
+		this._fields.push([k, v]);
+	}
+	this.toString = function() {
+		var boundary = "--------FormData" + Math.random();
+		var body = "";
+		for(var i =0; i<this._fields.length;i++){
+			var field = this._fields[i];
+			body += "--" + boundary + "\r\nContent-Disposition: form-data; name=\""+ field[0] +"\";";
+			// file upload
+			if (field[1].name) {
+				var file = field[1];
+				body += " filename=\""+ file.name +"\"\r\n";
+				body += "Content-Type: "+ file.type +"\r\n\r\n";
+				body += file.getAsBinary() + "\r\n";
+			} else {
+				body += "\r\n\r\n";
+				body += field[1] + "\r\n";
+			}
+		};
+		body += "--" + boundary +"--";
+		return body;
+	}
+};
+
+
+// shim sendAsBinary
+if(!("sendAsBinary" in new XMLHttpRequest())){
+	XMLHttpRequest.prototype.sendAsBinary = function(datastr) {
+		function byteValue(x) {
+			return x.charCodeAt(0) & 0xff;
+		}
+		var ords = Array.prototype.map.call(datastr, byteValue);
+		var ui8a = new Uint8Array(ords);
+		this.send(ui8a.buffer);
+	}
+}
+	
+</script>
+
+<script>
+function log(s){
+	if(typeof(s)==='string'){
+		s = document.createTextNode(s);
+	}else if(!s.tagName){
+		s = document.createTextNode(JSON.stringify(s, true, 2));
+	}
+	document.querySelector('.result').appendChild(s);
+}
+</script>

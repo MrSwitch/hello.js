@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>hello.js - demo - activities</title>
+	<link rel="stylesheet" href="/adorn/adorn.css" />
+	<script src="/adorn/adorn.js" async></script>
+
+	<script src="client_ids.js"></script>
+	<style>ul:empty:after{content:'empty';font-weight:bold;color:#aaa;}</style>
+
+	<script src="../src/hello.polyfill.js"></script>
+	<script src="../src/hello.js"></script>
+	<script src="../src/modules/facebook.js"></script>
+	<script src="../src/modules/google.js"></script>
+</head>
+<body>
+	<h1>hello.js - me/share</h1>
+
+	<button onclick="getActivities('google')">Get activities from Google</button>
+	<button onclick="getActivities('facebook')">Get activities from Facebook</button>
+
+	<h2>Activities list</h2>
+	<ul id="list"></ul>
+
+
+<script class="pre">
+function getActivities(network){
+	var hi = hello(network);
+	hi.login({scope:'share'}).then(function(){
+		// Get the friends
+		hi.api('me/share').then(function(r){
+			r.data.forEach(function(o){
+				var li = document.createElement('li');
+				li.innerHTML = o.name || o.message || o.story || o.title;
+				document.getElementById('list').appendChild(li);
+			});
+		});
+	});
+}
+hello.init( CLIENT_IDS, {redirect_uri:'../redirect.html'} );
+
+</script>
+
+</body>
+</html>

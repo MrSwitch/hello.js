@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="client_ids.js"></script>
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/modules/tumblr.js"></script>
+
+<title>hello( tumblr )</title>
+<h1>hello( tumblr )</h1>
+
+<button id='login' onclick="login('tumblr');">Tumblr</button>
+<div id="result"></div>
+<script class="pre">
+function login(network){
+	hello( network ).login().then( function(r){
+		// Get Profile
+		hello(network).api('me').then(function(p){
+			console.log(p);
+			document.getElementById('login').innerHTML = "Connected to "+ network+" as " + p.name;
+		});
+	}, function(e){
+		console.error(e);
+	});
+}
+
+hello.init({
+	'tumblr' : TUMBLR_CLIENT_ID
+},
+{
+	redirect_uri:'../redirect.html',
+	oauth_proxy: OAUTH_PROXY_URL
+});
+</script>
+
+<h2>Custom functions search</h2>
+
+<button onclick="getPosts('peacecorps.tumblr.com')">Get blog posts e.g. (from 'peacecorps.tumblr.com')</button>
+
+<pre id="blogs" placeholder="warning this loads a lot of content"></pre>
+
+<script class="pre">
+function getPosts(blog){
+	hello('tumblr').api('blog/'+blog+'/posts/text?notes_info=true').then(function(r){
+		var a = r.data.map(function(item){
+			return "<h2>"+item.title+"</h2>"+item.body_abstract;
+		});
+		document.getElementById('blogs').innerHTML = a.join('');
+	});
+}
+</script>
+
+<h2>GET me/like</h2>
+
+<button onclick="likes('tumblr')">Get my likes</button>
+
+<pre id="likes"></pre>
+
+<script class="pre">
+function likes(network){
+	hello( network ).login({force:false}).then( function(r){
+		// Get Profile
+		hello(network).api('me/like').then(function(p){
+			console.log(p);
+		});
+	}, function(e){
+		console.error(e);
+	});
+}
+</script>

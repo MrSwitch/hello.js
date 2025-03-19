@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+<script src="client_ids.js"></script>
+
+<title>Simple SkyDrive Demo</title>
+<h1>Simple Skydrive Upload using XHR2</h1>
+
+<p>Start by logging in 	<button onclick="login()">Login</button></p>
+
+<blockquote>
+	<b>pick an album as the destination</b>
+	<select id="select"></select>
+</br>
+	<b>Select a file</b>
+	<form>
+		<input type="file" name="file" id="file"/>
+	</form>
+</br>
+	<button onclick="xhrUpload( select.value, document.getElementById('file').files[0] )">Upload XHR</button>
+	<progress>
+	<span>25</span>%
+	</progress>
+	<div id="result"></div>
+</blockquote>
+
+<script>
+function login(){
+	window.location = 'https://oauth.live.com/authorize'+ 
+		'?client_id='+WINDOWS_CLIENT_ID+
+		'&scope=wl.skydrive_update'+
+		'&response_type=token'+
+		'&redirect_uri='+encodeURIComponent(window.location.href);
+}
+
+
+var access_token = (window.location.hash||window.location.search).match(/access_token=([^&]+)/); 
+if(access_token){ 
+	// Save the first match
+	localStorage.setItem("access_token", decodeURIComponent(access_token[1]));
+}
+</script>
+
+
+<script class="pre">
+function xhrUpload(path, file){
+
+	var token = localStorage.getItem("access_token");
+
+	// Initiate XML Instance
+	var xhr = new XMLHttpRequest();
+
+	xhr.onload = xhr.onerror = function(e){
+		var text = xhr.responseText;
+		console.log(text?JSON.parse(text):{error:{message:"Post Failed"}});
+	};
+
+	xhr.upload.onprogress = function(e){
+		var progressElement = document.getElementsByTagName('progress')[0];
+		progressElement.max = e.total;
+		progressElement.value = e.loaded;
+	};
+
+	xhr.open("POST", path + '?access_token=' + token, true);
+
+	var fd = new FormData();
+	fd.append('file', file);
+
+	xhr.send( fd );
+}
+</script>
+
+
+<script class="pre">
+function xhrRequest(method, url, data, complete, progress){
+
+	var xhr = new XMLHttpRequest();
+
+	// xhr.responseType = "json"; // is not widely supported as yet
+
+	xhr.onload = function(e){
+		var text = xhr.responseText;
+		complete(text?JSON.parse(text):{error:{message:"Could not get resource"}});
+	};
+
+	xhr.onerror = function(e){
+		var text = xhr.responseText;
+		complete(text?JSON.parse(text):{error:{message:"Post failed"}})
+	};
+
+	xhr.open(method, url, true);
+
+	if(data){
+		// Windows unique, convert to a JSON string if this contains binary data
+		data = JSON.stringify(data);
+		xhr.setRequestHeader("Content-Type", 'application/json');
+	}
+
+	xhr.send( data || null );
+}
+</script>
+
+<script>
+if(localStorage.getItem("access_token")){
+	// Token
+	var token = localStorage.getItem("access_token");
+
+	// Make httpRequest
+	// Retrieve all albums in SkyDrive
+	xhrRequest("GET", 'https://apis.live.net/v5.0/me/albums?access_token='+token, null, function(r){
+		// Valid
+		if(!r||r.error){
+			alert("You have an error: "+r.error.message);
+			localStorage.removeItem("access_token");
+			return;
+		}
+		// Loop through the results
+		for(var i=0;i<r.data.length;i++){
+			var obj = r.data[i];
+			var opt = document.createElement('option');
+			opt.value = obj.upload_location;
+			opt.innerHTML = obj.name;
+			document.getElementById('select').appendChild(opt);
+		}
+	});
+}
+</script>

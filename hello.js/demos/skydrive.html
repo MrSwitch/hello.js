@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+<script src="client_ids.js"></script>
+
+<title>Simple SkyDrive Demo</title>
+<style>
+img{
+	position: fixed;
+	top:0;
+	left:50%;
+	width:200px;
+	border:1px solid #ccc;
+	padding:10px;
+}
+img:nth-child(2n){
+	-webkit-transform:rotate(10deg);
+	-moz-transform:rotate(10deg);
+	-ms-transform:rotate(10deg);
+	transform:rotate(10deg);
+}
+img:nth-child(3n){
+	-webkit-transform:rotate(-10deg);
+	-moz-transform:rotate(-10deg);
+	-ms-transform:rotate(-10deg);
+	transform:rotate(-10deg);
+}
+</style>
+<h1>Simple Skydrive demo</h1>
+<blockquote>
+	<p>This demo uses OAuth2 and CORS (or JSONP) to make some REST calls which navigate the Windows Live Graph API to get some photos out of Skydrive. It is PLUGIN-FREE!</p>
+<p>If running locally, <a href="http://manage.dev.live.com/">register your development domain</a> and replace WINDOWS_CLIENT_ID (below) with the client_id you are assigned</p>
+</blockquote>
+
+<p>Build a login button</p>
+<button onclick="login()">Login</button>
+<pre>
+&lt;button onclick="login()"&gt;Login&lt;/button&gt;
+</pre>
+<p>Define the login function</p>
+<script class="pre">
+function login(){
+	window.location = 'https://oauth.live.com/authorize'+ 
+		'?client_id='+WINDOWS_CLIENT_ID+
+		'&scope=wl.skydrive'+
+		'&response_type=token'+
+		'&redirect_uri='+encodeURIComponent(window.location.href);
+}
+</script>
+<p>Save a new access_token - if window location address includes one</p> 
+<script class="pre">
+var access_token = (window.location.hash||window.location.search).match(/access_token=([^&]+)/); 
+if(access_token){ 
+	// Save the first match
+	localStorage.setItem("access_token", decodeURIComponent(access_token[1]));
+}
+</script>
+
+<p>Build an httpRequest handler function for CORS via XHR, falling back to JSONP</p>
+<script class="pre">
+function httpRequest(url,callback){
+	// IE10, FF, Chrome
+	if('withCredentials' in new XMLHttpRequest()){
+		var r = new XMLHttpRequest();
+		// xhr.responseType = "json"; // is not supported in any of the vendors yet.
+		r.onload = function(e){
+			callback(r.responseText?JSON.parse(r.responseText):{error:{message:"Could not get resource"}});
+		};
+		r.open('GET', url);
+		r.send( null );
+	}
+	else{
+		// Else add the callback on to the URL
+		jsonp(url+"&callback=?", callback);
+	}
+}
+</script>
+
+<p>jsonp(): A cross domain scripting "hack"</p>
+<script class="pre">
+var json_counter=0;
+function jsonp(path,callback){
+	// Make the anonymous function. not anonymous
+	var callback_name = 'jsonp_' + json_counter++;
+	window[callback_name] = callback;
+	// Add the callback name to the path
+	path = path.replace(/\=\?/, '='+callback_name);
+	// find a place to insert the script tag
+	var sibling = document.getElementsByTagName('script')[0];
+	// Create the script tag
+	var script = document.createElement('script');
+	script.src = path;
+	sibling.parentNode.insertBefore(script,sibling);
+}
+</script>
+
+<p>Navigate the Graph: getAllPhotos is a recursive function which seeks out images stored in the users SkyDrive</p>
+
+<script class="pre">
+function getAllPhotos(path,callback){
+	// Token
+	var token = localStorage.getItem("access_token");
+
+	// Make JSONP request
+	httpRequest('https://apis.live.net/v5.0/'+path+'?filter=albums,folders,photos&access_token='+token, function(r){
+		// Valid
+		if(!r||r.error){
+			alert("You have an error: "+r.error.message);
+			localStorage.removeItem("access_token");
+			return;
+		}
+		// Loop through the results
+		for(var i=0;i<r.data.length;i++){
+			var item = r.data[i];
+			// Make a request to get the folder contents
+			if(item.type === 'folder' || item.type === 'album'){
+				getAllPhotos(item.id+'/files', callback);
+			}
+			else if(item.type==='photo'){
+				callback(item);
+			}
+		}
+	});
+};
+</script>
+
+<p>If there is an access_token, fire off getAllPhotos, and print all images out to the screen</p>
+<script class="pre">
+if(localStorage.getItem("access_token")){
+	// Recursively start searching Skydrive directories for photos, triggers callback on each image
+	getAllPhotos('me/skydrive/files',function(obj){
+
+		// Create a new image in the DOM, give it some randomness and insert it into the dom.
+		var img = document.createElement('img');
+		img.src = obj.picture;
+		img.style.top = (parseInt(Math.random()*85,10))+'%';
+		img.style.left = (50+parseInt(Math.random()*50,10))+'%';
+		document.body.appendChild(img);
+	});
+}
+
+
+
+function httpRequest(url,callback){
+	// IE10, FF, Chrome
+	if('withCredentials' in new XMLHttpRequest()){
+		var r = new XMLHttpRequest();
+		// xhr.responseType = "json"; // is not supported in any of the vendors yet.
+		r.onload = function(e){
+			callback(r.responseText?JSON.parse(r.responseText):{error:{message:"Could not get resource"}});
+		};
+		r.open('GET', url);
+		r.send( null );
+	}
+	else{
+		// JSONP
+		// Make the anonymous function. not anonymous
+		var callback_name = 'jsonp_' + parseInt(Math.random()*1e10);
+		window[callback_name] = callback;
+		// find a place to insert the script tag
+		var sibling = document.getElementsByTagName('script')[0];
+		// Create the script tag
+		var script = document.createElement('script');
+		// Update the path with the callback name
+		script.src = (url+"&callback="+callback_name);
+		// Append
+		sibling.parentNode.insertBefore(script,sibling);
+	}
+}
+
+</script>

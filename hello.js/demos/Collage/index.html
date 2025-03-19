@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="style.css" />
+<script src="../client_ids.js"></script>
+<script src="../../src/hello.js"></script>
+<script src="../../src/modules/flickr.js"></script>
+<script src="../../src/modules/windows.js"></script>
+<script src="../../src/modules/facebook.js"></script>
+<script src="../../src/modules/google.js"></script>
+<script src="fabric.js"></script>
+<script src="/_packages/track.js"></script>
+<header>
+	<h1>&gt; <a onclick="nav.style.display='block';">Collage</a></h1>
+</header>
+
+<nav id="nav">
+	<button onclick="nav.style.display='none';" class="close">X</button>
+	<h1>Hi, welcome to Collage</h1>
+	<p>Play around with your images from 
+
+		<button onclick="loadImages('windows')">Skydrive</button>,
+		<button onclick="loadImages('flickr')">Flickr</button>,
+		<button onclick="loadImages('facebook')">FaceBook</button> or
+		<button onclick="loadImages('google')">Google</button>
+
+	</p>
+	<button onclick="limit+=10;update();" style="display:none;" id="count"></button>
+</nav>
+
+<section>
+	<canvas id="c" width="800" height="500"></canvas>
+</section>
+<script>
+
+var c = document.getElementById('c');
+c.width = window.innerWidth;
+c.height = window.innerHeight;
+
+// Start Fabric
+var canvas = new fabric.Canvas('c',{
+	selectionColor: 'blue',
+	selectionLineWidth: 2
+});
+
+
+var index = 0,
+	limit = 10, 
+	images = [];
+
+var count = document.getElementById('count');
+
+function update(){
+
+	var h = canvas.height,
+		w = canvas.width;
+
+
+	while(index<Math.min(images.length,limit)){
+
+		fabric.Image.fromURL(images[index++], function(img) {
+
+			var img = img.set({
+				left: parseInt(Math.random()*w), 
+				top: parseInt(Math.random()*h), 
+				angle: parseInt((Math.random()*50)-25,10),
+				selectable : true
+			});
+
+			canvas.add(img);
+		});
+	}
+
+	// Update
+	count.style.display = (limit>images.length?'none':'block');
+	count.innerHTML = "Load in " + index + " - " + (limit+10)  +" of "+images.length;
+}
+
+// Register with Hello
+function loadImages(network){
+
+	hello(network).login(function(){
+
+		// Does it have siblings?
+		hello(network).api('me/albums', function(r){
+
+			if(!r||r.error){
+				alert(r.error.message);
+				return;
+			}
+
+			// Loop through and add photos to the canvas
+			for(var i=0;i<r.data.length;i++){
+
+				hello(network).api('me/album', {id : r.data[i].id}, function(r){
+
+					if(!r||r.error){
+						alert(r.error.message);
+						return;
+					}
+
+					for(var i=0;i<r.data.length;i++){
+						images.push(r.data[i].picture);
+					}
+					update();
+				});
+			}
+		});
+	});
+};
+
+CLIENT_IDS.flickr = FLICKR_CLIENT_ID;
+hello.init(CLIENT_IDS,{
+	scope:'photos',
+	redirect_uri:"../../redirect.html",
+	oauth_proxy : OAUTH_PROXY_URL
+});
+
+</script>

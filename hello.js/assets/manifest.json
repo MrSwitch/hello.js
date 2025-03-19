@@ -1,0 +1,35 @@
+{
+	"name" : "HelloJS",
+	"description" : "Authentication and social integration for web apps",
+	"short_name": "HelloJS",
+	"start_url": "/",
+	"theme_color": "#4E5260",
+	"background_color": "white",
+	"icons" : [{
+		"src" : "https://avatars3.githubusercontent.com/u/947163?v=3&s=64",
+		"sizes" : "64x64",
+		"type" : "image/png"
+	},
+	{
+		"src" : "https://avatars3.githubusercontent.com/u/947163?v=3&s=144",
+		"sizes" : "144x144",
+		"type" : "image/png"
+	},
+	{
+		"src" : "https://avatars3.githubusercontent.com/u/947163?v=3&s=192",
+		"sizes" : "192x192",
+		"type" : "image/png"
+	},
+	{
+		"src" : "https://avatars3.githubusercontent.com/u/947163?v=3&s=512",
+		"sizes" : "512x512",
+		"type" : "image/png"
+	}],
+	"display": "standalone",
+	"orientation": "portrait-primary",
+	"favicon" : "./favicon.ico",
+	"github" : "MrSwitch",
+	"twitter:creator" : "@setData",
+	"author" : "Andrew Dodson, https://adodson.com",
+	"ga:tracking" : "UA-35317561-1"
+}

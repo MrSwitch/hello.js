@@ -1,0 +1,31 @@
+{
+   "data": [
+      {
+         "cover_photo": {
+            "created_time": "2014-05-31T15:11:19+0000",
+            "id": "10152107682897233"
+         },
+         "name": "Timeline Photos",
+         "id": "1380499628920241"
+      },
+      {
+         "cover_photo": {
+            "created_time": "2013-01-06T03:18:37+0000",
+            "name": "The new fifth Wiggle",
+            "id": "10151205596242233"
+         },
+         "name": "Mobile Uploads",
+         "id": "458485517232"
+      },
+      {
+         "name": "TestAlbum",
+         "id": "10151568394602233"
+      }
+   ],
+   "paging": {
+      "cursors": {
+         "before": "MTAxNTE2MDk1NTE3MjIyMzMZD",
+         "after": "MTc3MzI4NDIyMzIZD"
+      }
+   }
+}

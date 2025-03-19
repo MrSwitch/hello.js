@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="client_ids.js"></script>
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/modules/windows.js"></script>
+<script src="../src/modules/facebook.js"></script>
+<script src="../src/modules/google.js"></script>
+
+<style>
+	form{
+		padding:20px;
+	}
+	form label{
+		min-width:100px;
+		display: inline-block;
+		text-align: right;
+		font-weight:bold;
+	}
+	form input{
+		width:250px;
+	}
+
+</style>
+
+<h1>hello.api( me/share )</h1>
+
+<blockquote>
+	<form id="activity_form">
+		<label>message</label> <input type="text" name="message" value="Hello.js is anything but OAuth'ful"/>
+		<br />
+		<label>link</label> <input type="url" name="link" value="http://adodson.com/hello.js"/>
+	</form>
+
+</blockquote>
+
+
+<script class="pre">
+function post(network){
+	var fields = document.getElementById('activity_form').elements;
+	var hi = hello(network);
+	hi.login({scope:'publish'}).then(function(){
+		// Post the contents of the form
+		hi.api('me/share', 'post', {message: fields.message.value, link: fields.link.value}).then(function(r) {
+			alert("Your message has been published to "+ network);
+		}, function(r) {
+			alert("Whoops! Failed." + r.error.message);
+		});
+	})
+}
+
+hello.init(CLIENT_IDS, {redirect_uri:'../redirect.html'});
+</script>

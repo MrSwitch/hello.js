@@ -1,0 +1,91 @@
+<!--
+	Get the tests
+-->
+<table class="testtable">
+	<colgroup>
+		<col></col>
+		<col style="background:#E9E9E9;"></col>
+	</colgroup>
+	<thead>
+		<tr>
+			<th>method</th>
+			<th><label><input type="checkbox" data-bind="checked: test.scopes().length===test.checkedScopes().length, click:function(){ test.scopes().length===test.checkedScopes().length ? test.checkedScopes.removeAll() : test.checkAllScopes() }">scopes </label></th>
+			<!-- ko foreach:test.networks -->
+			<th><button data-bind="click:login, attr:{'class':'zocial icon ' + name, title:'Signin to '+ displayName}" title="Signin"></button>
+			<!--<button data-bind="click:runAll" class="run" title="Run all tests in this column"></button>-->
+			<a data-bind="click:logout, visible:online" title="Logout">logout</a></th>
+			<!-- /ko -->
+		</tr>
+	</thead>
+	<tbody data-bind="foreach: test.tests">
+		<!-- ko if: api() == $parent.filter -->
+		<tr data-bind="css: {debug: debug()}">
+
+			<td class="method" data-bind="click:function(){debug()?debug(false):debug(true);}"><span data-bind="attr:{ 'class' : method }, text:method"></span> <b data-bind="text: path"></b><p data-bind="text:title"></p></td>
+			<td>
+				<!-- ko foreach:scope -->
+				<label><input type="checkbox" data-bind="checked:$root.checkedScopes, value:$data"/><span data-bind="text:$data"></span></label>
+				<!-- /ko -->
+			</td>
+			<!-- ko foreach:variants -->
+			<td>
+				<!-- ko if:expected -->
+				<button data-bind="visible: enabled, click:run, css:{ working: status()==='working'}, attr:{ title : 'Execute test for '+network }" class="run" title="Run this test"></button>
+				<button class="response" data-bind="visible: enabled, css: { error : passed() === false, passed : passed() === true, exception:status()==='exception' }, visible:passed()===false||passed()===true||response(), click:function(){var bool = !($parent.debug()&&showResponse()); showResponse(bool);$parent.debug(bool);}"></button>
+				<span class="tooltip" data-bind="visible:info"><span data-bind="beautify:info"></span></span>
+				<!-- /ko -->
+				<!-- ko if:!expected -->
+				<button data-bind="visible:enabled" class="response passed"></button>
+				<!-- /ko -->
+			</td>
+			<!-- /ko -->
+		</tr>
+		<tr data-bind="visible:debug, css: {debug: debug()}">
+			<td colspan="2">
+				<form data-bind="visible: data.items().length, attr:{id:formId()}">
+					<h4>Parameters</h4>
+					<table>
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Value</th>
+								<th></th>
+							</tr>
+						</thead>
+						<tbody data-bind="foreach: data.items">
+						    <tr>
+						        <th><input type="text" size="10" data-bind="value:key"/></th>
+						        <td>
+						        	<!-- ko if:options.length -->
+						        	<select data-bind="options: options, value: value"></select>
+									<!-- /ko -->
+									<!-- ko if:!options.length -->
+						        	<input type="text" size="10" data-bind="value:value, visible:!(key()==='file'&&value()==='file'), attr:{name:key(), disabled:key()==='file'&&value()==='file'}"/><input type="file" data-bind="visible:key()==='file'&&value()==='file',attr:{name:key(), disabled:!(key()==='file'&&value()==='file')}"/>
+									<!-- /ko -->
+						       	</td>
+						        <td><a href="javascript:void(0);" data-bind="click: function() { $parent.data.removeItem($data) }">Delete</a></td>
+						    </tr>
+						</tbody>
+						<tfoot>
+							<tr>
+								<td colspan="3"><a href="javascript:void(0);" data-bind="click: data.addItem">Add item</a></td>
+							</tr>
+						</tfoot>
+					</table>
+				</form>
+				<div data-bind="visible: expected">
+					<h4>Expected</h4>
+					<pre data-bind="beautify: expected"></pre>
+				</div>
+			</td>
+			<td data-bind="attr: {colspan: variants().length}">
+				<!-- ko foreach:variants -->
+				<pre data-bind="visible: showResponse, css: { error : passed() === false, passed : passed() === true }, beautify: response"></pre>
+				<button class="green" data-bind="visible: showResponse() && next(), click:function(){next()();}">Next</button>
+				<!-- /ko -->
+			</td>
+		</tr>
+		<!-- /ko -->
+	</tbody>
+</table>
+
