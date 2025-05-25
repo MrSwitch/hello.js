@@ -1,4 +1,4 @@
-/*! hellojs v1.20.0 - (c) 2012-2023 Andrew Dodson - MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.20.0 - (c) 2012-2025 Andrew Dodson - MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -5426,10 +5426,10 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 					return res;
 				}
 			},
-			xhr: function(p) {
 
-				// Rely on the proxy for non-GET requests.
-				return (p.method !== 'get');
+			xhr: function(p) {
+				// Always use the proxy to ensure OAuth signing on all requests (GET and others)
+				return true;
 			}
 		}
 	});
@@ -5484,33 +5484,6 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 	function arrayToDataResponse(res) {
 		return Array.isArray(res) ? {data: res} : res;
 	}
-
-	/**
-	// The documentation says to define user in the request
-	// Although its not actually required.
-
-	var user_id;
-
-	function withUserId(callback){
-		if(user_id){
-			callback(user_id);
-		}
-		else{
-			hello.api('twitter:/me', function(o){
-				user_id = o.id;
-				callback(o.id);
-			});
-		}
-	}
-
-	function sign(url){
-		return function(p, callback){
-			withUserId(function(user_id){
-				callback(url+'?user_id='+user_id);
-			});
-		};
-	}
-	*/
 
 })(hello);
 // Vkontakte (vk.com)
