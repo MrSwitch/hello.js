@@ -402,7 +402,7 @@ hello('facebook').login().then(function() {
 
 <div data-bind="template: { name: 'tests-template', data: { test: $root, filter: 'logout' } }"></div>
 
-Remove all sessions or individual sessions.
+Remove all sessions or individual session.
 
 ### hello.logout([network] [, options] [, callback()])
 
@@ -487,7 +487,7 @@ hello('facebook').logout().then(function() {
 
 <div data-bind="template: { name: 'tests-template', data: { test: $root, filter: 'getAuthResponse' } }"></div>
 
-Get the current status of the session. This is a synchronous request and does not validate any session cookies which may have expired.
+Get the current status of the session. This is a synchronous request and does not validate any session cookie which may have gone expired.
 
 ### hello.getAuthResponse(network)
 
@@ -678,7 +678,7 @@ Please see [demo of the global events](demos/events.html).
 
 ## hello.on()
 
-Bind a callback to an event. An event may be triggered by a change in user state or a change in some detail.
+Bind a callback to an event. The event may be triggered by any change in user state or a change in any detail.
 
 ### hello.on(event, callback)
 
@@ -724,7 +724,7 @@ hello.on('auth.login', sessionStart);
 
 ## hello.off()
 
-Remove a callback. Both event name and function must exist.
+Remove a callback. Both event name and function must co-exist.
 
 ### hello.off(event, callback)
 
