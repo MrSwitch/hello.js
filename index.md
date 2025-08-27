@@ -34,11 +34,6 @@ hello.init(CLIENT_IDS_ALL, {
 	oauth_proxy: OAUTH_PROXY_URL
 });
 
-// Issue 541 : Support on auth.error event - @prathmesh-sananse
-hello.on('auth.error', function(e) {
-  console.error("Auth error from " + e.network, e.error);
-});
-
 getText('assets/test_network.html', function(response) {
 	document.getElementById('tests-template').text = response;
 	// Knockout binding goes here
