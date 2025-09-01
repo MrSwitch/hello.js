@@ -15,25 +15,26 @@
 <script class="pre">
 function login(network){
 
-	var yahoo = hello(network);
+    var yahoo = hello(network);
 
-	yahoo.login().then(function(){
+    yahoo.login().then(function(){
 
-		// Get Profile
-		return yahoo.api('me');
-	}).then(function(p) {
-		document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network+" as " + p.name;
-	}).then(null, function(e) {
-		console.error(e);
-	});
+        // Get Profile
+        return yahoo.api('me');
+    }).then(function(p) {
+        document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network+" as " + p.name;
+    }).then(null, function(e) {
+        console.error(e);
+    });
 }
 
+// In the new implementation, the Yahoo client ID is not needed here
 hello.init({
-	'yahoo' : YAHOO_CLIENT_ID
+    'yahoo': YAHOO_CLIENT_ID
 },
 {
-	redirect_uri:'../redirect.html',
-	oauth_proxy: OAUTH_PROXY_URL
+    redirect_uri:'../redirect.html',
+    oauth_proxy: OAUTH_PROXY_URL
 });
 
 </script>
