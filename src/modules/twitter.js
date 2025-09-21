@@ -1,6 +1,6 @@
 (function(hello) {
 
-	var base = 'https://api.twitter.com/';
+	const base = 'https://api.twitter.com/';
 
 	hello.init({
 
@@ -17,7 +17,7 @@
 			login: function(p) {
 				// Reauthenticate
 				// https://dev.twitter.com/oauth/reference/get/oauth/authenticate
-				var prefix = '?force_login=true';
+				const prefix = '?force_login=true';
 				this.oauth.auth = this.oauth.auth.replace(prefix, '') + (p.options.force ? prefix : '');
 			},
 
@@ -39,10 +39,10 @@
 			post: {
 				'me/share': function(p, callback) {
 
-					var data = p.data;
+					const data = p.data;
 					p.data = null;
 
-					var status = [];
+					const status = [];
 
 					// Change message to status
 					if (data.message) {
@@ -89,7 +89,7 @@
 
 				// See: https://dev.twitter.com/rest/reference/post/favorites/create
 				'me/like': function(p, callback) {
-					var id = p.data.id;
+					const id = p.data.id;
 					p.data = null;
 					callback('favorites/create.json?id=' + id);
 				}
@@ -100,7 +100,7 @@
 				// See: https://dev.twitter.com/rest/reference/post/favorites/destroy
 				'me/like': function(p, callback) {
 					p.method = 'post';
-					var id = p.data.id;
+					const id = p.data.id;
 					p.data = null;
 					callback('favorites/destroy.json?id=' + id);
 				}
@@ -144,7 +144,7 @@
 	function formatUser(o) {
 		if (o.id) {
 			if (o.name) {
-				var m = o.name.split(' ');
+				const m = o.name.split(' ');
 				o.first_name = m.shift();
 				o.last_name = m.join(' ');
 			}
@@ -169,7 +169,7 @@
 
 	function formatError(o) {
 		if (o.errors) {
-			var e = o.errors[0];
+			const e = o.errors[0];
 			o.error = {
 				code: 'request_failed',
 				message: e.message

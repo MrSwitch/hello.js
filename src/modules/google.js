@@ -1,6 +1,6 @@
 (function(hello) {
 
-	var contactsUrl = 'https://www.google.com/m8/feeds/contacts/default/full?v=3.0&alt=json&max-results=@{limit|1000}&start-index=@{start|1}';
+	const contactsUrl = 'https://www.google.com/m8/feeds/contacts/default/full?v=3.0&alt=json&max-results=@{limit|1000}&start-index=@{start|1}';
 
 	hello.init({
 
@@ -67,7 +67,7 @@
 				'me/contacts': contactsUrl,
 				'me/albums': 'https://picasaweb.google.com/data/feed/api/user/default?alt=json&max-results=@{limit|100}&start-index=@{start|1}',
 				'me/album': function(p, callback) {
-					var key = p.query.id;
+					const key = p.query.id;
 					delete p.query.id;
 					callback(key.replace('/entry/', '/feed/'));
 				},
@@ -264,11 +264,11 @@
 
 	function formatFriends(o, headers, req) {
 		paging(o);
-		var r = [];
+		const r = [];
 		if ('feed' in o && 'entry' in o.feed) {
-			var token = req.query.access_token;
-			for (var i = 0; i < o.feed.entry.length; i++) {
-				var a = o.feed.entry[i];
+			const token = req.query.access_token;
+			for (let i = 0; i < o.feed.entry.length; i++) {
+				const a = o.feed.entry[i];
 
 				a.id = a.id.$t;
 				a.name = a.title.$t;
@@ -285,7 +285,7 @@
 
 				if (a.link) {
 
-					var pic = (a.link.length > 0) ? a.link[0].href : null;
+					let pic = (a.link.length > 0) ? a.link[0].href : null;
 					if (pic && a.link[0].gd$etag) {
 						pic += (pic.indexOf('?') > -1 ? '&' : '?') + 'access_token=' + token;
 						a.picture = pic;
@@ -309,21 +309,21 @@
 
 	function formatEntry(a) {
 
-		var group = a.media$group;
-		var photo = group.media$content.length ? group.media$content[0] : {};
-		var mediaContent = group.media$content || [];
-		var mediaThumbnail = group.media$thumbnail || [];
+		const group = a.media$group;
+		const photo = group.media$content.length ? group.media$content[0] : {};
+		const mediaContent = group.media$content || [];
+		const mediaThumbnail = group.media$thumbnail || [];
 
-		var pictures = mediaContent
+		const pictures = mediaContent
 			.concat(mediaThumbnail)
 			.map(formatImage)
 			.sort(function(a, b) {
 				return a.width - b.width;
 			});
 
-		var i = 0;
-		var _a;
-		var p = {
+		let i = 0;
+		let _a;
+		const p = {
 			id: a.id.$t,
 			name: a.title.$t,
 			description: a.summary.$t,
@@ -340,7 +340,7 @@
 		// Get feed/children
 		if ('link' in a) {
 			for (i = 0; i < a.link.length; i++) {
-				var d = a.link[i];
+				const d = a.link[i];
 				if (d.rel.match(/\#feed$/)) {
 					p.upload_location = p.files = p.photos = d.href;
 					break;
@@ -378,9 +378,9 @@
 
 		// Contacts V2
 		if ('feed' in res && res.feed.openSearch$itemsPerPage) {
-			var limit = toInt(res.feed.openSearch$itemsPerPage.$t);
-			var start = toInt(res.feed.openSearch$startIndex.$t);
-			var total = toInt(res.feed.openSearch$totalResults.$t);
+			const limit = toInt(res.feed.openSearch$itemsPerPage.$t);
+			const start = toInt(res.feed.openSearch$startIndex.$t);
+			const total = toInt(res.feed.openSearch$totalResults.$t);
 
 			if ((start + limit) < total) {
 				res.paging = {
@@ -399,18 +399,18 @@
 	function Multipart() {
 
 		// Internal body
-		var body = [];
-		var boundary = (Math.random() * 1e10).toString(32);
-		var counter = 0;
-		var lineBreak = '\r\n';
-		var delim = lineBreak + '--' + boundary;
-		var ready = function() {};
+		let body = [];
+		const boundary = (Math.random() * 1e10).toString(32);
+		let counter = 0;
+		const lineBreak = '\r\n';
+		const delim = lineBreak + '--' + boundary;
+		let ready = function() {};
 
-		var dataUri = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
+		const dataUri = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
 
 		// Add file
 		function addFile(item) {
-			var fr = new FileReader();
+			const fr = new FileReader();
 			fr.onload = function(e) {
 				addContent(btoa(e.target.result), item.type + lineBreak + 'Content-Transfer-Encoding: base64');
 			};
@@ -434,11 +434,11 @@
 				content = [content];
 			}
 
-			for (var i = 0; i < content.length; i++) {
+			for (let i = 0; i < content.length; i++) {
 
 				counter++;
 
-				var item = content[i];
+				const item = content[i];
 
 				// Is this a file?
 				// Files can be either Blobs or File types
@@ -454,7 +454,7 @@
 				// Data:[<mime type>][;charset=<charset>][;base64],<encoded data>
 				// /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i
 				else if (typeof (item) === 'string' && item.match(dataUri)) {
-					var m = item.match(dataUri);
+					const m = item.match(dataUri);
 					addContent(item.replace(dataUri, ''), m[1] + lineBreak + 'Content-Transfer-Encoding: base64');
 				}
 
@@ -486,7 +486,7 @@
 	// POST https://developers.google.com/drive/manage-uploads
 	function uploadDrive(p, callback) {
 
-		var data = {};
+		let data = {};
 
 		// Test for DOM element
 		if (p.data &&
@@ -528,7 +528,7 @@
 
 		// Extract the file, if it exists from the data object
 		// If the File is an INPUT element lets just concern ourselves with the NodeList
-		var file;
+		let file;
 		if ('file' in p.data) {
 			file = p.data.file;
 			delete p.data.file;
@@ -552,7 +552,7 @@
 		// Set type p.data.mimeType = Object(file[0]).type || 'application/octet-stream';
 
 		// Construct a multipart message
-		var parts = new Multipart();
+		const parts = new Multipart();
 		parts.append(JSON.stringify(p.data), 'application/json');
 
 		// Read the file into a  base64 string... yep a hassle, i know

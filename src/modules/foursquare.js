@@ -79,7 +79,7 @@
 	}
 
 	function formatRequest(p, qs) {
-		var token = qs.access_token;
+		const token = qs.access_token;
 		delete qs.access_token;
 		qs.oauth_token = token;
 		qs.v = 20121125;

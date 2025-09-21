@@ -69,7 +69,7 @@
 				'default': function(o) {
 
 					if (o.response) {
-						var r = o.response;
+						const r = o.response;
 						if (r.posts) {
 							o.data = r.posts;
 						}
@@ -100,7 +100,7 @@
 	}
 
 	function extend(a, b) {
-		for (var x in b) {
+		for (const x in b) {
 			if (b.hasOwnProperty(x)) {
 				a[x] = b[x];
 			}

@@ -1,5 +1,5 @@
 (function(hello) {
-	var baseUrl = 'https://api.vimeo.com/';
+	const baseUrl = 'https://api.vimeo.com/';
 
 	hello.init({
 		vimeo: {

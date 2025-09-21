@@ -1,7 +1,7 @@
 (function(hello) {
 	// For APIs, once a version is no longer usable, any calls made to it will be defaulted to the next oldest usable version.
 	// So we explicitly state it.
-	var version = 'v2.9';
+	const version = 'v2.9';
 
 	hello.init({
 
@@ -53,9 +53,9 @@
 
 			logout: function(callback, options) {
 				// Assign callback to a global handler
-				var callbackID = hello.utils.globalEvent(callback);
-				var redirect = encodeURIComponent(hello.settings.redirect_uri + '?' + hello.utils.param({callback: callbackID, result: JSON.stringify({force: true}), state: '{}'}));
-				var token = (options.authResponse || {}).access_token;
+				const callbackID = hello.utils.globalEvent(callback);
+				const redirect = encodeURIComponent(hello.settings.redirect_uri + '?' + hello.utils.param({callback: callbackID, result: JSON.stringify({force: true}), state: '{}'}));
+				const token = (options.authResponse || {}).access_token;
 				hello.utils.iframe('https://www.facebook.com/logout.php?next=' + redirect + '&access_token=' + token);
 
 				// Possible responses:
@@ -128,7 +128,7 @@
 
 			// Special requirements for handling JSONP fallback
 			jsonp: function(p, qs) {
-				var m = p.method;
+				const m = p.method;
 				if (m !== 'get' && !hello.utils.hasBinary(p.data)) {
 					p.data.method = m;
 					p.method = 'get';
@@ -149,7 +149,7 @@
 		}
 	});
 
-	var base = 'https://graph.facebook.com/';
+	const base = 'https://graph.facebook.com/';
 
 	function formatUser(o) {
 		if (o.id) {
@@ -173,10 +173,10 @@
 		}
 
 		if (o && 'data' in o) {
-			var token = req.query.access_token;
+			const token = req.query.access_token;
 
 			if (!(o.data instanceof Array)) {
-				var data = o.data;
+				const data = o.data;
 				delete o.data;
 				o.data = [data];
 			}

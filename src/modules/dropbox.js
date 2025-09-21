@@ -1,7 +1,7 @@
 (function(hello) {
 
 	// OAuth1
-	var OAuth1Settings = {
+	const OAuth1Settings = {
 		version: '1.0',
 		auth: 'https://www.dropbox.com/1/oauth/authorize',
 		request: 'https://api.dropbox.com/1/oauth/request_token',
@@ -9,7 +9,7 @@
 	};
 
 	// OAuth2 Settings
-	var OAuth2Settings = {
+	const OAuth2Settings = {
 		version: 2,
 		auth: 'https://www.dropbox.com/1/oauth2/authorize',
 		grant: 'https://api.dropbox.com/1/oauth2/token'
@@ -30,7 +30,7 @@
 
 				// Should this be run as OAuth1?
 				// If the redirect_uri is is HTTP (non-secure) then its required to revert to the OAuth1 endpoints
-				var redirect = decodeURIComponent(p.qs.redirect_uri);
+				const redirect = decodeURIComponent(p.qs.redirect_uri);
 				if (redirect.indexOf('http:') === 0 && redirect.indexOf('http://localhost/') !== 0) {
 
 					// Override the dropbox OAuth settings.
@@ -89,8 +89,8 @@
 			post: {
 				'me/files': function(p, callback) {
 
-					var path = p.data.parent;
-					var fileName = p.data.name;
+					const path = p.data.parent;
+					const fileName = p.data.name;
 
 					p.data = {
 						file: p.data.file
@@ -106,7 +106,7 @@
 
 				'me/folders': function(p, callback) {
 
-					var name = p.data.name;
+					const name = p.data.name;
 					p.data = {};
 
 					callback('fileops/create_folder?root=@{root|sandbox}&' + hello.utils.param({
@@ -129,7 +129,7 @@
 					}
 
 					o.name = o.display_name;
-					var m = o.name.split(' ');
+					const m = o.name.split(' ');
 					o.first_name = m.shift();
 					o.last_name = m.join(' ');
 					o.id = o.uid;
@@ -166,7 +166,7 @@
 				// The proxy supports allow-cross-origin-resource
 				// Alas that's the only thing we're using.
 				if (p.data && p.data.file) {
-					var file = p.data.file;
+					const file = p.data.file;
 					if (file) {
 						if (file.files) {
 							p.data = file.files[0];
@@ -213,7 +213,7 @@
 			return;
 		}
 
-		var path = (o.root !== 'app_folder' ? o.root : '') + o.path.replace(/\&/g, '%26');
+		let path = (o.root !== 'app_folder' ? o.root : '') + o.path.replace(/\&/g, '%26');
 		path = path.replace(/^\//, '');
 		if (o.thumb_exists) {
 			o.thumbnail = req.oauth_proxy + '?path=' +
