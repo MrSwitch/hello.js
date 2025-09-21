@@ -38,7 +38,7 @@ if (!Object.keys) {
 if (!Array.prototype.indexOf) {
 	Array.prototype.indexOf = function(s) {
 
-		for (var j = 0; j < this.length; j++) {
+		for (let j = 0; j < this.length; j++) {
 			if (this[j] === s) {
 				return j;
 			}
@@ -56,14 +56,14 @@ if (!Array.prototype.forEach) {
 			throw new TypeError();
 		}
 
-		var t = Object(this);
-		var len = t.length >>> 0;
+		const t = Object(this);
+		const len = t.length >>> 0;
 		if (typeof fun !== 'function') {
 			throw new TypeError();
 		}
 
-		var thisArg = arguments.length >= 2 ? arguments[1] : void 0;
-		for (var i = 0; i < len; i++) {
+		const thisArg = arguments.length >= 2 ? arguments[1] : void 0;
+		for (let i = 0; i < len; i++) {
 			if (i in t) {
 				fun.call(thisArg, t[i], i, t);
 			}
@@ -77,7 +77,7 @@ if (!Array.prototype.forEach) {
 if (!Array.prototype.filter) {
 	Array.prototype.filter = function(fun, thisArg) {
 
-		var a = [];
+		const a = [];
 		this.forEach(function(val, i, t) {
 			if (fun.call(thisArg || void 0, val, i, t)) {
 				a.push(val);
@@ -94,7 +94,7 @@ if (!Array.prototype.map) {
 
 	Array.prototype.map = function(fun, thisArg) {
 
-		var a = [];
+		const a = [];
 		this.forEach(function(val, i, t) {
 			a.push(fun.call(thisArg || void 0, val, i, t));
 		});
@@ -135,10 +135,10 @@ if (!Function.prototype.bind) {
 
 		function C() {}
 
-		var a = [].slice;
-		var f = a.call(arguments, 1);
-		var _this = this;
-		var D = function() {
+		const a = [].slice;
+		const f = a.call(arguments, 1);
+		const _this = this;
+		const D = function() {
 			return _this.apply(this instanceof C ? this : b || window, f.concat(a.call(arguments)));
 		};
 

@@ -51,7 +51,7 @@
 				},
 
 				'meetings/start/scheduled': function(p, callback) {
-					var meetingId = p.data.meetingId;
+					const meetingId = p.data.meetingId;
 					p.data = {};
 					callback('meetings/' + meetingId + '/start');
 				},
@@ -100,9 +100,9 @@
 	});
 
 	function formatError(o, headers) {
-		var errorCode;
-		var message;
-		var details;
+		let errorCode;
+		let message;
+		let details;
 
 		if (o && ('Message' in o)) {
 			message = o.Message;
@@ -128,7 +128,7 @@
 
 	function formatRequest(p, qs) {
 		// Move the access token from the request body to the request header
-		var token = qs.access_token;
+		const token = qs.access_token;
 		delete qs.access_token;
 		p.headers.Authorization = 'Bearer ' + token;
 

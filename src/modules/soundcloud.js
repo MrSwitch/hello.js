@@ -56,7 +56,7 @@
 
 	function formatRequest(p, qs) {
 		// Alter the querystring
-		var token = qs.access_token;
+		const token = qs.access_token;
 		delete qs.access_token;
 		qs.oauth_token = token;
 		qs['_status_code_map[302]'] = 200;

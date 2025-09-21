@@ -45,7 +45,7 @@
 
 			post: {
 				'me/like': function(p, callback) {
-					var id = p.data.id;
+					const id = p.data.id;
 					p.data = {};
 					callback('media/' + id + '/likes');
 				}
@@ -88,7 +88,7 @@
 							d.picture = d.images.standard_resolution.url;
 							d.pictures = Object.keys(d.images)
 								.map(function(key) {
-									var image = d.images[key];
+									const image = d.images[key];
 									return formatImage(image);
 								})
 								.sort(function(a, b) {
@@ -111,8 +111,8 @@
 			// So besides JSONP we're stuck with proxy
 			xhr: function(p, qs) {
 
-				var method = p.method;
-				var proxy = method !== 'get';
+				const method = p.method;
+				const proxy = method !== 'get';
 
 				if (proxy) {
 
