@@ -19,12 +19,19 @@ This page is used for authentication as well as POST using the Iframe+form+hash 
 
 	<div class="loading"><span>&bull;</span><span>&bull;</span><span>&bull;</span></div>
 
-	<h2>Please close this window to continue.</h2>
+	<h2>Please close this window to carry on</h2>
 	<script>
 		window.onbeforeunload = function(){
 			document.getElementsByTagName('h2')[0].innerHTML="Redirecting, please wait";
 		}
 	</script>
+		<script>
+	const btn = document.getElementById('toggle-dark');
+	btn.addEventListener('click', () => {
+	document.documentElement.classList.toggle('dark-mode');
+	});
+	</script>
+
 	<script src="./src/hello.polyfill.js"></script>
 	<script src="./src/hello.js"></script>
 </body>
