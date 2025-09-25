@@ -1,0 +1,191 @@
+---
+title: JavaScript Coding Practice
+layout: default
+---
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JavaScript Coding Practice</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../assets/index.css">
+    <link rel="stylesheet" href="css/code-practice.css">
+    <!-- CodeMirror CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <!-- CodeMirror JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/closebrackets.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/addon/edit/matchbrackets.min.js"></script>
+</head>
+<body>
+    <div class="content">
+        <h1>JavaScript Coding Practice</h1>
+        
+        <p>Welcome to the interactive JavaScript coding practice! This tool allows you to write, run, and test JavaScript code directly in your browser.</p>
+        
+        <div class="challenge-selector">
+            <label for="challenge-select">Select a challenge:</label>
+            <select id="challenge-select" onchange="loadChallenge()">
+                <option value="hello-world">Hello World</option>
+                <option value="variables">Variables and Data Types</option>
+                <option value="functions">Functions</option>
+                <option value="arrays">Arrays and Loops</option>
+                <option value="objects">Objects</option>
+            </select>
+        </div>
+        
+        <div class="challenge-container">
+            <div class="challenge-title" id="challenge-title">Hello World</div>
+            <div class="challenge-description" id="challenge-description">
+                Write a JavaScript function that returns the string "Hello, World!".
+            </div>
+        </div>
+        
+        <div class="code-editor-container">
+            <div class="code-editor-header">
+                <span>JavaScript Code Editor</span>
+            </div>
+            <textarea id="code-editor" class="code-editor">// Write your code here
+function helloWorld() {
+    // Your code here
+    
+    return "";
+}
+
+// Test your function
+console.log(helloWorld());</textarea>
+            <div class="button-container">
+                <button class="reset-button" onclick="resetCode()">Reset Code</button>
+                <button class="run-button" onclick="runCode()">Run Code</button>
+            </div>
+            <div class="output-container" id="output">
+                <div>Output will appear here...</div>
+            </div>
+        </div>
+        
+        <div id="test-results"></div>
+    </div>
+    
+    <!-- Custom JS files -->    
+    <script src="js/code-editor.js"></script>
+    <script src="js/code-executor.js"></script>
+    <script>
+        // Challenge data
+        const challenges = {
+            'hello-world': {
+                title: 'Hello World',
+                description: 'Write a JavaScript function that returns the string "Hello, World!".',
+                initialCode: '// Write your code here\nfunction helloWorld() {\n    // Your code here\n    \n    return "";\n}\n\n// Test your function\nconsole.log(helloWorld());',
+                tests: [
+                    { name: 'Returns correct string', test: 'helloWorld() === "Hello, World!"' }
+                ]
+            },
+            'variables': {
+                title: 'Variables and Data Types',
+                description: 'Create variables of different types (string, number, boolean) and perform operations on them.',
+                initialCode: '// Create variables of different types\n// String variable named greeting\n// Number variable named age\n// Boolean variable named isStudent\n\n// Your code here\n\n\n// Calculate and return the length of the greeting string multiplied by the age\nfunction calculateValue() {\n    // Your code here\n    \n    return 0;\n}\n\n// Test your function\nconsole.log(calculateValue());',
+                tests: [
+                    { name: 'greeting is a string', test: 'typeof greeting === "string"' },
+                    { name: 'age is a number', test: 'typeof age === "number"' },
+                    { name: 'isStudent is a boolean', test: 'typeof isStudent === "boolean"' },
+                    { name: 'calculateValue returns correct result', test: 'calculateValue() === greeting.length * age' }
+                ]
+            },
+            'functions': {
+                title: 'Functions',
+                description: 'Create a function that takes two parameters and returns their sum. Then create another function that uses the first function to calculate the sum of three numbers.',
+                initialCode: '// Create a function named add that takes two parameters and returns their sum\n// Then create a function named addThree that takes three parameters and uses the add function to return their sum\n\n// Your code here\n\n\n// Test your functions\nconsole.log(add(5, 3));\nconsole.log(addThree(1, 2, 3));',
+                tests: [
+                    { name: 'add function works correctly', test: 'add(5, 3) === 8 && add(-1, 1) === 0' },
+                    { name: 'addThree function works correctly', test: 'addThree(1, 2, 3) === 6 && addThree(5, 10, 15) === 30' }
+                ]
+            },
+            'arrays': {
+                title: 'Arrays and Loops',
+                description: 'Create a function that takes an array of numbers and returns the sum of all even numbers in the array.',
+                initialCode: '// Create a function named sumEvenNumbers that takes an array of numbers\n// and returns the sum of all even numbers in the array\n\n// Your code here\n\n\n// Test your function\nconsole.log(sumEvenNumbers([1, 2, 3, 4, 5, 6])); // Should return 12 (2 + 4 + 6)\nconsole.log(sumEvenNumbers([1, 3, 5])); // Should return 0 (no even numbers)',
+                tests: [
+                    { name: 'Returns sum of even numbers', test: 'sumEvenNumbers([1, 2, 3, 4, 5, 6]) === 12' },
+                    { name: 'Returns 0 for array with no even numbers', test: 'sumEvenNumbers([1, 3, 5]) === 0' },
+                    { name: 'Works with negative even numbers', test: 'sumEvenNumbers([-2, 1, 3, 4]) === 2' }
+                ]
+            },
+            'objects': {
+                title: 'Objects',
+                description: 'Create a function that takes a person object with name and age properties and returns a greeting message.',
+                initialCode: '// Create a function named greetPerson that takes a person object with name and age properties\n// and returns a string in the format "Hello, [name]! You are [age] years old."\n\n// Your code here\n\n\n// Test your function\nconst person = { name: "John", age: 30 };\nconsole.log(greetPerson(person)); // Should return "Hello, John! You are 30 years old."',
+                tests: [
+                    { name: 'Returns correct greeting', test: 'greetPerson({ name: "John", age: 30 }) === "Hello, John! You are 30 years old."' },
+                    { name: 'Works with different values', test: 'greetPerson({ name: "Alice", age: 25 }) === "Hello, Alice! You are 25 years old."' }
+                ]
+            },
+            'palindrome': {
+                title: 'Check for Palindrome',
+                description: 'Write a function called isPalindrome that takes a string as an argument and returns true if it is a palindrome (reads the same forward and backward, ignoring case and non-alphanumeric characters), and false otherwise.',
+                initialCode: 'function isPalindrome(str) {\n  // Your code here\n}\n\n// Test your function\nconsole.log(isPalindrome("racecar")); // Should return true\nconsole.log(isPalindrome("hello")); // Should return false',
+                tests: [
+                    { name: 'isPalindrome("racecar") should return true', test: 'isPalindrome("racecar") === true' },
+                    { name: 'isPalindrome("A man, a plan, a canal: Panama") should return true', test: 'isPalindrome("A man, a plan, a canal: Panama") === true' },
+                    { name: 'isPalindrome("hello") should return false', test: 'isPalindrome("hello") === false' }
+                ]
+            },
+            'factorial': {
+                title: 'Calculate Factorial',
+                description: 'Write a function called factorial that takes a non-negative integer as an argument and returns its factorial (the product of all positive integers less than or equal to the number).',
+                initialCode: 'function factorial(n) {\n  // Your code here\n}\n\n// Test your function\nconsole.log(factorial(5)); // Should return 120',
+                tests: [
+                    { name: 'factorial(0) should return 1', test: 'factorial(0) === 1' },
+                    { name: 'factorial(5) should return 120', test: 'factorial(5) === 120' },
+                    { name: 'factorial(10) should return 3628800', test: 'factorial(10) === 3628800' }
+                ]
+            },
+            'fizzbuzz': {
+                title: 'FizzBuzz',
+                description: 'Write a function called fizzBuzz that takes a number as an argument and returns: "Fizz" if the number is divisible by 3, "Buzz" if divisible by 5, "FizzBuzz" if divisible by both 3 and 5, or the number itself as a string if none of these conditions are met.',
+                initialCode: 'function fizzBuzz(num) {\n  // Your code here\n}\n\n// Test your function\nconsole.log(fizzBuzz(3)); // Should return "Fizz"\nconsole.log(fizzBuzz(5)); // Should return "Buzz"\nconsole.log(fizzBuzz(15)); // Should return "FizzBuzz"\nconsole.log(fizzBuzz(7)); // Should return "7"',
+                tests: [
+                    { name: 'fizzBuzz(3) should return "Fizz"', test: 'fizzBuzz(3) === "Fizz"' },
+                    { name: 'fizzBuzz(5) should return "Buzz"', test: 'fizzBuzz(5) === "Buzz"' },
+                    { name: 'fizzBuzz(15) should return "FizzBuzz"', test: 'fizzBuzz(15) === "FizzBuzz"' },
+                    { name: 'fizzBuzz(7) should return "7"', test: 'fizzBuzz(7) === "7"' }
+                ]
+            }
+        };
+        
+        // Load a challenge
+        function loadChallenge() {
+            const challengeId = document.getElementById('challenge-select').value;
+            const challenge = challenges[challengeId];
+            
+            document.getElementById('challenge-title').textContent = challenge.title;
+            document.getElementById('challenge-description').textContent = challenge.description;
+            
+            // Update editor content
+            updateEditorContent(challenge.initialCode);
+            
+            document.getElementById('output').innerHTML = '<div>Output will appear here...</div>';
+            document.getElementById('test-results').innerHTML = '';
+        }
+        
+        // The runCode and runTests functions are now in code-executor.js
+        
+        // Reset the code to initial state
+        function resetCode() {
+            const challengeId = document.getElementById('challenge-select').value;
+            updateEditorContent(challenges[challengeId].initialCode);
+        }
+        
+        // Initialize when the page loads
+        window.onload = function() {
+            // Initialize the code editor
+            initCodeEditor();
+            
+            // Load the first challenge
+            loadChallenge();
+        };
+    </script>
+</body>
+</html>
