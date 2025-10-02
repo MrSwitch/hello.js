@@ -371,7 +371,7 @@ If a network string is provided: A consent window to authenticate with that netw
 					<td>state</td>
 					<td><i>string</i></td>
 					<td><q>ijustsetthis</q></td>
-					<td>Honours the state parameter, by storing it withing its own state object</td>
+					<td>Honours the state parameter, by storing it within its own state object</td>
 					<td><em>optional</em></td>
 					<td></td>
 				</tr>
@@ -777,7 +777,7 @@ hello('facebook').login({
 
 Scopes are tightly coupled with API requests. Unauthorized error response from an endpoint will occur if the scope privileges have not been granted. Use the [hello.api reference table](http://adodson.com/hello.js/#helloapi) to explore the API and scopes.
 
-It's considered good practice to limit the use of scopes. The more unnessary privileges you ask for the more likely users are going to drop off. If your app has many different sections, consider re-authorizing the user with different privileges as they go.
+It's considered good practice to limit the use of scopes. The more unnecessary privileges you ask for the more likely users are going to drop off. If your app has many different sections, consider re-authorizing the user with different privileges as they go.
 
 HelloJS modules standardises popular scope names. However you can always use proprietary scopes, e.g. to access google spreadsheets: `hello('google').login({scope: 'https://spreadsheets.google.com/feeds'});`
 
