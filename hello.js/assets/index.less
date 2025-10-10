@@ -1,0 +1,248 @@
+pre{
+	word-break: break-word;
+	word-break: break-all;
+	tab-size: 2;
+}
+
+header nav{
+	float: right;
+	a{
+		font-size:1.2em;
+		padding:5px;
+		background-color:#F5F7F5;
+		border:1px solid #CCC;
+		display: inline-block;
+		text-decoration: none;
+	}
+}
+#profile{
+	img{
+		border-radius:50%;
+		height: 100px;
+		display: block;
+		margin: auto;
+		background-color:#ddd;
+	}
+	div{
+		display:inline-block;
+		padding: 10px;
+	}
+	text-align:center;
+}
+
+button.zocial{
+	img{
+		height:24px;
+		vertical-align:middle;
+	}
+	span{
+		clear:left;
+	}
+}
+
+
+
+table.testtable{
+
+	pre + button{
+		position: relative;
+		margin: 0;
+	}
+
+	button{
+		cursor: pointer;
+	}
+
+	tbody td:first-child{
+		min-width:200px;
+	}
+	tbody td:nth-child(2){
+		min-width:100px;
+	}
+
+	td.method span{
+		vertical-align:top;
+		color:white;
+		text-transform:uppercase;
+		padding:7px 10px;
+		border-radius:3px;
+		font-size:0.7em;
+		min-width:60px;
+		text-align:center;
+	}
+
+	td.method{
+		span{
+			background-color:#4E5160;
+			color:white;
+
+			&.get,
+			&.post,
+			&.put,
+			&.delete{
+			}
+
+			&.get{
+				background-color:#0F6AB4;
+			}
+			&.post{
+				background-color:#10A54A;
+			}
+			&.put{
+				background-color:#c5862b;
+			}
+			&.delete{
+				background-color:red;
+			}
+
+		}
+	}
+
+	td,th{
+		padding: 2px;
+	}
+
+
+	tr.debug{
+		background-color:#E7F6EC;
+	}
+
+	.zocial.icon{
+		vertical-align: top;
+		color:black;
+		border-color: transparent;
+		border-radius:2px;
+		background-color:transparent;
+	}
+
+	pre *{
+		word-break:break-word;
+	}
+	th{
+		font-weight: normal;
+	}
+
+	a:hover{
+		cursor:pointer;
+		text-decoration: underline;
+	}
+}
+
+
+
+button{
+	&.run, &.working, &.response, &.pending{
+		color:black;
+		border: 1px solid #D2D2D2;
+		border-radius:10px;
+		background-color:#fff;
+	}
+	&.run:before{
+		content:"\025BA";		
+	}
+	&.working:before{
+		content:"\02589";
+	}
+
+	&.response{
+		color : white;
+		border-color:transparent;
+		&.error{
+			background-color:red;
+			&:after{
+				content: "\02716";
+			}
+		}
+		&.passed{
+			background-color:#10A54A;
+			&:after{
+				content: "\02714";
+			}
+		}
+		&.exception{
+			background-color:orange;
+			&:after{
+				content: "?";
+			}
+		}
+	}
+	&.pending{
+		background-color:lime;
+	}
+}
+
+
+
+.method{
+	&:before{
+		vertical-align:top;
+		color:white;
+		text-transform:uppercase;
+		padding:3px 0px;
+		border-radius:3px;
+		font-size:0.7em;
+		min-width:60px;
+		text-align:center;
+		display: inline-block;
+		margin:5px;
+	}
+	&.get:before{
+		content:"GET";
+		background-color: #0F6AB4;
+	}
+	&.post:before{
+		content:"POST";
+		background-color: #10A54A;
+	}
+	&.put:before{
+		content:"PUT";
+		background-color: #C5862B;
+	}
+	&.delete:before{
+		content:"DELETE";
+		background-color: red;
+	}
+}
+
+
+.tooltip{
+
+	@color:#444;
+	display: inline-block;
+	position:relative;
+
+	&:before{
+		background: @color;
+		border-radius: 50%;
+		color: #FFF;
+		content: '?';
+		display: inline-block;
+		line-height: 1;
+		text-align: center;
+		width: 1em;
+		vertical-align: top;
+	}
+
+	&>span{
+		background:white;
+		border:1px solid @color;
+		display:none;
+		padding:10px;
+		position: absolute;
+		min-width:200px;
+	}
+	&:hover{
+		& > span{
+			display: inline-block;
+		}
+	}
+}
+
+
+.adorn-shoutout {
+    background: url(https://user-images.githubusercontent.com/83319/31722733-de95bbde-b3ea-11e7-96bf-4f4e8f915588.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+    padding-left: 2em;
+    display: inline-block;
+}

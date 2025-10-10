@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>
+<script type="text/javascript" src="http://platform.linkedin.com/in.js">
+  api_key : exgsps7wo5o7
+  authorise : true
+</script>
+
+<script type="in/Login">
+Hello, <?js= firstName ?> <?js= lastName ?>.
+</script>
+
+<script>
+
+function callbackFunction(){
+	IN.API.Profile("me").result(function(r){console.log(r);});
+}
+
+</script>
+
+<button onclick="IN.User.authorize(callbackFunction, '')">login</button>
+
+</body>
+</html>

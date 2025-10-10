@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+</head>
+<body>
+<script>
+var a = window.postMessage; window.postMessage = function(s){console.log("OUT:"+s);a.apply(window,arguments);};
+window.addEventListener('message', function(e){
+	console.log(e);
+});
+
+function cb(){
+	console.log(arguments);
+}
+</script>
+<h1>LinkedIn SDK</h1>
+
+<p>SignIn</p>
+<button onclick="IN.User.authorize(cb, '')">Login</button>
+<div id="statusDiv"></div>
+
+<p>SignOut: of app and LinkedIn.com</p>
+<button onclick="IN.User.logout(cb,cb)">Logout</button>
+
+<p>Status Update</p>
+<button onclick="statusUpdate()">POST status</button>
+
+<script class="pre">
+function statusUpdate(){
+	IN.API.Raw("/people/~/current-status") // Update (PUT) the status
+		.method("PUT")
+		.body(JSON.stringify("Testing POST updates"))
+		.result( function(result) { console.log(result); document.getElementById("statusDiv").innerHTML = "Status updated"; } )
+		.error(  function(error)  { /* do nothing */ } );
+}
+</script>
+
+<script class="pre" src="http://platform.linkedin.com/in.js">
+  api_key : exgsps7wo5o7
+  authorise : true
+</script>
+
+
+<div id="statusDiv"></div>
+
+</body>
+</html>

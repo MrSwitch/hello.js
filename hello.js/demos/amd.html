@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<h1>hello.js via AMD</h1>
+<button id='google' onclick="hello.login('google');">google</button>
+<button id='facebook' onclick="hello.login('facebook');">facebook</button>
+<button id='windows' onclick="hello.login('windows');">windows</button>
+
+
+<p>Using an AMD script, such as this one...</p>
+<script class="pre" src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.11/require.min.js"></script>
+
+<p>Load hello.js asynchronously and get a reference to it.</p>
+<script class="pre">
+	require( ["../dist/hello.all", "./client_ids"], function(hello){
+
+		hello.on('auth.login', function(r){
+			// Get Profile
+			hello( r.network ).api( '/me' ).then( function(p){
+				document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
+			});
+		});
+
+		hello.init( 
+			CLIENT_IDS,
+			{
+				redirect_uri:'../redirect.html'
+			}
+		);
+	});
+</script>

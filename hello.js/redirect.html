@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<!--
+
+FACILITATES OAuth 1,1a,2 AUTHENTICATION
+
+To link to this page in HelloJS define the redirect_uri.
+
+This page is used for authentication as well as POST using the Iframe+form+hash communication hack.
+
+
+-->
+<html>
+<head>
+	<title>Hello, redirecting...</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+	<link href="./assets/redirect.css" rel="stylesheet" />
+</head>
+<body>
+
+	<div class="loading"><span>&bull;</span><span>&bull;</span><span>&bull;</span></div>
+
+	<h2>Please close this window to continue.</h2>
+	<script>
+		window.onbeforeunload = function(){
+			document.getElementsByTagName('h2')[0].innerHTML="Redirecting, please wait";
+		}
+	</script>
+	<script src="./src/hello.polyfill.js"></script>
+	<script src="./src/hello.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+{
+  "name": "hellojs",
+  "version": "1.20.0",
+  "description": "A clientside Javascript library for standardizing requests to OAuth2 web services (and OAuth1 - with a shim)",
+  "homepage": "https://adodson.com/hello.js",
+  "main": "dist/hello.all.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MrSwitch/hello.js.git"
+  },
+  "keywords": [
+    "oauth",
+    "oauth1.0",
+    "oauth2",
+    "api",
+    "facebooks",
+    "google",
+    "windows",
+    "linkedin",
+    "twitter"
+  ],
+  "files": [
+    "dist/",
+    "src/"
+  ],
+  "author": {
+    "name": "Andrew Dodson",
+    "email": "andrewjdodson@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MrSwitch/hello.js/issues"
+  },
+  "scripts": {
+    "build": "bash ./build.sh",
+    "lint": "eslint ./",
+    "test": "npm run lint && npm run test:build && npm run test:headless",
+    "test:build": "npx rollup tests/specs/index.js --file tests/specs/bundle.js --format iife",
+    "test:browserstack": "node_modules/.bin/browserstack-runner",
+    "test:browserstack:env": "source .env.sh && npm run test:browserstack",
+    "test:headless": "node ./tests/headless.mjs"
+  },
+  "devDependencies": {
+    "@semantic-release/changelog": "^6.0.2",
+    "@semantic-release/exec": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "browserstack-runner": "^0.9.4",
+    "eslint": "^8.32.0",
+    "eslint-config-5app": "^0.16.4",
+    "localhost": "^0.4.1",
+    "mocha": "^10.2.0",
+    "mocha-headless-chrome": "^4.0.0",
+    "rollup": "^3.10.1",
+    "semantic-release": "^20.1.0",
+    "sinon": "^15.0.1",
+    "uglify-js": "^3.17.4"
+  },
+  "release": {
+    "branches": [
+      "master"
+    ],
+    "plugins": [
+      "@semantic-release/commit-analyzer",
+      "@semantic-release/release-notes-generator",
+      "@semantic-release/changelog",
+      "@semantic-release/npm",
+      [
+        "@semantic-release/exec",
+        {
+          "prepareCmd": "npm run build"
+        }
+      ],
+      [
+        "@semantic-release/git",
+        {
+          "assets": [
+            "dist",
+            "package.json",
+            "CHANGELOG.md"
+          ],
+          "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        }
+      ],
+      "@semantic-release/github"
+    ]
+  }
+}

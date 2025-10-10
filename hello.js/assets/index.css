@@ -1,0 +1,201 @@
+pre {
+  word-break: break-word;
+  word-break: break-all;
+  tab-size: 2;
+}
+header nav {
+  float: right;
+}
+header nav a {
+  font-size: 1.2em;
+  padding: 5px;
+  background-color: #F5F7F5;
+  border: 1px solid #CCC;
+  display: inline-block;
+  text-decoration: none;
+}
+#profile {
+  text-align: center;
+}
+#profile img {
+  border-radius: 50%;
+  height: 100px;
+  display: block;
+  margin: auto;
+  background-color: #ddd;
+}
+#profile div {
+  display: inline-block;
+  padding: 10px;
+}
+button.zocial img {
+  height: 24px;
+  vertical-align: middle;
+}
+button.zocial span {
+  clear: left;
+}
+table.testtable pre + button {
+  position: relative;
+  margin: 0;
+}
+table.testtable button {
+  cursor: pointer;
+}
+table.testtable tbody td:first-child {
+  min-width: 200px;
+}
+table.testtable tbody td:nth-child(2) {
+  min-width: 100px;
+}
+table.testtable td.method span {
+  vertical-align: top;
+  color: white;
+  text-transform: uppercase;
+  padding: 7px 10px;
+  border-radius: 3px;
+  font-size: 0.7em;
+  min-width: 60px;
+  text-align: center;
+}
+table.testtable td.method span {
+  background-color: #4E5160;
+  color: white;
+}
+table.testtable td.method span.get {
+  background-color: #0F6AB4;
+}
+table.testtable td.method span.post {
+  background-color: #10A54A;
+}
+table.testtable td.method span.put {
+  background-color: #c5862b;
+}
+table.testtable td.method span.delete {
+  background-color: red;
+}
+table.testtable td,
+table.testtable th {
+  padding: 2px;
+}
+table.testtable tr.debug {
+  background-color: #E7F6EC;
+}
+table.testtable .zocial.icon {
+  vertical-align: top;
+  color: black;
+  border-color: transparent;
+  border-radius: 2px;
+  background-color: transparent;
+}
+table.testtable pre * {
+  word-break: break-word;
+}
+table.testtable th {
+  font-weight: normal;
+}
+table.testtable a:hover {
+  cursor: pointer;
+  text-decoration: underline;
+}
+button.run,
+button.working,
+button.response,
+button.pending {
+  color: black;
+  border: 1px solid #D2D2D2;
+  border-radius: 10px;
+  background-color: #fff;
+}
+button.run:before {
+  content: "\025BA";
+}
+button.working:before {
+  content: "\02589";
+}
+button.response {
+  color: white;
+  border-color: transparent;
+}
+button.response.error {
+  background-color: red;
+}
+button.response.error:after {
+  content: "\02716";
+}
+button.response.passed {
+  background-color: #10A54A;
+}
+button.response.passed:after {
+  content: "\02714";
+}
+button.response.exception {
+  background-color: orange;
+}
+button.response.exception:after {
+  content: "?";
+}
+button.pending {
+  background-color: lime;
+}
+.method:before {
+  vertical-align: top;
+  color: white;
+  text-transform: uppercase;
+  padding: 3px 0px;
+  border-radius: 3px;
+  font-size: 0.7em;
+  min-width: 60px;
+  text-align: center;
+  display: inline-block;
+  margin: 5px;
+}
+.method.get:before {
+  content: "GET";
+  background-color: #0F6AB4;
+}
+.method.post:before {
+  content: "POST";
+  background-color: #10A54A;
+}
+.method.put:before {
+  content: "PUT";
+  background-color: #C5862B;
+}
+.method.delete:before {
+  content: "DELETE";
+  background-color: red;
+}
+.tooltip {
+  display: inline-block;
+  position: relative;
+}
+.tooltip:before {
+  background: #444;
+  border-radius: 50%;
+  color: #FFF;
+  content: '?';
+  display: inline-block;
+  line-height: 1;
+  text-align: center;
+  width: 1em;
+  vertical-align: top;
+}
+.tooltip > span {
+  background: white;
+  border: 1px solid #444;
+  display: none;
+  padding: 10px;
+  position: absolute;
+  min-width: 200px;
+}
+.tooltip:hover > span {
+  display: inline-block;
+}
+.adorn-shoutout {
+  background: url(https://user-images.githubusercontent.com/83319/31722733-de95bbde-b3ea-11e7-96bf-4f4e8f915588.png);
+  background-repeat: no-repeat;
+  background-size: contain;
+  padding-left: 2em;
+  display: inline-block;
+}

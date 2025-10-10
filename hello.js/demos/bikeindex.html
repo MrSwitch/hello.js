@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<link rel="stylesheet" href="./helper/alert.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="client_ids.js"></script>
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/modules/bikeindex.js"></script>
+
+<title>hello( bikeindex )</title>
+<h1>hello( bikeindex )</h1>
+
+<script src="./helper/alert-https.js"></script>
+
+<button id='bikeindex' onclick="login('bikeindex');">bikeindex</button>
+<pre id="result">Signin to get a list of bikes</pre>
+<script class="pre">
+function login(network){
+
+	var bikeindex = hello(network);
+
+	bikeindex.login().then( function(){
+
+		// get user profile data
+		bikeindex.api( '/me', function(p){
+			document.getElementById( network ).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network +" as " + p.name;
+		});
+
+		// Get a bespoke endpoint from bikeindex
+		bikeindex.api( '/me/bikes', function(r){
+			document.getElementById('result').innerHTML = JSON.stringify(r,null,2);
+		});
+
+	}, console.error.bind(console));
+}
+</script>
+
+<script class="pre">
+hello.init({
+	// See https://bikeindex.org/
+	bikeindex : '406b92ba91fcf0a7695ed36e2e1fae83f9c5fdb2d3eeff6404d0ad47009f20fb'
+},{
+  	redirect_uri : '../redirect.html'
+});
+</script>

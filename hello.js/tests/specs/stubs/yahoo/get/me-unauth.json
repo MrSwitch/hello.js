@@ -1,0 +1,8 @@
+{
+  "error": {
+    "@uri": "http://yahoo.com",
+    "@lang": "en-US",
+    "description": "Please provide valid credentials. OAuth oauth_problem=\"OST_OAUTH_PARAMETER_ABSENT_ERROR\", realm=\"yahooapis.com\"",
+    "detail": "Please provide valid credentials. OAuth oauth_problem=\"OST_OAUTH_PARAMETER_ABSENT_ERROR\", realm=\"yahooapis.com\""
+  }
+}

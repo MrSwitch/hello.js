@@ -1,0 +1,76 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>DEMO</title>
+        <script src="../src/hello.polyfill.js"></script>
+        <script src="../src/hello.js"></script>
+        <script src="../src/modules/google.js"></script>
+        <script src="../src/modules/facebook.js"></script>
+        <script src="../src/modules/windows.js"></script>
+        <script src="./client_ids.js"></script>
+    </head>
+    <body>
+        <script>
+            hello.init(CLIENT_IDS, {redirect_uri:'../redirect.html'});
+
+            var sessionstart = function(auth) {
+                console.log('Welcome!  Fetching your information, from ' + auth.network);
+                console.log(auth);
+
+                var api_me_error = function() {
+                    console.log("Whoops!");
+                };
+                var api_me = function(response) {
+                    console.log("response api_me: ", response);
+                };
+                hello(auth.network).api("me").then(api_me, api_me_error);
+
+            };
+            var sessionend = function(auth) {
+                console.log("Session has ended. Auth: " + auth.network);
+            };
+            // events are called twice
+            hello.on("auth.logout", sessionend);
+            hello.on("auth.login", sessionstart);
+            hello.on("auth.failed", function() {
+                console.log("failed: ", arguments);
+            });
+            hello.on("auth", function() {
+                console.log("auth callback: ", arguments);
+            });
+            function entrar(service) {
+                hello(service).login({
+                    scope : "email"
+                });
+            };
+            function sair(service) {
+                hello(service).logout(function() {
+                    console.log("hello(\"" + service + "\").logout callback: You are signed in to " + service);
+                });
+            };
+        </script>
+        <h1> Bem vindo (!) à Microsoft </h1>
+        <button onclick="entrar('windows')">
+            Login na Microsoft
+        </button>
+        <button onclick="entrar('google')">
+            Login no Google
+        </button>
+        <button onclick="entrar('facebook')">
+            Login no Facebook
+        </button>
+        <p>
+            Sair
+        </p>
+        <button onclick="sair('windows')">
+            Logout na Microsoft
+        </button>
+        <button onclick="sair('google')">
+            Logout no Google
+        </button>
+        <button onclick="sair('facebook')">
+            Logout no Facebook
+        </button>
+    </body>
+</html>

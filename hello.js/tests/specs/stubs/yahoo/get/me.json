@@ -1,0 +1,101 @@
+{
+  "query": {
+    "count": 1,
+    "created": "2015-01-05T08:32:26Z",
+    "lang": "en-US",
+    "results": {
+      "profile": {
+        "guid": "UKGYDRAHEWONVO35KOOBBGQ4UU",
+        "aboutMe": "",
+        "ageCategory": "A",
+        "disclosures": [
+          {
+            "acceptance": "1",
+            "name": "bd",
+            "seen": "2015-01-05T00:30:57Z",
+            "version": "1"
+          },
+          {
+            "acceptance": "1",
+            "name": "ccard",
+            "seen": "2015-01-05T00:30:57Z",
+            "version": "1"
+          }
+        ],
+        "emails": {
+          "handle": "janemcgee35@yahoo.co.uk",
+          "id": "1",
+          "type": "HOME"
+        },
+        "familyName": "McGee",
+        "gender": "F",
+        "givenName": "Jane",
+        "image": {
+          "height": "192",
+          "imageUrl": "https://socialprofiles.zenfs.com/images/805efb9485e4878f21be4d9e9e5890ca_192.png",
+          "size": "192x192",
+          "width": "192"
+        },
+        "interests": [
+          {
+            "declaredInterests": "",
+            "interestCategory": "prfFavHobbies"
+          },
+          {
+            "declaredInterests": "",
+            "interestCategory": "prfFavMusic"
+          },
+          {
+            "declaredInterests": "",
+            "interestCategory": "prfFavMovies"
+          },
+          {
+            "declaredInterests": "",
+            "interestCategory": "prfFavFutureMovies"
+          },
+          {
+            "declaredInterests": "",
+            "interestCategory": "prfFavBooks"
+          },
+          {
+            "declaredInterests": "",
+            "interestCategory": "prfFavFutureBooks"
+          },
+          {
+            "declaredInterests": "",
+            "interestCategory": "prfFavQuotes"
+          },
+          {
+            "declaredInterests": "",
+            "interestCategory": "prfFavFoods"
+          },
+          {
+            "declaredInterests": "",
+            "interestCategory": "prfFavPlaces"
+          },
+          {
+            "declaredInterests": "",
+            "interestCategory": "prfFavFuturePlaces"
+          },
+          {
+            "declaredInterests": "",
+            "interestCategory": "prfFavAelse"
+          }
+        ],
+        "lang": "en-GB",
+        "location": "",
+        "memberSince": "2015-01-05T08:30:26Z",
+        "nickname": "Jane McGee",
+        "phones": {
+          "id": "10",
+          "number": "44-7001234567",
+          "type": "MOBILE"
+        },
+        "profileUrl": "http://profile.yahoo.com/UKGYDRAHEWONVO35KOOBBGQ4UU",
+        "timeZone": "Europe/London",
+        "isConnected": "true",
+        "bdRestricted": "true"
+      }
+    }
+  }
+}

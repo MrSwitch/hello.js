@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+<script src="../client_ids.js"></script>
+<script src="//js.live.net/v5.0/wl.debug.js"></script>
+<title>Windows Live demo</title>
+
+<p>Signin</p>
+<button onclick="WL.login({scope:'WL.signin'});">Signin</button>
+
+<p>Signout: of app and windows</p>
+<button onclick="WL.logout();">Signout</button>
+
+<button onclick="WL.api('me', function(){console.log(arguments)});">Get Me</button>
+<button onclick="WL.api('me/share', 'post', {message:'boom'}, function(){console.log(arguments)});">Share boom</button>
+
+
+<script>
+	WL.init({
+		client_id:WINDOWS_CLIENT_ID,
+		redirect_uri: window.location.href,
+		scope: "wl.signin", 
+		response_type: "token"
+	});
+</script>

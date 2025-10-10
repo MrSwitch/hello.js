@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<link rel="stylesheet" href="./helper/alert.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="client_ids.js"></script>
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/modules/amazon.js"></script>
+
+<title>hello( amazon )</title>
+<h1>hello( amazon )</h1>
+
+<script src="./helper/alert-https.js"></script>
+
+<blockquote>
+	<a href="https://login.amazon.com/documentation">Amazon Documentation</a>
+	<a href="https://sellercentral.amazon.com/gp/homepage.html">Register App</a>
+</blockquote>
+
+<button id='amazon' onclick="login('amazon');">amazon</button>
+<pre id="result">Signin to connect with Amazon</pre>
+<script class="pre">
+function login(network){
+
+	var amazon = hello(network);
+
+	amazon.login()
+	.then( function(){
+		// get user profile data
+		return amazon.api( '/me' );
+	})
+	.then( function(p){
+		document.getElementById( network ).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network +" as " + p.name;
+	})
+	.then( 
+		null,
+		console.error.bind(console)
+	);
+
+}
+</script>
+
+<script class="pre">
+hello.init({
+	// Register app https://sellercentral.amazon.com/gp/homepage.html
+	amazon : 'amzn1.application-oa2-client.5ac60070ee744ae7a241e10e48eae7ff'
+},{
+	redirect_uri : '../redirect.html'
+});
+</script>

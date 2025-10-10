@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/deprecated.js"></script>
+
+<title>hello( paypal )</title>
+<h1>hello( paypal )</h1>
+
+<button id='paypal' onclick="hello.login('paypal');">PayPal</button>
+<div id="result"></div>
+<script class="pre">
+hello.on('auth.login', function(r){
+	// Get Profile
+	var paypal = hello(r.network);
+	paypal.api('me').then(function(p) {
+		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
+	});
+	paypal.api('/user/repos').then(function(r){
+		for(var i=0;i<r.length;i++){
+			var li = document.createElement('li');
+			var a = document.createElement('a');
+			a.innerHTML = r[i].full_name;
+			a.href=r[i].html_url;
+			li.appendChild(a);
+			document.getElementById('result').appendChild(li);
+		}
+	}).then(null, function(e){
+		console.log(e);
+	});
+});
+
+hello.init({
+	paypal : {
+		id : '07cf80b1a9ad571263c80a5ab81b745f',
+		uri : {
+			auth : 'https://identity.x.com/xidentity/resources/authorize'
+		},
+		scope: {
+			basic: ''
+		}
+	}
+},	{redirect_uri:'../redirect.html'});
+</script>
