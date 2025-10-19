@@ -133,10 +133,10 @@
 					return res;
 				}
 			},
-			xhr: function(p) {
 
-				// Rely on the proxy for non-GET requests.
-				return (p.method !== 'get');
+			xhr: function(p) {
+				// Always use the proxy to ensure OAuth signing on all requests (GET and others)
+				return true;
 			}
 		}
 	});
@@ -191,32 +191,5 @@
 	function arrayToDataResponse(res) {
 		return Array.isArray(res) ? {data: res} : res;
 	}
-
-	/**
-	// The documentation says to define user in the request
-	// Although its not actually required.
-
-	var user_id;
-
-	function withUserId(callback){
-		if(user_id){
-			callback(user_id);
-		}
-		else{
-			hello.api('twitter:/me', function(o){
-				user_id = o.id;
-				callback(o.id);
-			});
-		}
-	}
-
-	function sign(url){
-		return function(p, callback){
-			withUserId(function(user_id){
-				callback(url+'?user_id='+user_id);
-			});
-		};
-	}
-	*/
 
 })(hello);
