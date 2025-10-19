@@ -13,13 +13,13 @@
 	};
 
 	// Augment the popup
-	var utilPopup = hello.utils.popup;
+	const utilPopup = hello.utils.popup;
 
 	// Replace popup
 	hello.utils.popup = function(url, redirectUri, options) {
 
 		// Run the standard
-		var popup = utilPopup.call(this, url, redirectUri, options);
+		const popup = utilPopup.call(this, url, redirectUri, options);
 
 		// Create a function for reopening the popup, and assigning events to the new popup object
 		// PhoneGap support
@@ -30,14 +30,14 @@
 
 				// Get the origin of the redirect URI
 
-				var a = hello.utils.url(redirectUri);
-				var redirectUriOrigin = a.origin || (a.protocol + '//' + a.hostname);
+				const a = hello.utils.url(redirectUri);
+				const redirectUriOrigin = a.origin || (a.protocol + '//' + a.hostname);
 
 				// Listen to changes in the InAppBrowser window
 
 				popup.addEventListener('loadstart', function(e) {
 
-					var url = e.url;
+					const url = e.url;
 
 					// Is this the path, as given by the redirectUri?
 					// Check the new URL agains the redirectUriOrigin.
@@ -49,12 +49,12 @@
 					}
 
 					// Split appart the URL
-					var a = hello.utils.url(url);
+					const a = hello.utils.url(url);
 
 					// We dont have window operations on the popup so lets create some
 					// The location can be augmented in to a location object like so...
 
-					var _popup = {
+					const _popup = {
 						location: {
 							// Change the location of the popup
 							assign: function(location) {

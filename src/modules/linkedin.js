@@ -41,7 +41,7 @@
 
 				// See: https://developer.linkedin.com/documents/api-requests-json
 				'me/share': function(p, callback) {
-					var data = {
+					const data = {
 						visibility: {
 							code: 'anyone'
 						}
@@ -192,7 +192,7 @@
 
 	function like(p, callback) {
 		p.headers['x-li-format'] = 'json';
-		var id = p.data.id;
+		const id = p.data.id;
 		p.data = (p.method !== 'delete').toString();
 		p.method = 'put';
 		callback('people/~/network/updates/key=' + id + '/is-liked');

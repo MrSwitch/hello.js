@@ -54,7 +54,7 @@
 
 	// Move the access token from the request body to the request header
 	function formatRequest(p, qs) {
-		var token = qs.access_token;
+		const token = qs.access_token;
 		delete qs.access_token;
 		p.headers.Authorization = 'Bearer ' + token;
 

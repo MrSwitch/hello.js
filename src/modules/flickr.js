@@ -35,7 +35,7 @@
 					if (o.id) {
 						if (o.realname) {
 							o.name = o.realname._content;
-							var m = o.name.split(' ');
+							const m = o.name.split(' ');
 							o.first_name = m.shift();
 							o.last_name = m.join(' ');
 						}
@@ -90,11 +90,11 @@
 	});
 
 	function getApiUrl(method, extraParams, skipNetwork) {
-		var url = ((skipNetwork) ? '' : 'flickr:') +
+		let url = ((skipNetwork) ? '' : 'flickr:') +
 			'?method=' + method +
 			'&api_key=' + hello.services.flickr.id +
 			'&format=json';
-		for (var param in extraParams) {
+		for (const param in extraParams) {
 			if (extraParams.hasOwnProperty(param)) {
 				url += '&' + param + '=' + extraParams[param];
 			}
@@ -107,7 +107,7 @@
 	// The method 'flickr.test.login' for each api call
 
 	function withUser(cb) {
-		var auth = hello.getAuthResponse('flickr');
+		const auth = hello.getAuthResponse('flickr');
 		cb(auth && auth.user_nsid ? auth.user_nsid : null);
 	}
 
@@ -125,7 +125,7 @@
 	}
 
 	function getBuddyIcon(profile, size) {
-		var url = 'https://www.flickr.com/images/buddyicon.gif';
+		let url = 'https://www.flickr.com/images/buddyicon.gif';
 		if (profile.nsid && profile.iconserver && profile.iconfarm) {
 			url = 'https://farm' + profile.iconfarm + '.staticflickr.com/' +
 				profile.iconserver + '/' +
@@ -156,13 +156,13 @@
 
 	function formatPhotos(o) {
 		if (o.photoset || o.photos) {
-			var set = ('photoset' in o) ? 'photoset' : 'photos';
+			const set = ('photoset' in o) ? 'photoset' : 'photos';
 			o = checkResponse(o, set);
 			paging(o);
 			o.data = o.photo;
 			delete o.photo;
-			for (var i = 0; i < o.data.length; i++) {
-				var photo = o.data[i];
+			for (let i = 0; i < o.data.length; i++) {
+				const photo = o.data[i];
 				photo.name = photo.title;
 				photo.picture = createPhotoUrl(photo.id, photo.farm, photo.server, photo.secret, '');
 				photo.pictures = createPictures(photo.id, photo.farm, photo.server, photo.secret);
@@ -177,8 +177,8 @@
 	// See: https://www.flickr.com/services/api/misc.urls.html
 	function createPictures(id, farm, server, secret) {
 
-		var NO_LIMIT = 2048;
-		var sizes = [
+		const NO_LIMIT = 2048;
+		const sizes = [
 			{id: 't', max: 100},
 			{id: 'm', max: 240},
 			{id: 'n', max: 320},
@@ -224,8 +224,8 @@
 			paging(o);
 			o.data = o.contact;
 			delete o.contact;
-			for (var i = 0; i < o.data.length; i++) {
-				var item = o.data[i];
+			for (let i = 0; i < o.data.length; i++) {
+				const item = o.data[i];
 				item.id = item.nsid;
 				item.name = item.realname || item.username;
 				item.thumbnail = getBuddyIcon(item, 'm');

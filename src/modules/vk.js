@@ -80,7 +80,7 @@
 	function formatError(o) {
 
 		if (o.error) {
-			var e = o.error;
+			const e = o.error;
 			o.error = {
 				code: e.error_code,
 				message: e.error_msg
