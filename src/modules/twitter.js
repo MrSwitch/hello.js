@@ -15,6 +15,16 @@
 			},
 
 			login: function(p) {
+				// Validate client configuration before proceeding
+				if (!hello.services.twitter || !hello.services.twitter.id) {
+					throw new Error('Twitter client ID not configured. Use hello.init({twitter: "your_client_id"})');
+				}
+
+				// Ensure client context is preserved for OAuth 1.0a vault creation
+				if (p.qs && p.qs.state) {
+					p.qs.state.client_id = hello.services.twitter.id;
+				}
+
 				// Reauthenticate
 				// https://dev.twitter.com/oauth/reference/get/oauth/authenticate
 				var prefix = '?force_login=true';
@@ -127,7 +137,17 @@
 					return res;
 				},
 
-				'default': function(res) {
+				'default': function(res, headers, req) {
+					// Add specific handling for vault creation errors
+					if (res && res.error && res.error.message && 
+						res.error.message.indexOf('system vault') !== -1 && 
+						res.error.message.indexOf('client CTX') !== -1) {
+						res.error = {
+							code: 'missing_client_context',
+							message: 'Twitter authentication failed: Missing client context. Ensure Twitter client ID is properly configured via hello.init()'
+						};
+					}
+
 					res = arrayToDataResponse(res);
 					paging(res);
 					return res;
