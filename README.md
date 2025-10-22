@@ -1010,3 +1010,11 @@ python -m SimpleHTTPServer
 # http://localhost:8000/tests/specs/index.html
 ```
 
+### Handling Authentication Errors
+
+If authentication fails or an OAuth response is invalid, you can listen for the `auth.error` event.
+
+```js
+hello.on('auth.error', function(error) {
+  console.error('Authentication failed:', error.error.message);
+});
