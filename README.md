@@ -882,14 +882,76 @@ The first parameter of a failed request to the *errorHandler* may be either *boo
 ## Extending the services
 Services are added to HelloJS as "modules" for more information about creating your own modules and examples, go to [Modules](./modules)
 
-## OAuth Proxy
+### auth.error Event
 
-<div data-bind="template: { name: 'tests-template', data: { test: $root, filter: 'oauth' } }">
-A list of the service providers OAuth* mechanisms is available at <a href="http://adodson.com/hello.js/#oauth-proxy">Provider OAuth Mechanisms</a>
-</div>
+The `auth.error` event is triggered whenever an authentication attempt fails. This includes scenarios such as invalid or expired tokens, user-initiated cancellations, network failures, or OAuth provider misconfigurations. By handling this event, you can provide meaningful feedback to users and implement fallback behaviors, improving the overall authentication experience.
 
-For providers which support only OAuth1 or OAuth2 with Explicit Grant, the authentication flow needs to be signed with a secret key that may not be exposed in the browser. HelloJS gets round this problem by the use of an intermediary webservice defined by `oauth_proxy`. This service looks up the secret from a database and performs the handshake required to provision an `access_token`. In the case of OAuth1, the webservice also signs subsequent API requests.
+#### Usage
 
+Subscribe to the `auth.error` event to capture authentication failures and respond appropriately:
+```javascript
+hello.on('auth.error', function(auth) {
+  console.error('Authentication failed:', auth);
+  
+  // Display user-friendly error message
+  if (auth.error.code === 'access_denied') {
+    showNotification('You declined the authorization request.');
+  } else if (auth.error.code === 'invalid_token') {
+    showNotification('Your session has expired. Please log in again.');
+  } else {
+    showNotification('Authentication failed. Please try again.');
+  }
+});
+
+// Attempt login
+hello('google').login();
+```
+
+The event handler receives an `auth` object containing error details:
+```javascript
+{
+  network: 'google',           // The network that failed
+  error: {
+    code: 'access_denied',     // Error code
+    message: 'User denied access' // Human-readable message
+  }
+}
+```
+
+#### Common Error Scenarios
+
+| Error Code | Cause | Solution |
+|------------|-------|----------|
+| `access_denied` | User cancelled the authorization prompt | Inform the user and provide option to retry |
+| `invalid_token` | Access token expired or was revoked | Clear stored credentials and prompt re-authentication |
+| `invalid_request` | Misconfigured OAuth parameters (client ID, redirect URI) | Verify your hello.js initialization settings |
+| `server_error` | OAuth provider experiencing issues | Implement retry logic with exponential backoff |
+| `network_error` | Request failed due to connectivity issues | Check network connection and retry |
+
+#### Best Practices
+
+**Improve User Experience**: Authentication failures can be frustrating. The `auth.error` event allows you to transform technical errors into clear, actionable messages that guide users toward resolution.
+
+**Handle Edge Cases Gracefully**: Different OAuth providers return varying error formats. Always include a fallback handler for unexpected error codes to prevent silent failures.
+
+**Security Considerations**: Log authentication errors for debugging, but avoid exposing sensitive details (like full OAuth responses) to end users. Consider tracking repeated failures as they may indicate configuration issues or potential security threats.
+
+**Recovery Strategies**: Implement automatic token refresh for `invalid_token` errors when refresh tokens are available, and provide clear "Try Again" actions for transient failures like network errors.
+```javascript
+// Example: Automatic retry with user feedback
+let retryCount = 0;
+
+hello.on('auth.error', function(auth) {
+  if (auth.error.code === 'network_error' && retryCount < 3) {
+    retryCount++;
+    setTimeout(() => hello(auth.network).login(), 2000);
+    showNotification(`Connection failed. Retrying (${retryCount}/3)...`);
+  } else {
+    retryCount = 0;
+    showNotification('Unable to authenticate. Please try again later.');
+  }
+});
+```
 
 **Quick start:** Register your Client ID and secret at the OAuth Proxy service, [Register your App](https://auth-server.herokuapp.com/)
 
