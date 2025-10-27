@@ -75,10 +75,14 @@ layout: default
 	<script type="text/javascript">
 
 	// Initiate the library
-	hello.init(CLIENT_IDS_ALL,{
-		redirect_uri: '../redirect.html',
-		oauth_proxy: OAUTH_PROXY_URL
-	});
+	hello.init(CLIENT_IDS_ALL, {
+    redirect_uri: '../redirect.html',
+    oauth_proxy: OAUTH_PROXY_URL,
+    scope: {
+        facebook: 'email,user_photos'
+    }
+});
+
 
 	getText('../assets/test_network.html', function(response){
 		document.getElementById('tests-template').text = response;
