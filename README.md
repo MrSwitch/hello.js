@@ -765,6 +765,31 @@ paginationExample('me/friends');
 ```
 
 
+### Quickstart / Usage
+```markdown
+## Quickstart
+
+Load hello.js in the browser or with bundlers.
+
+**Browser (CDN example)**
+
+```html
+<script src="https://unpkg.com/hellojs/dist/hello.min.js"></script>
+<script>
+  // initialize with provider id and client id
+  hello.init({
+    google: 'YOUR_GOOGLE_CLIENT_ID'
+  }, {redirect_uri: 'redirect.html'});
+
+  hello('google').login().then(function() {
+    return hello('google').api('me');
+  }).then(function(r) {
+    console.log(r);
+  });
+
+</script>
+
+
 ## Scope
 The scope property defines which privileges an app requires from a network provider. The scope can be defined globally for a session through `hello.init(object, {scope: 'string'})`, or at the point of triggering the auth flow e.g. `hello('network').login({scope: 'string'});`
 An app can specify multiple scopes, separated by commas - as in the example below.
