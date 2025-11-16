@@ -21,7 +21,7 @@ function login(network) {
 		// get user profile data
 		return facebook.api('me');
 	}).then(function(p) {
-		document.getElementById('profile').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network +" as " + p.name;
+		document.getElementById('profile').innerHTML = "<img src='"+ p.picture + "' width=24/>Connected to "+ network +" as " + p.name;
 	});
 }
 </script>

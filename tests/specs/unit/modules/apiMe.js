@@ -9,7 +9,7 @@ describe('hello.api(\'/me\')', function() {
 			network: 'bikeindex',
 			expect: {
 				id: '13674',
-				thumbnail: undefined
+				picture: undefined
 			},
 			errorExpect: {
 				code: 'access_denied',
@@ -21,7 +21,7 @@ describe('hello.api(\'/me\')', function() {
 			expect: {
 				id: '197571718',
 				name: 'Jane McGee',
-				thumbnail: 'https://app.box.com/api/avatar/large/197571718'
+				picture: 'https://app.box.com/api/avatar/large/197571718'
 			},
 			errorExpect: false
 		},
@@ -30,7 +30,7 @@ describe('hello.api(\'/me\')', function() {
 			expect: {
 				id: 374434467,
 				name: 'Jane McGee',
-				thumbnail: undefined
+				picture: undefined
 			},
 			errorExpect: {
 				code: 'server_error',
@@ -42,7 +42,7 @@ describe('hello.api(\'/me\')', function() {
 			expect: {
 				id: '100008806508341',
 				name: 'Jane McGee',
-				thumbnail: 'https://graph.facebook.com/100008806508341/picture'
+				picture: 'https://graph.facebook.com/100008806508341/picture'
 			},
 			errorExpect: {
 				code: 190,
@@ -54,7 +54,7 @@ describe('hello.api(\'/me\')', function() {
 			expect: {
 				id: '34790912@N05',
 				name: 'Jane McGee',
-				thumbnail: 'https://farm4.staticflickr.com/3729/buddyicons/34790912@N05_l.jpg'
+				picture: 'https://farm4.staticflickr.com/3729/buddyicons/34790912@N05_l.jpg'
 			},
 			errorExpect: {
 				code: 'invalid_request',
@@ -78,7 +78,7 @@ describe('hello.api(\'/me\')', function() {
 			expect: {
 				id: 10398423,
 				name: 'janemcgee35',
-				thumbnail: 'https://avatars.githubusercontent.com/u/10398423?v=3'
+				picture: 'https://avatars.githubusercontent.com/u/10398423?v=3'
 			},
 			errorExpect: false
 		},
@@ -87,7 +87,7 @@ describe('hello.api(\'/me\')', function() {
 			expect: {
 				id: '115111284799080900590',
 				name: 'Jane McGee',
-				thumbnail: 'https://lh3.googleusercontent.com/-NWCgcgRDieE/AAAAAAAAAAI/AAAAAAAAABc/DCi-M8IuzMo/photo.jpg?sz=50'
+				picture: 'https://lh3.googleusercontent.com/-NWCgcgRDieE/AAAAAAAAAAI/AAAAAAAAABc/DCi-M8IuzMo/photo.jpg?sz=50'
 			},
 			errorExpect: {
 				code: 403,
@@ -111,7 +111,7 @@ describe('hello.api(\'/me\')', function() {
 			expect: {
 				id: 'janemcgee35@join.me',
 				name: 'Jane McGee',
-				thumbnail: undefined
+				picture: undefined
 			},
 			errorExpect: false
 		},
@@ -132,7 +132,7 @@ describe('hello.api(\'/me\')', function() {
 			expect: {
 				id: 131420710,
 				name: 'janemcgee35',
-				thumbnail: 'https://i1.sndcdn.com/avatars-000123511300-upb183-large.jpg'
+				picture: 'https://i1.sndcdn.com/avatars-000123511300-upb183-large.jpg'
 			},
 			errorExpect: false
 		},
@@ -153,7 +153,7 @@ describe('hello.api(\'/me\')', function() {
 			expect: {
 				id: 434460,
 				name: 'Юрий Опарин',
-				thumbnail: 'http://cs304605.vk.me/u434460/d_1acca7c0.jpg'
+				picture: 'http://cs304605.vk.me/u434460/d_1acca7c0.jpg'
 			},
 			errorExpect: {
 				code: 10,
@@ -165,7 +165,7 @@ describe('hello.api(\'/me\')', function() {
 			expect: {
 				id: '939f37452466502a',
 				name: 'Jane McGee',
-				thumbnail: 'https://apis.live.net/v5.0/939f37452466502a/picture?access_token=token'
+				picture: 'https://apis.live.net/v5.0/939f37452466502a/picture?access_token=token'
 			},
 			errorExpect: {
 				code: 'request_token_invalid',
@@ -196,7 +196,7 @@ describe('hello.api(\'/me\')', function() {
 					.then(function(me) {
 						expect(me.id).to.be(test.expect.id);
 						expect(me.name).to.be(test.expect.name);
-						expect(me.thumbnail).to.be(test.expect.thumbnail);
+						expect(me.picture).to.be(test.expect.picture);
 						done();
 					})
 					.then(null, done);
