@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Hello.js Instagram Test</title>
+
+    <!-- Load the built hello.js bundle -->
+    <script src="../dist/hello.all.js"></script>
+
+    <!-- Load your updated instagram provider -->
+    <script src="../src/modules/instagram.js"></script>
+
+    <script>
+        // Initialize Hello.js with Instagram client_id
+        hello.init({
+            instagram: "123456789012345"
+        }, {
+            redirect_uri: "./redirect.html"
+        });
+
+        function login() {
+            console.log("→ login() called");
+            hello('instagram').login({ scope: 'basic' }).then(
+                () => console.log("✔ Logged in"),
+                (e) => console.error("✘ Login error", e)
+            );
+        }
+
+        function logout() {
+            console.log("→ logout() called");
+            hello('instagram').logout({ force: true }).then(
+                () => console.log("✔ Logged out (local session cleared)"),
+                (e) => console.error("✘ Logout error", e)
+            );
+        }
+    </script>
+
+</head>
+<body>
+
+    <button onclick="login()">Login Instagram</button>
+    <button onclick="logout()">Logout Instagram</button>
+
+</body>
+</html>
+
