@@ -14,6 +14,8 @@
 				auth: 'https://accounts.google.com/o/oauth2/v2/auth',
 				grant: 'https://www.googleapis.com/oauth2/v4/token'
 			},
+			redirect_uri: window.location.origin + '/redirect.html',
+
 
 			// Authorization scopes
 			scope: {
@@ -30,6 +32,7 @@
 				create_event: '',
 				offline_access: ''
 			},
+			
 
 			scope_delim: ' ',
 
@@ -49,6 +52,7 @@
 				if (p.options.force) {
 					p.qs.prompt = 'consent';
 				}
+				
 			},
 
 			// API base URI
@@ -212,6 +216,19 @@
 
 		return o;
 	}
+			function generateCodeVerifier() {
+			const array = new Uint8Array(32);
+			window.crypto.getRandomValues(array);
+			return btoa(String.fromCharCode.apply(null, array))
+				.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+		}
+
+		async function generateCodeChallenge(verifier) {
+			const data = new TextEncoder().encode(verifier);
+			const digest = await crypto.subtle.digest("SHA-256", data);
+			return btoa(String.fromCharCode.apply(null, new Uint8Array(digest)))
+				.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+		}
 
 	function formatImage(image) {
 		return {
