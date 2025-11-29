@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Hello.js Google Test</title>
+  <script src="../dist/hello.all.js"></script> <!-- or hello.js depending on repo -->
+  <script>
+    // TODO: replace with your client ID from Google
+    hello.init({
+      google: '240865364414-tkj04qpph6pmmdbqhmvdo404obhro6j9.apps.googleusercontent.com'
+    }, {
+      redirect_uri: 'http://localhost:5500/redirect.html'
+
+    });
+
+    function login() {
+      console.log('redirect_uri used by hello:', hello.settings.redirect_uri);
+      hello('google').login({ scope: 'email profile' })
+        .then(r => {
+          console.log('LOGIN OK', r);
+          document.getElementById('status').textContent = 'Login success';
+        })
+        .catch(e => {
+          console.error('LOGIN ERROR', e);
+          document.getElementById('status').textContent = 'Error: ' + JSON.stringify(e);
+        });
+    }
+  </script>
+</head>
+<body>
+  <h1>Hello.js Google Login Test</h1>
+  <button onclick="login()">Login with Google</button>
+  <pre id="status"></pre>
+</body>
+</html>
