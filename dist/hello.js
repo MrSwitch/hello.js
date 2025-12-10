@@ -1430,7 +1430,7 @@ hello.utils.extend(hello.utils, {
 		//  - This is bad if the value contains break points which are escaped
 		//  - Hence the url must be encoded twice as it contains breakpoints.
 		if (navigator.userAgent.indexOf('Safari') !== -1 && navigator.userAgent.indexOf('Chrome') === -1) {
-			url = redirectUri + '#oauth_redirect=' + encodeURIComponent(encodeURIComponent(url));
+			url = redirectUri + '#oauth_redirect=' + encodeURIComponent(url);
 		}
 
 		var popup = window.open(
