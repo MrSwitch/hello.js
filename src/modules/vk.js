@@ -40,6 +40,7 @@
 			get: {
 				me: function(p, callback) {
 					p.query.fields = 'id,first_name,last_name,photo_max';
+								p.query.v = '5.131';
 					callback('users.get');
 				}
 			},
