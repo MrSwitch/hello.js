@@ -891,19 +891,29 @@ A list of the service providers OAuth* mechanisms is available at <a href="http:
 For providers which support only OAuth1 or OAuth2 with Explicit Grant, the authentication flow needs to be signed with a secret key that may not be exposed in the browser. HelloJS gets round this problem by the use of an intermediary webservice defined by `oauth_proxy`. This service looks up the secret from a database and performs the handshake required to provision an `access_token`. In the case of OAuth1, the webservice also signs subsequent API requests.
 
 
-**Quick start:** Register your Client ID and secret at the OAuth Proxy service, [Register your App](https://auth-server.herokuapp.com/)
+**Quick start:**  
+The previously used OAuth Proxy service hosted on Heroku is no longer available,
+as Heroku free hosting has been discontinued.
 
+To get started, you can run an OAuth proxy locally using
+[node-oauth-shim](https://npmjs.org/package/oauth-shim).
 
-The default proxy service is [https://auth-server.herokuapp.com/](https://auth-server.herokuapp.com/). Developers may add their own network registration Client ID and secret to this service in order to get up and running.
-Alternatively recreate this service with [node-oauth-shim](https://npmjs.org/package/oauth-shim). Then override the default `oauth_proxy` in HelloJS client script in `hello.init`, like so...
+Once running, override the default `oauth_proxy` in the HelloJS client script
+using `hello.init`, like so:
+
 
 ```javascript
 hello.init(
 	CLIENT_IDS,
 	{
-		oauth_proxy: 'https://auth-server.herokuapp.com/proxy'
+		oauth_proxy: 'http://localhost:5500/proxy'
 	}
 )
+⚠️ Note:
+Make sure the OAuth proxy is running locally before initializing HelloJS.
+You can customize the proxy URL if hosting the service elsewhere.
+
+
 ```
 
 ### Enforce Explicit Grant
