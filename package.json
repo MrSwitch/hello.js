@@ -49,7 +49,7 @@
     "eslint-config-5app": "^0.16.4",
     "localhost": "^0.4.1",
     "mocha": "^10.2.0",
-    "mocha-headless-chrome": "^4.0.0",
+    "puppeteer": "4.0",
     "rollup": "^3.10.1",
     "semantic-release": "^20.1.0",
     "sinon": "^15.0.1",
