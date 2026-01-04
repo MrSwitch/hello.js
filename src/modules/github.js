@@ -71,7 +71,7 @@
 	});
 
 	function formatError(o, headers) {
-		var code = headers ? headers.statusCode : (o && 'meta' in o && 'status' in o.meta && o.meta.status);
+		const code = headers ? headers.statusCode : (o && 'meta' in o && 'status' in o.meta && o.meta.status);
 		if ((code === 401 || code === 403)) {
 			o.error = {
 				code: 'access_denied',
@@ -90,7 +90,7 @@
 
 	function paging(res, headers, req) {
 		if (res.data && res.data.length && headers && headers.Link) {
-			var next = headers.Link.match(/<(.*?)>;\s*rel=\"next\"/);
+			const next = headers.Link.match(/<(.*?)>;\s*rel=\"next\"/);
 			if (next) {
 				res.paging = {
 					next: next[1]

@@ -105,7 +105,7 @@
 
 	function paging(res, headers, req) {
 		if (res.data && res.data.length && headers && headers.Link) {
-			var next = headers.Link.match(/<(.*?)>;\s*rel=\"next\"/);
+			const next = headers.Link.match(/<(.*?)>;\s*rel=\"next\"/);
 			if (next) {
 				res.paging = {
 					next: next[1]

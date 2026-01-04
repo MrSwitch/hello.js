@@ -33,7 +33,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 		};
 
 		// Swap the storage method
-		var _cache = {};
+		let _cache = {};
 		chrome.storage.local.get('hello', function(r) {
 			// Update the cache
 			_cache = r.hello || {};
@@ -70,7 +70,7 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 		function _open(url, interactive) {
 
 			// Launch
-			var ref = {
+			const ref = {
 				closed: false
 			};
 
@@ -87,11 +87,11 @@ if (typeof chrome === 'object' && typeof chrome.identity === 'object' && chrome.
 				}
 
 				// Split appart the URL
-				var a = hello.utils.url(responseUrl);
+				const a = hello.utils.url(responseUrl);
 
 				// The location can be augmented in to a location object like so...
 				// We dont have window operations on the popup so lets create some
-				var _popup = {
+				const _popup = {
 					location: {
 
 						// Change the location of the popup

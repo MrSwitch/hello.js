@@ -79,7 +79,7 @@
 			o.id = o.guid;
 			o.last_name = o.familyName;
 			o.first_name = o.givenName || o.nickname;
-			var a = [];
+			const a = [];
 			if (o.first_name) {
 				a.push(o.first_name);
 			}
@@ -99,8 +99,8 @@
 	function formatFriends(o, headers, request) {
 		formatError(o);
 		paging(o, headers, request);
-		var contact;
-		var field;
+		let contact;
+		let field;
 		if (o.query && o.query.results && o.query.results.contact) {
 			o.data = o.query.results.contact;
 			delete o.query;

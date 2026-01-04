@@ -10,7 +10,7 @@
  * @license MIT: You are free to use and modify this code for any use, on the condition that this copyright notice remains.
  */
 
-var hello = function(name) {
+const hello = function(name) {
 	return hello.use(name);
 };
 
@@ -26,7 +26,7 @@ hello.utils = {
 				Array.prototype.push.apply(r, a);
 			}
 			else if (r && (r instanceof Object || typeof r === 'object') && a && (a instanceof Object || typeof a === 'object') && r !== a) {
-				for (var x in a) {
+				for (const x in a) {
 					// Prevent prototype pollution
 					if (dangerousKeys.includes(x)) {
 						continue;
@@ -115,7 +115,7 @@ hello.utils.extend(hello, {
 	use: function(service) {
 
 		// Create self, which inherits from its parent
-		var self = Object.create(this);
+		const self = Object.create(this);
 
 		// Inherit the prototype from its parent
 		self.settings = Object.create(this.settings);
@@ -138,7 +138,7 @@ hello.utils.extend(hello, {
 	// @param number timeout, timeout in seconds
 	init: function(services, options) {
 
-		var utils = this.utils;
+		const utils = this.utils;
 
 		if (!services) {
 			return this.services;
@@ -146,7 +146,7 @@ hello.utils.extend(hello, {
 
 		// Define provider credentials
 		// Reformat the ID field
-		for (var x in services) {if (services.hasOwnProperty(x)) {
+		for (const x in services) {if (services.hasOwnProperty(x)) {
 			if (typeof (services[x]) !== 'object') {
 				services[x] = {id: services[x]};
 			}
@@ -176,22 +176,22 @@ hello.utils.extend(hello, {
 	login: function() {
 
 		// Create an object which inherits its parent as the prototype and constructs a new event chain.
-		var _this = this;
-		var utils = _this.utils;
-		var error = utils.error;
-		var promise = utils.Promise();
+		const _this = this;
+		const utils = _this.utils;
+		const error = utils.error;
+		const promise = utils.Promise();
 
 		// Get parameters
-		var p = utils.args({network: 's', options: 'o', callback: 'f'}, arguments);
+		const p = utils.args({network: 's', options: 'o', callback: 'f'}, arguments);
 
 		// Local vars
-		var url;
+		let url;
 
 		// Get all the custom options and store to be appended to the querystring
-		var qs = utils.diffKey(p.options, _this.settings);
+		const qs = utils.diffKey(p.options, _this.settings);
 
 		// Merge/override options with app defaults
-		var opts = p.options = utils.merge(_this.settings, p.options || {});
+		const opts = p.options = utils.merge(_this.settings, p.options || {});
 
 		// Merge/override options with app defaults
 		opts.popup = utils.merge(_this.settings.popup, p.options.popup || {});
@@ -216,10 +216,10 @@ hello.utils.extend(hello, {
 			return promise.reject(error('invalid_network', 'The provided network was not recognized'));
 		}
 
-		var provider = _this.services[p.network];
+		const provider = _this.services[p.network];
 
 		// Create a global listener to capture events triggered out of scope
-		var callbackId = utils.globalEvent(function(obj) {
+		const callbackId = utils.globalEvent(function(obj) {
 
 			// The responseHandler returns a string, lets save this locally
 			if (obj) {
@@ -251,10 +251,10 @@ hello.utils.extend(hello, {
 			}
 		});
 
-		var redirectUri = utils.url(opts.redirect_uri).href;
+		const redirectUri = utils.url(opts.redirect_uri).href;
 
 		// May be a space-delimited list of multiple, complementary types
-		var responseType = provider.oauth.response_type || opts.response_type;
+		let responseType = provider.oauth.response_type || opts.response_type;
 
 		// Fallback to token if the module hasn't defined a grant url
 		if (/\bcode\b/.test(responseType) && !provider.oauth.grant) {
@@ -277,18 +277,18 @@ hello.utils.extend(hello, {
 		});
 
 		// Get current session for merging scopes, and for quick auth response
-		var session = utils.store(p.network);
+		const session = utils.store(p.network);
 
 		// Scopes (authentication permisions)
 		// Ensure this is a string - IE has a problem moving Arrays between windows
 		// Append the setup scope
-		var SCOPE_SPLIT = /[,\s]+/;
+		const SCOPE_SPLIT = /[,\s]+/;
 
 		// Include default scope settings (cloned).
-		var scope = _this.settings.scope ? [_this.settings.scope.toString()] : [];
+		let scope = _this.settings.scope ? [_this.settings.scope.toString()] : [];
 
 		// Extend the providers scope list with the default
-		var scopeMap = utils.merge(_this.settings.scope_map, provider.scope || {});
+		const scopeMap = utils.merge(_this.settings.scope_map, provider.scope || {});
 
 		// Add user defined scopes...
 		if (opts.scope) {
@@ -332,7 +332,7 @@ hello.utils.extend(hello, {
 
 			if (session && 'access_token' in session && session.access_token && 'expires' in session && session.expires > ((new Date()).getTime() / 1e3)) {
 				// What is different about the scopes in the session vs the scopes in the new login?
-				var diff = utils.diff((session.scope || '').split(SCOPE_SPLIT), (p.qs.state.scope || '').split(SCOPE_SPLIT));
+				const diff = utils.diff((session.scope || '').split(SCOPE_SPLIT), (p.qs.state.scope || '').split(SCOPE_SPLIT));
 				if (diff.length === 0) {
 
 					// OK trigger the callback
@@ -416,14 +416,14 @@ hello.utils.extend(hello, {
 		// Triggering popup?
 		else if (opts.display === 'popup') {
 
-			var popup = utils.popup(url, redirectUri, opts.popup);
+			const popup = utils.popup(url, redirectUri, opts.popup);
 
-			var timer = setInterval(function() {
+			const timer = setInterval(function() {
 				if (!popup || popup.closed) {
 					clearInterval(timer);
 					if (!promise.state) {
 
-						var response = error('cancelled', 'Login has been cancelled');
+						let response = error('cancelled', 'Login has been cancelled');
 
 						if (!popup) {
 							response = error('blocked', 'Popup was blocked');
@@ -453,14 +453,14 @@ hello.utils.extend(hello, {
 	// @param function callback
 	logout: function() {
 
-		var _this = this;
-		var utils = _this.utils;
-		var error = utils.error;
+		const _this = this;
+		const utils = _this.utils;
+		const error = utils.error;
 
 		// Create a new promise
-		var promise = utils.Promise();
+		const promise = utils.Promise();
 
-		var p = utils.args({name: 's', options: 'o', callback: 'f'}, arguments);
+		const p = utils.args({name: 's', options: 'o', callback: 'f'}, arguments);
 
 		p.options = p.options || {};
 
@@ -486,7 +486,7 @@ hello.utils.extend(hello, {
 		else if (p.name && p.authResponse) {
 
 			// Define the callback
-			var callback = function(opts) {
+			const callback = function(opts) {
 
 				// Remove from the store
 				utils.store(p.name, null);
@@ -496,9 +496,9 @@ hello.utils.extend(hello, {
 			};
 
 			// Run an async operation to remove the users session
-			var _opts = {};
+			const _opts = {};
 			if (p.options.force) {
-				var logout = _this.services[p.name].logout;
+				let logout = _this.services[p.name].logout;
 				if (logout) {
 					// Convert logout to URL string,
 					// If no string is returned, then this function will handle the logout async style
@@ -571,9 +571,9 @@ hello.utils.extend(hello.utils, {
 			formatFunction = formatFunction || encodeURIComponent;
 
 			// Override the items in the URL which already exist
-			for (var x in params) {
-				var str = '([\\?\\&])' + x + '=[^\\&]*';
-				var reg = new RegExp(str);
+			for (const x in params) {
+				const str = '([\\?\\&])' + x + '=[^\\&]*';
+				const reg = new RegExp(str);
 				if (url.match(reg)) {
 					url = url.replace(reg, '$1' + x + '=' + formatFunction(params[x]));
 					delete params[x];
@@ -592,9 +592,9 @@ hello.utils.extend(hello.utils, {
 	// Explode/encode the parameters of an URL string/object
 	// @param string s, string to decode
 	param: function(s, formatFunction) {
-		var b;
-		var a = {};
-		var m;
+		let b;
+		let a = {};
+		let m;
 
 		if (typeof (s) === 'string') {
 
@@ -602,7 +602,7 @@ hello.utils.extend(hello.utils, {
 
 			m = s.replace(/^[\#\?]/, '').match(/([^=\/\&]+)=([^\&]+)/g);
 			if (m) {
-				for (var i = 0; i < m.length; i++) {
+				for (let i = 0; i < m.length; i++) {
 					b = m[i].match(/([^=]+)=(.*)/);
 					a[b[1]] = formatFunction(b[2]);
 				}
@@ -614,11 +614,11 @@ hello.utils.extend(hello.utils, {
 
 			formatFunction = formatFunction || encodeURIComponent;
 
-			var o = s;
+			const o = s;
 
 			a = [];
 
-			for (var x in o) {if (o.hasOwnProperty(x)) {
+			for (const x in o) {if (o.hasOwnProperty(x)) {
 				if (o.hasOwnProperty(x)) {
 					a.push([x, o[x] === '?' ? '?' : formatFunction(o[x])].join('='));
 				}
@@ -631,12 +631,12 @@ hello.utils.extend(hello.utils, {
 	// Local storage facade
 	store: (function() {
 
-		var a = ['localStorage', 'sessionStorage'];
-		var i = -1;
-		var prefix = 'test';
+		const a = ['localStorage', 'sessionStorage'];
+		let i = -1;
+		const prefix = 'test';
 
 		// Set LocalStorage
-		var localStorage;
+		let localStorage;
 
 		while (a[++i]) {
 			try {
@@ -653,14 +653,14 @@ hello.utils.extend(hello.utils, {
 
 		if (!localStorage) {
 
-			var cache = null;
+			let cache = null;
 
 			localStorage = {
 				getItem: function(prop) {
 					prop = prop + '=';
-					var m = document.cookie.split(';');
-					for (var i = 0; i < m.length; i++) {
-						var _m = m[i].replace(/(^\s+|\s+$)/, '');
+					const m = document.cookie.split(';');
+					for (let i = 0; i < m.length; i++) {
+						const _m = m[i].replace(/(^\s+|\s+$)/, '');
 						if (_m && _m.indexOf(prop) === 0) {
 							return _m.substr(prop.length);
 						}
@@ -680,7 +680,7 @@ hello.utils.extend(hello.utils, {
 		}
 
 		function get() {
-			var json = {};
+			let json = {};
 			try {
 				json = JSON.parse(localStorage.getItem('hello')) || {};
 			}
@@ -697,7 +697,7 @@ hello.utils.extend(hello.utils, {
 		return function(name, value, days) {
 
 			// Local storage
-			var json = get();
+			const json = get();
 
 			if (name && value === undefined) {
 				return json[name] || null;
@@ -730,16 +730,16 @@ hello.utils.extend(hello.utils, {
 	// @param dom/string
 	append: function(node, attr, target) {
 
-		var n = typeof (node) === 'string' ? document.createElement(node) : node;
+		const n = typeof (node) === 'string' ? document.createElement(node) : node;
 
 		if (typeof (attr) === 'object') {
 			if ('tagName' in attr) {
 				target = attr;
 			}
 			else {
-				for (var x in attr) {if (attr.hasOwnProperty(x)) {
+				for (const x in attr) {if (attr.hasOwnProperty(x)) {
 					if (typeof (attr[x]) === 'object') {
-						for (var y in attr[x]) {if (attr[x].hasOwnProperty(y)) {
+						for (const y in attr[x]) {if (attr[x].hasOwnProperty(y)) {
 							n[x][y] = attr[x][y];
 						}}
 					}
@@ -787,7 +787,7 @@ hello.utils.extend(hello.utils, {
 	// Recursive merge two objects into one, second parameter overides the first
 	// @param a array
 	merge: function(/* Args: a, b, c, .. n */) {
-		var args = Array.prototype.slice.call(arguments);
+		const args = Array.prototype.slice.call(arguments);
 		args.unshift({});
 		return this.extend.apply(null, args);
 	},
@@ -797,10 +797,10 @@ hello.utils.extend(hello.utils, {
 	// @param a arguments
 	args: function(o, args) {
 
-		var p = {};
-		var i = 0;
-		var t = null;
-		var x = null;
+		const p = {};
+		let i = 0;
+		let t = null;
+		let x = null;
 
 		// 'x' is the first key in the list of object parameters
 		for (x in o) {if (o.hasOwnProperty(x)) {
@@ -862,7 +862,7 @@ hello.utils.extend(hello.utils, {
 
 		// Ugly shim, it works!
 		else {
-			var a = document.createElement('a');
+			const a = document.createElement('a');
 			a.href = path;
 			return a.cloneNode(false);
 		}
@@ -877,8 +877,8 @@ hello.utils.extend(hello.utils, {
 	// Get the different hash of properties unique to `a`, and not in `b`
 	diffKey: function(a, b) {
 		if (a || !b) {
-			var r = {};
-			for (var x in a) {
+			const r = {};
+			for (const x in a) {
 				// Does the property not exist?
 				if (!(x in b)) {
 					r[x] = a[x];
@@ -915,7 +915,7 @@ hello.utils.extend(hello.utils, {
 		}
 		else if (typeof (obj) === 'object') {
 			// Object
-			for (var key in obj) {
+			for (const key in obj) {
 				if (obj.hasOwnProperty(key)) {
 					return false;
 				}
@@ -935,12 +935,12 @@ hello.utils.extend(hello.utils, {
 	 */
 	Promise: (function() {
 		/*  promise states [Promises/A+ 2.1]  */
-		var STATE_PENDING = 0; /*  [Promises/A+ 2.1.1]  */
-		var STATE_FULFILLED = 1; /*  [Promises/A+ 2.1.2]  */
-		var STATE_REJECTED = 2; /*  [Promises/A+ 2.1.3]  */
+		const STATE_PENDING = 0; /*  [Promises/A+ 2.1.1]  */
+		const STATE_FULFILLED = 1; /*  [Promises/A+ 2.1.2]  */
+		const STATE_REJECTED = 2; /*  [Promises/A+ 2.1.3]  */
 
 		/*  promise object constructor  */
-		var api = function(executor) {
+		let api = function(executor) {
 			/*  optionally support non-constructor/plain-function call  */
 			if (!(this instanceof api))
 				return new api(executor);
@@ -971,8 +971,8 @@ hello.utils.extend(hello.utils, {
 
 			/*  "The then Method" [Promises/A+ 1.1, 1.2, 2.2]  */
 			then: function(onFulfilled, onRejected) {
-				var curr = this;
-				var next = new api(); /*  [Promises/A+ 2.2.7]  */
+				const curr = this;
+				const next = new api(); /*  [Promises/A+ 2.2.7]  */
 				curr.onFulfilled.push(
 					resolver(onFulfilled, next, "fulfill")); /*  [Promises/A+ 2.2.2/2.2.6]  */
 				curr.onRejected.push(
@@ -983,7 +983,7 @@ hello.utils.extend(hello.utils, {
 		};
 
 		/*  deliver an action  */
-		var deliver = function(curr, state, name, value) {
+		let deliver = function(curr, state, name, value) {
 			if (curr.state === STATE_PENDING) {
 				curr.state = state; /*  [Promises/A+ 2.1.2.1, 2.1.3.1]  */
 				curr[name] = value; /*  [Promises/A+ 2.1.2.2, 2.1.3.2]  */
@@ -993,7 +993,7 @@ hello.utils.extend(hello.utils, {
 		};
 
 		/*  execute all handlers  */
-		var execute = function(curr) {
+		const execute = function(curr) {
 			if (curr.state === STATE_FULFILLED)
 				execute_handlers(curr, "onFulfilled", curr.fulfillValue);
 			else if (curr.state === STATE_REJECTED)
@@ -1001,7 +1001,7 @@ hello.utils.extend(hello.utils, {
 		};
 
 		/*  execute particular set of handlers  */
-		var execute_handlers = function(curr, name, value) {
+		const execute_handlers = function(curr, name, value) {
 			/* global process: true */
 			/* global setImmediate: true */
 			/* global setTimeout: true */
@@ -1011,10 +1011,10 @@ hello.utils.extend(hello.utils, {
 				return;
 
 			/*  iterate over all handlers, exactly once  */
-			var handlers = curr[name];
+			const handlers = curr[name];
 			curr[name] = []; /*  [Promises/A+ 2.2.2.3, 2.2.3.3]  */
-			var func = function() {
-				for (var i = 0; i < handlers.length; i++)
+			const func = function() {
+				for (let i = 0; i < handlers.length; i++)
 					handlers[i](value); /*  [Promises/A+ 2.2.5]  */
 			};
 
@@ -1028,12 +1028,12 @@ hello.utils.extend(hello.utils, {
 		};
 
 		/*  generate a resolver function  */
-		var resolver = function(cb, next, method) {
+		const resolver = function(cb, next, method) {
 			return function(value) {
 				if (typeof cb !== "function") /*  [Promises/A+ 2.2.1, 2.2.7.3, 2.2.7.4]  */
 					next[method].call(next, value); /*  [Promises/A+ 2.2.7.3, 2.2.7.4]  */
 				else {
-					var result;
+					let result;
 					try { result = cb(value); } /*  [Promises/A+ 2.2.2.1, 2.2.3.1, 2.2.5, 3.2]  */
 					catch (e) {
 						next.reject(e); /*  [Promises/A+ 2.2.7.2]  */
@@ -1045,7 +1045,7 @@ hello.utils.extend(hello.utils, {
 		};
 
 		/*  "Promise Resolution Procedure"  */ /*  [Promises/A+ 2.3]  */
-		var resolve = function(promise, x) {
+		const resolve = function(promise, x) {
 			/*  sanity check arguments  */ /*  [Promises/A+ 2.3.1]  */
 			if (promise === x || promise.proxy === x) {
 				promise.reject(new TypeError("cannot resolve promise with itself"));
@@ -1054,7 +1054,7 @@ hello.utils.extend(hello.utils, {
 
 			/*  surgically check for a "then" method
 				(mainly to just call the "getter" of "then" only once)  */
-			var then;
+			let then;
 			if ((typeof x === "object" && x !== null) || typeof x === "function") {
 				try { then = x.then; } /*  [Promises/A+ 2.3.3.1, 3.5]  */
 				catch (e) {
@@ -1066,7 +1066,7 @@ hello.utils.extend(hello.utils, {
 			/*  handle own Thenables    [Promises/A+ 2.3.2]
 				and similar "thenables" [Promises/A+ 2.3.3]  */
 			if (typeof then === "function") {
-				var resolved = false;
+				const resolved = false;
 				try {
 					/*  call retrieved "then" method */ /*  [Promises/A+ 2.3.3.3]  */
 					then.call(x,
@@ -1107,7 +1107,7 @@ hello.utils.extend(hello.utils, {
 	// A contructor superclass for adding event menthods, on, off, emit.
 	Event: function() {
 
-		var separator = /[\s\,]+/;
+		const separator = /[\s\,]+/;
 
 		// If this doesn't support getPrototype then we can't get prototype.events of the parent
 		// So lets get the current instance events, and add those to a parent property
@@ -1126,8 +1126,8 @@ hello.utils.extend(hello.utils, {
 		this.on = function(evt, callback) {
 
 			if (callback && typeof (callback) === 'function') {
-				var a = evt.split(separator);
-				for (var i = 0; i < a.length; i++) {
+				const a = evt.split(separator);
+				for (let i = 0; i < a.length; i++) {
 
 					// Has this event already been fired on this instance?
 					this.events[a[i]] = [callback].concat(this.events[a[i]] || []);
@@ -1156,11 +1156,11 @@ hello.utils.extend(hello.utils, {
 		this.emit = function(evt /*, data, ... */) {
 
 			// Get arguments as an Array, knock off the first one
-			var args = Array.prototype.slice.call(arguments, 1);
+			const args = Array.prototype.slice.call(arguments, 1);
 			args.push(evt);
 
 			// Handler
-			var handler = function(name, index) {
+			const handler = function(name, index) {
 
 				// Replace the last property with the event name
 				args[args.length - 1] = (name === '*' ? evt : name);
@@ -1170,7 +1170,7 @@ hello.utils.extend(hello.utils, {
 			};
 
 			// Find the callbacks which match the condition and call
-			var _this = this;
+			let _this = this;
 			while (_this && _this.findEvents) {
 
 				// Find events which match
@@ -1184,8 +1184,8 @@ hello.utils.extend(hello.utils, {
 		//
 		// Easy functions
 		this.emitAfter = function() {
-			var _this = this;
-			var args = arguments;
+			const _this = this;
+			const args = arguments;
 			setTimeout(function() {
 				_this.emit.apply(_this, args);
 			}, 0);
@@ -1195,13 +1195,13 @@ hello.utils.extend(hello.utils, {
 
 		this.findEvents = function(evt, callback) {
 
-			var a = evt.split(separator);
+			const a = evt.split(separator);
 
-			for (var name in this.events) {if (this.events.hasOwnProperty(name)) {
+			for (const name in this.events) {if (this.events.hasOwnProperty(name)) {
 
 				if (a.indexOf(name) > -1) {
 
-					for (var i = 0; i < this.events[name].length; i++) {
+					for (let i = 0; i < this.events[name].length; i++) {
 
 						// Does the event handler exist?
 						if (this.events[name][i]) {
@@ -1243,28 +1243,28 @@ hello.utils.extend(hello.utils, {
 	// This has been augmented to support PhoneGap
 	popup: function(url, redirectUri, options) {
 
-		var documentElement = document.documentElement;
+		const documentElement = document.documentElement;
 
 		// Multi Screen Popup Positioning (http://stackoverflow.com/a/16861050)
 		// Credit: http://www.xtf.dk/2011/08/center-new-popup-window-even-on.html
 		// Fixes dual-screen position                         Most browsers      Firefox
 
 		if (options.height && options.top === undefined) {
-			var dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
-			var height = screen.height || window.innerHeight || documentElement.clientHeight;
+			const dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
+			const height = screen.height || window.innerHeight || documentElement.clientHeight;
 			options.top = parseInt((height - options.height) / 2, 10) + dualScreenTop;
 		}
 
 		if (options.width && options.left === undefined) {
-			var dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
-			var width = screen.width || window.innerWidth || documentElement.clientWidth;
+			const dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
+			const width = screen.width || window.innerWidth || documentElement.clientWidth;
 			options.left = parseInt((width - options.width) / 2, 10) + dualScreenLeft;
 		}
 
 		// Convert options into an array
-		var optionsArray = [];
+		const optionsArray = [];
 		Object.keys(options).forEach(function(name) {
-			var value = options[name];
+			const value = options[name];
 			optionsArray.push(name + (value !== null ? '=' + value : ''));
 		});
 
@@ -1281,7 +1281,7 @@ hello.utils.extend(hello.utils, {
 			url = redirectUri + '#oauth_redirect=' + encodeURIComponent(encodeURIComponent(url));
 		}
 
-		var popup = window.open(
+		const popup = window.open(
 			url,
 			'_blank',
 			optionsArray.join(',')
@@ -1297,9 +1297,9 @@ hello.utils.extend(hello.utils, {
 	// OAuth and API response handler
 	responseHandler: function(window, parent) {
 
-		var _this = this;
-		var p;
-		var location = window.location;
+		const _this = this;
+		let p;
+		const location = window.location;
 
 		// Is this an auth relay message which needs to call the proxy?
 		p = _this.param(location.search);
@@ -1308,13 +1308,13 @@ hello.utils.extend(hello.utils, {
 		if (p && p.state && (p.code || p.oauth_token)) {
 
 			try {
-				var state = JSON.parse(p.state);
+				const state = JSON.parse(p.state);
 
 				// Add this path as the redirect_uri
 				p.redirect_uri = state.redirect_uri || location.href.replace(/[\?\#].*$/, '');
 
 				// Redirect to the host
-				var path = _this.qs(state.oauth_proxy, p);
+				const path = _this.qs(state.oauth_proxy, p);
 
 
 				if (isValidUrl(path)) {
@@ -1343,13 +1343,13 @@ hello.utils.extend(hello.utils, {
 			// Remove any addition information
 			// E.g. p.state = 'facebook.page';
 			try {
-				var a = JSON.parse(p.state);
+				const a = JSON.parse(p.state);
 				_this.extend(p, a);
 			}
 			catch (e) {
-				var stateDecoded = decodeURIComponent(p.state);
+				const stateDecoded = decodeURIComponent(p.state);
 				try {
-					var b = JSON.parse(stateDecoded);
+					const b = JSON.parse(stateDecoded);
 					_this.extend(p, b);
 				}
 				catch (e) {
@@ -1391,7 +1391,7 @@ hello.utils.extend(hello.utils, {
 			else if (p.callback && p.callback in parent) {
 
 				// Trigger a function in the parent
-				var res = 'result' in p && p.result ? JSON.parse(p.result) : false;
+				const res = 'result' in p && p.result ? JSON.parse(p.result) : false;
 
 				// Trigger the callback on the parent
 				callback(parent, p.callback)(res);
@@ -1408,7 +1408,7 @@ hello.utils.extend(hello.utils, {
 		// (URI Fragments within 302 Location URI are lost over HTTPS)
 		// Loading the redirect.html before triggering the OAuth Flow seems to fix it.
 		else if ('oauth_redirect' in p) {
-			var url = decodeURIComponent(p.oauth_redirect);
+			const url = decodeURIComponent(p.oauth_redirect);
 
 			if (isValidUrl(url)) {
 				location.assign(url);
@@ -1418,7 +1418,7 @@ hello.utils.extend(hello.utils, {
 		}
 
 		function isValidUrl(url) {
-			var regexp = /^https?:/;
+			const regexp = /^https?:/;
 			return regexp.test(url)
 
 				// If `HELLOJS_REDIRECT_URL` is defined in the window context, validate that the URL matches it.
@@ -1432,8 +1432,8 @@ hello.utils.extend(hello.utils, {
 		// Trigger a callback to authenticate
 		function authCallback(obj, window, parent) {
 
-			var cb = obj.callback;
-			var network = obj.network;
+			const cb = obj.callback;
+			const network = obj.network;
 
 			// Trigger the callback on the parent
 			_this.store(network, obj);
@@ -1457,7 +1457,7 @@ hello.utils.extend(hello.utils, {
 				// Call the globalEvent function on the parent
 				// It's safer to pass back a string to the parent,
 				// Rather than an object/array (better for IE8)
-				var str = JSON.stringify(obj);
+				const str = JSON.stringify(obj);
 
 				try {
 					callback(parent, cb)(str);
@@ -1517,10 +1517,10 @@ hello.utils.Event.call(hello);
 (function(hello) {
 
 	// Monitor for a change in state and fire
-	var oldSessions = {};
+	const oldSessions = {};
 
 	// Hash of expired tokens
-	var expired = {};
+	const expired = {};
 
 	// Listen to other triggers to Auth events, use these to update this
 	hello.on('auth.login, auth.logout', function(auth) {
@@ -1531,8 +1531,8 @@ hello.utils.Event.call(hello);
 
 	(function self() {
 
-		var CURRENT_TIME = ((new Date()).getTime() / 1e3);
-		var emit = function(eventName) {
+		const CURRENT_TIME = ((new Date()).getTime() / 1e3);
+		const emit = function(eventName) {
 			hello.emit('auth.' + eventName, {
 				network: name,
 				authResponse: session
@@ -1540,7 +1540,7 @@ hello.utils.Event.call(hello);
 		};
 
 		// Loop through the services
-		for (var name in hello.services) {if (hello.services.hasOwnProperty(name)) {
+		for (const name in hello.services) {if (hello.services.hasOwnProperty(name)) {
 
 			if (!hello.services[name].id) {
 				// We haven't attached an ID so dont listen.
@@ -1549,14 +1549,14 @@ hello.utils.Event.call(hello);
 
 			// Get session
 			var session = hello.utils.store(name) || {};
-			var provider = hello.services[name];
-			var oldSess = oldSessions[name] || {};
+			const provider = hello.services[name];
+			const oldSess = oldSessions[name] || {};
 
 			// Listen for globalEvents that did not get triggered from the child
 			if (session && 'callback' in session) {
 
 				// To do remove from session object...
-				var cb = session.callback;
+				const cb = session.callback;
 				try {
 					delete session.callback;
 				}
@@ -1578,7 +1578,7 @@ hello.utils.Event.call(hello);
 
 				// If auto refresh is possible
 				// Either the browser supports
-				var refresh = provider.refresh || session.refresh_token;
+				const refresh = provider.refresh || session.refresh_token;
 
 				// Has the refresh been run recently?
 				if (refresh && (!(name in expired) || expired[name] < CURRENT_TIME)) {
@@ -1652,15 +1652,15 @@ hello.utils.Event.call(hello);
 hello.api = function() {
 
 	// Shorthand
-	var _this = this;
-	var utils = _this.utils;
-	var error = utils.error;
+	const _this = this;
+	const utils = _this.utils;
+	const error = utils.error;
 
 	// Construct a new Promise object
-	var promise = utils.Promise();
+	const promise = utils.Promise();
 
 	// Arguments
-	var p = utils.args({path: 's!', query: 'o', method: 's', data: 'o', timeout: 'i', callback: 'f'}, arguments);
+	const p = utils.args({path: 's!', query: 'o', method: 's', data: 'o', timeout: 'i', callback: 'f'}, arguments);
 
 	// Method
 	p.method = (p.method || 'get').toLowerCase();
@@ -1677,7 +1677,7 @@ hello.api = function() {
 		p.data = {};
 	}
 
-	var data = p.data = p.data || {};
+	const data = p.data = p.data || {};
 
 	// Completed event callback
 	promise.then(p.callback, p.callback);
@@ -1689,18 +1689,18 @@ hello.api = function() {
 	}
 
 	p.path = p.path.replace(/^\/+/, '');
-	var a = (p.path.split(/[\/\:]/, 2) || [])[0].toLowerCase();
+	const a = (p.path.split(/[\/\:]/, 2) || [])[0].toLowerCase();
 
 	if (a in _this.services) {
 		p.network = a;
-		var reg = new RegExp('^' + a + ':?\/?');
+		const reg = new RegExp('^' + a + ':?\/?');
 		p.path = p.path.replace(reg, '');
 	}
 
 	// Network & Provider
 	// Define the network that this request is made for
 	p.network = _this.settings.default_service = p.network || _this.settings.default_service;
-	var o = _this.services[p.network];
+	const o = _this.services[p.network];
 
 	// INVALID
 	// Is there no service by the given network name?
@@ -1746,8 +1746,8 @@ hello.api = function() {
 		p.query.access_token = p.authResponse.access_token;
 	}
 
-	var url = p.path;
-	var m;
+	let url = p.path;
+	let m;
 
 	// Store the query as options
 	// This is used to populate the request object before the data is augmented by the prewrap handlers.
@@ -1760,14 +1760,14 @@ hello.api = function() {
 
 	// URL Mapping
 	// Is there a map for the given URL?
-	var actions = o[{'delete': 'del'}[p.method] || p.method] || {};
+	const actions = o[{'delete': 'del'}[p.method] || p.method] || {};
 
 	// Extrapolate the QueryString
 	// Provide a clean path
 	// Move the querystring into the data
 	if (p.method === 'get') {
 
-		var query = url.split(/[\?#]/)[1];
+		const query = url.split(/[\?#]/)[1];
 		if (query) {
 			utils.extend(p.query, utils.param(query));
 
@@ -1818,7 +1818,7 @@ hello.api = function() {
 
 		// Format the string if it needs it
 		url = url.replace(/\@\{([a-z\_\-]+)(\|.*?)?\}/gi, function(m, key, defaults) {
-			var val = defaults ? defaults.replace(/^\|/, '') : '';
+			let val = defaults ? defaults.replace(/^\|/, '') : '';
 			if (key in p.query) {
 				val = p.query[key];
 				delete p.query[key];
@@ -1877,11 +1877,11 @@ hello.api = function() {
 			// FORMAT RESPONSE?
 			// Does self request have a corresponding formatter
 			if (o.wrap && ((p.path in o.wrap) || ('default' in o.wrap))) {
-				var wrap = (p.path in o.wrap ? p.path : 'default');
-				var time = (new Date()).getTime();
+				const wrap = (p.path in o.wrap ? p.path : 'default');
+				const time = (new Date()).getTime();
 
 				// FORMAT RESPONSE
-				var b = o.wrap[wrap](r, headers, p);
+				const b = o.wrap[wrap](r, headers, p);
 
 				// Has the response been utterly overwritten?
 				// Typically self augments the existing object.. but for those rare occassions
@@ -1922,8 +1922,8 @@ hello.utils.extend(hello.utils, {
 	// Make an HTTP request
 	request: function(p, callback) {
 
-		var _this = this;
-		var error = _this.error;
+		const _this = this;
+		const error = _this.error;
 
 		// This has to go through a POST request
 		if (!_this.isEmpty(p.data) && !('FileList' in window) && _this.hasBinary(p.data)) {
@@ -1934,7 +1934,7 @@ hello.utils.extend(hello.utils, {
 		}
 
 		// Check if the browser and service support CORS
-		var cors = this.request_cors(function() {
+		const cors = this.request_cors(function() {
 			// If it does then run this...
 			return ((p.xhr === undefined) || (p.xhr && (typeof (p.xhr) !== 'function' || p.xhr(p, p.query))));
 		});
@@ -1943,7 +1943,7 @@ hello.utils.extend(hello.utils, {
 
 			formatUrl(p, function(url) {
 
-				var x = _this.xhr(p.method, url, p.headers, p.data, callback);
+				const x = _this.xhr(p.method, url, p.headers, p.data, callback);
 				x.onprogress = p.onprogress || null;
 
 				// Windows Phone does not support xhr.upload, see #74
@@ -1959,7 +1959,7 @@ hello.utils.extend(hello.utils, {
 
 		// Clone the query object
 		// Each request modifies the query object and needs to be tared after each one.
-		var _query = p.query;
+		const _query = p.query;
 
 		p.query = _this.clone(p.query);
 
@@ -2001,7 +2001,7 @@ hello.utils.extend(hello.utils, {
 			p.query.redirect_uri = p.redirect_uri;
 			p.query.state = JSON.stringify({callback: p.callbackID});
 
-			var opts;
+			let opts;
 
 			if (typeof (p.form) === 'function') {
 
@@ -2030,7 +2030,7 @@ hello.utils.extend(hello.utils, {
 		function formatUrl(p, callback) {
 
 			// Are we signing the request?
-			var sign;
+			let sign;
 
 			// OAuth1
 			// Remove the token from the query before signing
@@ -2054,7 +2054,7 @@ hello.utils.extend(hello.utils, {
 			}
 
 			// Construct the path
-			var path = _this.qs(p.url, p.query);
+			let path = _this.qs(p.url, p.query);
 
 			// Proxy the request through a server
 			// Used for signing OAuth1
@@ -2083,7 +2083,7 @@ hello.utils.extend(hello.utils, {
 
 	// Return the type of DOM object
 	domInstance: function(type, data) {
-		var test = 'HTML' + (type || '').replace(
+		const test = 'HTML' + (type || '').replace(
 			/^[a-z]/,
 			function(m) {
 				return m.toUpperCase();
@@ -2119,8 +2119,8 @@ hello.utils.extend(hello.utils, {
 		}
 
 		// But does clone everything else.
-		var clone = {};
-		for (var x in obj) {
+		const clone = {};
+		for (const x in obj) {
 			clone[x] = this.clone(obj[x]);
 		}
 
@@ -2130,11 +2130,11 @@ hello.utils.extend(hello.utils, {
 	// XHR: uses CORS to make requests
 	xhr: function(method, url, headers, data, callback) {
 
-		var r = new XMLHttpRequest();
-		var error = this.error;
+		const r = new XMLHttpRequest();
+		const error = this.error;
 
 		// Binary?
-		var binary = false;
+		let binary = false;
 		if (method === 'blob') {
 			binary = method;
 			method = 'GET';
@@ -2144,7 +2144,7 @@ hello.utils.extend(hello.utils, {
 
 		// Xhr.responseType 'json' is not supported in any of the vendors yet.
 		r.onload = function(e) {
-			var json = r.response;
+			let json = r.response;
 			try {
 				json = JSON.parse(r.responseText);
 			}
@@ -2154,14 +2154,14 @@ hello.utils.extend(hello.utils, {
 				}
 			}
 
-			var headers = headersToJSON(r.getAllResponseHeaders());
+			const headers = headersToJSON(r.getAllResponseHeaders());
 			headers.statusCode = r.status;
 
 			callback(json || (method === 'GET' ? error('empty_response', 'Could not get resource') : {}), headers);
 		};
 
 		r.onerror = function(e) {
-			var json = r.responseText;
+			let json = r.responseText;
 			try {
 				json = JSON.parse(r.responseText);
 			}
@@ -2170,7 +2170,7 @@ hello.utils.extend(hello.utils, {
 			callback(json || error('access_denied', 'Could not get resource'));
 		};
 
-		var x;
+		let x;
 
 		// Should we add the query to the URL?
 		if (method === 'GET' || method === 'DELETE') {
@@ -2178,7 +2178,7 @@ hello.utils.extend(hello.utils, {
 		}
 		else if (data && typeof (data) !== 'string' && !(data instanceof FormData) && !(data instanceof File) && !(data instanceof Blob)) {
 			// Loop through and add formData
-			var f = new FormData();
+			const f = new FormData();
 			for (x in data) if (data.hasOwnProperty(x)) {
 				if (data[x] instanceof HTMLInputElement) {
 					if ('files' in data[x] && data[x].files.length > 0) {
@@ -2221,9 +2221,9 @@ hello.utils.extend(hello.utils, {
 
 		// Headers are returned as a string
 		function headersToJSON(s) {
-			var r = {};
-			var reg = /([a-z\-]+):\s?(.*);?/gi;
-			var m;
+			const r = {};
+			const reg = /([a-z\-]+):\s?(.*);?/gi;
+			let m;
 			while ((m = reg.exec(s))) {
 				r[m[1]] = m[2];
 			}
@@ -2238,15 +2238,15 @@ hello.utils.extend(hello.utils, {
 	// @param function callback a function to call on completion;
 	jsonp: function(url, callback, callbackID, timeout) {
 
-		var _this = this;
-		var error = _this.error;
+		const _this = this;
+		const error = _this.error;
 
 		// Change the name of the callback
-		var bool = 0;
-		var head = document.getElementsByTagName('head')[0];
-		var operaFix;
-		var result = error('server_error', 'server_error');
-		var cb = function() {
+		let bool = 0;
+		const head = document.getElementsByTagName('head')[0];
+		let operaFix;
+		let result = error('server_error', 'server_error');
+		const cb = function() {
 			if (!(bool++)) {
 				window.setTimeout(function() {
 					callback(result);
@@ -2269,7 +2269,7 @@ hello.utils.extend(hello.utils, {
 		url = url.replace(new RegExp('=\\?(&|$)'), '=' + callbackID + '$1');
 
 		// Build script tag
-		var script = _this.append('script', {
+		const script = _this.append('script', {
 			id: callbackID,
 			name: callbackID,
 			src: url,
@@ -2322,18 +2322,18 @@ hello.utils.extend(hello.utils, {
 	// @param function callback, function to execute in response
 	post: function(url, data, options, callback, callbackID, timeout) {
 
-		var _this = this;
-		var error = _this.error;
-		var doc = document;
+		const _this = this;
+		const error = _this.error;
+		const doc = document;
 
 		// This hack needs a form
-		var form = null;
-		var reenableAfterSubmit = [];
-		var newform;
-		var i = 0;
-		var x = null;
-		var bool = 0;
-		var cb = function(r) {
+		let form = null;
+		const reenableAfterSubmit = [];
+		let newform;
+		let i = 0;
+		let x = null;
+		let bool = 0;
+		const cb = function(r) {
 			if (!(bool++)) {
 				callback(r);
 			}
@@ -2344,7 +2344,7 @@ hello.utils.extend(hello.utils, {
 		_this.globalEvent(cb, callbackID);
 
 		// Build the iframe window
-		var win;
+		let win;
 		try {
 			// IE7 hack, only lets us define the name here, not later.
 			win = doc.createElement('<iframe name="' + callbackID + '">');
@@ -2425,19 +2425,19 @@ hello.utils.extend(hello.utils, {
 				newform = form;
 			}
 
-			var input;
+			let input;
 
 			// Add elements to the form if they dont exist
 			for (x in data) if (data.hasOwnProperty(x)) {
 
 				// Is this an element?
-				var el = (_this.domInstance('input', data[x]) || _this.domInstance('textArea', data[x]) || _this.domInstance('select', data[x]));
+				const el = (_this.domInstance('input', data[x]) || _this.domInstance('textArea', data[x]) || _this.domInstance('select', data[x]));
 
 				// Is this not an input element, or one that exists outside the form.
 				if (!el || data[x].form !== form) {
 
 					// Does an element have the same name?
-					var inputs = form.elements[x];
+					let inputs = form.elements[x];
 					if (input) {
 						// Remove it.
 						if (!(inputs instanceof NodeList)) {
@@ -2522,7 +2522,7 @@ hello.utils.extend(hello.utils, {
 				}
 
 				// Reenable the disabled form
-				for (var i = 0; i < reenableAfterSubmit.length; i++) {
+				for (let i = 0; i < reenableAfterSubmit.length; i++) {
 					if (reenableAfterSubmit[i]) {
 						reenableAfterSubmit[i].setAttribute('disabled', false);
 						reenableAfterSubmit[i].disabled = false;
@@ -2535,7 +2535,7 @@ hello.utils.extend(hello.utils, {
 	// Some of the providers require that only multipart is used with non-binary forms.
 	// This function checks whether the form contains binary data
 	hasBinary: function(data) {
-		for (var x in data) if (data.hasOwnProperty(x)) {
+		for (const x in data) if (data.hasOwnProperty(x)) {
 			if (this.isBinary(data[x])) {
 				return true;
 			}
@@ -2558,15 +2558,15 @@ hello.utils.extend(hello.utils, {
 
 	// Convert Data-URI to Blob string
 	toBlob: function(dataURI) {
-		var reg = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
-		var m = dataURI.match(reg);
+		const reg = /^data\:([^;,]+(\;charset=[^;,]+)?)(\;base64)?,/i;
+		const m = dataURI.match(reg);
 		if (!m) {
 			return dataURI;
 		}
 
-		var binary = atob(dataURI.replace(reg, ''));
-		var array = [];
-		for (var i = 0; i < binary.length; i++) {
+		const binary = atob(dataURI.replace(reg, ''));
+		const array = [];
+		for (let i = 0; i < binary.length; i++) {
 			array.push(binary.charCodeAt(i));
 		}
 
@@ -2580,8 +2580,8 @@ hello.utils.extend(hello.utils, {
 (function(hello) {
 
 	// Copy original function
-	var api = hello.api;
-	var utils = hello.utils;
+	const api = hello.api;
+	const utils = hello.utils;
 
 	utils.extend(utils, {
 
@@ -2589,9 +2589,9 @@ hello.utils.extend(hello.utils, {
 		// This takes a FormElement|NodeList|InputElement|MixedObjects and convers the data object to JSON.
 		dataToJSON: function(p) {
 
-			var _this = this;
-			var w = window;
-			var data = p.data;
+			const _this = this;
+			const w = window;
+			let data = p.data;
 
 			// Is data a form object
 			if (_this.domInstance('form', data)) {
@@ -2614,7 +2614,7 @@ hello.utils.extend(hello.utils, {
 			// Loop through data if it's not form data it must now be a JSON object
 			if (!('FormData' in w && data instanceof w.FormData)) {
 
-				for (var x in data) if (data.hasOwnProperty(x)) {
+				for (const x in data) if (data.hasOwnProperty(x)) {
 
 					if ('FileList' in w && data[x] instanceof w.FileList) {
 						if (data[x].length === 1) {
@@ -2643,12 +2643,12 @@ hello.utils.extend(hello.utils, {
 		// Given a list of elements extrapolate their values and return as a json object
 		nodeListToJSON: function(nodelist) {
 
-			var json = {};
+			const json = {};
 
 			// Create a data string
-			for (var i = 0; i < nodelist.length; i++) {
+			for (let i = 0; i < nodelist.length; i++) {
 
-				var input = nodelist[i];
+				const input = nodelist[i];
 
 				// If the name of the input is empty or diabled, dont add it.
 				if (input.disabled || !input.name) {
@@ -2672,7 +2672,7 @@ hello.utils.extend(hello.utils, {
 	hello.api = function() {
 
 		// Get arguments
-		var p = utils.args({path: 's!', method: 's', data: 'o', timeout: 'i', callback: 'f'}, arguments);
+		const p = utils.args({path: 's!', method: 's', data: 'o', timeout: 'i', callback: 'f'}, arguments);
 
 		// Change for into a data object
 		if (p.data) {
