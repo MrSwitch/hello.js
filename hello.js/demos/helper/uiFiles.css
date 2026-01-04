@@ -1,0 +1,13 @@
+#getMeFiles li img{
+	width:24px;
+	height:24px;
+}
+
+#getMeFiles ul.empty:after{
+	content:"empty";
+}
+
+#getMeFiles a + a{
+	margin-left:10px;
+}
+

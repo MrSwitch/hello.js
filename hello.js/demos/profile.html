@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css" />
+<script src="/adorn/adorn.js" async></script>
+
+<script src="client_ids.js"></script>
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/hello.phonegap.js"></script>
+<script src="../src/hello.chromeapp.js"></script>
+<script src="../src/modules/windows.js"></script>
+<script src="../src/modules/facebook.js"></script>
+<script src="../src/modules/google.js"></script>
+<script src="../src/modules/twitter.js"></script>
+
+<h1>hello.api( me )</h1>
+
+<p>Listen to the event "auth.login", and call <code>hello( network ).api( 'me' ).then( handler )</code></p>
+
+<h2>Demo</h2>
+<button id='google' class="profile">google</button>
+<button id='facebook' class="profile">facebook</button>
+<button id='windows' class="profile">windows</button>
+<button id='twitter' class="profile">twitter</button>
+
+<h2>Code</h2>
+<script src="helper/uiProfile.js" class="pre"></script>

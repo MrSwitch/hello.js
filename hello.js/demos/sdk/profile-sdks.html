@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+<script src="client_ids.js"></script>
+
+<h1>Profile Demo: With Windows Live and FaceBook SDK's</h1>
+
+<p>Include both the SDK's</p>
+<div class="fb-root"></div>
+
+<script src="//connect.facebook.net/en_US/all.js#xfbml=1" class="pre"></script>
+<script src="//js.live.net/v5.0/wl.js" class="pre"></script>
+
+<p>Signin with...</p>
+<div class="fb-login-button" style="display:inline-block;vertical-align:top;"></div>
+<span id="windowslive"></span>
+<p>or, just events added to normal buttons..</p>
+<button id="windows" onclick="WL.login();">Login Windows</button>
+<button id="facebook" onclick="FB.login();">Login Facebook</button>
+
+<p>Add event listeners for the login completed event and make a request for the users profile. Once that's loaded push it to the page. </p>
+<script class="pre">
+
+// Windows Live
+WL.Event.subscribe('auth.login', function(){
+	// Get Profile
+	WL.api('me', function(r){
+		document.getElementById('windows').innerHTML = "Connected to Windows as " + r.name;
+	});
+});
+
+// Facebook
+FB.Event.subscribe('auth.login', function(){
+	// Get Profile
+	FB.api('me', function(r){
+		document.getElementById('facebook').innerHTML = "Connected to FaceBook as " + r.name;
+	});
+});
+
+</script>
+
+<p>Plug the app keys (client_id') and voila</p>
+<script class="pre">
+// Initiate the windows live app
+WL.init({
+	client_id: WINDOWS_CLIENT_ID,
+	scope: "wl.signin"
+});
+
+WL.ui({
+	name : "signin",
+	element : "windowslive"
+})
+
+// Initiate the facebook app
+FB.init({
+	appId: FACEBOOK_CLIENT_ID
+});
+</script>

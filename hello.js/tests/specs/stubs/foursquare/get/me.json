@@ -1,0 +1,119 @@
+{
+  "meta": {
+    "code": 200
+  },
+  "notifications": [
+    {
+      "type": "notificationTray",
+      "item": {
+        "unreadCount": 0
+      }
+    }
+  ],
+  "response": {
+    "user": {
+      "id": "110649444",
+      "firstName": "Jane",
+      "lastName": "McGee",
+      "gender": "female",
+      "relationship": "self",
+      "photo": {
+        "prefix": "https://irs0.4sqi.net/img/user/",
+        "suffix": "/110649444-XTNO1LD24NJOW0TW.jpg"
+      },
+      "friends": {
+        "count": 0,
+        "groups": [
+          {
+            "type": "friends",
+            "name": "Mutual friends",
+            "count": 0,
+            "items": []
+          },
+          {
+            "type": "others",
+            "name": "Other friends",
+            "count": 0,
+            "items": []
+          }
+        ]
+      },
+      "tips": {
+        "count": 0
+      },
+      "homeCity": "London, ENG",
+      "bio": "",
+      "contact": {
+        "email": "janemcgee35@gmail.com"
+      },
+      "checkinPings": "off",
+      "pings": false,
+      "type": "user",
+      "badges": {
+        "count": 0,
+        "items": []
+      },
+      "mayorships": {
+        "count": 0,
+        "items": []
+      },
+      "checkins": {
+        "count": 0,
+        "items": []
+      },
+      "requests": {
+        "count": 0
+      },
+      "lists": {
+        "count": 1,
+        "groups": [
+          {
+            "type": "created",
+            "count": 1,
+            "items": [
+              {
+                "id": "110649444/todos",
+                "name": "My to-do list",
+                "description": "",
+                "user": {
+                  "id": "110649444",
+                  "firstName": "Jane",
+                  "lastName": "McGee",
+                  "gender": "female",
+                  "relationship": "self",
+                  "photo": {
+                    "prefix": "https://irs0.4sqi.net/img/user/",
+                    "suffix": "/110649444-XTNO1LD24NJOW0TW.jpg"
+                  }
+                },
+                "editable": false,
+                "public": false,
+                "collaborative": false,
+                "url": "/user/110649444/list/todos",
+                "canonicalUrl": "https://foursquare.com/user/110649444/list/todos",
+                "followers": {
+                  "count": 0
+                },
+                "listItems": {
+                  "count": 0
+                }
+              }
+            ]
+          },
+          {
+            "type": "followed",
+            "count": 0,
+            "items": []
+          }
+        ]
+      },
+      "photos": {
+        "count": 0,
+        "items": []
+      },
+      "blockedStatus": "none",
+      "createdAt": 1420447933,
+      "referralId": "u-110649444"
+    }
+  }
+}

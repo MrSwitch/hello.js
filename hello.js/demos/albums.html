@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+<script src="client_ids.js"></script>
+<style>
+
+img.picture{
+	width:80px;
+	border:1px solid #ccc;
+	padding:1%;
+	display: inline-block;
+	float:left;
+	vertical-align: top;
+	background-color: white;
+}
+img.picture:nth-child(2n){
+	-webkit-transform:rotate(10deg);
+	-moz-transform:rotate(10deg);
+	-ms-transform:rotate(10deg);
+	transform:rotate(10deg);
+}
+img.picture:nth-child(3n){
+	-webkit-transform:rotate(-10deg);
+	-moz-transform:rotate(-10deg);
+	-ms-transform:rotate(-10deg);
+	transform:rotate(-10deg);
+}
+.demo{
+	max-height:500px;
+	white-space: nowrap;
+	overflow: auto;
+}
+.column{
+	display:inline-block;
+	white-space: normal;
+	width:33%;
+	min-width: 200px;
+	padding:0.3%;
+}
+div.column{
+	height:300px;
+	overflow: auto;
+	background-color: #eee;
+	border: 2px solid white;
+}
+.column button{
+	width:100%;
+}
+
+</style>
+<title>Photo Albums w/ hello.js</title>
+<h1>Photo Albums w/ hello.js</h1>
+
+<h2>Demo</h2>
+
+<div class="demo">
+
+	<b class="column">Provider</b>
+	<b class="column">Albums</b>
+ 	<b class="column">Photos</b>
+	<br />
+	<div class="column">
+		<button id="windows" onclick="getAlbums('windows')">Get Albums from Windows</button>
+		<button id="facebook" onclick="getAlbums('facebook')">Get Albums from Facebook</button>
+		<button id="google" onclick="getAlbums('google')">Get Albums from Google</button>
+	</div><div class="column" id="albums">
+	</div><div class="column" id="photos">
+	</div>
+</div>
+
+
+<h2>Source</h2>
+
+<p>Include hello.js + modules</p>
+<script class="pre" src="../src/hello.js"></script>
+<script class="pre" src="../src/modules/windows.js"></script>
+<script class="pre" src="../src/modules/facebook.js"></script>
+<script class="pre" src="../src/modules/google.js"></script>
+
+<p>Setup a listener</p>
+
+<script class="pre">
+// Get User
+hello.on('auth.login', function(auth){
+
+	// Get Profile
+	hello(auth.network).api('me').then(function(r) {
+		document.getElementById(auth.network).innerHTML = "Get Albums from " + r.name + " at "+auth.network+"";
+	});
+});
+</script>
+
+
+<h3>Initiate HelloJS</h3>
+<p>Plug the app keys (client_id')</p>
+
+<script class="pre">
+
+// Initiate hellojs
+hello.init( CLIENT_IDS, {
+	scope: "files, photos",
+	redirect_uri: "../redirect.html"
+});
+</script>
+
+
+
+<h3>Get Albums</h3>
+
+<script class="pre">
+
+function getAlbums(network){
+
+	// Target where to put the list of albums
+	var list = document.getElementById('albums');
+	list.innerHTML = ''; // flush its content
+
+	//
+	// Setting force:false means we'll only trigger auth flow if the user is not already signed in with the correct credentials
+	var hi = hello(network);
+
+	hi.login({
+		force: false
+	})
+	.then(function(auth) {
+		// Get albums
+		return hi.api('me/albums');
+	})
+	.then(function(r) {
+
+		if (!r.data || r.data.length === 0) {
+			message(list, "There are no albums in the users account");
+			return
+		}
+
+		// Build buttons with the albums
+		r.data.forEach(buildAlbumBtn.bind(null, network));
+	})
+	.then(null, function (e) {
+		message(list, "Could not open albums from "+network+", try resigning in");
+	});
+
+}
+</script>
+
+<h3>Album button control</h3>
+
+<script class="pre">
+
+
+// Create a button selecting the album
+function buildAlbumBtn(network, item){
+
+	// Target where to put the list of albums
+	var list = document.getElementById('albums');
+
+	// construct the button
+	var btn = document.createElement('button');
+	btn.innerHTML = item.name;
+
+	// Append the photo
+	appendPhoto(btn, item.thumbnail);
+
+	// Add the controls
+	btn.onclick = function(){
+		// Trigger get
+		getPhotos( network, item.id );
+	};
+
+	// Append to the list
+	list.appendChild(btn);
+}
+</script>
+
+<h3>Get Photos</h3>
+
+<script class="pre">
+function getPhotos(network, id){
+
+	var list = document.getElementById('photos');
+	list.innerHTML = ''; // flush its content
+
+
+	hello(network)
+	.api('me/album', {
+		id: id,
+		limit:10
+	})
+	.then(function(r) {
+
+		if (!r.data || r.data.length === 0) {
+			message(list, "There are no photos in this album");
+			return
+		}
+
+		// Create a new image in the DOM, give it some randomness and insert it into the dom.
+		r.data.forEach(buildPhotoThumnail);
+
+	}, function(r) {
+		message(list, r && r.error ? r.error.message : 'something went wrong');
+	});
+}
+</script>
+
+<h3>Create photo thumbnail</h3>
+
+<script class="pre">
+function buildPhotoThumnail(item){
+
+	var list = document.getElementById('photos');
+
+	// Append to the list
+	var o = appendPhoto(list, item.thumbnail);
+	o.title = item.name;
+}
+
+function appendPhoto(el, url) {
+
+	if (url) {
+		var o = document.createElement('img');
+		o.className = 'picture';
+		o.src = url;
+
+		// Append to the list
+		el.appendChild(o);
+
+		return o;
+	}
+}
+
+</script>
+
+<script>
+// Report any notifications to the containing element
+function message(target, str){
+	target.appendChild(document.createTextNode(str));
+}
+</script>
+

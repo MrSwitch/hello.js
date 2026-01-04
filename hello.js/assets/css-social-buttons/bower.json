@@ -1,0 +1,23 @@
+{
+  "name": "css-social-buttons",
+  "description": "Zocial CSS social buttons",
+  "keywords": [
+    "css",
+    "font",
+    "icon",
+    "social",
+    "zocial"
+  ],
+  "homepage": "http://zocial.smcllns.com/",
+  "main": [
+    "css/zocial.css"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "*.json",
+    "*.yml",
+    "*.html",
+    "src/",
+    "templates/"
+  ]
+}

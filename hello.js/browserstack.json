@@ -1,0 +1,22 @@
+{
+	"test_framework" : "mocha",
+	"test_path": "tests/specs/index.html",
+	"browsers": [
+		"chrome_latest",
+		"firefox_latest",
+		"ie_latest",
+		"edge_latest",
+		"safari_latest",
+		{
+			"os": "iOS",
+			"os_version": "13.0",
+			"device": "iPad Air 2019",
+			"real_mobile": "false"
+		},
+		{
+			"os": "android",
+			"os_version": "8.0",
+			"device": "Samsung Galaxy S9"
+		}
+	]
+}

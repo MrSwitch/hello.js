@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+		<title>HelloJS Unit and E2E tests</title>
+		<link href="../../node_modules/mocha/mocha.css" media="screen" rel="stylesheet" type="text/css" />
+		<style>html,body{overflow:auto;-webkit-user-select: text;}</style>
+		<script src="../../node_modules/mocha/mocha.js"></script>
+		<script src="../../node_modules/sinon/pkg/sinon.js"></script>
+		<script src="../../assets/expect/index.js"></script>
+		<script src="./libs/atob.js"></script>
+		<script src="./libs/Blob.js"></script>
+		<script src="../../src/hello.js"></script>
+	</head>
+	<body>
+		<!-- Required for browser reporter -->
+		<div id="mocha"></div>
+		<script>
+			mocha.ui('bdd');
+			mocha.setup({timeout: 10000});
+		</script>
+		<script src="./bundle.js"></script>
+		<script>
+			if (window.mochaPhantomJS) { window.mochaPhantomJS.run(); }
+			else { mocha.run(); }
+		</script>
+
+	</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="client_ids.js"></script>
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/modules/google.js"></script>
+
+<h1>hello, then</h1>
+
+<p>The functions <code>hello.api</code>, <code>hello.login</code> and <code>hello.logout</code> return a <a href="http://promisesaplus.com/">Promises/A+ 1.1.1</a> compliant then method.</p>
+
+<h2>Example hello.api().then()</h2>
+<p>This example shows how to use Promises to act on the response from hello.login and hello.api calls.</p>
+
+<button id='google' onclick="login('google');">google profile</button>
+
+<script class="pre">
+function login(network){
+	// Make a login call and handle the response using promises
+	var hi = hello(network);
+	hi.login().then(function(){
+		console.log('fullfilled', 'making api call');
+		// Reurn another promise to get the users profile.
+		return 	hi.api( 'me' );
+	}).then(function(p){
+		// Print it to console.
+		console.log('hello.api(me) was fullfilled', p);
+		return p;
+	}).then(function(p){
+		// Insert it into thumbnail
+		document.getElementById(network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ network +" as " + p.name;
+	}).then(null, function(e){
+		// Uh oh
+		console.error(e);
+	});
+}
+</script>
+
+
+<h2>Promise.all</h2>
+
+<p><code>Promise.all</code> is not native in IE yet so here's a shim</p>
+<script src="http://s3.amazonaws.com/es6-promises/promise-1.0.0.min.js" class="pre"></script>
+
+
+<h3>Example Promise.all</h3>
+
+
+<p>
+<button id='google' onclick="friendsAndContacts('google');">google friends and contacts</button>
+
+<pre id="friends" placeholder="Please click the button above to get friends and contacts here."></pre>
+
+<script class="pre">
+function friendsAndContacts(network){
+	// Make a login call and handle the response using promises
+	hello(network).login({scope:'friends'}).then(function(){
+		console.log('fullfilled', 'making api call');
+		// Reurn another promise to get the users profile.
+		return Promise.all([
+			hello( network ).api( 'me/friends' ),
+			hello( network ).api( 'me/contacts' )
+		]);
+	}).then(function(all){
+
+		// Build a list of friends
+		var a = [];
+		for(var i=0;i<all.length;i++){
+			for(var j=0;j<all[i].data.length;j++){
+				a.push(all[i].data[j].name);
+			}
+		}
+		document.getElementById('friends').innerHTML = a.join(',');
+
+	}, function(e){
+		// Uh oh
+		console.error(e);
+	});
+}
+</script>
+
+
+
+<p>Initiate app</p>
+<script class="pre">
+hello.init( {
+	google : CLIENT_IDS.google
+},
+{
+	redirect_uri : '../redirect.html'
+});
+</script>

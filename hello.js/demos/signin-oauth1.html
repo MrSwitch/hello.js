@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="client_ids.js"></script>
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/modules/dropbox.js"></script>
+<script src="../src/modules/yahoo.js"></script>
+<script src="../src/modules/twitter.js"></script>
+
+
+<h1>HelloJS w/ OAuth 1.0&amp;1.0a</h1>
+
+<button id='yahoo' onclick="hello.login('yahoo');">yahoo</button>
+<button id='dropbox' onclick="hello.login('dropbox');">dropbox</button>
+<button id='twitter' onclick="hello.login('twitter');">twitter</button>
+
+<script class="pre">
+
+hello.on('auth.login', function(r){
+	// Get Profile
+	hello(r.network).api('me', function(p){
+		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
+	});
+});
+
+hello.on('auth.failed', function(r){
+	console.log(r);
+});
+
+hello.init({
+	yahoo : YAHOO_CLIENT_ID,
+	twitter : TWITTER_CLIENT_ID,
+	dropbox : DROPBOX_CLIENT_ID
+}, {
+	// defines the proxy service able to sign the OAuth1 requests
+	oauth_proxy: OAUTH_PROXY_URL,
+
+	redirect_uri:'../redirect.html'
+});
+
+</script>

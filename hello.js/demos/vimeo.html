@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+<script src="client_ids.js"></script>
+
+<title>hello( vimeo )</title>
+<h1>hello( vimeo )</h1>
+<button onclick="login('vimeo');">Login Vimeo</button>
+
+<pre class="response"></pre>
+
+<script src="../src/hello.js" class="pre"></script>
+<script src="../src/modules/vimeo.js" class="pre"></script>
+
+<script class="pre">
+function login(network){
+	
+	var app = hello(network);
+	app.login()
+	.then(function() {
+		app.api('me', function(r) {
+			document.body.querySelector('.response').appendChild(document.createTextNode(JSON.stringify(r, true, 2)));
+		});
+	})
+	.then(null, console.error.bind(console));
+}
+</script>
+
+<p>Initiate the library</p>
+
+<script class="pre">
+hello.init({
+	vimeo : "69000585ece5a658a7d57911da381472ab4bc406"
+},{
+	oauth_proxy: OAUTH_PROXY_URL,
+	redirect_uri:'../redirect.html'
+});
+</script>

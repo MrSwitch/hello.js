@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="../../demos/client_ids.js"></script>
+<script>
+// Add Dropbox
+CLIENT_IDS.dropbox = DROPBOX_CLIENT_ID;
+</script>
+<h1>hello.ui.filePicker</h1>
+<blockquote>
+	<p>The filePicker UI widget is an easy way to select files to bring into your web app, as a HelloJS plugin it supports the popular cloud drives too.</p>
+</blockquote>
+<style>#storyboard img{height:36px;}</style>
+<h2>Opening up a filePicker dialog</h2>
+<button type="button" id="demo1" class="fp-button" style="vertical-align:top;">File Picker Demo</button>
+<span id="storyboard"></span>
+<p>In its simplest form we trigger <i>hello.ui.filePicker(<em>callback</em>)</i>. The callback in this example is going to loop through the file responses e.g...</p>
+<script class="pre">
+document.getElementById("demo1").onclick = function(){
+	var storyboard = document.getElementById("storyboard");
+	hello.ui.filePicker(function(r){
+		console.log("selected:" + r.files.length + " files");
+		for(var i=0;i<r.files.length;i++){
+			var f = r.files[i];
+			var a = document.createElement('img');
+			if(f.thumbnail) a.src = f.thumbnail;
+			a.title = f.name || f.id;
+			storyboard.appendChild(a);
+			console.log(f);
+		}
+		console.log("selected:" + r.files.length + " files");
+	});
+}
+</script>
+
+<h2>Setup</h2>
+<p>The prerequirements for the filePicker include</p>
+<ol>
+<li>The HelloJS SDK, and any additional modules
+
+<script class="pre" src="../../dist/hello.all.js"></script>
+
+<li>The FilePicker Stylesheet
+<link class="pre" rel="stylesheet" href="filePicker.css"/>
+
+<li>The Social buttons
+<link rel="stylesheet" href="/css-social-buttons/css/zocial.css"/>
+
+<li>The FilePicker Script
+<script class="pre" src="filePicker.js"></script>
+
+<li>And HelloJS must be initiated like with the "files", "publish_files" and "photos" scope, like so...
+<script class="pre">
+hello.init( CLIENT_IDS, {
+	scope:"files, publish_files, photos", 
+	redirect_uri:'../../redirect.html',
+	oauth_proxy : OAUTH_PROXY_URL
+});
+</script>
+</ol>
+
+<h2>Alternative: Opening on demand</h2>
+<p>It might be you only want to load this on demand. The following example merely opens up a popup to the URL where the FilePicker code resides, e.g... </p>
+<button type="button" id="demo3" class="fp-button">File Picker Popup On Demand</button>
+<script class="pre">
+document.getElementById("demo3").onclick = function(){
+	var callbackId = "callback_"+parseInt(Math.random()*1e6,10).toString(16);
+	var win = window.open("popup.html#callback="+callbackId, "popup", "width=800px, height=500px");
+	window[callbackId] = function(r){
+		console.log("Ondemand response");
+		console.log(r);
+		alert("OnDemand response");
+	}
+}
+</script>
+
+
+<h2>Handling the FileList response</h2>
+
+<button type="button" id="demo4" class="fp-button">File Picker Photo Demo</button>
+<script class="pre">
+document.getElementById("demo4").onclick = function(){
+	hello.ui.filePicker({
+		type : 'image'
+	},function(r){alert("selected:" + r.files.length + " files");});
+}
+</script>
+
+<form>
+	<label for="file">Select a file</label> <input type="file" id="file" name="file"/> <button type="button" onclick="getFile(document.getElementById('file'))">FilePicker</button>
+</form>
+
+<script class="pre">
+function getFile(fileinput){
+	// Trigger the form input selection
+	hello.ui.filePicker(function(response){
+
+		// Response
+		for(var i=0;i<response.files.length;i++){
+			var o = response.files[i];
+			console.log('User has selected name:' + o.name + " source:" + o.source + "");
+		}
+	});
+}
+</script>
+
+<table>
+
+	<thead>
+		<tr>
+			<th>name</th>
+			<th>type</th>
+			<th>example</th>
+			<th>description</th>
+			<th>default</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>element</td>
+			<td><i>HTMLElement<i></td>
+			<td></td>
+			<td>HTML DOM element in which to create the filePicker widget</td>
+			<td>creates its own</td>
+		</tr>
+		<tr>
+			<td>type</td>
+			<td><q>string</q></td>
+			<td><q>image</q>, <q>image/png</q>, <q>video</q>, <q>text</q></td>
+			<td></td>
+			<td><q>*</q></td>
+		</tr>
+		<tr>
+			<td>multiple</td>
+			<td><i>bool</i>, <i>integer<i></td>
+			<td><i>5</i></td>
+			<td>The number of files the user is allowed to select. <i>false</i> or <i>0</i>: means they may select only one, <i>n</i> greater than 0 denotes how many they may select and <i>true</i> means that an unlimited number may be selected</td>
+			<td><i>true</i></td>
+		</tr>
+	</tbody>
+</table>

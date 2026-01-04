@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+<script src="../client_ids.js"></script>
+<title>Windows Live demo</title>
+
+<script class="pre" src="https://apis.google.com/js/client:plusone.js?onload=render"></script>
+
+<script>
+
+var token;
+
+function signinCallback(authResult) {
+	if (authResult['access_token']) {
+		// Update the app to reflect a signed in user
+		// Hide the sign-in button now that the user is authorized, for example:
+		document.getElementById('customBtn').setAttribute('style', 'display: none');
+		token = authResult['access_token'];
+
+	} else if (authResult['error']) {
+		// Update the app to reflect a signed out user
+		// Possible error values:
+		//   "user_signed_out" - User is signed-out
+		//   "access_denied" - User denied access to your app
+		//   "immediate_failed" - Could not automatically log in the user
+		console.log('Sign-in state: ' + authResult['error']);
+	}
+}
+
+function disconnectUser() {
+
+	// Perform an asynchronous GET request.
+	jsonp('https://accounts.google.com/o/oauth2/revoke?token=' + token + '&callback=?', function(){
+		console.log("disconnected");
+	});
+}
+
+
+var signinParams = {
+	'clientid' : GOOGLE_CLIENT_ID,
+	'cookiepolicy' : 'single_host_origin',
+	callback:signinCallback,
+};
+</script>
+
+<h1>Google SDK</h1>
+
+<p>Signin</p>
+<button id="customBtn" onclick="gapi.auth.signIn(signinParams);">
+	<span class="success">Signin Google</span>
+</button>
+
+<p>Signout: of this app only</p>
+<button onclick="gapi.auth.signOut();">Logout (delete local session)</button> <button onclick=" disconnectUser();">Revoke token</button>
