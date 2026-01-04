@@ -1,4 +1,4 @@
-/*! hellojs v1.20.0 - (c) 2012-2023 Andrew Dodson - MIT https://adodson.com/hello.js/LICENSE */
+/*! hellojs v1.21.0 - (c) 2012-2026 Andrew Dodson - MIT https://adodson.com/hello.js/LICENSE */
 // ES5 Object.create
 if (!Object.create) {
 
@@ -171,6 +171,7 @@ hello.utils = {
 
 	// Extend the first object with the properties and methods of the second
 	extend: function(r /*, a[, b[, ...]] */) {
+		const dangerousKeys = ['__proto__', 'constructor', 'prototype'];
 
 		// Get the arguments as an array but ommit the initial item
 		Array.prototype.slice.call(arguments, 1).forEach(function(a) {
@@ -180,7 +181,7 @@ hello.utils = {
 			else if (r && (r instanceof Object || typeof r === 'object') && a && (a instanceof Object || typeof a === 'object') && r !== a) {
 				for (var x in a) {
 					// Prevent prototype pollution
-					if (x === '__proto__' || x === 'constructor') {
+					if (dangerousKeys.includes(x)) {
 						continue;
 					}
 

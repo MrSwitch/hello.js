@@ -1,3 +1,16 @@
+# [1.21.0](https://github.com/MrSwitch/hello.js/compare/v1.20.0...v1.21.0) (2026-01-04)
+
+
+### Bug Fixes
+
+* **ci:** address issues ([f6f63dd](https://github.com/MrSwitch/hello.js/commit/f6f63dd5cdf0e2c4ea81fff3fbd9b523b6145bd5))
+* prevent prototype pollution in extend function ([468d253](https://github.com/MrSwitch/hello.js/commit/468d2532d8380faa606aa98e81be0f47fca890fc))
+
+
+### Features
+
+* **vk:** Add required 'v' API version parameter to VK API requests ([da2b6d1](https://github.com/MrSwitch/hello.js/commit/da2b6d195d4cab50e113180eba43230210891083)), closes [#544](https://github.com/MrSwitch/hello.js/issues/544)
+
 # [1.20.0](https://github.com/MrSwitch/hello.js/compare/v1.19.5...v1.20.0) (2023-01-25)
 
 
