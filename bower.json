@@ -1,7 +1,7 @@
 {
   "name": "hello",
   "homepage": "http://adodson.com/hello.js/",
-  "license": "https://github.com/MrSwitch/hello.js/blob/master/LICENSE",
+  "license": "https://github.com/MrSwitch/hello.js/blob/main/LICENSE",
   "repository": {
     "type": "git",
     "url": "git://github.com:MrSwitch/hello.js.git"

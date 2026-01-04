@@ -110,9 +110,9 @@ Here are some more demos...
 
 ## Install
 
-Download: [HelloJS](https://github.com/MrSwitch/hello.js/raw/master/dist/hello.all.js) | [HelloJS (minified)](https://github.com/MrSwitch/hello.js/raw/master/dist/hello.all.min.js)
+Download: [HelloJS](https://github.com/MrSwitch/hello.js/raw/main/dist/hello.all.js) | [HelloJS (minified)](https://github.com/MrSwitch/hello.js/raw/main/dist/hello.all.min.js)
 
-Compiled source, which combines all of the modules, can be obtained from [GitHub](https://github.com/MrSwitch/hello.js/tree/master/dist), and source files can be found in [Source](https://github.com/MrSwitch/hello.js/tree/master/src).
+Compiled source, which combines all of the modules, can be obtained from [GitHub](https://github.com/MrSwitch/hello.js/tree/main/dist), and source files can be found in [Source](https://github.com/MrSwitch/hello.js/tree/main/src).
 
 **Note:** Some services require OAuth1 or server-side OAuth2 authorization. In such cases, HelloJS communicates with an [OAuth Proxy](#oauth-proxy).
 
