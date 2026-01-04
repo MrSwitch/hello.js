@@ -179,7 +179,7 @@ hello.utils.extend(hello, {
 		var _this = this;
 		var utils = _this.utils;
 		var error = utils.error;
-		var promise = utils.Promise();
+		var {promise, reject, resolve} = utils.createDeferredPromise();
 
 		// Get parameters
 		var p = utils.args({network: 's', options: 'o', callback: 'f'}, arguments);
@@ -200,20 +200,21 @@ hello.utils.extend(hello, {
 		p.network = p.network || _this.settings.default_service;
 
 		// Bind callback to both reject and fulfill states
-		promise.proxy.then(p.callback, p.callback);
+		promise.then(p.callback, p.callback);
 
 		// Trigger an event on the global listener
 		function emit(s, value) {
 			hello.emit(s, value);
 		}
 
-		promise.proxy.then(emit.bind(this, 'auth.login auth'), emit.bind(this, 'auth.failed auth'));
+		promise.then(emit.bind(this, 'auth.login auth'), emit.bind(this, 'auth.failed auth'));
 
 		// Is our service valid?
 		if (typeof (p.network) !== 'string' || !(p.network in _this.services)) {
 			// Trigger the default login.
 			// Ahh we dont have one.
-			return promise.reject(error('invalid_network', 'The provided network was not recognized'));
+			reject(error('invalid_network', 'The provided network was not recognized'));
+			return promise;
 		}
 
 		var provider = _this.services[p.network];
@@ -240,14 +241,14 @@ hello.utils.extend(hello, {
 				utils.store(obj.network, obj);
 
 				// Fulfill a successful login
-				promise.fulfill({
+				resolve({
 					network: obj.network,
 					authResponse: obj
 				});
 			}
 			else {
 				// Reject a successful login
-				promise.reject(obj);
+				reject(obj);
 			}
 		});
 
@@ -336,7 +337,7 @@ hello.utils.extend(hello, {
 				if (diff.length === 0) {
 
 					// OK trigger the callback
-					promise.fulfill({
+					resolve({
 						unchanged: true,
 						network: p.network,
 						authResponse: session
@@ -421,18 +422,16 @@ hello.utils.extend(hello, {
 			var timer = setInterval(function() {
 				if (!popup || popup.closed) {
 					clearInterval(timer);
-					if (!promise.state) {
 
-						var response = error('cancelled', 'Login has been cancelled');
+					var response = error('cancelled', 'Login has been cancelled');
 
-						if (!popup) {
-							response = error('blocked', 'Popup was blocked');
-						}
-
-						response.network = p.network;
-
-						promise.reject(response);
+					if (!popup) {
+						response = error('blocked', 'Popup was blocked');
 					}
+
+					response.network = p.network;
+
+					reject(response);
 				}
 			}, 100);
 		}
@@ -441,7 +440,7 @@ hello.utils.extend(hello, {
 			window.location = url;
 		}
 
-		return promise.proxy;
+		return promise;
 
 		function encodeFunction(s) {return s;}
 
@@ -458,21 +457,21 @@ hello.utils.extend(hello, {
 		var error = utils.error;
 
 		// Create a new promise
-		var promise = utils.Promise();
+		var {promise, resolve, reject} = utils.createDeferredPromise();
 
 		var p = utils.args({name: 's', options: 'o', callback: 'f'}, arguments);
 
 		p.options = p.options || {};
 
 		// Add callback to events
-		promise.proxy.then(p.callback, p.callback);
+		promise.then(p.callback, p.callback);
 
 		// Trigger an event on the global listener
 		function emit(s, value) {
 			hello.emit(s, value);
 		}
 
-		promise.proxy.then(emit.bind(this, 'auth.logout auth'), emit.bind(this, 'error'));
+		promise.then(emit.bind(this, 'auth.logout auth'), emit.bind(this, 'error'));
 
 		// Network
 		p.name = p.name || this.settings.default_service;
@@ -480,7 +479,7 @@ hello.utils.extend(hello, {
 
 		if (p.name && !(p.name in _this.services)) {
 
-			promise.reject(error('invalid_network', 'The network was unrecognized'));
+			reject(error('invalid_network', 'The network was unrecognized'));
 
 		}
 		else if (p.name && p.authResponse) {
@@ -492,7 +491,7 @@ hello.utils.extend(hello, {
 				utils.store(p.name, null);
 
 				// Emit events by default
-				promise.fulfill(hello.utils.merge({network: p.name}, opts || {}));
+				resolve(hello.utils.merge({network: p.name}, opts || {}));
 			};
 
 			// Run an async operation to remove the users session
@@ -514,7 +513,7 @@ hello.utils.extend(hello, {
 					}
 					else if (logout === undefined) {
 						// The callback function will handle the response.
-						return promise.proxy;
+						return promise;
 					}
 				}
 			}
@@ -523,10 +522,10 @@ hello.utils.extend(hello, {
 			callback(_opts);
 		}
 		else {
-			promise.reject(error('invalid_session', 'There was no session to remove'));
+			reject(error('invalid_session', 'There was no session to remove'));
 		}
 
-		return promise.proxy;
+		return promise;
 	},
 
 	// Returns all the sessions that are subscribed too
@@ -925,183 +924,29 @@ hello.utils.extend(hello.utils, {
 		return true;
 	},
 
-	/* eslint-disable */
+	// Create a deferred promise with externally accessible resolve/reject functions
+	// Returns an object with {promise, resolve, reject}
+	createDeferredPromise: function() {
+		// Use modern Promise.withResolvers if available, otherwise polyfill
+		if (Promise.withResolvers) {
+			return Promise.withResolvers();
+		}
 
-	/*!
-	 **  Thenable -- Embeddable Minimum Strictly-Compliant Promises/A+ 1.1.1 Thenable
-	 **  Copyright (c) 2013-2014 Ralf S. Engelschall <http://engelschall.com>
-	 **  Licensed under The MIT License <http://opensource.org/licenses/MIT>
-	 **  Source-Code distributed on <http://github.com/rse/thenable>
-	 */
-	Promise: (function() {
-		/*  promise states [Promises/A+ 2.1]  */
-		var STATE_PENDING = 0; /*  [Promises/A+ 2.1.1]  */
-		var STATE_FULFILLED = 1; /*  [Promises/A+ 2.1.2]  */
-		var STATE_REJECTED = 2; /*  [Promises/A+ 2.1.3]  */
+		// Polyfill for older browsers
+		var resolve;
+		var reject;
+		var promise = new Promise(function(res, rej) {
+			resolve = res;
+			reject = rej;
+		});
 
-		/*  promise object constructor  */
-		var api = function(executor) {
-			/*  optionally support non-constructor/plain-function call  */
-			if (!(this instanceof api))
-				return new api(executor);
-
-			/*  initialize object  */
-			this.id = "Thenable/1.0.6";
-			this.state = STATE_PENDING; /*  initial state  */
-			this.fulfillValue = undefined; /*  initial value  */ /*  [Promises/A+ 1.3, 2.1.2.2]  */
-			this.rejectReason = undefined; /*  initial reason */ /*  [Promises/A+ 1.5, 2.1.3.2]  */
-			this.onFulfilled = []; /*  initial handlers  */
-			this.onRejected = []; /*  initial handlers  */
-
-			/*  provide optional information-hiding proxy  */
-			this.proxy = {
-				then: this.then.bind(this)
-			};
-
-			/*  support optional executor function  */
-			if (typeof executor === "function")
-				executor.call(this, this.fulfill.bind(this), this.reject.bind(this));
+		return {
+			promise: promise,
+			resolve: resolve,
+			reject: reject
 		};
+	},
 
-		/*  promise API methods  */
-		api.prototype = {
-			/*  promise resolving methods  */
-			fulfill: function(value) { return deliver(this, STATE_FULFILLED, "fulfillValue", value); },
-			reject: function(value) { return deliver(this, STATE_REJECTED, "rejectReason", value); },
-
-			/*  "The then Method" [Promises/A+ 1.1, 1.2, 2.2]  */
-			then: function(onFulfilled, onRejected) {
-				var curr = this;
-				var next = new api(); /*  [Promises/A+ 2.2.7]  */
-				curr.onFulfilled.push(
-					resolver(onFulfilled, next, "fulfill")); /*  [Promises/A+ 2.2.2/2.2.6]  */
-				curr.onRejected.push(
-					resolver(onRejected, next, "reject")); /*  [Promises/A+ 2.2.3/2.2.6]  */
-				execute(curr);
-				return next.proxy; /*  [Promises/A+ 2.2.7, 3.3]  */
-			}
-		};
-
-		/*  deliver an action  */
-		var deliver = function(curr, state, name, value) {
-			if (curr.state === STATE_PENDING) {
-				curr.state = state; /*  [Promises/A+ 2.1.2.1, 2.1.3.1]  */
-				curr[name] = value; /*  [Promises/A+ 2.1.2.2, 2.1.3.2]  */
-				execute(curr);
-			}
-			return curr;
-		};
-
-		/*  execute all handlers  */
-		var execute = function(curr) {
-			if (curr.state === STATE_FULFILLED)
-				execute_handlers(curr, "onFulfilled", curr.fulfillValue);
-			else if (curr.state === STATE_REJECTED)
-				execute_handlers(curr, "onRejected", curr.rejectReason);
-		};
-
-		/*  execute particular set of handlers  */
-		var execute_handlers = function(curr, name, value) {
-			/* global process: true */
-			/* global setImmediate: true */
-			/* global setTimeout: true */
-
-			/*  short-circuit processing  */
-			if (curr[name].length === 0)
-				return;
-
-			/*  iterate over all handlers, exactly once  */
-			var handlers = curr[name];
-			curr[name] = []; /*  [Promises/A+ 2.2.2.3, 2.2.3.3]  */
-			var func = function() {
-				for (var i = 0; i < handlers.length; i++)
-					handlers[i](value); /*  [Promises/A+ 2.2.5]  */
-			};
-
-			/*  execute procedure asynchronously  */ /*  [Promises/A+ 2.2.4, 3.1]  */
-			if (typeof process === "object" && typeof process.nextTick === "function")
-				process.nextTick(func);
-			else if (typeof setImmediate === "function")
-				setImmediate(func);
-			else
-				setTimeout(func, 0);
-		};
-
-		/*  generate a resolver function  */
-		var resolver = function(cb, next, method) {
-			return function(value) {
-				if (typeof cb !== "function") /*  [Promises/A+ 2.2.1, 2.2.7.3, 2.2.7.4]  */
-					next[method].call(next, value); /*  [Promises/A+ 2.2.7.3, 2.2.7.4]  */
-				else {
-					var result;
-					try { result = cb(value); } /*  [Promises/A+ 2.2.2.1, 2.2.3.1, 2.2.5, 3.2]  */
-					catch (e) {
-						next.reject(e); /*  [Promises/A+ 2.2.7.2]  */
-						return;
-					}
-					resolve(next, result); /*  [Promises/A+ 2.2.7.1]  */
-				}
-			};
-		};
-
-		/*  "Promise Resolution Procedure"  */ /*  [Promises/A+ 2.3]  */
-		var resolve = function(promise, x) {
-			/*  sanity check arguments  */ /*  [Promises/A+ 2.3.1]  */
-			if (promise === x || promise.proxy === x) {
-				promise.reject(new TypeError("cannot resolve promise with itself"));
-				return;
-			}
-
-			/*  surgically check for a "then" method
-				(mainly to just call the "getter" of "then" only once)  */
-			var then;
-			if ((typeof x === "object" && x !== null) || typeof x === "function") {
-				try { then = x.then; } /*  [Promises/A+ 2.3.3.1, 3.5]  */
-				catch (e) {
-					promise.reject(e); /*  [Promises/A+ 2.3.3.2]  */
-					return;
-				}
-			}
-
-			/*  handle own Thenables    [Promises/A+ 2.3.2]
-				and similar "thenables" [Promises/A+ 2.3.3]  */
-			if (typeof then === "function") {
-				var resolved = false;
-				try {
-					/*  call retrieved "then" method */ /*  [Promises/A+ 2.3.3.3]  */
-					then.call(x,
-						/*  resolvePromise  */ /*  [Promises/A+ 2.3.3.3.1]  */
-						function(y) {
-							if (resolved) return; resolved = true; /*  [Promises/A+ 2.3.3.3.3]  */
-							if (y === x) /*  [Promises/A+ 3.6]  */
-								promise.reject(new TypeError("circular thenable chain"));
-							else
-								resolve(promise, y);
-						},
-
-						/*  rejectPromise  */ /*  [Promises/A+ 2.3.3.3.2]  */
-						function(r) {
-							if (resolved) return; resolved = true; /*  [Promises/A+ 2.3.3.3.3]  */
-							promise.reject(r);
-						}
-					);
-				}
-				catch (e) {
-					if (!resolved) /*  [Promises/A+ 2.3.3.3.3]  */
-						promise.reject(e); /*  [Promises/A+ 2.3.3.3.4]  */
-				}
-				return;
-			}
-
-			/*  handle other values  */
-			promise.fulfill(x); /*  [Promises/A+ 2.3.4, 2.3.3.4]  */
-		};
-
-		/*  export API  */
-		return api;
-	})(),
-
-	/* eslint-enable */
 
 	// Event
 	// A contructor superclass for adding event menthods, on, off, emit.
@@ -1656,8 +1501,8 @@ hello.api = function() {
 	var utils = _this.utils;
 	var error = utils.error;
 
-	// Construct a new Promise object
-	var promise = utils.Promise();
+	// Construct a new Promise object with external resolvers
+	var {promise, resolve, reject} = utils.createDeferredPromise();
 
 	// Arguments
 	var p = utils.args({path: 's!', query: 'o', method: 's', data: 'o', timeout: 'i', callback: 'f'}, arguments);
@@ -1685,7 +1530,8 @@ hello.api = function() {
 	// Remove the network from path, e.g. facebook:/me/friends
 	// Results in { network : facebook, path : me/friends }
 	if (!p.path) {
-		return promise.reject(error('invalid_path', 'Missing the path parameter from the request'));
+		reject(error('invalid_path', 'Missing the path parameter from the request'));
+		return promise;
 	}
 
 	p.path = p.path.replace(/^\/+/, '');
@@ -1705,14 +1551,16 @@ hello.api = function() {
 	// INVALID
 	// Is there no service by the given network name?
 	if (!o) {
-		return promise.reject(error('invalid_network', 'Could not match the service requested: ' + p.network));
+		reject(error('invalid_network', 'Could not match the service requested: ' + p.network));
+		return promise;
 	}
 
 	// PATH
 	// As long as the path isn't flagged as unavaiable, e.g. path == false
 
 	if (!(!(p.method in o) || !(p.path in o[p.method]) || o[p.method][p.path] !== false)) {
-		return promise.reject(error('invalid_path', 'The provided path is not available on the selected network'));
+		reject(error('invalid_path', 'The provided path is not available on the selected network'));
+		return promise;
 	}
 
 	// PROXY
@@ -1810,7 +1658,7 @@ hello.api = function() {
 		getPath(url);
 	}
 
-	return promise.proxy;
+	return promise;
 
 	// If url needs a base
 	// Wrap everything in
@@ -1828,7 +1676,7 @@ hello.api = function() {
 				delete p.data[key];
 			}
 			else if (!defaults) {
-				promise.reject(error('missing_attribute', 'The attribute ' + key + ' is missing from the request'));
+				reject(error('missing_attribute', 'The attribute ' + key + ' is missing from the request'));
 			}
 
 			return val;
@@ -1852,10 +1700,10 @@ hello.api = function() {
 			if (!p.formatResponse) {
 				// Bad request? error statusCode or otherwise contains an error response vis JSONP?
 				if (typeof headers === 'object' ? (headers.statusCode >= 400) : (typeof r === 'object' && 'error' in r)) {
-					promise.reject(r);
+					reject(r);
 				}
 				else {
-					promise.fulfill(r);
+					resolve(r);
 				}
 
 				return;
@@ -1907,10 +1755,10 @@ hello.api = function() {
 			// Dispatch to listeners
 			// Emit events which pertain to the formatted response
 			if (!r || 'error' in r) {
-				promise.reject(r);
+				reject(r);
 			}
 			else {
-				promise.fulfill(r);
+				resolve(r);
 			}
 		});
 	}
