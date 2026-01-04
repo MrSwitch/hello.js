@@ -1,3 +1,10 @@
+## [1.21.1](https://github.com/MrSwitch/hello.js/compare/v1.21.0...v1.21.1) (2026-01-04)
+
+
+### Bug Fixes
+
+* **utils:** use native promise ([#708](https://github.com/MrSwitch/hello.js/issues/708)) ([4502a95](https://github.com/MrSwitch/hello.js/commit/4502a95f250ebe7b59b50764c31b9d1c82bbbce2))
+
 # [1.21.0](https://github.com/MrSwitch/hello.js/compare/v1.20.0...v1.21.0) (2026-01-04)
 
 
