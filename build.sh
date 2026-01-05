@@ -6,6 +6,9 @@ version=`node -e "console.log(require('./package.json').version)"`
 # Year
 year=$(date +'%Y')
 
+# Make dist directory if it doesn't exist
+mkdir -p dist
+
 # Set current working directory to src/
 cd src/
 
