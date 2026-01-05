@@ -6,3 +6,4 @@ src/*.html
 src/**/*.html
 tests/specs/bundle.js
 .env.sh
+dist/
