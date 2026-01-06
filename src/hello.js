@@ -10,6 +10,7 @@
  * @license MIT: You are free to use and modify this code for any use, on the condition that this copyright notice remains.
  */
 
+// returns hello.use(name) :)
 var hello = function(name) {
 	return hello.use(name);
 };
