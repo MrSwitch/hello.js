@@ -1,3 +1,10 @@
+## [1.21.2](https://github.com/MrSwitch/hello.js/compare/v1.21.1...v1.21.2) (2026-01-08)
+
+
+### Bug Fixes
+
+* **ci:** ensures the gh-pages build includes latest version ([e2ffd69](https://github.com/MrSwitch/hello.js/commit/e2ffd69b93afb547dc22728120a3e6df4c1f187a))
+
 ## [1.21.1](https://github.com/MrSwitch/hello.js/compare/v1.21.0...v1.21.1) (2026-01-04)
 
 
