@@ -1,0 +1,7 @@
+{
+  "meta": {
+    "error_type": "OAuthParameterException",
+    "code": 400,
+    "error_message": "Missing client_id or access_token URL parameter."
+  }
+}

@@ -1,0 +1,23 @@
+{
+   "data": [
+      {
+         "id": "27b855245ea869d8", 
+         "name": "Robert Levy"
+      }, {
+         "id": "64280cd529986db3", 
+         "name": "Patrick Neeman"
+      }, {
+         "id": "b0fccf2acadc8811", 
+         "name": "Andrew Dodson"
+      }, {
+         "id": "6cbd89211d21e20f", 
+         "name": "Drew Dodson"
+      }, {
+         "id": "db8dd2af244b61e5", 
+         "name": "Afolabi Olasebikan"
+      }
+   ], 
+   "paging": {
+      "next": "/me/friends?offset=5&limit=5"
+   }
+}

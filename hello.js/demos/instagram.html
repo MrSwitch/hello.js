@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="client_ids.js"></script>
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/modules/instagram.js"></script>
+
+<title>hello( instagram )</title>
+<h1>hello( instagram )</h1>
+
+<button id='profile' onclick="getPhotos()">Get instagram photos</button>
+<div id="result"></div>
+<button id="more" style="display:none;">Load more</button>
+
+<p>The button above executes <code>getPhotos()</code></p>
+
+<script class="pre">
+function getPhotos(){
+
+	// Define an instagram instance
+	var instagram = hello( 'instagram' );
+
+	// Trigger login to instagram
+	instagram.login().then( function(){
+
+		// Get Profile
+		instagram.api('me').then( profileHandler, errorHandler);
+
+		// Get user photos
+		instagram.api('me/photos').then( photosHandler, errorHandler );
+
+	},errorHandler);
+}
+
+
+function profileHandler( r ){
+
+	var profile = document.getElementById( 'profile' );
+
+	profile.innerHTML = "<img src='"+ r.thumbnail + "' width=24/>Connected to instagram as " + r.name;
+
+}
+
+
+function photosHandler( r ){
+
+	for(var i=0;i<r.data.length;i++){
+		var pic = r.data[i];
+		var img = document.createElement('img');
+		img.title = pic.name;
+		img.src = pic.thumbnail;
+		document.getElementById( 'result' ).appendChild( img );
+	}
+
+	var next = r.paging && r.paging.next;
+
+	more.style.display = next ? 'block' : 'none';
+	more.onclick = function(){
+
+		hello( 'instagram' ).api( next ).then( photosHandler, errorHandler );
+
+	};
+}
+
+</script>
+
+<p>Set up your client id</p>
+
+<script class="pre">
+hello.init({
+	instagram : INSTAGRAM_CLIENT_ID
+},{
+	scope : 'photos',
+	redirect_uri:'../redirect.html'
+});
+</script>
+
+
+<h2>Like</h2>
+
+<button onclick="getPopular()">Get popular photos</button>
+
+<p>Once photos are loaded, click the photo to 'like'</p>
+
+<div id="popular"></div>
+
+<style>
+.liked{
+	border:5px solid lime;
+}
+</style>
+<script class="pre">
+function getPopular(){
+
+	var instagram = hello('instagram');
+
+	instagram.login({scope:'publish'}).then(function(){
+
+		// Custom instagram endpoint
+		return instagram.api('media/popular');
+	})
+	.then(popularMediaHandler, errorHandler)
+}
+
+
+function popularMediaHandler( r ){
+
+	var popularContainer = document.getElementById( 'popular' );
+
+	r.data.forEach(function(pic){
+
+		var img = document.createElement('img');
+		img.title = pic.caption.text;
+		img.src = pic.images.thumbnail.url;
+		img.className = ( pic.user_has_liked ? 'liked' : '' );
+
+		img.onclick = likePic.bind( pic, img );
+
+		popularContainer.appendChild( img );
+
+	});
+
+}
+
+
+function likePic(img){
+
+	var pic = this;
+
+	var method = !pic.user_has_liked ? 'post' : 'delete';
+
+	hello( 'instagram' ).api( 'me/like', method, {
+		id: pic.id
+	})
+	.then(function(r) {
+		if (r.meta.code === 200) {
+			pic.user_has_liked = method === 'post';
+			img.className = ( pic.user_has_liked ? 'liked' : '' );
+		}
+	}, console.error.bind(console));
+};
+
+
+</script>
+
+
+<script>
+
+function errorHandler(e){
+	log("Failed making API request " + e.error.message );
+}
+
+function log(str){
+	console.log(str);
+	document.getElementById('result').appendChild(document.createTextNode(str));
+}
+</script>

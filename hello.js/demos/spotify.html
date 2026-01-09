@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="client_ids.js"></script>
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/modules/spotify.js"></script>
+
+<title>hello( spotify )</title>
+<h1>hello( spotify )</h1>
+
+<button id='spotify' onclick="hello.login('spotify');">Spotify</button>
+<div id="result"></div>
+<script class="pre">
+	hello.on('auth.login', function(r){
+		// Get Profile
+		console.log("auth.login");
+		var hi = hello(r.network)
+		hi.api('me').then(function(p){
+			document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
+		});
+	});
+
+	hello.init({
+		spotify : SPOTIFY_CLIENT_ID
+	},	{redirect_uri:'../redirect.html'});
+</script>

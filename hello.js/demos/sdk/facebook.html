@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+<script src="../client_ids.js"></script>
+<div id="fb-root"></div>
+<h1>Facebook proprietary SDK</h1>
+
+<p>SignIn</p>
+<button id="login" onclick="FB.login();">Login Facebook</button>
+
+<p>SignOut: of this app and Facebook.com</p>
+<button onclick="FB.logout();">Logout</button>
+
+<p>Include the SDK's</p>
+<script src="//connect.facebook.net/en_US/all.js" class="pre"></script>
+
+<p>FB.Event.subscribe</p>
+<script class="pre">
+// Login event
+function authResponse(response){
+	if (response.status === 'connected'|| response.authResponse) {
+		document.body.className = "signedin";
+
+		// Get Profile
+		FB.api('me', function(r){
+			document.getElementById('login').innerHTML = "Connected to FaceBook as " + r.name;
+		});
+	}
+	else{
+		document.body.className = "";
+		document.getElementById('login').innerHTML = "Login Facebook";
+	}
+}
+
+
+FB.Event.subscribe('auth.login', authResponse);
+</script>
+
+<p>FB.init</p>
+<script class="pre">
+// Initiate the facebook app
+FB.init({
+	appId: FACEBOOK_CLIENT_ID,
+	scope: "basic",
+	status : true
+});
+</script>
+
+<p>FB.init</p>
+<script class="pre">
+FB.getLoginStatus(authResponse);
+</script>

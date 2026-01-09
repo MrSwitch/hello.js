@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+<script src="../client_ids.js"></script>
+<script src="http://connect.soundcloud.com/sdk.js"></script>
+<title>Soundcloud demo</title>
+<h1>Soundcloud demo</h1>
+
+<p>Signin</p>
+<button onclick="SC.connect(function(){});">Signin</button>
+
+<p>Signout: of app and windows</p>
+<button onclick="SC.disconnect(function(){});">Signout</button>
+
+<button onclick="SC.get('/me', function(me){alert('Hello, ' + me.username); });">Get Me</button>
+
+<script class="pre">
+// initialize client with app credentials
+SC.initialize({
+  client_id: CLIENT_IDS_ALL.soundcloud,
+  redirect_uri : "../../redirect.html"
+});
+</script>

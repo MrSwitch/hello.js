@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="client_ids.js"></script>
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/modules/soundcloud.js"></script>
+
+<title>hello( soundcloud )</title>
+<h1>hello( soundcloud )</h1>
+
+<button id='soundcloud' onclick="hello.login('soundcloud');">SoundCloud</button>
+<div id="result"></div>
+<script class="pre">
+hello.on('auth.login', function(r){
+	// Get Profile
+	console.log("auth.login");
+	var hi = hello(r.network)
+	hi.api('me').then(function(p){
+		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
+	});
+	hi.api('/tracks', function(r){
+		console.log(r);
+		for(var i=0;i<r.length;i++){
+			var li = document.createElement('li');
+			var a = document.createElement('a');
+			a.innerHTML = r[i].title;
+			a.href=r[i].permalink_url;
+			li.appendChild(a);
+			document.getElementById('result').appendChild(li);
+		}
+	});
+});
+
+hello.init({
+	soundcloud : SOUNDCLOUD_CLIENT_ID
+},	{redirect_uri:'../redirect.html'});
+</script>

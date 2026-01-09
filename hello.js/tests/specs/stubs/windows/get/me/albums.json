@@ -1,0 +1,52 @@
+{
+  "data": [
+    {
+      "id": "folder.939f37452466502a.939F37452466502A!115",
+      "from": {
+        "name": "Jane McGee",
+        "id": "939f37452466502a"
+      },
+      "name": "More Pictures",
+      "description": "",
+      "parent_id": "folder.939f37452466502a",
+      "size": 2443258,
+      "upload_location": "https://apis.live.net/v5.0/folder.939f37452466502a.939F37452466502A!115/files/",
+      "comments_count": 0,
+      "comments_enabled": false,
+      "is_embeddable": true,
+      "count": 7,
+      "link": "https://onedrive.live.com/redir.aspx?cid=939f37452466502a&page=browse&resid=939F37452466502A!115&parId=939F37452466502A!105",
+      "type": "album",
+      "shared_with": {
+        "access": "Just me"
+      },
+      "created_time": "2015-01-07T07:33:04+0000",
+      "updated_time": "2015-01-07T07:33:52+0000",
+      "client_updated_time": "2015-01-07T07:33:21+0000"
+    },
+    {
+      "id": "folder.939f37452466502a.939F37452466502A!106",
+      "from": {
+        "name": "Jane McGee",
+        "id": "939f37452466502a"
+      },
+      "name": "Pictures",
+      "description": "",
+      "parent_id": "folder.939f37452466502a",
+      "size": 2443258,
+      "upload_location": "https://apis.live.net/v5.0/folder.939f37452466502a.939F37452466502A!106/files/",
+      "comments_count": 0,
+      "comments_enabled": false,
+      "is_embeddable": true,
+      "count": 7,
+      "link": "https://onedrive.live.com/redir.aspx?cid=939f37452466502a&page=browse&resid=939F37452466502A!106&parId=939F37452466502A!105",
+      "type": "album",
+      "shared_with": {
+        "access": "Just me"
+      },
+      "created_time": "2015-01-06T13:29:14+0000",
+      "updated_time": "2015-01-06T13:34:15+0000",
+      "client_updated_time": "2015-01-06T13:29:14+0000"
+    }
+  ]
+}

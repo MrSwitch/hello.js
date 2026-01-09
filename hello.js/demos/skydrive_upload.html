@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+<script src="client_ids.js"></script>
+
+<title>Simple SkyDrive Demo</title>
+<style>
+img{
+	position: fixed;
+	top:0;
+	left:50%;
+	width:200px;
+	border:1px solid #ccc;
+	padding:10px;
+}
+img:nth-child(2n){
+	-webkit-transform:rotate(10deg);
+	-moz-transform:rotate(10deg);
+	-ms-transform:rotate(10deg);
+	transform:rotate(10deg);
+}
+img:nth-child(3n){
+	-webkit-transform:rotate(-10deg);
+	-moz-transform:rotate(-10deg);
+	-ms-transform:rotate(-10deg);
+	transform:rotate(-10deg);
+}
+</style>
+<h1>Simple Skydrive demo</h1>
+<blockquote>
+	<p>This demo uses OAuth2 and CORS (or JSONP) to make some REST calls which navigate the Windows Live Graph API to get some photos out of Skydrive. It is PLUGIN-FREE!</p>
+<p>If running locally, <a href="http://manage.dev.live.com/">register your development domain</a> and replace WINDOWS_CLIENT_ID (below) with the client_id you are assigned</p>
+</blockquote>
+
+	<p>Start by logging in 	<button onclick="login()">Login</button></p>
+
+<blockquote>
+	<b>1. Create an Album</b>
+	<form>
+		<label>Album name </label>
+		<input type="text" id="new_name" name="name" value="New Album Name"/>
+		<br />
+		<label>Album description </label>
+		<textarea id="new_description" name="description">This is a test album</textarea>
+		<button type="button" onclick="createAlbum(this.form)">Upload</button>
+	</form>
+	<b>2. Select a file</b>
+	<form>
+		<input type="file" name="file" id="file"/>
+	</form>
+</br>
+	<b>pick an album as the destination</b>
+	<select id="select"></select>
+</br>
+	<button onclick="postPhoto( select.value, document.getElementById('file').form )">Upload</button>
+	<button onclick="xhrUpload( select.value, document.getElementById('file').files[0] )">Upload XHR</button>
+	<div id="result"></div>
+</blockquote>
+
+<script>
+function login(){
+	window.location = 'https://oauth.live.com/authorize'+ 
+		'?client_id='+WINDOWS_CLIENT_ID+
+		'&scope=wl.skydrive_update'+
+		'&response_type=token'+
+		'&redirect_uri='+encodeURIComponent(window.location.href);
+}
+
+
+var access_token = (window.location.hash||window.location.search).match(/access_token=([^&]+)/); 
+if(access_token){ 
+	// Save the first match
+	localStorage.setItem("access_token", decodeURIComponent(access_token[1]));
+}
+
+var json_counter=0;
+function jsonp(path,callback){
+	// Make the anonymous function. not anonymous
+	var callback_name = 'jsonp_' + json_counter++;
+	window[callback_name] = callback;
+	// Add the callback name to the path
+	path = path.replace(/\=\?/, '='+callback_name);
+	// find a place to insert the script tag
+	var sibling = document.getElementsByTagName('script')[0];
+	// Create the script tag
+	var script = document.createElement('script');
+	script.src = path;
+	sibling.parentNode.insertBefore(script,sibling);
+}
+
+
+
+//
+// Param
+// Explode/Encode the parameters of an URL string/object
+// @param string s, String to decode
+//
+function _param(s){
+	var b,
+		a = {},
+		m;
+	
+	if(typeof(s)==='string'){
+
+		m = s.replace(/^[\#\?]/,'').match(/([^=\/\&]+)=([^\&]+)/g);
+		if(m){
+			for(var i=0;i<m.length;i++){
+				b = m[i].split('=');
+				a[b[0]] = decodeURIComponent( b[1] );
+			}
+		}
+		return a;
+	}
+	else {
+		var o = s;
+	
+		a = [];
+
+		for( var x in o ){if(o.hasOwnProperty(x)){
+			if( o.hasOwnProperty(x) ){
+				a.push( [x, o[x] === '?' ? '?' : encodeURIComponent(o[x]) ].join('=') );
+			}
+		}}
+
+		return a.join('&');
+	}
+}
+
+</script>
+
+<p>This is the crux of what this demo is showing. postPhoto uploads the file selected in the file input element to the path of the album. It then creates an anchor tag to the uploaded file.</p>
+
+
+<script>
+function createAlbum(form){
+
+	var token = localStorage.getItem("access_token");
+
+	if(token){
+		httpRequest( "POST", 'https://apis.live.net/v5.0/me/albums?access_token='+token, 
+			{
+				name: form.elements['name'].value,
+				description: form.elements['description'].value
+			}, 
+			function(r){ 
+				if(!r||r.error){
+					alert(r.error.message);
+					return;
+				}
+				var opt = document.createElement('option'); 
+				opt.value=this.upload_location; 
+				opt.innerHTML = this.name;
+				document.getElementById('select').appendChild(opt);
+			});
+	}
+	else{
+		alert("Please click the login button first");
+	}
+
+}
+</script>
+
+<script class="pre">
+function postPhoto(path, fileInputElement){
+	var token = localStorage.getItem("access_token");
+
+	if(token){
+		// Post a photo up
+		httpRequest( "POST", path + '?access_token=' + token, {
+			file : fileInputElement 
+		}, function(r){
+			console.log(r);
+			var a = document.createElement('a');
+			a.href = r.source;
+			a.innerHTML = r.name;
+			a.target = "_blank";
+			document.getElementById('result').appendChild(a);
+		}, function(e){
+			console.log("PROGRESS");
+			console.log(e);
+		});
+	}
+	else{
+		alert("Please click the login button first");
+	}
+}
+</script>
+
+
+<script>
+function xhrUpload(path, file){
+
+	var token = localStorage.getItem("access_token");
+
+	// Initiate XML Instance
+	var xhr = new XMLHttpRequest();
+
+	xhr.onload = xhr.onerror = function(e){
+		var text = xhr.responseText;
+		console.log(text?JSON.parse(text):{error:{message:"Post Failed"}});
+	};
+
+	xhr.open("POST", path + '?access_token=' + token, true);
+
+	var fd = new FormData();
+	fd.append('file', file);
+
+	xhr.send( fd );
+}
+</script>
+
+
+
+
+<script class="pre">
+function xhrRequest(method, url, data, complete, progress){
+
+	var xhr = new XMLHttpRequest();
+
+	// xhr.responseType = "json"; // is not widely supported as yet
+
+	xhr.onload = function(e){
+		var text = xhr.responseText;
+		complete(text?JSON.parse(text):{error:{message:"Could not get resource"}});
+	};
+
+	xhr.onerror = function(e){
+		var text = xhr.responseText;
+		complete(text?JSON.parse(text):{error:{message:"Post failed"}})
+	};
+
+	xhr.onprogress = progress;
+
+	xhr.open(method, url, true);
+
+	if(data){
+		// Windows unique, convert to a JSON string if this contains binary data
+		if(!has_binary(data)){
+			data = JSON.stringify(data);
+			xhr.setRequestHeader("Content-Type", 'application/json');
+		}
+		// Create FormData
+		else if(!(data instanceof FormData)){
+
+			// Loop through and add formData
+			var f = new FormData();
+			for( var x in data )if(data.hasOwnProperty(x)){
+				f.append(x, data[x]);
+			}
+			data = f;
+		}
+	}
+
+	xhr.send( data || null );
+}
+</script>
+
+<script class="pre">
+function httpRequest(method, url, data, complete, progress){
+
+	var p = {
+		data : data
+	}
+	if( p.data && !_dataToJSON(p) ){
+		iframeHack(url, p.data, callback);
+		return;
+	}
+	data = p.data;
+
+	// IE10, FF, Chrome
+	if('withCredentials' in new XMLHttpRequest()){
+
+		xhrRequest( method, url, data, complete, progress );
+	}
+	else{
+
+		// windows convert POST to GET
+		// This perhaps isn't that great
+		var qs;
+		if( data ){
+			data.method = 'post';
+			qs = data;
+			data=null;
+		}
+
+
+		// Else add the callback on to the URL
+		if(!data){
+			jsonp(url+(qs?'&'+_param(qs):'')+"&callback=?", complete);
+		}
+		else{
+			iframeHack(url, data, complete);
+		}
+	}
+}
+
+//
+// Some of the providers require that only MultiPart is used with non-binary forms.
+// This function checks whether the form contains binary data
+function has_binary(data){
+	if(("FormData" in window && data instanceof FormData)||
+		("File" in window && data instanceof File)||
+		("Blob" in window && data instanceof Blob)
+		){
+		return true;
+	}
+	for(var x in data ) if(data.hasOwnProperty(x)){
+		if( data[x] instanceof HTMLElement && data[x].type === 'file' ){
+			return true;
+		}
+	}
+	return false;
+}
+
+
+</script>
+
+<p>IFrameHack</p>
+<script class="pre">
+// user out little helped function to read the parameters
+var qs = _param(window.location.hash);
+// If there exists a state and a result in the hashtag then we need to call these on the parent.
+// Result is serialized JSON string.
+if(qs&&qs.state&&qs.result){
+	// trigger a function in the parent
+	window.parent[qs.state](JSON.parse(qs.result));
+}
+
+</script>
+
+<p>This Form+iFrame+hash hack lets us attach a number of different data types to be posted.</p>
+<ul>
+	<li>InputElement: Post a single input element within a form
+	<li>InputForm: Post an entire form and all its values
+	<li>JSON: Turn a JSON key=>value or a key=>InputElement hash into a form post
+</ul>
+
+<script class="pre">
+function iframeHack(url, data, callback){
+
+	// This hack needs a form
+	var form = null, 
+		reenableAfterSubmit = [],
+		newform;
+
+	// What is the name of the callback to contain
+	// We'll also use this to name the iFrame
+	var state = "ifrmhack_"+parseInt(Math.random()*1e6).toString(16);
+
+	// Save the callback to the window
+	window[state] = function(r){
+		try{
+			// remove the iframe from the page.
+			win.parentNode.removeChild(win);
+			// remove the form
+			if(newform){
+				newform.parentNode.removeChild(newform);
+			}
+		}
+		catch(e){console.error("could not remove iframe")}
+
+		// reenable the disabled form
+		for(var i=0;i<reenableAfterSubmit.length;i++){
+			if(reenableAfterSubmit[i]){
+				reenableAfterSubmit[i].setAttribute('disabled', false);
+			}
+		}
+
+		// fire the callback
+		callback(r);
+	}
+
+	// Build the iframe window
+	var win = document.createElement('iframe');
+	win.id = state;
+	win.name = state;
+	win.height = "1px";
+	win.width = "1px";
+	document.body.appendChild(win);
+
+	// Add some additional query parameters to the URL
+	url += "&suppress_response_codes=true&redirect_uri="+encodeURIComponent(window.location.href.replace(/#.*$/,'')) +"&state="+state;
+
+	// if we are just posting a single item
+	if(data instanceof HTMLInputElement){
+		// get the parent form
+		var form = data.form;
+		// Loop through and disable all of its siblings
+		for( var i = 0; i < form.elements.length; i++ ){
+			if(form.elements[i] !== data){
+				form.elements[i].setAttribute('disabled',true);
+			}
+		}
+		// Move the focus to the form
+		data = form;
+	}
+
+	// Posting a form
+	if(data instanceof HTMLFormElement){
+		// This is a form element
+		var form = data;
+
+		// Does this form need to be a multipart form?
+		for( var i = 0; i < form.elements.length; i++ ){
+			if(!form.elements[i].disabled && form.elements[i].type === 'file'){
+				form.setAttribute('enctype', 'multipart/form-data');
+				form.elements[i].setAttribute('name', 'file');
+			}
+		}
+	}
+	else{
+		// Its not a form element, 
+		// Therefore it must be a JSON object of Key=>Value or Key=>Element
+
+		// If anyone of those values are a input type=file we shall shall insert its siblings into the form for which it belongs.
+		for(var x in data) if(data.hasOwnProperty(x)){
+			// is this an input Element?
+			if( data[x] instanceof HTMLInputElement && data[x].type === 'file' ){
+				form = data[x].form;
+				form.setAttribute('enctype', 'multipart/form-data');
+			}
+		}
+
+		// Do If there is no defined form element, lets create one.
+		if(!form){
+			// Build form
+			form = document.createElement('form');
+			form.height = "1px";
+			form.width = "1px";
+			document.body.appendChild(form);
+			newform = form;
+		}
+
+		// Add elements to the form if they dont exist
+		for(var x in data) if(data.hasOwnProperty(x)){
+
+			// Is this an element?
+			var el = ( data[x] instanceof HTMLInputElement || data[x] instanceof HTMLTextAreaElement || data[x] instanceof HTMLSelectElement );
+
+			// is this not an input element, or one that exists outside the form.
+			if( !el || data[x].form !== form ){
+
+				// Does an element have the same name?
+				if(form.elements[x]){
+					// Remove it.
+					form.elements[x].parentNode.removeChild(form.elements[x]);
+				}
+
+				// Create an input element
+				var input = document.createElement('input');
+				input.setAttribute('name', x);
+				input.value = data[x];
+
+				// Does it have a value attribute?
+				if(el){
+					input.value = data[x].value;
+				}
+				else if(el instanceof HTMLElement){
+					input.value = data[x].innerHTML || data[x].innerText;
+				}
+
+				form.appendChild(input);
+			}
+			// it is an element, which exists within the form, but the name is wrong
+			else if( el && data[x].name !== x){
+				data[x].setAttribute('name', x);
+				data[x].name = x;
+			}
+		}
+
+		// Disable elements from within the form if they weren't specified
+		for(var i=0;i<form.children.length;i++){
+			// Does the same name and value exist in the parent
+			if( !( form.children[i].name in data ) && form.children[i].getAttribute('disabled') !== true ) {
+				// disable 
+				form.children[i].setAttribute('disabled',true);
+				// add re-enable to callback
+				reenableAfterSubmit.push(form.children[i]);
+			}
+		}
+	}
+
+
+	// Set the target of the form
+	form.setAttribute('method', 'post');
+	form.setAttribute('action', url);
+	form.setAttribute('target', state);
+
+	// Submit the form
+	setTimeout(function(){
+		form.submit();
+	},30);
+}
+
+</script>
+
+<script>
+
+
+//
+// 
+//
+function _dataToJSON(p){
+	var data = p.data;
+
+	// Is data a form object
+	if( data instanceof HTMLFormElement ){
+		// Get the first FormElement Item if its an type=file
+		var kids = data.children;
+
+		var json = {};
+
+		// Create a data string
+		for(var i=0;i<kids.length;i++){
+
+			// Is this a file, does the browser not support 'files' and 'FormData'?
+			if( kids[i].type === 'file' ){
+				// the browser does not XHR2
+				if("FormData" in window){
+					json = new FormData(data);
+					break;
+				}
+				else if( !("files" in kids[i]) ){
+					return false;
+				}
+			}
+			else{
+				json[ kids[i].name ] = kids[i].value || kids[i].innerHTML;
+			}
+		}
+
+		// Convert to a postable querystring
+		data = json;
+	}
+
+	// Is this a form input element?
+	if( data instanceof HTMLInputElement ){
+		// Get the Input Element
+		// Do we have a Blob data?
+		if("files" in data){
+
+			var o = {};
+			o[ data.name ] = data.files;
+			// Turn it into a FileList
+			data = o;
+		}
+		else{
+			// This is old school, we have to perform the FORM + IFRAME + HASHTAG hack
+			return false;
+		}
+	}
+
+	// Is data a blob, File, FileList?
+	if( ("File" in window && data instanceof File) 
+		|| ("Blob" in window && data instanceof Blob) 
+		|| ("FileList" in window && data instanceof FileList) ){
+
+		// Convert to a JSON object
+		data = {'file' : data};
+	}
+
+	// Loop through data if its not FormData it must now be a JSON object
+	if( !( "FormData" in window && data instanceof FormData ) ){
+
+		// Loop through the object
+		for(var x in data) if(data.hasOwnProperty(x)){
+
+			// FileList Object?
+			if("FileList" in window && data[x] instanceof FileList){
+				// Get first record only
+				if(data[x].length===1){
+					data[x] = data[x][0];
+				}
+				else{
+					console.error("We were expecting the FileList to contain one file");
+				}
+			}
+			else if( data[x] instanceof HTMLInputElement && data[x].type === 'file' ){
+				if( ("files" in data[x] ) ){
+					data[x] = data[x].files[0];
+				}
+				else{
+					// this does not support HTML5 forms FileList
+					return false;
+				}
+			}
+			else if( data[x] instanceof HTMLInputElement
+				&& data[x] instanceof HTMLSelectElement
+				&& data[x] instanceof HTMLTextAreaElement
+				){
+				data[x] = data[x].value;
+			}
+			else if( data[x] instanceof Element ){
+				data[x] = data[x].innerHTML || data[x].innerText;
+			}
+		}
+	}
+
+	p.data = data;
+
+	return true;
+}
+
+</script>
+
+<script>
+if(localStorage.getItem("access_token")){
+	// Token
+	var token = localStorage.getItem("access_token");
+
+	// Make httpRequest
+	// Retrieve all albums in SkyDrive
+	httpRequest("GET", 'https://apis.live.net/v5.0/me/albums?access_token='+token, null, function(r){
+		// Valid
+		if(!r||r.error){
+			alert("You have an error: "+r.error.message);
+			localStorage.removeItem("access_token");
+			return;
+		}
+		// Loop through the results
+		for(var i=0;i<r.data.length;i++){
+			var obj = r.data[i];
+			var opt = document.createElement('option');
+			opt.value = obj.upload_location;
+			opt.innerHTML = obj.name;
+			document.getElementById('select').appendChild(opt);
+		}
+	});
+}
+</script>
