@@ -1149,6 +1149,14 @@ hello.utils.extend(hello.utils, {
 		// Is this an auth relay message which needs to call the proxy?
 		p = _this.param(location.search);
 
+		// Decode back possible Base64-encoded state
+		if (p && p.state) {
+			const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+			if (base64regex.test(p.state)) {
+				p.state = window.atob(p.state);
+			}
+		}
+
 		// OAuth2 or OAuth1 server response?
 		if (p && p.state && (p.code || p.oauth_token)) {
 
