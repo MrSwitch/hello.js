@@ -1,3 +1,10 @@
+## [1.21.4](https://github.com/MrSwitch/hello.js/compare/v1.21.3...v1.21.4) (2026-01-12)
+
+
+### Bug Fixes
+
+* should not publish dist/ ([20f6076](https://github.com/MrSwitch/hello.js/commit/20f6076d9a09ec382fe8ab94c382a1190f396107))
+
 ## [1.21.3](https://github.com/MrSwitch/hello.js/compare/v1.21.2...v1.21.3) (2026-01-12)
 
 
