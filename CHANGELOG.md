@@ -1,3 +1,10 @@
+## [1.21.3](https://github.com/MrSwitch/hello.js/compare/v1.21.2...v1.21.3) (2026-01-12)
+
+
+### Bug Fixes
+
+* deprecate hello.polyfill.js ([db595e6](https://github.com/MrSwitch/hello.js/commit/db595e62115a0a1ae6c3673066b73175fdd919b2))
+
 ## [1.21.2](https://github.com/MrSwitch/hello.js/compare/v1.21.1...v1.21.2) (2026-01-08)
 
 
