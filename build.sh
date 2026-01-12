@@ -21,8 +21,7 @@ echo "${banner}" > ../dist/hello.all.js
 echo "${banner}" > ../dist/hello.all.min.js
 
 # Merge all src files into dist/hello.js
-cat hello.polyfill.js \
-	hello.js \
+cat hello.js \
 	hello.chromeapp.js \
 	hello.phonegap.js \
 	hello.amd.js \
@@ -30,8 +29,7 @@ cat hello.polyfill.js \
 	>> ../dist/hello.js
 
 # Merge all src files and modules into dist/hello.all.js
-cat hello.polyfill.js \
-	hello.js \
+cat hello.js \
 	hello.chromeapp.js \
 	hello.phonegap.js \
 	modules/dropbox.js \

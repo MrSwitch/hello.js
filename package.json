@@ -41,12 +41,15 @@
     "test:headless": "node ./tests/headless.mjs"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.3",
+    "@eslint/js": "^9.39.2",
     "@semantic-release/changelog": "^6.0.2",
     "@semantic-release/exec": "^6.0.3",
     "@semantic-release/git": "^10.0.1",
     "browserstack-runner": "^0.9.4",
-    "eslint": "^8.32.0",
-    "eslint-config-5app": "^0.16.4",
+    "eslint": "^9.39.2",
+    "eslint-config-5app": "^1.0.0",
+    "globals": "^17.0.0",
     "localhost": "^0.4.1",
     "mocha": "^10.2.0",
     "puppeteer": "4.0",
