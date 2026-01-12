@@ -948,8 +948,6 @@ For a demo, or, if you're bundling up the library from `src/*` files, then pleas
 
 HelloJS targets all modern browsers.
 
-Polyfills are included in `src/hello.polyfill.js` this is to bring older browsers upto date. If you're using the resources located in `dist/` this is already bundled in. But if you're building from source you might like to first determine whether these polyfills are required, or if you're already supporting them etc...
-
 ## PhoneGap Support
 
 HelloJS can also be run on PhoneGap applications. Checkout the demo [hellojs-phonegap-demo](https://github.com/MrSwitch/hellojs-phonegap-demo)
