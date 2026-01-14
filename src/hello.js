@@ -37,10 +37,7 @@ hello.utils = {
 			}
 			else {
 
-				if (Array.isArray(a)) {
-					// Clone it
-					a = a.slice(0);
-				}
+				
 
 				r = a;
 			}
