@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="./client_ids.js"></script>
+
+<script src="../src/modules/dropbox.js"></script>
+
+<link rel="stylesheet" href="./helper/uiFiles.css"/>
+
+<title>hello( dropbox )</title>
+<h1>hello( dropbox )</h1>
+
+<button id='profile' onclick="demo();">Dropbox</button>
+<div id="uiFiles"></div>
+
+<p>Include the UI demo script.</p>
+<script src="./helper/uiFiles.js" class="pre"></script>
+
+<script class="pre">
+
+function demo(){
+
+	var dropbox = hello('dropbox');
+
+	dropbox.login().then(function() {
+
+		dropbox.api("me").then(function(p) {
+			document.getElementById('profile').innerHTML = "Connected to dropbox as " + p.name;
+		});
+
+		// See the included script of this same name.
+		uiFiles('dropbox');
+	});
+}
+
+</script>
+<script class="pre">
+hello.init({
+	'dropbox' : DROPBOX_CLIENT_ID,
+},
+{
+	redirect_uri:'../redirect.html',
+
+	// OAuth Proxy Is required to sercurely handle communications the service
+	// The service https://auth-server.herokuapp.com can be used to authenticate the User+App
+	// And then sign subsequent requests
+	oauth_proxy : OAUTH_PROXY_URL
+});
+</script>

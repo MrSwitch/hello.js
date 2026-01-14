@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="client_ids.js"></script>
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/modules/joinme.js"></script>
+
+<title>hello( joinme )</title>
+<h1>hello( joinme )</h1>
+
+<button id='joinme' onclick="login('joinme');">join.me</button>
+<div id="result"></div>
+<script class="pre">
+function login(network){
+
+	var joinme = hello(network);
+
+	joinme.login().then(function(){
+
+		// get user profile data
+		joinme.api('me').then(function(p) {
+			document.getElementById( network ).innerHTML = "Connected to "+ network +" as " + p.name;
+		});
+
+		// Get your upcoming meetings from joinme
+		joinme.api('/meetings').then(function(r) {
+			if (r.meetings && r.meetings.length > 0)
+				document.getElementById('result').innerHTML = JSON.stringify(r.meetings,null,3);
+			else
+				document.getElementById('result').innerHTML = "There are no upcoming meetings on your schedule.";
+		});
+
+	});
+}
+</script>
+
+<script class="pre">
+hello.init({
+	joinme : JOINME_CLIENT_ID
+}, {
+	redirect_uri : '../redirect.html',
+    scope : 'user,scheduler'
+});
+</script>

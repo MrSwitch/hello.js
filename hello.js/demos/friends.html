@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>hello.js - Javascript API for OAuth2 authentication and REST services</title>
+	<link rel="stylesheet" href="/adorn/adorn.css" />
+	<script src="/adorn/adorn.js" async></script>
+
+	<script src="client_ids.js"></script>
+	<style>ul:empty:after{content:'empty';font-weight:bold;color:#aaa;}</style>
+</head>
+<body>
+	<h1>hello.api( me/friends )</h1>
+
+
+	<button onclick="getFriends('google', 'me/friends')">Get Google me/friends</button>
+	<button onclick="getFriends('facebook', 'me/friends')">Get Facebook me/friends</button>
+	<button onclick="getFriends('windows', 'me/friends')">Get Windows me/friends</button>
+	<button onclick="getFriends('yahoo', 'me/friends')">Get Yahoo me/friends</button>
+	<button onclick="getFriends('google', 'me/contacts')">Get Google me/contacts</button>
+	<button onclick="getFriends('windows', 'me/contacts')">Get Windows me/contacs</button>
+
+	<h2>Friends list</h2>
+	<ul id="list"></ul>
+	<button id="more" style="display:none;"></button>
+
+
+<h2>Include hello.js and the modules</h2>
+<p>One should merge these for performance.</p>
+<script class="pre" src="../src/hello.js"></script>
+<script class="pre" src="../src/modules/windows.js"></script>
+<script class="pre" src="../src/modules/facebook.js"></script>
+<script class="pre" src="../src/modules/google.js"></script>
+<script class="pre" src="../src/modules/yahoo.js"></script>
+
+<h2>Initiate</h2>
+<script class="pre">
+hello.init( {
+		windows : CLIENT_IDS_ALL.windows,
+		google : CLIENT_IDS_ALL.google,
+		facebook : CLIENT_IDS_ALL.facebook,
+		yahoo : CLIENT_IDS_ALL.yahoo
+	}
+	, {
+		redirect_uri:'../redirect.html',
+		oauth_proxy : OAUTH_PROXY_URL,
+		scope:"friends"
+	}
+);
+</script>
+
+<h2>Build Button events</h2>
+<script class="pre">
+function getFriends(network, path){
+
+	var list = document.getElementById('list');
+	list.innerHTML = '';
+	var btn_more = document.getElementById('more');
+	btn_more.style.display = 'none';
+
+	// login
+	hello(network).login({scope:'friends'}).then(function(auth) {
+		// Get the friends
+		// using path, me/friends or me/contacts
+		hello(network).api(path, {limit:10}).then(function responseHandler(r) {
+			for(var i=0;i<r.data.length;i++){
+				var o = r.data[i];
+				var li = document.createElement('li');
+				li.innerHTML = o.name + (o.thumbnail?" <img src="+o.thumbnail+" />":'');
+				list.appendChild(li);
+			};
+
+			btn_more.onclick = function(){
+				// Make another request and handle is in the same way
+				hello( network ).api( r.paging.next, {limit:10}, responseHandler );
+			};
+			btn_more.innerHTML = "Next from "+network;
+			btn_more.style.display = 'block';
+		});
+	}, function() {
+		if(!auth||auth.error){
+			console.log("Signin aborted");
+			return;
+		}
+	});
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+<script src="client_ids.js"></script>
+<link rel="stylesheet" href="./helper/alert.css"/>
+
+<title>hello( box )</title>
+<h1>hello( box )</h1>
+
+
+<blockquote>
+	Box.com only provides authentication from apps which are using HTTPS. <a href="https://developers.box.com/docs/#api-basics">See Box.com API documentation</a>
+</blockquote>
+
+<script src="./helper/alert-https.js"></script>
+
+<button onclick="login();" id="profile">Login Box</button>
+
+<script src="../src/hello.js" class="pre"></script>
+<script src="../src/modules/box.js" class="pre"></script>
+
+<script class="pre">
+
+var profile = document.getElementById( 'profile' );
+
+function login(){
+
+	var box = hello('box');
+	
+	box
+	.login()
+	.then(function(){
+		return box.api('me')
+	})
+	.then(function(r){
+		
+		profile.innerHTML = "<img src='"+ r.thumbnail + "' width=24/>Connected to Box.com as " + r.name;
+
+	}, console.error.bind(console) );
+
+}
+</script>
+
+<p>Initiate box client</p>
+
+
+<script class="pre">
+hello.init({
+	box : 'rdyb5se2fcuioryle3qdw2wcrps959x4'
+},{
+	redirect_uri:'../redirect.html',
+	response_type:'code'
+});
+</script>

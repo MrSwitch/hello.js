@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+<script src="client_ids.js"></script>
+<script>
+// DEBUGGING
+window.addEventListener('message', function(){
+	console.debug(arguments[0].origin, arguments[0].data);
+});
+</script>
+
+
+<h1>hello.js to Google Drive</h1>
+
+<form onsubmit="return upload('google');">
+	<input type="file" id="file"/> <button type="submit">Upload to Google root</button>
+</form>
+
+<pre class="response"></pre>
+
+<p>Include the SDK's</p>
+<script src="../src/hello.js" class="pre"></script>
+<script src="../src/modules/google.js" class="pre"></script>
+
+<p>Add event listeners for the login completed event and make a request for the users profile. Once that's loaded push it to the page. </p>
+
+<script class="pre">
+hello.init({
+	google : GOOGLE_CLIENT_ID
+},	{
+	redirect_uri:'../redirect.html',
+	scope : 'publish_files'
+});
+</script>
+
+<p>The function called when the above form is submitted</p>
+
+<script class="pre">
+function upload(network){
+
+	var google = hello("google");
+	google.login().then(function() {
+
+		google.api('me/files', 'post', {
+			file : document.getElementById('file')
+		}).then(function(response) {
+			log(response);
+		});
+
+	});
+	return false;
+}
+</script>
+
+<script>
+function log(s){
+	document.body.querySelector('.response').appendChild(document.createTextNode(JSON.stringify(s, true, 2)));
+}
+</script>

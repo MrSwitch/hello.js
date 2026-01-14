@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="../client_ids.js"></script>
+<script>
+// DEBUGGING
+window.addEventListener('message', function(){
+	console.debug(arguments[0].origin, arguments[0].data);
+});
+</script>
+
+
+<h1>Upload via Google SDK's</h1>
+
+<button id="google">Login Google</button>
+
+<form onsubmit="return upload();">
+	<input type="file" id="file" name="file"/><button type="submit">Upload to Google root</button>
+</form>
+
+<p>Include both the SDK's</p>
+<script src="https://apis.google.com/js/client.js?onload=gapiLoaded" class="pre"></script>
+
+<p>Add event listeners for the login completed event and make a request for the users profile. Once that's loaded push it to the page. </p>
+<script class="pre">
+
+// Google
+(function (){
+
+	function handleAuthResult(authResult){
+		auth = authResult;
+		// Get data
+		gapi.client.load('plus', 'v1', function() {
+			var request = gapi.client.plus.people.get({
+				'userId': 'me'
+			});
+			request.execute(function(r) {
+				btn.innerHTML = "Signed in as " + r.displayName;
+			});
+		});
+		// Google drive has no directory structre as such
+	}
+
+	var scopes = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/plus.me',
+		auth = null;
+
+	var btn = document.getElementById('google');
+	btn.onclick = function(){
+		gapi.auth.authorize({client_id: GOOGLE_CLIENT_ID, scope: scopes, immediate: false}, handleAuthResult);
+	};
+
+	window.setTimeout(function(){
+		gapi.auth.authorize({client_id: GOOGLE_CLIENT_ID, scope: scopes, immediate: true}, handleAuthResult);
+	},1000);
+
+})();
+
+</script>
+
+
+<script class="pre">
+function upload(){
+
+	var callback = function(file) {
+		console.log(file)
+	};
+
+	gapi.client.load('drive', 'v2', function() {
+		var fileData = document.getElementById('file').files[0];
+
+		const boundary = '-------314159265358979323846';
+		const delimiter = "\r\n--" + boundary + "\r\n";
+		const close_delim = "\r\n--" + boundary + "--";
+
+		var reader = new FileReader();
+		reader.readAsBinaryString(fileData);
+		reader.onload = function(e) {
+		var contentType = fileData.type || 'application/octet-stream';
+		var metadata = {
+		'title': fileData.name,
+		'mimeType': contentType
+		};
+
+		var base64Data = btoa(reader.result);
+		var multipartRequestBody =
+		delimiter +
+		'Content-Type: application/json\r\n\r\n' +
+		JSON.stringify(metadata) +
+		delimiter +
+		'Content-Type: ' + contentType + '\r\n' +
+		'Content-Transfer-Encoding: base64\r\n' +
+		'\r\n' +
+		base64Data +
+		close_delim;
+
+		var request = gapi.client.request({
+		'path': '/upload/drive/v2/files',
+		'method': 'POST',
+		'params': {'uploadType': 'multipart'},
+		'headers': {
+		'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
+		},
+		'body': multipartRequestBody});
+		request.execute(callback);
+		}
+	});
+	return false;
+}
+</script>

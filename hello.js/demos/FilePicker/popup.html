@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="filePicker.css"/>
+<link rel="stylesheet" href="/css-social-buttons/css/zocial.css"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+<script src="../../hello.js"></script>
+<script src="../../demos/client_ids.js"></script>
+<script src="filePicker.js"></script>
+<style>
+
+</style>
+<body>
+<script>
+
+hello.init(CLIENT_IDS, {scope: 'files,publish_files', redirect_uri:"../../redirect.html"});
+
+var picker = hello.ui.filePicker({
+	element : document.body
+},function(r){
+	var p = hello.utils.param(window.location.hash);
+	try{
+		window.opener[p.callback]();
+	}catch(e){}
+});
+
+</script>
+</body>

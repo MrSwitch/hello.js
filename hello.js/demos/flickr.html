@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="client_ids.js"></script>
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/modules/flickr.js"></script>
+
+<title>hello( flickr )</title>
+<h1>hello( flickr )</h1>
+
+<button id='login' onclick="hello.login('flickr');">Flickr</button>
+<div id="result"></div>
+<script class="pre">
+
+hello.on('auth.login', function(r){
+	// Get Profile
+	hello(r.network).api('me').then(function(p) {
+		document.getElementById('login').innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
+	});
+});
+
+hello.init({
+	'flickr' : FLICKR_CLIENT_ID
+},
+{
+	redirect_uri:'../redirect.html',
+	oauth_proxy: OAUTH_PROXY_URL
+});
+
+</script>

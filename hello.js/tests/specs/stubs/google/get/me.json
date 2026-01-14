@@ -1,0 +1,20 @@
+{
+  "kind": "plus#person",
+  "etag": "\"RqKWnRU4WW46-6W3rWhLR9iFZQM/SBScUjPbvff5Vv-q8alzq6EVbTQ\"",
+  "objectType": "person",
+  "id": "115111284799080900590",
+  "displayName": "Jane McGee",
+  "name": {
+    "familyName": "McGee",
+    "givenName": "Jane"
+  },
+  "url": "https://plus.google.com/115111284799080900590",
+  "image": {
+    "url": "https://lh3.googleusercontent.com/-NWCgcgRDieE/AAAAAAAAAAI/AAAAAAAAABc/DCi-M8IuzMo/photo.jpg?sz=50",
+    "isDefault": false
+  },
+  "isPlusUser": true,
+  "language": "en",
+  "circledByCount": 0,
+  "verified": false
+}

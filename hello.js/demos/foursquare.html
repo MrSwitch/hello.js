@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+
+<script src="../src/hello.polyfill.js"></script>
+<script src="../src/hello.js"></script>
+<script src="../src/modules/foursquare.js"></script>
+
+<title>hello( foursquare )</title>
+<h1>hello( foursquare )</h1>
+
+<button id='foursquare' onclick="hello.login('foursquare');">FourSquare</button>
+<div id="result"></div>
+<script class="pre">
+hello.on('auth.login', function(r){
+	// Get Profile
+	console.log("auth.login");
+	hello(r.network).api('me').then(function(p) {
+		document.getElementById(r.network).innerHTML = "<img src='"+ p.thumbnail + "' width=24/>Connected to "+ r.network+" as " + p.name;
+	});
+});
+
+hello.init({
+	foursquare : FOURSQUARE_CLIENT_ID
+},	{redirect_uri:'../redirect.html'});
+</script>

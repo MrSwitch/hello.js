@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>hello.js - Login Events</title>
+	<link rel="stylesheet" href="/adorn/adorn.css" />
+	<script src="/adorn/adorn.js" async></script>
+
+	<script src="client_ids.js"></script>
+	<script src="../src/hello.js"></script>
+	<script src="../src/modules/windows.js"></script>
+	<script src="../src/modules/facebook.js"></script>
+	<script src="../src/modules/google.js"></script>
+	<script src="../src/modules/github.js"></script>
+	<script src="../src/modules/twitter.js"></script>
+
+</head>
+<body>
+<h1>hello login</h1>
+
+<h2>hello.login</h2>
+	<button onclick="login('google')">Login Google</button>
+	<button onclick="login('facebook')">Login Facebook</button>
+	<button onclick="login('windows')">Login Windows</button>
+	<button onclick="login('github')">Login Github</button>
+	<button onclick="login('twitter')">Login Twitter</button>
+
+<button style="float:right;" onclick="this.nextElementSibling.innerHTML='';">Clear</button>
+<pre id="login"></pre>
+
+<script class="pre">
+// Signin button click handler
+function login(network){
+	hello( network ).login(function(e){
+		log("login",e);
+	});
+}
+
+</script>
+
+<p>Set up credentials for all experiments.</p>
+<script class="pre">
+hello.init( {
+	windows	: CLIENT_IDS_ALL.windows,
+	facebook: CLIENT_IDS_ALL.facebook,
+	google 	: CLIENT_IDS_ALL.google,
+	github	: CLIENT_IDS_ALL.github,
+	twitter	: CLIENT_IDS_ALL.twitter
+},{
+	redirect_uri:'../redirect.html'
+});
+</script>
+
+<h2>hello.login [display:page]</h2>
+<p>This demo will redirect the browser window through the OAuth signin flow via the <code>redirect_url</code>, and return the browser window to the <code>page_uri</code> (the default value is the current page).</p>
+	<button onclick="loginPage('google')">Login Google</button>
+	<button onclick="loginPage('facebook')">Login Facebook</button>
+	<button onclick="loginPage('windows')">Login Windows</button>
+	<button onclick="loginPage('github')">Login Github</button>
+	<button onclick="loginPage('twitter')">Login Twitter</button>
+
+<button style="float:right;" onclick="this.nextElementSibling.innerHTML='';">Clear</button>
+<pre id="login-page"></pre>
+
+<script class="pre">
+// Signin button click handler
+function loginPage(network){
+	hello( network ).login({display:'page'},function(e){
+		// This will never get called unless with failure
+		log("login-page",e);
+	});
+}
+
+</script>
+
+<p>Changing the value of <code>page_uri</code> in the request can be used to navigate to another page after the user has signed in. The example below navigates the user agent to the <code>demos/</code> directory.</p>
+
+	<button onclick="loginPageUrl('google')">Login Google</button>
+	<button onclick="loginPageUrl('facebook')">Login Facebook</button>
+	<button onclick="loginPageUrl('windows')">Login Windows</button>
+	<button onclick="loginPageUrl('github')">Login Github</button>
+	<button onclick="loginPageUrl('twitter')">Login Twitter</button>
+
+<script class="pre">
+// Signin button click handler
+function loginPageUrl(network){
+	hello( network ).login({
+		display:'page',
+		page_uri:'./'
+	});
+}
+
+</script>
+
+<p>If the final page is the same as the <code>redirect_uri</code> path then the page_uri must be disabled by setting it to false, i.e. <code>page_uri=<i>false</i></code>
+
+<h2>hello.logout</h2>
+
+	<button onclick="logout('google')">Logout Google</button>
+	<button onclick="logout('facebook')">Logout Facebook</button>
+	<button onclick="logout('windows')">Logout Windows</button>
+	<button onclick="logout('github')">Logout Github</button>
+	<button onclick="logout('twitter')">Login Twitter</button>
+
+<button style="float:right;" onclick="this.nextElementSibling.innerHTML='';">Clear</button>
+<pre id="logout"></pre>
+
+<script class="pre">
+// Signin button click handler
+function logout(network){
+	hello( network ).logout(function(e){
+		log("logout",e);
+	});
+}
+</script>
+
+<h2>hello.logout [force]</h2>
+
+<p>Force logout from providers site too</p>
+
+	<button onclick="logoutForce('google')">Logout Google</button>
+	<button onclick="logoutForce('facebook')">Logout Facebook</button>
+	<button onclick="logoutForce('windows')">Logout Windows</button>
+	<button onclick="logoutForce('github')">Logout Github</button>
+	<button onclick="logoutForce('twitter')">Logout Twitter</button>
+
+<button style="float:right;" onclick="this.nextElementSibling.innerHTML='';">Clear</button>
+<pre id="logout-force"></pre>
+
+<script class="pre">
+// Signin button click handler
+function logoutForce(network){
+	hello( network ).logout({force:true},function(e){
+		log("logout-force",e);
+	});
+}
+</script>
+
+
+<h2>hello.login [scope]</h2>
+
+<p>Force assign another scope</p>
+
+	<button onclick="loginScope('google')">Login Google</button>
+	<button onclick="loginScope('facebook')">Login Facebook</button>
+	<button onclick="loginScope('windows')">Login Windows</button>
+	<button onclick="loginScope('github')">Login Github</button>
+	<button onclick="loginScope('twitter')">Login Twitter</button>
+
+<button style="float:right;" onclick="this.nextElementSibling.innerHTML='';">Clear</button>
+<pre id="login-scope"></pre>
+
+<script class="pre">
+// Signin button click handler
+function loginScope(network){
+	hello( network ).login({scope:'email'},function(e){
+		log("login-scope",e);
+	});
+}
+</script>
+
+
+<script>
+function log(name,obj){
+	document.getElementById(name).appendChild(document.createTextNode(name + ':' + JSON.stringify(obj,true,2)));
+   }
+</script>
+
+</body>
+</html>

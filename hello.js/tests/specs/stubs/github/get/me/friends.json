@@ -1,0 +1,40 @@
+[
+  {
+    "login": "indieisaconcept",
+    "id": 640613,
+    "avatar_url": "https://avatars.githubusercontent.com/u/640613?v=3",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/indieisaconcept",
+    "html_url": "https://github.com/indieisaconcept",
+    "followers_url": "https://api.github.com/users/indieisaconcept/followers",
+    "following_url": "https://api.github.com/users/indieisaconcept/following{/other_user}",
+    "gists_url": "https://api.github.com/users/indieisaconcept/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/indieisaconcept/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/indieisaconcept/subscriptions",
+    "organizations_url": "https://api.github.com/users/indieisaconcept/orgs",
+    "repos_url": "https://api.github.com/users/indieisaconcept/repos",
+    "events_url": "https://api.github.com/users/indieisaconcept/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/indieisaconcept/received_events",
+    "type": "User",
+    "site_admin": false
+  },
+  {
+    "login": "aullman",
+    "id": 733672,
+    "avatar_url": "https://avatars.githubusercontent.com/u/733672?v=3",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/aullman",
+    "html_url": "https://github.com/aullman",
+    "followers_url": "https://api.github.com/users/aullman/followers",
+    "following_url": "https://api.github.com/users/aullman/following{/other_user}",
+    "gists_url": "https://api.github.com/users/aullman/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/aullman/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/aullman/subscriptions",
+    "organizations_url": "https://api.github.com/users/aullman/orgs",
+    "repos_url": "https://api.github.com/users/aullman/repos",
+    "events_url": "https://api.github.com/users/aullman/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/aullman/received_events",
+    "type": "User",
+    "site_admin": false
+  }
+]

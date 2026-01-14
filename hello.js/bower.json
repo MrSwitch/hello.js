@@ -1,0 +1,24 @@
+{
+  "name": "hello",
+  "homepage": "http://adodson.com/hello.js/",
+  "license": "https://github.com/MrSwitch/hello.js/blob/master/LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com:MrSwitch/hello.js.git"
+  },
+  "main": [
+    "dist/hello.all.js"
+  ],
+  "devDependencies": {
+    "expect": "~0.3.1",
+    "css-social-buttons": "^1.2.0",
+    "knockout": "^3.4.0"
+  },
+  "ignore": [
+    "**/*",
+    "!dist/*",
+    "!src/**",
+    "!README.md",
+    "package.json"
+  ]
+}

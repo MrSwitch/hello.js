@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="/adorn/adorn.css"/>
+<script src="/adorn/adorn.js" async></script>
+<script src="client_ids.js"></script>
+
+<h1>Upload demo with proprietary SDK's</h1>
+
+<blockquote>
+	<h2>Signin buttons</h2>
+	<button id="windows" onclick="WL.logout();WL.login('wl.skydrive_update');">Login Windows</button>
+	<button id="facebook" onclick="FB.login();">Login Facebook</button>
+	<button id="google">Login Google</button>
+
+	<h2>Upload Form</h2>
+	<form>
+		<input type="file" id="file"/>
+	</form>
+
+	<select id="wl_albums"></select>
+	<button type="button" onclick="uploadWL()">Upload Skydrive</button>
+
+	or
+	
+	<select id="fb_albums"></select>
+	<button type="button" onclick="uploadFB()">Upload Facebook</button>
+
+	or
+
+	<button type="button" onclick="uploadGG()">Upload to Google root</button>
+
+</blockquote>
+
+<p>Include both the SDK's</p>
+<script src="//connect.facebook.net/en_US/all.js" class="pre"></script>
+<script src="//js.live.net/v5.0/wl.debug.js" class="pre"></script>
+<script src="https://apis.google.com/js/client.js?onload=gapiLoaded" class="pre"></script>
+
+<p>Add event listeners for the login completed event and make a request for the users profile. Once that's loaded push it to the page. </p>
+<script class="pre">
+// Windows Live
+WL.Event.subscribe('auth.login', function(){
+	// Get Profile
+	WL.api('me', function(r){
+		document.getElementById('windows').innerHTML = "Connected to Windows as " + r.name;
+	});
+	// Get albums
+	WL.api('me/albums', function(r){
+		for(var i=0;i<r.data.length;i++){
+			var o = document.createElement('option');
+			o.value = r.data[i].upload_location;
+			o.innerHTML = r.data[i].name;
+			document.getElementById('wl_albums').appendChild(o);
+		}
+	});
+});
+
+// Facebook
+FB.Event.subscribe('auth.login', function(){
+	// Get Profile
+	FB.api('me', function(r){
+		document.getElementById('facebook').innerHTML = "Connected to FaceBook as " + r.name;
+	});
+	// Get albums
+	FB.api('me/albums', function(r){
+		for(var i=0;i<r.data.length;i++){
+			var o = document.createElement('option');
+			o.value = r.data[i].upload_location;
+			o.innerHTML = r.data[i].name;
+			document.getElementById('fb_albums').appendChild(o);
+		}
+	});
+});
+
+// Google
+(function (){
+
+	function handleAuthResult(authResult){
+		auth = authResult;
+		// Get data
+		gapi.client.load('plus', 'v1', function() {
+			var request = gapi.client.plus.people.get({
+				'userId': 'me'
+			});
+			request.execute(function(r) {
+				btn.innerHTML = "Connected to Google as " + r.displayName;
+			});
+		});
+		// Google drive has no directory structre as such
+	}
+
+	var scopes = 'https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/plus.me',
+		auth = null;
+
+	var btn = document.getElementById('google');
+	btn.onclick = function(){
+		gapi.auth.authorize({client_id: GOOGLE_CLIENT_ID, scope: scopes, immediate: false}, handleAuthResult);
+	};
+
+	window.setTimeout(function(){
+		gapi.auth.authorize({client_id: GOOGLE_CLIENT_ID, scope: scopes, immediate: true}, handleAuthResult);
+	},1000);
+
+})();
+
+</script>
+
+<script class="pre">
+function uploadWL(){
+	WL.upload({
+		path:document.getElementById('wl_albums').value,
+		element:'file',
+		overwrite:true
+	}).then(function(e){
+		console.log("Success");
+		console.log(e);
+	});
+}
+</script>
+
+<script class="pre">
+function uploadFB(){
+	FB.upload({
+		path:document.getElementById('fb_albums').value,
+		element:'file',
+		overwrite:true
+	}).then(function(e){
+		console.log("Success");
+		console.log(e);
+	});
+}
+</script>
+<script class="pre">
+function uploadGG(){
+
+	var callback = function(file) {
+		console.log(file)
+		};
+
+	gapi.client.load('drive', 'v2', function() {
+		var fileData = document.getElementById('file').files[0];
+
+		const boundary = '-------314159265358979323846';
+		const delimiter = "\r\n--" + boundary + "\r\n";
+		const close_delim = "\r\n--" + boundary + "--";
+
+		var reader = new FileReader();
+		reader.readAsBinaryString(fileData);
+		reader.onload = function(e) {
+		var contentType = fileData.type || 'application/octet-stream';
+		var metadata = {
+		'title': fileData.name,
+		'mimeType': contentType
+		};
+
+		var base64Data = btoa(reader.result);
+		var multipartRequestBody =
+		delimiter +
+		'Content-Type: application/json\r\n\r\n' +
+		JSON.stringify(metadata) +
+		delimiter +
+		'Content-Type: ' + contentType + '\r\n' +
+		'Content-Transfer-Encoding: base64\r\n' +
+		'\r\n' +
+		base64Data +
+		close_delim;
+
+		var request = gapi.client.request({
+		'path': '/upload/drive/v2/files',
+		'method': 'POST',
+		'params': {'uploadType': 'multipart'},
+		'headers': {
+		'Content-Type': 'multipart/mixed; boundary="' + boundary + '"'
+		},
+		'body': multipartRequestBody});
+		request.execute(callback);
+		}
+	});
+}
+</script>
+
+
+<p>Plug the app keys (client_id') and voila</p>
+<script class="pre">
+// Initiate the windows live app
+WL.init({
+	client_id: WINDOWS_CLIENT_ID,
+	scope: "wl.signin, wl.skydrive, wl.skydrive_update"
+});
+
+// Initiate the facebook app
+FB.init({
+	appId: FACEBOOK_CLIENT_ID,
+	scope: "publish_stream"
+});
+</script>
