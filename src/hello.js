@@ -1544,16 +1544,24 @@ hello.api = function() {
 	}
 
 	// Network & Provider
-	// Define the network that this request is made for
-	p.network = _this.settings.default_service = p.network || _this.settings.default_service;
-	var o = _this.services[p.network];
+// Define the network that this request is made for
+p.network = _this.settings.default_service = p.network || _this.settings.default_service;
+var o = _this.services[p.network];
 
-	// INVALID
-	// Is there no service by the given network name?
-	if (!o) {
-		reject(error('invalid_network', 'Could not match the service requested: ' + p.network));
-		return promise;
-	}
+// INVALID
+// Is there no service by the given network name?
+if (!o) {
+	reject(error('invalid_network', 'Could not match the service requested: ' + p.network));
+	return promise;
+}
+
+// Force XHR for GitHub so Authorization headers are sent
+if (p.network === 'github') {
+	p.xhr = true;
+	p.jsonp = false;
+	p.form = false;
+}
+
 
 	// PATH
 	// As long as the path isn't flagged as unavaiable, e.g. path == false
@@ -1589,10 +1597,22 @@ hello.api = function() {
 
 	// Get the current session
 	// Append the access_token to the query
-	p.authResponse = _this.getAuthResponse(p.network);
-	if (p.authResponse && p.authResponse.access_token) {
-		p.query.access_token = p.authResponse.access_token;
-	}
+	// Get the current session
+p.authResponse = _this.getAuthResponse(p.network);
+
+// Append the access_token
+if (p.authResponse && p.authResponse.access_token) {
+
+    // GitHub requires Authorization header instead of query param
+    if (p.network === 'github') {
+        p.headers = p.headers || {};
+        p.headers.Authorization = 'Bearer ' + p.authResponse.access_token;
+    } else {
+        p.query.access_token = p.authResponse.access_token;
+    }
+}
+
+
 
 	var url = p.path;
 	var m;
