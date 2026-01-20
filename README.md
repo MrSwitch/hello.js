@@ -977,6 +977,30 @@ HelloJS relies on these fantastic services for it's development and deployment, 
 
 - [BrowserStack](https://www.browserstack.com/) for providing a means to test across multiple devices.
 
+### Example usage with React
+
+If you want to use **hello.js** in a React project:
+
+```jsx
+import hello from 'hellojs';
+
+hello.init({
+  google: 'YOUR_GOOGLE_CLIENT_ID',
+});
+
+function LoginButton() {
+  const handleLogin = () => {
+    hello('google')
+      .login()
+      .then(() => alert('Logged in!'));
+  };
+
+  return <button onClick={handleLogin}>Login with Google</button>;
+}
+
+export default LoginButton;
+
+
 
 ## Can I contribute?
 
