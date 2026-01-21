@@ -362,6 +362,14 @@ hello.utils.extend(hello, {
 			provider.login(p);
 		}
 
+		// Enhanced OAuth 1.0a handling for client context preservation
+		if (provider && parseInt(provider.oauth.version, 10) === 1) {
+			// Ensure client context exists for system vault creation
+			if (p.qs && p.qs.state && provider.id && !p.qs.state.client_id) {
+				p.qs.state.client_id = provider.id;
+			}
+		}
+
 		// Add OAuth to state
 		// Where the service is going to take advantage of the oauth_proxy
 		if (!/\btoken\b/.test(responseType) ||
