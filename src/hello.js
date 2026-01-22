@@ -1467,6 +1467,16 @@ hello.utils.Event.call(hello);
 				emit('update');
 			}
 
+			// Issue 541 : Support on auth.error event - @prathmesh-sananse
+			// Check if there was an error in the session
+			else if (session && session.error) {
+				hello.emit('auth.error', {
+					network: name,
+					error: session.error,
+					authResponse: session
+				});
+			}
+
 			// Updated stored session
 			oldSessions[name] = session;
 
