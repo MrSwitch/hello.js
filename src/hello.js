@@ -368,12 +368,29 @@ hello.utils.extend(hello, {
 		parseInt(provider.oauth.version, 10) < 2 ||
 		(opts.display === 'none' && provider.oauth.grant && session && session.refresh_token)) {
 
-			// Add the oauth endpoints
-			p.qs.state.oauth = provider.oauth;
-
-			// Add the proxy url
-			p.qs.state.oauth_proxy = opts.oauth_proxy;
-
+			// Store oauth config in sessionStorage to avoid large URL headers in Chrome
+			// Only pass a reference ID in the state parameter
+			var stateId = 'oauth_state_' + p.network + '_' + Date.now();
+			
+			try {
+				if (window.sessionStorage) {
+					window.sessionStorage.setItem(stateId, JSON.stringify({
+						oauth: provider.oauth,
+						oauth_proxy: opts.oauth_proxy
+					}));
+					p.qs.state.oauth_state_id = stateId;
+				}
+				else {
+					// Fallback: include oauth data directly if sessionStorage unavailable
+					p.qs.state.oauth = provider.oauth;
+					p.qs.state.oauth_proxy = opts.oauth_proxy;
+				}
+			}
+			catch (e) {
+				// Fallback: include oauth data directly if sessionStorage fails
+				p.qs.state.oauth = provider.oauth;
+				p.qs.state.oauth_proxy = opts.oauth_proxy;
+			}
 		}
 
 		// Convert state to a string
@@ -1154,6 +1171,22 @@ hello.utils.extend(hello.utils, {
 
 			try {
 				var state = JSON.parse(p.state);
+
+				// Retrieve oauth config from sessionStorage if oauth_state_id is present
+				if (state.oauth_state_id && window.sessionStorage) {
+					try {
+						var storedOAuthState = JSON.parse(window.sessionStorage.getItem(state.oauth_state_id));
+						if (storedOAuthState) {
+							state.oauth = storedOAuthState.oauth;
+							state.oauth_proxy = storedOAuthState.oauth_proxy;
+							// Clean up sessionStorage
+							window.sessionStorage.removeItem(state.oauth_state_id);
+						}
+					}
+					catch (e) {
+						// Continue with state as is if sessionStorage retrieval fails
+					}
+				}
 
 				// Add this path as the redirect_uri
 				p.redirect_uri = state.redirect_uri || location.href.replace(/[\?\#].*$/, '');
