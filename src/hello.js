@@ -1285,6 +1285,13 @@ hello.utils.extend(hello.utils, {
 
 			// If this is a page request it has no parent or opener window to handle callbacks
 			if (('display' in obj) && obj.display === 'page') {
+				// Emit error event for page display mode if error exists
+				if (obj.error) {
+					hello.emit('error', {
+						network: network,
+						error: obj.error
+					});
+				}
 				return;
 			}
 
@@ -1452,6 +1459,14 @@ hello.utils.Event.call(hello);
 				continue;
 			}
 
+			// Check for errors in session
+			else if (session.error && !oldSess.error) {
+				// Emit the error event
+				hello.emit('error', {
+					network: name,
+					error: session.error
+				});
+			}
 			// Access_token has been removed
 			else if (!session.access_token && oldSess.access_token) {
 				emit('logout');

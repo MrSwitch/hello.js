@@ -15,7 +15,32 @@
 
 			// Refresh the access_token once expired
 			refresh: true,
-
+		logout: function(callback) {
+			// Instagram now requires POST method for logout instead of GET
+			// Using form submission via iframe to handle the logout
+			var form = document.createElement('form');
+			form.method = 'POST';
+			form.action = 'https://www.instagram.com/accounts/logout/';
+			form.style.display = 'none';
+			
+			var iframe = document.createElement('iframe');
+			iframe.name = 'logout_frame';
+			iframe.style.display = 'none';
+			document.body.appendChild(iframe);
+			
+			form.target = 'logout_frame';
+			document.body.appendChild(form);
+			
+			// Submit the form
+			form.submit();
+			
+			// Clean up after a short delay
+			setTimeout(function() {
+				document.body.removeChild(form);
+				document.body.removeChild(iframe);
+				callback();
+			}, 1000);
+		},
 			scope: {
 				basic: 'basic',
 				photos: '',
